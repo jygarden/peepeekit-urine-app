@@ -45,7 +45,10 @@ module.exports = async function handler(req, res) {
             { text: (petHint || '') + PROMPT },
             { inline_data: { mime_type: 'image/jpeg', data: imageB64 } }
           ]}],
-          generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
+          generationConfig: { 
+            temperature: 0.1, 
+            response_mime_type: 'application/json' // 수정됨: REST API 스펙에 맞게 스네이크 케이스로 변경
+          }
         })
       }
     );
@@ -56,7 +59,10 @@ module.exports = async function handler(req, res) {
     const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!raw) return res.status(500).json({ error: '분석 결과를 받지 못했습니다.' });
 
-    const result = JSON.parse(raw);
+    // 수정됨: 제미나이가 마크다운(```json)을 섞어 보낼 경우를 대비해 텍스트 클리닝 작업 추가
+    const cleanedRaw = raw.replace(/```json/gi, '').replace(/```/gi, '').trim();
+
+    const result = JSON.parse(cleanedRaw);
     return res.status(200).json(result);
 
   } catch (err) {
