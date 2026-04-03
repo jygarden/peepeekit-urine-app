@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🐾 펫소변 AI 검사</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #f1f5f9; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+    #app { max-width: 430px; margin: 0 auto; min-height: 100vh; }
+
+    .header {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      padding: 20px 20px 28px; color: #fff;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+    .header p  { font-size: 12px; opacity: .85; margin-top: 4px; }
+
+    .content { padding: 20px 16px 48px; }
+    .section-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 10px; }
+
+    .pet-row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .pet-btn {
+      flex: 1; padding: 18px 8px; background: #fff;
+      border: 2px solid #e2e8f0; border-radius: 14px;
+      cursor: pointer; font-size: 28px; text-align: center;
+      transition: all .2s; box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    }
+    .pet-btn span { display: block; font-size: 13px; font-weight: 700; color: #374151; margin-top: 6px; }
+    .pet-btn.active {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-color: transparent;
+      box-shadow: 0 4px 16px rgba(99,102,241,.38);
+    }
+    .pet-btn.active span { color: #fff; }
+
+    .input-name {
+      width: 100%; padding: 10px 14px; border-radius: 10px;
+      border: 1.5px solid #e2e8f0; font-size: 13px; outline: none;
+      margin-top: 10px; display: none;
+    }
+    .input-name.show { display: block; }
+
+    .upload-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .upload-btn {
+      padding: 20px; background: #fff;
+      border: 2px dashed #cbd5e1; border-radius: 16px;
+      cursor: pointer; text-align: center; width: 100%;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .upload-btn.accent { border-color: #6366f1; }
+    .upload-btn .icon { font-size: 30px; }
+    .upload-btn .lbl  { font-size: 15px; font-weight: 700; color: #334155; margin-top: 6px; }
+    .upload-btn.accent .lbl { color: #6366f1; }
+    .upload-btn .sub  { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+
+    .guide-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 16px; }
+    .guide-box .gtitle { font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 8px; }
+    .guide-box li { font-size: 12px; color: #78350f; line-height: 1.9; list-style: none; }
+    .guide-box li::before { content: "• "; }
+
+    .preview-wrap { position: relative; margin-bottom: 16px; }
+    .preview-wrap img { width: 100%; border-radius: 16px; display: block; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    .btn-close-img {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(0,0,0,.5); border: none; border-radius: 50%;
+      width: 34px; height: 34px; color: #fff; font-size: 18px;
+      cursor: pointer; line-height: 34px; text-align: center;
+    }
+
+    .error-box {
+      background: #fff1f2; border: 1px solid #fecdd3;
+      border-radius: 12px; padding: 14px; margin-bottom: 14px;
+      font-size: 13px; color: #be123c; display: none;
+    }
+    .error-box.show { display: block; }
+
+    .btn-analyze {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none; border-radius: 14px; color: #fff;
+      font-size: 16px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(99,102,241,.42);
+      letter-spacing: -.3px;
+    }
+    .btn-analyze:disabled { background: #94a3b8; box-shadow: none; cursor: not-allowed; }
+
+    .loading-box {
+      text-align: center; margin-top: 18px;
+      background: #fff; border-radius: 14px;
+      padding: 24px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.07); display: none;
+    }
+    .loading-box.show { display: block; }
+    .loading-box .emoji { font-size: 44px; }
+    .loading-box p     { font-size: 14px; color: #475569; margin-top: 10px; font-weight: 600; }
+    .loading-box small { font-size: 12px; color: #94a3b8; margin-top: 6px; display: block; }
+
+    .result-banner {
+      border-radius: 18px; padding: 22px 20px; color: #fff;
+      margin-bottom: 14px; text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,.16);
+    }
+    .result-banner .big-icon { font-size: 44px; margin-bottom: 6px; }
+    .result-banner h2  { font-size: 20px; font-weight: 800; }
+    .result-banner .pet-sub  { font-size: 13px; opacity: .9; margin-top: 4px; }
+    .result-banner .summary  { font-size: 13px; opacity: .92; margin-top: 10px; line-height: 1.7; }
+    .bg-normal  { background: linear-gradient(135deg,#10b981,#059669); }
+    .bg-warning { background: linear-gradient(135deg,#f59e0b,#d97706); }
+    .bg-danger  { background: linear-gradient(135deg,#ef4444,#dc2626); }
+
+    .rec-box { border-radius: 12px; padding: 14px; margin-bottom: 14px; font-size: 13px; line-height: 1.7; border: 1.5px solid; }
+    .rec-normal  { background:#f0fdf4; border-color:#86efac; color:#166534; }
+    .rec-warning { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+    .rec-danger  { background:#fff1f2; border-color:#fecdd3; color:#9f1239; }
+
+    .item-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+    .item-card.border-normal  { border: 1.5px solid #e2e8f0; }
+    .item-card.border-warning { border: 1.5px solid #fde68a; }
+    .item-card.border-danger  { border: 1.5px solid #fecdd3; }
+    .item-top   { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .item-name  { font-size: 14px; font-weight: 700; color: #1e293b; }
+    .item-right { display: flex; align-items: center; gap: 8px; }
+    .item-value { font-size: 13px; color: #64748b; font-weight: 600; }
+    .badge { padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; color: #fff; }
+    .badge-normal  { background: #22c55e; }
+    .badge-warning { background: #f59e0b; }
+    .badge-danger  { background: #ef4444; }
+    .item-desc { font-size: 12px; color: #64748b; line-height: 1.6; }
+
+    .tips-box { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+    .tips-box .ttitle { font-size: 14px; font-weight: 700; color: #15803d; margin-bottom: 10px; }
+    .tip-row  { display: flex; gap: 8px; margin-bottom: 8px; }
+    .tip-row:last-child { margin-bottom: 0; }
+    .tip-check { color: #22c55e; font-size: 14px; flex-shrink: 0; font-weight: 700; }
+    .tip-text  { font-size: 13px; color: #166534; line-height: 1.6; }
+
+    .action-row { display: flex; gap: 12px; margin-top: 4px; margin-bottom: 20px; }
+    .btn-retake {
+      flex: 1; padding: 14px; background: #fff;
+      border: 2px solid #6366f1; border-radius: 12px;
+      color: #6366f1; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .btn-new {
+      flex: 1; padding: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none; border-radius: 12px; color: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99,102,241,.38);
+    }
+
+    .disclaimer { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; font-size: 11px; color: #94a3b8; line-height: 1.8; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>🐾 펫소변 AI 검사</h1>
+    <p>반려동물 건강을 AI로 스마트하게 확인하세요</p>
+  </div>
+
+  <div class="content">
+
+    <!-- 홈 -->
+    <div class="screen active" id="screenHome">
+      <div class="section-title">반려동물 선택</div>
+      <div class="pet-row">
+        <button class="pet-btn" id="btnDog" onclick="selectPet('dog')">🐶<span>강아지</span></button>
+        <button class="pet-btn" id="btnCat" onclick="selectPet('cat')">🐱<span>고양이</span></button>
+      </div>
+      <input type="text" class="input-name" id="petNameInput" placeholder="이름 입력 (선택)" />
+
+      <div class="section-title" style="margin-top:16px">검사 이미지 업로드</div>
+      <div class="upload-area">
+        <button class="upload-btn accent" onclick="document.getElementById('cameraInput').click()">
+          <div class="icon">📷</div>
+          <div class="lbl">카메라로 촬영</div>
+          <div class="sub">지금 바로 검사 키트를 찍어주세요</div>
+        </button>
+        <button class="upload-btn" onclick="document.getElementById('galleryInput').click()">
+          <div class="icon">🖼️</div>
+          <div class="lbl">갤러리에서 선택</div>
+          <div class="sub">저장된 사진을 불러오세요</div>
+        </button>
+      </div>
+
+      <div class="guide-box">
+        <div class="gtitle">📌 올바른 촬영 방법</div>
+        <ul>
+          <li>검사 후 2분 이내에 촬영하세요</li>
+          <li>밝은 곳에서 키트를 평평하게 놓고 촬영하세요</li>
+          <li>키트 전체가 화면에 꽉 차게 촬영하세요</li>
+          <li>그림자나 반사가 없도록 해주세요</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 미리보기 -->
+    <div class="screen" id="screenPreview">
+      <div class="preview-wrap">
+        <img id="previewImg" src="" alt="검사 이미지" />
+        <button class="btn-close-img" onclick="resetAll()">×</button>
+      </div>
+      <div class="error-box" id="errorBox"></div>
+      <button class="btn-analyze" id="btnAnalyze" onclick="analyze()">🔬 AI 분석 시작</button>
+      <div class="loading-box" id="loadingBox">
+        <div class="emoji">🤖</div>
+        <p>Gemini AI가 분석하고 있습니다</p>
+        <small>pH, 단백질, 포도당 등 수치를 읽는 중...</small>
+      </div>
+    </div>
+
+    <!-- 결과 -->
+    <div class="screen" id="screenResult">
+      <div class="result-banner" id="resultBanner">
+        <div class="big-icon" id="resultIcon">✅</div>
+        <h2 id="resultTitle">종합 결과</h2>
+        <div class="pet-sub" id="resultPetSub"></div>
+        <div class="summary" id="resultSummary"></div>
+      </div>
+      <div class="rec-box" id="recBox"></div>
+      <div class="section-title">📊 항목별 검사 결과</div>
+      <div id="itemCards"></div>
+      <div class="tips-box" id="tipsBox" style="display:none">
+        <div class="ttitle">💡 관리 팁</div>
+        <div id="tipsList"></div>
+      </div>
+      <div class="section-title">📸 검사 이미지</div>
+      <img id="resultImg" src="" alt="검사 이미지" style="width:100%;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.10);margin-bottom:14px;" />
+      <div class="action-row">
+        <button class="btn-retake" onclick="retake()">📷 재촬영</button>
+        <button class="btn-new" onclick="resetAll()">🔄 새 검사</button>
+      </div>
+      <div class="disclaimer">
+        ⚠️ <strong style="color:#64748b">안내:</strong> 이 결과는 AI가 이미지를 분석한 참고용 정보입니다. 정확한 진단을 위해서는 반드시 수의사와 상담하시기 바랍니다.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)" />
+<input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleFile(this)" />
+
+<script>
+  let selectedPet = null;
+  let imageB64    = null;
+  let imageSrc    = null;
+
+  const URGENCY = {
+    normal: '현재 건강 상태가 양호합니다. 정기 검진을 꾸준히 해주세요 🐾',
+    soon:   '일부 수치가 불안정합니다. 가까운 시일 내 수의사 방문을 권장합니다 🏥',
+    urgent: '이상 수치가 감지되었습니다. 빠른 시일 내 수의사 방문이 필요합니다 ⚠️',
+  };
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function selectPet(type) {
+    selectedPet = selectedPet === type ? null : type;
+    document.getElementById('btnDog').classList.toggle('active', selectedPet === 'dog');
+    document.getElementById('btnCat').classList.toggle('active', selectedPet === 'cat');
+    const inp = document.getElementById('petNameInput');
+    if (selectedPet) {
+      inp.classList.add('show');
+      inp.placeholder = (selectedPet === 'dog' ? '강아지' : '고양이') + ' 이름 (선택)';
+    } else {
+      inp.classList.remove('show');
+    }
+  }
+
+  function handleFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imageSrc = e.target.result;
+      imageB64 = e.target.result.split(',')[1];
+      document.getElementById('previewImg').src = imageSrc;
+      clearError();
+      showScreen('screenPreview');
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = '⚠️ ' + msg;
+    box.classList.add('show');
+  }
+  function clearError() { document.getElementById('errorBox').classList.remove('show'); }
+
+  async function analyze() {
+    if (!imageB64) return;
+    const btn     = document.getElementById('btnAnalyze');
+    const loading = document.getElementById('loadingBox');
+    btn.disabled = true;
+    btn.textContent = '🔄 AI 분석 중...';
+    loading.classList.add('show');
+    clearError();
+
+    const petName = document.getElementById('petNameInput').value.trim();
+    const petHint = selectedPet
+      ? `이 이미지는 ${selectedPet === 'dog' ? '강아지' : '고양이'}${petName ? `(이름: ${petName})` : ''}의 소변검사 키트입니다. `
+      : '';
+
+    try {
+      // ✅ 서버 API 호출 (API 키는 서버에 숨겨져 있음)
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageB64, petHint })
+      });
+
+      const result = await res.json();
+      if (result.error) throw new Error(result.error);
+
+      renderResult(result, petName);
+      showScreen('screenResult');
+
+    } catch (err) {
+      showError(err.message || '분석 중 오류가 발생했습니다.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔬 AI 분석 시작';
+      loading.classList.remove('show');
+    }
+  }
+
+  function renderResult(r, petName) {
+    const STATUS = { normal: '정상', warning: '주의', danger: '이상' };
+    const ICON   = { normal: '✅', warning: '⚠️', danger: '🚨' };
+
+    const banner = document.getElementById('resultBanner');
+    banner.className = 'result-banner bg-' + (r.overallStatus || 'normal');
+    document.getElementById('resultIcon').textContent    = ICON[r.overallStatus]   || '🔬';
+    document.getElementById('resultTitle').textContent   = '종합 결과: ' + (STATUS[r.overallStatus] || '분석 완료');
+    document.getElementById('resultPetSub').textContent  = petName ? petName + '의 검사 결과' : '';
+    document.getElementById('resultSummary').textContent = r.summary || '';
+
+    const rec = document.getElementById('recBox');
+    rec.className = 'rec-box rec-' + (r.overallStatus || 'normal');
+    rec.textContent = '🏥 ' + (URGENCY[r.urgency] || URGENCY.normal);
+
+    const cards = document.getElementById('itemCards');
+    cards.innerHTML = '';
+    (r.testItems || []).forEach(item => {
+      const s = item.status || 'normal';
+      cards.innerHTML += `
+        <div class="item-card border-${s}">
+          <div class="item-top">
+            <span class="item-name">${item.name || ''}</span>
+            <div class="item-right">
+              <span class="item-value">${item.value || ''}</span>
+              <span class="badge badge-${s}">${STATUS[s] || s}</span>
+            </div>
+          </div>
+          <div class="item-desc">${item.description || ''}</div>
+        </div>`;
+    });
+
+    const tipsBox = document.getElementById('tipsBox');
+    const tipsList = document.getElementById('tipsList');
+    if (r.tips && r.tips.length > 0) {
+      tipsList.innerHTML = r.tips.map(t =>
+        `<div class="tip-row"><span class="tip-check">✓</span><div class="tip-text">${t}</div></div>`
+      ).join('');
+      tipsBox.style.display = 'block';
+    } else {
+      tipsBox.style.display = 'none';
+    }
+
+    document.getElementById('resultImg').src = imageSrc;
+  }
+
+  function retake() { clearError(); showScreen('screenPreview'); }
+
+  function resetAll() {
+    imageSrc = null; imageB64 = null;
+    clearError();
+    document.getElementById('loadingBox').classList.remove('show');
+    document.getElementById('btnAnalyze').disabled = false;
+    document.getElementById('btnAnalyze').textContent = '🔬 AI 분석 시작';
+    showScreen('screenHome');
+  }
+</script>
+</body>
+</html>
