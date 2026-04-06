@@ -170,6 +170,43 @@
     .history-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;margin-top:6px}
     .empty-history{text-align:center;padding:48px 20px;color:#94a3b8;font-size:14px}
 
+    /* ── 추천 섹션 공통 ── */
+    .reco-section{margin-bottom:14px}
+    .reco-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .reco-header .reco-icon{font-size:22px}
+    .reco-header .reco-title{font-size:14px;font-weight:800;color:#1e293b}
+
+    /* ── 영양제 카드 ── */
+    .supp-card{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid #6366f1}
+    .supp-card.priority-필수{border-left-color:#ef4444}
+    .supp-card.priority-권장{border-left-color:#f59e0b}
+    .supp-card.priority-선택{border-left-color:#6366f1}
+    .supp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+    .supp-name{font-size:14px;font-weight:700;color:#1e293b}
+    .supp-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;color:#fff}
+    .supp-badge.필수{background:#ef4444}
+    .supp-badge.권장{background:#f59e0b}
+    .supp-badge.선택{background:#6366f1}
+    .supp-reason{font-size:12px;color:#64748b;line-height:1.6}
+
+    /* ── 사료 카드 ── */
+    .food-card{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:15px;margin-bottom:8px}
+    .food-type{font-size:13px;font-weight:800;color:#15803d;margin-bottom:10px}
+    .food-row{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+    .food-tag{background:#fff;border:1.5px solid #86efac;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#166534}
+    .food-avoid{background:#fff1f2;border:1.5px solid #fecdd3;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;color:#be123c}
+    .food-label{font-size:11px;font-weight:700;color:#15803d;margin-bottom:5px}
+    .food-avoid-label{font-size:11px;font-weight:700;color:#be123c;margin-bottom:5px}
+    .food-water{font-size:12px;color:#0369a1;background:#e0f2fe;border-radius:8px;padding:8px 10px;margin-top:6px}
+
+    /* ── 운동 카드 ── */
+    .exercise-card{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fcd34d;border-radius:14px;padding:15px}
+    .exercise-freq{font-size:13px;font-weight:800;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .exercise-types{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+    .exercise-type-tag{background:#fff;border:1.5px solid #fcd34d;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600;color:#78350f}
+    .exercise-caution{font-size:12px;color:#92400e;background:rgba(255,255,255,.6);border-radius:9px;padding:9px 11px;line-height:1.7;margin-bottom:6px}
+    .exercise-indoor{font-size:12px;color:#0369a1;background:#e0f2fe;border-radius:8px;padding:8px 10px}
+
     /* ── 진행 표시 ── */
     .step-indicator{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:18px}
     .step-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:all .2s}
@@ -403,6 +440,33 @@
       <div class="tips-box" id="tipsBox" style="display:none">
         <div class="ttitle">💡 관리 팁</div>
         <div id="tipsList"></div>
+      </div>
+
+      <!-- 영양제 추천 -->
+      <div class="reco-section" id="suppSection" style="display:none">
+        <div class="reco-header">
+          <span class="reco-icon">💊</span>
+          <span class="reco-title">맞춤 영양제 추천</span>
+        </div>
+        <div id="suppList"></div>
+      </div>
+
+      <!-- 사료 추천 -->
+      <div class="reco-section" id="foodSection" style="display:none">
+        <div class="reco-header">
+          <span class="reco-icon">🍖</span>
+          <span class="reco-title">사료 & 식단 추천</span>
+        </div>
+        <div id="foodCard"></div>
+      </div>
+
+      <!-- 운동 추천 -->
+      <div class="reco-section" id="exerciseSection" style="display:none">
+        <div class="reco-header">
+          <span class="reco-icon">🏃</span>
+          <span class="reco-title">운동 & 활동 추천</span>
+        </div>
+        <div id="exerciseCard"></div>
       </div>
 
       <!-- 검사 이미지 -->
@@ -738,6 +802,63 @@ function renderResult(r, info) {
     tipsBox.style.display = 'block';
   } else {
     tipsBox.style.display = 'none';
+  }
+
+  // ── 영양제 추천 ──
+  const suppSection = document.getElementById('suppSection');
+  const suppList    = document.getElementById('suppList');
+  if (r.supplements && r.supplements.length > 0) {
+    suppList.innerHTML = r.supplements.map(s => {
+      const pri = s.priority || '권장';
+      return `
+        <div class="supp-card priority-${pri}">
+          <div class="supp-top">
+            <span class="supp-name">💊 ${s.name || ''}</span>
+            <span class="supp-badge ${pri}">${pri}</span>
+          </div>
+          <div class="supp-reason">${s.reason || ''}</div>
+        </div>`;
+    }).join('');
+    suppSection.style.display = 'block';
+  } else {
+    suppSection.style.display = 'none';
+  }
+
+  // ── 사료 추천 ──
+  const foodSection = document.getElementById('foodSection');
+  const foodCard    = document.getElementById('foodCard');
+  if (r.foodRecommendation) {
+    const f = r.foodRecommendation;
+    const ingrTags  = (f.ingredients||[]).map(i => `<span class="food-tag">✅ ${i}</span>`).join('');
+    const avoidTags = (f.avoid||[]).map(a => `<span class="food-avoid">❌ ${a}</span>`).join('');
+    foodCard.innerHTML = `
+      <div class="food-card">
+        <div class="food-type">🍽️ ${f.type || ''}</div>
+        ${ingrTags ? `<div class="food-label">권장 성분</div><div class="food-row">${ingrTags}</div>` : ''}
+        ${avoidTags ? `<div class="food-avoid-label">주의 성분</div><div class="food-row">${avoidTags}</div>` : ''}
+        ${f.waterIntake ? `<div class="food-water">💧 ${f.waterIntake}</div>` : ''}
+      </div>`;
+    foodSection.style.display = 'block';
+  } else {
+    foodSection.style.display = 'none';
+  }
+
+  // ── 운동 추천 ──
+  const exerciseSection = document.getElementById('exerciseSection');
+  const exerciseCard    = document.getElementById('exerciseCard');
+  if (r.exerciseRecommendation) {
+    const e = r.exerciseRecommendation;
+    const typeTags = (e.type||[]).map(t => `<span class="exercise-type-tag">${t}</span>`).join('');
+    exerciseCard.innerHTML = `
+      <div class="exercise-card">
+        ${e.frequency ? `<div class="exercise-freq">⏱️ ${e.frequency}</div>` : ''}
+        ${typeTags ? `<div class="exercise-types">${typeTags}</div>` : ''}
+        ${e.caution ? `<div class="exercise-caution">⚠️ ${e.caution}</div>` : ''}
+        ${e.indoorTips ? `<div class="exercise-indoor">🏠 실내 활동 팁: ${e.indoorTips}</div>` : ''}
+      </div>`;
+    exerciseSection.style.display = 'block';
+  } else {
+    exerciseSection.style.display = 'none';
   }
 
   // 이미지
