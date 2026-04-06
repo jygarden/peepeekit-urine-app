@@ -149,6 +149,17 @@
     /* ── 면책 ── */
     .disclaimer{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:13px;font-size:11px;color:#94a3b8;line-height:1.8}
 
+    /* ── 환경 건강 분석 박스 ── */
+    .env-health-box{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #7dd3fc;border-radius:14px;padding:16px;margin-bottom:14px}
+    .env-health-box .etitle{font-size:13px;font-weight:800;color:#0369a1;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .env-health-item{font-size:12px;color:#0c4a6e;line-height:1.7;margin-bottom:8px;padding:10px 12px;background:rgba(255,255,255,.6);border-radius:9px}
+    .env-health-item .elabel{font-size:11px;font-weight:700;color:#0284c7;margin-bottom:3px}
+
+    /* ── 종합 맞춤 분석 박스 ── */
+    .final-analysis-box{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fcd34d;border-radius:14px;padding:16px;margin-bottom:14px}
+    .final-analysis-box .ftitle{font-size:13px;font-weight:800;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .final-analysis-txt{font-size:12px;color:#78350f;line-height:1.8}
+
     /* ── 히스토리 ── */
     .history-item{background:#fff;border-radius:14px;padding:15px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);cursor:pointer;border:1.5px solid #e2e8f0}
     .history-item:active{background:#f8fafc}
@@ -338,8 +349,8 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 분석하고 있습니다</p>
-      <small>pH, 단백질, 포도당 등 수치를 읽는 중...</small>
+      <p>Gemini AI가 종합 분석 중입니다</p>
+      <small>소변 수치 + 품종·나이·환경 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
 
@@ -369,6 +380,19 @@
         <div class="saju-organ" id="sajuOrgan"></div>
         <div id="sajuTips"></div>
         <div class="saju-month" id="sajuMonth"></div>
+      </div>
+
+      <!-- 환경·품종·나이 건강 분석 -->
+      <div class="env-health-box" id="envHealthBox" style="display:none">
+        <div class="etitle">🏡 생활환경 & 품종 맞춤 건강 분석</div>
+        <div class="env-health-item" id="envAnalysisItem" style="display:none">
+          <div class="elabel">📍 환경별 건강 위험 요소</div>
+          <div id="envAnalysisText"></div>
+        </div>
+        <div class="env-health-item" id="breedAgeItem" style="display:none">
+          <div class="elabel">🐾 품종·나이 특이사항</div>
+          <div id="breedAgeText"></div>
+        </div>
       </div>
 
       <!-- 항목별 결과 -->
@@ -663,6 +687,28 @@ function renderResult(r, info) {
   } else {
     sajuBox.style.display = 'none';
   }
+
+  // 환경·품종 건강 분석
+  const envHealthBox  = document.getElementById('envHealthBox');
+  const envAnalysisItem = document.getElementById('envAnalysisItem');
+  const breedAgeItem  = document.getElementById('breedAgeItem');
+  let showEnvBox = false;
+
+  if (r.envAnalysis) {
+    document.getElementById('envAnalysisText').textContent = r.envAnalysis;
+    envAnalysisItem.style.display = 'block';
+    showEnvBox = true;
+  } else {
+    envAnalysisItem.style.display = 'none';
+  }
+  if (r.breedAgeAnalysis) {
+    document.getElementById('breedAgeText').textContent = r.breedAgeAnalysis;
+    breedAgeItem.style.display = 'block';
+    showEnvBox = true;
+  } else {
+    breedAgeItem.style.display = 'none';
+  }
+  envHealthBox.style.display = showEnvBox ? 'block' : 'none';
 
   // 항목별 결과
   const container = document.getElementById('resultItems');
