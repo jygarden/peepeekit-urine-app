@@ -109,13 +109,13 @@
     .rec-warning{background:#fffbeb;border-color:#fde68a;color:#92400e}
     .rec-danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
 
-    /* ── 사주 건강 박스 ── */
-    .saju-box{background:linear-gradient(135deg,#fdf4ff,#f5f3ff);border:1.5px solid #e9d5ff;border-radius:14px;padding:16px;margin-bottom:14px}
-    .saju-box .stitle{font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-    .saju-organ{display:inline-block;background:#7c3aed;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px}
-    .saju-tip{font-size:12px;color:#5b21b6;line-height:1.7;margin-bottom:4px;display:flex;gap:6px}
+    /* ── 체질 건강 박스 (구 사주 박스) ── */
+    .saju-box{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:14px;padding:16px;margin-bottom:14px}
+    .saju-box .stitle{font-size:13px;font-weight:800;color:#1d4ed8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .saju-organ{display:inline-block;background:#2563eb;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+    .saju-tip{font-size:12px;color:#1e40af;line-height:1.7;margin-bottom:4px;display:flex;gap:6px}
     .saju-tip::before{content:"•";flex-shrink:0}
-    .saju-month{font-size:12px;color:#6d28d9;margin-top:8px;padding-top:8px;border-top:1px solid #ddd6fe;line-height:1.6}
+    .saju-month{font-size:12px;color:#1d4ed8;margin-top:8px;padding-top:8px;border-top:1px solid #bfdbfe;line-height:1.6}
 
     /* ── 항목 카드 ── */
     .result-item{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -386,7 +386,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>피피키트 AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 품종·나이·환경 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -411,23 +411,23 @@
       <!-- 권고 -->
       <div class="rec-box" id="recBox"></div>
 
-      <!-- 사주 건강 분석 -->
+      <!-- 체질 건강 분석 (내부적으로 사주 활용, 외부엔 검사 기반으로 표시) -->
       <div class="saju-box" id="sajuBox" style="display:none">
-        <div class="stitle">🔮 건강 체질 분석</div>
+        <div class="stitle">🔬 검사 기반 체질 건강 포인트</div>
         <div class="saju-organ" id="sajuOrgan"></div>
         <div id="sajuTips"></div>
         <div class="saju-month" id="sajuMonth"></div>
       </div>
 
-      <!-- 환경·품종·나이 건강 분석 -->
+      <!-- 종합 패턴 분석 (내부적으로 환경+품종+나이 활용, 외부엔 검사 기반으로 표시) -->
       <div class="env-health-box" id="envHealthBox" style="display:none">
-        <div class="etitle">🏡 생활환경 & 품종 맞춤 건강 분석</div>
+        <div class="etitle">🔍 수치 패턴 종합 분석</div>
         <div class="env-health-item" id="envAnalysisItem" style="display:none">
-          <div class="elabel">📍 환경별 건강 위험 요소</div>
+          <div class="elabel">📊 생활 패턴 감지 결과</div>
           <div id="envAnalysisText"></div>
         </div>
         <div class="env-health-item" id="breedAgeItem" style="display:none">
-          <div class="elabel">🐾 품종·나이 특이사항</div>
+          <div class="elabel">📈 체질·연령대 수치 특이사항</div>
           <div id="breedAgeText"></div>
         </div>
       </div>
@@ -446,7 +446,7 @@
       <div class="reco-section" id="suppSection" style="display:none">
         <div class="reco-header">
           <span class="reco-icon">💊</span>
-          <span class="reco-title">맞춤 영양제 추천</span>
+          <span class="reco-title">검사 결과 맞춤 영양제</span>
         </div>
         <div id="suppList"></div>
       </div>
@@ -455,7 +455,7 @@
       <div class="reco-section" id="foodSection" style="display:none">
         <div class="reco-header">
           <span class="reco-icon">🍖</span>
-          <span class="reco-title">사료 & 식단 추천</span>
+          <span class="reco-title">검사 결과 맞춤 사료 & 식단</span>
         </div>
         <div id="foodCard"></div>
       </div>
@@ -464,7 +464,7 @@
       <div class="reco-section" id="exerciseSection" style="display:none">
         <div class="reco-header">
           <span class="reco-icon">🏃</span>
-          <span class="reco-title">운동 & 활동 추천</span>
+          <span class="reco-title">검사 결과 맞춤 운동 & 활동</span>
         </div>
         <div id="exerciseCard"></div>
       </div>
@@ -743,7 +743,7 @@ function renderResult(r, info) {
   // 사주 건강
   const sajuBox = document.getElementById('sajuBox');
   if (info.saju) {
-    document.getElementById('sajuOrgan').textContent = '집중 관리 부위: '+info.saju.organ;
+    document.getElementById('sajuOrgan').textContent = '집중 관리 수치 영역: '+info.saju.organ;
     document.getElementById('sajuTips').innerHTML = info.saju.tips
       .map(t=>`<div class="saju-tip">${t}</div>`).join('');
     document.getElementById('sajuMonth').textContent = info.saju.monthInfo;
