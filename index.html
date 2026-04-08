@@ -4,6 +4,18 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>🐾 펫소변 AI 검사</title>
+
+  <!-- PWA 설정 -->
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#6366f1"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+
+  <!-- iOS 홈화면 앱 설정 -->
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="펫소변검사"/>
+  <link rel="apple-touch-icon" href="/icon-192.png"/>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -386,7 +398,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 품종·나이·환경 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -502,11 +514,85 @@
 
 </div>
 
+<!-- Android/Chrome 홈화면 추가 배너 -->
+<div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:14px 16px;
+  align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.2)">
+  <span style="font-size:28px">🐾</span>
+  <div style="flex:1">
+    <div style="font-size:13px;font-weight:800;color:#fff">홈화면에 앱으로 추가하기</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.85);margin-top:2px">아이콘을 탭하면 앱처럼 바로 실행돼요</div>
+  </div>
+  <button onclick="installApp()" style="background:#fff;border:none;border-radius:10px;
+    padding:8px 14px;font-size:12px;font-weight:800;color:#6366f1;cursor:pointer;white-space:nowrap">추가</button>
+  <button onclick="dismissInstall()" style="background:none;border:none;color:rgba(255,255,255,.7);
+    font-size:20px;cursor:pointer;padding:0 4px">×</button>
+</div>
+
+<!-- iOS Safari 홈화면 추가 안내 배너 -->
+<div id="iosBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:#1e293b;padding:16px;align-items:flex-start;gap:12px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.3);border-radius:16px 16px 0 0">
+  <span style="font-size:28px;flex-shrink:0">🐾</span>
+  <div style="flex:1">
+    <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px">홈화면에 앱으로 추가하는 방법</div>
+    <div style="font-size:12px;color:#94a3b8;line-height:1.8">
+      1️⃣ 하단 <strong style="color:#fff">공유 버튼(□↑)</strong> 탭<br>
+      2️⃣ <strong style="color:#fff">"홈 화면에 추가"</strong> 선택<br>
+      3️⃣ 오른쪽 위 <strong style="color:#fff">"추가"</strong> 탭 → 완료!
+    </div>
+  </div>
+  <button onclick="document.getElementById('iosBanner').style.display='none'"
+    style="background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:0">×</button>
+</div>
+
 <!-- 숨김 파일 입력 -->
 <input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)"/>
 <input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleFile(this)"/>
 
 <script>
+// ══════════════════════════════════════
+// PWA 서비스워커 등록
+// ══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// 홈화면 추가 배너 (iOS 제외 - iOS는 별도 안내)
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').style.display = 'none';
+}
+
+// iOS 감지 → 별도 안내
+window.addEventListener('load', () => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone;
+  if (isIOS && !isStandalone) {
+    setTimeout(() => {
+      document.getElementById('iosBanner').style.display = 'flex';
+    }, 3000);
+  }
+});
+
 // ══════════════════════════════════════
 // 상태
 // ══════════════════════════════════════
