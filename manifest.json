@@ -1,7 +1,7 @@
 {
-  "name": "펫소변 AI 검사",
-  "short_name": "펫소변검사",
-  "description": "반려동물 소변검사 AI 분석 앱 — 사진 한 장으로 건강 체크",
+  "name": "건강어때",
+  "short_name": "건강어때",
+  "description": "AI가 분석하는 나만의 건강 파트너 — 반려동물부터 가족까지",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
