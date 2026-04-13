@@ -236,7 +236,10 @@
         <h1>🐾 건강어때</h1>
         <p>반려동물 건강을 AI로 스마트하게 확인하세요</p>
       </div>
-      <button class="btn-history" onclick="goHistory()">📋 검사기록</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn-history" onclick="showInstallGuide()">📲 앱 추가</button>
+        <button class="btn-history" onclick="goHistory()">📋 검사기록</button>
+      </div>
     </div>
   </div>
 
@@ -580,6 +583,17 @@ function installApp() {
 
 function dismissInstall() {
   document.getElementById('installBanner').style.display = 'none';
+}
+function showInstallGuide() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isIOS) {
+    document.getElementById('iosBanner').style.display = 'flex';
+  } else if (deferredPrompt) {
+    installApp();
+  } else {
+    // 이미 설치됐거나 Android 외 환경 → 안내 팝업
+    alert('📲 홈화면에 앱 추가하는 방법\n\n【아이폰/아이패드 (Safari)】\n1. 하단 공유 버튼(□↑) 탭\n2. "홈 화면에 추가" 선택\n3. 오른쪽 위 "추가" 탭\n\n【안드로이드 (Chrome)】\n1. 우측 상단 메뉴(⋮) 탭\n2. "홈 화면에 추가" 선택\n3. "추가" 탭');
+  }
 }
 
 // iOS 감지 → 별도 안내
