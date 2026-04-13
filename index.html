@@ -748,6 +748,26 @@ function getSajuHealth(birthYear, birthMonth) {
 async function analyze() {
   if (!imageB64) return;
 
+  // 연락처 필수 검증
+  const contactVal = document.getElementById('ownerContact').value.trim();
+  const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
+  if (!contactVal) {
+    alert('연락처를 입력해주세요. (필수)');
+    document.getElementById('ownerContact').focus();
+    return;
+  }
+  if (!phoneRegex.test(contactVal)) {
+    alert('올바른 휴대폰 번호를 입력해주세요.\n예: 010-1234-5678');
+    document.getElementById('ownerContact').focus();
+    return;
+  }
+
+  // 개인정보 동의 필수 검증
+  if (!document.getElementById('consentPrivacy').checked) {
+    alert('개인정보 수집 및 이용에 동의해주세요. (필수)');
+    return;
+  }
+
   const btn     = document.getElementById('btnAnalyze');
   const loading = document.getElementById('loadingBox');
   btn.disabled = true;
