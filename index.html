@@ -665,9 +665,23 @@ function formatPhone(input) {
 // 다음 단계 (촬영으로)
 // ══════════════════════════════════════
 function goCapture() {
+  // 연락처 필수 검증
+  const contactVal = document.getElementById('ownerContact').value.trim();
+  const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
+  if (!contactVal) {
+    alert('연락처를 입력해주세요. (필수)');
+    document.getElementById('ownerContact').focus();
+    return;
+  }
+  if (!phoneRegex.test(contactVal)) {
+    alert('올바른 휴대폰 번호를 입력해주세요.\n예: 010-1234-5678');
+    document.getElementById('ownerContact').focus();
+    return;
+  }
+  // 개인정보 동의 필수 검증
   const privacy = document.getElementById('consentPrivacy').checked;
-  if (!privacy && document.getElementById('screenHome').classList.contains('active')) {
-    alert('개인정보 수집 및 이용에 동의해 주세요.');
+  if (!privacy) {
+    alert('개인정보 수집 및 이용에 동의해 주세요. (필수)');
     return;
   }
   showScreen('screenCapture');
