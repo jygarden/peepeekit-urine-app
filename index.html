@@ -612,26 +612,6 @@ function showScreen(id) {
   window.scrollTo(0, 0);
 }
 function goHome()    { showScreen('screenHome'); }
-function goCapture() {
-  const contactVal = document.getElementById('ownerContact').value.trim();
-  const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
-  if (!contactVal) {
-    alert('연락처를 입력해주세요. (필수)');
-    document.getElementById('ownerContact').focus();
-    return;
-  }
-  if (!phoneRegex.test(contactVal)) {
-    alert('올바른 휴대폰 번호를 입력해주세요.\n예: 010-1234-5678');
-    document.getElementById('ownerContact').focus();
-    return;
-  }
-  const privacy = document.getElementById('consentPrivacy').checked;
-  if (!privacy) {
-    alert('개인정보 수집 및 이용에 동의해 주세요. (필수)');
-    return;
-  }
-  showScreen('screenCapture');
-}
 function goHistory() { renderHistory(); showScreen('screenHistory'); }
 
 // ══════════════════════════════════════
