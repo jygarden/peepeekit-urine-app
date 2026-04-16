@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.geongangeottae.app",
-        "sha256_cert_fingerprints": ["19:5E:51:94:B1:A7:BA:52:A5:E4:A3:33:73:50:2D:A1:DC:44:F7:20:ED:9E:9E:D2:9D:96:58:FA:3F:05:57:CF"]
+        "sha256_cert_fingerprints": ["79:9A:2F:DF:3D:0B:B2:42:BC:1D:D8:C8:09:0D:DF:87:2D:41:52:60:B6:0D:9C:03:6D:6C:2D:08:64:96:06:7A"]
       }
     }]
