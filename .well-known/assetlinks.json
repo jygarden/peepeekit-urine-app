@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.peepeekit_urine_app_5h3f.twa",
+        "sha256_cert_fingerprints": ["31:79:0F:3C:40:D4:AE:33:CF:17:B7:F4:65:E6:27:C0:D7:DC:37:56:1B:71:79:9E:E8:DC:7E:5D:ED:FF:FD:5C"]
+      }
+    }]
