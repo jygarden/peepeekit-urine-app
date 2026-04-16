@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "app.vercel.peepeekit_urine_app_5h3f.twa",
-        "sha256_cert_fingerprints": ["31:79:0F:3C:40:D4:AE:33:CF:17:B7:F4:65:E6:27:C0:D7:DC:37:56:1B:71:79:9E:E8:DC:7E:5D:ED:FF:FD:5C"]
+        "package_name": "com.geongangeottae.app",
+        "sha256_cert_fingerprints": ["19:5E:51:94:B1:A7:BA:52:A5:E4:A3:33:73:50:2D:A1:DC:44:F7:20:ED:9E:9E:D2:9D:96:58:FA:3F:05:57:CF"]
       }
     }]
