@@ -4,39 +4,32 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>건강어때 — 반려동물 AI 건강검진</title>
-
   <!-- PWA 설정 -->
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#6366f1"/>
   <meta name="mobile-web-app-capable" content="yes"/>
-
   <!-- iOS 홈화면 앱 설정 -->
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="건강어때"/>
   <link rel="apple-touch-icon" href="/icon-192.png"/>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
     body{background:#f1f5f9;font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding-bottom:0}
     #app{max-width:430px;margin:0 auto;min-height:100vh}
-
     /* ── 헤더 ── */
     .header{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:18px 20px 22px;color:#fff;position:sticky;top:0;z-index:200}
     .header-row{display:flex;justify-content:space-between;align-items:center}
     .header h1{font-size:19px;font-weight:800;letter-spacing:-.5px}
     .header p{font-size:11px;opacity:.85;margin-top:3px}
     .btn-history{background:rgba(255,255,255,.18);border:none;border-radius:8px;padding:6px 11px;color:#fff;font-size:11px;cursor:pointer;white-space:nowrap}
-
     /* ── 화면 ── */
     .screen{display:none;padding:16px 16px 40px}
     .screen.active{display:block}
-
     /* ── 공통 ── */
     .section-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:8px}
     .card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
-
     /* ── 입력 필드 ── */
     .field{margin-bottom:12px}
     .field label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px}
@@ -48,21 +41,18 @@
     .field input:focus,.field select:focus{border-color:#6366f1}
     .field .row2{display:flex;gap:8px}
     .field .row2 select{flex:1}
-
     /* ── 반려동물 버튼 ── */
     .pet-row{display:flex;gap:10px;margin-bottom:14px}
     .pet-btn{flex:1;padding:16px 8px;background:#fff;border:2px solid #e2e8f0;border-radius:14px;cursor:pointer;font-size:26px;text-align:center;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.07)}
     .pet-btn span{display:block;font-size:12px;font-weight:700;color:#374151;margin-top:5px}
     .pet-btn.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;box-shadow:0 4px 14px rgba(99,102,241,.38)}
     .pet-btn.active span{color:#fff}
-
     /* ── 환경 선택 ── */
     .env-row{display:flex;gap:8px;margin-bottom:14px}
     .env-btn{flex:1;padding:12px 6px;background:#fff;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;text-align:center;font-size:20px;transition:all .18s}
     .env-btn span{display:block;font-size:11px;font-weight:600;color:#374151;margin-top:4px}
     .env-btn.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent}
     .env-btn.active span{color:#fff}
-
     /* ── 마케팅 동의 ── */
     .consent-box{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px}
     .consent-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
@@ -70,41 +60,34 @@
     .consent-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;margin-top:1px;accent-color:#6366f1;cursor:pointer}
     .consent-row label{font-size:12px;color:#475569;line-height:1.6;cursor:pointer}
     .consent-row label strong{color:#1e293b}
-
     /* ── 버튼 ── */
     .btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,.40);letter-spacing:-.3px}
     .btn-primary:disabled{background:#94a3b8;box-shadow:none;cursor:not-allowed}
     .btn-outline{width:100%;padding:13px;background:#fff;border:2px solid #6366f1;border-radius:12px;color:#6366f1;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px}
-
     /* ── 촬영 화면 ── */
     .warning-banner{background:#fef3c7;border:1.5px solid #fbbf24;border-radius:12px;padding:14px;margin-bottom:14px}
     .warning-banner .wtitle{font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px}
     .warning-banner li{font-size:12px;color:#78350f;line-height:1.9;list-style:none}
     .warning-banner li::before{content:"⚠️ ";font-size:11px}
-
     .upload-btn{padding:20px;background:#fff;border:2px dashed #cbd5e1;border-radius:16px;cursor:pointer;text-align:center;width:100%;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
     .upload-btn.accent{border-color:#6366f1}
     .upload-btn .icon{font-size:30px}
     .upload-btn .lbl{font-size:15px;font-weight:700;color:#334155;margin-top:6px}
     .upload-btn.accent .lbl{color:#6366f1}
     .upload-btn .sub{font-size:12px;color:#94a3b8;margin-top:4px}
-
     /* ── 미리보기 ── */
     .preview-wrap{position:relative;margin-bottom:14px}
     .preview-wrap img{width:100%;border-radius:16px;display:block;box-shadow:0 4px 16px rgba(0,0,0,.12)}
     .btn-close-img{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:18px;cursor:pointer;line-height:34px;text-align:center}
-
     /* ── 에러 ── */
     .error-box{background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:13px;margin-bottom:13px;font-size:13px;color:#be123c;display:none}
     .error-box.show{display:block}
-
     /* ── 로딩 ── */
     .loading-box{text-align:center;margin-top:16px;background:#fff;border-radius:14px;padding:22px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:none}
     .loading-box.show{display:block}
     .loading-box .emoji{font-size:42px}
     .loading-box p{font-size:14px;color:#475569;margin-top:10px;font-weight:600}
     .loading-box small{font-size:12px;color:#94a3b8;margin-top:6px;display:block}
-
     /* ── 결과 배너 ── */
     .result-banner{border-radius:18px;padding:22px 20px;color:#fff;margin-bottom:14px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.16)}
     .result-banner .big-icon{font-size:42px;margin-bottom:6px}
@@ -114,13 +97,13 @@
     .bg-normal{background:linear-gradient(135deg,#10b981,#059669)}
     .bg-warning{background:linear-gradient(135deg,#f59e0b,#d97706)}
     .bg-danger{background:linear-gradient(135deg,#ef4444,#dc2626)}
-
     /* ── 권고 박스 ── */
     .rec-box{border-radius:12px;padding:13px;margin-bottom:13px;font-size:13px;line-height:1.7;border:1.5px solid}
     .rec-normal{background:#f0fdf4;border-color:#86efac;color:#166534}
     .rec-warning{background:#fffbeb;border-color:#fde68a;color:#92400e}
     .rec-danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
-
+    /* ── 미세 수치 변화 안내 ── */
+    .subtle-note{display:block;font-size:11px;opacity:.75;margin-top:5px;font-style:italic}
     /* ── 체질 건강 박스 (구 사주 박스) ── */
     .saju-box{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #93c5fd;border-radius:14px;padding:16px;margin-bottom:14px}
     .saju-box .stitle{font-size:13px;font-weight:800;color:#1d4ed8;margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -128,7 +111,6 @@
     .saju-tip{font-size:12px;color:#1e40af;line-height:1.7;margin-bottom:4px;display:flex;gap:6px}
     .saju-tip::before{content:"•";flex-shrink:0}
     .saju-month{font-size:12px;color:#1d4ed8;margin-top:8px;padding-top:8px;border-top:1px solid #bfdbfe;line-height:1.6}
-
     /* ── 항목 카드 ── */
     .result-item{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
     .result-item.border-normal{border:1.5px solid #e2e8f0}
@@ -143,7 +125,6 @@
     .badge-warning{background:#f59e0b}
     .badge-danger{background:#ef4444}
     .ri-desc{font-size:12px;color:#64748b;line-height:1.6}
-
     /* ── 팁 ── */
     .tips-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:15px;margin-bottom:13px}
     .tips-box .ttitle{font-size:13px;font-weight:700;color:#15803d;margin-bottom:9px}
@@ -151,43 +132,38 @@
     .tip-row:last-child{margin-bottom:0}
     .tip-check{color:#22c55e;font-size:13px;flex-shrink:0;font-weight:700}
     .tip-text{font-size:12px;color:#166534;line-height:1.6}
-
     /* ── 액션 버튼 ── */
     .action-row{display:flex;gap:10px;margin:4px 0 16px}
     .btn-retake{flex:1;padding:13px;background:#fff;border:2px solid #6366f1;border-radius:12px;color:#6366f1;font-size:13px;font-weight:700;cursor:pointer}
     .btn-new{flex:1;padding:13px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(99,102,241,.35)}
     .btn-download{width:100%;padding:13px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 3px 10px rgba(14,165,233,.35)}
-
     /* ── 면책 ── */
     .disclaimer{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:13px;font-size:11px;color:#94a3b8;line-height:1.8}
-
     /* ── 환경 건강 분석 박스 ── */
     .env-health-box{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1.5px solid #7dd3fc;border-radius:14px;padding:16px;margin-bottom:14px}
     .env-health-box .etitle{font-size:13px;font-weight:800;color:#0369a1;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .env-health-item{font-size:12px;color:#0c4a6e;line-height:1.7;margin-bottom:8px;padding:10px 12px;background:rgba(255,255,255,.6);border-radius:9px}
     .env-health-item .elabel{font-size:11px;font-weight:700;color:#0284c7;margin-bottom:3px}
-
     /* ── 종합 맞춤 분석 박스 ── */
     .final-analysis-box{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fcd34d;border-radius:14px;padding:16px;margin-bottom:14px}
     .final-analysis-box .ftitle{font-size:13px;font-weight:800;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
     .final-analysis-txt{font-size:12px;color:#78350f;line-height:1.8}
-
     /* ── 히스토리 ── */
-    .history-item{background:#fff;border-radius:14px;padding:15px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);cursor:pointer;border:1.5px solid #e2e8f0}
+    .history-item{background:#fff;border-radius:14px;padding:15px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1.5px solid #e2e8f0}
     .history-item:active{background:#f8fafc}
     .history-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
     .history-pet{font-size:14px;font-weight:700;color:#1e293b}
     .history-date{font-size:11px;color:#94a3b8}
     .history-info{font-size:12px;color:#64748b;line-height:1.7}
     .history-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;margin-top:6px}
+    .history-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+    .btn-view-history{background:#6366f1;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer}
     .empty-history{text-align:center;padding:48px 20px;color:#94a3b8;font-size:14px}
-
     /* ── 추천 섹션 공통 ── */
     .reco-section{margin-bottom:14px}
     .reco-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
     .reco-header .reco-icon{font-size:22px}
     .reco-header .reco-title{font-size:14px;font-weight:800;color:#1e293b}
-
     /* ── 영양제 카드 ── */
     .supp-card{background:#fff;border-radius:12px;padding:13px 15px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid #6366f1}
     .supp-card.priority-필수{border-left-color:#ef4444}
@@ -200,7 +176,6 @@
     .supp-badge.권장{background:#f59e0b}
     .supp-badge.선택{background:#6366f1}
     .supp-reason{font-size:12px;color:#64748b;line-height:1.6}
-
     /* ── 사료 카드 ── */
     .food-card{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:15px;margin-bottom:8px}
     .food-type{font-size:13px;font-weight:800;color:#15803d;margin-bottom:10px}
@@ -210,7 +185,6 @@
     .food-label{font-size:11px;font-weight:700;color:#15803d;margin-bottom:5px}
     .food-avoid-label{font-size:11px;font-weight:700;color:#be123c;margin-bottom:5px}
     .food-water{font-size:12px;color:#0369a1;background:#e0f2fe;border-radius:8px;padding:8px 10px;margin-top:6px}
-
     /* ── 운동 카드 ── */
     .exercise-card{background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fcd34d;border-radius:14px;padding:15px}
     .exercise-freq{font-size:13px;font-weight:800;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -218,7 +192,6 @@
     .exercise-type-tag{background:#fff;border:1.5px solid #fcd34d;border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600;color:#78350f}
     .exercise-caution{font-size:12px;color:#92400e;background:rgba(255,255,255,.6);border-radius:9px;padding:9px 11px;line-height:1.7;margin-bottom:6px}
     .exercise-indoor{font-size:12px;color:#0369a1;background:#e0f2fe;border-radius:8px;padding:8px 10px}
-
     /* ── 진행 표시 ── */
     .step-indicator{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:18px}
     .step-dot{width:8px;height:8px;border-radius:50%;background:#e2e8f0;transition:all .2s}
@@ -228,7 +201,6 @@
 </head>
 <body>
 <div id="app">
-
   <!-- 헤더 -->
   <div class="header">
     <div class="header-row">
@@ -242,16 +214,13 @@
       </div>
     </div>
   </div>
-
   <!-- ════════════ 홈: 고객 & 반려동물 정보 ════════════ -->
   <div class="screen active" id="screenHome">
-
     <div class="step-indicator">
       <div class="step-dot active" id="dot1"></div>
       <div class="step-dot" id="dot2"></div>
       <div class="step-dot" id="dot3"></div>
     </div>
-
     <!-- 반려동물 선택 -->
     <div class="section-title">🐾 반려동물 정보</div>
     <div class="card">
@@ -293,7 +262,6 @@
         </div>
       </div>
     </div>
-
     <!-- 생활 환경 -->
     <div class="section-title">🏠 생활 환경</div>
     <div class="card">
@@ -318,7 +286,6 @@
         </div>
       </div>
     </div>
-
     <!-- 보호자 정보 -->
     <div class="section-title">👤 보호자 정보</div>
     <div class="card">
@@ -326,7 +293,6 @@
         <label>연락처 <span style="color:#ef4444">*</span></label>
         <input type="tel" id="ownerContact" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)"/>
       </div>
-
       <div class="consent-box">
         <div class="consent-row">
           <input type="checkbox" id="consentMarketing"/>
@@ -344,10 +310,8 @@
         </div>
       </div>
     </div>
-
     <button class="btn-primary" onclick="goCapture()">다음 — 사진 촬영 →</button>
   </div>
-
   <!-- ════════════ 촬영 화면 ════════════ -->
   <div class="screen" id="screenCapture">
     <div class="step-indicator">
@@ -355,7 +319,6 @@
       <div class="step-dot active"></div>
       <div class="step-dot"></div>
     </div>
-
     <!-- 촬영 안내 -->
     <div class="warning-banner">
       <div class="wtitle">📸 촬영 전 꼭 확인하세요!</div>
@@ -367,7 +330,6 @@
         <li>그림자와 반사광이 없도록 해주세요</li>
       </ul>
     </div>
-
     <button class="upload-btn accent" onclick="document.getElementById('cameraInput').click()">
       <div class="icon">📷</div>
       <div class="lbl">카메라로 촬영</div>
@@ -378,10 +340,8 @@
       <div class="lbl">갤러리에서 선택</div>
       <div class="sub">저장된 사진을 불러오세요</div>
     </button>
-
     <button class="btn-outline" onclick="goHome()">← 이전으로</button>
   </div>
-
   <!-- ════════════ 미리보기 화면 ════════════ -->
   <div class="screen" id="screenPreview">
     <div class="step-indicator">
@@ -389,23 +349,18 @@
       <div class="step-dot active"></div>
       <div class="step-dot"></div>
     </div>
-
     <div class="preview-wrap">
       <img id="previewImg" src="" alt="검사 이미지"/>
       <button class="btn-close-img" onclick="goCapture()">×</button>
     </div>
-
     <div class="error-box" id="errorBox"></div>
-
     <button class="btn-primary" id="btnAnalyze" onclick="analyze()">🔬 AI 분석 시작</button>
-
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
       <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 품종·나이·환경 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
-
   <!-- ════════════ 결과 화면 ════════════ -->
   <div class="screen" id="screenResult">
     <div id="resultCapture">
@@ -414,7 +369,6 @@
         <div class="step-dot done"></div>
         <div class="step-dot active"></div>
       </div>
-
       <!-- 종합 결과 -->
       <div class="result-banner" id="resultBanner">
         <div class="big-icon" id="resultIcon">✅</div>
@@ -422,10 +376,8 @@
         <div class="pet-sub" id="resultPetSub"></div>
         <div class="summary-txt" id="resultSummary"></div>
       </div>
-
       <!-- 권고 -->
       <div class="rec-box" id="recBox"></div>
-
       <!-- 체질 건강 분석 (내부적으로 사주 활용, 외부엔 검사 기반으로 표시) -->
       <div class="saju-box" id="sajuBox" style="display:none">
         <div class="stitle">🔬 검사 기반 체질 건강 포인트</div>
@@ -433,7 +385,6 @@
         <div id="sajuTips"></div>
         <div class="saju-month" id="sajuMonth"></div>
       </div>
-
       <!-- 종합 패턴 분석 (내부적으로 환경+품종+나이 활용, 외부엔 검사 기반으로 표시) -->
       <div class="env-health-box" id="envHealthBox" style="display:none">
         <div class="etitle">🔍 수치 패턴 종합 분석</div>
@@ -446,17 +397,14 @@
           <div id="breedAgeText"></div>
         </div>
       </div>
-
       <!-- 항목별 결과 -->
       <div class="section-title">📊 항목별 검사 결과</div>
       <div id="resultItems"></div>
-
       <!-- 관리 팁 -->
       <div class="tips-box" id="tipsBox" style="display:none">
         <div class="ttitle">💡 관리 팁</div>
         <div id="tipsList"></div>
       </div>
-
       <!-- 영양제 추천 -->
       <div class="reco-section" id="suppSection" style="display:none">
         <div class="reco-header">
@@ -465,7 +413,6 @@
         </div>
         <div id="suppList"></div>
       </div>
-
       <!-- 사료 추천 -->
       <div class="reco-section" id="foodSection" style="display:none">
         <div class="reco-header">
@@ -474,7 +421,6 @@
         </div>
         <div id="foodCard"></div>
       </div>
-
       <!-- 운동 추천 -->
       <div class="reco-section" id="exerciseSection" style="display:none">
         <div class="reco-header">
@@ -483,29 +429,26 @@
         </div>
         <div id="exerciseCard"></div>
       </div>
-
-      <!-- 검사 이미지 -->
-      <div class="section-title">📸 검사 이미지</div>
-      <img id="resultImg" src="" alt="검사 이미지" style="width:100%;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.10);margin-bottom:14px"/>
-
+      <!-- 검사 이미지 (히스토리 조회 시 숨김) -->
+      <div id="resultImgSection">
+        <div class="section-title">📸 검사 이미지</div>
+        <img id="resultImg" src="" alt="검사 이미지" style="width:100%;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.10);margin-bottom:14px"/>
+      </div>
       <!-- 검사 정보 요약 -->
       <div class="card" id="infoSummary" style="font-size:12px;color:#64748b;line-height:2"></div>
-
       <div class="disclaimer">
         ⚠️ <strong style="color:#64748b">안내:</strong> 이 결과는 AI가 이미지를 분석한 참고용 정보입니다. 정확한 진단을 위해서는 반드시 수의사와 상담하시기 바랍니다. 촬영 환경(빛, 각도)에 따라 결과가 달라질 수 있습니다.
       </div>
     </div>
-
     <!-- 다운로드 & 액션 -->
     <div style="margin-top:14px">
-      <button class="btn-download" onclick="downloadResult()">📥 결과 이미지 저장</button>
+      <button class="btn-download" id="btnDownload" onclick="downloadResult()">📥 결과 이미지 저장</button>
       <div class="action-row">
-        <button class="btn-retake" onclick="goCapture()">📷 재촬영</button>
+        <button class="btn-retake" id="btnRetake" onclick="goCapture()">📷 재촬영</button>
         <button class="btn-new" onclick="resetAll()">🏠 새 검사</button>
       </div>
     </div>
   </div>
-
   <!-- ════════════ 기록 화면 ════════════ -->
   <div class="screen" id="screenHistory">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -514,9 +457,7 @@
     </div>
     <div id="historyList"></div>
   </div>
-
 </div>
-
 <!-- Android/Chrome 홈화면 추가 배너 -->
 <div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:14px 16px;
@@ -531,7 +472,6 @@
   <button onclick="dismissInstall()" style="background:none;border:none;color:rgba(255,255,255,.7);
     font-size:20px;cursor:pointer;padding:0 4px">×</button>
 </div>
-
 <!-- iOS Safari 홈화면 추가 안내 배너 -->
 <div id="iosBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:#1e293b;padding:16px;align-items:flex-start;gap:12px;
@@ -548,11 +488,9 @@
   <button onclick="document.getElementById('iosBanner').style.display='none'"
     style="background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:0">×</button>
 </div>
-
 <!-- 숨김 파일 입력 -->
 <input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)"/>
 <input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleFile(this)"/>
-
 <script>
 // ══════════════════════════════════════
 // PWA 서비스워커 등록
@@ -562,7 +500,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
-
 // 홈화면 추가 배너 (iOS 제외 - iOS는 별도 안내)
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -570,7 +507,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
   document.getElementById('installBanner').style.display = 'flex';
 });
-
 function installApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -580,7 +516,6 @@ function installApp() {
     });
   }
 }
-
 function dismissInstall() {
   document.getElementById('installBanner').style.display = 'none';
 }
@@ -591,11 +526,9 @@ function showInstallGuide() {
   } else if (deferredPrompt) {
     installApp();
   } else {
-    // 이미 설치됐거나 Android 외 환경 → 안내 팝업
     alert('📲 홈화면에 앱 추가하는 방법\n\n【아이폰/아이패드 (Safari)】\n1. 하단 공유 버튼(□↑) 탭\n2. "홈 화면에 추가" 선택\n3. 오른쪽 위 "추가" 탭\n\n【안드로이드 (Chrome)】\n1. 우측 상단 메뉴(⋮) 탭\n2. "홈 화면에 추가" 선택\n3. "추가" 탭');
   }
 }
-
 // iOS 감지 → 별도 안내
 window.addEventListener('load', () => {
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -606,17 +539,16 @@ window.addEventListener('load', () => {
     }, 3000);
   }
 });
-
 // ══════════════════════════════════════
 // 상태
 // ══════════════════════════════════════
-let selectedPet = null;
+let selectedPet    = null;
 let selectedEnv    = null;
 let selectedGender = null;
-let imageB64    = null;
-let imageSrc    = null;
-let currentResult = null;
-
+let imageB64       = null;
+let imageSrc       = null;
+let currentResult  = null;
+let isFromHistory  = false;  // 히스토리에서 열었는지 여부
 // ══════════════════════════════════════
 // 화면 전환
 // ══════════════════════════════════════
@@ -627,7 +559,6 @@ function showScreen(id) {
 }
 function goHome()    { showScreen('screenHome'); }
 function goHistory() { renderHistory(); showScreen('screenHistory'); }
-
 // ══════════════════════════════════════
 // 생년도 셀렉트 채우기
 // ══════════════════════════════════════
@@ -640,7 +571,6 @@ function goHistory() { renderHistory(); showScreen('screenHistory'); }
     sel.appendChild(opt);
   }
 })();
-
 // ══════════════════════════════════════
 // 반려동물 / 환경 선택
 // ══════════════════════════════════════
@@ -649,21 +579,18 @@ function selectPet(type) {
   document.getElementById('btnDog').classList.toggle('active', selectedPet === 'dog');
   document.getElementById('btnCat').classList.toggle('active', selectedPet === 'cat');
 }
-
 function selectGender(type) {
   selectedGender = selectedGender === type ? null : type;
   document.getElementById('genderMale').classList.toggle('active', selectedGender === '수컷');
   document.getElementById('genderFemale').classList.toggle('active', selectedGender === '암컷');
   document.getElementById('genderNeutered').classList.toggle('active', selectedGender === '중성화');
 }
-
 function selectEnv(type) {
   selectedEnv = selectedEnv === type ? null : type;
   document.getElementById('envIndoor').classList.toggle('active', selectedEnv === '실내');
   document.getElementById('envOutdoor').classList.toggle('active', selectedEnv === '실외');
   document.getElementById('envMixed').classList.toggle('active', selectedEnv === '실내+실외');
 }
-
 // ══════════════════════════════════════
 // 전화번호 자동 포맷
 // ══════════════════════════════════════
@@ -673,12 +600,10 @@ function formatPhone(input) {
   else if (v.length <= 7) input.value = v.slice(0,3) + '-' + v.slice(3);
   else input.value = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
 }
-
 // ══════════════════════════════════════
 // 다음 단계 (촬영으로)
 // ══════════════════════════════════════
 function goCapture() {
-  // 연락처 필수 검증
   const contactVal = document.getElementById('ownerContact').value.trim();
   const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
   if (!contactVal) {
@@ -691,7 +616,6 @@ function goCapture() {
     document.getElementById('ownerContact').focus();
     return;
   }
-  // 개인정보 동의 필수 검증
   const privacy = document.getElementById('consentPrivacy').checked;
   if (!privacy) {
     alert('개인정보 수집 및 이용에 동의해 주세요. (필수)');
@@ -699,7 +623,6 @@ function goCapture() {
   }
   showScreen('screenCapture');
 }
-
 // ══════════════════════════════════════
 // 파일 처리
 // ══════════════════════════════════════
@@ -717,20 +640,17 @@ function handleFile(input) {
   reader.readAsDataURL(file);
   input.value = '';
 }
-
 function showError(msg) {
   const box = document.getElementById('errorBox');
   box.textContent = '⚠️ ' + msg;
   box.classList.add('show');
 }
 function clearError() { document.getElementById('errorBox').classList.remove('show'); }
-
 // ══════════════════════════════════════
 // 사주 건강 분석 (원소명 없이 장기 중심)
 // ══════════════════════════════════════
 function getSajuHealth(birthYear, birthMonth) {
   if (!birthYear || !birthMonth) return null;
-
   const stemIdx = ((parseInt(birthYear) - 4) % 10 + 10) % 10;
   const stemData = [
     { organ:'간·담낭',   tips:['이번 검사 수치상 지방이 적은 사료를 선택하시면 도움이 됩니다','간 수치 혈액 검사를 정기적으로 병행하시기 바랍니다'] },
@@ -744,7 +664,6 @@ function getSajuHealth(birthYear, birthMonth) {
     { organ:'신장·방광', tips:['이번 검사에서 수분 섭취가 매우 중요한 것으로 나타났습니다. 신선한 물을 항상 제공하세요','소변 검사를 정기적으로 반복하여 신장 기능 변화를 모니터링하세요'] },
     { organ:'신장·방광', tips:['이번 수치상 저인산·저단백 식단이 적합합니다','음수량과 소변량을 자주 확인하시기 바랍니다'] },
   ];
-
   const monthData = {
     1:'이번 검사에서 신장·방광 수치에 주의가 필요한 패턴이 감지되었습니다. 체온 유지와 수분 보충에 신경써 주세요.',
     2:'검사 수치상 간 기능과 면역력 관련 지표를 꾸준히 모니터링하시기 바랍니다.',
@@ -759,7 +678,6 @@ function getSajuHealth(birthYear, birthMonth) {
     11:'이번 수치 패턴에서 신장 기능 모니터링이 권장됩니다. 체온 유지에도 신경써 주세요.',
     12:'검사 결과상 방광·신장 수치를 집중 관리하고, 충분한 보온과 수분 섭취를 유지하세요.',
   };
-
   const data = stemData[stemIdx];
   const month = parseInt(birthMonth);
   return {
@@ -768,14 +686,11 @@ function getSajuHealth(birthYear, birthMonth) {
     monthInfo: monthData[month] || '',
   };
 }
-
 // ══════════════════════════════════════
 // AI 분석
 // ══════════════════════════════════════
 async function analyze() {
   if (!imageB64) return;
-
-  // 연락처 필수 검증
   const contactVal = document.getElementById('ownerContact').value.trim();
   const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
   if (!contactVal) {
@@ -788,58 +703,51 @@ async function analyze() {
     document.getElementById('ownerContact').focus();
     return;
   }
-
-  // 개인정보 동의 필수 검증
   if (!document.getElementById('consentPrivacy').checked) {
     alert('개인정보 수집 및 이용에 동의해주세요. (필수)');
     return;
   }
-
   const btn     = document.getElementById('btnAnalyze');
   const loading = document.getElementById('loadingBox');
   btn.disabled = true;
   btn.textContent = '🔄 AI 분석 중...';
   loading.classList.add('show');
   clearError();
+  const petName    = document.getElementById('petName').value.trim();
+  const petBreed   = document.getElementById('petBreed').value.trim();
+  const petType    = selectedPet;
+  const gender     = selectedGender;
+  const contact    = document.getElementById('ownerContact').value.trim();
+  const marketing  = document.getElementById('consentMarketing').checked;
+  const birthYear  = document.getElementById('petBirthYear').value;
+  const birthMonth = document.getElementById('petBirthMonth').value;
+  const region     = document.getElementById('region').value;
+  const env        = selectedEnv;
 
-  const petName   = document.getElementById('petName').value.trim();
-  const petBreed  = document.getElementById('petBreed').value.trim();
-  const petType   = selectedPet;
-  const gender    = selectedGender;
-  const contact   = document.getElementById('ownerContact').value.trim();
-  const marketing = document.getElementById('consentMarketing').checked;
-  const birthYear = document.getElementById('petBirthYear').value;
-  const birthMonth= document.getElementById('petBirthMonth').value;
-  const region    = document.getElementById('region').value;
-  const env       = selectedEnv;
+  // ★ Fix 4: 한국어 UI 값 → 영어 API 값으로 매핑
+  const envKrToEn = { '실내': 'indoor', '실외': 'outdoor', '실내+실외': 'both' };
+  const environment = envKrToEn[env] || env || null;
 
   const petHint = petType
     ? `이 이미지는 ${petType==='dog'?'강아지':'고양이'}${petBreed?`(품종: ${petBreed})`:''}${petName?`(이름: ${petName})`:''}${gender?`(성별: ${gender})`:''}의 소변검사 키트입니다. `
     : '';
-
-  const recordData = { contact, marketing, petType, petName, petBreed, gender, birthYear, birthMonth, region, environment: env };
-
+  const recordData = { contact, marketing, petType, petName, petBreed, gender, birthYear, birthMonth, region, environment };
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageB64, petHint, recordData })
     });
-
     const result = await res.json();
     if (result.error) throw new Error(result.error);
-
     currentResult = result;
-
+    isFromHistory = false;
     // 사주 분석 추가
     const saju = getSajuHealth(birthYear, birthMonth);
     renderResult(result, { petName, petBreed, petType, gender, contact, region, env, birthYear, birthMonth, saju });
-
-    // 로컬 기록 저장
-    saveToHistory({ result, petName, petType, contact, region, env, birthYear, birthMonth });
-
+    // ★ Fix 5a: 전체 결과 포함하여 히스토리 저장
+    saveToHistory({ result, petName, petBreed, petType, gender, contact, region, env, birthYear, birthMonth });
     showScreen('screenResult');
-
   } catch (err) {
     showError(err.message || '분석 중 오류가 발생했습니다.');
   } finally {
@@ -848,7 +756,6 @@ async function analyze() {
     loading.classList.remove('show');
   }
 }
-
 // ══════════════════════════════════════
 // 결과 렌더링
 // ══════════════════════════════════════
@@ -860,19 +767,18 @@ function renderResult(r, info) {
     soon:   '일부 수치가 불안정합니다. 가까운 시일 내 수의사 방문을 권장합니다 🏥',
     urgent: '이상 수치가 감지되었습니다. 빠른 시일 내 수의사 방문이 필요합니다 ⚠️',
   };
-
   // 배너
   document.getElementById('resultBanner').className = 'result-banner bg-'+(r.overallStatus||'normal');
   document.getElementById('resultIcon').textContent    = ICON[r.overallStatus]  ||'🔬';
   document.getElementById('resultTitle').textContent   = '종합 결과: '+(STATUS[r.overallStatus]||'분석 완료');
   document.getElementById('resultPetSub').textContent  = info.petName ? info.petName+'의 검사 결과' : '';
   document.getElementById('resultSummary').textContent = r.summary||'';
-
-  // 권고
+  // ★ Fix 6: 권고 박스에 항상 미세 수치 변화 안내 표시
   const rec = document.getElementById('recBox');
   rec.className = 'rec-box rec-'+(r.overallStatus||'normal');
-  rec.textContent = '🏥 '+(URGENCY[r.urgency]||URGENCY.normal);
-
+  const urgencyText = URGENCY[r.urgency] || URGENCY.normal;
+  const subtleNote = r.subtleChangeNote || '미세한 수치 변화가 있을 경우 아래 건강관리 내용을 확인해주세요.';
+  rec.innerHTML = `🏥 ${urgencyText}<span class="subtle-note">${subtleNote}</span>`;
   // 사주 건강
   const sajuBox = document.getElementById('sajuBox');
   if (info.saju) {
@@ -884,13 +790,11 @@ function renderResult(r, info) {
   } else {
     sajuBox.style.display = 'none';
   }
-
   // 환경·품종 건강 분석
-  const envHealthBox  = document.getElementById('envHealthBox');
+  const envHealthBox    = document.getElementById('envHealthBox');
   const envAnalysisItem = document.getElementById('envAnalysisItem');
-  const breedAgeItem  = document.getElementById('breedAgeItem');
+  const breedAgeItem    = document.getElementById('breedAgeItem');
   let showEnvBox = false;
-
   if (r.envAnalysis) {
     document.getElementById('envAnalysisText').textContent = r.envAnalysis;
     envAnalysisItem.style.display = 'block';
@@ -906,7 +810,6 @@ function renderResult(r, info) {
     breedAgeItem.style.display = 'none';
   }
   envHealthBox.style.display = showEnvBox ? 'block' : 'none';
-
   // 항목별 결과
   const container = document.getElementById('resultItems');
   container.innerHTML = '';
@@ -924,7 +827,6 @@ function renderResult(r, info) {
         <div class="ri-desc">${item.description||''}</div>
       </div>`;
   });
-
   // 팁
   const tipsBox  = document.getElementById('tipsBox');
   const tipsList = document.getElementById('tipsList');
@@ -936,7 +838,6 @@ function renderResult(r, info) {
   } else {
     tipsBox.style.display = 'none';
   }
-
   // ── 영양제 추천 ──
   const suppSection = document.getElementById('suppSection');
   const suppList    = document.getElementById('suppList');
@@ -956,7 +857,6 @@ function renderResult(r, info) {
   } else {
     suppSection.style.display = 'none';
   }
-
   // ── 사료 추천 ──
   const foodSection = document.getElementById('foodSection');
   const foodCard    = document.getElementById('foodCard');
@@ -975,7 +875,6 @@ function renderResult(r, info) {
   } else {
     foodSection.style.display = 'none';
   }
-
   // ── 운동 추천 ──
   const exerciseSection = document.getElementById('exerciseSection');
   const exerciseCard    = document.getElementById('exerciseCard');
@@ -993,10 +892,20 @@ function renderResult(r, info) {
   } else {
     exerciseSection.style.display = 'none';
   }
-
-  // 이미지
-  document.getElementById('resultImg').src = imageSrc;
-
+  // ★ Fix 5b: 히스토리 열람 여부에 따라 이미지/버튼 표시 제어
+  const resultImgSection = document.getElementById('resultImgSection');
+  const btnDownload      = document.getElementById('btnDownload');
+  const btnRetake        = document.getElementById('btnRetake');
+  if (isFromHistory) {
+    resultImgSection.style.display = 'none';
+    btnDownload.style.display = 'none';
+    btnRetake.style.display = 'none';
+  } else {
+    resultImgSection.style.display = 'block';
+    document.getElementById('resultImg').src = imageSrc || '';
+    btnDownload.style.display = 'block';
+    btnRetake.style.display = 'block';
+  }
   // 검사 정보 요약
   const parts = [];
   if (info.petType) parts.push((info.petType==='dog'?'🐶 강아지':'🐱 고양이'));
@@ -1009,26 +918,61 @@ function renderResult(r, info) {
   parts.push('📅 '+new Date().toLocaleDateString('ko-KR'));
   document.getElementById('infoSummary').innerHTML = parts.join(' &nbsp;|&nbsp; ');
 }
-
 // ══════════════════════════════════════
-// 결과 다운로드
+// ★ Fix 5b: 히스토리 항목 열기
+// ══════════════════════════════════════
+function viewHistoryItem(id) {
+  try {
+    const history = JSON.parse(localStorage.getItem('petUrineHistory')||'[]');
+    const item = history.find(h => h.id === id);
+    if (!item || !item.result) {
+      alert('저장된 결과를 불러올 수 없습니다.\n(이전 버전에서 저장된 기록은 다시 검사해 주세요)');
+      return;
+    }
+    currentResult = item.result;
+    imageSrc = null;
+    isFromHistory = true;
+    const saju = getSajuHealth(item.birthYear, item.birthMonth);
+    renderResult(item.result, {
+      petName:    item.petName    || '',
+      petBreed:   item.petBreed   || '',
+      petType:    item.petType    || null,
+      gender:     item.gender     || '',
+      region:     item.region     || '',
+      env:        item.env        || '',
+      birthYear:  item.birthYear  || '',
+      birthMonth: item.birthMonth || '',
+      saju,
+    });
+    showScreen('screenResult');
+  } catch(e) {
+    alert('기록을 불러오는 중 오류가 발생했습니다.');
+  }
+}
+// ══════════════════════════════════════
+// ★ Fix 5c: 고화질 결과 이미지 저장
 // ══════════════════════════════════════
 async function downloadResult() {
-  const btn = document.querySelector('.btn-download');
+  const btn = document.getElementById('btnDownload');
   btn.textContent = '⏳ 저장 중...';
   btn.disabled = true;
   try {
     const el = document.getElementById('resultCapture');
+    const scale = Math.max(3, (window.devicePixelRatio || 1) * 2);
     const canvas = await html2canvas(el, {
-      scale: 2,
+      scale,
       useCORS: true,
+      allowTaint: true,
       backgroundColor: '#f1f5f9',
-      scrollY: -window.scrollY
+      scrollY: -window.scrollY,
+      windowWidth: document.documentElement.offsetWidth,
+      imageTimeout: 0,
+      logging: false,
     });
     const link = document.createElement('a');
     const petName = document.getElementById('petName').value.trim() || '반려동물';
     link.download = `${petName}_소변검사_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.href = canvas.toDataURL('image/png', 1.0);
     link.click();
   } catch(e) {
     alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -1037,27 +981,34 @@ async function downloadResult() {
     btn.disabled = false;
   }
 }
-
 // ══════════════════════════════════════
-// 로컬 히스토리 저장/조회
+// ★ Fix 5a: 로컬 히스토리 저장 (전체 결과 포함)
 // ══════════════════════════════════════
 function saveToHistory(data) {
   try {
     const key = 'petUrineHistory';
     const history = JSON.parse(localStorage.getItem(key)||'[]');
     history.unshift({
-      id: Date.now(),
-      date: new Date().toISOString(),
-      petName: data.petName,
-      petType: data.petType,
-      region: data.region,
+      id:            Date.now(),
+      date:          new Date().toISOString(),
+      petName:       data.petName    || '',
+      petBreed:      data.petBreed   || '',
+      petType:       data.petType    || null,
+      gender:        data.gender     || '',
+      region:        data.region     || '',
+      env:           data.env        || '',
+      birthYear:     data.birthYear  || '',
+      birthMonth:    data.birthMonth || '',
       overallStatus: data.result.overallStatus,
-      summary: data.result.summary,
+      summary:       data.result.summary,
+      result:        data.result,  // ★ 전체 결과 저장
     });
-    localStorage.setItem(key, JSON.stringify(history.slice(0, 30)));
+    localStorage.setItem(key, JSON.stringify(history.slice(0, 15)));
   } catch(e) {}
 }
-
+// ══════════════════════════════════════
+// 히스토리 렌더링 (결과 보기 버튼 추가)
+// ══════════════════════════════════════
 function renderHistory() {
   const list = document.getElementById('historyList');
   try {
@@ -1074,6 +1025,7 @@ function renderHistory() {
       const dateStr = d.toLocaleDateString('ko-KR') + ' ' + d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
       const petLabel = h.petType==='dog'?'🐶':h.petType==='cat'?'🐱':'🐾';
       const status = h.overallStatus||'normal';
+      const hasFullResult = !!h.result;
       return `
         <div class="history-item">
           <div class="history-header">
@@ -1081,19 +1033,21 @@ function renderHistory() {
             <div class="history-date">${dateStr}</div>
           </div>
           <div class="history-info">${h.region||''} ${h.region?'·':''} ${h.summary||''}</div>
-          <span class="history-badge" style="background:${BG[status]}">${ICON[status]} ${STATUS[status]||'결과 없음'}</span>
+          <div class="history-footer">
+            <span class="history-badge" style="background:${BG[status]}">${ICON[status]} ${STATUS[status]||'결과 없음'}</span>
+            ${hasFullResult ? `<button class="btn-view-history" onclick="viewHistoryItem(${h.id})">결과 보기 →</button>` : ''}
+          </div>
         </div>`;
     }).join('');
   } catch(e) {
     list.innerHTML = '<div class="empty-history">기록을 불러올 수 없습니다.</div>';
   }
 }
-
 // ══════════════════════════════════════
 // 초기화
 // ══════════════════════════════════════
 function resetAll() {
-  imageSrc = null; imageB64 = null; currentResult = null;
+  imageSrc = null; imageB64 = null; currentResult = null; isFromHistory = false;
   clearError();
   document.getElementById('loadingBox').classList.remove('show');
   document.getElementById('btnAnalyze').disabled = false;
