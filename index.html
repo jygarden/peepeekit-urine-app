@@ -886,7 +886,7 @@ function renderResult(r, info) {
         ${e.frequency ? `<div class="exercise-freq">⏱️ ${e.frequency}</div>` : ''}
         ${typeTags ? `<div class="exercise-types">${typeTags}</div>` : ''}
         ${e.caution ? `<div class="exercise-caution">⚠️ ${e.caution}</div>` : ''}
-        ${e.indoorTips ? `<div class="exercise-indoor">🏠 실내 활동 팁: ${e.indoorTips}</div>` : ''}
+        ${e.indoorTips && info.env !== '실외' ? `<div class="exercise-indoor">🏠 실내 활동 팁: ${e.indoorTips}</div>` : ''}
       </div>`;
     exerciseSection.style.display = 'block';
   } else {
