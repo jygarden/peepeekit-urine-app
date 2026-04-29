@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건강어때 관리자</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+  /* 로그인 */
+  #login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #667eea, #764ba2); }
+  .login-box { background: white; border-radius: 24px; padding: 48px 40px; width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center; }
+  .login-box .logo { font-size: 48px; margin-bottom: 8px; }
+  .login-box h1 { font-size: 22px; font-weight: 800; color: #111827; margin-bottom: 4px; }
+  .login-box p { font-size: 13px; color: #9CA3AF; margin-bottom: 28px; }
+  .login-box input { width: 100%; padding: 14px 16px; border: 2px solid #E5E7EB; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+  .login-box input:focus { border-color: #764ba2; }
+  .login-box button { width: 100%; margin-top: 14px; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .login-box .error { color: #EF4444; font-size: 13px; margin-top: 10px; }
+
+  /* 헤더 */
+  #admin-page { display: none; }
+  header { background: linear-gradient(135deg, #667eea, #764ba2); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  header h1 { color: white; font-size: 18px; font-weight: 800; }
+  header span { color: rgba(255,255,255,0.8); font-size: 13px; }
+  header button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; }
+
+  /* 메인 */
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+  /* 스탯 카드 */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: white; border-radius: 18px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .stat-card .label { font-size: 12px; color: #9CA3AF; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 32px; font-weight: 900; margin: 6px 0 2px; }
+  .stat-card .sub { font-size: 12px; color: #9CA3AF; }
+  .stat-card.total .value { color: #667eea; }
+  .stat-card.normal .value { color: #22C55E; }
+  .stat-card.warning .value { color: #F59E0B; }
+  .stat-card.marketing .value { color: #EC4899; }
+
+  /* 섹션 */
+  .section { background: white; border-radius: 18px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .section-header h2 { font-size: 16px; font-weight: 700; color: #111827; }
+  .section-header .count { font-size: 13px; color: #9CA3AF; background: #F3F4F6; padding: 4px 10px; border-radius: 20px; }
+
+  /* 필터 */
+  .filters { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filters select, .filters input { padding: 8px 12px; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 13px; outline: none; background: white; }
+  .filters select:focus, .filters input:focus { border-color: #764ba2; }
+  .btn-export { padding: 8px 16px; background: #22C55E; color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin-left: auto; }
+
+  /* 테이블 */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #F3F4F6; }
+  tbody td { padding: 12px; border-bottom: 1px solid #F9FAFB; color: #374151; }
+  tbody tr:hover { background: #FAFAFA; }
+  tbody tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge.normal { background: #DCFCE7; color: #166534; }
+  .badge.warning { background: #FEF3C7; color: #92400E; }
+  .badge.danger { background: #FEE2E2; color: #991B1B; }
+  .badge.dog { background: #EDE9FE; color: #5B21B6; }
+  .badge.cat { background: #FCE7F3; color: #9D174D; }
+
+  /* 로딩 */
+  .loading { text-align: center; padding: 40px; color: #9CA3AF; }
+  .spinner { width: 32px; height: 32px; border: 3px solid #E5E7EB; border-top-color: #764ba2; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 마케팅 목록 */
+  .contact-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .contact-item { background: #F9FAFB; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #374151; }
+  .contact-item .name { font-weight: 600; color: #111827; margin-bottom: 2px; }
+  .contact-item .phone { color: #667eea; }
+
+  .empty { text-align: center; padding: 32px; color: #9CA3AF; font-size: 14px; }
+
+  @media (max-width: 768px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .contact-list { grid-template-columns: 1fr 1fr; }
+    header { padding: 0 16px; }
+    main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 로그인 페이지 -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="logo">🐾</div>
+    <h1>건강어때 관리자</h1>
+    <p>관리자 비밀번호를 입력해주세요</p>
+    <input type="password" id="pw-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">로그인</button>
+    <div class="error" id="pw-error"></div>
+  </div>
+</div>
+
+<!-- 관리자 페이지 -->
+<div id="admin-page">
+  <header>
+    <h1>🐾 건강어때 관리자 대시보드</h1>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="last-updated"></span>
+      <button onclick="loadData()">🔄 새로고침</button>
+      <button onclick="logout()">로그아웃</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 스탯 카드 -->
+    <div class="stats">
+      <div class="stat-card total">
+        <div class="label">총 검사 수</div>
+        <div class="value" id="stat-total">-</div>
+        <div class="sub">누적 전체</div>
+      </div>
+      <div class="stat-card normal">
+        <div class="label">정상</div>
+        <div class="value" id="stat-normal">-</div>
+        <div class="sub" id="stat-normal-pct">-</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="label">주의/위험</div>
+        <div class="value" id="stat-warning">-</div>
+        <div class="sub" id="stat-warning-pct">-</div>
+      </div>
+      <div class="stat-card marketing">
+        <div class="label">마케팅 동의</div>
+        <div class="value" id="stat-marketing">-</div>
+        <div class="sub">연락 가능</div>
+      </div>
+    </div>
+
+    <!-- 검사 기록 테이블 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>📋 검사 기록</h2>
+        <span class="count" id="record-count">불러오는 중...</span>
+      </div>
+      <div class="filters">
+        <select id="filter-status" onchange="filterRecords()">
+          <option value="">전체 상태</option>
+          <option value="normal">정상</option>
+          <option value="warning">주의</option>
+          <option value="danger">위험</option>
+        </select>
+        <select id="filter-pet" onchange="filterRecords()">
+          <option value="">전체 동물</option>
+          <option value="강아지">강아지</option>
+          <option value="고양이">고양이</option>
+        </select>
+        <select id="filter-region" onchange="filterRecords()">
+          <option value="">전체 지역</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="이름 / 연락처 검색" oninput="filterRecords()">
+        <button class="btn-export" onclick="exportCSV()">📥 CSV 내보내기</button>
+      </div>
+      <div id="records-loading" class="loading"><div class="spinner"></div>데이터 불러오는 중...</div>
+      <div class="table-wrap" id="records-table" style="display:none">
+        <table>
+          <thead>
+            <tr>
+              <th>날짜</th>
+              <th>반려동물</th>
+              <th>품종</th>
+              <th>성별</th>
+              <th>나이</th>
+              <th>지역</th>
+              <th>환경</th>
+              <th>결과</th>
+              <th>연락처</th>
+              <th>마케팅</th>
+            </tr>
+          </thead>
+          <tbody id="records-body"></tbody>
+        </table>
+      </div>
+      <div id="records-empty" class="empty" style="display:none">검사 기록이 없습니다</div>
+    </div>
+
+    <!-- 마케팅 동의 목록 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>📱 마케팅 동의 연락처</h2>
+        <span class="count" id="marketing-count">-</span>
+      </div>
+      <div id="marketing-list" class="contact-list"></div>
+      <div id="marketing-empty" class="empty" style="display:none">마케팅 동의 사용자가 없습니다</div>
+    </div>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://guvzbtemficekutgxngb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
+const ADMIN_PW = 'geongangtae2025!';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let allRecords = [];
+
+function login() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PW) {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('admin-page').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('pw-error').textContent = '비밀번호가 틀렸습니다';
+  }
+}
+
+function logout() {
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('admin-page').style.display = 'none';
+  document.getElementById('pw-input').value = '';
+}
+
+async function loadData() {
+  document.getElementById('records-loading').style.display = 'block';
+  document.getElementById('records-table').style.display = 'none';
+  document.getElementById('records-empty').style.display = 'none';
+
+  const { data, error } = await supabase
+    .from('pet_records')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(500);
+
+  if (error) {
+    console.error(error);
+    document.getElementById('records-loading').innerHTML = '❌ 데이터 로드 실패: ' + error.message;
+    return;
+  }
+
+  allRecords = data || [];
+  updateStats();
+  populateRegionFilter();
+  renderRecords(allRecords);
+  renderMarketing();
+
+  const now = new Date().toLocaleString('ko-KR');
+  document.getElementById('last-updated').textContent = '업데이트: ' + now;
+}
+
+function updateStats() {
+  const total = allRecords.length;
+  const normal = allRecords.filter(r => r.overall_status === 'normal').length;
+  const warning = allRecords.filter(r => r.overall_status === 'warning' || r.overall_status === 'danger').length;
+  const marketing = allRecords.filter(r => r.marketing_consent && r.owner_contact).length;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-normal').textContent = normal;
+  document.getElementById('stat-normal-pct').textContent = total ? Math.round(normal/total*100) + '%' : '-';
+  document.getElementById('stat-warning').textContent = warning;
+  document.getElementById('stat-warning-pct').textContent = total ? Math.round(warning/total*100) + '%' : '-';
+  document.getElementById('stat-marketing').textContent = marketing;
+}
+
+function populateRegionFilter() {
+  const regions = [...new Set(allRecords.map(r => r.region).filter(Boolean))].sort();
+  const sel = document.getElementById('filter-region');
+  sel.innerHTML = '<option value="">전체 지역</option>';
+  regions.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    sel.appendChild(opt);
+  });
+}
+
+function filterRecords() {
+  const status = document.getElementById('filter-status').value;
+  const pet = document.getElementById('filter-pet').value;
+  const region = document.getElementById('filter-region').value;
+  const search = document.getElementById('filter-search').value.toLowerCase();
+
+  let filtered = allRecords.filter(r => {
+    if (status && r.overall_status !== status) return false;
+    if (pet && r.pet_type !== pet) return false;
+    if (region && r.region !== region) return false;
+    if (search) {
+      const name = (r.pet_name || '').toLowerCase();
+      const contact = (r.owner_contact || '').toLowerCase();
+      if (!name.includes(search) && !contact.includes(search)) return false;
+    }
+    return true;
+  });
+  renderRecords(filtered);
+}
+
+function renderRecords(records) {
+  document.getElementById('records-loading').style.display = 'none';
+  document.getElementById('record-count').textContent = records.length + '건';
+
+  if (records.length === 0) {
+    document.getElementById('records-table').style.display = 'none';
+    document.getElementById('records-empty').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('records-table').style.display = 'block';
+  document.getElementById('records-empty').style.display = 'none';
+
+  const tbody = document.getElementById('records-body');
+  tbody.innerHTML = records.map(r => {
+    const date = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '-';
+    const age = r.pet_birth_year ? (new Date().getFullYear() - r.pet_birth_year) + '살' : '-';
+    const env = r.living_environment === 'indoor' ? '실내' : r.living_environment === 'outdoor' ? '실외' : r.living_environment || '-';
+    const gender = r.pet_gender === 'male' ? '수컷' : r.pet_gender === 'female' ? '암컷' : r.pet_gender || '-';
+    const statusBadge = r.overall_status === 'normal' ? '<span class="badge normal">정상</span>'
+      : r.overall_status === 'warning' ? '<span class="badge warning">주의</span>'
+      : r.overall_status === 'danger' ? '<span class="badge danger">위험</span>' : '-';
+    const petBadge = r.pet_type === '강아지' ? '<span class="badge dog">🐶 강아지</span>'
+      : r.pet_type === '고양이' ? '<span class="badge cat">🐱 고양이</span>'
+      : (r.pet_type || '-');
+    const marketing = r.marketing_consent ? '✅' : '❌';
+
+    return `<tr>
+      <td>${date}</td>
+      <td>${petBadge} ${r.pet_name || ''}</td>
+      <td>${r.pet_breed || '-'}</td>
+      <td>${gender}</td>
+      <td>${age}</td>
+      <td>${r.region || '-'}</td>
+      <td>${env}</td>
+      <td>${statusBadge}</td>
+      <td style="color:#667eea">${r.owner_contact || '-'}</td>
+      <td style="text-align:center">${marketing}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderMarketing() {
+  const list = allRecords.filter(r => r.marketing_consent && r.owner_contact);
+  document.getElementById('marketing-count').textContent = list.length + '명';
+
+  if (list.length === 0) {
+    document.getElementById('marketing-list').style.display = 'none';
+    document.getElementById('marketing-empty').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('marketing-list').style.display = 'grid';
+  document.getElementById('marketing-empty').style.display = 'none';
+  document.getElementById('marketing-list').innerHTML = list.map(r => `
+    <div class="contact-item">
+      <div class="name">${r.pet_name || '이름없음'} (${r.pet_type || ''})</div>
+      <div class="phone">${r.owner_contact}</div>
+      <div style="font-size:11px;color:#9CA3AF;margin-top:3px">${r.region || ''} · ${r.pet_breed || ''}</div>
+    </div>
+  `).join('');
+}
+
+function exportCSV() {
+  const status = document.getElementById('filter-status').value;
+  const pet = document.getElementById('filter-pet').value;
+  const region = document.getElementById('filter-region').value;
+  const search = document.getElementById('filter-search').value.toLowerCase();
+
+  let filtered = allRecords.filter(r => {
+    if (status && r.overall_status !== status) return false;
+    if (pet && r.pet_type !== pet) return false;
+    if (region && r.region !== region) return false;
+    if (search) {
+      const name = (r.pet_name || '').toLowerCase();
+      const contact = (r.owner_contact || '').toLowerCase();
+      if (!name.includes(search) && !contact.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const headers = ['날짜', '반려동물종류', '이름', '품종', '성별', '출생년도', '지역', '환경', '결과', '연락처', '마케팅동의'];
+  const rows = filtered.map(r => [
+    r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR') : '',
+    r.pet_type || '', r.pet_name || '', r.pet_breed || '',
+    r.pet_gender || '', r.pet_birth_year || '',
+    r.region || '', r.living_environment || '',
+    r.overall_status || '', r.owner_contact || '',
+    r.marketing_consent ? 'Y' : 'N'
+  ]);
+
+  const csv = '\uFEFF' + [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '건강어때_데이터_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
