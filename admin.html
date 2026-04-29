@@ -202,8 +202,20 @@ const SUPABASE_URL = 'https://guvzbtemficekutgxngb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
 const ADMIN_PW = 'eggdot0220!';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabaseClient = null;
 let allRecords = [];
+
+function getSupabase() {
+  if (!supabaseClient) {
+    try {
+      const sb = window.supabase || window.Supabase;
+      supabaseClient = sb.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+      console.error('Supabase 초기화 실패:', e);
+    }
+  }
+  return supabaseClient;
+}
 
 function login() {
   const pw = document.getElementById('pw-input').value;
@@ -227,7 +239,12 @@ async function loadData() {
   document.getElementById('records-table').style.display = 'none';
   document.getElementById('records-empty').style.display = 'none';
 
-  const { data, error } = await supabase
+  const sb = getSupabase();
+  if (!sb) {
+    document.getElementById('records-loading').innerHTML = '❌ Supabase 연결 실패. 페이지를 새로고침 해주세요.';
+    return;
+  }
+  const { data, error } = await sb
     .from('pet_records')
     .select('*')
     .order('created_at', { ascending: false })
