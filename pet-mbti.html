@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>반려동물 MBTI — 건강어때</title>
+<meta name="description" content="피피키트 반려동물 MBTI(32유형). 성격 공감 + 11가지 소변지표 기반 루틴/주의상황/운동팁 + 피피키트 체크 추천." />
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#f1f5f9;font-family:'Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;padding-bottom:40px;min-height:100vh}
+#app{max-width:430px;margin:0 auto}
+
+/* ── 헤더 ── */
+.header{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:16px 20px 20px;color:#fff;position:sticky;top:0;z-index:100}
+.header-row{display:flex;justify-content:space-between;align-items:center}
+.back-btn{background:rgba(255,255,255,.18);border:none;border-radius:8px;padding:6px 11px;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+.header h1{font-size:17px;font-weight:800;letter-spacing:-.5px}
+.header p{font-size:11px;opacity:.85;margin-top:2px}
+.header-space{width:40px}
+
+/* ── 화면 ── */
+.screen{display:none;padding:16px 16px 20px}
+.screen.active{display:block}
+
+/* ── 공통 카드 ── */
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+
+/* ── 버튼 ── */
+.btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(99,102,241,.38);letter-spacing:-.3px}
+.btn-primary:active{transform:scale(.98)}
+.btn-outline{width:100%;padding:13px;background:#fff;border:2px solid #6366f1;border-radius:12px;color:#6366f1;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;display:block}
+.btn-secondary{flex:1;padding:12px;background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;color:#475569;font-size:13px;font-weight:700;cursor:pointer}
+.btn-row{display:flex;gap:10px;margin-top:10px}
+
+/* ── 인트로 ── */
+.intro-hero{background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:1.5px solid #c4b5fd;border-radius:16px;padding:22px 20px;margin-bottom:12px;text-align:center}
+.intro-emoji{font-size:52px;margin-bottom:10px}
+.intro-title{font-size:22px;font-weight:800;color:#1e293b;line-height:1.3;margin-bottom:6px}
+.intro-title span{color:#7c3aed}
+.intro-desc{font-size:13px;color:#64748b;line-height:1.6}
+.pill-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:#fff;border:1.5px solid #e2e8f0;font-size:12px;color:#475569;font-weight:700}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);flex-shrink:0}
+
+/* ── 진행 바 ── */
+.progress-wrap{margin-bottom:16px}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:6px}
+.progress-bar{background:#e2e8f0;border-radius:999px;height:7px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#6366f1,#a78bfa);border-radius:999px;transition:width .3s ease}
+
+/* ── 질문 ── */
+.q-card{background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.q-category{font-size:11px;color:#6366f1;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.q-text{font-size:17px;font-weight:700;color:#1e293b;line-height:1.45}
+
+/* ── 선택지 ── */
+.choice-btn{width:100%;background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;text-align:left;transition:all .15s}
+.choice-btn:active{transform:scale(.99)}
+.choice-btn.selected{background:#ede9fe;border-color:#6366f1}
+.choice-label{font-size:11px;color:#94a3b8;font-weight:700;margin-bottom:4px}
+.choice-value{font-size:15px;font-weight:700;color:#1e293b}
+.choice-btn.selected .choice-value{color:#5b21b6}
+
+/* ── 로딩 ── */
+.loading-card{background:#fff;border-radius:14px;padding:32px 20px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,.07)}
+.loading-spinner{width:46px;height:46px;border:4px solid #ede9fe;border-top-color:#6366f1;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:16px;font-weight:800;color:#1e293b;margin-bottom:4px}
+.loading-sub{font-size:13px;color:#64748b;line-height:1.6}
+
+/* ── 결과 배너 ── */
+.result-banner{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:18px;padding:22px 20px;color:#fff;margin-bottom:12px;text-align:center;box-shadow:0 4px 16px rgba(99,102,241,.35)}
+.result-mbti{font-size:30px;font-weight:900;letter-spacing:.5px;margin-bottom:4px}
+.result-variant{font-size:13px;opacity:.85;margin-bottom:6px}
+.result-nick{font-size:18px;font-weight:800;margin-bottom:4px}
+.result-one{font-size:13px;opacity:.88;line-height:1.5}
+
+/* ── 상위 % 배지 ── */
+.rarity-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.4);border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:#fff;margin-top:10px}
+
+/* ── 특성 배지 ── */
+.badge-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;justify-content:center}
+.type-badge{font-size:11px;padding:4px 11px;border-radius:20px;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4);color:#fff;font-weight:700}
+
+/* ── QR 공유 ── */
+.qr-badge{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px;cursor:pointer;margin-top:12px}
+.qr-badge:active{opacity:.85}
+.qr-txt{flex:1;min-width:0}
+.qr-t1{font-size:12px;font-weight:700;color:#fff}
+.qr-t2{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qr-badge img{width:52px;height:52px;border-radius:8px;background:#fff;border:1px solid rgba(255,255,255,.3);padding:4px;flex:0 0 auto}
+
+/* ── 탭 ── */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{flex:0 0 auto;border:1.5px solid #e2e8f0;background:#fff;padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;color:#475569}
+.tab-btn.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;color:#fff}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── 미니카드 ── */
+.mini-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.mini-card h4{font-size:13px;font-weight:800;color:#1e293b;margin-bottom:8px}
+.mini-card ul{padding-left:18px;color:#475569;font-size:13px;line-height:1.8}
+.mini-card p{font-size:13px;color:#475569;line-height:1.6}
+
+/* ── 포커스 카드 ── */
+.focus-card{background:linear-gradient(135deg,#ede9fe,#f5f3ff);border:1.5px solid #c4b5fd;border-radius:12px;padding:14px;margin-bottom:10px}
+.focus-card h4{font-size:13px;font-weight:800;color:#5b21b6;margin-bottom:8px}
+.focus-card ul{padding-left:18px;color:#4c1d95;font-size:13px;line-height:1.8}
+
+/* ── 브릿지 카드 ── */
+.bridge-card{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #a78bfa;border-radius:14px;padding:16px;margin-bottom:12px}
+.bridge-title{font-size:14px;font-weight:800;color:#4c1d95;margin-bottom:8px}
+.bridge-desc{font-size:13px;color:#374151;line-height:1.6;margin-bottom:12px}
+
+/* ── 지표 ── */
+.indicator-item{padding:10px 0;border-top:1px solid #f1f5f9}
+.indicator-item:first-child{border-top:none}
+.ind-name{font-size:13px;font-weight:700;color:#1e293b;margin-bottom:3px}
+.ind-hint{font-size:12px;color:#64748b;line-height:1.5}
+
+/* ── 스티키 CTA ── */
+.sticky-cta{position:sticky;bottom:12px;z-index:50;margin-top:12px;background:rgba(255,255,255,.92);border:1px solid #e2e8f0;border-radius:16px;padding:10px;box-shadow:0 4px 20px rgba(0,0,0,.12);backdrop-filter:blur(8px)}
+.sticky-hint{font-size:11px;color:#64748b;margin-top:6px;line-height:1.5}
+
+.disclaimer{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;font-size:11px;color:#94a3b8;line-height:1.7;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="header-row">
+      <button class="back-btn" onclick="history.back()">←</button>
+      <div>
+        <h1>🧠 반려동물 MBTI</h1>
+        <p>32유형 · 11가지 건강지표 연동</p>
+      </div>
+      <div class="header-space"></div>
+    </div>
+  </div>
+
+  <!-- ════ 홈 ════ -->
+  <div class="screen active" id="home">
+    <div class="intro-hero">
+      <div class="intro-emoji">🐾</div>
+      <div class="intro-title">우리 아이 MBTI는<br><span>어떤 유형</span>일까요?</div>
+      <div class="intro-desc">보호자 관찰 기반 16문항으로<br>32가지 성격 유형 + 건강 루틴까지 분석해요</div>
+      <div class="pill-row">
+        <div class="pill"><span class="pill-dot"></span>32유형 A/B</div>
+        <div class="pill"><span class="pill-dot"></span>11가지 건강지표</div>
+        <div class="pill"><span class="pill-dot"></span>결과 공유</div>
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn-primary" id="startBtn">🐾 테스트 시작하기</button>
+      <button class="btn-outline" id="seeLastBtn">마지막 결과 보기</button>
+      <div class="disclaimer">*본 테스트는 보호자 관찰 기반 콘텐츠이며, 결과/팁은 <b>의학적 진단이 아닙니다</b>. 이상 징후가 지속되면 수의사 상담을 권장합니다.</div>
+    </div>
+  </div>
+
+  <!-- ════ 퀴즈 ════ -->
+  <div class="screen" id="quiz">
+    <div class="q-card">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="qCount">1 / 16</span>
+          <span id="qPct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="bar"></div></div>
+      </div>
+      <div class="q-category" id="qCategory">에너지 스타일</div>
+      <div class="q-text" id="qText">질문 로딩 중...</div>
+    </div>
+    <div class="choice-btn" id="choiceA">
+      <div class="choice-label">A</div>
+      <div class="choice-value" id="aText"></div>
+    </div>
+    <div class="choice-btn" id="choiceB">
+      <div class="choice-label">B</div>
+      <div class="choice-value" id="bText"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" id="backBtn">← 이전</button>
+      <button class="btn-secondary" id="restartBtn">처음으로</button>
+    </div>
+  </div>
+
+  <!-- ════ 로딩 ════ -->
+  <div class="screen" id="loading">
+    <div class="loading-card">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">분석 중이에요 🔎</div>
+      <div class="loading-sub">성격 유형 + 11가지 건강지표<br>맞춤 루틴을 정리하고 있어요</div>
+    </div>
+  </div>
+
+  <!-- ════ 결과 ════ -->
+  <div class="screen" id="result">
+    <!-- 결과 배너 -->
+    <div class="result-banner" id="shareCard">
+      <img id="rImg" src="" alt="" style="width:100%;max-height:180px;object-fit:contain;border-radius:12px;background:rgba(255,255,255,.15);padding:8px;margin-bottom:10px" onerror="this.style.display='none'">
+      <div class="result-mbti" id="rCode">ENTP-A</div>
+      <div class="result-variant" id="rVariant">🟢 안정형 (A)</div>
+      <div class="result-nick" id="rNick">호기심 폭주 발명가</div>
+      <div class="result-one" id="rOne">지루한 건 못 참는 아이디어 댕댕이</div>
+      <div class="rarity-badge" id="rarityBadge">⭐ <span id="rarityText">반려견 상위 7%</span></div>
+      <div class="badge-row" id="rBadges"></div>
+      <div class="qr-badge" id="qrBadge">
+        <div class="qr-txt">
+          <div class="qr-t1">친구에게 공유하기 (클릭해서 링크복사)</div>
+          <div class="qr-t2" id="qrUrlText"></div>
+        </div>
+        <img id="qrImg" alt="QR">
+      </div>
+    </div>
+
+    <!-- 이미지 공유 -->
+    <div class="mini-card">
+      <h4>📸 이미지로 공유</h4>
+      <div class="btn-row">
+        <button class="btn-secondary" id="shareCardBtn">이미지 저장</button>
+        <button class="btn-secondary" id="shareStoryBtn">공유하기</button>
+      </div>
+      <p style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.5">*모바일: 공유창(카톡/인스타) / PC: 이미지 다운로드</p>
+    </div>
+
+    <!-- 건강 브릿지 -->
+    <div class="bridge-card">
+      <div class="bridge-title" id="bridgeTitle">🩺 건강 관리 포인트</div>
+      <div class="bridge-desc" id="bridgeDesc"></div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn-primary" style="flex:2;padding:12px" id="goKitBtn">피피키트로 1분 체크</button>
+        <button class="btn-secondary" style="flex:1" id="go11Btn">건강지표 보기</button>
+      </div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="t1">요약</button>
+      <button class="tab-btn" data-tab="t2">11가지 건강지표</button>
+      <button class="tab-btn" data-tab="t3">루틴</button>
+      <button class="tab-btn" data-tab="t4">주의</button>
+    </div>
+
+    <!-- t1: 요약 -->
+    <div class="tab-panel active" id="t1">
+      <div class="mini-card">
+        <h4>집에서 자주 보이는 모습</h4>
+        <ul id="rTraits"></ul>
+      </div>
+      <div class="mini-card">
+        <h4>보호자 공감 멘트</h4>
+        <p id="rEmpathy"></p>
+      </div>
+      <div class="mini-card">
+        <h4>오늘의 컨디션 한 줄</h4>
+        <p id="rToday"></p>
+      </div>
+      <div class="focus-card">
+        <h4>💊 피피키트 건강지표 중 오늘 우선 체크 추천</h4>
+        <ul id="rFocus"></ul>
+        <div style="font-size:12px;color:#5b21b6;margin-top:8px" id="rFocusWhy"></div>
+      </div>
+    </div>
+
+    <!-- t2: 건강지표 -->
+    <div class="tab-panel" id="t2">
+      <div class="mini-card">
+        <h4>11가지 건강지표 — 보호자 언어로 보기</h4>
+        <div id="indicatorList"></div>
+      </div>
+    </div>
+
+    <!-- t3: 루틴 -->
+    <div class="tab-panel" id="t3">
+      <div class="mini-card">
+        <h4>오늘 추천 운동/놀이</h4>
+        <ul id="rDo"></ul>
+      </div>
+      <div class="mini-card">
+        <h4>체크 후 이렇게 해요 (루틴)</h4>
+        <ul id="rNext"></ul>
+        <p style="font-size:11px;color:#94a3b8;margin-top:8px">*진단이 아니라 "컨디션 체크"예요. 이상이 지속되면 병원 상담 권장.</p>
+      </div>
+    </div>
+
+    <!-- t4: 주의 -->
+    <div class="tab-panel" id="t4">
+      <div class="mini-card">
+        <h4>이 타입이 조심해야 할 상황 TOP3</h4>
+        <ul id="rAvoid"></ul>
+      </div>
+      <div class="mini-card">
+        <h4>이상 신호 체크리스트</h4>
+        <ul id="rWatch"></ul>
+      </div>
+    </div>
+
+    <!-- 하단 버튼 -->
+    <div class="mini-card" style="margin-top:4px">
+      <div class="btn-row">
+        <button class="btn-secondary" id="againBtn">🔄 다시 테스트</button>
+        <button class="btn-secondary" onclick="window.location.href='index.html'">🏠 건강어때 홈</button>
+      </div>
+    </div>
+
+    <!-- ID 카드로 이동 -->
+    <button class="btn-primary" onclick="window.location.href='pet-idcard.html'" style="margin:0 0 10px">🪪 반려동물 ID 카드 만들기</button>
+
+    <!-- 스티키 CTA -->
+    <div class="sticky-cta">
+      <div class="btn-row" style="margin:0">
+        <button class="btn-primary" style="flex:1;padding:12px;font-size:13px" id="goSmartstoreBtn">네이버 스마트스토어</button>
+        <button class="btn-secondary" style="flex:1" id="goOwnmallBtn">자사몰</button>
+      </div>
+      <div class="sticky-hint" id="rTiming"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+const SMARTSTORE_URL = "https://smartstore.naver.com/checkmyhealth";
+const OWNMALL_URL    = "https://www.checkmyhealth.co.kr";
+const QUIZ_BASE_URL  = window.location.origin + window.location.pathname;
+
+// ── 상위 % 희귀도 ───────────────────────────
+const RARITY_PCT = {
+  INTJ:3, INFJ:2, ENTJ:4, ENFJ:5,
+  INTP:5, INFP:6, ENTP:7, ENFP:9,
+  ISTJ:11, ISFJ:13, ESTJ:9, ESFJ:12,
+  ISTP:6, ISFP:8, ESTP:5, ESFP:9
+};
+
+// ── 11가지 건강지표 ─────────────────────────
+const INDICATORS = [
+  { key:"잠혈",        label:"잠혈",        nick:"피 흔적 신호",      hint:"자극/염증/결석 등으로 소변에 피 흔적이 나타날 수 있어요.", when:"소변색이 진해지거나, 배뇨 시 불편해 보일 때" },
+  { key:"빌리루빈",    label:"빌리루빈",    nick:"간·담즙 힌트",      hint:"간/담도 관련 컨디션 변화의 힌트가 될 수 있어요.", when:"식욕이 떨어지거나, 평소보다 축 늘어질 때" },
+  { key:"우로빌리노겐",label:"우로빌리노겐",nick:"간·장 순환 힌트",   hint:"간 대사/장 컨디션 변화의 힌트가 될 수 있어요.", when:"컨디션이 들쑥날쑥하거나 변 상태가 달라졌을 때" },
+  { key:"케톤체",      label:"케톤체",      nick:"에너지 부족 신호",  hint:"식사량 부족/공복/과도한 운동 후 에너지 대사가 바뀔 때 나타날 수 있어요.", when:"잘 안 먹는 날, 산책량이 확 늘어난 날" },
+  { key:"단백질",      label:"단백질",      nick:"몸 부담 신호",      hint:"강한 운동/스트레스/특정 컨디션에서 단백이 올라갈 수 있어요.", when:"과열 후, 탈수 의심될 때, 컨디션이 떨어질 때" },
+  { key:"아질산염",    label:"아질산염",    nick:"세균성 자극 힌트",  hint:"요로 쪽 자극/세균 관련 힌트가 될 수 있어요.", when:"소변 냄새가 강해지거나, 자주/급하게 화장실 가려 할 때" },
+  { key:"포도당",      label:"포도당",      nick:"당 대사 힌트",      hint:"당 대사/식습관 변화의 힌트가 될 수 있어요.", when:"물/소변 패턴이 달라지고, 식욕 변화가 동반될 때" },
+  { key:"pH",          label:"pH",          nick:"소변 산도 균형",    hint:"식단/수분/스트레스에 따라 소변 환경이 달라질 수 있어요.", when:"사료 변경, 간식 급증, 스트레스 이벤트 후" },
+  { key:"비중",        label:"비중",        nick:"수분(농축) 신호",   hint:"물을 덜 마시거나 땀·헥헥으로 수분이 빠지면 농축될 수 있어요.", when:"산책/놀이가 길었던 날, 물을 잘 안 마신 날" },
+  { key:"백혈구",      label:"백혈구",      nick:"염증/자극 힌트",    hint:"요로 쪽 염증/자극의 힌트가 될 수 있어요.", when:"배뇨 불편, 빈뇨, 핥기/불안 행동 증가" },
+  { key:"아스코르빈산",label:"아스코르빈산",nick:"비타민C/간식 영향", hint:"섭취한 영양/간식 영향이 반영될 수 있어요.", when:"최근 영양제/간식 루틴이 바뀌었을 때" },
+];
+
+function renderIndicatorList(){
+  const wrap = document.getElementById("indicatorList");
+  if(!wrap) return;
+  wrap.innerHTML = INDICATORS.map(i=>`
+    <div class="indicator-item">
+      <div class="ind-name">${i.label} · <span style="opacity:.65;font-weight:400">${i.nick}</span></div>
+      <div class="ind-hint">💡 ${i.hint}<br>📅 이런 날: ${i.when}</div>
+    </div>
+  `).join("");
+}
+
+// ── 16문항 ──────────────────────────────────
+const questions = [
+  { axis:"EI", q:"산책 중 낯선 사람/강아지를 보면", A:"먼저 다가간다", B:"거리를 두고 지켜본다" },
+  { axis:"EI", q:"혼자 있을 때", A:"자극에 바로 반응한다", B:"조용히 보낸다" },
+  { axis:"EI", q:"새 공간(카페/숙소)에 가면", A:"바로 돌아다니며 탐색한다", B:"보호자 옆에서 천천히 적응한다" },
+  { axis:"EI", q:"손님이 오면", A:"반긴다", B:"관찰한다" },
+  { axis:"NS", q:"새 장난감/간식이 생기면", A:"바로 시도한다", B:"냄새 맡고 익숙해져야 한다" },
+  { axis:"NS", q:"산책 코스를 바꾸면", A:"더 신나고 집중한다", B:"원래 코스가 편하다" },
+  { axis:"NS", q:"낯선 소리/물건(청소기 등)", A:"궁금해서 확인한다", B:"피하거나 거리를 둔다" },
+  { axis:"NS", q:"집 배치가 바뀌면", A:"금방 적응한다", B:"한동안 불편해한다" },
+  { axis:"TF", q:"훈련할 때", A:"규칙/반복에 잘 맞춘다", B:"기분/관계 분위기에 좌우된다" },
+  { axis:"TF", q:'보호자가 "안 돼" 하면', A:"멈추고 눈치 본다", B:"서운/삐짐 반응이 크다" },
+  { axis:"TF", q:"낯선 사람이 만지려 하면", A:"상황 판단 후 반응한다", B:"감정적으로 즉각 반응한다" },
+  { axis:"TF", q:"칭찬을 받으면", A:"행동을 이해하고 반복한다", B:"감정이 확 달아오른다" },
+  { axis:"JP", q:"식사/산책 시간이 바뀌면", A:"루틴대로 하려 한다", B:"그때그때 괜찮다" },
+  { axis:"JP", q:"흥분했을 때", A:"비교적 빨리 진정한다", B:"진정까지 시간이 오래 걸린다" },
+  { axis:"JP", q:"간식 앞에서", A:"기다리기/참기가 된다", B:"바로 달려든다" },
+  { axis:"JP", q:"산책에서 냄새 맡기 시작하면", A:"적당히 하고 이동한다", B:"끝까지 파고든다" },
+];
+const AXIS_LABEL = { EI:"에너지 스타일", NS:"탐색 스타일", TF:"반응 스타일", JP:"생활 패턴" };
+
+// ── 기본 프로필 ─────────────────────────────
+const baseProfiles = {
+  "ENTP":{ nick:"호기심 폭주 발명가", one:"지루한 건 못 참는 아이디어 댕댕이", traits:["새로운 냄새/길이면 바로 탐험","놀이가 '프로젝트'로 커짐","산책이 탐사로 변함"], empathy:""가만히 있으면… 꼭 뭔가를 해요(=사고)."" },
+  "ENFP":{ nick:"친구 수집가", one:"사람·강아지 모두 내 친구! 인싸 타입", traits:["산책 나가면 인사하느라 바쁨","칭찬/관심에 에너지 충전","놀이가 곧 사랑표현"], empathy:""왜 다 반가워하지? (심지어 바람도 반가워함)"" },
+  "ENTJ":{ nick:"리더형 대장견", one:"목표가 있으면 끝까지 가는 추진력", traits:["산책도 '코스/미션'이 있어야 만족","훈련 흡수 빠름","규칙이 선명할수록 안정"], empathy:""얘는… 집사보다 더 계획적이에요."" },
+  "ENFJ":{ nick:"정서 케어 리더", one:"분위기 읽고, 관계로 움직이는 타입", traits:["집사 감정에 민감","칭찬/스킨십으로 안정","친구에게 배려가 많은 편"], empathy:""내 기분이 별로면… 애도 예민해져요."" },
+  "ESTP":{ nick:"액션파 모험가", one:"몸으로 뛰는 게 최고! 즉흥 플레이", traits:["달리기/점프/추격 좋아함","지루하면 바로 행동","에너지 소모가 큰 편"], empathy:""산책이 아니라… 운동회예요."" },
+  "ESFP":{ nick:"흥 부자 스타", one:"관심 받으면 텐션이 쭉 올라가는 타입", traits:["칭찬에 반짝","놀이에 몰입","흥분-진정 사이클이 뚜렷"], empathy:""칭찬하면… 공연을 시작해요."" },
+  "ESTJ":{ nick:"규칙 담당 매니저", one:"루틴이 깔끔하면 컨디션도 안정", traits:["정해진 시간/순서가 편함","훈련 꾸준히 잘 따라옴","일관성 있을수록 안정"], empathy:""시간표가 몸에 박혀 있어요."" },
+  "ESFJ":{ nick:"애교 만점 케어견", one:"함께하는 게 곧 행복", traits:["가족 곁에서 안정","칭찬/스킨십에 회복","혼자 있으면 심심해함"], empathy:""붙어있으면 세상 착해져요."" },
+  "INTP":{ nick:"혼자 탐구하는 과학자", one:"관찰·탐색·퍼즐 놀이에 집중", traits:["혼자서도 잘 놈","새 자극엔 조용히 탐색","관찰 모드가 많음"], empathy:""저 눈빛… 뭔가 계산 중이에요."" },
+  "INFP":{ nick:"감성 순둥이", one:"안정감이 있을 때 제일 예쁜 타입", traits:["낯선 환경에 예민할 수 있음","집사 곁에서 안심","기분이 행동에 반영"], empathy:""서운하면… 표정이 바로 보여요."" },
+  "INTJ":{ nick:"전략가 냉철견", one:"상황 판단 후 움직이는 타입", traits:["쓸데없는 에너지 낭비 싫어함","훈련/규칙 이해 빠름","낯선 건 먼저 분석"], empathy:""얘는… 일단 보고 결정해요."" },
+  "INFJ":{ nick:"조용한 공감러", one:"섬세하게 느끼고 오래 기억하는 타입", traits:["환경 변화에 민감","관계가 안정되면 편안","낯선 자극에 피곤해함"], empathy:""사소한 변화에도… 컨디션이 달라져요."" },
+  "ISTP":{ nick:"쿨한 해결사", one:"필요할 때만 움직이는 효율러", traits:["혼자 있을 때 편안","자기 리듬이 중요","탐색은 짧고 굵게"], empathy:""관심 없는 척… 다 알고 있어요."" },
+  "ISFP":{ nick:"감성 장인", one:"자기만의 취향이 확실한 타입", traits:["좋아하는 루틴에 충성","싫은 건 싫음","기분 따라 컨디션 변화"], empathy:""오늘은… 하고 싶은 날이 아닌가 봐요."" },
+  "ISTJ":{ nick:"루틴 지킴이", one:"안정과 규칙이 곧 행복", traits:["예측 가능하면 편안","꾸준한 타입","변화가 많으면 스트레스"], empathy:""루틴 깨지면… 바로 티나요."" },
+  "ISFJ":{ nick:"애착 안정형", one:"집사 옆이 제일 편한 타입", traits:["보호자 곁에서 안정","조용히 따라다님","칭찬/스킨십에 회복"], empathy:""같이 있으면 세상 제일 착해져요."" },
+};
+
+// ── 수의학 멘트 ─────────────────────────────
+const EXPERTS_MENT = {
+  "ISTJ":"고통을 잘 참는 ISTJ는 신장 기능이 크게 저하될 때까지 증상을 숨깁니다. 지금 소변 수치로 침묵의 신호를 확인하세요.",
+  "ISFJ":"보호자 의존도가 높은 ISFJ는 정서적 스트레스로 인한 비세균성 방광염에 취약합니다. 숨겨진 염증 수치를 체크하세요.",
+  "INFJ":"환경 변화에 민감한 INFJ는 스트레스가 혈뇨로 이어지는 특발성 방광염 위험이 높습니다. 아이의 방광 건강을 미리 살피세요.",
+  "INTJ":"외관상 건강해 보여도 대사 지표는 다를 수 있습니다. 11가지 건강지표 수치로 건강을 관리하세요.",
+  "ISTP":"통증 역치가 높은 ISTP는 질병 초기 신호를 놓치기 쉽습니다. 활동량 뒤에 숨겨진 백혈구와 단백뇨 수치를 꼭 확인하세요.",
+  "ISFP":"활동량이 적은 ISFP는 비만과 당뇨 등 대사 질환 위험이 상대적으로 높습니다. 게으름이 아닌 요당 수치 변화를 살피세요.",
+  "INFP":"배변을 참는 습관이 있는 INFP는 소변 농축으로 인한 결석 형성 위험이 큽니다. 지금 요비중 지표로 결석을 예방하세요.",
+  "INTP":"원인 모를 무기력증은 뇌가 아닌 신장의 전해질 불균형 때문일 수 있습니다. 분석적인 11가지 건강지표로 답을 얻으세요.",
+  "ESTP":"마킹이 잦은 ESTP는 외부 세균에 의한 요로 감염 위험이 타 유형보다 높습니다. 산책 후 방광염 여부를 즉시 체크하세요.",
+  "ESFP":"식탐이 강한 ESFP는 간 부하와 당뇨 관리가 필수입니다. 즐거운 간식 시간 뒤에 숨겨진 간 수치와 단백뇨를 확인하세요.",
+  "ENFP":"흥분도가 높은 ENFP는 혈압 상승으로 인한 일시적 단백뇨 발생이 잦습니다. 신나게 논 날, 아이의 신장 부하를 점검하세요.",
+  "ENTP":"참견하느라 물 마시는 걸 잊는 ENTP는 탈수와 결석 위험에 노출되기 쉽습니다. 요비중 확인으로 아이의 수분 상태를 검진하세요.",
+  "ESTJ":"철저한 관리로도 막을 수 없는 유전적 취약점이 존재합니다. 체계적인 관리를 선호하는 보호자라면 데이터로 건강을 관리하세요.",
+  "ESFJ":"사람을 좋아해 배뇨를 참는 ESFJ는 방광 벽이 두꺼워지는 질환에 취약합니다. 참는 습관이 병이 되지 않도록 소변으로 확인하세요.",
+  "ENFJ":"보호자의 감정에 동기화되는 ENFJ는 심인성 신체 질환이 나타날 확률이 높습니다. 아이의 마음뿐 아니라 몸속 수치도 돌봐주세요.",
+  "ENTJ":"바쁜 보호자를 위한 효율적인 1분 검진. 치명적인 질환으로 진행되기 전, 소변 지표로 골든타임을 선점하세요.",
+};
+
+function uniq(arr){ return [...new Set(arr)]; }
+
+function buildHealthPlan(type){
+  const t4=type.slice(0,4); const sub=type.slice(5,6);
+  const L=t4.split(""); const E=L[0]==="E", N=L[1]==="N", T=L[2]==="T", J=L[3]==="J";
+  let focus=[],why=[],avoid=[],doToday=[],watch=[],badges=[];
+  if(E){
+    focus.push("비중","케톤체","단백질");
+    why.push("활동량↑ 타입은 '수분(비중)'과 '과열 후 에너지(케톤체)', '몸 부담(단백질)'을 먼저 보면 좋아요.");
+    avoid.push("산책/놀이 과열(장시간 달리기)","한낮 더위·차 안 대기","물 없이 외출");
+    doToday.push("노즈워크 8분(흥분 분산)","짧은 달리기 3세트(각 30초)","놀이 후 '물 한 모금' 루틴");
+    watch.push("헥헥이 오래 지속됨","물 마심이 평소보다 줄거나 늘어남","소변색이 진해짐");
+    badges.push({k:"활동형",tone:"info"});
+  }else{
+    focus.push("pH","비중","아스코르빈산");
+    why.push("조용히 지내는 타입은 '수분(비중)'과 '소변 환경(pH)' 변화가 티가 날 수 있어요.");
+    avoid.push("갑작스런 루틴 변화","낯선 장소에 장시간 노출","긴장되는 소음 환경");
+    doToday.push("코담요(숨김) 5분","짧은 산책 15분(안정 페이스)","칭찬/스킨십 2분 루틴");
+    watch.push("소변 횟수/패턴 변화","식욕이 애매하게 떨어짐","평소보다 더 숨어있음");
+    badges.push({k:"안정형",tone:"good"});
+  }
+  if(N){
+    focus.push("pH","비중");
+    why.push("호기심·변화 선호 타입은 '새 환경/간식 변화'가 잦아 pH와 비중 체크가 도움돼요.");
+    avoid.push("간식 급증/새 간식 테스트","여행·이벤트 연속","새 사료 급작 변경");
+    doToday.push("새 장난감은 10분만(과자극 방지)","냄새 산책 10분(탐색 만족)","집 안 미션 놀이 5분");
+    watch.push("간식 후 소변 냄새 변화","흥분 뒤 컨디션 급 다운","밤에 뒤척임");
+    badges.push({k:"호기심형",tone:"info"});
+  }else{
+    focus.push("포도당","pH");
+    why.push("익숙함 선호 타입은 '식단/루틴'이 바뀔 때 컨디션 변화가 커질 수 있어요.");
+    avoid.push("사료/간식 '갑작 교체'","식사시간 들쑥날쑥","산책 시간 급변");
+    doToday.push("정해진 코스 산책 20분","간식은 시간/양 고정","'앉아-기다려' 10회");
+    watch.push("먹는 속도 변화","물 마시는 패턴 변화","갑자기 예민해짐");
+    badges.push({k:"루틴선호",tone:"good"});
+  }
+  if(T){
+    focus.push("단백질","케톤체");
+    why.push("규칙/훈련 반응 좋은 타입은 운동·훈련 강도가 올라가기 쉬워 단백질/케톤체를 챙기면 좋아요.");
+    avoid.push("과한 훈련(한 번에 오래)","휴식 없이 연속 놀이","보상 간식 과다");
+    doToday.push("훈련 5분×2세트(짧고 자주)","복종-놀이 번갈아(흥분 조절)","훈련 후 물+휴식 10분");
+    watch.push("활동 후 힘이 빠짐","숨 가쁨이 오래감","식사량이 줄어듦");
+    badges.push({k:"훈련반응↑",tone:"info"});
+  }else{
+    focus.push("백혈구","아질산염","잠혈","pH");
+    why.push("감정/환경 민감 타입은 스트레스 이벤트 후 요로 쪽 자극 신호(백혈구/아질산염/잠혈/pH)를 먼저 보면 좋아요.");
+    avoid.push("손님·이벤트 후 과자극","미용/목욕 직후 무리한 산책","불안 유발 환경(소음/군중)");
+    doToday.push("안정 신호(앉아/기다려) 10회","편한 자리에서 휴식 20분","노즈워크 5분(진정용)");
+    watch.push("빈뇨/급하게 화장실 가려 함","배뇨 시 불편해 보임","평소보다 핥기/불안 행동");
+    badges.push({k:"민감형",tone:"warn"});
+  }
+  if(J){
+    focus.push("비중","pH");
+    why.push("루틴형은 큰 변화가 있을 때(여행/사료교체) 컨디션 흔들림을 비중/pH로 가볍게 확인하면 좋아요.");
+    avoid.push("스케줄 급변","여행 당일 빡센 일정","급격한 운동량 증가");
+    doToday.push("늘 하던 시간에 산책","늘 하던 시간에 식사","물그릇 위치 고정");
+    watch.push("루틴 깨진 날 컨디션 변화","변 상태/식사량 변화","잠 패턴 변화");
+    badges.push({k:"루틴형",tone:"good"});
+  }else{
+    focus.push("케톤체","포도당","비중");
+    why.push("즉흥형은 식사/활동이 들쑥날쑥해 '에너지(케톤체/포도당)'와 '수분(비중)'을 챙기는 게 좋아요.");
+    avoid.push("공복이 길어짐","간식으로 식사 대체","산책/놀이 급증");
+    doToday.push("식사 시간 30분만이라도 고정","놀이 전후 물 루틴","산책은 2번 나눠서(짧게)");
+    watch.push("밥 거르는 날이 생김","물/소변 패턴이 들쑥날쑥","컨디션이 갑자기 다운");
+    badges.push({k:"즉흥형",tone:"info"});
+  }
+  if(sub==="B"){
+    focus.push("백혈구","아질산염","잠혈","pH","비중");
+    watch.push("이벤트(여행/손님/미용/사료 변경) 다음날 컨디션 저하","소변 냄새가 강해짐","자주 핥거나 불안해짐");
+    avoid.push("이벤트를 연속으로(여행+손님+미용)","과자극 놀이(공 던지기 무한 반복)","낯선 환경 장시간 체류");
+    doToday.push("진정 루틴(편한 자리+저자극) 20분","짧은 산책 10~15분","노즈워크 5분(과자극 없이)");
+    badges.push({k:"B(예민)",tone:"warn"});
+  }else{
+    badges.push({k:"A(안정)",tone:"good"});
+  }
+  const priority=["비중","pH","백혈구","아질산염","잠혈","단백질","케톤체","포도당","빌리루빈","우로빌리노겐","아스코르빈산"];
+  focus=uniq(focus).sort((a,b)=>priority.indexOf(a)-priority.indexOf(b)).slice(0,4);
+  avoid=uniq(avoid).slice(0,3); doToday=uniq(doToday).slice(0,3); watch=uniq(watch).slice(0,6);
+  const timing=(sub==="B")
+    ?"추천 체크 타이밍: <b>이벤트(여행/미용/손님/사료 변경) 후 24~48시간</b> 안에 1분 체크 + 2~3일 관찰 기록이 좋아요."
+    :"추천 체크 타이밍: <b>월 1~2회 루틴 체크</b> + 사료/간식/산책량이 바뀐 주에 한 번 더 체크하면 마음이 편해져요.";
+  return { focus, why:uniq(why).slice(0,2).join(" "), avoid, doToday, watch, timing,
+    badges:uniq(badges.map(b=>b.k)).map(k=>({k,tone:k.includes("B(")?"warn":(k.includes("안정")||k.includes("루틴")?"good":"info")}))
+  };
+}
+
+// ── 상태 ─────────────────────────────────
+const state={i:0,answers:Array(questions.length).fill(null),score:{E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0},bCount:0};
+const el=id=>document.getElementById(id);
+
+function show(id){
+  ["home","quiz","loading","result"].forEach(s=>{
+    const e=el(s); if(e) e.classList.toggle("active", e.id===id);
+  });
+  window.scrollTo(0,0);
+}
+
+function resetAll(){
+  state.i=0; state.answers.fill(null);
+  state.score={E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0}; state.bCount=0;
+  show("home");
+}
+
+function applyScores(){
+  state.score={E:0,I:0,N:0,S:0,T:0,F:0,J:0,P:0}; state.bCount=0;
+  state.answers.forEach((pick,idx)=>{
+    if(pick==null) return;
+    const q=questions[idx]; const isA=pick==="A";
+    if(q.axis==="EI") state.score[isA?"E":"I"]++;
+    if(q.axis==="NS") state.score[isA?"N":"S"]++;
+    if(q.axis==="TF") state.score[isA?"T":"F"]++;
+    if(q.axis==="JP") state.score[isA?"J":"P"]++;
+    const qNum=idx+1;
+    if(!isA){ state.bCount+=1; if(qNum===7||qNum===8||qNum===14) state.bCount+=1; }
+  });
+}
+
+function calcType(){
+  applyScores();
+  const EorI=state.score.E>=state.score.I?"E":"I";
+  const NorS=state.score.N>=state.score.S?"N":"S";
+  const TorF=state.score.T>=state.score.F?"T":"F";
+  const JorP=state.score.J>=state.score.P?"J":"P";
+  const sub=state.bCount>=8?"B":"A";
+  return `${EorI}${NorS}${TorF}${JorP}-${sub}`;
+}
+
+function renderQuestion(){
+  const q=questions[state.i];
+  el("qCount").textContent=`${state.i+1} / ${questions.length}`;
+  el("qPct").textContent=Math.round(state.i/questions.length*100)+"%";
+  el("bar").style.width=`${state.i/(questions.length-1)*100}%`;
+  el("qCategory").textContent=AXIS_LABEL[q.axis]||q.axis;
+  el("qText").textContent=q.q+"?";
+  el("aText").textContent=q.A;
+  el("bText").textContent=q.B;
+  el("choiceA").classList.remove("selected");
+  el("choiceB").classList.remove("selected");
+}
+
+function answer(pick){
+  el(pick==="A"?"choiceA":"choiceB").classList.add("selected");
+  state.answers[state.i]=pick;
+  setTimeout(()=>{
+    if(state.i<questions.length-1){ state.i++; renderQuestion(); }
+    else finish();
+  }, 280);
+}
+
+function finish(){
+  show("loading");
+  setTimeout(()=>{
+    const type=calcType();
+    localStorage.setItem("peepeekit_last_type",type);
+    const t4=type.slice(0,4);
+    const base=baseProfiles[t4]||baseProfiles["ENFP"];
+    localStorage.setItem("petMBTI",JSON.stringify({mbti:type,petName:"우리 아이",petType:"강아지",animal:"🐶",title:base.nick,desc:base.one}));
+    showResult(type);
+  }, 1200);
+}
+
+function subVariantText(sub){
+  if(sub==="B") return {addNick:"(예민형)",addOne:"자극이 많으면 회복이 느릴 수 있어요",today:"오늘은 '자극/수분/요로 컨디션' 3가지를 가볍게 확인하면 마음이 편해져요."};
+  return {addNick:"(안정형)",addOne:"루틴만 지켜도 컨디션이 잘 유지돼요",today:"오늘은 '수분+루틴'만 챙겨도 충분해요. 변화가 있었다면 1분 체크 추천!"};
+}
+
+function showResult(type){
+  const t4=type.slice(0,4); const sub=type.slice(5,6);
+  const base=baseProfiles[t4]||baseProfiles["ENFP"];
+  const v=subVariantText(sub);
+  const rImg=el("rImg");
+  rImg.style.display=""; rImg.src=`assets/types/${type.toUpperCase()}.png`;
+  rImg.onerror=()=>{ rImg.style.display="none"; };
+
+  el("rCode").textContent=type;
+  el("rVariant").textContent=sub==="B"?"🔶 예민형 (B)":"🟢 안정형 (A)";
+  el("rNick").textContent=`${base.nick} ${v.addNick}`;
+  el("rOne").textContent=`${base.one} · ${v.addOne}`;
+
+  // 상위 % 희귀도
+  const basePct=RARITY_PCT[t4]||7;
+  const finalPct=sub==="B"?Math.max(1,Math.round(basePct*0.6)):basePct;
+  el("rarityText").textContent=`반려견 상위 ${finalPct}%`;
+
+  // 특성 배지
+  const plan=buildHealthPlan(type);
+  el("rBadges").innerHTML=plan.badges.map(b=>`<span class="type-badge">${b.k}</span>`).join("");
+
+  // 건강 브릿지
+  const ment=EXPERTS_MENT[t4]||"전문가의 맞춤 가이드로 아이의 건강 지표를 확인하세요.";
+  el("bridgeTitle").textContent=`🩺 ${t4} 수의학적 건강 관리`;
+  el("bridgeDesc").innerHTML=`<b>${ment}</b><br><br>추천된 11가지 지표를 <b>피피키트</b>로 지금 바로 확인하고 "우리 아이만의 기준"을 세워주세요.`;
+
+  // 탭 t1
+  el("rTraits").innerHTML=base.traits.map(t=>`<li>${t}</li>`).join("");
+  el("rEmpathy").textContent=base.empathy;
+  el("rToday").textContent=plan.why||v.today;
+  el("rFocus").innerHTML=plan.focus.map(k=>{ const info=INDICATORS.find(x=>x.key===k); return `<li>${info?`${info.label} · ${info.nick}`:k}</li>`; }).join("");
+  el("rFocusWhy").textContent=plan.why;
+
+  // 탭 t3
+  el("rDo").innerHTML=plan.doToday.map(t=>`<li>${t}</li>`).join("");
+  const rNext=el("rNext");
+  if(rNext) rNext.innerHTML=[
+    "✅ 비중/케톤체가 신경 쓰이면 → 물 한 모금 루틴 + 다음날 1회 재체크",
+    "✅ pH가 흔들린 날 → 간식/사료 변화 기록 + 2~3일 관찰",
+    "✅ 백혈구/아질산염/잠혈이 계속 의심되면 → 소변 패턴(빈뇨/냄새/불편) 체크 + 상담 고려"
+  ].map(t=>`<li>${t}</li>`).join("");
+
+  // 탭 t4
+  el("rAvoid").innerHTML=plan.avoid.map(t=>`<li>${t}</li>`).join("");
+  el("rWatch").innerHTML=plan.watch.map(t=>`<li>${t}</li>`).join("");
+  el("rTiming").innerHTML=plan.timing;
+
+  setShareQR(type);
+  renderIndicatorList();
+  show("result");
+}
+
+async function setShareQR(type){
+  const qrUrl=`${QUIZ_BASE_URL}?type=${encodeURIComponent(type)}`;
+  el("qrUrlText").textContent=qrUrl;
+  try{
+    const dataUrl=await QRCode.toDataURL(qrUrl,{margin:1,width:180,color:{dark:"#ffffff",light:"rgba(0,0,0,0)"}});
+    el("qrImg").src=dataUrl;
+  }catch(e){ el("qrImg").style.display="none"; }
+}
+
+function activateTab(tabId){
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelector(`.tab-btn[data-tab="${tabId}"]`)?.classList.add("active");
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  el(tabId)?.classList.add("active");
+}
+
+// ── 공유 ───────────────────────────────────
+async function captureEl(e,bg="#6366f1"){
+  return await html2canvas(e,{backgroundColor:bg,scale:window.devicePixelRatio,useCORS:true});
+}
+function downloadBlob(blob,name){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+async function shareFileOrDownload(blob,filename,title,text){
+  const ua=navigator.userAgent.toLowerCase();
+  const isInApp=/kakao|naver|line|instagram/i.test(ua);
+  const isAndroid=/android/i.test(ua);
+  if(isAndroid&&isInApp){
+    const reader=new FileReader(); reader.readAsDataURL(blob);
+    reader.onloadend=()=>{ const w=window.open(); if(w) w.document.write(`<body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh"><p style="color:#fff;font-size:15px;margin:20px;text-align:center">이미지를 길게 눌러 [이미지 저장]을 선택하세요.</p><img src="${reader.result}" style="max-width:90%;border-radius:10px"><button onclick="window.close()" style="margin-top:20px;padding:10px 24px;border-radius:20px;border:none;background:#fff;font-weight:bold">닫기</button></body>`); };
+    return;
+  }
+  const file=new File([blob],filename,{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{ await navigator.share({files:[file],title,text}); return; }catch(e){}
+  }
+  downloadBlob(blob,filename);
+}
+async function shareCardImage(){
+  const card=el("shareCard"); if(!card) return;
+  const canvas=await captureEl(card);
+  canvas.toBlob(async blob=>{ await shareFileOrDownload(blob,"mbti-card.png","반려동물 MBTI 결과","우리 강아지 MBTI 결과래 🐶"); },"image/png");
+}
+async function shareStoryImage(){ await shareCardImage(); }
+const copyResultLink=()=>{
+  const mbtiType=el("rCode").textContent;
+  const finalUrl=`${QUIZ_BASE_URL}?type=${encodeURIComponent(mbtiType)}`;
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(finalUrl).then(()=>alert("공유 링크가 복사되었습니다! 😊")).catch(()=>fallbackCopyText(finalUrl));
+  }else fallbackCopyText(finalUrl);
+};
+function fallbackCopyText(text){
+  const t=document.createElement("textarea"); t.value=text; t.style.position="fixed"; t.style.left="-9999px";
+  document.body.appendChild(t); t.focus(); t.select();
+  try{ document.execCommand("copy"); alert("결과 링크가 복사되었습니다! 😊"); }
+  catch(e){ alert("복사 실패! 주소창의 링크를 직접 복사해주세요."); }
+  document.body.removeChild(t);
+}
+
+// ── 이벤트 바인딩 ─────────────────────────
+el("startBtn").addEventListener("click",()=>{ show("quiz"); state.i=0; renderQuestion(); });
+el("seeLastBtn").addEventListener("click",()=>{ const last=localStorage.getItem("peepeekit_last_type"); if(last) showResult(last); else alert("저장된 결과가 없어요. 먼저 테스트를 진행해줘!"); });
+el("choiceA").addEventListener("click",()=>answer("A"));
+el("choiceB").addEventListener("click",()=>answer("B"));
+el("backBtn").addEventListener("click",()=>{ if(state.i>0){ state.i--; renderQuestion(); } });
+el("restartBtn").addEventListener("click",resetAll);
+el("againBtn").addEventListener("click",()=>{ state.i=0; state.answers.fill(null); show("quiz"); renderQuestion(); });
+el("shareCardBtn")?.addEventListener("click",shareCardImage);
+el("shareStoryBtn")?.addEventListener("click",shareStoryImage);
+el("qrBadge")?.addEventListener("click",copyResultLink);
+el("goSmartstoreBtn").addEventListener("click",()=>window.open(SMARTSTORE_URL,"_blank"));
+el("goOwnmallBtn").addEventListener("click",()=>window.open(OWNMALL_URL,"_blank"));
+el("goKitBtn")?.addEventListener("click",()=>window.open(SMARTSTORE_URL,"_blank"));
+el("go11Btn")?.addEventListener("click",()=>{ activateTab("t2"); el("tabs")?.scrollIntoView({behavior:"smooth",block:"start"}); });
+document.getElementById("tabs")?.addEventListener("click",e=>{ const btn=e.target.closest(".tab-btn"); if(btn) activateTab(btn.dataset.tab); });
+
+// URL 파라미터로 직접 결과 보기
+const urlParams=new URLSearchParams(window.location.search);
+const urlType=urlParams.get("type");
+if(urlType&&/^[EISNTFJP]{4}-[AB]$/.test(urlType)) showResult(urlType);
+else show("home");
+</script>
+</body>
+</html>
