@@ -114,8 +114,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'GEMINI_API_KEY 미설정' });
     }
 
-    // 현재 사용 가능한 이미지 in/out 모델 (Nano Banana)
-    const MODEL = 'gemini-2.5-flash-image-preview';
+    // Nano Banana — 이미지 in/out 가능 모델
+    // (2025년 정식 출시되면서 -preview 꼬리가 떨어졌어요. 그게 404의 원인)
+    const MODEL = 'gemini-2.5-flash-image';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
 
     const prompt = buildPrompt(petInfo, style);
