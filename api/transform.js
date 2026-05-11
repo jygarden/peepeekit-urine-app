@@ -96,6 +96,14 @@ This is the most important instruction:
 ═══ STYLE ═══
 ${styleDef.description}
 
+═══ COMEDY BONUS — slight humorous twist ═══
+Add ONE small unexpected funny detail to make the scene more memorable and shareable:
+- A subtly silly prop placement (e.g., glasses sliding off, a sock stuck on a paw, a tiny coffee stain on the shirt)
+- A slightly exaggerated reaction face beat (cartoon sweat drop, raised eyebrow, derp tongue out)
+- A tiny background gag (a butterfly photobombing, a cookie just out of reach, a fallen pen rolling)
+- Or a comic-book style detail like motion lines or sparkle effects on the eyes
+Keep it tasteful (no offensive content) — just one charming "ha!" moment that makes this image stand out from a generic stylized portrait.
+
 ═══ PERSONALITY SCENE ${petInfo.mbti ? `(MBTI: ${petInfo.mbti})` : ''} ═══
 ${petInfo.mbti && cues.outfit ? `- Outfit: ${cues.outfit}
 - Pose: ${cues.pose}
