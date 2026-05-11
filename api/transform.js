@@ -1,173 +1,171 @@
-// ════════════════════════════════════════════════════════════
-//  /api/transform.js  — Vercel Serverless Function
-//  반려동물 → 사람 의인화 (웹툰풍 / 3D K-드라마풍)
-//
-//  요청 본문(JSON):
-//    {
-//      imageBase64: "<base64>",
-//      mimeType:    "image/jpeg" 또는 "image/png" 등,
-//      style:       "webtoon" | "kdrama"   (기본: webtoon)
-//      petInfo: {
-//        species:  "강아지" | "고양이" | "토끼" | ...,
-//        breed:    "포메라니안",
-//        mbti:     "ENTP",        // 4글자 (없으면 빈 문자열)
-//        gender:   "남아" | "여아" | "중성화",
-//        age:      "3살",
-//        name:     "콩이"
-//      }
-//    }
-//
-//  응답: { imageBase64, mimeType }
-//  환경변수: GEMINI_API_KEY (Vercel Dashboard에서 설정)
-// ════════════════════════════════════════════════════════════
+// api/transform.js
+// Vercel Serverless Function — 반려동물 캐릭터화 (Disney 3D / Ghibli 일러스트)
+// 핵심 원칙: 펫의 정체성(종·털색·귀모양·눈색)은 그대로 두고
+//          MBTI 성격이 포즈·배경·소품으로 표현되도록 한다.
 
-const MBTI_VIBE = {
-  ENFJ: '따뜻하고 카리스마 있는, 사람들을 잘 챙기고 분위기를 부드럽게 만드는',
-  ENFP: '활발하고 호기심 많은, 에너지가 넘치고 친화력이 좋은',
-  ENTJ: '리더십 있고 자신감 넘치는, 결단력 있고 추진력 강한',
-  ENTP: '재치 있고 장난기 많은, 호기심 가득하고 아이디어가 번뜩이는',
-  ESFJ: '친절하고 사교적인, 정 많고 주변을 살뜰히 챙기는',
-  ESFP: '밝고 흥 많은, 분위기 메이커 역할을 자처하는',
-  ESTJ: '책임감 강하고 단정한, 신뢰감 주는 든든한',
-  ESTP: '활동적이고 모험심 강한, 자유분방하고 즉흥적인',
-  INFJ: '신비롭고 사려 깊은, 차분하고 통찰력 있는',
-  INFP: '감성적이고 부드러운, 몽상가 같고 따뜻한',
-  INTJ: '지적이고 시크한, 자기 주관이 뚜렷한 차가운 미인/미남상',
-  INTP: '논리적이고 호기심 많은, 차분한 관찰자 분위기의',
-  ISFJ: '온화하고 다정한, 조용히 챙기는 따뜻한',
-  ISFP: '예술적이고 감성적인, 자유롭고 부드러운 분위기의',
-  ISTJ: '성실하고 단정한, 믿음직하고 깔끔한',
-  ISTP: '쿨하고 실용적인, 과묵하지만 매력적인 멋쟁이',
+const MODEL = 'gemini-2.5-flash-image';
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+
+// ─────────────────────────────────────────────
+// MBTI별 시각적 단서 (포즈 / 배경 / 소품 / 무드)
+// ─────────────────────────────────────────────
+const VISUAL_CUES = {
+  ENFJ: { pose: 'attentive sitting pose with warm focused gaze, head tilted slightly toward viewer', bg: 'soft sunset park with gentle bokeh, golden hour light', props: 'a small ribbon or scarf around the neck', mood: 'warm and caring' },
+  ENFP: { pose: 'mid-air playful jump or excited running pose with tongue out / ears flying', bg: 'colorful confetti or bright outdoor adventure scene with balloons', props: 'a tiny party hat or floating balloons nearby', mood: 'bursting with joyful energy' },
+  ENTJ: { pose: 'proud standing pose, chest forward, looking confidently into distance', bg: 'majestic mountaintop sunset or cozy throne-like spot', props: 'a small crown, cape, or regal collar', mood: 'commanding and confident' },
+  ENTP: { pose: 'curious head tilt with one paw lifted, eyes sparkling with interest', bg: 'cozy workshop or library with floating magical idea-sparks', props: 'tiny round glasses or a small open book', mood: 'mischievous and inventive' },
+  ESFJ: { pose: 'snuggling pose with kind smile, leaning gently toward warmth', bg: 'warm cottage interior with soft cushions, teapot and steam', props: 'a knit scarf or holding a tiny tea cup', mood: 'cozy and nurturing' },
+  ESFP: { pose: 'dancing pose mid-spin, joyful expression', bg: 'beach sunset party with string lights or disco backdrop', props: 'sunglasses or a tropical flower lei', mood: 'celebratory and radiant' },
+  ESTJ: { pose: 'sitting upright at attention, very proper and dignified', bg: 'organized desk in a classic library setting', props: 'a small bow tie or tiny planner notebook', mood: 'reliable and disciplined' },
+  ESTP: { pose: 'sprinting action shot, dynamic motion, looking ready for adventure', bg: 'motion-blur skate park or mountain trail with wind', props: 'tiny sunglasses or a small helmet', mood: 'thrill-seeking and bold' },
+  INFJ: { pose: 'thoughtful gaze out a window, calm and contemplative', bg: 'rainy window with warm lamp glow, soft indoor light', props: 'an open book or a single lit candle nearby', mood: 'serene and introspective' },
+  INFP: { pose: 'curled up dreaming with eyes softly closed, peaceful smile', bg: 'soft watercolor field of wildflowers at dawn', props: 'a delicate flower crown or floating petals', mood: 'dreamy and gentle' },
+  INTJ: { pose: 'elegant seated pose with slight head turn, slight smirk', bg: 'minimalist dark study with one focused spotlight', props: 'wire-frame glasses or a chess piece beside', mood: 'sharp and refined' },
+  INTP: { pose: 'observing intently with paws tucked, head down in focus', bg: 'cluttered cozy study with stacks of books and scrolls', props: 'a small magnifying glass or scroll', mood: 'curious and contemplative' },
+  ISFJ: { pose: 'gently nuzzled into a soft blanket, content sleepy eyes', bg: 'warm sunlit kitchen or bakery with morning light', props: 'a knit blanket draped over or a small warm bun', mood: 'tender and protective' },
+  ISFP: { pose: 'relaxed lounging with serene face, lying on side gracefully', bg: 'spring meadow or art studio with watercolor brushes', props: 'a paintbrush or wildflower in soft focus', mood: 'free-spirited and gentle' },
+  ISTJ: { pose: 'attentive sitting pose, neat and proper, alert eyes', bg: 'tidy workspace with organized shelves and clean lines', props: 'a tiny pocket watch or planner', mood: 'steadfast and trustworthy' },
+  ISTP: { pose: 'casual leaning pose with cool, slightly squinted stare', bg: 'mechanic garage or mountain lookout at dusk', props: 'a tiny wrench or compass beside', mood: 'cool and resourceful' },
 };
 
+// ─────────────────────────────────────────────
+// 스타일 정의
+// ─────────────────────────────────────────────
+const STYLES = {
+  disney: {
+    label: 'Disney-Pixar 3D animated character',
+    description: `Disney-Pixar 3D animation style:
+- Smooth 3D rendered look with cinematic lighting (like Bolt, Dug from Up, or the cats in Luca)
+- Slightly oversized expressive eyes with sparkle reflections
+- Soft stylized facial features (NOT photorealistic)
+- Warm, saturated, vibrant color palette
+- Subtle ambient occlusion, soft rim lighting, polished surfaces
+- Full body or 3/4 body shot, single character centered`,
+  },
+  ghibli: {
+    label: 'Studio Ghibli hand-painted illustration',
+    description: `Studio Ghibli illustration style:
+- Soft watercolor / gouache hand-painted look
+- Gentle, nostalgic color palette (muted earth tones, warm pastels)
+- Slightly simplified rounded friendly shapes with hand-drawn outlines
+- Visible paper texture and brush strokes
+- Atmospheric soft natural lighting, dappled sunlight where appropriate
+- Painted illustration aesthetic, calm and peaceful`,
+  },
+};
+
+// ─────────────────────────────────────────────
+// 프롬프트 빌더
+// ─────────────────────────────────────────────
 function buildPrompt(petInfo, style) {
-  const { species = '강아지', breed = '믹스', mbti = '', gender = '', age = '', name = '' } = petInfo || {};
+  const styleDef = STYLES[style] || STYLES.disney;
+  const cues = VISUAL_CUES[petInfo.mbti] || {};
+  const species = petInfo.species || '강아지';
+  const breed = petInfo.breed || 'mixed breed';
 
-  const speciesKR =
-    /고양이|cat/i.test(species) ? '고양이' :
-    /토끼/.test(species)        ? '토끼' :
-    /햄스터/.test(species)      ? '햄스터' :
-                                  '강아지';
+  return `Transform this photo of a ${breed} ${species} into a ${styleDef.label}.
 
-  const genderKR = gender === '남아' || gender === '수컷' ? '남성'
-                 : gender === '여아' || gender === '암컷' ? '여성'
-                 : '인물';
+═══ CRITICAL — PRESERVE PET IDENTITY ═══
+The output MUST clearly be the SAME pet shown in the input photo, just stylized.
+- Keep as a ${species} — DO NOT change to a human, person, or different animal species
+- Exact same fur/coat color and markings as the original photo
+- Same ear shape (floppy / pointed / cropped / fluffy)
+- Same eye color
+- Same body proportions and breed characteristics
+- The owner must instantly recognize "this is MY pet!"
 
-  const vibe = MBTI_VIBE[mbti] || '매력적이고 개성 있는';
+═══ STYLE ═══
+${styleDef.description}
 
-  const styleBlock = style === 'kdrama'
-    ? `[그림 스타일]
-- 한국 드라마 주인공 / AI 프로필 사진 풍 3D 사실 렌더링
-- 살짝 미화된 톤, 자연광 + 영화적 라이팅
-- 깨끗하고 단정한 배경 (단색 그라데이션 또는 흐릿한 카페/거리)
-- 상반신 정면 또는 약간 사선 구도, 어깨 위로 잘림
-- 사실적이지만 너무 사실적이라 언캐니해 보이지 않을 만큼만`
-    : `[그림 스타일]
-- 한국 네이버웹툰 그림체 (예: 유미의 세포들, 여신강림, 외모지상주의 같은 결)
-- 깔끔한 라인아트, 또렷한 큰 눈, 부드러운 셀 셰이딩
-- 파스텔톤 배경 + 살짝 화사한 색감
-- 상반신 정면 또는 약간 사선, 어깨 위로 잘림
-- 캐릭터 디자인이 한눈에 보이는 만화/일러스트 톤`;
+═══ PERSONALITY EXPRESSION ${petInfo.mbti ? `(MBTI: ${petInfo.mbti})` : ''} ═══
+${petInfo.mbti && cues.pose ? `- Pose: ${cues.pose}
+- Background: ${cues.bg}
+- Props/Accessories: ${cues.props}
+- Overall Mood: ${cues.mood}` : `- Pose: natural friendly pose
+- Background: warm soft setting matching the pet's character
+- Mood: heartwarming and recognizable`}
 
-  return `이 반려동물 사진을 사람으로 의인화해주세요.
+═══ OUTPUT REQUIREMENTS ═══
+- Single character only (the pet)
+- No text, no logos, no watermarks, no captions
+- High quality, vibrant, share-worthy result
+- Composition should fit well in a square or vertical format
 
-[원본 정보]
-- 종류: ${speciesKR}
-- 품종: ${breed}
-- MBTI: ${mbti || '미상'} → ${vibe} 성격
-- 성별: ${genderKR}
-- 나이: ${age || '미상'}
-${name ? `- 이름: ${name}` : ''}
-
-[변환 핵심 규칙]
-1. 외형 매핑: 품종의 특징을 사람의 외형으로 자연스럽게 변환
-   • 털 색 → 머리 색
-   • 체구(소형/중형/대형) → 체형/키 분위기
-   • 얼굴 인상(귀 모양·주둥이·눈매) → 사람 얼굴의 인상
-2. 성격 표현: 위 MBTI vibe를 표정·자세·옷차림에 자연스럽게 녹이기
-3. 정체성 보존: 원본 동물의 분위기(품종·털색·표정)가 사람 모습에서도 한눈에 느껴져야 함
-4. 연령대: 20대 중반~30대 초반의 ${genderKR}로 표현 (강아지가 어리든 노견이든 무관하게 매력 어필 연령대로)
-
-${styleBlock}
-
-[금기]
-- 동물의 모습이 남아있으면 안 됨 (귀/털/주둥이 등 동물 요소 X) — 완전한 사람으로
-- 너무 사실적인 사진처럼 그리지 말 것 (언캐니 밸리 방지)
-- 여러 명 그리지 말 것 — 한 명만
-
-이미지 단 1장만 생성해서 응답해주세요.`;
+Make this pet character feel like a beloved animated movie protagonist — recognizable, expressive, and instantly shareable.`;
 }
 
+// ─────────────────────────────────────────────
+// Vercel Serverless Handler
+// ─────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'POST만 지원합니다' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const { imageBase64, mimeType, style, petInfo } = req.body || {};
+
+  if (!imageBase64 || !petInfo) {
+    return res.status(400).json({ error: '사진이나 펫 정보가 누락되었어요.' });
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('GEMINI_API_KEY env var not set');
+    return res.status(500).json({ error: '서버 설정 오류예요. 잠시 후 다시 시도해주세요.' });
+  }
+
+  const prompt = buildPrompt(petInfo, style);
+
   try {
-    const { imageBase64, mimeType, style = 'webtoon', petInfo = {} } = req.body || {};
-    if (!imageBase64 || !mimeType) {
-      return res.status(400).json({ error: 'imageBase64, mimeType 누락' });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY 미설정' });
-    }
-
-    // Nano Banana — 이미지 in/out 가능 모델
-    // (2025년 정식 출시되면서 -preview 꼬리가 떨어졌어요. 그게 404의 원인)
-    const MODEL = 'gemini-2.5-flash-image';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
-
-    const prompt = buildPrompt(petInfo, style);
-
-    const body = {
-      contents: [{
-        parts: [
-          { text: prompt },
-          { inline_data: { mime_type: mimeType, data: imageBase64 } }
-        ]
-      }],
-      generationConfig: {
-        responseModalities: ['IMAGE'],
-        temperature: 0.95
-      }
-    };
-
-    const r = await fetch(url, {
+    const response = await fetch(`${API_URL}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: mimeType || 'image/jpeg', data: imageBase64 } }
+          ]
+        }],
+        generationConfig: {
+          responseModalities: ['IMAGE'],
+          temperature: 0.85,
+        }
+      })
     });
 
-    if (!r.ok) {
-      const errText = await r.text();
-      console.error('Gemini API error:', errText);
-      return res.status(502).json({ error: `Gemini API 오류: ${errText.slice(0, 300)}` });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error:', response.status, errorText);
+      return res.status(500).json({ error: 'AI 변환에 실패했어요. 잠시 후 다시 시도해주세요.' });
     }
 
-    const data = await r.json();
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    const imgPart = parts.find(p => p.inline_data || p.inlineData);
+    const data = await response.json();
+    const candidate = data.candidates?.[0];
 
-    if (!imgPart) {
-      // 안전 필터로 차단됐을 가능성 — promptFeedback 확인
-      const block = data?.promptFeedback?.blockReason;
-      const msg = block
-        ? `안전 필터에 걸렸어요(${block}). 다른 사진으로 시도해주세요.`
-        : '응답에 이미지가 없습니다. 잠시 후 다시 시도해주세요.';
-      return res.status(502).json({ error: msg });
+    if (!candidate) {
+      console.error('No candidate in response:', JSON.stringify(data));
+      return res.status(500).json({ error: '결과를 생성하지 못했어요. 다른 사진으로 시도해주세요.' });
     }
 
-    const inline = imgPart.inline_data || imgPart.inlineData;
+    const imagePart = candidate.content?.parts?.find(p => p.inlineData);
+    if (!imagePart) {
+      const reason = candidate.finishReason;
+      if (reason === 'SAFETY' || reason === 'IMAGE_SAFETY') {
+        return res.status(500).json({ error: '안전 필터에 걸렸어요. 다른 사진으로 시도해주세요.' });
+      }
+      console.error('No image in response. Finish reason:', reason);
+      return res.status(500).json({ error: '이미지 생성에 실패했어요. 다시 시도해주세요.' });
+    }
+
     return res.status(200).json({
-      imageBase64: inline.data,
-      mimeType: inline.mime_type || inline.mimeType || 'image/png',
-      style
+      imageBase64: imagePart.inlineData.data,
+      mimeType: imagePart.inlineData.mimeType || 'image/png',
+      style: style || 'disney',
     });
 
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ error: e.message || '서버 오류' });
+  } catch (err) {
+    console.error('Transform handler error:', err);
+    return res.status(500).json({ error: 'AI 서비스에 일시적 문제가 있어요. 잠시 후 다시 시도해주세요.' });
   }
 }
