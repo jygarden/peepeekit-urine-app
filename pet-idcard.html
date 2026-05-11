@@ -9,16 +9,13 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#0f0a1e;color:#e2e8f0;min-height:100vh}
 .bg{position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(99,102,241,.15),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(139,92,246,.12),transparent 50%);pointer-events:none;z-index:0}
 .wrap{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:0 0 100px}
-
 header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
 .back-btn{background:rgba(255,255,255,.08);border:none;color:#e2e8f0;width:36px;height:36px;border-radius:10px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .header-title{font-size:16px;font-weight:700}
 .header-space{width:36px}
-
 .form-section{padding:0 20px 20px}
 .form-title{font-size:20px;font-weight:800;margin-bottom:4px}
 .form-sub{font-size:13px;color:#64748b;margin-bottom:20px}
-
 /* 사진 업로드 + AI 변환 */
 .photo-section{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;margin-bottom:20px}
 .photo-section-title{font-size:14px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px}
@@ -41,13 +38,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 .btn-alt-style:hover{background:rgba(255,255,255,.1)}
 .ai-badge{background:linear-gradient(90deg,#6366f1,#8b5cf6);color:white;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700}
 input[type=file]{display:none}
-
 /* AI 변환 상태 */
 .ai-status{margin-top:10px;font-size:12px;color:#94a3b8;display:none;align-items:center;gap:8px}
 .ai-status.show{display:flex}
 .ai-spinner{width:14px;height:14px;border:2px solid rgba(99,102,241,.3);border-top-color:#6366f1;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
-
 /* 사진 선택 옵션 */
 .photo-options{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
 .photo-options.show{display:block}
@@ -58,8 +53,7 @@ input[type=file]{display:none}
 .photo-option img{width:64px;height:64px;border-radius:8px;object-fit:cover;display:block}
 .photo-option-label{font-size:10px;color:#94a3b8;margin-top:4px;font-weight:600}
 .photo-option.active .photo-option-label{color:#a5b4fc}
-
-/* 페르소나 카드 (의인화 결과 미리보기) */
+/* 페르소나 카드 (캐릭터 결과 미리보기) */
 .persona-preview{display:none;margin-top:14px;background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(139,92,246,.12));border:1px solid rgba(139,92,246,.35);border-radius:16px;padding:16px}
 .persona-preview.show{display:block}
 .persona-title{font-size:11px;color:#a5b4fc;font-weight:700;letter-spacing:.5px;margin-bottom:10px;text-transform:uppercase}
@@ -68,7 +62,6 @@ input[type=file]{display:none}
 .persona-key{color:#94a3b8;font-weight:600}
 .persona-val{color:#e2e8f0;font-weight:700;text-align:right}
 .persona-quote{margin-top:10px;padding:10px 12px;background:rgba(255,255,255,.06);border-radius:10px;font-size:12px;color:#cbd5e1;line-height:1.6;font-style:italic}
-
 /* 폼 필드 */
 .field{margin-bottom:14px}
 .field label{font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
@@ -80,14 +73,11 @@ input[type=file]{display:none}
 .score-wrap{display:flex;align-items:center;gap:12px}
 .score-wrap input[type=range]{flex:1;height:6px;accent-color:#6366f1}
 .score-val{font-size:18px;font-weight:800;color:#6366f1;width:36px;text-align:center}
-
 .gen-btn{width:100%;padding:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:16px;color:white;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:28px;box-shadow:0 4px 20px rgba(99,102,241,.35);transition:transform .15s}
 .gen-btn:active{transform:scale(.97)}
-
 /* ━━━━ ID 카드 ━━━━ */
 #cardWrap{padding:0 20px;display:none}
 .card-label{font-size:13px;color:#64748b;text-align:center;margin-bottom:12px}
-
 #idCard{
   width:100%;background:linear-gradient(135deg,#1e1b4b 0%,#2d1b69 50%,#1e1b4b 100%);
   border-radius:24px;padding:28px 24px;position:relative;overflow:hidden;
@@ -95,11 +85,9 @@ input[type=file]{display:none}
 }
 #idCard::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(139,92,246,.3),transparent 70%);border-radius:50%}
 #idCard::after{content:'';position:absolute;bottom:-40px;left:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(99,102,241,.2),transparent 70%);border-radius:50%}
-
 .card-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;z-index:1}
 .card-brand{font-size:12px;font-weight:800;color:rgba(255,255,255,.4);letter-spacing:1px}
 .card-ai-badge{background:linear-gradient(90deg,#6366f1,#8b5cf6);color:white;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
-
 .card-main{display:flex;gap:18px;align-items:flex-start;margin-bottom:20px;position:relative;z-index:1}
 .card-photo{width:90px;height:90px;border-radius:18px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;overflow:hidden;border:3px solid rgba(139,92,246,.5);position:relative}
 .card-photo img{width:100%;height:100%;object-fit:cover}
@@ -110,44 +98,35 @@ input[type=file]{display:none}
 .card-age-gender{display:flex;gap:8px;flex-wrap:wrap}
 .card-tag{background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px;font-size:12px;color:rgba(255,255,255,.7);font-weight:600}
 .card-tag.persona{background:rgba(139,92,246,.25);color:#c4b5fd}
-
 .card-divider{height:1px;background:rgba(255,255,255,.1);margin:0 0 18px;position:relative;z-index:1}
-
 .card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;position:relative;z-index:1}
 .card-stat{text-align:center}
 .card-stat-label{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
 .card-stat-value{font-size:16px;font-weight:800;color:white}
 .card-stat-value.mbti{font-size:14px;background:linear-gradient(90deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-
 .card-health-bar{margin-bottom:18px;position:relative;z-index:1}
 .card-health-label{display:flex;justify-content:space-between;margin-bottom:6px}
 .card-health-label span:first-child{font-size:11px;color:rgba(255,255,255,.5)}
 .card-health-label span:last-child{font-size:13px;font-weight:800;color:white}
 .card-health-track{background:rgba(255,255,255,.1);border-radius:8px;height:8px;overflow:hidden}
 .card-health-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#10b981,#34d399)}
-
 .card-mbti-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(99,102,241,.15);border-radius:14px;border:1px solid rgba(99,102,241,.3);margin-bottom:14px;position:relative;z-index:1}
 .card-mbti-emoji{font-size:28px}
 .card-mbti-info{flex:1}
 .card-mbti-type{font-size:18px;font-weight:800;background:linear-gradient(90deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card-mbti-name{font-size:12px;color:rgba(255,255,255,.5)}
-
 .card-quote{display:none;padding:12px 14px;background:rgba(255,255,255,.05);border-left:3px solid #818cf8;border-radius:8px;font-size:13px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:14px;font-style:italic;position:relative;z-index:1}
 .card-quote.show{display:block}
-.card-quote::before{content:'“';color:#818cf8;font-size:18px;font-weight:700;margin-right:4px}
-.card-quote::after{content:'”';color:#818cf8;font-size:18px;font-weight:700;margin-left:4px}
-
+.card-quote::before{content:'\201C';color:#818cf8;font-size:18px;font-weight:700;margin-right:4px}
+.card-quote::after{content:'\201D';color:#818cf8;font-size:18px;font-weight:700;margin-left:4px}
 .card-footer{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
 .card-footer-brand{font-size:11px;color:rgba(255,255,255,.3);display:flex;align-items:center;gap:4px}
 .card-id{font-size:10px;color:rgba(255,255,255,.2);font-family:monospace}
-
 .share-btns{display:flex;gap:10px;padding:16px 20px}
 .btn-save{flex:1;padding:14px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:14px;color:white;font-size:15px;font-weight:700;cursor:pointer}
 .btn-insta{padding:14px 18px;background:linear-gradient(135deg,#f43f5e,#f97316);border:none;border-radius:14px;color:white;font-size:20px;cursor:pointer}
 .btn-again{padding:14px 18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:#e2e8f0;font-size:20px;cursor:pointer}
-
 .share-tip{text-align:center;font-size:12px;color:#475569;padding:0 20px 16px;line-height:1.7}
-
 /* 전체 로딩 오버레이 */
 #aiLoading{position:fixed;inset:0;background:rgba(15,10,30,.92);display:none;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:16px}
 .ai-loading-inner{text-align:center;padding:0 30px}
@@ -168,15 +147,13 @@ input[type=file]{display:none}
     <div class="header-title">🪪 ID 카드 만들기</div>
     <div class="header-space"></div>
   </header>
-
   <div class="form-section">
-    <div class="form-title">우리 아이가 사람이라면? 🪄</div>
-    <div class="form-sub">AI가 웹툰 캐릭터로 의인화해드려요 ✨</div>
-
-    <!-- 사진 업로드 + AI 변환 -->
+    <div class="form-title">우리 아이의 캐릭터 만들기 🎨</div>
+    <div class="form-sub">AI가 우리 아이를 디즈니 / 지브리 캐릭터로 만들어드려요 ✨</div>
+    <!-- 사진 업로드 + AI 캐릭터화 -->
     <div class="photo-section">
-      <div class="photo-section-title">📸 사진 <span class="ai-badge">AI 의인화</span></div>
-      <div class="photo-section-hint">💡 정보(품종 · MBTI · 성별)를 먼저 채우면 의인화 결과가 더 정확해져요!</div>
+      <div class="photo-section-title">📸 사진 <span class="ai-badge">AI 캐릭터</span></div>
+      <div class="photo-section-hint">💡 정보(품종 · MBTI)를 먼저 채우면 우리 아이만의 캐릭터가 더 정확해져요!</div>
       <div class="photo-row">
         <div class="photo-box">
           <div class="photo-circle" id="photoCircle" onclick="document.getElementById('photoInput').click()">📷</div>
@@ -186,39 +163,34 @@ input[type=file]{display:none}
           <button class="btn-upload-photo" onclick="document.getElementById('photoInput').click()">
             📁 사진 선택하기
           </button>
-          <button class="btn-ai-transform" id="aiBtn" onclick="doAITransform('webtoon')" disabled>
-            🎨 웹툰 사람으로 변환 <span class="ai-badge">AI</span>
+          <button class="btn-ai-transform" id="aiBtn" onclick="doAITransform('disney')" disabled>
+            🎨 디즈니 캐릭터로 변환 <span class="ai-badge">AI</span>
           </button>
           <button class="btn-alt-style" id="altBtn">
-            🎬 K-드라마 스타일로도 보기
+            🌸 지브리 스타일로도 보기
           </button>
         </div>
       </div>
       <input type="file" id="photoInput" accept="image/*" onchange="loadPhoto(this)">
-
       <!-- AI 변환 상태 -->
       <div class="ai-status" id="aiStatus">
         <div class="ai-spinner"></div>
-        <span id="aiStatusText">AI가 의인화 중이에요...</span>
+        <span id="aiStatusText">AI가 캐릭터로 그리는 중이에요...</span>
       </div>
-
-      <!-- 사진 선택 옵션 (원본 / 웹툰 / K-드라마) -->
+      <!-- 사진 선택 옵션 (원본 / 디즈니 / 지브리) -->
       <div class="photo-options" id="photoOptions">
         <div class="photo-options-label">어떤 사진을 카드에 사용할까요?</div>
         <div class="photo-option-row" id="photoOptionRow"></div>
       </div>
-
-      <!-- 의인화 페르소나 미리보기 -->
+      <!-- 캐릭터 페르소나 미리보기 -->
       <div class="persona-preview" id="personaPreview">
-        <div class="persona-title">✨ 의인화 페르소나</div>
+        <div class="persona-title">✨ 우리 아이의 캐릭터 페르소나</div>
         <div class="persona-row"><span class="persona-key">이름</span><span class="persona-val" id="pName">-</span></div>
-        <div class="persona-row"><span class="persona-key">사람 나이</span><span class="persona-val" id="pAge">-</span></div>
-        <div class="persona-row"><span class="persona-key">유형</span><span class="persona-val" id="pNick">-</span></div>
-        <div class="persona-row"><span class="persona-key">직업</span><span class="persona-val" id="pOcc">-</span></div>
+        <div class="persona-row"><span class="persona-key">성격</span><span class="persona-val" id="pNick">-</span></div>
+        <div class="persona-row"><span class="persona-key">활동 스타일</span><span class="persona-val" id="pVibe">-</span></div>
         <div class="persona-quote" id="pQuote">-</div>
       </div>
     </div>
-
     <!-- 정보 입력 -->
     <div class="field">
       <label>이름</label>
@@ -265,28 +237,26 @@ input[type=file]{display:none}
       <label>MBTI 유형</label>
       <select id="fMBTI">
         <option value="">MBTI 없음</option>
-        <option>ENFJ — 공감왕 골든리트리버</option>
-        <option>ENFP — 호기심 많은 너구리</option>
-        <option>ENTJ — 카리스마 말라무트</option>
-        <option>ENTP — 엉뚱한 비글</option>
-        <option>ESFJ — 살뜰한 포메라니안</option>
-        <option>ESFP — 파티 동물 시바이누</option>
-        <option>ESTJ — 대장 리트리버</option>
-        <option>ESTP — 사고뭉치 테리어</option>
-        <option>INFJ — 신비로운 페르시안</option>
-        <option>INFP — 몽상가 앙고라 토끼</option>
-        <option>INTJ — 도도한 샴고양이</option>
-        <option>INTP — 철학자 고양이</option>
-        <option>ISFJ — 조용한 수호자 몰티즈</option>
-        <option>ISFP — 힐링메이트 래브라도</option>
-        <option>ISTJ — 꼼꼼한 진돗개</option>
-        <option>ISTP — 쿨한 코리안 숏헤어</option>
+        <option>ENFJ — 공감왕 케어러</option>
+        <option>ENFP — 에너지 폭발 인싸</option>
+        <option>ENTJ — 타고난 대장</option>
+        <option>ENTP — 호기심 폭주 탐험가</option>
+        <option>ESFJ — 정 많은 케어러</option>
+        <option>ESFP — 분위기 메이커</option>
+        <option>ESTJ — 단단한 기둥</option>
+        <option>ESTP — 못 말리는 모험가</option>
+        <option>INFJ — 신비로운 통찰러</option>
+        <option>INFP — 감성 부자 몽상가</option>
+        <option>INTJ — 시크한 전략가</option>
+        <option>INTP — 조용한 호기심 천재</option>
+        <option>ISFJ — 조용히 챙겨주는 천사</option>
+        <option>ISFP — 자유로운 감성 장인</option>
+        <option>ISTJ — 믿음직한 루틴 마스터</option>
+        <option>ISTP — 쿨한 해결사</option>
       </select>
     </div>
-
     <button class="gen-btn" onclick="generateCard()">✨ ID 카드 생성하기</button>
   </div>
-
   <!-- 생성된 카드 -->
   <div id="cardWrap">
     <div class="card-label">📸 스크린샷 또는 저장 후 인스타에 공유하세요!</div>
@@ -294,13 +264,13 @@ input[type=file]{display:none}
       <div id="idCard">
         <div class="card-header-row">
           <div class="card-brand">건강어때 · Pet ID</div>
-          <div class="card-ai-badge" id="cardAIBadge" style="display:none">✨ AI 의인화</div>
+          <div class="card-ai-badge" id="cardAIBadge" style="display:none">✨ AI 캐릭터</div>
           <div style="font-size:20px">🐾</div>
         </div>
         <div class="card-main">
           <div class="card-photo" id="cardPhoto">
             <span id="cardPhotoEmoji">🐾</span>
-            <div class="card-photo-ai-tag" id="cardAITag" style="display:none">✨ AI 의인화</div>
+            <div class="card-photo-ai-tag" id="cardAITag" style="display:none">✨ AI</div>
           </div>
           <div class="card-info">
             <div class="card-name" id="cardName">콩이</div>
@@ -340,7 +310,7 @@ input[type=file]{display:none}
           <div class="card-mbti-emoji" id="cardMBTIEmoji">🦊</div>
           <div class="card-mbti-info">
             <div class="card-mbti-type" id="cardMBTIType">ENFJ</div>
-            <div class="card-mbti-name" id="cardMBTIName">공감왕 골든리트리버</div>
+            <div class="card-mbti-name" id="cardMBTIName">공감왕 케어러</div>
           </div>
         </div>
         <div class="card-quote" id="cardQuote">한마디</div>
@@ -357,59 +327,60 @@ input[type=file]{display:none}
     </div>
     <div class="share-tip">
       💡 이미지 저장 후 인스타그램 스토리에 올려보세요!<br>
-      <span style="color:#6366f1">#건강어때 #반려동물MBTI #펫아이디카드 #반려동물의인화 #우리아이가사람이라면</span>
+      <span style="color:#6366f1">#건강어때 #반려동물MBTI #펫아이디카드 #우리아이만의캐릭터 #반려동물캐릭터</span>
     </div>
   </div>
 </div>
-
 <!-- AI 변환 로딩 -->
 <div id="aiLoading">
   <div class="ai-loading-inner">
     <div class="ai-loading-emoji">🎨</div>
-    <div class="ai-loading-title" id="aiLoadingTitle">AI가 의인화 중이에요!</div>
-    <div class="ai-loading-sub" id="aiLoadingSub">웹툰 캐릭터로 변환하는 중...<br>약 15~20초 정도 걸려요 🐾</div>
+    <div class="ai-loading-title" id="aiLoadingTitle">AI가 캐릭터로 그리는 중이에요!</div>
+    <div class="ai-loading-sub" id="aiLoadingSub">디즈니 캐릭터로 변환하는 중...<br>약 15~20초 정도 걸려요 🐾</div>
     <div class="ai-progress"><div class="ai-progress-fill" id="aiProgressFill"></div></div>
   </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 // ══════════════════════════════════════
-// MBTI 페르소나 데이터 (의인화용)
+// MBTI 페르소나 데이터 (펫 캐릭터용)
+// 핵심: 사람화 X / 펫 자체의 성격 캐릭터화 O
 // ══════════════════════════════════════
 const MBTI_PERSONA = {
-  ENFJ:{ nick:'따뜻한 카리스마', occs:['초등학교 선생님','심리상담사','간호사','커뮤니티 매니저','NGO 활동가'], quotes:['오늘 너 기분 어때?','같이 가자, 혼자 가지 마.','괜찮아, 다 잘 될 거야.'] },
-  ENFP:{ nick:'에너지 폭발 인싸', occs:['카페 사장','여행 작가','유튜버','플로리스트','광고 기획자'], quotes:['오늘은 또 누구랑 친구하지?','재밌는 거 없나?','같이 가자!'] },
-  ENTJ:{ nick:'타고난 리더',     occs:['스타트업 대표','컨설턴트','변호사','프로듀서','PM'], quotes:['일단 해보자.','그건 내가 정리할게.','계획부터 세워.'] },
-  ENTP:{ nick:'아이디어 폭주 토론러', occs:['크리에이터','카피라이터','유튜버','기획자','발명가'], quotes:['이거 한번 해보면 어때?','오늘은 또 뭘 할까?','재밌겠다 그거.'] },
-  ESFJ:{ nick:'정 많은 케어러',   occs:['승무원','간호사','이벤트 플래너','카페 매니저','유치원 선생님'], quotes:['밥 먹었어?','오늘 옷 예쁘다!','내가 도와줄게.'] },
-  ESFP:{ nick:'분위기 메이커',     occs:['연예인','DJ','댄스 강사','쇼핑몰 사장','플로리스트'], quotes:['오늘 진짜 예쁘다!','같이 놀자~','오늘 뭐하지?'] },
-  ESTJ:{ nick:'단단한 기둥',       occs:['은행원','공무원','관리자','교사','경찰관'], quotes:['일단 정리부터 하자.','약속은 지켜야지.','그건 이렇게 하면 돼.'] },
-  ESTP:{ nick:'심심한 거 못 참는 모험가', occs:['스포츠 트레이너','바리스타','여행 가이드','인플루언서','레이싱 드라이버'], quotes:['일단 가자!','뭐가 두려워?','재밌어 보이는데?'] },
-  INFJ:{ nick:'신비로운 통찰러',   occs:['작가','심리상담사','큐레이터','디자이너','편집자'], quotes:['괜찮아, 천천히 해도 돼.','네 마음은 어때?','나는 너를 믿어.'] },
-  INFP:{ nick:'감성 부자 몽상가',  occs:['일러스트레이터','시인','작가','뮤지션','북디자이너'], quotes:['그래도 괜찮아.','나는 이게 더 좋아.','있는 그대로가 좋아.'] },
-  INTJ:{ nick:'시크한 전략가',     occs:['연구원','전략 컨설턴트','아키텍트','교수','CTO'], quotes:['이미 다 계산해뒀어.','효율적으로 가자.','그건 이미 분석 끝.'] },
-  INTP:{ nick:'조용한 호기심 천재', occs:['개발자','연구원','데이터 사이언티스트','기획자','게임 디자이너'], quotes:['음… 잠깐, 생각 좀.','근데 그게 왜 그런 거야?','흥미로운데?'] },
-  ISFJ:{ nick:'조용히 챙겨주는 천사', occs:['도서관 사서','간호사','약사','베이커','플로리스트'], quotes:['많이 먹어.','추워? 이거 입어.','걱정 마, 내가 챙겨줄게.'] },
-  ISFP:{ nick:'자유로운 감성 장인', occs:['일러스트레이터','바리스타','플로리스트','뮤지션','사진작가'], quotes:['그냥 흘러가는 대로.','예쁘다, 이거.','천천히 가자.'] },
-  ISTJ:{ nick:'믿음직한 루틴 마스터', occs:['회계사','공무원','엔지니어','판사','교사'], quotes:['약속은 약속이야.','꼼꼼히 봐야 해.','내가 정리해놨어.'] },
-  ISTP:{ nick:'쿨한 해결사',       occs:['엔지니어','소방관','바이크 라이더','게임 개발자','목수'], quotes:['뭐, 해보면 알지.','말로 하지 말고 보여줘.','그게 그렇게 어려워?'] },
+  ENFJ:{ nick:'공감왕 케어러',         vibe:'모두를 챙기는 따뜻함',          quotes:['오늘 기분 어때?','내가 옆에 있어줄게.','괜찮아, 천천히 가자.'] },
+  ENFP:{ nick:'에너지 폭발 인싸',      vibe:'새 친구 사냥꾼',                quotes:['오늘은 누구랑 놀까?','재밌는 거 없나?','같이 가자!'] },
+  ENTJ:{ nick:'타고난 대장',           vibe:'집안 총괄 매니저',              quotes:['따라와, 다 정리해줄게.','일단 가자.','내 영역이야.'] },
+  ENTP:{ nick:'호기심 폭주 탐험가',    vibe:'모든 걸 한 번씩 시도하는 호기심', quotes:['이거 한번 해보자!','왜 그런 거지?','재밌겠다 그거.'] },
+  ESFJ:{ nick:'정 많은 케어러',        vibe:'반려인 옆 껌딱지',              quotes:['밥 먹었어?','오늘 어땠어?','내가 옆에 있을게.'] },
+  ESFP:{ nick:'분위기 메이커',         vibe:'파티의 중심',                   quotes:['오늘 진짜 신난다!','같이 놀자~','오늘 뭐하지?'] },
+  ESTJ:{ nick:'단단한 기둥',           vibe:'루틴의 수호자',                 quotes:['시간 됐어, 산책 가자.','약속은 약속이야.','이렇게 하는 거야.'] },
+  ESTP:{ nick:'못 말리는 모험가',      vibe:'액션 영화 주인공',              quotes:['일단 뛰자!','뭐가 두려워?','오늘은 무슨 사건이 있을까?'] },
+  INFJ:{ nick:'신비로운 통찰러',       vibe:'창가의 철학자',                 quotes:['괜찮아, 천천히 해도 돼.','네 마음을 알 것 같아.','나는 너를 믿어.'] },
+  INFP:{ nick:'감성 부자 몽상가',      vibe:'창문 너머 세상 탐험러',         quotes:['그래도 괜찮아.','나는 이게 좋아.','있는 그대로가 좋아.'] },
+  INTJ:{ nick:'시크한 전략가',         vibe:'계산된 우아함',                 quotes:['이미 다 알아봤어.','효율적으로 가자.','내 방식이 맞아.'] },
+  INTP:{ nick:'조용한 호기심 천재',    vibe:'골똘히 관찰하는 탐구자',        quotes:['음… 잠깐, 생각 좀.','근데 그게 왜 그런 거야?','흥미로운데?'] },
+  ISFJ:{ nick:'조용히 챙겨주는 천사',  vibe:'폭신한 담요 같은 존재',         quotes:['많이 먹어.','내가 챙겨줄게.','옆에 있을게, 걱정 마.'] },
+  ISFP:{ nick:'자유로운 감성 장인',    vibe:'느긋한 산책러',                 quotes:['그냥 흘러가는 대로.','예쁘다, 이거.','천천히 가자.'] },
+  ISTJ:{ nick:'믿음직한 루틴 마스터',  vibe:'시계처럼 정확한 일상',          quotes:['약속은 약속이야.','꼼꼼히 봐야지.','이미 정리해놨어.'] },
+  ISTP:{ nick:'쿨한 해결사',           vibe:'관찰형 모험가',                 quotes:['뭐, 해보면 알지.','말로 하지 말고 보여줘.','그게 그렇게 어려워?'] },
 };
-
 const MBTI_EMOJI = {
   ENFJ:'🦊',ENFP:'🦝',ENTJ:'🐕‍🦺',ENTP:'🐕',ESFJ:'🐩',ESFP:'🐶',ESTJ:'🦮',ESTP:'🐕',
   INFJ:'🐇',INFP:'🐰',INTJ:'😸',INTP:'🦜',ISFJ:'🐕',ISFP:'🐈',ISTJ:'🐕',ISTP:'🐱'
 };
-
+// 스타일 라벨
+const STYLE_LABEL = {
+  disney: { full:'디즈니 캐릭터', short:'디즈니', tag:'🎨 AI 디즈니', emoji:'🎨' },
+  ghibli: { full:'지브리 스타일', short:'지브리', tag:'🌸 AI 지브리', emoji:'🌸' },
+};
 // ══════════════════════════════════════
 // 상태
 // ══════════════════════════════════════
 let originalPhotoDataURL = null;
-let aiPhotos = { webtoon:null, kdrama:null };
+let aiPhotos = { disney:null, ghibli:null };
 let activePhotoDataURL = null;
-let activeStyle = null;     // 'webtoon' | 'kdrama' | null(원본)
+let activeStyle = null;     // 'disney' | 'ghibli' | null(원본)
 let currentPersona = null;
-
 // ══════════════════════════════════════
 // 초기 진입: MBTI 결과 자동 입력
 // ══════════════════════════════════════
@@ -423,7 +394,6 @@ window.onload = () => {
     }
   } catch(e) {}
 };
-
 // ══════════════════════════════════════
 // 폼에서 펫 정보 읽기
 // ══════════════════════════════════════
@@ -440,7 +410,6 @@ function readPetInfo() {
     mbti,
   };
 }
-
 // ══════════════════════════════════════
 // 페르소나 생성 (이름+MBTI 시드로 결정적)
 // ══════════════════════════════════════
@@ -449,34 +418,22 @@ function generatePersona(petInfo) {
   const data = MBTI_PERSONA[code] || MBTI_PERSONA.ENFP;
   const seed = (petInfo.name || 'pet') + code;
   const hash = [...seed].reduce((a,c) => a + c.charCodeAt(0), 0);
-  const occ   = data.occs  [hash % data.occs.length];
   const quote = data.quotes[(hash * 7 + 1) % data.quotes.length];
-
-  const dogAgeNum = parseInt((petInfo.age || '').replace(/\D/g,'')) || 3;
-  let humanAge;
-  if (dogAgeNum <= 1)       humanAge = 18;
-  else if (dogAgeNum === 2) humanAge = 24;
-  else                      humanAge = Math.min(45, 20 + dogAgeNum * 4);
-
   return {
     name: petInfo.name || '우리 아이',
-    humanAge,
     nick: data.nick,
-    occupation: occ,
+    vibe: data.vibe,
     quote,
     mbti: code,
   };
 }
-
 function renderPersona(p) {
-  document.getElementById('pName').textContent = p.name;
-  document.getElementById('pAge').textContent  = `${p.humanAge}세`;
-  document.getElementById('pNick').textContent = p.nick;
-  document.getElementById('pOcc').textContent  = p.occupation;
+  document.getElementById('pName').textContent  = p.name;
+  document.getElementById('pNick').textContent  = p.nick;
+  document.getElementById('pVibe').textContent  = p.vibe;
   document.getElementById('pQuote').textContent = `"${p.quote}"`;
   document.getElementById('personaPreview').classList.add('show');
 }
-
 // ══════════════════════════════════════
 // 사진 업로드
 // ══════════════════════════════════════
@@ -488,110 +445,91 @@ function loadPhoto(input) {
     originalPhotoDataURL = e.target.result;
     activePhotoDataURL = originalPhotoDataURL;
     activeStyle = null;
-    aiPhotos = { webtoon:null, kdrama:null };
+    aiPhotos = { disney:null, ghibli:null };
     currentPersona = null;
-
     document.getElementById('photoCircle').innerHTML = `<img src="${originalPhotoDataURL}" alt="pet">`;
-
     const aiBtn = document.getElementById('aiBtn');
     aiBtn.disabled = false;
-    aiBtn.innerHTML = '🎨 웹툰 사람으로 변환 <span class="ai-badge">AI</span>';
-    aiBtn.onclick = () => doAITransform('webtoon');
-
+    aiBtn.innerHTML = '🎨 디즈니 캐릭터로 변환 <span class="ai-badge">AI</span>';
+    aiBtn.onclick = () => doAITransform('disney');
     document.getElementById('altBtn').classList.remove('show');
     document.getElementById('photoOptions').classList.remove('show');
     document.getElementById('personaPreview').classList.remove('show');
   };
   reader.readAsDataURL(file);
 }
-
 // ══════════════════════════════════════
-// AI 의인화 변환 호출
+// AI 캐릭터화 호출
 // ══════════════════════════════════════
 async function doAITransform(style) {
   if (!originalPhotoDataURL) return;
-
-  const styleLabel = style === 'kdrama' ? 'K-드라마 스타일' : '웹툰 캐릭터';
-  document.getElementById('aiLoadingTitle').textContent = 'AI가 의인화 중이에요!';
-  document.getElementById('aiLoadingSub').innerHTML = `${styleLabel}로 변환하는 중...<br>약 15~20초 정도 걸려요 🐾`;
+  const label = STYLE_LABEL[style] || STYLE_LABEL.disney;
+  document.getElementById('aiLoadingTitle').textContent = 'AI가 캐릭터로 그리는 중이에요!';
+  document.getElementById('aiLoadingSub').innerHTML = `${label.full}로 변환하는 중...<br>약 15~20초 정도 걸려요 🐾`;
   document.getElementById('aiLoading').style.display = 'flex';
-
   const fill = document.getElementById('aiProgressFill');
   fill.style.animation = 'none';
   requestAnimationFrame(() => { fill.style.animation = 'progress 18s ease forwards'; });
-
   try {
     const matches = originalPhotoDataURL.match(/^data:([^;]+);base64,(.+)$/);
     const mimeType = matches[1];
     const imageBase64 = matches[2];
     const petInfo = readPetInfo();
-
     const res = await fetch('/api/transform', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64, mimeType, style, petInfo })
     });
-
     if (!res.ok) {
       const err = await res.json().catch(()=>({error:'알 수 없는 오류'}));
       throw new Error(err.error || 'AI 변환 실패');
     }
-
     const data = await res.json();
     aiPhotos[style] = `data:${data.mimeType};base64,${data.imageBase64}`;
-
     // 페르소나 생성 + 표시
     currentPersona = generatePersona(petInfo);
     renderPersona(currentPersona);
-
     // 활성 사진 = 방금 변환한 것
     setActivePhoto(style);
     renderPhotoOptions();
-
     // 다른 스타일 토글 안내
     const altBtn = document.getElementById('altBtn');
-    if (style === 'webtoon' && !aiPhotos.kdrama) {
-      altBtn.textContent = '🎬 K-드라마 스타일로도 보기';
-      altBtn.onclick = () => doAITransform('kdrama');
+    if (style === 'disney' && !aiPhotos.ghibli) {
+      altBtn.textContent = '🌸 지브리 스타일로도 보기';
+      altBtn.onclick = () => doAITransform('ghibli');
       altBtn.classList.add('show');
-    } else if (style === 'kdrama' && !aiPhotos.webtoon) {
-      altBtn.textContent = '🎨 웹툰 스타일로도 보기';
-      altBtn.onclick = () => doAITransform('webtoon');
+    } else if (style === 'ghibli' && !aiPhotos.disney) {
+      altBtn.textContent = '🎨 디즈니 캐릭터로도 보기';
+      altBtn.onclick = () => doAITransform('disney');
       altBtn.classList.add('show');
     } else {
       altBtn.classList.remove('show');
     }
-
     // 메인 버튼 → 다시 변환
     const aiBtn = document.getElementById('aiBtn');
     aiBtn.innerHTML = '🔄 다시 변환 <span class="ai-badge">AI</span>';
-    aiBtn.onclick = () => doAITransform(activeStyle || 'webtoon');
-
+    aiBtn.onclick = () => doAITransform(activeStyle || 'disney');
   } catch(e) {
     alert('AI 변환 오류: ' + e.message + '\n\n원본 사진으로 진행해주세요!');
   } finally {
     document.getElementById('aiLoading').style.display = 'none';
   }
 }
-
 // ══════════════════════════════════════
-// 사진 옵션 (원본 / 웹툰 / K-드라마) 렌더링
+// 사진 옵션 (원본 / 디즈니 / 지브리) 렌더링
 // ══════════════════════════════════════
 function renderPhotoOptions() {
   const row = document.getElementById('photoOptionRow');
   const opts = [{ key:'orig', label:'원본', src:originalPhotoDataURL }];
-  if (aiPhotos.webtoon) opts.push({ key:'webtoon', label:'🎨 웹툰',     src:aiPhotos.webtoon });
-  if (aiPhotos.kdrama)  opts.push({ key:'kdrama',  label:'🎬 K-드라마', src:aiPhotos.kdrama  });
-
+  if (aiPhotos.disney) opts.push({ key:'disney', label:'🎨 디즈니', src:aiPhotos.disney });
+  if (aiPhotos.ghibli) opts.push({ key:'ghibli', label:'🌸 지브리', src:aiPhotos.ghibli });
   const activeKey = activeStyle === null ? 'orig' : activeStyle;
-
   row.innerHTML = opts.map(o => `
     <div class="photo-option ${activeKey === o.key ? 'active':''}" data-style="${o.key}">
       <img src="${o.src}" alt="${o.label}">
       <div class="photo-option-label">${o.label}</div>
     </div>
   `).join('');
-
   row.querySelectorAll('.photo-option').forEach(el => {
     el.addEventListener('click', () => {
       const s = el.dataset.style;
@@ -599,16 +537,13 @@ function renderPhotoOptions() {
       renderPhotoOptions();
     });
   });
-
   document.getElementById('photoOptions').classList.add('show');
 }
-
 function setActivePhoto(style) {
   activeStyle = style;
   activePhotoDataURL = style === null ? originalPhotoDataURL : aiPhotos[style];
   document.getElementById('photoCircle').innerHTML = `<img src="${activePhotoDataURL}" alt="pet">`;
 }
-
 // ══════════════════════════════════════
 // ID 카드 생성
 // ══════════════════════════════════════
@@ -619,36 +554,30 @@ function generateCard() {
   const mbtiCode = mbtiRaw ? mbtiRaw.split(' — ')[0].trim() : '';
   const mbtiName = mbtiRaw ? mbtiRaw.split(' — ')[1] : '';
   const typeOpt  = document.getElementById('fType').options[document.getElementById('fType').selectedIndex].text;
-
   const isAI = activeStyle !== null;
   if (isAI && !currentPersona) currentPersona = generatePersona(petInfo);
   const persona = currentPersona;
-
   const scoreLabel  = score >= 90 ? '매우 좋음' : score >= 75 ? '양호' : score >= 60 ? '보통' : '주의 필요';
   const healthColor = score >= 90 ? 'linear-gradient(90deg,#10b981,#34d399)'
                     : score >= 75 ? 'linear-gradient(90deg,#6366f1,#a78bfa)'
                     : score >= 60 ? 'linear-gradient(90deg,#f59e0b,#fbbf24)'
                                   : 'linear-gradient(90deg,#ef4444,#f87171)';
-
   document.getElementById('cardName').textContent  = petInfo.name || '우리 아이';
   document.getElementById('cardBreed').textContent = petInfo.breed;
-
-  // AI일 땐 사람 나이 + 직업으로 표시
+  // 펫 정보 그대로 표시 (사람으로 바꾸지 않음)
+  // AI 모드일 때만 종류 자리에 캐릭터 성격 태그 추가
   const ageEl = document.getElementById('cardAge');
   const typeEl = document.getElementById('cardType');
+  ageEl.textContent = petInfo.age || '-';
+  ageEl.classList.remove('persona');
   if (isAI && persona) {
-    ageEl.textContent = `${persona.humanAge}세`;
-    ageEl.classList.add('persona');
-    typeEl.textContent = `💼 ${persona.occupation}`;
+    typeEl.textContent = `✨ ${persona.nick}`;
     typeEl.classList.add('persona');
   } else {
-    ageEl.textContent = petInfo.age || '-';
-    ageEl.classList.remove('persona');
     typeEl.textContent = typeOpt;
     typeEl.classList.remove('persona');
   }
   document.getElementById('cardGender').textContent = petInfo.gender;
-
   document.getElementById('cardScoreStat').textContent  = score + '점';
   document.getElementById('cardMBTIStat').textContent   = mbtiCode || '-';
   document.getElementById('cardScoreLabel').textContent = `${score}점 / ${scoreLabel}`;
@@ -656,25 +585,23 @@ function generateCard() {
   document.getElementById('cardHealthFill').style.background = healthColor;
   document.getElementById('cardDate').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit'}).replace('. ','.');
   document.getElementById('cardID').textContent = 'ID: ' + Math.random().toString(36).substring(2,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
-
   // AI 배지
   const aiBadgeEl = document.getElementById('cardAIBadge');
   if (isAI) {
+    const lbl = STYLE_LABEL[activeStyle] || STYLE_LABEL.disney;
     aiBadgeEl.style.display = 'block';
-    aiBadgeEl.textContent = `✨ ${activeStyle === 'kdrama' ? 'K-드라마' : '웹툰'} 의인화`;
+    aiBadgeEl.textContent = `${lbl.emoji} AI ${lbl.short}`;
   } else {
     aiBadgeEl.style.display = 'none';
   }
-
   // 사진
   const cardPhotoEl = document.getElementById('cardPhoto');
-  const aiTagText = activeStyle === 'kdrama' ? '🎬 AI K-드라마' : '🎨 AI 웹툰';
   if (activePhotoDataURL) {
+    const aiTagText = isAI ? (STYLE_LABEL[activeStyle] || STYLE_LABEL.disney).tag : '';
     cardPhotoEl.innerHTML = `<img src="${activePhotoDataURL}" alt="pet">${isAI ? `<div class="card-photo-ai-tag">${aiTagText}</div>` : ''}`;
   } else {
     cardPhotoEl.innerHTML = `<span>${typeOpt.split(' ')[0]}</span>`;
   }
-
   // MBTI 행
   if (mbtiCode) {
     document.getElementById('cardMBTIRow').style.display = 'flex';
@@ -684,7 +611,6 @@ function generateCard() {
   } else {
     document.getElementById('cardMBTIRow').style.display = 'none';
   }
-
   // 한마디 (AI일 때만)
   const quoteEl = document.getElementById('cardQuote');
   if (isAI && persona) {
@@ -693,11 +619,9 @@ function generateCard() {
   } else {
     quoteEl.classList.remove('show');
   }
-
   document.getElementById('cardWrap').style.display = 'block';
   setTimeout(() => document.getElementById('cardWrap').scrollIntoView({ behavior:'smooth' }), 100);
 }
-
 // ══════════════════════════════════════
 // 카드 저장 / 공유
 // ══════════════════════════════════════
@@ -719,11 +643,9 @@ async function saveCard() {
   btn.textContent = '📥 이미지 저장';
   btn.disabled = false;
 }
-
 function shareInsta() {
-  alert('📸 이미지 저장 후 인스타그램 앱에서 스토리로 올려주세요!\n\n#건강어때 #반려동물MBTI #펫아이디카드 #반려동물의인화 #우리아이가사람이라면');
+  alert('📸 이미지 저장 후 인스타그램 앱에서 스토리로 올려주세요!\n\n#건강어때 #반려동물MBTI #펫아이디카드 #우리아이만의캐릭터 #반려동물캐릭터');
 }
-
 function scrollToTop() {
   window.scrollTo({ top:0, behavior:'smooth' });
 }
