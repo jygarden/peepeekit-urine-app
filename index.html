@@ -1272,10 +1272,18 @@ function loginWithKakao() {
     alert('카카오 SDK를 불러오지 못했어요. 잠시 후 다시 시도해주세요.');
     return;
   }
+  // 로그인 시작 시점의 URL을 저장 (콜백 후 동일 URL을 사용해야 함)
   const redirectUri = window.location.origin + window.location.pathname;
+  sessionStorage.setItem('kakao_redirect_uri', redirectUri);
+
+  // 모바일 환경 감지 (iOS/Android)
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  // 모바일이면 카카오톡 앱과 연동(throughTalk), 데스크탑은 카카오 계정 페이지
   Kakao.Auth.authorize({
     redirectUri: redirectUri,
-    scope: 'profile_nickname,profile_image'
+    scope: 'profile_nickname,profile_image',
+    throughTalk: isMobile  // ← 모바일에서 카카오톡 앱이 있으면 자동 로그인
   });
 }
 
@@ -1290,7 +1298,11 @@ async function handleKakaoCallback() {
   document.getElementById('kakaoLoading').classList.add('show');
 
   try {
-    const redirectUri = window.location.origin + window.location.pathname;
+    // 로그인 시작 시 저장한 URI를 우선 사용 (콜백 후 path가 바뀌어도 매칭됨)
+    const redirectUri = sessionStorage.getItem('kakao_redirect_uri')
+      || (window.location.origin + window.location.pathname);
+    sessionStorage.removeItem('kakao_redirect_uri');
+
     // 서버 함수 호출 (CORS 우회 + 토큰 교환 + 사용자 조회 한 번에)
     const res = await fetch('/api/kakao-callback', {
       method: 'POST',
