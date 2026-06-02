@@ -154,6 +154,9 @@
     .kakao-btn:hover{box-shadow:0 6px 24px rgba(254,229,0,.55)}
     .kakao-btn:active{transform:scale(.98)}
     .kakao-btn svg{width:20px;height:20px;flex-shrink:0}
+    /* 모바일에서는 카카오 버튼 + 구분선 숨김 */
+    body.is-mobile .kakao-btn,
+    body.is-mobile .welcome-divider{display:none !important}
     .welcome-divider{
       display:flex;align-items:center;gap:10px;margin:18px 0 14px;
       font-size:11px;color:#9CA3B5;letter-spacing:-.1px
@@ -1924,6 +1927,10 @@ function resetAll() {
 // 페이지 첫 로드 시 환영 화면 초기화
 // ════════════════════════════════════════════════════════════════
 document.body.classList.add('welcome-active');
+// 모바일이면 카카오 버튼 숨김 (WebView OAuth 한계 때문)
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+  document.body.classList.add('is-mobile');
+}
 initWelcome();
 </script>
 </body>
