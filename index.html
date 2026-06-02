@@ -19,8 +19,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{background:#f1f5f9;font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding-bottom:0}
+    body{background:#F7F7F5;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo","Noto Sans KR",sans-serif;padding-bottom:0;color:#1D1D1F;-webkit-font-smoothing:antialiased}
     #app{max-width:430px;margin:0 auto;min-height:100vh}
+    /* 헤더 전체 제거 */
+    .header{display:none !important}
 
     /* ── 헤더 ── */
     .header{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:18px 20px 22px;color:#fff;position:sticky;top:0;z-index:200}
@@ -28,6 +30,7 @@
     .header h1{font-size:19px;font-weight:800;letter-spacing:-.5px}
     .header p{font-size:11px;opacity:.85;margin-top:3px}
     .btn-history{background:rgba(255,255,255,.18);border:none;border-radius:8px;padding:6px 11px;color:#fff;font-size:11px;cursor:pointer;white-space:nowrap}
+    .btn-back-home{background:rgba(255,255,255,.18);border:none;border-radius:8px;padding:6px 11px;color:#fff;font-size:11px;cursor:pointer;white-space:nowrap;margin-right:6px}
 
     /* ── 화면 ── */
     .screen{display:none;padding:16px 16px 40px}
@@ -49,14 +52,63 @@
     .field .row2{display:flex;gap:8px}
     .field .row2 select{flex:1}
 
-    /* ── 분석 대상 (반려동물 / 사람) 토글 ── */
-    .subject-row{display:flex;gap:10px;margin-bottom:16px}
-    .subject-btn{flex:1;padding:18px 8px;background:#fff;border:2px solid #e2e8f0;border-radius:16px;cursor:pointer;font-size:32px;text-align:center;transition:all .18s;box-shadow:0 1px 6px rgba(0,0,0,.08)}
-    .subject-btn span{display:block;font-size:13px;font-weight:800;color:#374151;margin-top:6px}
-    .subject-btn.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);border-color:transparent;box-shadow:0 6px 18px rgba(99,102,241,.42)}
-    .subject-btn.active span{color:#fff}
+    /* ════════════ 홈 화면 — 시안과 동일 ════════════ */
+    body.home-active{background:#F7F7F5}
+    #screenHome{padding:0}
+    .home-wrap{padding:70px 26px 0;min-height:100vh;display:flex;flex-direction:column}
 
-    /* ── 반려동물 버튼 ── */
+    .home-title{margin-bottom:46px}
+    .home-title h1{font-size:26px;font-weight:800;letter-spacing:-.8px;color:#1D1D1F;line-height:1.15}
+    .home-title .sub{font-size:12.5px;color:#6E6E73;letter-spacing:-.2px;margin-top:12px;font-weight:500;line-height:1.5}
+
+    /* 카드 — 크고 푹신한 박스 */
+    .home-cards{display:flex;flex-direction:column;gap:24px;width:100%}
+    .home-card{
+      width:100%;min-height:210px;background:#FFFFFF;border:none;border-radius:28px;
+      padding:28px;cursor:pointer;display:flex;align-items:center;gap:22px;text-align:left;
+      box-shadow:0 2px 6px rgba(0,0,0,.04),0 14px 40px rgba(0,0,0,.07);
+      transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s,outline-color .2s;
+      position:relative;overflow:hidden;-webkit-appearance:none;font-family:inherit;
+      outline:1.5px solid transparent;outline-offset:-1.5px
+    }
+    .home-card:hover{box-shadow:0 2px 6px rgba(0,0,0,.05),0 18px 50px rgba(0,0,0,.10)}
+    .home-card:active{transform:scale(.99)}
+    .home-card.human:active{outline-color:#5E7CE2}
+    .home-card.pet:active{outline-color:#8FC9B5}
+
+    /* 아이콘 큰 원 */
+    .hc-icon-wrap{
+      width:112px;height:112px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      background:#EFEEF3
+    }
+    .hc-icon{width:62px;height:62px;display:block}
+    .home-card.human .hc-icon{color:#5E7CE2}
+    .home-card.pet .hc-icon{color:#5A6470}
+    .hc-icon path,.hc-icon circle,.hc-icon ellipse,.hc-icon line{
+      stroke:currentColor;stroke-width:1.4;fill:none;stroke-linecap:round;stroke-linejoin:round
+    }
+
+    /* 텍스트 */
+    .hc-content{flex:1;min-width:0}
+    .hc-content h3{font-size:18px;font-weight:700;letter-spacing:-.45px;color:#1D1D1F;line-height:1.25;margin-bottom:8px}
+    .hc-content p{font-size:12.5px;color:#6E6E73;letter-spacing:-.15px;font-weight:500;line-height:1.55}
+
+    .hc-arrow{width:9px;height:14px;color:#C7C7CC;flex-shrink:0;margin-left:2px}
+    .hc-arrow path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+    .home-foot{margin-top:auto;padding-top:50px;padding-bottom:26px}
+    .home-history-row{
+      width:100%;display:flex;align-items:center;justify-content:space-between;
+      background:none;border:none;padding:20px 4px 8px;cursor:pointer;
+      font-family:inherit;font-size:13.5px;color:#1D1D1F;font-weight:600;letter-spacing:-.2px;
+      border-top:1px solid #E5E5EA
+    }
+    .home-history-row .arr{width:9px;height:14px;color:#C7C7CC}
+    .home-history-row .arr path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .home-disclaimer{margin-top:12px;font-size:10.5px;color:#6E6E73;line-height:1.6;letter-spacing:-.1px;text-align:center;opacity:.6}
+
+    /* ── 반려동물 버튼 (폼 안) ── */
     .pet-row{display:flex;gap:10px;margin-bottom:14px}
     .pet-btn{flex:1;padding:16px 8px;background:#fff;border:2px solid #e2e8f0;border-radius:14px;cursor:pointer;font-size:26px;text-align:center;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.07)}
     .pet-btn span{display:block;font-size:12px;font-weight:700;color:#374151;margin-top:5px}
@@ -231,7 +283,7 @@
     .step-dot.active{background:#6366f1;width:22px;border-radius:4px}
     .step-dot.done{background:#6366f1}
 
-    /* ── 기능 메뉴 (반려동물 전용) ── */
+    /* ── 반려동물 특별 기능 ── */
     .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
     .feature-card{background:#fff;border-radius:16px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08);border:2px solid transparent;transition:all .18s;text-decoration:none;display:block}
     .feature-card:active{transform:scale(.97)}
@@ -243,212 +295,209 @@
     .feature-card.mbti .fc-title{color:#7c3aed}
     .feature-card.idcard .fc-title{color:#db2777}
     .feature-section-label{font-size:13px;font-weight:700;color:#334155;margin-bottom:8px}
-
-    /* 사람 모드일 때 숨김 처리 */
-    .pet-only{display:block}
-    .human-only{display:none}
-    body.mode-human .pet-only{display:none}
-    body.mode-human .human-only{display:block}
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- 헤더 -->
+  <!-- 헤더 (홈 화면에서는 숨김) -->
   <div class="header">
     <div class="header-row">
       <div>
-        <h1><span id="headerEmoji">🐾</span> 건강어때</h1>
-        <p id="headerSub">반려동물 건강을 AI로 스마트하게 확인하세요</p>
+        <h1>건강어때</h1>
+        <p id="headerSub">AI 소변검사 키트 분석</p>
       </div>
-      <button class="btn-history" onclick="goHistory()">📋 검사기록</button>
+      <div style="display:flex;align-items:center">
+        <button class="btn-back-home" id="btnBackHome" onclick="goHome()" style="display:none">홈</button>
+        <button class="btn-history" onclick="goHistory()">검사기록</button>
+      </div>
     </div>
   </div>
 
-  <!-- ════════════ 홈: 분석 대상 선택 + 정보 입력 ════════════ -->
+  <!-- ════════════ 홈 화면 (Minimal Apple Style) ════════════ -->
   <div class="screen active" id="screenHome">
+    <div class="home-wrap">
 
-    <!-- ★★ 분석 대상 (반려동물 / 사람) 토글 ★★ -->
-    <div class="section-title">🔬 누구의 건강을 확인할까요?</div>
-    <div class="subject-row">
-      <button class="subject-btn" id="btnSubjectPet" onclick="selectSubject('pet')">
-        🐾<span>반려동물</span>
-      </button>
-      <button class="subject-btn" id="btnSubjectHuman" onclick="selectSubject('human')">
-        🧑<span>사람</span>
-      </button>
-    </div>
-
-    <!-- 반려동물 특별 기능 (반려동물 모드일 때만 표시) -->
-    <div class="pet-only">
-      <div class="feature-section-label">✨ 반려동물 특별 기능</div>
-      <div class="feature-grid">
-        <a class="feature-card mbti" href="pet-mbti.html">
-          <div class="fc-icon">🧠</div>
-          <div class="fc-title">반려동물 MBTI</div>
-          <div class="fc-desc">우리 아이 성격 유형 알아보기</div>
-        </a>
-        <a class="feature-card idcard" href="pet-idcard.html">
-          <div class="fc-icon">🪪</div>
-          <div class="fc-title">반려동물 ID 카드</div>
-          <div class="fc-desc">AI 픽사 변환 + 인스타 공유</div>
-        </a>
+      <div class="home-title">
+        <h1>오늘의 건강 체크</h1>
+        <div class="sub">사람과 반려동물의 건강 상태를 쉽고 간편하게 확인해보세요</div>
       </div>
+
+      <div class="home-cards">
+
+        <!-- 1) 사람 (내 건강) — 위 -->
+        <button class="home-card human" onclick="enterHuman()">
+          <div class="hc-icon-wrap">
+            <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+              <circle cx="16" cy="11" r="5"/>
+              <path d="M6 27 C 6 21, 10 17.5, 16 17.5 C 22 17.5, 26 21, 26 27"/>
+            </svg>
+          </div>
+          <div class="hc-content">
+            <h3>내 건강 체크</h3>
+            <p>소변검사 키트로 주요 건강 지표를<br>간편하게 확인해요</p>
+          </div>
+          <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+        </button>
+
+        <!-- 2) 반려동물 — 아래 (강아지 + 고양이 실루엣) -->
+        <button class="home-card pet" onclick="enterPet()">
+          <div class="hc-icon-wrap">
+            <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+              <!-- 강아지 (왼쪽) -->
+              <!-- 귀 -->
+              <path d="M8 12.5 C 7.2 11, 7.5 9, 8.2 8.7 C 9 8.5, 9.5 9.5, 9.5 11"/>
+              <path d="M12.5 12.5 C 13 11, 12.8 9, 12 8.7"/>
+              <!-- 머리 -->
+              <circle cx="10.3" cy="13.5" r="2.6"/>
+              <!-- 코 -->
+              <circle cx="10.3" cy="14.4" r=".35" fill="currentColor" stroke="none"/>
+              <!-- 몸통 -->
+              <path d="M8 16.2 C 7 17.5, 6.8 20, 7.5 22 C 8 23.2, 9 24, 10 24 L 11 24 C 12.5 24, 13.5 22.5, 13.5 20.5 C 13.5 18, 12.8 16.5, 12.3 15.8"/>
+              <!-- 앞다리 -->
+              <path d="M9 22.5 L 9 24 M 11.5 22.5 L 11.5 24"/>
+
+              <!-- 고양이 (오른쪽) -->
+              <!-- 뾰족한 귀 -->
+              <path d="M18 12 L 18.3 8.5 L 20.2 11"/>
+              <path d="M23.2 12 L 22.8 8.5 L 21 11"/>
+              <!-- 머리 -->
+              <circle cx="20.6" cy="13.5" r="2.6"/>
+              <!-- 코 -->
+              <circle cx="20.6" cy="14.4" r=".35" fill="currentColor" stroke="none"/>
+              <!-- 몸통 -->
+              <path d="M18.2 16.2 C 17.2 17.5, 17 20, 17.7 22 C 18.2 23.2, 19.2 24, 20.2 24 L 21.2 24 C 22.7 24, 23.7 22.5, 23.7 20.5 C 23.7 18, 23 16.5, 22.5 15.8"/>
+              <!-- 앞다리 -->
+              <path d="M19.3 22.5 L 19.3 24 M 21.8 22.5 L 21.8 24"/>
+              <!-- 꼬리 -->
+              <path d="M24 23 C 26 23, 26 19, 24 19"/>
+            </svg>
+          </div>
+          <div class="hc-content">
+            <h3>반려동물 건강 체크</h3>
+            <p>우리 아이의 건강 신호를 집에서 간편하게 확인해요</p>
+          </div>
+          <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+        </button>
+
+      </div>
+
+      <div class="home-foot">
+        <button class="home-history-row" onclick="goHistory()">
+          <span>최근 검사 기록 보기</span>
+          <svg class="arr" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+        </button>
+        <div class="home-disclaimer">본 결과는 AI 참고용 정보이며,<br>의학적 진단은 의료 전문가의 진료를 받으세요.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════ 반려동물 폼 화면 ════════════ -->
+  <div class="screen" id="screenPetForm">
+
+    <div class="feature-section-label">✨ 반려동물 특별 기능</div>
+    <div class="feature-grid">
+      <a class="feature-card mbti" href="pet-mbti.html">
+        <div class="fc-icon">🧠</div>
+        <div class="fc-title">반려동물 MBTI</div>
+        <div class="fc-desc">우리 아이 성격 유형 알아보기</div>
+      </a>
+      <a class="feature-card idcard" href="pet-idcard.html">
+        <div class="fc-icon">🪪</div>
+        <div class="fc-title">반려동물 ID 카드</div>
+        <div class="fc-desc">AI 픽사 변환 + 인스타 공유</div>
+      </a>
     </div>
 
     <div class="step-indicator">
-      <div class="step-dot active" id="dot1"></div>
-      <div class="step-dot" id="dot2"></div>
-      <div class="step-dot" id="dot3"></div>
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
     </div>
 
-    <!-- ═══ 반려동물 폼 ═══ -->
-    <div class="pet-only">
-      <div class="section-title">🐾 반려동물 정보</div>
-      <div class="card">
-        <div class="pet-row">
-          <button class="pet-btn" id="btnDog" onclick="selectPet('dog')">🐶<span>강아지</span></button>
-          <button class="pet-btn" id="btnCat" onclick="selectPet('cat')">🐱<span>고양이</span></button>
-        </div>
-        <div class="field">
-          <label>반려동물 이름</label>
-          <input type="text" id="petName" placeholder="예: 뽀삐"/>
-        </div>
-        <div class="field">
-          <label>품종</label>
-          <input type="text" id="petBreed" placeholder="예: 말티즈, 페르시안, 믹스 등"/>
-        </div>
-        <div class="field">
-          <label>성별</label>
-          <div class="row2">
-            <button type="button" class="env-btn" id="genderMale" onclick="selectGender('수컷')" style="font-size:16px">♂<span>수컷</span></button>
-            <button type="button" class="env-btn" id="genderFemale" onclick="selectGender('암컷')" style="font-size:16px">♀<span>암컷</span></button>
-            <button type="button" class="env-btn" id="genderNeutered" onclick="selectGender('중성화')" style="font-size:14px">✂️<span>중성화</span></button>
-          </div>
-        </div>
-        <div class="field">
-          <label>반려동물 생년월 <span style="color:#94a3b8;font-weight:400">(건강 체질 분석에 활용)</span></label>
-          <div class="row2">
-            <select id="petBirthYear">
-              <option value="">출생연도</option>
-            </select>
-            <select id="petBirthMonth">
-              <option value="">출생월</option>
-              <option value="1">1월</option><option value="2">2월</option>
-              <option value="3">3월</option><option value="4">4월</option>
-              <option value="5">5월</option><option value="6">6월</option>
-              <option value="7">7월</option><option value="8">8월</option>
-              <option value="9">9월</option><option value="10">10월</option>
-              <option value="11">11월</option><option value="12">12월</option>
-            </select>
-          </div>
+    <div class="section-title">🐾 반려동물 정보</div>
+    <div class="card">
+      <div class="pet-row">
+        <button class="pet-btn" id="btnDog" onclick="selectPet('dog')">🐶<span>강아지</span></button>
+        <button class="pet-btn" id="btnCat" onclick="selectPet('cat')">🐱<span>고양이</span></button>
+      </div>
+      <div class="field">
+        <label>반려동물 이름</label>
+        <input type="text" id="petName" placeholder="예: 뽀삐"/>
+      </div>
+      <div class="field">
+        <label>품종</label>
+        <input type="text" id="petBreed" placeholder="예: 말티즈, 페르시안, 믹스 등"/>
+      </div>
+      <div class="field">
+        <label>성별</label>
+        <div class="row2">
+          <button type="button" class="env-btn" id="genderMale" onclick="selectGender('수컷')" style="font-size:16px">♂<span>수컷</span></button>
+          <button type="button" class="env-btn" id="genderFemale" onclick="selectGender('암컷')" style="font-size:16px">♀<span>암컷</span></button>
+          <button type="button" class="env-btn" id="genderNeutered" onclick="selectGender('중성화')" style="font-size:14px">✂️<span>중성화</span></button>
         </div>
       </div>
-
-      <div class="section-title">🏠 생활 환경</div>
-      <div class="card">
-        <div class="field">
-          <label>사는 지역</label>
-          <select id="region">
-            <option value="">지역 선택</option>
-            <option>서울</option><option>경기</option><option>인천</option>
-            <option>부산</option><option>대구</option><option>광주</option>
-            <option>대전</option><option>울산</option><option>세종</option>
-            <option>강원</option><option>충북</option><option>충남</option>
-            <option>전북</option><option>전남</option><option>경북</option>
-            <option>경남</option><option>제주</option><option>기타</option>
+      <div class="field">
+        <label>반려동물 생년월 <span style="color:#94a3b8;font-weight:400">(건강 체질 분석에 활용)</span></label>
+        <div class="row2">
+          <select id="petBirthYear">
+            <option value="">출생연도</option>
+          </select>
+          <select id="petBirthMonth">
+            <option value="">출생월</option>
+            <option value="1">1월</option><option value="2">2월</option>
+            <option value="3">3월</option><option value="4">4월</option>
+            <option value="5">5월</option><option value="6">6월</option>
+            <option value="7">7월</option><option value="8">8월</option>
+            <option value="9">9월</option><option value="10">10월</option>
+            <option value="11">11월</option><option value="12">12월</option>
           </select>
         </div>
-        <div class="field">
-          <label>생활 환경</label>
-          <div class="env-row" style="margin-bottom:0">
-            <button class="env-btn" id="envIndoor" onclick="selectEnv('실내')">🏠<span>실내</span></button>
-            <button class="env-btn" id="envOutdoor" onclick="selectEnv('실외')">🌳<span>실외</span></button>
-            <button class="env-btn" id="envMixed" onclick="selectEnv('실내+실외')">🔄<span>실내+실외</span></button>
-          </div>
+      </div>
+    </div>
+
+    <div class="section-title">🏠 생활 환경</div>
+    <div class="card">
+      <div class="field">
+        <label>사는 지역</label>
+        <select id="region">
+          <option value="">지역 선택</option>
+          <option>서울</option><option>경기</option><option>인천</option>
+          <option>부산</option><option>대구</option><option>광주</option>
+          <option>대전</option><option>울산</option><option>세종</option>
+          <option>강원</option><option>충북</option><option>충남</option>
+          <option>전북</option><option>전남</option><option>경북</option>
+          <option>경남</option><option>제주</option><option>기타</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>생활 환경</label>
+        <div class="env-row" style="margin-bottom:0">
+          <button class="env-btn" id="envIndoor" onclick="selectEnv('실내')">🏠<span>실내</span></button>
+          <button class="env-btn" id="envOutdoor" onclick="selectEnv('실외')">🌳<span>실외</span></button>
+          <button class="env-btn" id="envMixed" onclick="selectEnv('실내+실외')">🔄<span>실내+실외</span></button>
         </div>
       </div>
     </div>
 
-    <!-- ═══ 사람 폼 ═══ -->
-    <div class="human-only">
-      <div class="section-title">🧑 본인 정보</div>
-      <div class="card">
-        <div class="field">
-          <label>이름 (또는 별명)</label>
-          <input type="text" id="humanName" placeholder="예: 홍길동"/>
-        </div>
-        <div class="field">
-          <label>성별</label>
-          <div class="row2">
-            <button type="button" class="env-btn" id="hGenderMale" onclick="selectHumanGender('male')" style="font-size:16px">♂<span>남성</span></button>
-            <button type="button" class="env-btn" id="hGenderFemale" onclick="selectHumanGender('female')" style="font-size:16px">♀<span>여성</span></button>
-          </div>
-        </div>
-        <div class="field">
-          <label>생년월 <span style="color:#94a3b8;font-weight:400">(건강 체질 분석에 활용)</span></label>
-          <div class="row2">
-            <select id="humanBirthYear">
-              <option value="">출생연도</option>
-            </select>
-            <select id="humanBirthMonth">
-              <option value="">출생월</option>
-              <option value="1">1월</option><option value="2">2월</option>
-              <option value="3">3월</option><option value="4">4월</option>
-              <option value="5">5월</option><option value="6">6월</option>
-              <option value="7">7월</option><option value="8">8월</option>
-              <option value="9">9월</option><option value="10">10월</option>
-              <option value="11">11월</option><option value="12">12월</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-title">🏠 생활 패턴</div>
-      <div class="card">
-        <div class="field">
-          <label>사는 지역</label>
-          <select id="humanRegion">
-            <option value="">지역 선택</option>
-            <option>서울</option><option>경기</option><option>인천</option>
-            <option>부산</option><option>대구</option><option>광주</option>
-            <option>대전</option><option>울산</option><option>세종</option>
-            <option>강원</option><option>충북</option><option>충남</option>
-            <option>전북</option><option>전남</option><option>경북</option>
-            <option>경남</option><option>제주</option><option>기타</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>평소 활동량</label>
-          <div class="env-row" style="margin-bottom:0;flex-wrap:wrap">
-            <button class="env-btn" id="lsSedentary" onclick="selectLifestyle('sedentary')">💺<span>좌식·사무</span></button>
-            <button class="env-btn" id="lsMixed" onclick="selectLifestyle('mixed')">🚶<span>보통</span></button>
-            <button class="env-btn" id="lsActive" onclick="selectLifestyle('active')">🏃<span>활동적</span></button>
-            <button class="env-btn" id="lsShift" onclick="selectLifestyle('shift')">🌙<span>교대·불규칙</span></button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ 공통: 연락처 + 동의 ═══ -->
-    <div class="section-title" id="contactSectionLabel">👤 보호자 정보</div>
+    <div class="section-title">👤 보호자 정보</div>
     <div class="card">
       <div class="field">
         <label>연락처 <span style="color:#ef4444">*</span></label>
-        <input type="tel" id="ownerContact" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)"/>
+        <input type="tel" id="petContact" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)"/>
       </div>
-
       <div class="consent-box">
         <div class="consent-row">
-          <input type="checkbox" id="consentMarketing"/>
-          <label for="consentMarketing">
+          <input type="checkbox" id="petConsentMarketing"/>
+          <label for="petConsentMarketing">
             <strong>[선택] 마케팅 정보 수신 동의</strong><br>
-            신제품 출시, 프로모션, 건강 정보 등 유용한 소식을 받아보겠습니다. 동의 후에도 언제든지 수신 거부 가능합니다.
+            신제품 출시, 프로모션, 건강 정보 등 유용한 소식을 받아보겠습니다.
           </label>
         </div>
         <div class="consent-row">
-          <input type="checkbox" id="consentPrivacy" required/>
-          <label for="consentPrivacy">
+          <input type="checkbox" id="petConsentPrivacy" required/>
+          <label for="petConsentPrivacy">
             <strong>[필수] 개인정보 수집 및 이용 동의</strong><br>
             검사 결과 분석 및 서비스 제공 목적으로 입력하신 정보를 수집합니다.
           </label>
@@ -456,7 +505,102 @@
       </div>
     </div>
 
-    <button class="btn-primary" onclick="goCapture()">다음 — 사진 촬영 →</button>
+    <button class="btn-primary" onclick="goCapture('pet')">다음 — 사진 촬영 →</button>
+    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 사람 폼 화면 ════════════ -->
+  <div class="screen" id="screenHumanForm">
+
+    <div class="step-indicator">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <div class="section-title">🧑 본인 정보</div>
+    <div class="card">
+      <div class="field">
+        <label>이름 (또는 별명)</label>
+        <input type="text" id="humanName" placeholder="예: 홍길동"/>
+      </div>
+      <div class="field">
+        <label>성별</label>
+        <div class="row2">
+          <button type="button" class="env-btn" id="hGenderMale" onclick="selectHumanGender('male')" style="font-size:16px">♂<span>남성</span></button>
+          <button type="button" class="env-btn" id="hGenderFemale" onclick="selectHumanGender('female')" style="font-size:16px">♀<span>여성</span></button>
+        </div>
+      </div>
+      <div class="field">
+        <label>생년월 <span style="color:#94a3b8;font-weight:400">(건강 체질 분석에 활용)</span></label>
+        <div class="row2">
+          <select id="humanBirthYear">
+            <option value="">출생연도</option>
+          </select>
+          <select id="humanBirthMonth">
+            <option value="">출생월</option>
+            <option value="1">1월</option><option value="2">2월</option>
+            <option value="3">3월</option><option value="4">4월</option>
+            <option value="5">5월</option><option value="6">6월</option>
+            <option value="7">7월</option><option value="8">8월</option>
+            <option value="9">9월</option><option value="10">10월</option>
+            <option value="11">11월</option><option value="12">12월</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">🏠 생활 패턴</div>
+    <div class="card">
+      <div class="field">
+        <label>사는 지역</label>
+        <select id="humanRegion">
+          <option value="">지역 선택</option>
+          <option>서울</option><option>경기</option><option>인천</option>
+          <option>부산</option><option>대구</option><option>광주</option>
+          <option>대전</option><option>울산</option><option>세종</option>
+          <option>강원</option><option>충북</option><option>충남</option>
+          <option>전북</option><option>전남</option><option>경북</option>
+          <option>경남</option><option>제주</option><option>기타</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>평소 활동량</label>
+        <div class="env-row" style="margin-bottom:0;flex-wrap:wrap">
+          <button class="env-btn" id="lsSedentary" onclick="selectLifestyle('sedentary')">💺<span>좌식·사무</span></button>
+          <button class="env-btn" id="lsMixed" onclick="selectLifestyle('mixed')">🚶<span>보통</span></button>
+          <button class="env-btn" id="lsActive" onclick="selectLifestyle('active')">🏃<span>활동적</span></button>
+          <button class="env-btn" id="lsShift" onclick="selectLifestyle('shift')">🌙<span>교대·불규칙</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">👤 연락처</div>
+    <div class="card">
+      <div class="field">
+        <label>연락처 <span style="color:#ef4444">*</span></label>
+        <input type="tel" id="humanContact" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)"/>
+      </div>
+      <div class="consent-box">
+        <div class="consent-row">
+          <input type="checkbox" id="humanConsentMarketing"/>
+          <label for="humanConsentMarketing">
+            <strong>[선택] 마케팅 정보 수신 동의</strong><br>
+            신제품 출시, 프로모션, 건강 정보 등 유용한 소식을 받아보겠습니다.
+          </label>
+        </div>
+        <div class="consent-row">
+          <input type="checkbox" id="humanConsentPrivacy" required/>
+          <label for="humanConsentPrivacy">
+            <strong>[필수] 개인정보 수집 및 이용 동의</strong><br>
+            검사 결과 분석 및 서비스 제공 목적으로 입력하신 정보를 수집합니다.
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="goCapture('human')">다음 — 사진 촬영 →</button>
+    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
   <!-- ════════════ 촬영 화면 ════════════ -->
@@ -489,7 +633,7 @@
       <div class="sub">저장된 사진을 불러오세요</div>
     </button>
 
-    <button class="btn-outline" onclick="goHome()">← 이전으로</button>
+    <button class="btn-outline" onclick="backToForm()">← 이전으로</button>
   </div>
 
   <!-- ════════════ 미리보기 화면 ════════════ -->
@@ -502,7 +646,7 @@
 
     <div class="preview-wrap">
       <img id="previewImg" src="" alt="검사 이미지"/>
-      <button class="btn-close-img" onclick="goCapture()">×</button>
+      <button class="btn-close-img" onclick="showScreen('screenCapture')">×</button>
     </div>
 
     <div class="error-box" id="errorBox"></div>
@@ -512,7 +656,7 @@
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
       <p>건강어때 AI가 종합 분석 중입니다</p>
-      <small id="loadingSub">소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
+      <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
 
@@ -537,7 +681,6 @@
 
       <div class="rec-box" id="recBox"></div>
 
-      <!-- 사람용 의료 면책 (사람 모드에서만 표시) -->
       <div class="medical-disclaimer-box" id="medicalDisclaimerBox" style="display:none">
         ⚠️ <strong>의료 안내:</strong> <span id="medicalDisclaimerText">본 결과는 의학적 진단이 아닌 일반 건강 정보입니다. 증상이 지속되거나 우려되는 경우 반드시 의료 전문가의 진료를 받으세요.</span>
       </div>
@@ -606,7 +749,7 @@
     <div style="margin-top:14px">
       <button class="btn-download" onclick="downloadResult()">📥 결과 이미지 저장</button>
       <div class="action-row">
-        <button class="btn-retake" onclick="goCapture()">📷 재촬영</button>
+        <button class="btn-retake" onclick="showScreen('screenCapture')">📷 재촬영</button>
         <button class="btn-new" onclick="resetAll()">🏠 새 검사</button>
       </div>
     </div>
@@ -616,7 +759,7 @@
   <div class="screen" id="screenHistory">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div class="section-title" style="margin-bottom:0">📋 검사 기록</div>
-      <button onclick="goHome()" style="background:none;border:none;color:#6366f1;font-size:13px;font-weight:700;cursor:pointer">+ 새 검사</button>
+      <button onclick="goHome()" style="background:none;border:none;color:#6366f1;font-size:13px;font-weight:700;cursor:pointer">🏠 홈으로</button>
     </div>
     <div id="historyList"></div>
   </div>
@@ -627,7 +770,7 @@
 <div id="installBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:14px 16px;
   align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,.2)">
-  <span style="font-size:28px">🐾</span>
+  <span style="font-size:28px">🩺</span>
   <div style="flex:1">
     <div style="font-size:13px;font-weight:800;color:#fff">건강어때 — 홈화면에 추가하기</div>
     <div style="font-size:11px;color:rgba(255,255,255,.85);margin-top:2px">아이콘을 탭하면 앱처럼 바로 실행돼요</div>
@@ -642,7 +785,7 @@
 <div id="iosBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
   background:#1e293b;padding:16px;align-items:flex-start;gap:12px;
   box-shadow:0 -4px 20px rgba(0,0,0,.3);border-radius:16px 16px 0 0">
-  <span style="font-size:28px;flex-shrink:0">🐾</span>
+  <span style="font-size:28px;flex-shrink:0">🩺</span>
   <div style="flex:1">
     <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:6px">홈화면에 앱으로 추가하는 방법</div>
     <div style="font-size:12px;color:#94a3b8;line-height:1.8">
@@ -674,7 +817,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
   document.getElementById('installBanner').style.display = 'flex';
 });
-
 function installApp() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -685,7 +827,6 @@ function installApp() {
   }
 }
 function dismissInstall() { document.getElementById('installBanner').style.display = 'none'; }
-
 window.addEventListener('load', () => {
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone;
@@ -699,12 +840,12 @@ window.addEventListener('load', () => {
 // ══════════════════════════════════════
 // 상태
 // ══════════════════════════════════════
-let subjectMode    = 'pet';   // 'pet' | 'human'
+let subjectMode    = null;   // 'pet' | 'human'
 let selectedPet    = null;
 let selectedEnv    = null;
-let selectedGender = null;       // 반려동물용
-let humanGender    = null;       // 사람용
-let humanLifestyle = null;       // 사람용
+let selectedGender = null;
+let humanGender    = null;
+let humanLifestyle = null;
 let imageB64       = null;
 let imageSrc       = null;
 let currentResult  = null;
@@ -715,24 +856,55 @@ let currentResult  = null;
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  // 홈 버튼은 홈 화면 외에서 보임
+  document.getElementById('btnBackHome').style.display = (id === 'screenHome') ? 'none' : 'inline-block';
+  // 홈 화면에서는 헤더 숨김 (body 클래스로 제어)
+  document.body.classList.toggle('home-active', id === 'screenHome');
+  // 헤더 부제목 (홈 외 화면)
+  const headerSub = document.getElementById('headerSub');
+  if (headerSub) {
+    if (subjectMode === 'pet')        headerSub.textContent = '반려동물 건강검진';
+    else if (subjectMode === 'human') headerSub.textContent = '본인 건강검진';
+    else                              headerSub.textContent = 'AI 소변검사 키트 분석';
+  }
   window.scrollTo(0, 0);
 }
-function goHome()    { showScreen('screenHome'); }
-function goHistory() { renderHistory(); showScreen('screenHistory'); }
+
+function goHome() {
+  subjectMode = null;
+  showScreen('screenHome');
+}
+function goHistory() {
+  renderHistory();
+  showScreen('screenHistory');
+}
+
+// ★ 홈에서 선택 → 해당 폼으로 이동
+function enterPet() {
+  subjectMode = 'pet';
+  showScreen('screenPetForm');
+}
+function enterHuman() {
+  subjectMode = 'human';
+  showScreen('screenHumanForm');
+}
+
+// 촬영 화면에서 뒤로
+function backToForm() {
+  showScreen(subjectMode === 'human' ? 'screenHumanForm' : 'screenPetForm');
+}
 
 // ══════════════════════════════════════
-// 생년도 셀렉트 채우기 (반려동물 + 사람)
+// 생년도 셀렉트 채우기
 // ══════════════════════════════════════
 (function() {
   const cur = new Date().getFullYear();
-  // 반려동물: 0~25년 전
   const petSel = document.getElementById('petBirthYear');
   for (let y = cur; y >= cur - 25; y--) {
     const opt = document.createElement('option');
     opt.value = y; opt.textContent = y + '년';
     petSel.appendChild(opt);
   }
-  // 사람: 0~100년 전
   const humanSel = document.getElementById('humanBirthYear');
   for (let y = cur; y >= cur - 100; y--) {
     const opt = document.createElement('option');
@@ -742,26 +914,6 @@ function goHistory() { renderHistory(); showScreen('screenHistory'); }
 })();
 
 // ══════════════════════════════════════
-// ★ 분석 대상 (반려동물 / 사람) 전환
-// ══════════════════════════════════════
-function selectSubject(mode) {
-  subjectMode = mode;
-  document.getElementById('btnSubjectPet').classList.toggle('active',   mode === 'pet');
-  document.getElementById('btnSubjectHuman').classList.toggle('active', mode === 'human');
-  document.body.classList.toggle('mode-human', mode === 'human');
-
-  // 헤더 문구 갱신
-  document.getElementById('headerEmoji').textContent = mode === 'pet' ? '🐾' : '🩺';
-  document.getElementById('headerSub').textContent = mode === 'pet'
-    ? '반려동물 건강을 AI로 스마트하게 확인하세요'
-    : '내 건강을 AI로 스마트하게 확인하세요';
-
-  // 연락처 섹션 라벨
-  document.getElementById('contactSectionLabel').textContent = mode === 'pet'
-    ? '👤 보호자 정보' : '👤 본인 연락처';
-}
-
-// ══════════════════════════════════════
 // 반려동물 / 환경 선택
 // ══════════════════════════════════════
 function selectPet(type) {
@@ -769,36 +921,29 @@ function selectPet(type) {
   document.getElementById('btnDog').classList.toggle('active', selectedPet === 'dog');
   document.getElementById('btnCat').classList.toggle('active', selectedPet === 'cat');
 }
-
 function selectGender(type) {
   selectedGender = selectedGender === type ? null : type;
   document.getElementById('genderMale').classList.toggle('active', selectedGender === '수컷');
   document.getElementById('genderFemale').classList.toggle('active', selectedGender === '암컷');
   document.getElementById('genderNeutered').classList.toggle('active', selectedGender === '중성화');
 }
-
 function selectEnv(type) {
   selectedEnv = selectedEnv === type ? null : type;
   document.getElementById('envIndoor').classList.toggle('active', selectedEnv === '실내');
   document.getElementById('envOutdoor').classList.toggle('active', selectedEnv === '실외');
   document.getElementById('envMixed').classList.toggle('active',  selectedEnv === '실내+실외');
 }
-
-// ══════════════════════════════════════
-// ★ 사람 선택 (성별 / 생활패턴)
-// ══════════════════════════════════════
 function selectHumanGender(type) {
   humanGender = humanGender === type ? null : type;
   document.getElementById('hGenderMale').classList.toggle('active', humanGender === 'male');
   document.getElementById('hGenderFemale').classList.toggle('active', humanGender === 'female');
 }
-
 function selectLifestyle(type) {
   humanLifestyle = humanLifestyle === type ? null : type;
   document.getElementById('lsSedentary').classList.toggle('active', humanLifestyle === 'sedentary');
-  document.getElementById('lsMixed').classList.toggle('active', humanLifestyle === 'mixed');
-  document.getElementById('lsActive').classList.toggle('active', humanLifestyle === 'active');
-  document.getElementById('lsShift').classList.toggle('active', humanLifestyle === 'shift');
+  document.getElementById('lsMixed').classList.toggle('active',     humanLifestyle === 'mixed');
+  document.getElementById('lsActive').classList.toggle('active',    humanLifestyle === 'active');
+  document.getElementById('lsShift').classList.toggle('active',     humanLifestyle === 'shift');
 }
 
 // ══════════════════════════════════════
@@ -814,12 +959,20 @@ function formatPhone(input) {
 // ══════════════════════════════════════
 // 다음 단계 (촬영으로)
 // ══════════════════════════════════════
-function goCapture() {
-  const privacy = document.getElementById('consentPrivacy').checked;
-  if (!privacy && document.getElementById('screenHome').classList.contains('active')) {
-    alert('개인정보 수집 및 이용에 동의해 주세요.');
-    return;
+function goCapture(mode) {
+  // 필수 동의 확인
+  if (mode === 'pet') {
+    if (!document.getElementById('petConsentPrivacy').checked) {
+      alert('개인정보 수집 및 이용에 동의해 주세요.');
+      return;
+    }
+  } else {
+    if (!document.getElementById('humanConsentPrivacy').checked) {
+      alert('개인정보 수집 및 이용에 동의해 주세요.');
+      return;
+    }
   }
+  subjectMode = mode;
   showScreen('screenCapture');
 }
 
@@ -849,7 +1002,7 @@ function showError(msg) {
 function clearError() { document.getElementById('errorBox').classList.remove('show'); }
 
 // ══════════════════════════════════════
-// 사주 건강 분석 (반려동물·사람 공통)
+// 사주 건강 분석
 // ══════════════════════════════════════
 function getSajuHealth(birthYear, birthMonth, mode) {
   if (!birthYear || !birthMonth) return null;
@@ -867,7 +1020,6 @@ function getSajuHealth(birthYear, birthMonth, mode) {
     { organ:'신장·방광',  tips:['이번 검사에서 수분 섭취가 매우 중요한 것으로 나타났습니다. 신선한 물을 항상 제공하세요','소변 검사를 정기적으로 반복하여 신장 기능 변화를 모니터링하세요'] },
     { organ:'신장·방광',  tips:['이번 수치상 저인산·저단백 식단이 적합합니다','음수량과 소변량을 자주 확인하시기 바랍니다'] },
   ];
-
   const humanStemData = [
     { organ:'간·담낭',    tips:['이번 검사 수치상 기름진 음식과 음주를 줄이시는 것이 권장됩니다','정기적인 간 기능 혈액검사를 병행하시기 바랍니다'] },
     { organ:'간·담낭',    tips:['검사 결과상 항산화 성분(베리류·녹황색 채소) 섭취가 도움이 됩니다','과도한 단백질·약물 복용은 이번 수치에서 주의가 필요합니다'] },
@@ -880,7 +1032,6 @@ function getSajuHealth(birthYear, birthMonth, mode) {
     { organ:'신장·방광',  tips:['이번 검사에서 수분 섭취가 매우 중요한 것으로 나타났습니다. 하루 1.5~2L 물 섭취를 권장합니다','소변 검사를 정기적으로 반복하여 신장 기능 변화를 모니터링하세요'] },
     { organ:'신장·방광',  tips:['이번 수치상 저염·저단백 식단이 적합합니다','음수량과 소변 색을 자주 확인하시기 바랍니다'] },
   ];
-
   const monthDataPet = {
     1:'이번 검사에서 신장·방광 수치에 주의가 필요한 패턴이 감지되었습니다. 체온 유지와 수분 보충에 신경써 주세요.',
     2:'검사 수치상 간 기능과 면역력 관련 지표를 꾸준히 모니터링하시기 바랍니다.',
@@ -914,11 +1065,7 @@ function getSajuHealth(birthYear, birthMonth, mode) {
   const monthTable = mode === 'human' ? monthDataHuman : monthDataPet;
   const data = stemTable[stemIdx];
   const month = parseInt(birthMonth);
-  return {
-    organ: data.organ,
-    tips: data.tips,
-    monthInfo: monthTable[month] || '',
-  };
+  return { organ: data.organ, tips: data.tips, monthInfo: monthTable[month] || '' };
 }
 
 // ══════════════════════════════════════
@@ -934,9 +1081,6 @@ async function analyze() {
   loading.classList.add('show');
   clearError();
 
-  const contact   = document.getElementById('ownerContact').value.trim();
-  const marketing = document.getElementById('consentMarketing').checked;
-
   let recordData, petHint = '', sajuInput = null;
 
   if (subjectMode === 'pet') {
@@ -948,6 +1092,8 @@ async function analyze() {
     const birthMonth= document.getElementById('petBirthMonth').value;
     const region    = document.getElementById('region').value;
     const env       = selectedEnv;
+    const contact   = document.getElementById('petContact').value.trim();
+    const marketing = document.getElementById('petConsentMarketing').checked;
 
     petHint = petType
       ? `이 이미지는 ${petType==='dog'?'강아지':'고양이'}${petBreed?`(품종: ${petBreed})`:''}${petName?`(이름: ${petName})`:''}${gender?`(성별: ${gender})`:''}의 소변검사 키트입니다. `
@@ -956,13 +1102,14 @@ async function analyze() {
     recordData = { contact, marketing, petType, petName, breed: petBreed, gender, birthYear, birthMonth, region, environment: env };
     sajuInput = { birthYear, birthMonth };
   } else {
-    // human
     const name      = document.getElementById('humanName').value.trim();
     const gender    = humanGender;
     const birthYear = document.getElementById('humanBirthYear').value;
     const birthMonth= document.getElementById('humanBirthMonth').value;
     const region    = document.getElementById('humanRegion').value;
     const lifestyle = humanLifestyle;
+    const contact   = document.getElementById('humanContact').value.trim();
+    const marketing = document.getElementById('humanConsentMarketing').checked;
 
     recordData = { contact, marketing, name, gender, birthYear, birthMonth, region, lifestyle };
     sajuInput = { birthYear, birthMonth };
@@ -986,7 +1133,7 @@ async function analyze() {
       petName: recordData.petName, petBreed: recordData.breed, petType: recordData.petType,
       humanName: recordData.name,
       gender: recordData.gender,
-      contact, region: recordData.region,
+      region: recordData.region,
       env: recordData.environment, lifestyle: recordData.lifestyle,
       birthYear: recordData.birthYear, birthMonth: recordData.birthMonth,
       saju
@@ -1024,7 +1171,6 @@ function renderResult(r, info) {
   };
   const URGENCY = isHuman ? URGENCY_HUMAN : URGENCY_PET;
 
-  // 배너
   document.getElementById('resultBanner').className = 'result-banner bg-'+(r.overallStatus||'normal');
   document.getElementById('resultIcon').textContent    = ICON[r.overallStatus]  ||'🔬';
   document.getElementById('resultTitle').textContent   = '종합 결과: '+(STATUS[r.overallStatus]||'분석 완료');
@@ -1034,7 +1180,6 @@ function renderResult(r, info) {
   document.getElementById('resultPetSub').textContent  = subjLabel;
   document.getElementById('resultSummary').textContent = r.summary||'';
 
-  // 상위 % 계산
   const items = r.testItems || [];
   const normalCount = items.filter(i => i.status === 'normal').length;
   const total = items.length || 1;
@@ -1050,12 +1195,10 @@ function renderResult(r, info) {
   document.getElementById('percentileText').textContent = pctText;
   badge.style.display = items.length > 0 ? 'inline-flex' : 'none';
 
-  // 권고
   const rec = document.getElementById('recBox');
   rec.className = 'rec-box rec-'+(r.overallStatus||'normal');
-  rec.textContent = (isHuman ? '🏥 ' : '🏥 ') + (URGENCY[r.urgency]||URGENCY.normal);
+  rec.textContent = '🏥 ' + (URGENCY[r.urgency]||URGENCY.normal);
 
-  // 사람용 의료 면책
   const medBox = document.getElementById('medicalDisclaimerBox');
   if (isHuman) {
     document.getElementById('medicalDisclaimerText').textContent =
@@ -1065,7 +1208,6 @@ function renderResult(r, info) {
     medBox.style.display = 'none';
   }
 
-  // 사주 건강
   const sajuBox = document.getElementById('sajuBox');
   if (info.saju) {
     document.getElementById('sajuOrgan').textContent = '집중 관리 수치 영역: '+info.saju.organ;
@@ -1073,16 +1215,12 @@ function renderResult(r, info) {
       .map(t=>`<div class="saju-tip">${t}</div>`).join('');
     document.getElementById('sajuMonth').textContent = info.saju.monthInfo;
     sajuBox.style.display = 'block';
-  } else {
-    sajuBox.style.display = 'none';
-  }
+  } else { sajuBox.style.display = 'none'; }
 
-  // 환경·체질 분석
   const envHealthBox  = document.getElementById('envHealthBox');
   const envAnalysisItem = document.getElementById('envAnalysisItem');
   const breedAgeItem  = document.getElementById('breedAgeItem');
   let showEnvBox = false;
-
   if (r.envAnalysis) {
     document.getElementById('envAnalysisText').textContent = r.envAnalysis;
     envAnalysisItem.style.display = 'block';
@@ -1095,7 +1233,6 @@ function renderResult(r, info) {
   } else { breedAgeItem.style.display = 'none'; }
   envHealthBox.style.display = showEnvBox ? 'block' : 'none';
 
-  // 항목별 결과
   const container = document.getElementById('resultItems');
   container.innerHTML = '';
   (r.testItems||[]).forEach(item => {
@@ -1113,7 +1250,6 @@ function renderResult(r, info) {
       </div>`;
   });
 
-  // 팁
   const tipsBox  = document.getElementById('tipsBox');
   const tipsList = document.getElementById('tipsList');
   if (r.tips && r.tips.length > 0) {
@@ -1123,7 +1259,6 @@ function renderResult(r, info) {
     tipsBox.style.display = 'block';
   } else { tipsBox.style.display = 'none'; }
 
-  // 영양제
   const suppSection = document.getElementById('suppSection');
   const suppList    = document.getElementById('suppList');
   if (r.supplements && r.supplements.length > 0) {
@@ -1141,7 +1276,6 @@ function renderResult(r, info) {
     suppSection.style.display = 'block';
   } else { suppSection.style.display = 'none'; }
 
-  // 사료/식단
   document.getElementById('foodEmoji').textContent = isHuman ? '🥗' : '🍖';
   document.getElementById('foodTitle').textContent = isHuman
     ? '검사 결과 맞춤 식단'
@@ -1162,7 +1296,6 @@ function renderResult(r, info) {
     foodSection.style.display = 'block';
   } else { foodSection.style.display = 'none'; }
 
-  // 운동
   const exerciseSection = document.getElementById('exerciseSection');
   const exerciseCard    = document.getElementById('exerciseCard');
   if (r.exerciseRecommendation) {
@@ -1178,13 +1311,9 @@ function renderResult(r, info) {
     exerciseSection.style.display = 'block';
   } else { exerciseSection.style.display = 'none'; }
 
-  // 이미지
   document.getElementById('resultImg').src = imageSrc;
-
-  // 면책 전문가 라벨
   document.getElementById('disclaimerExpert').textContent = isHuman ? '의사·전문가' : '수의사';
 
-  // 검사 정보 요약
   const parts = [];
   if (isHuman) {
     if (info.humanName) parts.push('🧑 ' + info.humanName);
@@ -1218,10 +1347,7 @@ async function downloadResult() {
   try {
     const el = document.getElementById('resultCapture');
     const canvas = await html2canvas(el, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#f1f5f9',
-      scrollY: -window.scrollY
+      scale: 2, useCORS: true, backgroundColor: '#f1f5f9', scrollY: -window.scrollY
     });
     const link = document.createElement('a');
     const baseName = subjectMode === 'human'
@@ -1239,11 +1365,11 @@ async function downloadResult() {
 }
 
 // ══════════════════════════════════════
-// 로컬 히스토리 저장/조회 (반려동물 + 사람 통합)
+// 로컬 히스토리
 // ══════════════════════════════════════
 function saveToHistory({ result, recordData, subject }) {
   try {
-    const key = 'urineHistoryV2';  // v2: 사람·반려동물 통합
+    const key = 'urineHistoryV2';
     const history = JSON.parse(localStorage.getItem(key)||'[]');
     history.unshift({
       id: Date.now(),
@@ -1262,14 +1388,13 @@ function saveToHistory({ result, recordData, subject }) {
 function renderHistory() {
   const list = document.getElementById('historyList');
   try {
-    // v2 + 기존 v1(petUrineHistory) 둘 다 읽기
     const newH = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
     const oldH = JSON.parse(localStorage.getItem('petUrineHistory')||'[]')
       .map(h => ({ ...h, subject: 'pet', name: h.petName }));
     const history = [...newH, ...oldH].sort((a,b) => new Date(b.date) - new Date(a.date));
 
     if (history.length === 0) {
-      list.innerHTML = '<div class="empty-history">아직 검사 기록이 없습니다.<br>첫 검사를 시작해보세요! 🩺</div>';
+      list.innerHTML = '<div class="empty-history">아직 검사 기록이 없습니다.<br>홈으로 가서 첫 검사를 시작해보세요! 🩺</div>';
       return;
     }
     const STATUS = { normal:'정상', warning:'주의', danger:'이상' };
@@ -1298,7 +1423,7 @@ function renderHistory() {
 }
 
 // ══════════════════════════════════════
-// 초기화
+// 초기화 (홈으로)
 // ══════════════════════════════════════
 function resetAll() {
   imageSrc = null; imageB64 = null; currentResult = null;
@@ -1306,13 +1431,8 @@ function resetAll() {
   document.getElementById('loadingBox').classList.remove('show');
   document.getElementById('btnAnalyze').disabled = false;
   document.getElementById('btnAnalyze').textContent = '🔬 AI 분석 시작';
-  showScreen('screenCapture');
+  goHome();
 }
-
-// ══════════════════════════════════════
-// 첫 로드 시 기본 모드 설정 (반려동물)
-// ══════════════════════════════════════
-selectSubject('pet');
 </script>
 </body>
 </html>
