@@ -57,9 +57,9 @@
     #screenHome{padding:0}
     .home-wrap{padding:70px 26px 0;min-height:100vh;display:flex;flex-direction:column}
 
-    .home-title{margin-bottom:46px}
-    .home-title h1{font-size:26px;font-weight:800;letter-spacing:-.8px;color:#1D1D1F;line-height:1.15}
-    .home-title .sub{font-size:12.5px;color:#6E6E73;letter-spacing:-.2px;margin-top:12px;font-weight:500;line-height:1.5}
+    .home-title{margin-bottom:42px}
+    .home-title h1{font-size:20px;font-weight:800;letter-spacing:-.6px;color:#1D1D1F;line-height:1.15}
+    .home-title .sub{font-size:10.5px;color:#6E6E73;letter-spacing:-.2px;margin-top:8px;font-weight:500;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* 카드 — 크고 푹신한 박스 */
     .home-cards{display:flex;flex-direction:column;gap:24px;width:100%}
@@ -76,23 +76,25 @@
     .home-card.human:active{outline-color:#5E7CE2}
     .home-card.pet:active{outline-color:#8FC9B5}
 
-    /* 아이콘 큰 원 */
+    /* 아이콘 원 */
     .hc-icon-wrap{
-      width:112px;height:112px;border-radius:50%;
+      width:92px;height:92px;border-radius:50%;
       display:flex;align-items:center;justify-content:center;flex-shrink:0;
       background:#EFEEF3
     }
-    .hc-icon{width:62px;height:62px;display:block}
+    .hc-icon{width:50px;height:50px;display:block}
     .home-card.human .hc-icon{color:#5E7CE2}
     .home-card.pet .hc-icon{color:#5A6470}
     .hc-icon path,.hc-icon circle,.hc-icon ellipse,.hc-icon line{
-      stroke:currentColor;stroke-width:1.4;fill:none;stroke-linecap:round;stroke-linejoin:round
+      stroke:currentColor;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round
     }
+    /* 면(fill)을 의도한 경우엔 stroke 끄기 */
+    .hc-icon [data-fill]{fill:currentColor;stroke:none}
 
     /* 텍스트 */
     .hc-content{flex:1;min-width:0}
-    .hc-content h3{font-size:18px;font-weight:700;letter-spacing:-.45px;color:#1D1D1F;line-height:1.25;margin-bottom:8px}
-    .hc-content p{font-size:12.5px;color:#6E6E73;letter-spacing:-.15px;font-weight:500;line-height:1.55}
+    .hc-content h3{font-size:14.5px;font-weight:700;letter-spacing:-.35px;color:#1D1D1F;line-height:1.25;margin-bottom:6px}
+    .hc-content p{font-size:10.5px;color:#6E6E73;letter-spacing:-.15px;font-weight:500;line-height:1.55}
 
     .hc-arrow{width:9px;height:14px;color:#C7C7CC;flex-shrink:0;margin-left:2px}
     .hc-arrow path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -100,13 +102,13 @@
     .home-foot{margin-top:auto;padding-top:50px;padding-bottom:26px}
     .home-history-row{
       width:100%;display:flex;align-items:center;justify-content:space-between;
-      background:none;border:none;padding:20px 4px 8px;cursor:pointer;
-      font-family:inherit;font-size:13.5px;color:#1D1D1F;font-weight:600;letter-spacing:-.2px;
+      background:none;border:none;padding:18px 4px 6px;cursor:pointer;
+      font-family:inherit;font-size:11.5px;color:#1D1D1F;font-weight:600;letter-spacing:-.2px;
       border-top:1px solid #E5E5EA
     }
-    .home-history-row .arr{width:9px;height:14px;color:#C7C7CC}
+    .home-history-row .arr{width:8px;height:13px;color:#C7C7CC}
     .home-history-row .arr path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-    .home-disclaimer{margin-top:12px;font-size:10.5px;color:#6E6E73;line-height:1.6;letter-spacing:-.1px;text-align:center;opacity:.6}
+    .home-disclaimer{margin-top:10px;font-size:9.5px;color:#6E6E73;line-height:1.6;letter-spacing:-.1px;text-align:center;opacity:.6}
 
     /* ── 반려동물 버튼 (폼 안) ── */
     .pet-row{display:flex;gap:10px;margin-bottom:14px}
@@ -340,37 +342,40 @@
           <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
         </button>
 
-        <!-- 2) 반려동물 — 아래 (강아지 + 고양이 실루엣) -->
+        <!-- 2) 반려동물 — 아래 (강아지 얼굴 + 고양이 얼굴) -->
         <button class="home-card pet" onclick="enterPet()">
           <div class="hc-icon-wrap">
             <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-              <!-- 강아지 (왼쪽) -->
-              <!-- 귀 -->
-              <path d="M8 12.5 C 7.2 11, 7.5 9, 8.2 8.7 C 9 8.5, 9.5 9.5, 9.5 11"/>
-              <path d="M12.5 12.5 C 13 11, 12.8 9, 12 8.7"/>
-              <!-- 머리 -->
-              <circle cx="10.3" cy="13.5" r="2.6"/>
+              <!-- ── 강아지 얼굴 (왼쪽) ── -->
+              <!-- 처진 귀 (양옆) -->
+              <path d="M7.2 12 C 6 13.5, 6 15.5, 7.5 16.2"/>
+              <path d="M13.8 12 C 15 13.5, 15 15.5, 13.5 16.2"/>
+              <!-- 얼굴 -->
+              <circle cx="10.5" cy="16" r="3.5"/>
+              <!-- 눈 -->
+              <circle cx="9.3" cy="15.5" r=".35" data-fill/>
+              <circle cx="11.7" cy="15.5" r=".35" data-fill/>
               <!-- 코 -->
-              <circle cx="10.3" cy="14.4" r=".35" fill="currentColor" stroke="none"/>
-              <!-- 몸통 -->
-              <path d="M8 16.2 C 7 17.5, 6.8 20, 7.5 22 C 8 23.2, 9 24, 10 24 L 11 24 C 12.5 24, 13.5 22.5, 13.5 20.5 C 13.5 18, 12.8 16.5, 12.3 15.8"/>
-              <!-- 앞다리 -->
-              <path d="M9 22.5 L 9 24 M 11.5 22.5 L 11.5 24"/>
+              <ellipse cx="10.5" cy="17" rx=".45" ry=".38" data-fill/>
+              <!-- 입 -->
+              <path d="M9.9 17.7 C 10.2 18.2, 10.8 18.2, 11.1 17.7"/>
 
-              <!-- 고양이 (오른쪽) -->
-              <!-- 뾰족한 귀 -->
-              <path d="M18 12 L 18.3 8.5 L 20.2 11"/>
-              <path d="M23.2 12 L 22.8 8.5 L 21 11"/>
-              <!-- 머리 -->
-              <circle cx="20.6" cy="13.5" r="2.6"/>
-              <!-- 코 -->
-              <circle cx="20.6" cy="14.4" r=".35" fill="currentColor" stroke="none"/>
-              <!-- 몸통 -->
-              <path d="M18.2 16.2 C 17.2 17.5, 17 20, 17.7 22 C 18.2 23.2, 19.2 24, 20.2 24 L 21.2 24 C 22.7 24, 23.7 22.5, 23.7 20.5 C 23.7 18, 23 16.5, 22.5 15.8"/>
-              <!-- 앞다리 -->
-              <path d="M19.3 22.5 L 19.3 24 M 21.8 22.5 L 21.8 24"/>
-              <!-- 꼬리 -->
-              <path d="M24 23 C 26 23, 26 19, 24 19"/>
+              <!-- ── 고양이 얼굴 (오른쪽) ── -->
+              <!-- 뾰족한 귀 (양옆 삼각형) -->
+              <path d="M18 13.4 L 18.6 10.4 L 20.2 12.7"/>
+              <path d="M23.4 13.4 L 22.8 10.4 L 21.2 12.7"/>
+              <!-- 얼굴 -->
+              <circle cx="20.7" cy="16" r="3.5"/>
+              <!-- 눈 -->
+              <circle cx="19.5" cy="15.5" r=".35" data-fill/>
+              <circle cx="21.9" cy="15.5" r=".35" data-fill/>
+              <!-- 코 (작은 삼각형) -->
+              <path d="M20.7 16.7 L 21 17 L 20.4 17 Z" data-fill/>
+              <!-- 입 -->
+              <path d="M20.1 17.5 C 20.35 18, 20.7 18, 20.7 17.7 C 20.7 18, 21.05 18, 21.3 17.5"/>
+              <!-- 수염 -->
+              <line x1="17.4" y1="16.4" x2="18.6" y2="16.4"/>
+              <line x1="22.8" y1="16.4" x2="24" y2="16.4"/>
             </svg>
           </div>
           <div class="hc-content">
