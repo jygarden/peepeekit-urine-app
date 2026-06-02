@@ -1284,44 +1284,31 @@ async function handleKakaoCallback() {
   const code = params.get('code');
   if (!code) return false;
 
-  // URL에서 code 제거 (새로고침해도 다시 안 타도록)
+  // URL에서 code 제거
   window.history.replaceState({}, document.title, window.location.pathname);
 
   document.getElementById('kakaoLoading').classList.add('show');
 
   try {
     const redirectUri = window.location.origin + window.location.pathname;
-    // 토큰 교환
-    const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
+    // 서버 함수 호출 (CORS 우회 + 토큰 교환 + 사용자 조회 한 번에)
+    const res = await fetch('/api/kakao-callback', {
       method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8'},
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: KAKAO_JS_KEY,
-        redirect_uri: redirectUri,
-        code: code
-      }).toString()
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ code, redirectUri })
     });
-    const tokenData = await tokenRes.json();
-    if (tokenData.error) throw new Error(tokenData.error_description || tokenData.error);
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || '로그인 실패');
 
-    // 사용자 정보 조회
-    const userRes = await fetch('https://kapi.kakao.com/v2/user/me', {
-      headers: {'Authorization': 'Bearer ' + tokenData.access_token}
-    });
-    const user = await userRes.json();
-
-    const name = (user.properties && user.properties.nickname)
-      || (user.kakao_account && user.kakao_account.profile && user.kakao_account.profile.nickname)
-      || '사용자';
-    const profileImg = (user.properties && user.properties.profile_image)
-      || (user.kakao_account && user.kakao_account.profile && user.kakao_account.profile.profile_image_url);
-    const kakaoId = user.id;
+    const name = data.nickname || '사용자';
+    const profileImg = data.profileImage;
+    const kakaoId = data.kakaoId;
 
     localStorage.setItem('userName', name);
     localStorage.setItem('kakaoId', String(kakaoId));
     localStorage.setItem('loginProvider', 'kakao');
     if (profileImg) localStorage.setItem('userProfileImg', profileImg);
+    if (data.email) localStorage.setItem('userEmail', data.email);
 
     document.getElementById('kakaoLoading').classList.remove('show');
 
