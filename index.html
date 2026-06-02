@@ -16,10 +16,15 @@
   <meta name="apple-mobile-web-app-title" content="건강어때"/>
   <link rel="apple-touch-icon" href="/icon-192.png"/>
 
+  <!-- 동글동글한 한글 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    body{background:#F7F7F5;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo","Noto Sans KR",sans-serif;padding-bottom:0;color:#1D1D1F;-webkit-font-smoothing:antialiased}
+    body{background:#F7F7F5;font-family:'Gowun Dodum',ui-rounded,'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;padding-bottom:0;color:#1D1D1F;-webkit-font-smoothing:antialiased}
     #app{max-width:430px;margin:0 auto;min-height:100vh}
     /* 헤더 전체 제거 */
     .header{display:none !important}
@@ -52,43 +57,218 @@
     .field .row2{display:flex;gap:8px}
     .field .row2 select{flex:1}
 
+    /* ════════════ 환영(Welcome) 화면 ════════════ */
+    body.welcome-active{
+      background:linear-gradient(180deg,#FAFCFF 0%,#EBF3FE 60%,#D5E6FB 100%);
+      overflow:hidden
+    }
+    #screenWelcome{padding:0;display:none;position:relative;z-index:2}
+    #screenWelcome.active{display:block}
+
+    /* ── 오로라 배경 (더 강하게, 화면 전체 흐름) ── */
+    .aurora-bg{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;display:none}
+    body.welcome-active .aurora-bg{display:block}
+    .aurora-blob{position:absolute;border-radius:50%;filter:blur(80px);will-change:transform;mix-blend-mode:screen}
+    .aurora-blob.b1{width:620px;height:620px;left:-200px;top:30%;background:rgba(94,124,226,.65);animation:auroraFloat1 14s ease-in-out infinite}
+    .aurora-blob.b2{width:520px;height:520px;right:-150px;top:55%;background:rgba(138,184,255,.7);animation:auroraFloat2 17s ease-in-out infinite}
+    .aurora-blob.b3{width:480px;height:480px;left:20%;bottom:-180px;background:rgba(168,200,255,.75);animation:auroraFloat3 16s ease-in-out infinite}
+    .aurora-blob.b4{width:380px;height:380px;right:10%;bottom:-100px;background:rgba(214,231,255,.85);animation:auroraFloat4 19s ease-in-out infinite}
+    .aurora-blob.b5{width:340px;height:340px;left:40%;top:10%;background:rgba(177,210,253,.55);animation:auroraFloat5 20s ease-in-out infinite}
+    .aurora-blob.b6{width:280px;height:280px;left:5%;top:5%;background:rgba(200,225,255,.5);animation:auroraFloat6 18s ease-in-out infinite}
+    @keyframes auroraFloat1{
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(80px,-50px) scale(1.2)}
+      66%{transform:translate(-40px,40px) scale(1.05)}
+    }
+    @keyframes auroraFloat2{
+      0%,100%{transform:translate(0,0) scale(1)}
+      50%{transform:translate(-90px,-60px) scale(.85)}
+    }
+    @keyframes auroraFloat3{
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(50px,-80px) scale(1.25)}
+      66%{transform:translate(-30px,-30px) scale(1.05)}
+    }
+    @keyframes auroraFloat4{
+      0%,100%{transform:translate(0,0) scale(1)}
+      50%{transform:translate(-50px,-90px) scale(1.15)}
+    }
+    @keyframes auroraFloat5{
+      0%,100%{transform:translate(0,0) scale(1)}
+      50%{transform:translate(60px,80px) scale(1.1)}
+    }
+    @keyframes auroraFloat6{
+      0%,100%{transform:translate(0,0) scale(1)}
+      50%{transform:translate(70px,40px) scale(.9)}
+    }
+
+    .welcome-wrap{
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:60px 30px 60px;position:relative;z-index:3;text-align:center
+    }
+    .welcome-brand{
+      font-size:15px;font-weight:700;color:#5E7CE2;letter-spacing:-.2px;
+      opacity:0;animation:fadeSlideUp .7s cubic-bezier(.2,.8,.2,1) .15s forwards
+    }
+    .welcome-content{
+      margin-top:90px;display:flex;flex-direction:column;align-items:center;width:100%;max-width:340px
+    }
+    .welcome-greet{
+      font-size:15px;font-weight:500;color:#6E6E73;letter-spacing:-.2px;line-height:1.3;
+      opacity:0;animation:fadeSlideUp .8s cubic-bezier(.2,.8,.2,1) .45s forwards
+    }
+    .welcome-name{
+      font-size:32px;font-weight:700;color:#1D1D1F;letter-spacing:-1px;margin-top:10px;line-height:1.25;
+      opacity:0;animation:fadeSlideUp .8s cubic-bezier(.2,.8,.2,1) .8s forwards
+    }
+    .welcome-wave{display:inline-block;animation:wave 1.6s ease-in-out 1.4s infinite;transform-origin:70% 70%}
+    @keyframes wave{
+      0%,100%{transform:rotate(0)}
+      10%,30%{transform:rotate(-12deg)}
+      20%,40%{transform:rotate(12deg)}
+      50%{transform:rotate(0)}
+    }
+    .welcome-sub{
+      font-size:13px;color:#6E6E73;letter-spacing:-.2px;margin-top:18px;font-weight:500;line-height:1.5;
+      opacity:0;animation:fadeSlideUp .8s cubic-bezier(.2,.8,.2,1) 1.15s forwards
+    }
+    .welcome-input-wrap{
+      margin-top:30px;width:100%;
+      opacity:0;animation:fadeSlideUp .8s cubic-bezier(.2,.8,.2,1) 1.05s forwards
+    }
+    .welcome-input{
+      width:100%;padding:16px 18px;border:1.5px solid #DBE5F5;border-radius:16px;
+      font-size:14px;background:rgba(255,255,255,.85);outline:none;font-family:inherit;
+      color:#1D1D1F;letter-spacing:-.3px;transition:border-color .2s, box-shadow .2s;
+      backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
+    }
+    .welcome-input::placeholder{color:#B0B8C5}
+    .welcome-input:focus{border-color:#5E7CE2;box-shadow:0 0 0 4px rgba(94,124,226,.10)}
+    .welcome-btn{
+      width:100%;padding:17px;margin-top:14px;border:none;border-radius:16px;
+      background:linear-gradient(135deg,#7B96F0 0%,#5E7CE2 100%);
+      color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;
+      box-shadow:0 4px 18px rgba(94,124,226,.35);
+      transition:transform .2s,box-shadow .2s
+    }
+    .welcome-btn:hover{box-shadow:0 6px 24px rgba(94,124,226,.45)}
+    .welcome-btn:active{transform:scale(.98)}
+    .welcome-hint{
+      margin-top:18px;text-align:center;font-size:11px;color:#7C8898;letter-spacing:-.15px;
+      display:flex;align-items:center;justify-content:center;gap:5px;
+      opacity:0;animation:fadeSlideUp .8s cubic-bezier(.2,.8,.2,1) 1.3s forwards
+    }
+    .welcome-hint svg{width:11px;height:11px;color:#7C8898;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
     /* ════════════ 홈 화면 — 시안과 동일 ════════════ */
     body.home-active{background:#F7F7F5}
     #screenHome{padding:0}
     .home-wrap{padding:70px 26px 0;min-height:100vh;display:flex;flex-direction:column}
 
-    .home-title{margin-bottom:42px}
-    .home-title h1{font-size:20px;font-weight:800;letter-spacing:-.6px;color:#1D1D1F;line-height:1.15}
-    .home-title .sub{font-size:10.5px;color:#6E6E73;letter-spacing:-.2px;margin-top:8px;font-weight:500;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    /* ── 진입 애니메이션 ── */
+    @keyframes fadeSlideUp{
+      from{opacity:0;transform:translateY(16px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @keyframes iconPop{
+      0%{transform:scale(.85);opacity:0}
+      60%{transform:scale(1.06);opacity:1}
+      100%{transform:scale(1);opacity:1}
+    }
+    @keyframes softFloat{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-3px)}
+    }
+    /* 홈에 들어왔을 때 한 번씩 등장 */
+    #screenHome.active .home-title{animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) both}
+    #screenHome.active .home-card:nth-child(1){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .12s both}
+    #screenHome.active .home-card:nth-child(2){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .22s both}
+    #screenHome.active .home-foot{animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .34s both}
+    /* 아이콘 안쪽 그림은 카드 등장 직후 살짝 팝 */
+    #screenHome.active .home-card:nth-child(1) .hc-icon{animation:iconPop .55s cubic-bezier(.2,.8,.2,1) .35s both}
+    #screenHome.active .home-card:nth-child(2) .hc-icon{animation:iconPop .55s cubic-bezier(.2,.8,.2,1) .45s both}
+
+    /* 카드 hover: 들어올림 + 아이콘 확대 + 화살표 우측 nudge */
+    .home-card{transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,outline-color .2s}
+    .hc-icon-wrap,.hc-icon,.hc-arrow{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+    .home-card:hover .hc-icon-wrap{transform:scale(1.05)}
+    .home-card:hover .hc-arrow{transform:translateX(3px)}
+    /* 활성 탭(누르는 순간) */
+    .home-card:active .hc-icon-wrap{transform:scale(.97)}
+
+    /* 아이콘 박스에 미세하게 떠 있는 느낌 (홈 머무를 때만) */
+    #screenHome.active .home-card .hc-icon-wrap{
+      animation:softFloat 4.2s ease-in-out infinite 1s
+    }
+    #screenHome.active .home-card:nth-child(2) .hc-icon-wrap{
+      animation-delay:2.1s
+    }
+
+    /* 상단 (타이틀 + 벨 버튼) */
+    .home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:32px}
+    .home-title{flex:1;min-width:0}
+    .home-title h1{font-size:23px;font-weight:800;letter-spacing:-.7px;color:#1D1D1F;line-height:1.3}
+    .home-title .sub{font-size:11px;color:#6E6E73;letter-spacing:-.2px;margin-top:10px;font-weight:500;line-height:1.5}
+    .bell-btn{
+      width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid #E5E5EA;
+      display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+      color:#1D1D1F;box-shadow:0 1px 3px rgba(0,0,0,.04);padding:0;font-family:inherit;
+      transition:transform .15s,box-shadow .2s
+    }
+    .bell-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .bell-btn:active{transform:scale(.95)}
+    .bell-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
     /* 카드 — 크고 푹신한 박스 */
-    .home-cards{display:flex;flex-direction:column;gap:24px;width:100%}
+    .home-cards{display:flex;flex-direction:column;gap:16px;width:100%}
     .home-card{
-      width:100%;min-height:210px;background:#FFFFFF;border:none;border-radius:28px;
-      padding:28px;cursor:pointer;display:flex;align-items:center;gap:22px;text-align:left;
-      box-shadow:0 2px 6px rgba(0,0,0,.04),0 14px 40px rgba(0,0,0,.07);
+      width:100%;background:#FFFFFF;border:none;border-radius:24px;
+      padding:22px 22px 16px;cursor:pointer;display:flex;flex-direction:column;text-align:left;
+      box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 26px rgba(0,0,0,.06);
       transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s,outline-color .2s;
       position:relative;overflow:hidden;-webkit-appearance:none;font-family:inherit;
       outline:1.5px solid transparent;outline-offset:-1.5px
     }
-    .home-card:hover{box-shadow:0 2px 6px rgba(0,0,0,.05),0 18px 50px rgba(0,0,0,.10)}
-    .home-card:active{transform:scale(.99)}
+    .home-card:hover{box-shadow:0 1px 2px rgba(0,0,0,.04),0 14px 34px rgba(0,0,0,.09)}
+    .home-card:active{transform:scale(.985)}
     .home-card.human:active{outline-color:#5E7CE2}
     .home-card.pet:active{outline-color:#8FC9B5}
-
-    /* 아이콘 원 */
-    .hc-icon-wrap{
-      width:92px;height:92px;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;flex-shrink:0;
-      background:#EFEEF3
+    .card-top{display:flex;align-items:center;gap:18px}
+    .card-divider{display:none}
+    /* 카드 footer — 알약(pill) 뱃지 */
+    .card-footer{display:flex;align-items:center;gap:6px;margin-top:14px;flex-wrap:wrap}
+    .card-pill{
+      display:inline-flex;align-items:center;gap:5px;
+      padding:5px 11px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:-.1px;
+      color:#5E7CE2;background:rgba(94,124,226,.10)
     }
-    .hc-icon{width:50px;height:50px;display:block}
+    .home-card.pet .card-pill.subj-pill{
+      color:#4EA483;background:rgba(110,175,146,.13)
+    }
+    .card-pill.time-pill{color:#6E6E73;background:#F2F2F4}
+    .card-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .card-pill svg{width:11px;height:11px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+    /* 아이콘 원 — 그라데이션 글로우 */
+    .hc-icon-wrap{
+      width:78px;height:78px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+      position:relative
+    }
+    .home-card.human .hc-icon-wrap{
+      background:radial-gradient(circle at 30% 30%, #FFFFFF 0%, #DEE9FF 60%, #C5D8FB 100%);
+      box-shadow:0 4px 18px rgba(94,124,226,.18), inset 0 1px 2px rgba(255,255,255,.8)
+    }
+    .home-card.pet .hc-icon-wrap{
+      background:radial-gradient(circle at 30% 30%, #FFFFFF 0%, #DAF0E5 60%, #BDE2D0 100%);
+      box-shadow:0 4px 18px rgba(143,201,181,.25), inset 0 1px 2px rgba(255,255,255,.8)
+    }
+    .hc-icon{width:44px;height:44px;display:block}
     .home-card.human .hc-icon{color:#5E7CE2}
-    .home-card.pet .hc-icon{color:#5A6470}
+    .home-card.pet .hc-icon{color:#4EA483}
     .hc-icon path,.hc-icon circle,.hc-icon ellipse,.hc-icon line{
       stroke:currentColor;stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round
     }
-    /* 면(fill)을 의도한 경우엔 stroke 끄기 */
     .hc-icon [data-fill]{fill:currentColor;stroke:none}
 
     /* 텍스트 */
@@ -99,16 +279,30 @@
     .hc-arrow{width:9px;height:14px;color:#C7C7CC;flex-shrink:0;margin-left:2px}
     .hc-arrow path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 
-    .home-foot{margin-top:auto;padding-top:50px;padding-bottom:26px}
-    .home-history-row{
-      width:100%;display:flex;align-items:center;justify-content:space-between;
-      background:none;border:none;padding:18px 4px 6px;cursor:pointer;
-      font-family:inherit;font-size:11.5px;color:#1D1D1F;font-weight:600;letter-spacing:-.2px;
-      border-top:1px solid #E5E5EA
+    /* 최근 검사 기록 섹션 */
+    .recent-section{margin-top:24px}
+    .recent-title{font-size:12.5px;font-weight:700;color:#1D1D1F;margin-bottom:10px;letter-spacing:-.3px;padding-left:4px}
+    .recent-empty{
+      background:#fff;border:none;border-radius:20px;padding:18px 18px;width:100%;
+      display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;font-family:inherit;
+      box-shadow:0 1px 2px rgba(0,0,0,.03),0 6px 18px rgba(0,0,0,.05);transition:transform .2s
     }
-    .home-history-row .arr{width:8px;height:13px;color:#C7C7CC}
-    .home-history-row .arr path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-    .home-disclaimer{margin-top:10px;font-size:9.5px;color:#6E6E73;line-height:1.6;letter-spacing:-.1px;text-align:center;opacity:.6}
+    .recent-empty:active{transform:scale(.99)}
+    .recent-icon{
+      width:42px;height:42px;border-radius:14px;background:#EFEEF3;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6E6E73
+    }
+    .recent-icon svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .recent-text{flex:1;min-width:0}
+    .empty-title{font-size:12.5px;font-weight:600;color:#1D1D1F;letter-spacing:-.2px;line-height:1.3}
+    .empty-sub{font-size:10.5px;color:#6E6E73;margin-top:3px;letter-spacing:-.1px}
+
+    /* 하단 면책 (방패 아이콘) */
+    .bottom-disclaimer{
+      margin-top:auto;padding:30px 0 26px;display:flex;align-items:center;justify-content:center;gap:6px;
+      font-size:10px;color:#6E6E73;text-align:center;letter-spacing:-.1px
+    }
+    .bottom-disclaimer svg{width:12px;height:12px;color:#6E6E73;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
     /* ── 반려동물 버튼 (폼 안) ── */
     .pet-row{display:flex;gap:10px;margin-bottom:14px}
@@ -316,83 +510,157 @@
     </div>
   </div>
 
+  <!-- ════════════ 오로라 배경 (Welcome 전용) ════════════ -->
+  <div class="aurora-bg">
+    <div class="aurora-blob b1"></div>
+    <div class="aurora-blob b2"></div>
+    <div class="aurora-blob b3"></div>
+    <div class="aurora-blob b4"></div>
+    <div class="aurora-blob b5"></div>
+    <div class="aurora-blob b6"></div>
+  </div>
+
+  <!-- ════════════ 환영 화면 ════════════ -->
+  <div class="screen active" id="screenWelcome">
+    <div class="welcome-wrap">
+      <div class="welcome-brand">건강어때</div>
+
+      <div class="welcome-content">
+        <!-- 재방문 인사 모드 -->
+        <div id="welcomeReturn" style="display:none">
+          <div class="welcome-greet" id="welcomeGreet">안녕하세요</div>
+          <div class="welcome-name"><span id="welcomeName">고객</span>님 <span class="welcome-wave">👋</span></div>
+          <div class="welcome-sub">오늘도 건강한 하루 보내세요</div>
+        </div>
+
+        <!-- 첫 방문: 이름 입력 모드 -->
+        <div id="welcomeFirst" style="display:none">
+          <div class="welcome-greet">처음 만나서 반가워요</div>
+          <div class="welcome-name">이름을 알려주세요</div>
+          <div class="welcome-sub">앱에서 사용할 이름을 입력해주세요</div>
+          <div class="welcome-input-wrap">
+            <input type="text" class="welcome-input" id="nameInput" placeholder="예: 진영" maxlength="10"
+                   onkeydown="if(event.key==='Enter')saveName()"/>
+            <button class="welcome-btn" onclick="saveName()">시작하기</button>
+            <div class="welcome-hint">
+              <svg viewBox="0 0 24 24"><path d="M7 11 V 8 C 7 5, 9 3, 12 3 C 15 3, 17 5, 17 8 V 11"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
+              입력한 이름은 나중에 변경할 수 있어요
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ════════════ 홈 화면 (Minimal Apple Style) ════════════ -->
-  <div class="screen active" id="screenHome">
+  <div class="screen" id="screenHome">
     <div class="home-wrap">
 
-      <div class="home-title">
-        <h1>오늘의 건강 체크</h1>
-        <div class="sub">사람과 반려동물의 건강 상태를 쉽고 간편하게 확인해보세요</div>
+      <div class="home-top">
+        <div class="home-title">
+          <h1>오늘, 작은 신호를<br>확인해보세요</h1>
+          <div class="sub">사람과 반려동물의 건강 지표를 1분 만에 기록해요</div>
+        </div>
+        <button class="bell-btn" onclick="alert('알림 기능은 준비 중이에요')" aria-label="알림">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 8 C 6 5, 8.5 3, 12 3 C 15.5 3, 18 5, 18 8 V13 L 20 17 H 4 L 6 13 V8 Z"/>
+            <path d="M10 20 C 10 21, 11 22, 12 22 C 13 22, 14 21, 14 20"/>
+          </svg>
+        </button>
       </div>
 
       <div class="home-cards">
 
-        <!-- 1) 사람 (내 건강) — 위 -->
+        <!-- 1) 사람 (내 건강) -->
         <button class="home-card human" onclick="enterHuman()">
-          <div class="hc-icon-wrap">
-            <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-              <circle cx="16" cy="11" r="5"/>
-              <path d="M6 27 C 6 21, 10 17.5, 16 17.5 C 22 17.5, 26 21, 26 27"/>
-            </svg>
+          <div class="card-top">
+            <div class="hc-icon-wrap">
+              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <circle cx="16" cy="11" r="5"/>
+                <path d="M6 27 C 6 21, 10 17.5, 16 17.5 C 22 17.5, 26 21, 26 27"/>
+              </svg>
+            </div>
+            <div class="hc-content">
+              <h3>내 건강 체크</h3>
+              <p>소변검사 키트로<br>주요 건강 지표 확인</p>
+            </div>
+            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
           </div>
-          <div class="hc-content">
-            <h3>내 건강 체크</h3>
-            <p>소변검사 키트로 주요 건강 지표를<br>간편하게 확인해요</p>
+          <div class="card-footer">
+            <span class="card-pill subj-pill"><span class="dot"></span><span id="humanLastInfo">마지막 기록 없음</span></span>
+            <span class="card-pill time-pill">
+              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
+              약 1분
+            </span>
           </div>
-          <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
         </button>
 
-        <!-- 2) 반려동물 — 아래 (강아지 얼굴 + 고양이 얼굴) -->
+        <!-- 2) 반려동물 -->
         <button class="home-card pet" onclick="enterPet()">
-          <div class="hc-icon-wrap">
-            <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-              <!-- ── 강아지 얼굴 (왼쪽) ── -->
-              <!-- 처진 귀 (양옆) -->
-              <path d="M7.2 12 C 6 13.5, 6 15.5, 7.5 16.2"/>
-              <path d="M13.8 12 C 15 13.5, 15 15.5, 13.5 16.2"/>
-              <!-- 얼굴 -->
-              <circle cx="10.5" cy="16" r="3.5"/>
-              <!-- 눈 -->
-              <circle cx="9.3" cy="15.5" r=".35" data-fill/>
-              <circle cx="11.7" cy="15.5" r=".35" data-fill/>
-              <!-- 코 -->
-              <ellipse cx="10.5" cy="17" rx=".45" ry=".38" data-fill/>
-              <!-- 입 -->
-              <path d="M9.9 17.7 C 10.2 18.2, 10.8 18.2, 11.1 17.7"/>
-
-              <!-- ── 고양이 얼굴 (오른쪽) ── -->
-              <!-- 뾰족한 귀 (양옆 삼각형) -->
-              <path d="M18 13.4 L 18.6 10.4 L 20.2 12.7"/>
-              <path d="M23.4 13.4 L 22.8 10.4 L 21.2 12.7"/>
-              <!-- 얼굴 -->
-              <circle cx="20.7" cy="16" r="3.5"/>
-              <!-- 눈 -->
-              <circle cx="19.5" cy="15.5" r=".35" data-fill/>
-              <circle cx="21.9" cy="15.5" r=".35" data-fill/>
-              <!-- 코 (작은 삼각형) -->
-              <path d="M20.7 16.7 L 21 17 L 20.4 17 Z" data-fill/>
-              <!-- 입 -->
-              <path d="M20.1 17.5 C 20.35 18, 20.7 18, 20.7 17.7 C 20.7 18, 21.05 18, 21.3 17.5"/>
-              <!-- 수염 -->
-              <line x1="17.4" y1="16.4" x2="18.6" y2="16.4"/>
-              <line x1="22.8" y1="16.4" x2="24" y2="16.4"/>
-            </svg>
+          <div class="card-top">
+            <div class="hc-icon-wrap">
+              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <!-- 강아지 -->
+                <path d="M7.2 12 C 6 13.5, 6 15.5, 7.5 16.2"/>
+                <path d="M13.8 12 C 15 13.5, 15 15.5, 13.5 16.2"/>
+                <circle cx="10.5" cy="16" r="3.5"/>
+                <circle cx="9.3" cy="15.5" r=".35" data-fill/>
+                <circle cx="11.7" cy="15.5" r=".35" data-fill/>
+                <ellipse cx="10.5" cy="17" rx=".45" ry=".38" data-fill/>
+                <path d="M9.9 17.7 C 10.2 18.2, 10.8 18.2, 11.1 17.7"/>
+                <!-- 고양이 -->
+                <path d="M18 13.4 L 18.6 10.4 L 20.2 12.7"/>
+                <path d="M23.4 13.4 L 22.8 10.4 L 21.2 12.7"/>
+                <circle cx="20.7" cy="16" r="3.5"/>
+                <circle cx="19.5" cy="15.5" r=".35" data-fill/>
+                <circle cx="21.9" cy="15.5" r=".35" data-fill/>
+                <path d="M20.7 16.7 L 21 17 L 20.4 17 Z" data-fill/>
+                <path d="M20.1 17.5 C 20.35 18, 20.7 18, 20.7 17.7 C 20.7 18, 21.05 18, 21.3 17.5"/>
+                <line x1="17.4" y1="16.4" x2="18.6" y2="16.4"/>
+                <line x1="22.8" y1="16.4" x2="24" y2="16.4"/>
+              </svg>
+            </div>
+            <div class="hc-content">
+              <h3>반려동물 건강 체크</h3>
+              <p>우리 아이의 건강 신호를<br>집에서 확인</p>
+            </div>
+            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
           </div>
-          <div class="hc-content">
-            <h3>반려동물 건강 체크</h3>
-            <p>우리 아이의 건강 신호를 집에서 간편하게 확인해요</p>
+          <div class="card-footer">
+            <span class="card-pill subj-pill"><span class="dot"></span><span id="petLastInfo">최근 기록 없음</span></span>
+            <span class="card-pill time-pill">
+              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
+              약 1분
+            </span>
           </div>
-          <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
         </button>
 
       </div>
 
-      <div class="home-foot">
-        <button class="home-history-row" onclick="goHistory()">
-          <span>최근 검사 기록 보기</span>
-          <svg class="arr" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+      <!-- 최근 검사 기록 -->
+      <div class="recent-section">
+        <div class="recent-title">최근 검사 기록</div>
+        <button class="recent-empty" id="recentEmpty" onclick="goHistory()">
+          <div class="recent-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 4 H 15 V 7 H 9 V 4 Z"/>
+              <path d="M7 5 H 5 V 21 H 19 V 5 H 17"/>
+              <path d="M8 11 H 16 M 8 14 H 13 M 8 17 H 14"/>
+            </svg>
+          </div>
+          <div class="recent-text">
+            <div class="empty-title" id="recentTitle">아직 저장된 검사 기록이 없어요</div>
+            <div class="empty-sub" id="recentSub">첫 건강 체크를 시작해보세요</div>
+          </div>
         </button>
-        <div class="home-disclaimer">본 결과는 AI 참고용 정보이며,<br>의학적 진단은 의료 전문가의 진료를 받으세요.</div>
+      </div>
+
+      <!-- 하단 면책 -->
+      <div class="bottom-disclaimer">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 3 L 19 5.5 V 12 C 19 16, 16 19.5, 12 21 C 8 19.5, 5 16, 5 12 V 5.5 L 12 3 Z"/>
+        </svg>
+        <span>검사 결과는 확진이 아닌 건강관리 참고용입니다.</span>
       </div>
 
     </div>
@@ -660,7 +928,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -862,9 +1130,12 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   // 홈 버튼은 홈 화면 외에서 보임
-  document.getElementById('btnBackHome').style.display = (id === 'screenHome') ? 'none' : 'inline-block';
-  // 홈 화면에서는 헤더 숨김 (body 클래스로 제어)
+  document.getElementById('btnBackHome').style.display = (id === 'screenHome' || id === 'screenWelcome') ? 'none' : 'inline-block';
+  // body 클래스 (배경색 제어)
   document.body.classList.toggle('home-active', id === 'screenHome');
+  document.body.classList.toggle('welcome-active', id === 'screenWelcome');
+  // 홈 진입 시 카드 정보·최근 기록 갱신
+  if (id === 'screenHome') updateHomeStats();
   // 헤더 부제목 (홈 외 화면)
   const headerSub = document.getElementById('headerSub');
   if (headerSub) {
@@ -873,6 +1144,95 @@ function showScreen(id) {
     else                              headerSub.textContent = 'AI 소변검사 키트 분석';
   }
   window.scrollTo(0, 0);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 홈 카드 footer + 최근 검사 기록 영역 갱신
+// ════════════════════════════════════════════════════════════════
+function timeAgo(iso) {
+  const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (sec < 60)        return '방금 전';
+  if (sec < 3600)      return Math.floor(sec/60) + '분 전';
+  if (sec < 86400)     return Math.floor(sec/3600) + '시간 전';
+  if (sec < 86400*7)   return Math.floor(sec/86400) + '일 전';
+  if (sec < 86400*30)  return Math.floor(sec/(86400*7)) + '주 전';
+  return Math.floor(sec/(86400*30)) + '개월 전';
+}
+function updateHomeStats() {
+  try {
+    const all = [
+      ...JSON.parse(localStorage.getItem('urineHistoryV2')||'[]'),
+      ...JSON.parse(localStorage.getItem('petUrineHistory')||'[]').map(h=>({...h,subject:'pet'}))
+    ].sort((a,b)=> new Date(b.date)-new Date(a.date));
+
+    const lastHuman = all.find(h=>h.subject==='human');
+    const lastPet   = all.find(h=>h.subject==='pet'||!h.subject);
+
+    document.getElementById('humanLastInfo').textContent =
+      lastHuman ? `마지막 기록 ${timeAgo(lastHuman.date)}` : '마지막 기록 없음';
+    document.getElementById('petLastInfo').textContent =
+      lastPet ? `최근 기록 ${timeAgo(lastPet.date)}` : '최근 기록 없음';
+
+    // 최근 검사 기록 카드
+    const recent = all[0];
+    if (recent) {
+      const subj = recent.subject === 'human' ? '🧑 ' : (recent.petType==='dog'?'🐶 ':recent.petType==='cat'?'🐱 ':'🐾 ');
+      document.getElementById('recentTitle').textContent = subj + (recent.name || '이름 없음') + ' · ' + timeAgo(recent.date);
+      const STAT = { normal:'정상', warning:'주의', danger:'이상' };
+      document.getElementById('recentSub').textContent = (STAT[recent.overallStatus] || '결과 없음') + ' · ' + (recent.summary || '결과 보기').slice(0,28);
+    } else {
+      document.getElementById('recentTitle').textContent = '아직 저장된 검사 기록이 없어요';
+      document.getElementById('recentSub').textContent = '첫 건강 체크를 시작해보세요';
+    }
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════════════════
+// ★ 환영 화면 로직
+// ════════════════════════════════════════════════════════════════
+function timeGreeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12)  return '좋은 아침이에요';
+  if (h >= 12 && h < 18) return '좋은 오후예요';
+  if (h >= 18 && h < 22) return '좋은 저녁이에요';
+  return '안녕하세요';
+}
+
+function initWelcome() {
+  const name = localStorage.getItem('userName');
+  if (!name) {
+    // 첫 방문 — 이름 입력 모드
+    document.getElementById('welcomeFirst').style.display = 'block';
+    document.getElementById('welcomeReturn').style.display = 'none';
+    setTimeout(() => {
+      document.getElementById('nameInput').focus();
+    }, 800);
+  } else {
+    // 재방문 — 인사 모드, 2.5초 후 자동 홈으로
+    document.getElementById('welcomeReturn').style.display = 'block';
+    document.getElementById('welcomeFirst').style.display = 'none';
+    document.getElementById('welcomeGreet').textContent = timeGreeting();
+    document.getElementById('welcomeName').textContent = name;
+    setTimeout(() => goHome(), 2500);
+  }
+}
+
+function saveName() {
+  const inp = document.getElementById('nameInput');
+  const v = (inp.value || '').trim();
+  if (!v) {
+    inp.focus();
+    return;
+  }
+  localStorage.setItem('userName', v);
+  // 인사 모드로 부드럽게 전환
+  document.getElementById('welcomeFirst').style.display = 'none';
+  document.getElementById('welcomeReturn').style.display = 'block';
+  document.getElementById('welcomeGreet').textContent = '반가워요';
+  document.getElementById('welcomeName').textContent = v;
+  // 애니메이션 재실행을 위해 reflow
+  void document.getElementById('welcomeReturn').offsetWidth;
+  setTimeout(() => goHome(), 2200);
 }
 
 function goHome() {
@@ -1438,6 +1798,12 @@ function resetAll() {
   document.getElementById('btnAnalyze').textContent = '🔬 AI 분석 시작';
   goHome();
 }
+
+// ════════════════════════════════════════════════════════════════
+// 페이지 첫 로드 시 환영 화면 초기화
+// ════════════════════════════════════════════════════════════════
+document.body.classList.add('welcome-active');
+initWelcome();
 </script>
 </body>
 </html>
