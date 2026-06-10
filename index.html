@@ -567,6 +567,26 @@
     .feature-card.mbti .fc-title{color:#7c3aed}
     .feature-card.idcard .fc-title{color:#db2777}
     .feature-section-label{font-size:13px;font-weight:700;color:#334155;margin-bottom:8px}
+    /* ── 설정 모달 ── */
+    .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px;animation:cmhFadeIn .2s ease-out}
+    .settings-overlay.show{display:flex}
+    @keyframes settingsSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .settings-modal{background:#fff;border-radius:20px;padding:24px 22px 18px;max-width:340px;width:100%;animation:settingsSlide .3s cubic-bezier(.2,.8,.2,1);font-family:inherit;position:relative}
+    .settings-modal h3{font-size:17px;font-weight:800;color:#1D1D1F;margin-bottom:6px;letter-spacing:-.4px}
+    .settings-modal .settings-sub{font-size:12px;color:#6E6E73;margin-bottom:18px;letter-spacing:-.1px}
+    .settings-modal .settings-current{display:flex;align-items:center;gap:10px;background:#F7F7F5;border-radius:12px;padding:12px 14px;margin-bottom:12px}
+    .settings-modal .settings-current-label{font-size:11px;color:#6E6E73;font-weight:600}
+    .settings-modal .settings-current-value{font-size:14px;color:#1D1D1F;font-weight:700;letter-spacing:-.3px}
+    .settings-modal .settings-input{width:100%;padding:13px 15px;border:1.5px solid #DBE5F5;border-radius:12px;font-size:14px;outline:none;font-family:inherit;letter-spacing:-.2px;margin-bottom:14px;background:#fff;color:#1D1D1F}
+    .settings-modal .settings-input:focus{border-color:#5E7CE2;box-shadow:0 0 0 4px rgba(94,124,226,.10)}
+    .settings-modal .settings-btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;transition:transform .15s,box-shadow .2s}
+    .settings-modal .settings-btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 3px 12px rgba(99,102,241,.35);margin-bottom:8px}
+    .settings-modal .settings-btn-primary:active{transform:scale(.985)}
+    .settings-modal .settings-btn-secondary{background:#fff;color:#6E6E73;border:1.5px solid #E5E5EA;margin-bottom:8px}
+    .settings-modal .settings-btn-secondary:active{background:#F7F7F5}
+    .settings-modal .settings-btn-danger{background:transparent;color:#FF3B30;font-size:13px;padding:10px}
+    .settings-modal .settings-divider{height:1px;background:#E5E5EA;margin:12px 0}
+    .settings-modal .settings-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border:none;background:rgba(0,0,0,.06);border-radius:50%;cursor:pointer;font-size:15px;color:#444;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
   </style>
 </head>
 <body>
@@ -650,7 +670,7 @@
           <h1>오늘, 작은 신호를<br>확인해보세요</h1>
           <div class="sub">사람과 반려동물의 건강 지표를 1분 만에 기록해요</div>
         </div>
-        <button class="bell-btn" onclick="alert('알림 기능은 준비 중이에요')" aria-label="알림">
+        <button class="bell-btn" onclick="openSettings()" aria-label="설정">
           <svg viewBox="0 0 24 24">
             <path d="M6 8 C 6 5, 8.5 3, 12 3 C 15.5 3, 18 5, 18 8 V13 L 20 17 H 4 L 6 13 V8 Z"/>
             <path d="M10 20 C 10 21, 11 22, 12 22 C 13 22, 14 21, 14 20"/>
@@ -1177,6 +1197,26 @@
   </div>
   <button onclick="document.getElementById('iosBanner').style.display='none'"
     style="background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:0">×</button>
+</div>
+
+<!-- 설정 모달 -->
+<div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-modal">
+    <button class="settings-close" onclick="closeSettings()" aria-label="닫기">✕</button>
+    <h3>설정</h3>
+    <div class="settings-sub">이름 변경 및 데이터 관리</div>
+    <div class="settings-current">
+      <div>
+        <div class="settings-current-label">현재 이름</div>
+        <div class="settings-current-value" id="settingsCurrentName">-</div>
+      </div>
+    </div>
+    <input type="text" class="settings-input" id="settingsNameInput" placeholder="새 이름 입력 (예: 진영)" maxlength="10" onkeydown="if(event.key==='Enter')saveNewName()"/>
+    <button class="settings-btn settings-btn-primary" onclick="saveNewName()">이름 변경</button>
+    <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">취소</button>
+    <div class="settings-divider"></div>
+    <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
+  </div>
 </div>
 
 <input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)"/>
@@ -2046,6 +2086,52 @@ function resetAll() {
   document.getElementById('btnAnalyze').disabled = false;
   document.getElementById('btnAnalyze').textContent = '🔬 AI 분석 시작';
   goHome();
+}
+
+// ════════════════════════════════════════════════════════════════
+// ★ 설정 모달 (이름 변경 + 데이터 초기화)
+// ════════════════════════════════════════════════════════════════
+function openSettings() {
+  const currentName = localStorage.getItem('userName') || '아직 설정 안됨';
+  document.getElementById('settingsCurrentName').textContent = currentName;
+  document.getElementById('settingsNameInput').value = '';
+  document.getElementById('settingsOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('settingsNameInput').focus(), 100);
+}
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('show');
+}
+function saveNewName() {
+  const inp = document.getElementById('settingsNameInput');
+  const v = (inp.value || '').trim();
+  if (!v) {
+    inp.focus();
+    inp.placeholder = '새 이름을 입력해주세요!';
+    return;
+  }
+  localStorage.setItem('userName', v);
+  closeSettings();
+  // 환영 화면으로 돌아가서 새 이름으로 인사
+  document.getElementById('welcomeReturn').style.display = 'block';
+  document.getElementById('welcomeFirst').style.display = 'none';
+  document.getElementById('welcomeGreet').textContent = '반가워요';
+  document.getElementById('welcomeName').textContent = v;
+  showScreen('screenWelcome');
+  setTimeout(() => goHome(), 1800);
+}
+function resetAllData() {
+  if (!confirm('정말로 모든 기록과 이름을 삭제할까요?\n\n이 작업은 되돌릴 수 없어요.')) return;
+  // 검사 기록 + 이름 + 로그인 정보 모두 삭제
+  localStorage.removeItem('userName');
+  localStorage.removeItem('kakaoId');
+  localStorage.removeItem('loginProvider');
+  localStorage.removeItem('userProfileImg');
+  localStorage.removeItem('userEmail');
+  localStorage.removeItem('urineHistoryV2');
+  localStorage.removeItem('petUrineHistory');
+  closeSettings();
+  alert('모든 데이터가 삭제되었어요. 처음 화면으로 돌아갑니다.');
+  location.reload();
 }
 
 // ════════════════════════════════════════════════════════════════
