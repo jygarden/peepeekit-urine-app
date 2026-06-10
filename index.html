@@ -1913,22 +1913,88 @@ async function downloadResult() {
 // ══════════════════════════════════════
 // 로컬 히스토리
 // ══════════════════════════════════════
-function saveToHistory({ result, recordData, subject }) {
+// 이미지 압축 (히스토리 저장 용량 절약)
+function compressImageForHistory(dataUrl, maxWidth=700, quality=0.72) {
+  return new Promise((resolve) => {
+    if (!dataUrl) return resolve(null);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(1, maxWidth / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      try {
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } catch(e) { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+async function saveToHistory({ result, recordData, subject }) {
   try {
     const key = 'urineHistoryV2';
     const history = JSON.parse(localStorage.getItem(key)||'[]');
+    // 이미지 압축
+    const compressedImage = await compressImageForHistory(imageSrc);
     history.unshift({
       id: Date.now(),
       date: new Date().toISOString(),
       subject: subject || 'pet',
+      // 전체 결과 + 입력 정보 저장 (재조회용)
+      fullResult: result,
+      fullRecord: recordData,
+      image: compressedImage,
+      // 요약 (목록 표시용)
       petType: recordData.petType,
       name: subject === 'human' ? recordData.name : recordData.petName,
       region: recordData.region,
       overallStatus: result.overallStatus,
       summary: result.summary,
     });
-    localStorage.setItem(key, JSON.stringify(history.slice(0, 30)));
-  } catch(e) {}
+    // 최근 12개만 보관 (localStorage 용량 절약)
+    let trimmed = history.slice(0, 12);
+    // 용량 초과 시 단계적으로 줄임
+    while (trimmed.length > 1) {
+      try {
+        localStorage.setItem(key, JSON.stringify(trimmed));
+        break;
+      } catch(quotaErr) {
+        trimmed = trimmed.slice(0, trimmed.length - 1);
+      }
+    }
+  } catch(e) { console.error('히스토리 저장 실패:', e); }
+}
+
+// 히스토리 항목 클릭 → 처음 봤던 결과 화면 그대로 다시 보여주기
+function viewHistoryItem(id) {
+  try {
+    const history = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
+    const item = history.find(h => String(h.id) === String(id));
+    if (!item || !item.fullResult) {
+      alert('이 기록은 자세한 정보가 저장되지 않은 옛날 기록이에요. 새 검사부터는 상세 결과가 저장돼요.');
+      return;
+    }
+    // 이미지 복원
+    imageSrc = item.image || null;
+    currentResult = item.fullResult;
+    subjectMode = item.subject || 'pet';
+    const rec = item.fullRecord || {};
+    const saju = getSajuHealth(rec.birthYear, rec.birthMonth, item.subject);
+    renderResult(item.fullResult, {
+      subject: item.subject,
+      petName: rec.petName, petBreed: rec.breed, petType: rec.petType,
+      humanName: rec.name,
+      gender: rec.gender,
+      region: rec.region,
+      env: rec.environment, lifestyle: rec.lifestyle,
+      birthYear: rec.birthYear, birthMonth: rec.birthMonth,
+      saju
+    });
+    showScreen('screenResult');
+  } catch(e) { alert('기록을 불러올 수 없습니다.'); }
 }
 
 function renderHistory() {
@@ -1953,10 +2019,12 @@ function renderHistory() {
         : h.petType === 'dog' ? '🐶'
         : h.petType === 'cat' ? '🐱' : '🐾';
       const status = h.overallStatus||'normal';
+      const hasFullResult = h.fullResult ? '' : 'opacity:.7';
+      const clickAttr = h.fullResult ? `onclick="viewHistoryItem('${h.id}')"` : '';
       return `
-        <div class="history-item">
+        <div class="history-item" ${clickAttr} style="${hasFullResult}">
           <div class="history-header">
-            <div class="history-pet">${subjectIcon} ${h.name||'이름 없음'}</div>
+            <div class="history-pet">${subjectIcon} ${h.name||'이름 없음'}${h.fullResult ? ' <span style="font-size:11px;color:#6366f1;font-weight:600">› 자세히</span>' : ''}</div>
             <div class="history-date">${dateStr}</div>
           </div>
           <div class="history-info">${h.region||''} ${h.region?'·':''} ${h.summary||''}</div>
