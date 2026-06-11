@@ -640,7 +640,9 @@
     .settings-modal .settings-btn-primary:active{transform:scale(.985)}
     .settings-modal .settings-btn-secondary{background:#fff;color:#6E6E73;border:1.5px solid #E5E5EA;margin-bottom:8px}
     .settings-modal .settings-btn-secondary:active{background:#F7F7F5}
-    .settings-modal .settings-btn-danger{background:transparent;color:#FF3B30;font-size:13px;padding:10px}
+    .settings-modal .settings-btn-danger{background:#fff;color:#FF3B30;font-size:13px;padding:13px;border:1.5px solid #FFD4D2;border-radius:12px;font-weight:700;box-shadow:0 1px 3px rgba(255,59,48,.08);transition:background .15s}
+    .settings-modal .settings-btn-danger:hover{background:#FFF5F4}
+    .settings-modal .settings-btn-danger:active{transform:scale(.985)}
     .settings-modal .settings-divider{height:1px;background:#E5E5EA;margin:12px 0}
     .settings-modal .settings-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border:none;background:rgba(0,0,0,.06);border-radius:50%;cursor:pointer;font-size:15px;color:#444;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
     /* ── 프로필 선택 화면 ── */
@@ -702,6 +704,38 @@
     .reward-card:disabled{opacity:.55;cursor:not-allowed}
     .reward-icon-wrap{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;background:linear-gradient(135deg,#F5F3FF,#EDE9FE)}
     .reward-card.physical .reward-icon-wrap{background:linear-gradient(135deg,#FEF3C7,#FCD34D)}
+    /* 검사 기록 카드 점수 표시 */
+    .history-score{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;margin-left:6px}
+    /* 다음 검사 리마인더 배너 */
+    .reminder-banner{background:linear-gradient(135deg,#fff7ed,#fed7aa);border:1.5px solid #fdba74;border-radius:16px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+    .reminder-banner .ic{font-size:24px;flex-shrink:0}
+    .reminder-banner .txt{flex:1;font-size:12px;color:#9a3412;line-height:1.5}
+    .reminder-banner .txt strong{font-weight:800;color:#7c2d12}
+    .reminder-banner .close-btn{background:rgba(0,0,0,.08);border:none;border-radius:50%;width:22px;height:22px;color:#7c2d12;font-size:12px;cursor:pointer;line-height:1}
+    /* 친절한 에러 박스 */
+    .friendly-error{background:#fff1f2;border:1.5px solid #fecdd3;border-radius:14px;padding:16px;margin-bottom:14px;display:none}
+    .friendly-error.show{display:block}
+    .friendly-error .err-title{font-size:14px;font-weight:800;color:#be123c;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .friendly-error .err-body{font-size:12px;color:#9f1239;line-height:1.6;margin-bottom:10px}
+    .friendly-error .err-action{display:flex;gap:8px;flex-wrap:wrap}
+    .friendly-error .err-btn{flex:1;padding:9px;background:#fff;border:1.5px solid #fecdd3;border-radius:10px;color:#9f1239;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-width:80px}
+    .friendly-error .err-btn.primary{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border-color:transparent}
+    /* 촬영 팁 모달 */
+    .tip-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px}
+    .tip-overlay.show{display:flex}
+    .tip-modal{background:#fff;border-radius:22px;padding:26px 22px 18px;max-width:340px;width:100%;animation:settingsSlide .35s cubic-bezier(.2,.8,.2,1)}
+    .tip-modal h3{font-size:17px;font-weight:800;color:#1D1D1F;margin-bottom:14px;text-align:center;letter-spacing:-.3px}
+    .tip-modal .tip-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9}
+    .tip-modal .tip-item:last-child{border-bottom:none}
+    .tip-modal .tip-emoji{font-size:24px;flex-shrink:0}
+    .tip-modal .tip-text{flex:1;font-size:12.5px;color:#475569;line-height:1.6}
+    .tip-modal .tip-text strong{color:#1D1D1F;font-weight:700}
+    .tip-modal .tip-confirm{width:100%;padding:13px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px}
+    /* SNS 공유 버튼 */
+    .share-row{display:flex;gap:10px;margin:14px 0}
+    .share-btn{flex:1;padding:13px;border:none;border-radius:12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:-.2px}
+    .share-btn.kakao{background:#FEE500;color:#1A1A1A;box-shadow:0 3px 10px rgba(254,229,0,.4)}
+    .share-btn.image{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;box-shadow:0 3px 10px rgba(14,165,233,.35)}
     .reward-info{flex:1;min-width:0}
     .reward-name{font-size:14px;font-weight:700;color:#1D1D1F;letter-spacing:-.3px}
     .reward-desc{font-size:11px;color:#6E6E73;margin-top:2px;line-height:1.5}
@@ -811,6 +845,15 @@
   <div class="screen" id="screenHome">
     <div class="home-wrap">
 
+      <!-- 다음 검사 리마인더 배너 -->
+      <div class="reminder-banner" id="reminderBanner" style="display:none">
+        <div class="ic">⏰</div>
+        <div class="txt">
+          <strong>마지막 검사 후 <span id="reminderDays">30</span>일 지났어요!</strong><br>
+          정기적인 검사로 건강 변화를 체크하세요.
+        </div>
+        <button class="close-btn" onclick="dismissReminder()">✕</button>
+      </div>
       <div class="points-badge-wrap">
         <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
           <span class="gem">💎</span> <span id="homePointsNum">0</span>P
@@ -1311,6 +1354,14 @@
     </div>
 
     <div class="error-box" id="errorBox"></div>
+    <div class="friendly-error" id="friendlyError">
+      <div class="err-title" id="friendlyErrorTitle">😢 분석을 완료하지 못했어요</div>
+      <div class="err-body" id="friendlyErrorBody"></div>
+      <div class="err-action">
+        <button class="err-btn primary" onclick="showScreen('screenCapture')">📷 다시 촬영</button>
+        <button class="err-btn" onclick="hideFriendlyError()">닫기</button>
+      </div>
+    </div>
 
     <button class="btn-primary" id="btnAnalyze" onclick="analyze()">🔬 AI 분석 시작</button>
 
@@ -1427,6 +1478,18 @@
     </div>
 
     <div style="margin-top:14px">
+      <!-- SNS 공유 -->
+      <div class="share-row">
+        <button class="share-btn kakao" onclick="shareKakao()">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path fill="#1A1A1A" d="M9 1C4.58 1 1 3.84 1 7.34c0 2.23 1.45 4.19 3.65 5.31l-.92 3.39c-.08.3.25.54.51.36l4.04-2.69c.24.02.48.04.72.04 4.42 0 8-2.84 8-6.41C17 3.84 13.42 1 9 1z"/>
+          </svg>
+          카카오톡 공유
+        </button>
+        <button class="share-btn image" onclick="downloadResult()">
+          📸 인스타용 이미지
+        </button>
+      </div>
       <!-- 다음 검사용 키트 CTA -->
       <a class="kit-cta" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
         <div class="cta-emoji">🛒</div>
@@ -1501,6 +1564,30 @@
   </div>
   <button onclick="document.getElementById('iosBanner').style.display='none'"
     style="background:none;border:none;color:#64748b;font-size:22px;cursor:pointer;padding:0">×</button>
+</div>
+
+<!-- 촬영 팁 모달 (첫 검사 시 자동 표시) -->
+<div class="tip-overlay" id="tipOverlay" onclick="if(event.target===this)closeTip()">
+  <div class="tip-modal">
+    <h3>📸 사진 촬영 꿀팁</h3>
+    <div class="tip-item">
+      <span class="tip-emoji">⏱</span>
+      <div class="tip-text"><strong>60~120초</strong> 사이에 촬영하세요. 너무 빠르면 색이 안 변하고, 너무 늦으면 변색돼요.</div>
+    </div>
+    <div class="tip-item">
+      <span class="tip-emoji">💡</span>
+      <div class="tip-text"><strong>형광등 아래 평평한 곳</strong>에서. 직사광선 ×</div>
+    </div>
+    <div class="tip-item">
+      <span class="tip-emoji">🎯</span>
+      <div class="tip-text"><strong>키트 전체가 화면에 꽉 차게.</strong> 그림자·반사광 없이</div>
+    </div>
+    <div class="tip-item">
+      <span class="tip-emoji">⚠️</span>
+      <div class="tip-text">빛 환경에 따라 결과가 다를 수 있어요. 참고용으로 활용하세요.</div>
+    </div>
+    <button class="tip-confirm" onclick="closeTip()">확인했어요!</button>
+  </div>
 </div>
 
 <!-- 설정 모달 -->
@@ -1587,8 +1674,10 @@ function showScreen(id) {
   // body 클래스 (배경색 제어)
   document.body.classList.toggle('home-active', id === 'screenHome');
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
-  // 홈 진입 시 카드 정보·최근 기록 갱신
-  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); }
+  // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크
+  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); }
+  // 촬영 화면 첫 진입 시 팁 표시
+  if (id === 'screenCapture') maybeShowCaptureTip();
   // 헤더 부제목 (홈 외 화면)
   const headerSub = document.getElementById('headerSub');
   if (headerSub) {
@@ -2593,7 +2682,24 @@ async function analyze() {
     showScreen('screenResult');
 
   } catch (err) {
-    showError(err.message || '분석 중 오류가 발생했습니다.');
+    // 친절한 에러 메시지로 변환
+    const msg = (err.message || '').toLowerCase();
+    let title = '😢 분석을 완료하지 못했어요';
+    let body = err.message || '분석 중 오류가 발생했습니다.';
+    if (msg.includes('네트워크') || msg.includes('network') || msg.includes('failed to fetch')) {
+      title = '📡 인터넷 연결을 확인해주세요';
+      body = 'WiFi나 데이터가 연결됐는지 확인 후 다시 시도해주세요.';
+    } else if (msg.includes('이미지') || msg.includes('image') || msg.includes('키트')) {
+      title = '📷 키트를 다시 촬영해주세요';
+      body = '이미지가 흐릿하거나 키트가 잘 안 보여요. 형광등 아래 평평한 곳에서 다시 찍어주세요.';
+    } else if (msg.includes('prepayment') || msg.includes('credits') || msg.includes('quota')) {
+      title = '⏳ 잠시 후 다시 시도해주세요';
+      body = '서버가 일시적으로 분주해요. 1~2분 후 다시 시도해주세요.';
+    } else if (msg.includes('api') || msg.includes('서버')) {
+      title = '🔧 일시적인 오류예요';
+      body = '잠시 후 다시 시도해주세요. 계속 안 되면 카카오톡 채널로 문의해주세요.';
+    }
+    showFriendlyError(title, body);
   } finally {
     btn.disabled = false;
     btn.textContent = '🔬 AI 분석 시작';
@@ -2955,6 +3061,100 @@ function renderResult(r, info) {
 // 결과 다운로드
 // ══════════════════════════════════════
 // ══════════════════════════════════════
+// 🎁 작은 개선 기능들 (촬영 팁, 친절한 에러, 리마인더, SNS 공유)
+// ══════════════════════════════════════
+
+// 첫 검사 시 촬영 팁 자동 표시
+function maybeShowCaptureTip() {
+  if (!localStorage.getItem('captureTipShown')) {
+    setTimeout(() => {
+      document.getElementById('tipOverlay').classList.add('show');
+    }, 400);
+    localStorage.setItem('captureTipShown', '1');
+  }
+}
+function closeTip() {
+  document.getElementById('tipOverlay').classList.remove('show');
+}
+
+// 친절한 에러 표시
+function showFriendlyError(title, body) {
+  document.getElementById('friendlyErrorTitle').textContent = title || '😢 분석을 완료하지 못했어요';
+  document.getElementById('friendlyErrorBody').textContent = body || '다시 시도해주세요.';
+  document.getElementById('friendlyError').classList.add('show');
+  document.getElementById('errorBox').classList.remove('show');
+}
+function hideFriendlyError() {
+  document.getElementById('friendlyError').classList.remove('show');
+}
+
+// 다음 검사 리마인더 (마지막 검사로부터 30일 지났는지)
+function checkReminder() {
+  try {
+    const history = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
+    if (history.length === 0) {
+      document.getElementById('reminderBanner').style.display = 'none';
+      return;
+    }
+    const last = history[0];
+    const dismissedUntil = parseInt(localStorage.getItem('reminderDismissedUntil')||'0', 10);
+    if (Date.now() < dismissedUntil) {
+      document.getElementById('reminderBanner').style.display = 'none';
+      return;
+    }
+    const daysSince = Math.floor((Date.now() - new Date(last.date).getTime()) / (1000*60*60*24));
+    if (daysSince >= 30) {
+      document.getElementById('reminderDays').textContent = daysSince;
+      document.getElementById('reminderBanner').style.display = 'flex';
+    } else {
+      document.getElementById('reminderBanner').style.display = 'none';
+    }
+  } catch(e) {}
+}
+function dismissReminder() {
+  // 7일 동안 안 보이게
+  localStorage.setItem('reminderDismissedUntil', String(Date.now() + 7*24*60*60*1000));
+  document.getElementById('reminderBanner').style.display = 'none';
+}
+
+// 카카오톡 공유
+function shareKakao() {
+  if (!window.Kakao || !Kakao.isInitialized()) {
+    alert('카카오 SDK 로드 실패. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+  if (!currentResult) return;
+  const subject = subjectMode === 'human'
+    ? (document.getElementById('humanName').value.trim() || '내')
+    : (document.getElementById('petName').value.trim() || '반려동물');
+  const score = calculateHealthScore(currentResult.testItems) || 0;
+  const STAT = { normal:'정상', warning:'주의', danger:'이상' };
+  try {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: `${subject}의 건강어때 검사 결과 🩺`,
+        description: `건강 점수 ${score}점 · ${STAT[currentResult.overallStatus] || '분석 완료'}\n${currentResult.summary || ''}`.slice(0, 100),
+        imageUrl: 'https://peepeekit-urine-app-5h3f.vercel.app/icon-512.png',
+        link: {
+          mobileWebUrl: 'https://peepeekit-urine-app-5h3f.vercel.app/',
+          webUrl: 'https://peepeekit-urine-app-5h3f.vercel.app/'
+        }
+      },
+      buttons: [{
+        title: '나도 검사하기',
+        link: {
+          mobileWebUrl: 'https://peepeekit-urine-app-5h3f.vercel.app/',
+          webUrl: 'https://peepeekit-urine-app-5h3f.vercel.app/'
+        }
+      }]
+    });
+  } catch(e) {
+    alert('공유 실패: ' + (e.message || ''));
+  }
+}
+
+// ══════════════════════════════════════
 // 📄 PDF 리포트 다운로드 (병원/수의사용)
 // ══════════════════════════════════════
 async function downloadPDF() {
@@ -3143,10 +3343,13 @@ function renderHistory() {
       const status = h.overallStatus||'normal';
       const hasFullResult = h.fullResult ? '' : 'opacity:.7';
       const clickAttr = h.fullResult ? `onclick="viewHistoryItem('${h.id}')"` : '';
+      // 점수 계산 (있으면)
+      const score = h.fullResult ? calculateHealthScore(h.fullResult.testItems) : null;
+      const scoreBadge = score !== null ? `<span class="history-score">💯 ${score}</span>` : '';
       return `
         <div class="history-item" ${clickAttr} style="${hasFullResult}">
           <div class="history-header">
-            <div class="history-pet">${subjectIcon} ${h.name||'이름 없음'}${h.fullResult ? ' <span style="font-size:11px;color:#6366f1;font-weight:600">› 자세히</span>' : ''}</div>
+            <div class="history-pet">${subjectIcon} ${h.name||'이름 없음'}${scoreBadge}${h.fullResult ? ' <span style="font-size:11px;color:#6366f1;font-weight:600">› 자세히</span>' : ''}</div>
             <div class="history-date">${dateStr}</div>
           </div>
           <div class="history-info">${h.region||''} ${h.region?'·':''} ${h.summary||''}</div>
