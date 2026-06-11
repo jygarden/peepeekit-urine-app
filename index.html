@@ -22,6 +22,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Chart.js (추세 그래프용) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <!-- 카카오 로그인 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
     integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
@@ -436,6 +438,35 @@
     .loading-box p{font-size:14px;color:#475569;margin-top:10px;font-weight:600}
     .loading-box small{font-size:12px;color:#94a3b8;margin-top:6px;display:block}
 
+    /* ── 건강 종합 점수 ── */
+    .health-score-card{background:linear-gradient(135deg,#FFFFFF 0%,#F5F3FF 100%);border:2px solid rgba(99,102,241,.18);border-radius:20px;padding:22px 18px;margin-bottom:14px;text-align:center;box-shadow:0 4px 20px rgba(99,102,241,.12);position:relative;overflow:hidden}
+    .health-score-card::before{content:"";position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.15) 0%,transparent 70%);pointer-events:none}
+    .score-label{font-size:11px;font-weight:700;color:#6366f1;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase}
+    .score-main{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:8px}
+    .score-num{font-size:54px;font-weight:900;color:#1D1D1F;letter-spacing:-2px;line-height:1;font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .score-unit{font-size:18px;font-weight:700;color:#94a3b8}
+    .score-grade-wrap{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
+    .score-grade{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:18px;font-weight:900;color:#fff;font-family:ui-rounded,'SF Pro Rounded',-apple-system,system-ui}
+    .score-grade.A{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 3px 10px rgba(16,185,129,.35)}
+    .score-grade.B{background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 3px 10px rgba(59,130,246,.35)}
+    .score-grade.C{background:linear-gradient(135deg,#f59e0b,#d97706);box-shadow:0 3px 10px rgba(245,158,11,.35)}
+    .score-grade.D{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 3px 10px rgba(239,68,68,.35)}
+    .score-grade-label{font-size:13px;font-weight:700;color:#475569}
+    .score-bars{display:flex;gap:4px;margin-top:14px;justify-content:center}
+    .score-bar{width:32px;height:6px;border-radius:3px;background:#E5E7EB}
+    .score-bar.fill{background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+    .score-message{font-size:12px;color:#64748b;margin-top:10px;line-height:1.5;letter-spacing:-.1px}
+    .score-trend-hint{display:inline-flex;align-items:center;gap:4px;background:rgba(99,102,241,.08);color:#6366f1;font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;margin-top:8px}
+    /* ── 추세 그래프 ── */
+    .trend-section{background:#fff;border-radius:16px;padding:16px 14px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.05);border:1px solid #f1f5f9}
+    .trend-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .trend-title{font-size:13px;font-weight:800;color:#1D1D1F;letter-spacing:-.3px;display:flex;align-items:center;gap:6px}
+    .trend-count{font-size:10.5px;color:#6366f1;background:rgba(99,102,241,.10);padding:3px 9px;border-radius:999px;font-weight:700}
+    .trend-chart-wrap{position:relative;height:180px;margin:0 -4px}
+    .trend-tabs{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px}
+    .trend-tab{padding:6px 12px;background:#F1F5F9;border:none;border-radius:999px;font-size:11px;font-weight:700;color:#64748b;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:all .2s}
+    .trend-tab.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 2px 6px rgba(99,102,241,.3)}
+    .trend-empty{text-align:center;padding:30px 20px;color:#94A3B8;font-size:13px;line-height:1.7}
     /* ── 결과 배너 ── */
     .result-banner{border-radius:18px;padding:22px 20px;color:#fff;margin-bottom:14px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.16)}
     .result-banner .big-icon{font-size:42px;margin-bottom:6px}
@@ -530,6 +561,29 @@
     .supp-badge.권장{background:#f59e0b}
     .supp-badge.선택{background:#6366f1}
     .supp-reason{font-size:12px;color:#64748b;line-height:1.6}
+    /* 영양제 메타 정보 (용량/타이밍/시너지) */
+    .supp-badges{display:flex;gap:4px;align-items:center}
+    .supp-cat{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;color:#fff;letter-spacing:-.1px}
+    .supp-cat.기본{background:#3b82f6}
+    .supp-cat.타겟{background:#8b5cf6}
+    .supp-cat.부스터{background:#f59e0b}
+    .supp-meta{margin-top:8px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;flex-direction:column;gap:5px}
+    .supp-meta-row{display:flex;gap:8px;font-size:11px;line-height:1.5;align-items:flex-start}
+    .supp-meta-label{flex-shrink:0;color:#475569;font-weight:600;width:60px}
+    .supp-meta-val{color:#334155;flex:1}
+    .supp-caution{margin-top:7px;padding:6px 9px;background:#fff7ed;border-left:3px solid #f59e0b;border-radius:6px;font-size:11px;color:#92400e;line-height:1.5}
+    /* 약사 조합 처방 박스 */
+    .supp-combo{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:16px;padding:18px 16px;margin-top:14px;margin-bottom:8px}
+    .combo-title{font-size:14px;font-weight:800;color:#5b21b6;margin-bottom:12px;letter-spacing:-.3px;display:flex;align-items:center;gap:6px}
+    .combo-stack{background:rgba(255,255,255,.7);border-radius:10px;padding:10px 13px;margin-bottom:8px}
+    .combo-stack-title{font-size:12px;font-weight:700;color:#6d28d9;margin-bottom:6px}
+    .combo-stack ul{list-style:none;padding:0;margin:0}
+    .combo-stack li{font-size:11.5px;color:#3730a3;padding:3px 0;line-height:1.55;padding-left:14px;position:relative}
+    .combo-stack li::before{content:"•";position:absolute;left:4px;color:#8b5cf6;font-weight:700}
+    .combo-note{margin-top:10px;padding:10px;background:rgba(255,255,255,.6);border-radius:8px;font-size:12px;color:#4c1d95;line-height:1.7}
+    .combo-tip{margin-top:8px;padding:8px 10px;background:#eff6ff;border-radius:8px;font-size:11.5px;color:#1d4ed8;line-height:1.6}
+    .combo-cost{margin-top:8px;font-size:12px;color:#5b21b6;text-align:right;font-weight:600}
+    .combo-cost strong{color:#7c3aed;font-size:13px;font-weight:800}
 
     /* ── 사료 카드 ── */
     .food-card{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:14px;padding:15px;margin-bottom:8px}
@@ -1061,6 +1115,25 @@
         <div class="step-dot active"></div>
       </div>
 
+      <!-- 건강 종합 점수 카드 -->
+      <div class="health-score-card" id="healthScoreCard">
+        <div class="score-label">HEALTH SCORE</div>
+        <div class="score-main">
+          <span class="score-num" id="scoreNum">--</span>
+          <span class="score-unit">/100</span>
+        </div>
+        <div class="score-grade-wrap">
+          <span class="score-grade A" id="scoreGrade">A</span>
+          <span class="score-grade-label" id="scoreGradeLabel">최상</span>
+        </div>
+        <div class="score-bars" id="scoreBars"></div>
+        <div class="score-message" id="scoreMessage">정상 범위의 건강 상태예요</div>
+        <div class="score-trend-hint" id="scoreTrendHint" style="display:none">
+          <span id="scoreTrendIcon">↑</span> <span id="scoreTrendText">지난번보다 +5점</span>
+        </div>
+      </div>
+
+      <!-- 결과 배너 (기존) -->
       <div class="result-banner" id="resultBanner">
         <div class="big-icon" id="resultIcon">✅</div>
         <h2 id="resultTitle">종합 결과</h2>
@@ -1161,6 +1234,21 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div class="section-title" style="margin-bottom:0">📋 검사 기록</div>
       <button onclick="goHome()" style="background:none;border:none;color:#6366f1;font-size:13px;font-weight:700;cursor:pointer">🏠 홈으로</button>
+    </div>
+    <!-- 추세 그래프 (검사 2회 이상일 때만 표시) -->
+    <div class="trend-section" id="trendSection" style="display:none">
+      <div class="trend-header">
+        <div class="trend-title">📊 건강 점수 추세</div>
+        <span class="trend-count" id="trendCount">3회</span>
+      </div>
+      <div class="trend-tabs" id="trendTabs">
+        <button class="trend-tab active" onclick="switchTrend('all')">전체</button>
+        <button class="trend-tab" onclick="switchTrend('pet')">🐾 반려동물</button>
+        <button class="trend-tab" onclick="switchTrend('human')">🧑 사람</button>
+      </div>
+      <div class="trend-chart-wrap">
+        <canvas id="trendChart"></canvas>
+      </div>
     </div>
     <div id="historyList"></div>
   </div>
@@ -1463,6 +1551,8 @@ function goHome() {
 function goHistory() {
   renderHistory();
   showScreen('screenHistory');
+  // 추세 그래프도 함께 렌더
+  setTimeout(() => renderTrendChart(), 100);
 }
 
 // ★ 홈에서 선택 → 해당 폼으로 이동
@@ -1741,7 +1831,149 @@ async function analyze() {
 // ══════════════════════════════════════
 // 결과 렌더링
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// 건강 종합 점수 계산
+// ══════════════════════════════════════
+function calculateHealthScore(testItems) {
+  if (!testItems || testItems.length === 0) return null;
+  const scores = { normal: 100, warning: 60, danger: 20 };
+  const total = testItems.reduce((sum, item) => sum + (scores[item.status] || 60), 0);
+  return Math.round(total / testItems.length);
+}
+function getGradeInfo(score) {
+  if (score >= 90) return { grade: 'A', label: '최상', message: '훌륭한 건강 상태예요! 지금 컨디션을 잘 유지해주세요 ✨' };
+  if (score >= 80) return { grade: 'A', label: '우수', message: '대부분 정상 범위의 양호한 건강 상태예요 💚' };
+  if (score >= 70) return { grade: 'B', label: '양호', message: '전반적으로 좋아요. 몇 가지 항목 관리만 신경써주세요 👍' };
+  if (score >= 60) return { grade: 'C', label: '주의', message: '주의가 필요한 수치들이 보여요. 관리 팁을 확인해주세요 ⚠️' };
+  return { grade: 'D', label: '집중관리', message: '집중적인 관리가 필요해요. 전문가 상담을 권장합니다 🏥' };
+}
+function renderHealthScore(r) {
+  const card = document.getElementById('healthScoreCard');
+  const score = calculateHealthScore(r.testItems);
+  if (score === null) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = 'block';
+  const info = getGradeInfo(score);
+  document.getElementById('scoreNum').textContent = score;
+  const gradeEl = document.getElementById('scoreGrade');
+  gradeEl.textContent = info.grade;
+  gradeEl.className = 'score-grade ' + info.grade;
+  document.getElementById('scoreGradeLabel').textContent = info.label;
+  document.getElementById('scoreMessage').textContent = info.message;
+  // 점수 막대 (10단계, 채워진 만큼)
+  const bars = Math.round(score / 10);
+  const barsEl = document.getElementById('scoreBars');
+  barsEl.innerHTML = Array.from({length:10},(_,i)=>
+    `<div class="score-bar${i < bars ? ' fill' : ''}"></div>`).join('');
+  // 지난 점수 비교
+  try {
+    const history = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
+    const prevItem = history.find(h => h.fullResult);
+    if (prevItem && prevItem.fullResult) {
+      const prevScore = calculateHealthScore(prevItem.fullResult.testItems);
+      if (prevScore !== null && prevScore !== score) {
+        const diff = score - prevScore;
+        const hint = document.getElementById('scoreTrendHint');
+        document.getElementById('scoreTrendIcon').textContent = diff > 0 ? '↑' : '↓';
+        document.getElementById('scoreTrendText').textContent =
+          diff > 0 ? `지난번보다 +${diff}점` : `지난번보다 ${diff}점`;
+        hint.style.background = diff > 0 ? 'rgba(16,185,129,.10)' : 'rgba(239,68,68,.10)';
+        hint.style.color = diff > 0 ? '#059669' : '#dc2626';
+        hint.style.display = 'inline-flex';
+      } else {
+        document.getElementById('scoreTrendHint').style.display = 'none';
+      }
+    }
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════
+// 추세 그래프 (Chart.js)
+// ══════════════════════════════════════
+let trendChartInstance = null;
+let currentTrendFilter = 'all';
+function switchTrend(filter) {
+  currentTrendFilter = filter;
+  document.querySelectorAll('.trend-tab').forEach((btn, i) => {
+    const filters = ['all','pet','human'];
+    btn.classList.toggle('active', filters[i] === filter);
+  });
+  renderTrendChart();
+}
+function renderTrendChart() {
+  const section = document.getElementById('trendSection');
+  try {
+    const history = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
+    let filtered = history.filter(h => h.fullResult);
+    if (currentTrendFilter === 'pet') filtered = filtered.filter(h => h.subject !== 'human');
+    if (currentTrendFilter === 'human') filtered = filtered.filter(h => h.subject === 'human');
+    if (filtered.length < 2) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
+    document.getElementById('trendCount').textContent = filtered.length + '회';
+    // 시간 오래된 순으로 정렬 (그래프 왼쪽이 과거)
+    filtered = filtered.slice().reverse();
+    const labels = filtered.map(h => {
+      const d = new Date(h.date);
+      return `${d.getMonth()+1}/${d.getDate()}`;
+    });
+    const scores = filtered.map(h => calculateHealthScore(h.fullResult.testItems) || 0);
+    if (trendChartInstance) trendChartInstance.destroy();
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    // 그라데이션 배경
+    const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+    gradient.addColorStop(0, 'rgba(99,102,241,.35)');
+    gradient.addColorStop(1, 'rgba(99,102,241,.02)');
+    trendChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: '건강 점수',
+          data: scores,
+          borderColor: '#6366f1',
+          backgroundColor: gradient,
+          tension: 0.35,
+          fill: true,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(29,29,31,.92)',
+            padding: 10,
+            cornerRadius: 8,
+            titleFont: { family: 'Gowun Dodum', size: 12 },
+            bodyFont: { family: 'Gowun Dodum', size: 12 },
+            callbacks: {
+              label: (ctx) => ctx.parsed.y + '점'
+            }
+          }
+        },
+        scales: {
+          y: { min: 0, max: 100, ticks: { stepSize: 25, font:{family:'Gowun Dodum', size: 10}, color:'#94a3b8' }, grid:{color:'#f1f5f9'} },
+          x: { ticks: { font:{family:'Gowun Dodum', size: 10}, color:'#94a3b8' }, grid:{display:false} }
+        }
+      }
+    });
+  } catch(e) { section.style.display = 'none'; }
+}
+
 function renderResult(r, info) {
+  // 건강 종합 점수 계산 + 표시
+  renderHealthScore(r);
   const isHuman = info.subject === 'human';
   const STATUS  = { normal:'정상', warning:'주의', danger:'이상' };
   const ICON    = { normal:'✅', warning:'⚠️', danger:'🚨' };
@@ -1850,15 +2082,38 @@ function renderResult(r, info) {
   if (r.supplements && r.supplements.length > 0) {
     suppList.innerHTML = r.supplements.map(s => {
       const pri = s.priority || '권장';
+      const cat = s.category || '';
+      const catBadge = cat ? `<span class="supp-cat ${cat}">${cat}</span>` : '';
+      const dose = s.dosage ? `<div class="supp-meta-row"><span class="supp-meta-label">💊 용량</span><span class="supp-meta-val">${s.dosage}</span></div>` : '';
+      const time = s.timing ? `<div class="supp-meta-row"><span class="supp-meta-label">⏰ 타이밍</span><span class="supp-meta-val">${s.timing}</span></div>` : '';
+      const syn = s.synergy && s.synergy !== '단독 복용 OK' ? `<div class="supp-meta-row"><span class="supp-meta-label">🔗 시너지</span><span class="supp-meta-val">${s.synergy}</span></div>` : '';
+      const caut = s.caution && s.caution !== '특별한 주의 사항 없음' ? `<div class="supp-caution">⚠️ ${s.caution}</div>` : '';
       return `
         <div class="supp-card priority-${pri}">
           <div class="supp-top">
             <span class="supp-name">💊 ${s.name || ''}</span>
-            <span class="supp-badge ${pri}">${pri}</span>
+            <div class="supp-badges">${catBadge}<span class="supp-badge ${pri}">${pri}</span></div>
           </div>
           <div class="supp-reason">${s.reason || ''}</div>
+          ${dose || time || syn ? `<div class="supp-meta">${dose}${time}${syn}</div>` : ''}
+          ${caut}
         </div>`;
     }).join('');
+    // 약사 조합 처방
+    if (r.supplementCombo) {
+      const c = r.supplementCombo;
+      const morning = (c.morningStack || []).map(m => `<li>${m}</li>`).join('');
+      const evening = (c.eveningStack || []).map(e => `<li>${e}</li>`).join('');
+      suppList.innerHTML += `
+        <div class="supp-combo">
+          <div class="combo-title">💊 약사 조합 처방</div>
+          ${morning ? `<div class="combo-stack"><div class="combo-stack-title">🌅 아침 스택</div><ul>${morning}</ul></div>` : ''}
+          ${evening ? `<div class="combo-stack"><div class="combo-stack-title">🌙 저녁 스택</div><ul>${evening}</ul></div>` : ''}
+          ${c.synergyNote ? `<div class="combo-note">${c.synergyNote}</div>` : ''}
+          ${c.timingTip ? `<div class="combo-tip">💡 ${c.timingTip}</div>` : ''}
+          ${c.estimatedMonthlyCost ? `<div class="combo-cost">📅 월 예상 비용: <strong>${c.estimatedMonthlyCost}</strong></div>` : ''}
+        </div>`;
+    }
     suppSection.style.display = 'block';
   } else { suppSection.style.display = 'none'; }
 
