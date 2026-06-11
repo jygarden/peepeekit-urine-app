@@ -1014,8 +1014,11 @@
           <div class="field"><label>상세 주소</label><input type="text" id="shipAddress2" placeholder="동/호수 등"/></div>
           <div class="field"><label>요청 사항 (선택)</label><textarea id="shipMemo" placeholder="문 앞에 두고 가주세요 등"></textarea></div>
         </div>
-        <button class="settings-btn settings-btn-primary" onclick="submitShipping()" style="margin-top:8px">신청 완료</button>
-        <button class="settings-btn settings-btn-secondary" onclick="closeCoupon()">취소</button>
+        <div style="font-size:11px;color:#94A3B8;background:#F7F7F5;border-radius:8px;padding:9px 11px;margin-bottom:8px;text-align:center;line-height:1.5">
+          💡 <strong style="color:#475569">신청 완료 시</strong> 포인트가 차감돼요. 취소하면 차감 안 돼요!
+        </div>
+        <button class="settings-btn settings-btn-primary" onclick="submitShipping()" style="margin-top:0">신청 완료 (포인트 차감)</button>
+        <button class="settings-btn settings-btn-secondary" onclick="closeCoupon()">취소 (차감 X)</button>
       </div>
       <!-- 신청 완료 화면 -->
       <div id="couponDone" style="display:none">
@@ -1990,13 +1993,16 @@ function redeemReward(rewardId) {
   if (!reward) return;
   if (getPoints() < reward.cost) return;
   if (!confirm(`${reward.name} (${reward.cost.toLocaleString()}P)\n교환하시겠어요?`)) return;
-  addPoints(-reward.cost, `🎁 ${reward.name}`);
   pendingReward = reward;
   if (reward.type === 'coupon') {
+    // 쿠폰: 코드 발급 즉시 차감 (코드 받은 시점에 확정)
+    addPoints(-reward.cost, `🎁 ${reward.name}`);
     showCouponModal(reward);
   } else if (reward.type === 'gifticon') {
+    // 기프티콘: 폼 제출 후 차감
     showGifticonForm(reward);
   } else {
+    // 실물: 폼 제출 후 차감
     showShippingForm(reward);
   }
 }
@@ -2085,6 +2091,12 @@ function submitShipping() {
   // 기프티콘: 이름+폰번호만 / 실물: 이름+폰번호+주소
   if (!name || !phone) { alert('이름, 연락처는 필수예요!'); return; }
   if (!isGifticon && !addr1) { alert('주소는 필수예요!'); return; }
+  // 최종 제출 시점에 포인트 차감 (도중 닫으면 차감 안 됨)
+  if (getPoints() < pendingReward.cost) {
+    alert('포인트가 부족해요. 다시 시도해주세요.');
+    return;
+  }
+  addPoints(-pendingReward.cost, `🎁 ${pendingReward.name}`);
   const orderId = 'O' + Date.now();
   const orders = getOrders();
   orders.unshift({
