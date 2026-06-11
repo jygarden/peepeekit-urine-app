@@ -24,6 +24,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Chart.js (추세 그래프용) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- jsPDF (PDF 리포트용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- 카카오 로그인 SDK -->
   <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
     integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
@@ -641,6 +643,30 @@
     .settings-modal .settings-btn-danger{background:transparent;color:#FF3B30;font-size:13px;padding:10px}
     .settings-modal .settings-divider{height:1px;background:#E5E5EA;margin:12px 0}
     .settings-modal .settings-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border:none;background:rgba(0,0,0,.06);border-radius:50%;cursor:pointer;font-size:15px;color:#444;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+    /* ── 프로필 선택 화면 ── */
+    .profile-wrap{padding:24px 20px 40px}
+    .profile-header{margin-bottom:18px}
+    .profile-header h2{font-size:21px;font-weight:800;color:#1D1D1F;letter-spacing:-.5px;line-height:1.3;margin-bottom:6px}
+    .profile-header p{font-size:12px;color:#6E6E73;letter-spacing:-.1px}
+    .profile-list{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+    .profile-card{background:#fff;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;border:none;width:100%;text-align:left;font-family:inherit;box-shadow:0 1px 2px rgba(0,0,0,.03),0 4px 14px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s;position:relative}
+    .profile-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.08)}
+    .profile-card:active{transform:scale(.985)}
+    .profile-avatar{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:30px;background:linear-gradient(135deg,#F5F3FF,#EDE9FE);position:relative}
+    .profile-avatar.pet{background:radial-gradient(circle at 30% 30%,#fff,#DAF0E5,#BDE2D0)}
+    .profile-avatar.human{background:radial-gradient(circle at 30% 30%,#fff,#DEE9FF,#C5D8FB)}
+    .profile-info{flex:1;min-width:0}
+    .profile-name{font-size:15px;font-weight:700;color:#1D1D1F;letter-spacing:-.3px;margin-bottom:3px}
+    .profile-meta{font-size:11px;color:#6E6E73;letter-spacing:-.1px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .profile-card .arrow{width:9px;height:14px;color:#C7C7CC;flex-shrink:0}
+    .profile-card .arrow path{stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .profile-card .delete-btn{position:absolute;top:6px;right:6px;width:24px;height:24px;background:rgba(0,0,0,.06);border:none;border-radius:50%;font-size:12px;color:#94A3B8;cursor:pointer;display:none;line-height:1;padding:0;align-items:center;justify-content:center}
+    .profile-card.edit-mode .delete-btn{display:flex}
+    .profile-add{background:#fff;border:2px dashed #c4b5fd;border-radius:16px;padding:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font-family:inherit;color:#6366f1;font-size:13.5px;font-weight:700;letter-spacing:-.2px;transition:background .15s}
+    .profile-add:hover{background:#F5F3FF}
+    .profile-add:active{transform:scale(.99)}
+    .profile-empty{text-align:center;padding:34px 20px;color:#94A3B8;font-size:13px;line-height:1.7}
+    .profile-edit-toggle{background:none;border:none;color:#6366f1;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
   </style>
 </head>
 <body>
@@ -836,6 +862,25 @@
         <span>검사 결과는 확진이 아닌 건강관리 참고용입니다.</span>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ════════════ 프로필 선택 화면 (사람/반려동물 공통) ════════════ -->
+  <div class="screen" id="screenProfilePicker">
+    <div class="profile-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+        <div class="profile-header" style="margin-bottom:0">
+          <h2 id="profilePickerTitle">누구의 건강을<br>확인할까요?</h2>
+          <p id="profilePickerSub">프로필을 선택하거나 새로 추가하세요</p>
+        </div>
+        <button class="profile-edit-toggle" id="profileEditToggle" onclick="toggleProfileEdit()" style="display:none">편집</button>
+      </div>
+      <div class="profile-list" id="profileList"></div>
+      <button class="profile-add" onclick="addNewProfileFlow()">
+        <span style="font-size:18px;line-height:1">＋</span>
+        <span id="profileAddLabel">새 프로필 추가</span>
+      </button>
+      <button class="btn-outline" style="margin-top:14px" onclick="goHome()">← 홈으로</button>
     </div>
   </div>
 
@@ -1222,6 +1267,7 @@
         <span class="cta-arrow">›</span>
       </a>
       <button class="btn-download" onclick="downloadResult()">📥 결과 이미지 저장</button>
+      <button class="btn-download" style="background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 3px 10px rgba(16,185,129,.35)" onclick="downloadPDF()">📄 PDF 리포트 다운로드 (병원용)</button>
       <div class="action-row">
         <button class="btn-retake" onclick="showScreen('screenCapture')">📷 재촬영</button>
         <button class="btn-new" onclick="resetAll()">🏠 새 검사</button>
@@ -1303,6 +1349,7 @@
     <button class="settings-btn settings-btn-primary" onclick="saveNewName()">이름 변경</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">취소</button>
     <div class="settings-divider"></div>
+    <button class="settings-btn settings-btn-secondary" style="color:#6366f1" onclick="manageProfilesFromSettings()">👨‍👩‍👧 프로필 관리 (가족·반려동물)</button>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
   </div>
 </div>
@@ -1555,14 +1602,195 @@ function goHistory() {
   setTimeout(() => renderTrendChart(), 100);
 }
 
-// ★ 홈에서 선택 → 해당 폼으로 이동
+// ════════════════════════════════════════════════════════════════
+// 🏠 프로필 시스템 (가족·여러 반려동물 관리)
+// ════════════════════════════════════════════════════════════════
+const PROFILES_KEY = 'profilesV1';
+let activeProfile = null;
+let profileEditMode = false;
+
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem(PROFILES_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+function saveProfiles(arr) {
+  localStorage.setItem(PROFILES_KEY, JSON.stringify(arr));
+}
+function addProfile(profile) {
+  const profiles = getProfiles();
+  profile.id = 'p_' + Date.now();
+  profile.createdAt = new Date().toISOString();
+  profiles.push(profile);
+  saveProfiles(profiles);
+  return profile;
+}
+function deleteProfile(id) {
+  if (!confirm('이 프로필을 삭제할까요?\n(과거 검사 기록은 그대로 유지됩니다)')) return;
+  const profiles = getProfiles().filter(p => p.id !== id);
+  saveProfiles(profiles);
+  renderProfileList();
+}
+function toggleProfileEdit() {
+  profileEditMode = !profileEditMode;
+  document.getElementById('profileEditToggle').textContent = profileEditMode ? '완료' : '편집';
+  renderProfileList();
+}
+function renderProfileList() {
+  const list = document.getElementById('profileList');
+  const profiles = getProfiles().filter(p => p.type === subjectMode);
+  const editBtn = document.getElementById('profileEditToggle');
+  editBtn.style.display = profiles.length > 0 ? 'block' : 'none';
+  if (profiles.length === 0) {
+    list.innerHTML = `<div class="profile-empty">아직 ${subjectMode==='human'?'사람':'반려동물'} 프로필이 없어요.<br>새로 추가해 보세요!</div>`;
+    return;
+  }
+  list.innerHTML = profiles.map(p => {
+    let avatar, meta;
+    if (p.type === 'pet') {
+      avatar = p.petType === 'dog' ? '🐶' : p.petType === 'cat' ? '🐱' : '🐾';
+      const parts = [];
+      if (p.breed) parts.push(p.breed);
+      if (p.birthYear) {
+        const age = new Date().getFullYear() - parseInt(p.birthYear);
+        parts.push(`${age}살`);
+      }
+      if (p.gender) parts.push(p.gender);
+      if (p.region) parts.push(p.region);
+      meta = parts.join(' · ') || '정보 없음';
+    } else {
+      avatar = '🧑';
+      const parts = [];
+      if (p.gender) parts.push(p.gender === 'male' ? '남성' : p.gender === 'female' ? '여성' : p.gender);
+      if (p.birthYear) {
+        const age = new Date().getFullYear() - parseInt(p.birthYear);
+        parts.push(`${age}살`);
+      }
+      if (p.region) parts.push(p.region);
+      meta = parts.join(' · ') || '정보 없음';
+    }
+    const clickAttr = profileEditMode ? '' : `onclick="useProfile('${p.id}')"`;
+    return `
+      <button class="profile-card ${profileEditMode ? 'edit-mode' : ''}" ${clickAttr}>
+        <div class="profile-avatar ${p.type}">${avatar}</div>
+        <div class="profile-info">
+          <div class="profile-name">${p.name || '이름 없음'}</div>
+          <div class="profile-meta">${meta}</div>
+        </div>
+        <svg class="arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+        <button class="delete-btn" onclick="event.stopPropagation();deleteProfile('${p.id}')" aria-label="삭제">✕</button>
+      </button>`;
+  }).join('');
+}
+function useProfile(id) {
+  const p = getProfiles().find(x => x.id === id);
+  if (!p) return;
+  activeProfile = p;
+  // 폼 자동 채우기
+  if (p.type === 'pet') {
+    if (p.petType) { selectedPet = p.petType; setTimeout(()=>selectPet(p.petType), 50); selectedPet = p.petType; }
+    document.getElementById('petName').value = p.name || '';
+    document.getElementById('petBreed').value = p.breed || '';
+    if (p.gender) { selectedGender = p.gender; setTimeout(()=>selectGender(p.gender), 50); selectedGender = p.gender; }
+    document.getElementById('petBirthYear').value = p.birthYear || '';
+    document.getElementById('petBirthMonth').value = p.birthMonth || '';
+    document.getElementById('region').value = p.region || '';
+    if (p.environment) { selectedEnv = p.environment; setTimeout(()=>selectEnv(p.environment), 50); selectedEnv = p.environment; }
+    document.getElementById('petContact').value = p.contact || '';
+    showScreen('screenPetForm');
+  } else {
+    document.getElementById('humanName').value = p.name || '';
+    if (p.gender) { humanGender = p.gender; setTimeout(()=>selectHumanGender(p.gender), 50); humanGender = p.gender; }
+    document.getElementById('humanBirthYear').value = p.birthYear || '';
+    document.getElementById('humanBirthMonth').value = p.birthMonth || '';
+    document.getElementById('humanRegion').value = p.region || '';
+    if (p.lifestyle) { humanLifestyle = p.lifestyle; setTimeout(()=>selectLifestyle(p.lifestyle), 50); humanLifestyle = p.lifestyle; }
+    document.getElementById('humanContact').value = p.contact || '';
+    showScreen('screenHumanForm');
+  }
+}
+function addNewProfileFlow() {
+  activeProfile = null;
+  // 빈 폼으로 이동
+  if (subjectMode === 'pet') {
+    document.getElementById('petName').value = '';
+    document.getElementById('petBreed').value = '';
+    document.getElementById('petBirthYear').value = '';
+    document.getElementById('petBirthMonth').value = '';
+    document.getElementById('region').value = '';
+    document.getElementById('petContact').value = '';
+    selectedPet = null; selectedGender = null; selectedEnv = null;
+    document.querySelectorAll('#screenPetForm .active').forEach(el => el.classList.remove('active'));
+    showScreen('screenPetForm');
+  } else {
+    document.getElementById('humanName').value = '';
+    document.getElementById('humanBirthYear').value = '';
+    document.getElementById('humanBirthMonth').value = '';
+    document.getElementById('humanRegion').value = '';
+    document.getElementById('humanContact').value = '';
+    humanGender = null; humanLifestyle = null;
+    document.querySelectorAll('#screenHumanForm .active').forEach(el => el.classList.remove('active'));
+    showScreen('screenHumanForm');
+  }
+}
+
+// 검사 후 프로필 자동 저장/업데이트
+function saveOrUpdateProfile(recordData, subject) {
+  if (!recordData.name && !recordData.petName) return null;
+  const profiles = getProfiles();
+  const name = subject === 'human' ? recordData.name : recordData.petName;
+  // 같은 type + 같은 이름이면 업데이트
+  const existing = profiles.find(p => p.type === subject && p.name === name);
+  if (existing) {
+    Object.assign(existing, {
+      petType: recordData.petType, breed: recordData.breed,
+      gender: recordData.gender, birthYear: recordData.birthYear,
+      birthMonth: recordData.birthMonth, region: recordData.region,
+      environment: recordData.environment, lifestyle: recordData.lifestyle,
+      contact: recordData.contact, updatedAt: new Date().toISOString()
+    });
+    saveProfiles(profiles);
+    return existing;
+  } else {
+    return addProfile({
+      type: subject,
+      name: name,
+      petType: recordData.petType, breed: recordData.breed,
+      gender: recordData.gender, birthYear: recordData.birthYear,
+      birthMonth: recordData.birthMonth, region: recordData.region,
+      environment: recordData.environment, lifestyle: recordData.lifestyle,
+      contact: recordData.contact
+    });
+  }
+}
+
+// ★ 홈에서 선택 → 프로필 선택 화면으로 (없으면 바로 폼)
 function enterPet() {
   subjectMode = 'pet';
-  showScreen('screenPetForm');
+  const profiles = getProfiles().filter(p => p.type === 'pet');
+  if (profiles.length === 0) {
+    addNewProfileFlow();
+  } else {
+    document.getElementById('profilePickerTitle').innerHTML = '어떤 반려동물의<br>건강을 확인할까요?';
+    document.getElementById('profilePickerSub').textContent = '프로필을 선택하거나 새로 추가하세요';
+    document.getElementById('profileAddLabel').textContent = '새 반려동물 추가';
+    profileEditMode = false;
+    renderProfileList();
+    showScreen('screenProfilePicker');
+  }
 }
 function enterHuman() {
   subjectMode = 'human';
-  showScreen('screenHumanForm');
+  const profiles = getProfiles().filter(p => p.type === 'human');
+  if (profiles.length === 0) {
+    addNewProfileFlow();
+  } else {
+    document.getElementById('profilePickerTitle').innerHTML = '누구의<br>건강을 확인할까요?';
+    document.getElementById('profilePickerSub').textContent = '프로필을 선택하거나 새로 추가하세요';
+    document.getElementById('profileAddLabel').textContent = '새 가족 추가';
+    profileEditMode = false;
+    renderProfileList();
+    showScreen('screenProfilePicker');
+  }
 }
 
 // 촬영 화면에서 뒤로
@@ -1816,7 +2044,8 @@ async function analyze() {
     });
 
     saveToHistory({ result, recordData, subject: subjectMode });
-
+    // 프로필 자동 저장/업데이트 (다음 검사 시 자동 채우기용)
+    saveOrUpdateProfile(recordData, subjectMode);
     showScreen('screenResult');
 
   } catch (err) {
@@ -2181,6 +2410,60 @@ function renderResult(r, info) {
 // ══════════════════════════════════════
 // 결과 다운로드
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// 📄 PDF 리포트 다운로드 (병원/수의사용)
+// ══════════════════════════════════════
+async function downloadPDF() {
+  const pdfBtns = document.querySelectorAll('.btn-download');
+  const pdfBtn = pdfBtns[1]; // 두 번째가 PDF 버튼
+  const originalText = pdfBtn ? pdfBtn.textContent : '';
+  if (pdfBtn) { pdfBtn.textContent = '⏳ PDF 생성 중...'; pdfBtn.disabled = true; }
+  try {
+    const el = document.getElementById('resultCapture');
+    const canvas = await html2canvas(el, {
+      scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollY: -window.scrollY
+    });
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+    // jsPDF 호출
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth - 20; // 양옆 10mm 여백
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    let position = 10;
+    let heightLeft = imgHeight;
+    // 첫 페이지
+    pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+    heightLeft -= (pageHeight - 20);
+    // 페이지 넘치면 추가 페이지
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight + 10;
+      pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+      heightLeft -= (pageHeight - 20);
+    }
+    // 푸터: 생성일·앱명
+    const pageCount = pdf.internal.pages.length - 1;
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(150);
+      const footer = `건강어때 AI 소변검사 리포트 · 생성일: ${new Date().toLocaleDateString('ko-KR')} · ${i}/${pageCount}`;
+      pdf.text(footer, pageWidth / 2, pageHeight - 5, { align: 'center' });
+    }
+    const baseName = subjectMode === 'human'
+      ? (document.getElementById('humanName').value.trim() || '본인')
+      : (document.getElementById('petName').value.trim() || '반려동물');
+    const dateStr = new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'');
+    pdf.save(`건강어때_${baseName}_${dateStr}.pdf`);
+  } catch(e) {
+    alert('PDF 생성 중 오류가 발생했습니다: ' + (e.message || ''));
+  } finally {
+    if (pdfBtn) { pdfBtn.textContent = '📄 PDF 리포트 다운로드 (병원용)'; pdfBtn.disabled = false; }
+  }
+}
+
 async function downloadResult() {
   const btn = document.querySelector('.btn-download');
   btn.textContent = '⏳ 저장 중...';
@@ -2374,6 +2657,25 @@ function saveNewName() {
   showScreen('screenWelcome');
   setTimeout(() => goHome(), 1800);
 }
+function manageProfilesFromSettings() {
+  closeSettings();
+  // 사람·반려동물 둘 다 보여주기 위해 subjectMode 일시 변경 → 모두 표시 모드
+  const allProfiles = getProfiles();
+  if (allProfiles.length === 0) {
+    alert('아직 저장된 프로필이 없어요.\n첫 검사 후 자동으로 프로필이 생성돼요!');
+    return;
+  }
+  // 첫 프로필의 type으로 시작 (편집 모드 자동 진입)
+  subjectMode = allProfiles[0].type;
+  document.getElementById('profilePickerTitle').innerHTML = '프로필 관리';
+  document.getElementById('profilePickerSub').textContent = '편집 모드입니다. ✕ 버튼으로 삭제하세요.';
+  document.getElementById('profileAddLabel').textContent = '새 프로필 추가';
+  profileEditMode = true;
+  renderProfileList();
+  document.getElementById('profileEditToggle').textContent = '완료';
+  showScreen('screenProfilePicker');
+}
+
 function resetAllData() {
   if (!confirm('정말로 모든 기록과 이름을 삭제할까요?\n\n이 작업은 되돌릴 수 없어요.')) return;
   // 검사 기록 + 이름 + 로그인 정보 모두 삭제
@@ -2384,6 +2686,7 @@ function resetAllData() {
   localStorage.removeItem('userEmail');
   localStorage.removeItem('urineHistoryV2');
   localStorage.removeItem('petUrineHistory');
+  localStorage.removeItem('profilesV1');
   closeSettings();
   alert('모든 데이터가 삭제되었어요. 처음 화면으로 돌아갑니다.');
   location.reload();
