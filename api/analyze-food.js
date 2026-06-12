@@ -14,10 +14,12 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
 
   try {
-    const { imageB64, mealTime, userProfile } = req.body;
+    const { imageB64, mealTime, userProfile, target } = req.body;
     if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
-    const prompt = buildFoodPrompt(mealTime, userProfile);
+    const prompt = target === 'pet'
+      ? buildPetFoodPrompt(mealTime)
+      : buildFoodPrompt(mealTime, userProfile);
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -116,6 +118,60 @@ ${profile}
     {
       "name": "추천 영양제 (예: 오메가3, 종합비타민)",
       "reason": "이 식단에서 부족한 영양소 보충 이유 1문장"
+    }
+  ]
+}`;
+}
+
+// 반려동물 사료 분석 프롬프트
+function buildPetFoodPrompt(mealTime) {
+  return `🇰🇷 모든 응답값을 **한국어**로 작성하세요.
+
+당신은 반려동물 영양 전문가이자 수의사입니다. 사진 속 반려동물 사료/간식을 분석하세요. 사료 포장지면 영양 표시 라벨을 읽고, 그릇에 담긴 사료면 시각적으로 추정하세요.
+
+=== 분석 규칙 ===
+1. 사료/간식 종류 식별 (드라이/웨트/간식/생식 등)
+2. 추정 영양성분 (단백질·지방·탄수화물·식이섬유·수분 %)
+3. 주요 성분 (닭고기, 연어, 쌀, 옥수수 등)
+4. 강아지/고양이/공통 적합 여부
+5. 종합 점수 0~100점
+6. 좋은 점·주의점 명확하게
+7. 알러지·민감성 식재료 경고
+8. 가격대 추정 (있으면)
+
+=== 사진이 사료 아닐 때 ===
+{"error": "반려동물 사료 사진을 다시 업로드해주세요."}
+
+=== JSON 응답 형식 ===
+{
+  "foods": [
+    { "name": "사료/간식명 (추정)", "amount": "예: 1회 급여량 60g", "calories": kcal 추정 }
+  ],
+  "totalCalories": 1회 급여 총 칼로리,
+  "nutrition": {
+    "carbs": 탄수화물g,
+    "protein": 단백질g,
+    "fat": 지방g,
+    "fiber": 식이섬유g,
+    "sodium": 나트륨mg,
+    "sugar": 당류g
+  },
+  "balanceScore": 0~100,
+  "balanceGrade": "A 또는 B 또는 C 또는 D",
+  "balanceLabel": "한 단어 평가 (예: 최상/우수/양호/주의)",
+  "macroRatio": { "carbsPercent": 정수, "proteinPercent": 정수, "fatPercent": 정수 },
+  "highlights": [
+    { "type": "good 또는 warning 또는 danger", "text": "한 줄 평가" }
+  ],
+  "summary": "사료 종합 평가 2~3문장 (한국어)",
+  "missing": ["부족한 성분"],
+  "excessive": ["과다 성분 (예: 곡물 부산물, 인공첨가물)"],
+  "tips": ["급여 팁1", "팁2", "팁3"],
+  "nextMeal": "추천 사료/간식 종류와 이유 1~2문장",
+  "supplements": [
+    {
+      "name": "이 사료에 부족한 영양 보충용 영양제",
+      "reason": "이유 1문장"
     }
   ]
 }`;
