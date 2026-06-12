@@ -20,19 +20,23 @@ module.exports = async function handler(req, res) {
     const systemPrompt = buildChatSystemPrompt(context);
     const history = (context?.history || []).slice(-6);
 
-    const contents = [{
-      role: 'user',
-      parts: [{ text: systemPrompt + '\n\n사용자: ' + message }]
-    }];
+    // 1) 시스템 프롬프트를 첫 번째 user 메시지로 + 인사 응답으로 유도
+    const contents = [
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      { role: 'model', parts: [{ text: '네, 검사 결과 잘 살펴봤어요. 무엇이든 편하게 물어보세요! 🙂' }] }
+    ];
 
-    // 이전 대화 추가
+    // 2) 이전 대화를 (오래된 순서로) 추가
     history.forEach(h => {
       if (h.role === 'user') {
         contents.push({ role: 'user', parts: [{ text: h.text }] });
-      } else {
+      } else if (h.role === 'ai') {
         contents.push({ role: 'model', parts: [{ text: h.text }] });
       }
     });
+
+    // 3) 마지막으로 현재 사용자 메시지
+    contents.push({ role: 'user', parts: [{ text: message }] });
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -41,7 +45,7 @@ module.exports = async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents,
-          generationConfig: { temperature: 0.7, maxOutputTokens: 800 }
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2000 }
         })
       }
     );
@@ -82,7 +86,7 @@ ${items}
 이 결과를 기반으로 답변하세요.`;
   }
 
-  return `🇰🇷 모든 답변을 **한국어**로, 친근하고 따뜻한 톤으로 작성하세요. 답변은 3~6문장으로 간결하게.
+  return `🇰🇷 모든 답변을 **한국어**로, 친근하고 따뜻한 톤으로 작성하세요. 답변은 **반드시 완결된 문장**으로 마무리하세요. 절대 중간에 끊지 마세요. 길이는 4~10문장 정도 충분히 설명하되, 끝맺음 확실하게.
 
 ${persona}
 사용자 이름: ${context?.userName || '고객님'}
