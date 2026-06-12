@@ -1488,9 +1488,9 @@
   <!-- ════════════ AI 영양사 채팅 ════════════ -->
   <div class="screen" id="screenChat">
     <div class="chat-header">
-      <button class="chat-back" onclick="goHome()">← 홈</button>
+      <button class="chat-back" onclick="exitChat()">← 결과로</button>
       <h2>🤖 AI 영양사<span class="sub">검사 결과 기반 맞춤 답변</span></h2>
-      <div style="width:30px"></div>
+      <button class="chat-back" onclick="goHome()" style="font-size:11px">🏠 홈</button>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-suggestions" id="chatSuggestions">
@@ -2962,6 +2962,14 @@ function renderActionPlan(r, info) {
 // 🤖 AI 영양사·약사 채팅
 // ════════════════════════════════════════════════════════════════
 let chatMessages = [];
+function exitChat() {
+  // 검사 결과 있으면 결과 화면으로, 없으면 홈으로
+  if (currentResult) {
+    showScreen('screenResult');
+  } else {
+    goHome();
+  }
+}
 function enterChat() {
   chatMessages = [];
   document.getElementById('chatMessages').innerHTML = '';
