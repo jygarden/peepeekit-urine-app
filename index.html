@@ -428,6 +428,79 @@
     .highlight-item.good{background:#F0FDF4;color:#15803D}
     .highlight-item.warning{background:#FFFBEB;color:#92400E}
     .highlight-item.danger{background:#FFF1F2;color:#9F1239}
+    /* ── 🎯 검사 변화 비교 카드 ── */
+    .compare-card{background:linear-gradient(135deg,#ECFDF5 0%,#DBEAFE 100%);border:2px solid #A7F3D0;border-radius:22px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+    .compare-card.declined{background:linear-gradient(135deg,#FEF2F2 0%,#FFF7ED 100%);border-color:#FDBA74}
+    .compare-card.same{background:linear-gradient(135deg,#F9FAFB 0%,#F3F4F6 100%);border-color:#E5E7EB}
+    .compare-title{font-size:13px;font-weight:800;color:#065F46;letter-spacing:-.3px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .compare-card.declined .compare-title{color:#9A3412}
+    .compare-card.same .compare-title{color:#374151}
+    .compare-score-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.6);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+    .compare-score-item{text-align:center;flex:1}
+    .compare-score-label{font-size:10px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .compare-score-num{font-size:32px;font-weight:900;color:#1D1D1F;line-height:1;font-family:ui-rounded,'SF Pro Rounded',system-ui;letter-spacing:-1px}
+    .compare-arrow{font-size:24px;color:#10B981;margin:0 8px}
+    .compare-card.declined .compare-arrow{color:#EF4444}
+    .compare-card.same .compare-arrow{color:#94A3B8}
+    .compare-diff{display:inline-block;background:#10B981;color:#fff;font-size:13px;font-weight:800;padding:4px 12px;border-radius:999px;margin-top:6px}
+    .compare-card.declined .compare-diff{background:#EF4444}
+    .compare-card.same .compare-diff{background:#94A3B8}
+    .compare-items{background:rgba(255,255,255,.6);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+    .compare-item-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,.06)}
+    .compare-item-row:last-child{border-bottom:none}
+    .compare-item-name{font-weight:600;color:#1D1D1F}
+    .compare-item-change{font-weight:700}
+    .compare-item-change.up{color:#059669}
+    .compare-item-change.down{color:#DC2626}
+    .compare-item-change.flat{color:#6B7280}
+    .compare-message{background:rgba(255,255,255,.7);border-radius:12px;padding:11px 14px;font-size:12.5px;color:#0F766E;line-height:1.6;font-weight:600}
+    .compare-card.declined .compare-message{color:#9A3412}
+    .compare-card.same .compare-message{color:#374151}
+    .compare-period{font-size:10.5px;color:#6B7280;margin-top:8px;text-align:center;letter-spacing:-.1px}
+    /* ── 🤖 AI 영양사 채팅 ── */
+    .chat-btn-row{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border:none;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;width:100%;cursor:pointer;font-family:inherit;text-align:left;margin-bottom:14px;box-shadow:0 3px 10px rgba(251,191,36,.25);transition:transform .15s,box-shadow .2s}
+    .chat-btn-row:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(251,191,36,.35)}
+    .chat-btn-row:active{transform:scale(.985)}
+    .chat-btn-ic{font-size:28px;flex-shrink:0}
+    .chat-btn-text{flex:1}
+    .chat-btn-title{font-size:13px;font-weight:800;color:#78350F}
+    .chat-btn-sub{font-size:11px;color:#92400E;margin-top:2px}
+    .chat-btn-arrow{color:#78350F;font-size:16px;font-weight:800}
+    /* 채팅 화면 */
+    #screenChat{padding:0;background:#F7F7F5}
+    .chat-header{background:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E5E5EA;position:sticky;top:0;z-index:10}
+    .chat-header h2{font-size:15px;font-weight:800;color:#1D1D1F}
+    .chat-header h2 .sub{font-size:10px;color:#6E6E73;font-weight:500;display:block;margin-top:2px}
+    .chat-back{background:none;border:none;color:#6366F1;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+    .chat-messages{padding:16px;min-height:calc(100vh - 200px);display:flex;flex-direction:column;gap:10px;padding-bottom:90px}
+    .chat-msg{max-width:80%;padding:11px 14px;border-radius:18px;font-size:13px;line-height:1.5;letter-spacing:-.1px;word-break:break-word}
+    .chat-msg.user{align-self:flex-end;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border-bottom-right-radius:6px}
+    .chat-msg.ai{align-self:flex-start;background:#fff;color:#1D1D1F;border:1px solid #E5E5EA;border-bottom-left-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+    .chat-msg.typing{align-self:flex-start;background:#fff;border:1px solid #E5E5EA;padding:14px;border-radius:18px;border-bottom-left-radius:6px}
+    .chat-typing-dots{display:flex;gap:4px}
+    .chat-typing-dots span{width:8px;height:8px;border-radius:50%;background:#94A3B8;animation:typing 1.4s infinite ease-in-out}
+    .chat-typing-dots span:nth-child(2){animation-delay:.2s}
+    .chat-typing-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+    .chat-input-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:430px;width:100%;background:#fff;padding:12px 14px;border-top:1px solid #E5E5EA;display:flex;gap:8px;z-index:20}
+    .chat-input-bar input{flex:1;padding:11px 15px;border:1.5px solid #E5E5EA;border-radius:999px;font-size:13px;outline:none;font-family:inherit;background:#F7F7F5}
+    .chat-input-bar input:focus{border-color:#6366F1;background:#fff}
+    .chat-input-bar button{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:none;border-radius:50%;width:42px;height:42px;font-size:15px;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(99,102,241,.4);flex-shrink:0}
+    .chat-input-bar button:disabled{background:#94A3B8;box-shadow:none}
+    .chat-suggestions{display:flex;gap:6px;overflow-x:auto;padding:8px 14px;background:#fff;border-top:1px solid #f1f5f9}
+    .chat-suggest{flex-shrink:0;background:#F1F5F9;border:none;border-radius:999px;padding:7px 13px;font-size:11.5px;font-weight:600;color:#475569;cursor:pointer;font-family:inherit}
+    .chat-suggest:hover{background:#E2E8F0}
+    /* ── 📅 이번 주 액션 플랜 ── */
+    .action-plan{background:linear-gradient(135deg,#F0F9FF,#E0F2FE);border:1.5px solid #7DD3FC;border-radius:18px;padding:18px;margin-bottom:14px}
+    .action-plan-title{font-size:14px;font-weight:800;color:#0C4A6E;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .action-plan-day{background:rgba(255,255,255,.7);border-radius:12px;padding:11px 14px;margin-bottom:7px;display:flex;align-items:flex-start;gap:11px}
+    .action-plan-day.today{background:#FCD34D;border:2px solid #F59E0B}
+    .action-plan-dow{font-size:13px;font-weight:800;color:#0369A1;min-width:30px}
+    .action-plan-day.today .action-plan-dow{color:#78350F}
+    .action-plan-text{flex:1;font-size:11.5px;color:#075985;line-height:1.6}
+    .action-plan-day.today .action-plan-text{color:#7C2D12;font-weight:600}
+    .action-plan-check{width:18px;height:18px;border:1.5px solid #94A3B8;border-radius:6px;cursor:pointer;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent}
+    .action-plan-check.done{background:#10B981;border-color:#10B981;color:#fff}
 
     /* ── 반려동물 버튼 (폼 안) ── */
     .pet-row{display:flex;gap:10px;margin-bottom:14px}
@@ -1385,12 +1458,38 @@
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
+  <!-- ════════════ AI 영양사 채팅 ════════════ -->
+  <div class="screen" id="screenChat">
+    <div class="chat-header">
+      <button class="chat-back" onclick="goHome()">← 홈</button>
+      <h2>🤖 AI 영양사<span class="sub">검사 결과 기반 맞춤 답변</span></h2>
+      <div style="width:30px"></div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-suggestions" id="chatSuggestions">
+      <button class="chat-suggest" onclick="sendSuggest('이번 검사 결과 더 자세히 설명해줘')">결과 자세히</button>
+      <button class="chat-suggest" onclick="sendSuggest('오늘 점심 메뉴 추천해줘')">점심 추천</button>
+      <button class="chat-suggest" onclick="sendSuggest('가장 시급한 영양제 1개만 추천')">영양제 1개</button>
+      <button class="chat-suggest" onclick="sendSuggest('운동 추천해줘')">운동 추천</button>
+      <button class="chat-suggest" onclick="sendSuggest('피해야 할 음식은?')">피할 음식</button>
+    </div>
+    <div class="chat-input-bar">
+      <input type="text" id="chatInput" placeholder="궁금한 거 물어보세요..." onkeydown="if(event.key==='Enter')sendChatMessage()"/>
+      <button onclick="sendChatMessage()" id="chatSendBtn">↑</button>
+    </div>
+  </div>
+
   <!-- ════════════ 식단 사진 업로드 화면 ════════════ -->
   <div class="screen" id="screenFoodCapture">
     <div class="section-title">🍽 식단 분석</div>
     <div class="card">
       <div class="field">
-        <label>언제 드신 식사예요?</label>
+        <label>어떤 식사·사료인가요?</label>
+        <div class="meal-time-row" style="margin-bottom:10px">
+          <button class="meal-time-btn active" id="ftHuman" onclick="selectFoodTarget('human')">🧑<br>사람 식사</button>
+          <button class="meal-time-btn" id="ftPet" onclick="selectFoodTarget('pet')">🐾<br>반려동물 사료</button>
+        </div>
+        <label id="mealTimeLabel">언제 드신 식사예요?</label>
         <div class="meal-time-row">
           <button class="meal-time-btn" id="mtBreakfast" onclick="selectMealTime('아침')">🌅<br>아침</button>
           <button class="meal-time-btn" id="mtLunch" onclick="selectMealTime('점심')">☀️<br>점심</button>
@@ -1577,6 +1676,9 @@
         <div class="step-dot active"></div>
       </div>
 
+      <!-- 🎯 검사 변화 비교 (이전 검사 있을 때만) -->
+      <div id="compareWrap"></div>
+
       <!-- 건강 종합 점수 카드 -->
       <div class="health-score-card" id="healthScoreCard">
         <div class="score-label">HEALTH SCORE</div>
@@ -1607,6 +1709,19 @@
       </div>
 
       <div class="rec-box" id="recBox"></div>
+
+      <!-- 🤖 AI 영양사·약사 채팅 진입 -->
+      <button class="chat-btn-row" onclick="enterChat()">
+        <span class="chat-btn-ic">🤖</span>
+        <div class="chat-btn-text">
+          <div class="chat-btn-title">AI 영양사한테 물어보기</div>
+          <div class="chat-btn-sub">이번 결과 기반으로 답변해드려요</div>
+        </div>
+        <span class="chat-btn-arrow">›</span>
+      </button>
+
+      <!-- 📅 이번 주 액션 플랜 -->
+      <div id="actionPlanWrap"></div>
 
       <div class="medical-disclaimer-box" id="medicalDisclaimerBox" style="display:none">
         ⚠️ <strong>의료 안내:</strong> <span id="medicalDisclaimerText">본 결과는 의학적 진단이 아닌 일반 건강 정보입니다. 증상이 지속되거나 우려되는 경우 반드시 의료 전문가의 진료를 받으세요.</span>
@@ -2635,8 +2750,219 @@ let foodImageSrc = null;
 let selectedMealTime = null;
 let currentFoodResult = null;
 
+// ════════════════════════════════════════════════════════════════
+// 🎯 검사 변화 비교 카드
+// ════════════════════════════════════════════════════════════════
+function renderCompareCard(r, info) {
+  const wrap = document.getElementById('compareWrap');
+  wrap.innerHTML = '';
+  try {
+    const history = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
+    // 같은 subject·같은 이름의 이전 검사 찾기
+    const currentName = info.subject === 'human' ? info.humanName : info.petName;
+    const prev = history.find(h => h.fullResult && h.subject === info.subject && h.name === currentName);
+    if (!prev || !prev.fullResult) return;
+    const curScore = calculateHealthScore(r.testItems);
+    const prevScore = calculateHealthScore(prev.fullResult.testItems);
+    if (curScore === null || prevScore === null) return;
+    const diff = curScore - prevScore;
+    // 같은 항목 변화 분석 (있는 항목만)
+    const itemChanges = [];
+    const STATS = { normal:3, warning:2, danger:1 };
+    (r.testItems || []).forEach(curItem => {
+      const prevItem = (prev.fullResult.testItems || []).find(p => p.name === curItem.name);
+      if (!prevItem) return;
+      const curStat = STATS[curItem.status] || 2;
+      const prevStat = STATS[prevItem.status] || 2;
+      const change = curStat - prevStat;
+      if (change !== 0) {
+        itemChanges.push({ name: curItem.name, curStatus: curItem.status, prevStatus: prevItem.status, change });
+      }
+    });
+    const daysSince = Math.floor((Date.now() - new Date(prev.date).getTime()) / (1000*60*60*24));
+    const cardClass = diff > 0 ? '' : diff < 0 ? 'declined' : 'same';
+    const arrow = diff > 0 ? '↗' : diff < 0 ? '↘' : '→';
+    const diffText = diff > 0 ? `+${diff}점 개선!` : diff < 0 ? `${diff}점` : '동일';
+    let message = '';
+    if (diff > 10) message = '✨ 정말 큰 개선이에요! 그동안의 노력이 보여요. 이대로 유지!';
+    else if (diff > 0) message = '💪 조금씩 좋아지고 있어요. 지금 흐름 계속 가요!';
+    else if (diff === 0) message = '✅ 안정적으로 유지되고 있어요.';
+    else if (diff > -10) message = '⚠️ 약간 떨어졌네요. 최근 식단·생활 점검이 필요해요.';
+    else message = '🏥 큰 변화예요. 전문가 상담을 권장합니다.';
+    const itemsHtml = itemChanges.length > 0 ? `
+      <div class="compare-items">
+        ${itemChanges.slice(0,4).map(c => {
+          const cls = c.change > 0 ? 'up' : c.change < 0 ? 'down' : 'flat';
+          const ic = c.change > 0 ? '✨ 개선' : c.change < 0 ? '⚠️ 악화' : '동일';
+          const STAT = { normal:'정상', warning:'주의', danger:'이상' };
+          return `<div class="compare-item-row">
+            <span class="compare-item-name">${c.name}</span>
+            <span class="compare-item-change ${cls}">${STAT[c.prevStatus]} → ${STAT[c.curStatus]} ${ic}</span>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+    wrap.innerHTML = `
+      <div class="compare-card ${cardClass}">
+        <div class="compare-title">🎯 한 달 전 vs 지금</div>
+        <div class="compare-score-row">
+          <div class="compare-score-item">
+            <div class="compare-score-label">이전</div>
+            <div class="compare-score-num">${prevScore}</div>
+          </div>
+          <div class="compare-arrow">${arrow}</div>
+          <div class="compare-score-item">
+            <div class="compare-score-label">현재</div>
+            <div class="compare-score-num">${curScore}</div>
+            <div class="compare-diff">${diffText}</div>
+          </div>
+        </div>
+        ${itemsHtml}
+        <div class="compare-message">${message}</div>
+        <div class="compare-period">📅 ${daysSince}일 전 검사와 비교</div>
+      </div>`;
+  } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════════════════
+// 📅 이번 주 액션 플랜 자동 생성
+// ════════════════════════════════════════════════════════════════
+function renderActionPlan(r, info) {
+  const wrap = document.getElementById('actionPlanWrap');
+  if (!wrap) return;
+  const focus = r.focusAreas?.[0] || '신장·방광';
+  const isHuman = info.subject === 'human';
+  // 기본 7일 플랜 (요일별)
+  const days = ['일','월','화','수','목','금','토'];
+  const today = new Date().getDay();
+  const plans = isHuman ? [
+    '💧 물 2L 충분히 + 가벼운 산책 20분',
+    '🥗 채소 위주 식단 + 단백질 살짝',
+    '🏃 유산소 30분 (걷기/자전거)',
+    '🥘 한식 (저염) + 영양제 챙기기',
+    '🧘 충분한 수면 7시간 이상',
+    '🍱 식이섬유 풍부한 식단',
+    '🛌 휴식 + 일주일 컨디션 점검'
+  ] : [
+    '💧 충분한 신선한 물 + 짧은 산책',
+    '🍽 균형 잡힌 사료 + 가벼운 놀이',
+    '🐕 산책 30분 (관절 부담 X)',
+    '💊 영양제 챙기기 + 식사 시간 일정',
+    '🛌 충분한 휴식 + 깨끗한 잠자리',
+    '🪥 양치질 + 털 관리',
+    '🏥 한 주 컨디션 점검'
+  ];
+  const dayItems = days.map((d, i) => {
+    const isToday = i === today;
+    return `
+      <div class="action-plan-day ${isToday ? 'today' : ''}">
+        <div class="action-plan-dow">${d}${isToday ? ' (오늘)' : ''}</div>
+        <div class="action-plan-text">${plans[i]}</div>
+        <button class="action-plan-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></button>
+      </div>`;
+  }).join('');
+  wrap.innerHTML = `
+    <div class="action-plan">
+      <div class="action-plan-title">📅 이번 주 맞춤 액션 플랜</div>
+      ${dayItems}
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🤖 AI 영양사·약사 채팅
+// ════════════════════════════════════════════════════════════════
+let chatMessages = [];
+function enterChat() {
+  chatMessages = [];
+  document.getElementById('chatMessages').innerHTML = '';
+  showScreen('screenChat');
+  // 인사 메시지 + 결과 요약
+  if (currentResult) {
+    const score = calculateHealthScore(currentResult.testItems) || 0;
+    addChatBubble('ai', `안녕하세요! 검사 결과를 보고 답변해드릴 영양사예요. 🙂\n\n이번 종합 점수는 **${score}점**이고, ${currentResult.summary?.slice(0, 60) || '분석 완료됐어요'}\n\n궁금한 거 편하게 물어보세요!`);
+  } else {
+    addChatBubble('ai', '안녕하세요! 영양 관련해서 궁금한 거 편하게 물어보세요. 🙂');
+  }
+}
+function addChatBubble(role, text) {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  div.textContent = text;
+  c.appendChild(div);
+  c.scrollTop = c.scrollHeight;
+  chatMessages.push({ role, text });
+}
+function showTyping() {
+  const c = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.id = 'typingIndicator';
+  div.className = 'chat-msg typing';
+  div.innerHTML = '<div class="chat-typing-dots"><span></span><span></span><span></span></div>';
+  c.appendChild(div);
+  c.scrollTop = c.scrollHeight;
+}
+function hideTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+function sendSuggest(text) {
+  document.getElementById('chatInput').value = text;
+  sendChatMessage();
+}
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addChatBubble('user', text);
+  showTyping();
+  document.getElementById('chatSendBtn').disabled = true;
+  try {
+    const res = await fetch('/api/chat-nutritionist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        context: {
+          result: currentResult,
+          subject: subjectMode,
+          userName: localStorage.getItem('userName') || '',
+          history: chatMessages.slice(-6)  // 최근 6개 메시지만
+        }
+      })
+    });
+    const data = await res.json();
+    hideTyping();
+    if (data.error) {
+      addChatBubble('ai', '⚠️ ' + data.error);
+    } else {
+      addChatBubble('ai', data.reply || '답변을 받지 못했어요. 다시 시도해주세요.');
+    }
+  } catch(e) {
+    hideTyping();
+    addChatBubble('ai', '⚠️ 통신 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+  } finally {
+    document.getElementById('chatSendBtn').disabled = false;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🐾 식단/사료 대상 선택
+// ════════════════════════════════════════════════════════════════
+let foodTarget = 'human';  // 'human' or 'pet'
+function selectFoodTarget(target) {
+  foodTarget = target;
+  document.getElementById('ftHuman').classList.toggle('active', target === 'human');
+  document.getElementById('ftPet').classList.toggle('active', target === 'pet');
+  // 사료면 시간 라벨 변경
+  document.getElementById('mealTimeLabel').textContent =
+    target === 'pet' ? '언제 주는 사료예요?' : '언제 드신 식사예요?';
+}
+
 function enterFood() {
   subjectMode = 'food';
+  foodTarget = 'human';
+  selectFoodTarget('human');
   selectedMealTime = guessMealTime();
   ['Breakfast','Lunch','Dinner','Snack'].forEach(t => {
     const map = { Breakfast:'아침', Lunch:'점심', Dinner:'저녁', Snack:'간식' };
@@ -2691,7 +3017,7 @@ async function analyzeFood() {
     const res = await fetch('/api/analyze-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageB64: foodImageB64, mealTime: selectedMealTime, userProfile })
+      body: JSON.stringify({ imageB64: foodImageB64, mealTime: selectedMealTime, userProfile, target: foodTarget })
     });
     const result = await res.json();
     if (result.error) throw new Error(result.error);
@@ -3246,8 +3572,12 @@ function renderTrendChart() {
 }
 
 function renderResult(r, info) {
+  // 🎯 변화 비교 카드 (이전 검사와)
+  renderCompareCard(r, info);
   // 건강 종합 점수 계산 + 표시
   renderHealthScore(r);
+  // 📅 액션 플랜 자동 생성
+  renderActionPlan(r, info);
   const isHuman = info.subject === 'human';
   const STATUS  = { normal:'정상', warning:'주의', danger:'이상' };
   const ICON    = { normal:'✅', warning:'⚠️', danger:'🚨' };
