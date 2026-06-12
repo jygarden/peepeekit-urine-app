@@ -305,6 +305,13 @@
       background:radial-gradient(circle at 30% 30%, #FFFFFF 0%, #DAF0E5 60%, #BDE2D0 100%);
       box-shadow:0 4px 18px rgba(143,201,181,.25), inset 0 1px 2px rgba(255,255,255,.8)
     }
+    .home-card.food .hc-icon-wrap{
+      background:radial-gradient(circle at 30% 30%, #FFFFFF 0%, #FFEEDB 60%, #FFD8A8 100%);
+      box-shadow:0 4px 18px rgba(245,158,11,.22), inset 0 1px 2px rgba(255,255,255,.8)
+    }
+    .home-card.food .hc-icon{color:#F59E0B}
+    .home-card.food:active{outline-color:#F59E0B}
+    .home-card.food .card-pill.subj-pill{color:#D97706;background:rgba(245,158,11,.13)}
     .hc-icon{width:44px;height:44px;display:block}
     .home-card.human .hc-icon{color:#5E7CE2}
     .home-card.pet .hc-icon{color:#4EA483}
@@ -383,6 +390,44 @@
     .kit-cta .cta-title{font-size:14px;font-weight:800;letter-spacing:-.3px;color:#fff}
     .kit-cta .cta-sub{font-size:11px;opacity:.9;margin-top:3px;letter-spacing:-.1px;color:#fff}
     .kit-cta .cta-arrow{font-size:16px;font-weight:700}
+    /* ── 식단 분석 화면 ── */
+    .meal-time-row{display:flex;gap:8px;margin-bottom:14px}
+    .meal-time-btn{flex:1;padding:11px 6px;background:#fff;border:1.5px solid #E5E5EA;border-radius:12px;cursor:pointer;text-align:center;font-size:13px;font-weight:700;color:#6E6E73;font-family:inherit;transition:all .15s}
+    .meal-time-btn.active{background:linear-gradient(135deg,#F59E0B,#EA580C);border-color:transparent;color:#fff;box-shadow:0 3px 10px rgba(245,158,11,.32)}
+    /* 칼로리 큰 표시 */
+    .calorie-hero{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border-radius:20px;padding:22px 18px;text-align:center;color:#78350F;margin-bottom:14px;box-shadow:0 4px 18px rgba(251,191,36,.30)}
+    .calorie-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;margin-bottom:6px}
+    .calorie-num{font-size:42px;font-weight:900;letter-spacing:-1.5px;line-height:1;font-family:ui-rounded,'SF Pro Rounded',system-ui}
+    .calorie-unit{font-size:18px;font-weight:700;opacity:.8;margin-left:3px}
+    .calorie-sub{font-size:11px;margin-top:6px;opacity:.85}
+    /* 영양소 막대 */
+    .nutri-grid{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+    .nutri-title{font-size:13px;font-weight:800;color:#1D1D1F;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .nutri-item{margin-bottom:10px}
+    .nutri-item:last-child{margin-bottom:0}
+    .nutri-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+    .nutri-name{font-size:12px;color:#475569;font-weight:600}
+    .nutri-val{font-size:12px;color:#1D1D1F;font-weight:700}
+    .nutri-bar{height:6px;border-radius:3px;background:#F1F5F9;overflow:hidden}
+    .nutri-fill{height:100%;border-radius:3px;transition:width .5s ease-out}
+    .nutri-fill.carbs{background:linear-gradient(90deg,#FBBF24,#F59E0B)}
+    .nutri-fill.protein{background:linear-gradient(90deg,#A78BFA,#7C3AED)}
+    .nutri-fill.fat{background:linear-gradient(90deg,#FB7185,#E11D48)}
+    .nutri-fill.fiber{background:linear-gradient(90deg,#86EFAC,#22C55E)}
+    .nutri-fill.sodium{background:linear-gradient(90deg,#94A3B8,#64748B)}
+    .nutri-fill.sugar{background:linear-gradient(90deg,#F9A8D4,#EC4899)}
+    /* 인식된 음식 리스트 */
+    .food-list{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+    .food-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F1F5F9;font-size:13px}
+    .food-item:last-child{border-bottom:none}
+    .food-item .fname{font-weight:600;color:#1D1D1F}
+    .food-item .famount{color:#6E6E73;font-size:11px;margin-left:6px}
+    .food-item .fcal{color:#F59E0B;font-weight:800}
+    /* 하이라이트 */
+    .highlight-item{display:flex;gap:8px;padding:9px 11px;border-radius:10px;margin-bottom:6px;font-size:12px;line-height:1.5}
+    .highlight-item.good{background:#F0FDF4;color:#15803D}
+    .highlight-item.warning{background:#FFFBEB;color:#92400E}
+    .highlight-item.danger{background:#FFF1F2;color:#9F1239}
 
     /* ── 반려동물 버튼 (폼 안) ── */
     .pet-row{display:flex;gap:10px;margin-bottom:14px}
@@ -898,6 +943,39 @@
           </div>
         </button>
 
+        <!-- 식단 분석 (NEW) -->
+        <button class="home-card food" onclick="enterFood()">
+          <div class="card-top">
+            <div class="hc-icon-wrap">
+              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <!-- 그릇 + 밥 -->
+                <path d="M5 17 Q 5 23, 16 23 Q 27 23, 27 17"/>
+                <path d="M5 17 L 27 17"/>
+                <ellipse cx="16" cy="14" rx="9" ry="3"/>
+                <circle cx="13" cy="13" r=".6" data-fill/>
+                <circle cx="16" cy="13" r=".6" data-fill/>
+                <circle cx="19" cy="13" r=".6" data-fill/>
+                <!-- 김 -->
+                <path d="M11 10 Q 10 7, 11 5"/>
+                <path d="M16 9 Q 15 5, 16 3"/>
+                <path d="M21 10 Q 22 7, 21 5"/>
+              </svg>
+            </div>
+            <div class="hc-content">
+              <h3>🍽 식단 분석</h3>
+              <p>음식 사진 한 장으로<br>칼로리·영양 분석</p>
+            </div>
+            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+          </div>
+          <div class="card-footer">
+            <span class="card-pill subj-pill"><span class="dot"></span><span id="foodLastInfo">기록 없음</span></span>
+            <span class="card-pill time-pill">
+              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
+              약 30초
+            </span>
+          </div>
+        </button>
+
         <!-- 2) 반려동물 -->
         <button class="home-card pet" onclick="enterPet()">
           <div class="card-top">
@@ -1307,6 +1385,124 @@
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
+  <!-- ════════════ 식단 사진 업로드 화면 ════════════ -->
+  <div class="screen" id="screenFoodCapture">
+    <div class="section-title">🍽 식단 분석</div>
+    <div class="card">
+      <div class="field">
+        <label>언제 드신 식사예요?</label>
+        <div class="meal-time-row">
+          <button class="meal-time-btn" id="mtBreakfast" onclick="selectMealTime('아침')">🌅<br>아침</button>
+          <button class="meal-time-btn" id="mtLunch" onclick="selectMealTime('점심')">☀️<br>점심</button>
+          <button class="meal-time-btn" id="mtDinner" onclick="selectMealTime('저녁')">🌙<br>저녁</button>
+          <button class="meal-time-btn" id="mtSnack" onclick="selectMealTime('간식')">🍪<br>간식</button>
+        </div>
+      </div>
+    </div>
+    <div class="warning-banner" style="background:#FFF7ED;border-color:#FDBA74">
+      <div class="wtitle" style="color:#9A3412">📸 사진 촬영 팁</div>
+      <ul style="color:#7C2D12">
+        <li>음식 전체가 잘 보이게 위에서 촬영</li>
+        <li>식기·그릇 함께 찍으면 양 추정에 도움됨</li>
+        <li>밝은 조명 아래에서</li>
+        <li>한 식사의 음식 전부 다 한 사진에</li>
+      </ul>
+    </div>
+    <button class="upload-btn accent" style="border-color:#F59E0B" onclick="document.getElementById('foodCameraInput').click()">
+      <div class="icon">📷</div>
+      <div class="lbl" style="color:#F59E0B">카메라로 촬영</div>
+      <div class="sub">지금 바로 식사 사진을 찍어주세요</div>
+    </button>
+    <button class="upload-btn" onclick="document.getElementById('foodGalleryInput').click()">
+      <div class="icon">🖼️</div>
+      <div class="lbl">갤러리에서 선택</div>
+      <div class="sub">저장된 사진을 불러오세요</div>
+    </button>
+    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 식단 미리보기 ════════════ -->
+  <div class="screen" id="screenFoodPreview">
+    <div class="preview-wrap">
+      <img id="foodPreviewImg" src="" alt="식단 이미지"/>
+      <button class="btn-close-img" onclick="showScreen('screenFoodCapture')">×</button>
+    </div>
+    <div class="error-box" id="foodErrorBox"></div>
+    <button class="btn-primary" id="btnFoodAnalyze" onclick="analyzeFood()" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 4px 14px rgba(245,158,11,.40)">🤖 AI 식단 분석 시작</button>
+    <div class="loading-box" id="foodLoadingBox">
+      <div class="emoji">🍴</div>
+      <p>AI 영양사가 분석 중이에요...</p>
+      <small>음식 종류, 칼로리, 영양소를 계산하고 있어요</small>
+    </div>
+  </div>
+
+  <!-- ════════════ 식단 결과 화면 ════════════ -->
+  <div class="screen" id="screenFoodResult">
+    <div id="foodResultCapture">
+      <!-- 총 칼로리 Hero -->
+      <div class="calorie-hero">
+        <div class="calorie-label" id="foodMealTimeLabel">점심 · 분석 결과</div>
+        <div class="calorie-num"><span id="foodTotalCal">0</span><span class="calorie-unit">kcal</span></div>
+        <div class="calorie-sub" id="foodGradeLabel">영양 균형: 양호 (B)</div>
+      </div>
+      <!-- 인식된 음식 -->
+      <div class="food-list">
+        <div class="nutri-title">🍴 인식된 음식</div>
+        <div id="foodItemsList"></div>
+      </div>
+      <!-- 영양소 막대 -->
+      <div class="nutri-grid">
+        <div class="nutri-title">📊 영양소 분석</div>
+        <div id="foodNutriItems"></div>
+      </div>
+      <!-- 종합 평가 -->
+      <div class="card" style="background:#FAFCFF">
+        <div class="nutri-title">💬 영양사 코멘트</div>
+        <div id="foodSummary" style="font-size:13px;color:#475569;line-height:1.7"></div>
+      </div>
+      <!-- 잘된 점/주의점 -->
+      <div id="foodHighlights" style="margin-bottom:14px"></div>
+      <!-- 부족/과다 -->
+      <div class="env-health-box" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fbbf24" id="foodMissingBox">
+        <div class="etitle" style="color:#92400E">⚖️ 영양소 균형</div>
+        <div class="env-health-item" id="foodMissingItem" style="display:none">
+          <div class="elabel" style="color:#92400E">📉 더 필요한 영양소</div>
+          <div id="foodMissingText"></div>
+        </div>
+        <div class="env-health-item" id="foodExcessiveItem" style="display:none">
+          <div class="elabel" style="color:#9F1239">📈 과다 섭취</div>
+          <div id="foodExcessiveText"></div>
+        </div>
+      </div>
+      <!-- 다음 식사 -->
+      <div class="saju-box" id="foodNextMealBox" style="display:none">
+        <div class="stitle">🍱 다음 식사 추천</div>
+        <div id="foodNextMeal" style="font-size:13px;color:#1E40AF;line-height:1.7"></div>
+      </div>
+      <!-- 추천 영양제 -->
+      <div class="reco-section" id="foodSuppSection" style="display:none">
+        <div class="reco-header">
+          <span class="reco-icon">💊</span>
+          <span class="reco-title">이 식단에 추가 권장 영양제</span>
+        </div>
+        <div id="foodSuppList"></div>
+      </div>
+      <!-- 팁 -->
+      <div class="tips-box" id="foodTipsBox" style="display:none">
+        <div class="ttitle">💡 관리 팁</div>
+        <div id="foodTipsList"></div>
+      </div>
+      <img id="foodResultImg" src="" alt="식단 이미지" style="width:100%;border-radius:12px;margin-bottom:14px"/>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn-download" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 3px 10px rgba(245,158,11,.35)" onclick="downloadFoodResult()">📥 결과 이미지 저장</button>
+      <div class="action-row">
+        <button class="btn-retake" style="border-color:#F59E0B;color:#F59E0B" onclick="showScreen('screenFoodCapture')">📷 다시 찍기</button>
+        <button class="btn-new" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 3px 10px rgba(245,158,11,.35)" onclick="goHome()">🏠 홈으로</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ════════════ 촬영 화면 ════════════ -->
   <div class="screen" id="screenCapture">
     <div class="step-indicator">
@@ -1611,6 +1807,8 @@
   </div>
 </div>
 
+<input type="file" id="foodCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleFoodFile(this)"/>
+<input type="file" id="foodGalleryInput" accept="image/*" style="display:none" onchange="handleFoodFile(this)"/>
 <input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)"/>
 <input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleFile(this)"/>
 
@@ -1714,6 +1912,13 @@ function updateHomeStats() {
       lastHuman ? `마지막 기록 ${timeAgo(lastHuman.date)}` : '마지막 기록 없음';
     document.getElementById('petLastInfo').textContent =
       lastPet ? `최근 기록 ${timeAgo(lastPet.date)}` : '최근 기록 없음';
+    // 식단 기록
+    try {
+      const foodH = JSON.parse(localStorage.getItem('foodHistoryV1')||'[]');
+      const lastFood = foodH[0];
+      const foodEl = document.getElementById('foodLastInfo');
+      if (foodEl) foodEl.textContent = lastFood ? `최근 ${timeAgo(lastFood.date)}` : '아직 기록 없음';
+    } catch(e) {}
 
     // 최근 검사 기록 카드
     const recent = all[0];
@@ -2420,6 +2625,196 @@ function enterHuman() {
     renderProfileList();
     showScreen('screenProfilePicker');
   }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🍽 식단 분석 시스템
+// ════════════════════════════════════════════════════════════════
+let foodImageB64 = null;
+let foodImageSrc = null;
+let selectedMealTime = null;
+let currentFoodResult = null;
+
+function enterFood() {
+  subjectMode = 'food';
+  selectedMealTime = guessMealTime();
+  ['Breakfast','Lunch','Dinner','Snack'].forEach(t => {
+    const map = { Breakfast:'아침', Lunch:'점심', Dinner:'저녁', Snack:'간식' };
+    document.getElementById('mt'+t).classList.toggle('active', map[t] === selectedMealTime);
+  });
+  showScreen('screenFoodCapture');
+}
+function guessMealTime() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 11) return '아침';
+  if (h >= 11 && h < 15) return '점심';
+  if (h >= 17 && h < 22) return '저녁';
+  return '간식';
+}
+function selectMealTime(time) {
+  selectedMealTime = time;
+  const map = { '아침':'Breakfast', '점심':'Lunch', '저녁':'Dinner', '간식':'Snack' };
+  ['Breakfast','Lunch','Dinner','Snack'].forEach(t => {
+    document.getElementById('mt'+t).classList.toggle('active', t === map[time]);
+  });
+}
+
+function handleFoodFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    foodImageSrc = e.target.result;
+    foodImageB64 = e.target.result.split(',')[1];
+    document.getElementById('foodPreviewImg').src = foodImageSrc;
+    document.getElementById('foodErrorBox').classList.remove('show');
+    showScreen('screenFoodPreview');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+async function analyzeFood() {
+  if (!foodImageB64) return;
+  const btn = document.getElementById('btnFoodAnalyze');
+  const loading = document.getElementById('foodLoadingBox');
+  btn.disabled = true;
+  btn.textContent = '🔄 분석 중...';
+  loading.classList.add('show');
+  document.getElementById('foodErrorBox').classList.remove('show');
+
+  // 사용자 프로필 (사람 프로필 있으면 활용)
+  const humanProfiles = getProfiles().filter(p => p.type === 'human');
+  const userProfile = humanProfiles[0] || null;
+
+  try {
+    const res = await fetch('/api/analyze-food', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageB64: foodImageB64, mealTime: selectedMealTime, userProfile })
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    currentFoodResult = result;
+    renderFoodResult(result);
+    saveFoodHistory(result);
+    if (canEarn('test')) { incrementDailyCount('test'); addPoints(100, '식단 분석 완료'); }
+    showScreen('screenFoodResult');
+  } catch (err) {
+    const box = document.getElementById('foodErrorBox');
+    box.textContent = '⚠️ ' + (err.message || '분석 실패');
+    box.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 AI 식단 분석 시작';
+    loading.classList.remove('show');
+  }
+}
+
+function renderFoodResult(r) {
+  // Hero
+  document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
+  document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
+  const grade = r.balanceGrade || 'B';
+  const label = r.balanceLabel || '양호';
+  document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
+  // 음식 목록
+  const items = (r.foods || []).map(f =>
+    `<div class="food-item">
+      <div><span class="fname">${f.name}</span><span class="famount">${f.amount || ''}</span></div>
+      <div class="fcal">${(f.calories || 0).toLocaleString()} kcal</div>
+    </div>`
+  ).join('');
+  document.getElementById('foodItemsList').innerHTML = items || '<div style="color:#94A3B8;font-size:12px;padding:8px">음식 인식 결과 없음</div>';
+  // 영양소 막대 (대략적 기준치 기반)
+  const n = r.nutrition || {};
+  const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
+  const labels = { carbs:'탄수화물', protein:'단백질', fat:'지방', fiber:'식이섬유', sodium:'나트륨', sugar:'당류' };
+  const units = { carbs:'g', protein:'g', fat:'g', fiber:'g', sodium:'mg', sugar:'g' };
+  const nutriHtml = Object.keys(targets).map(k => {
+    const val = n[k] || 0;
+    const pct = Math.min(100, Math.round(val / targets[k] * 100));
+    return `<div class="nutri-item">
+      <div class="nutri-row">
+        <span class="nutri-name">${labels[k]}</span>
+        <span class="nutri-val">${val}${units[k]} <span style="color:#94A3B8;font-weight:500">/ ${targets[k]}${units[k]}</span></span>
+      </div>
+      <div class="nutri-bar"><div class="nutri-fill ${k}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('foodNutriItems').innerHTML = nutriHtml;
+  // 요약
+  document.getElementById('foodSummary').textContent = r.summary || '';
+  // 하이라이트
+  const hl = (r.highlights || []).map(h => {
+    const ic = h.type === 'good' ? '✅' : h.type === 'warning' ? '⚠️' : '🚨';
+    return `<div class="highlight-item ${h.type || 'good'}">${ic} ${h.text}</div>`;
+  }).join('');
+  document.getElementById('foodHighlights').innerHTML = hl;
+  // 부족/과다
+  const missing = (r.missing || []).join(', ');
+  const excessive = (r.excessive || []).join(', ');
+  const missBox = document.getElementById('foodMissingBox');
+  if (missing) {
+    document.getElementById('foodMissingText').textContent = missing;
+    document.getElementById('foodMissingItem').style.display = '';
+  } else { document.getElementById('foodMissingItem').style.display = 'none'; }
+  if (excessive) {
+    document.getElementById('foodExcessiveText').textContent = excessive;
+    document.getElementById('foodExcessiveItem').style.display = '';
+  } else { document.getElementById('foodExcessiveItem').style.display = 'none'; }
+  missBox.style.display = (missing || excessive) ? 'block' : 'none';
+  // 다음 식사
+  if (r.nextMeal) {
+    document.getElementById('foodNextMeal').textContent = r.nextMeal;
+    document.getElementById('foodNextMealBox').style.display = 'block';
+  } else { document.getElementById('foodNextMealBox').style.display = 'none'; }
+  // 영양제
+  const supp = r.supplements || [];
+  if (supp.length > 0) {
+    document.getElementById('foodSuppList').innerHTML = supp.map(s =>
+      `<div class="supp-card priority-권장">
+        <div class="supp-top"><span class="supp-name">💊 ${s.name}</span></div>
+        <div class="supp-reason">${s.reason}</div>
+      </div>`).join('');
+    document.getElementById('foodSuppSection').style.display = 'block';
+  } else { document.getElementById('foodSuppSection').style.display = 'none'; }
+  // 팁
+  if (r.tips && r.tips.length > 0) {
+    document.getElementById('foodTipsList').innerHTML = r.tips.map(t =>
+      `<div class="tip-row"><span class="tip-check">✓</span><div class="tip-text">${t}</div></div>`).join('');
+    document.getElementById('foodTipsBox').style.display = 'block';
+  } else { document.getElementById('foodTipsBox').style.display = 'none'; }
+  document.getElementById('foodResultImg').src = foodImageSrc;
+}
+
+function saveFoodHistory(result) {
+  try {
+    const key = 'foodHistoryV1';
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    history.unshift({
+      id: Date.now(),
+      date: new Date().toISOString(),
+      mealTime: selectedMealTime,
+      totalCalories: result.totalCalories,
+      balanceScore: result.balanceScore,
+      balanceGrade: result.balanceGrade,
+      foods: (result.foods || []).map(f => f.name).join(', '),
+      summary: result.summary
+    });
+    localStorage.setItem(key, JSON.stringify(history.slice(0, 30)));
+  } catch(e) {}
+}
+
+async function downloadFoodResult() {
+  try {
+    const el = document.getElementById('foodResultCapture');
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#FAFCFF' });
+    const link = document.createElement('a');
+    link.download = `식단분석_${selectedMealTime}_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch(e) { alert('저장 중 오류'); }
 }
 
 // 촬영 화면에서 뒤로
