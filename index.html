@@ -4096,15 +4096,24 @@ async function saveToHistory({ result, recordData, subject }) {
     });
     // 최근 12개만 보관 (localStorage 용량 절약)
     let trimmed = history.slice(0, 12);
-    // 용량 초과 시 단계적으로 줄임
-    while (trimmed.length > 1) {
+    // 일단 저장 시도, 실패하면 단계적으로 줄임
+    let saved = false;
+    while (trimmed.length >= 1 && !saved) {
       try {
         localStorage.setItem(key, JSON.stringify(trimmed));
-        break;
+        saved = true;
       } catch(quotaErr) {
-        trimmed = trimmed.slice(0, trimmed.length - 1);
+        if (trimmed.length === 1) {
+          // 단 1개도 못 저장 → 이미지 빼고 재시도
+          trimmed[0].image = null;
+          try { localStorage.setItem(key, JSON.stringify(trimmed)); saved = true; }
+          catch(e2) { console.error('히스토리 저장 실패 (이미지 제외해도):', e2); break; }
+        } else {
+          trimmed = trimmed.slice(0, trimmed.length - 1);
+        }
       }
     }
+    if (!saved) console.error('히스토리 저장 완전 실패');
   } catch(e) { console.error('히스토리 저장 실패:', e); }
 }
 
