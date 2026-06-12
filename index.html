@@ -3371,13 +3371,41 @@ function renderFoodResult(r) {
       ${r.lightTips.map(t => `<div class="light-tip-item"><span>${t}</span></div>`).join('')}
     </div>`;
   }
-  // 컨테이너 (foodTipsBox 위에 한 번에 삽입)
+  // ⭐ 영양소 사전 — 모든 keyNutrients를 한 곳에 모음 (어떤 재료에서 왔는지)
+  const nutrientMap = {};
+  (r.foods || []).forEach(f => {
+    (f.keyNutrients || []).forEach(n => {
+      if (!nutrientMap[n.name]) nutrientMap[n.name] = { benefit: n.benefit, foods: [] };
+      nutrientMap[n.name].foods.push(f.name);
+    });
+  });
+  let nutrientDictHtml = '';
+  if (Object.keys(nutrientMap).length > 0) {
+    nutrientDictHtml = `<div class="pairings-box" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border-color:#FBBF24">
+      <div class="pairings-title" style="color:#92400E">⭐ 이 식사의 핵심 영양소</div>
+      ${Object.entries(nutrientMap).map(([name, d]) => `
+        <div class="pair-item" style="color:#78350F;background:rgba(255,255,255,.8)">
+          <div class="pair-combo">${name}</div>
+          <div class="pair-reason" style="margin-bottom:3px">${d.benefit}</div>
+          <div style="font-size:10.5px;color:#A16207;font-weight:600">📍 ${d.foods.join(', ')}에서</div>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+
+  // 옛 nextMealBox / tipsBox 숨김 (새로운 디자인으로 대체)
+  const oldNextBox = document.getElementById('foodNextMealBox');
+  if (oldNextBox) oldNextBox.style.display = 'none';
+  const oldTipsBox = document.getElementById('foodTipsBox');
+  if (oldTipsBox) oldTipsBox.style.display = 'none';
+
+  // 컨테이너에 모두 모아서 삽입
   const container = document.getElementById('foodHighlights');
   const baseHighlights = (r.highlights || []).map(h => {
     const ic = h.type === 'good' ? '✅' : h.type === 'warning' ? '⚠️' : '🚨';
     return `<div class="highlight-item ${h.type || 'good'}">${ic} ${h.text}</div>`;
   }).join('');
-  container.innerHTML = baseHighlights + todayHtml + pairingsHtml + lightTipsHtml + nextMealHtml;
+  container.innerHTML = baseHighlights + todayHtml + nutrientDictHtml + pairingsHtml + lightTipsHtml + nextMealHtml;
   // 영양소 막대 (대략적 기준치 기반)
   const n = r.nutrition || {};
   const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
