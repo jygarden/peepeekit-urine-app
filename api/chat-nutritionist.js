@@ -52,11 +52,13 @@ module.exports = async function handler(req, res) {
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(response.status).json({ error: 'AI 응답 오류: ' + errText.slice(0, 100) });
+      return res.status(response.status).json({ error: 'AI 응답 오류: ' + errText.slice(0, 150) });
     }
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '죄송해요, 답변을 만들지 못했어요.';
+    let reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '죄송해요, 답변을 만들지 못했어요.';
+    // 혹시 모를 마크다운 정리
+    reply = reply.trim();
 
     return res.status(200).json({ reply });
   } catch (err) {
