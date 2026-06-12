@@ -501,6 +501,68 @@
     .action-plan-day.today .action-plan-text{color:#7C2D12;font-weight:600}
     .action-plan-check{width:18px;height:18px;border:1.5px solid #94A3B8;border-radius:6px;cursor:pointer;flex-shrink:0;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent}
     .action-plan-check.done{background:#10B981;border-color:#10B981;color:#fff}
+    /* ── 🔍 음식 인식 확인 화면 ── */
+    .confirm-hero{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border-radius:18px;padding:18px;text-align:center;color:#78350F;margin-bottom:14px}
+    .confirm-hero h2{font-size:16px;font-weight:800;margin-bottom:4px}
+    .confirm-hero p{font-size:12px;opacity:.85;line-height:1.5}
+    .confirm-food-card{background:#fff;border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .confirm-food-name{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .confirm-food-name input{flex:1;background:#F7F7F5;border:1.5px solid #E5E5EA;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:700;color:#1D1D1F;outline:none;font-family:inherit}
+    .confirm-food-name input:focus{border-color:#F59E0B;background:#fff}
+    .confirm-ingredients-label{font-size:11px;font-weight:700;color:#6E6E73;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+    .confirm-ing-chip{display:inline-flex;align-items:center;gap:6px;background:#FFFBEB;border:1.5px solid #FCD34D;color:#78350F;border-radius:999px;padding:6px 11px 6px 14px;font-size:12.5px;font-weight:600;margin:0 5px 5px 0}
+    .confirm-ing-chip input{background:transparent;border:none;outline:none;width:auto;font-family:inherit;font-size:12.5px;font-weight:600;color:#78350F;padding:0;max-width:120px;min-width:30px}
+    .confirm-ing-chip button{background:rgba(0,0,0,.10);border:none;width:18px;height:18px;border-radius:50%;font-size:10px;color:#78350F;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0}
+    .confirm-ing-chip button:hover{background:rgba(0,0,0,.18)}
+    .confirm-add-btn{background:#fff;border:1.5px dashed #F59E0B;color:#F59E0B;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin:5px 5px 0 0}
+    .confirm-actions{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+    /* 음식별 카드(결과) — 기능성 영양소 표시 */
+    .food-detail-card{background:#fff;border-radius:14px;padding:13px 16px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05);border-left:3px solid #F59E0B}
+    .food-detail-name{font-size:14px;font-weight:800;color:#1D1D1F;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+    .food-detail-amount{font-size:11px;color:#6E6E73;font-weight:500}
+    .food-detail-cal{color:#F59E0B;font-weight:800;font-size:13px}
+    .key-nutrient-row{background:linear-gradient(135deg,#FEF3C7,#FFFBEB);border-radius:10px;padding:9px 11px;margin-top:8px;font-size:11.5px;color:#78350F;line-height:1.5}
+    .key-nutrient-row strong{color:#78350F;font-weight:800}
+    /* 음식 궁합 박스 */
+    .pairings-box{background:linear-gradient(135deg,#F0FDF4,#DBEAFE);border:1.5px solid #BBF7D0;border-radius:16px;padding:16px;margin-bottom:12px}
+    .pairings-title{font-size:13.5px;font-weight:800;color:#065F46;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .pair-item{background:rgba(255,255,255,.7);border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:12px;line-height:1.5}
+    .pair-item.good{color:#065F46}
+    .pair-item.warning{color:#9A3412;background:rgba(255,237,213,.8)}
+    .pair-combo{font-weight:700;margin-bottom:2px}
+    .pair-reason{font-size:11px;opacity:.85}
+    /* 오늘 비교 박스 */
+    .today-compare-box{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1.5px solid #93C5FD;border-radius:14px;padding:14px 16px;margin-bottom:12px;font-size:12.5px;color:#1E40AF;line-height:1.6}
+    .today-compare-box::before{content:"💬 ";font-size:14px}
+    /* 라이트 팁 박스 */
+    .light-tips-box{background:linear-gradient(135deg,#FAF5FF,#F3E8FF);border:1.5px solid #C4B5FD;border-radius:14px;padding:14px 16px;margin-bottom:12px}
+    .light-tips-title{font-size:13px;font-weight:800;color:#5B21B6;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+    .light-tip-item{font-size:12px;color:#4C1D95;line-height:1.6;padding:6px 0;display:flex;gap:8px}
+    .light-tip-item:not(:last-child){border-bottom:1px solid rgba(196,181,253,.3)}
+    .light-tip-item::before{content:"💡";flex-shrink:0}
+    /* 다음 식사 (현실적) */
+    .next-meal-cta{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border:1.5px solid #FBBF24;border-radius:16px;padding:14px 16px;margin-bottom:12px}
+    .next-meal-title{font-size:13px;font-weight:800;color:#78350F;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+    .next-meal-menu{font-size:14px;font-weight:800;color:#9A3412;margin-bottom:4px}
+    .next-meal-reason{font-size:12px;color:#92400E;line-height:1.5}
+    /* ── 📊 종합 리포트 화면 ── */
+    #screenReport{padding:0}
+    .report-wrap{padding:22px 18px 40px}
+    .report-back{background:none;border:none;color:#F59E0B;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:14px}
+    .report-tabs{display:flex;gap:6px;background:#F1F5F9;border-radius:12px;padding:4px;margin-bottom:18px}
+    .report-tab{flex:1;padding:9px;border:none;background:transparent;border-radius:9px;font-size:12.5px;font-weight:700;color:#64748B;cursor:pointer;font-family:inherit;transition:all .15s}
+    .report-tab.active{background:#fff;color:#F59E0B;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .report-summary-card{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border-radius:18px;padding:18px;color:#78350F;margin-bottom:14px;text-align:center}
+    .report-summary-num{font-size:30px;font-weight:900;line-height:1}
+    .report-summary-label{font-size:11px;opacity:.85;margin-top:4px}
+    .report-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+    .report-stat-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .report-stat-num{font-size:22px;font-weight:900;color:#1D1D1F;line-height:1}
+    .report-stat-label{font-size:11px;color:#6E6E73;margin-top:4px}
+    .report-section{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+    .report-section-title{font-size:13.5px;font-weight:800;color:#1D1D1F;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .nutri-deficit-bar{height:6px;border-radius:3px;background:#F1F5F9;overflow:hidden;margin-top:5px}
+    .nutri-deficit-fill{height:100%;background:linear-gradient(90deg,#EF4444,#F59E0B);border-radius:3px}
     /* ── 접기·펼치기 카드 (UX 정리) ── */
     .collapse-card{background:#fff;border-radius:18px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #f1f5f9;overflow:hidden;transition:box-shadow .2s}
     .collapse-card.open{box-shadow:0 2px 10px rgba(0,0,0,.06)}
@@ -1136,6 +1198,16 @@
         </button>
       </div>
 
+      <!-- 📊 종합 영양 리포트 진입 -->
+      <button class="kit-purchase" onclick="goReport()" style="border:none;background:linear-gradient(135deg,#FEF3C7,#FCD34D);width:100%;cursor:pointer;font-family:inherit">
+        <div class="kit-emoji">📊</div>
+        <div class="kit-text">
+          <div class="kit-title">오늘·이번 주 영양 리포트</div>
+          <div class="kit-sub">식단 데이터로 만든 종합 분석</div>
+        </div>
+        <svg class="kit-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+      </button>
+
       <!-- 키트 구매 카드 -->
       <a class="kit-purchase" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
         <div class="kit-emoji">🧪</div>
@@ -1559,6 +1631,33 @@
       <div class="emoji">🍴</div>
       <p>AI 영양사가 분석 중이에요...</p>
       <small>음식 종류, 칼로리, 영양소를 계산하고 있어요</small>
+    </div>
+  </div>
+
+  <!-- ════════════ 🔍 음식 인식 확인 화면 ════════════ -->
+  <div class="screen" id="screenFoodConfirm">
+    <div class="confirm-hero">
+      <h2>🔍 인식한 음식·재료가 맞나요?</h2>
+      <p>틀리면 직접 수정해주세요. 정확할수록 더 좋은 분석!</p>
+    </div>
+    <div id="confirmFoodList"></div>
+    <div class="confirm-actions">
+      <button class="btn-primary" style="background:linear-gradient(135deg,#F59E0B,#EA580C)" onclick="confirmAndAnalyze()">✅ 이대로 정확하게 분석하기</button>
+      <button class="btn-outline" onclick="showScreen('screenFoodPreview')">📷 다시 찍기</button>
+    </div>
+  </div>
+
+  <!-- ════════════ 📊 종합 리포트 화면 ════════════ -->
+  <div class="screen" id="screenReport">
+    <div class="report-wrap">
+      <button class="report-back" onclick="goHome()">← 홈으로</button>
+      <div style="font-size:21px;font-weight:800;color:#1D1D1F;margin-bottom:6px">📊 종합 영양 리포트</div>
+      <div style="font-size:12px;color:#6E6E73;margin-bottom:18px">식단 데이터 기반 자동 리포트</div>
+      <div class="report-tabs">
+        <button class="report-tab active" id="rtToday" onclick="switchReport('today')">오늘</button>
+        <button class="report-tab" id="rtWeek" onclick="switchReport('week')">이번 주</button>
+      </div>
+      <div id="reportContent"></div>
     </div>
   </div>
 
@@ -3099,24 +3198,99 @@ function handleFoodFile(input) {
   input.value = '';
 }
 
+// 1단계: AI가 음식·재료 인식 → 확인 화면으로
+let detectedFoodsData = null;
 async function analyzeFood() {
   if (!foodImageB64) return;
   const btn = document.getElementById('btnFoodAnalyze');
   const loading = document.getElementById('foodLoadingBox');
   btn.disabled = true;
-  btn.textContent = '🔄 분석 중...';
+  btn.textContent = '🔍 음식 인식 중...';
   loading.classList.add('show');
   document.getElementById('foodErrorBox').classList.remove('show');
-
-  // 사용자 프로필 (사람 프로필 있으면 활용)
-  const humanProfiles = getProfiles().filter(p => p.type === 'human');
-  const userProfile = humanProfiles[0] || null;
-
   try {
     const res = await fetch('/api/analyze-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageB64: foodImageB64, mealTime: selectedMealTime, userProfile, target: foodTarget })
+      body: JSON.stringify({ imageB64: foodImageB64, target: foodTarget, mode: 'detect' })
+    });
+    const result = await res.json();
+    if (result.error) throw new Error(result.error);
+    detectedFoodsData = result.detectedFoods || [];
+    renderConfirmFoods();
+    showScreen('screenFoodConfirm');
+  } catch (err) {
+    const box = document.getElementById('foodErrorBox');
+    box.textContent = '⚠️ ' + (err.message || '인식 실패');
+    box.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🤖 AI 식단 분석 시작';
+    loading.classList.remove('show');
+  }
+}
+
+// 확인 화면 렌더링
+function renderConfirmFoods() {
+  const list = document.getElementById('confirmFoodList');
+  list.innerHTML = detectedFoodsData.map((food, fi) => `
+    <div class="confirm-food-card">
+      <div class="confirm-food-name">
+        <span style="font-size:20px">🍽</span>
+        <input type="text" value="${escapeHtml(food.name)}" oninput="updateFoodName(${fi}, this.value)"/>
+      </div>
+      <div class="confirm-ingredients-label">재료 (수정·삭제·추가)</div>
+      <div id="ingredients-${fi}">
+        ${(food.ingredients || []).map((ing, ii) => `
+          <span class="confirm-ing-chip">
+            <input type="text" value="${escapeHtml(ing)}" oninput="updateIngredient(${fi}, ${ii}, this.value)" style="width:${Math.max(ing.length*8, 40)}px"/>
+            <button onclick="removeIngredient(${fi}, ${ii})">✕</button>
+          </span>
+        `).join('')}
+        <button class="confirm-add-btn" onclick="addIngredient(${fi})">＋ 재료 추가</button>
+      </div>
+    </div>
+  `).join('');
+}
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function updateFoodName(fi, val) { if (detectedFoodsData[fi]) detectedFoodsData[fi].name = val; }
+function updateIngredient(fi, ii, val) { if (detectedFoodsData[fi] && detectedFoodsData[fi].ingredients) detectedFoodsData[fi].ingredients[ii] = val; }
+function removeIngredient(fi, ii) {
+  if (detectedFoodsData[fi] && detectedFoodsData[fi].ingredients) {
+    detectedFoodsData[fi].ingredients.splice(ii, 1);
+    renderConfirmFoods();
+  }
+}
+function addIngredient(fi) {
+  const val = prompt('추가할 재료 이름:');
+  if (val && val.trim()) {
+    detectedFoodsData[fi].ingredients = detectedFoodsData[fi].ingredients || [];
+    detectedFoodsData[fi].ingredients.push(val.trim());
+    renderConfirmFoods();
+  }
+}
+
+// 2단계: 확인된 데이터로 풀 분석
+async function confirmAndAnalyze() {
+  const btn = event.target;
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '🤖 AI 영양사 분석 중...';
+  // 사용자 프로필
+  const humanProfiles = getProfiles().filter(p => p.type === 'human');
+  const userProfile = humanProfiles[0] || null;
+  // 오늘 다른 식사들 (개인화)
+  const todayMeals = getTodayMeals();
+  try {
+    const res = await fetch('/api/analyze-food', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageB64: foodImageB64, mealTime: selectedMealTime, userProfile,
+        target: foodTarget, mode: 'analyze',
+        confirmedFoods: detectedFoodsData,
+        todayMeals
+      })
     });
     const result = await res.json();
     if (result.error) throw new Error(result.error);
@@ -3126,14 +3300,22 @@ async function analyzeFood() {
     if (canEarn('test')) { incrementDailyCount('test'); addPoints(100, '식단 분석 완료'); }
     showScreen('screenFoodResult');
   } catch (err) {
-    const box = document.getElementById('foodErrorBox');
-    box.textContent = '⚠️ ' + (err.message || '분석 실패');
-    box.classList.add('show');
+    alert('분석 실패: ' + (err.message || ''));
   } finally {
     btn.disabled = false;
-    btn.textContent = '🤖 AI 식단 분석 시작';
-    loading.classList.remove('show');
+    btn.textContent = originalText;
   }
+}
+
+function getTodayMeals() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const history = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    return history
+      .filter(h => h.date && h.date.startsWith(today))
+      .slice(0, 5)
+      .map(h => ({ mealTime: h.mealTime, foods: h.foods, totalCalories: h.totalCalories }));
+  } catch(e) { return []; }
 }
 
 function renderFoodResult(r) {
@@ -3143,14 +3325,59 @@ function renderFoodResult(r) {
   const grade = r.balanceGrade || 'B';
   const label = r.balanceLabel || '양호';
   document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
-  // 음식 목록
-  const items = (r.foods || []).map(f =>
-    `<div class="food-item">
-      <div><span class="fname">${f.name}</span><span class="famount">${f.amount || ''}</span></div>
-      <div class="fcal">${(f.calories || 0).toLocaleString()} kcal</div>
-    </div>`
-  ).join('');
+  // 음식 목록 + 기능성 영양소
+  const items = (r.foods || []).map(f => {
+    const nutrients = (f.keyNutrients || []).map(n =>
+      `<div style="margin-top:4px"><strong>${n.name}</strong> — ${n.benefit}</div>`
+    ).join('');
+    return `<div class="food-detail-card">
+      <div class="food-detail-name">
+        <div><span style="font-weight:800">${f.name}</span> <span class="food-detail-amount">${f.amount || ''}</span></div>
+        <div class="food-detail-cal">${(f.calories || 0).toLocaleString()} kcal</div>
+      </div>
+      ${nutrients ? `<div class="key-nutrient-row">⭐ <strong>핵심 영양소</strong>${nutrients}</div>` : ''}
+    </div>`;
+  }).join('');
   document.getElementById('foodItemsList').innerHTML = items || '<div style="color:#94A3B8;font-size:12px;padding:8px">음식 인식 결과 없음</div>';
+
+  // 🍱 다음 식사 (현실적·센스있게)
+  let nextMealHtml = '';
+  if (r.nextMeal && typeof r.nextMeal === 'object') {
+    nextMealHtml = `<div class="next-meal-cta">
+      <div class="next-meal-title">🍱 다음 식사 추천</div>
+      <div class="next-meal-menu">${r.nextMeal.menu || ''}</div>
+      <div class="next-meal-reason">${r.nextMeal.reason || ''}</div>
+    </div>`;
+  } else if (r.nextMeal) {
+    nextMealHtml = `<div class="next-meal-cta">
+      <div class="next-meal-title">🍱 다음 식사 추천</div>
+      <div class="next-meal-menu">${r.nextMeal}</div>
+    </div>`;
+  }
+  // 음식 궁합 박스
+  let pairingsHtml = '';
+  if (r.pairings && (r.pairings.good?.length || r.pairings.warning?.length)) {
+    const goods = (r.pairings.good||[]).map(p => `<div class="pair-item good"><div class="pair-combo">✨ ${p.combo}</div><div class="pair-reason">${p.benefit}</div></div>`).join('');
+    const warns = (r.pairings.warning||[]).map(p => `<div class="pair-item warning"><div class="pair-combo">⚠️ ${p.combo}</div><div class="pair-reason">${p.reason}</div></div>`).join('');
+    pairingsHtml = `<div class="pairings-box"><div class="pairings-title">🤝 음식 궁합 분석</div>${goods}${warns}</div>`;
+  }
+  // 오늘 비교
+  const todayHtml = r.todayComparison ? `<div class="today-compare-box">${r.todayComparison}</div>` : '';
+  // 라이트 팁
+  let lightTipsHtml = '';
+  if (r.lightTips && r.lightTips.length > 0) {
+    lightTipsHtml = `<div class="light-tips-box">
+      <div class="light-tips-title">🌿 건강 관리 꿀팁</div>
+      ${r.lightTips.map(t => `<div class="light-tip-item"><span>${t}</span></div>`).join('')}
+    </div>`;
+  }
+  // 컨테이너 (foodTipsBox 위에 한 번에 삽입)
+  const container = document.getElementById('foodHighlights');
+  const baseHighlights = (r.highlights || []).map(h => {
+    const ic = h.type === 'good' ? '✅' : h.type === 'warning' ? '⚠️' : '🚨';
+    return `<div class="highlight-item ${h.type || 'good'}">${ic} ${h.text}</div>`;
+  }).join('');
+  container.innerHTML = baseHighlights + todayHtml + pairingsHtml + lightTipsHtml + nextMealHtml;
   // 영양소 막대 (대략적 기준치 기반)
   const n = r.nutrition || {};
   const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
@@ -3225,10 +3452,137 @@ function saveFoodHistory(result) {
       balanceScore: result.balanceScore,
       balanceGrade: result.balanceGrade,
       foods: (result.foods || []).map(f => f.name).join(', '),
+      nutrition: result.nutrition,
+      missing: result.missing,
+      excessive: result.excessive,
       summary: result.summary
     });
-    localStorage.setItem(key, JSON.stringify(history.slice(0, 30)));
+    localStorage.setItem(key, JSON.stringify(history.slice(0, 60)));
   } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════════════════
+// 📊 종합 영양 리포트 (오늘/이번 주)
+// ════════════════════════════════════════════════════════════════
+let reportTab = 'today';
+function goReport() {
+  reportTab = 'today';
+  switchReport('today');
+  showScreen('screenReport');
+}
+function switchReport(tab) {
+  reportTab = tab;
+  document.getElementById('rtToday').classList.toggle('active', tab === 'today');
+  document.getElementById('rtWeek').classList.toggle('active', tab === 'week');
+  renderReport();
+}
+function renderReport() {
+  const target = document.getElementById('reportContent');
+  try {
+    const all = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    const cutoff = reportTab === 'today'
+      ? new Date(new Date().toISOString().split('T')[0]).getTime()
+      : Date.now() - 7*24*60*60*1000;
+    const list = all.filter(h => new Date(h.date).getTime() >= cutoff);
+    if (list.length === 0) {
+      target.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#94A3B8;font-size:13px;line-height:1.7">
+        ${reportTab === 'today' ? '오늘' : '이번 주'} 식단 기록이 없어요!<br>식단 분석을 한 번 해보세요 🍽
+      </div>`;
+      return;
+    }
+    // 누적 통계
+    const totalCal = list.reduce((s,h) => s + (h.totalCalories || 0), 0);
+    const avgScore = Math.round(list.reduce((s,h) => s + (h.balanceScore || 0), 0) / list.length);
+    const totalNutri = { carbs:0, protein:0, fat:0, fiber:0, sodium:0, sugar:0 };
+    list.forEach(h => {
+      if (h.nutrition) Object.keys(totalNutri).forEach(k => totalNutri[k] += (h.nutrition[k] || 0));
+    });
+    // 부족·과다 영양소 빈도
+    const missCount = {}, excCount = {};
+    list.forEach(h => {
+      (h.missing || []).forEach(m => missCount[m] = (missCount[m]||0) + 1);
+      (h.excessive || []).forEach(e => excCount[e] = (excCount[e]||0) + 1);
+    });
+    const topMissing = Object.entries(missCount).sort((a,b) => b[1]-a[1]).slice(0, 5);
+    const topExcessive = Object.entries(excCount).sort((a,b) => b[1]-a[1]).slice(0, 3);
+    // 권장량 비교 (오늘 vs 일주일)
+    const target_targets = reportTab === 'today'
+      ? { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 }
+      : { carbs:2100, protein:420, fat:455, fiber:175, sodium:14000, sugar:350 };
+    const nutriHtml = Object.keys(target_targets).map(k => {
+      const val = totalNutri[k];
+      const tg = target_targets[k];
+      const pct = Math.min(100, Math.round(val / tg * 100));
+      const labels = { carbs:'탄수화물', protein:'단백질', fat:'지방', fiber:'식이섬유', sodium:'나트륨', sugar:'당류' };
+      const units = { carbs:'g', protein:'g', fat:'g', fiber:'g', sodium:'mg', sugar:'g' };
+      const cls = pct >= 90 ? '#10B981' : pct >= 50 ? '#6366F1' : '#EF4444';
+      return `<div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+          <span>${labels[k]}</span>
+          <span style="font-weight:700">${val}${units[k]} <span style="color:#94A3B8">/ ${tg}${units[k]} (${pct}%)</span></span>
+        </div>
+        <div style="height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${cls};border-radius:3px"></div>
+        </div>
+      </div>`;
+    }).join('');
+    target.innerHTML = `
+      <div class="report-summary-card">
+        <div class="report-summary-num">${avgScore}<span style="font-size:14px"> 점</span></div>
+        <div class="report-summary-label">평균 영양 균형 점수</div>
+      </div>
+      <div class="report-stats-grid">
+        <div class="report-stat-card">
+          <div class="report-stat-num">${list.length}</div>
+          <div class="report-stat-label">식사 횟수</div>
+        </div>
+        <div class="report-stat-card">
+          <div class="report-stat-num">${totalCal.toLocaleString()}</div>
+          <div class="report-stat-label">총 칼로리</div>
+        </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">📊 누적 영양소 (${reportTab === 'today' ? '오늘' : '이번 주'} 권장량 대비)</div>
+        ${nutriHtml}
+      </div>
+      ${topMissing.length > 0 ? `
+      <div class="report-section">
+        <div class="report-section-title">📉 자주 부족한 영양소</div>
+        ${topMissing.map(([n, c]) => `<div style="font-size:12.5px;color:#9F1239;margin-bottom:5px;display:flex;justify-content:space-between"><span>• ${n}</span><span style="color:#94A3B8">${c}회 부족</span></div>`).join('')}
+      </div>` : ''}
+      ${topExcessive.length > 0 ? `
+      <div class="report-section">
+        <div class="report-section-title">📈 자주 과다 섭취</div>
+        ${topExcessive.map(([n, c]) => `<div style="font-size:12.5px;color:#9A3412;margin-bottom:5px;display:flex;justify-content:space-between"><span>• ${n}</span><span style="color:#94A3B8">${c}회</span></div>`).join('')}
+      </div>` : ''}
+      <div class="report-section" style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1.5px solid #C4B5FD">
+        <div class="report-section-title" style="color:#5B21B6">💊 추천 영양제 (자주 부족한 거 기반)</div>
+        <div style="font-size:12px;color:#4C1D95;line-height:1.7">
+          ${topMissing.slice(0, 3).map(([n]) => {
+            const map = {
+              '비타민C': '비타민C 1000mg — 항산화·면역 강화',
+              '칼슘': '칼슘+비타민D — 뼈 건강',
+              '오메가3': '오메가3 EPA+DHA 1000mg — 혈관·두뇌',
+              '식이섬유': '차전자피 분말 — 장 건강·포만감',
+              '단백질': '유청 단백질 25g — 근육·회복',
+              '철분': '철분 18mg + 비타민C — 빈혈 예방',
+              '비타민D': '비타민D3 2000IU — 면역·뼈 건강'
+            };
+            return `<div style="margin-bottom:4px">✓ ${map[n] || `${n} 보충제`}</div>`;
+          }).join('') || '<div>현재 부족한 영양소 없음 ✨</div>'}
+        </div>
+      </div>
+      <div class="report-section" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7">
+        <div class="report-section-title" style="color:#065F46">🏃 추천 운동</div>
+        <div style="font-size:12px;color:#064E3B;line-height:1.7">
+          ${avgScore >= 80
+            ? '✓ 식단 균형 좋아요! 가벼운 유산소 30분/일 (걷기·자전거)<br>✓ 주 2회 근력 운동으로 근육 유지'
+            : '✓ 식이섬유·단백질 더 챙기면서<br>✓ 가벼운 산책 20~30분/일 — 소화 + 혈당 관리<br>✓ 식후 30분~1시간 후가 베스트'}
+        </div>
+      </div>`;
+  } catch(e) {
+    target.innerHTML = '<div style="color:#EF4444;padding:20px">리포트 생성 중 오류가 발생했어요</div>';
+  }
 }
 
 async function downloadFoodResult() {
