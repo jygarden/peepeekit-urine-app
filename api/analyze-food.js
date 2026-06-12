@@ -14,12 +14,22 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
 
   try {
-    const { imageB64, mealTime, userProfile, target } = req.body;
-    if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
+    const { imageB64, mealTime, userProfile, target, mode, confirmedFoods, todayMeals } = req.body;
+    if (!imageB64 && mode !== 'analyze-text') return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
-    const prompt = target === 'pet'
-      ? buildPetFoodPrompt(mealTime)
-      : buildFoodPrompt(mealTime, userProfile);
+    // mode: 'detect' = 1차 인식만 / 'analyze' = 확정 재료로 풀 분석 / undefined = 한 번에 처리 (구버전 호환)
+    let prompt;
+    if (mode === 'detect') {
+      prompt = target === 'pet' ? buildPetDetectPrompt() : buildHumanDetectPrompt();
+    } else if (mode === 'analyze' && confirmedFoods) {
+      prompt = target === 'pet'
+        ? buildPetFoodPrompt(mealTime, confirmedFoods)
+        : buildFoodPrompt(mealTime, userProfile, confirmedFoods, todayMeals);
+    } else {
+      prompt = target === 'pet'
+        ? buildPetFoodPrompt(mealTime)
+        : buildFoodPrompt(mealTime, userProfile, null, todayMeals);
+    }
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -60,72 +70,172 @@ module.exports = async function handler(req, res) {
   }
 };
 
-function buildFoodPrompt(mealTime, userProfile) {
+// 1차: 음식·재료 빠른 인식 (확인용)
+function buildHumanDetectPrompt() {
+  return `🇰🇷 한국어로만 응답.
+
+사진 속 음식을 빠르게 인식해서 음식명과 들어간 재료만 JSON으로 답하세요.
+재료가 헷갈리는 경우(예: 숙주 vs 콩나물, 떡 vs 두부) 가장 가능성 높은 것으로.
+
+=== 응답 형식 ===
+{
+  "detectedFoods": [
+    {
+      "name": "음식명 (예: 토마토 숙주 계란 볶음)",
+      "ingredients": ["재료1", "재료2", "재료3"]
+    }
+  ],
+  "overallName": "전체 식사를 한 줄로 (예: 토마토 숙주 계란 볶음 + 잡곡밥)"
+}
+
+사진이 음식 아니면: {"error": "음식 사진을 다시 업로드해주세요."}`;
+}
+
+function buildPetDetectPrompt() {
+  return `🇰🇷 한국어로만 응답.
+반려동물 사료/간식 사진에서 종류와 주요 재료 빠르게 인식.
+
+=== 응답 형식 ===
+{
+  "detectedFoods": [
+    {
+      "name": "사료/간식명 (추정)",
+      "ingredients": ["주재료1", "주재료2"]
+    }
+  ],
+  "overallName": "한 줄 요약"
+}
+
+사료 아니면: {"error": "반려동물 사료 사진을 다시 업로드해주세요."}`;
+}
+
+function buildFoodPrompt(mealTime, userProfile, confirmedFoods, todayMeals) {
   const time = mealTime || '식사';
   const profile = buildProfileHint(userProfile);
-  return `🇰🇷 **언어 규칙 (절대 준수)**: 모든 JSON 응답값을 반드시 **한국어**로 작성. 영문 영양소명만 한국어와 병기 가능 (예: "단백질(Protein)").
+  const confirmHint = confirmedFoods ? `\n\n=== 사용자가 확인한 음식·재료 (이걸 기준으로 정확히 분석!) ===\n${JSON.stringify(confirmedFoods, null, 2)}` : '';
+  const todayHint = todayMeals && todayMeals.length > 0 ? `\n\n=== 오늘 이미 먹은 다른 식사들 (개인화·비교에 활용) ===\n${todayMeals.map(m => `${m.mealTime || '식사'}: ${m.foods}${m.totalCalories ? ` (${m.totalCalories}kcal)` : ''}`).join('\n')}` : '';
+
+  return `🇰🇷 **언어 규칙 (절대 준수)**: 모든 JSON 응답값을 반드시 **한국어**로 작성. 영문은 성분명만 병기 가능 (예: "오메가3 (Omega-3)", "라이코펜 (Lycopene)").
 
 당신은 20년 경력의 임상 영양사이자 한국 식단 전문가입니다. 사용자가 ${time}으로 먹은 음식 사진을 보고 깊이 있는 영양 분석을 제공하세요.
 
-${profile}
+${profile}${confirmHint}${todayHint}
 
-=== 분석 규칙 ===
-1. 사진 속 모든 음식을 한국어로 식별 (예: "김치찌개", "잡곡밥", "계란말이")
-2. 각 음식의 1인분 기준 칼로리·영양소 추정 (한국 음식 표준 영양 DB 기준)
-3. 사용자 프로필이 있으면 그에 맞춘 평가
-4. 균형 점수 (0~100점) 산출:
-   - 단백질·탄수화물·지방 비율 균형
-   - 식이섬유, 비타민, 미네랄 충족도
-   - 나트륨·당분 과다 여부
-   - 한국인 권장 섭취량 기준
-5. 잘된 점·개선점 모두 제시
-6. 다음 식사 추천 (구체적으로)
+=== 분석 핵심 규칙 ===
+1. **음식 인식**: 사진 속 모든 음식 한국어로 식별 (사용자 확정 데이터 있으면 그대로 사용)
+2. **칼로리·영양소**: 1인분 기준 추정 (한국 음식 표준 영양 DB)
+3. **균형 점수 (0~100)**: 매크로 비율 + 식이섬유 + 비타민/미네랄 + 나트륨·당 + 한국인 권장량
+4. **개인화**: 사용자 프로필 + 오늘 다른 식사 데이터 반영
 
-=== 사진이 음식 아닐 때 ===
-{"error": "음식 사진을 다시 업로드해주세요."} 만 반환.
+=== ⭐ 영양소 강조 규칙 (중요) ===
+탄수화물·단백질·지방 같은 기본 외에 **음식이 가진 고유 기능성 성분**을 더 강조하세요!
+예시:
+- 토마토 → 라이코펜 (강력한 항산화·전립선 건강)
+- 생선/연어 → 오메가3·DHA (두뇌·심혈관)
+- 시금치 → 엽산·철분 (빈혈·임산부)
+- 견과류 → 비타민E·셀레늄 (피부·항산화)
+- 마늘 → 알리신 (면역·혈압)
+- 고구마 → 베타카로틴 (눈·피부)
+- 콩 → 이소플라본 (호르몬 균형)
+- 김치 → 프로바이오틱스 (장 건강)
+
+→ \`keyNutrients\` 필드에 **음식별 기능성 성분 + 효능 한 줄**
+
+=== ⭐ 음식 궁합·상극 규칙 (중요) ===
+이번 식사 안의 음식들 사이의 **궁합·상극**을 분석!
+좋은 궁합 예시:
+- 토마토 + 올리브유 → 라이코펜 흡수율 ↑
+- 시금치 + 참기름 → 비타민K 흡수↑
+- 김치 + 돼지고기 → 비타민B1·소화 시너지
+
+상극 예시:
+- 시금치 + 두부 → 옥살산이 칼슘 흡수 방해
+- 우유 + 감귤류 → 단백질 응고로 소화 부담
+- 게 + 감 → 단백질 변성
+
+→ \`pairings\` 필드에 좋은 궁합 + 주의 궁합 모두
+
+=== ⭐ 오늘 다른 식사 비교 (todayMeals 있을 때) ===
+"오늘 점심에 ${'${고기를 드셨는데}'} 저녁에도 또 고기네요? OOO을 추가하면 더 좋아요" 같은 식의 **개인적 코멘트**.
+- 같은 종류 반복이면 → 다른 영양소 보충 추천
+- 다른 종류 잘 섞었으면 → 칭찬 + 인정
+
+=== ⭐ 다음 식사 추천 — 현실적이고 센스있게 ===
+교과서 같은 "단백질·채소 위주" X
+실제 사람들이 쉽게 접하는 메뉴로!
+좋은 예: "저녁엔 가볍게 김밥 한 줄 + 어묵국 어떨까요?" / "오늘 단백질 부족하니까 닭가슴살 샐러드 or 두부김밥 추천!" / "당 좀 떨어진 듯해요. 호두 한 줌이나 사과 반쪽 어때요?"
+나쁜 예: "단백질이 풍부한 식단을 권장합니다"
+
+=== ⭐ 관리 팁 — 라이트한 톤 ===
+"~을 권장합니다" X (딱딱함)
+실생활 꿀팁 톤으로!
+좋은 예:
+- "식사 후 바로 운동보다는 30분~1시간 후 가벼운 산책이 소화에 좋아요 🚶"
+- "식사 직후 물 벌컥은 위산 묽어져서 소화↓ — 식사 30분 후가 베스트"
+- "녹차나 커피는 식후 1시간 뒤에 — 철분 흡수에 방해될 수 있어요"
+- "양치는 식후 30분 뒤! 바로 닦으면 치아 손상 ↑"
+- "잠자기 3시간 전엔 식사 끝내기 — 위 부담↓"
 
 === JSON 응답 형식 (이대로만) ===
 {
   "foods": [
-    { "name": "음식명", "amount": "양 (예: 1공기, 1인분, 5조각)", "calories": 정수 }
+    {
+      "name": "음식명",
+      "amount": "양 (예: 1공기, 1인분)",
+      "calories": 정수,
+      "keyNutrients": [
+        { "name": "기능성 성분명 (예: 라이코펜)", "benefit": "효능 한 줄 (예: 강력한 항산화·전립선 건강)" }
+      ]
+    }
   ],
   "totalCalories": 정수,
   "nutrition": {
-    "carbs": 탄수화물g (정수),
-    "protein": 단백질g (정수),
-    "fat": 지방g (정수),
-    "fiber": 식이섬유g (정수),
-    "sodium": 나트륨mg (정수),
-    "sugar": 당류g (정수)
+    "carbs": 정수, "protein": 정수, "fat": 정수,
+    "fiber": 정수, "sodium": 정수, "sugar": 정수
   },
-  "balanceScore": 0~100 정수,
-  "balanceGrade": "A 또는 B 또는 C 또는 D",
-  "balanceLabel": "한 단어 평가 (예: 최상/우수/양호/주의/개선필요)",
+  "balanceScore": 0~100,
+  "balanceGrade": "A/B/C/D",
+  "balanceLabel": "최상/우수/양호/주의/개선필요",
   "macroRatio": {
-    "carbsPercent": 탄수화물 칼로리 비율,
-    "proteinPercent": 단백질 칼로리 비율,
-    "fatPercent": 지방 칼로리 비율
+    "carbsPercent": 정수, "proteinPercent": 정수, "fatPercent": 정수
   },
   "highlights": [
     { "type": "good 또는 warning 또는 danger", "text": "한 줄 평가" }
   ],
-  "summary": "전체 식단에 대한 종합 평가 2~3문장 (한국어)",
-  "missing": ["부족한 영양소1", "영양소2"],
-  "excessive": ["과다 영양소1 (예: 나트륨)"],
-  "tips": ["맞춤 관리 팁1", "팁2", "팁3"],
-  "nextMeal": "다음 식사로 추천하는 한식 메뉴와 이유 1~2문장",
+  "summary": "친근한 톤의 종합 평가 2~3문장",
+  "pairings": {
+    "good": [
+      { "combo": "음식A + 음식B", "benefit": "왜 좋은지 1줄" }
+    ],
+    "warning": [
+      { "combo": "음식A + 음식B", "reason": "왜 주의인지 1줄" }
+    ]
+  },
+  "todayComparison": "오늘 다른 식사 있으면 비교 코멘트 1~2문장 (없으면 null)",
+  "missing": ["부족한 영양소·기능성 성분"],
+  "excessive": ["과다 영양소"],
+  "lightTips": [
+    "라이트한 실생활 꿀팁 1 (식후 운동 시점 등)",
+    "라이트한 꿀팁 2 (수분 섭취 타이밍 등)",
+    "라이트한 꿀팁 3"
+  ],
+  "nextMeal": {
+    "menu": "실제 사람들이 쉽게 먹는 구체 메뉴 (친근하게)",
+    "reason": "왜 이 메뉴인지 센스있게 한 줄"
+  },
   "supplements": [
     {
-      "name": "추천 영양제 (예: 오메가3, 종합비타민)",
-      "reason": "이 식단에서 부족한 영양소 보충 이유 1문장"
+      "name": "추천 영양제명",
+      "reason": "이 식단에서 부족한 성분 보충 이유 1문장"
     }
   ]
 }`;
 }
 
 // 반려동물 사료 분석 프롬프트
-function buildPetFoodPrompt(mealTime) {
-  return `🇰🇷 모든 응답값을 **한국어**로 작성하세요.
+function buildPetFoodPrompt(mealTime, confirmedFoods) {
+  const confirmHint = confirmedFoods ? `\n\n=== 사용자 확정 재료 ===\n${JSON.stringify(confirmedFoods, null, 2)}` : '';
+  return `🇰🇷 모든 응답값을 **한국어**로 작성하세요.${confirmHint}
 
 당신은 반려동물 영양 전문가이자 수의사입니다. 사진 속 반려동물 사료/간식을 분석하세요. 사료 포장지면 영양 표시 라벨을 읽고, 그릇에 담긴 사료면 시각적으로 추정하세요.
 
