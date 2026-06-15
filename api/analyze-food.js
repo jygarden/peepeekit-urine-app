@@ -45,8 +45,8 @@ module.exports = async function handler(req, res) {
             ]
           }],
           generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 8192,
+            temperature: 0.3,
+            maxOutputTokens: 16384,
             responseMimeType: 'application/json'
           }
         })
@@ -76,11 +76,26 @@ module.exports = async function handler(req, res) {
     try {
       result = JSON.parse(textOutput);
     } catch(e) {
-      console.error('JSON 파싱 실패:', textOutput.slice(0, 500));
-      return res.status(500).json({
-        error: 'AI 응답 형식 오류가 발생했어요. 다시 시도해주세요.',
-        raw: textOutput.slice(0, 200)
-      });
+      // 잘린 JSON 복구 시도
+      console.error('JSON 파싱 1차 실패, 복구 시도');
+      const recovered = tryRecoverTruncatedJSON(textOutput);
+      if (recovered) {
+        try {
+          result = JSON.parse(recovered);
+          console.log('✅ JSON 복구 성공');
+        } catch(e2) {
+          console.error('복구도 실패:', recovered.slice(-200));
+          return res.status(500).json({
+            error: '응답이 너무 길어서 잘렸어요. 음식을 조금 줄이거나 다시 시도해주세요.',
+            raw: textOutput.slice(-300)
+          });
+        }
+      } else {
+        return res.status(500).json({
+          error: 'AI 응답 형식 오류가 발생했어요. 다시 시도해주세요.',
+          raw: textOutput.slice(0, 200)
+        });
+      }
     }
 
     if (result.error) return res.status(400).json(result);
@@ -348,6 +363,62 @@ function buildPetFoodPrompt(mealTime, confirmedFoods) {
     }
   ]
 }`;
+}
+
+// 🛡 잘린 JSON 자동 복구 — 응답이 중간에 끊겨도 살리기
+function tryRecoverTruncatedJSON(text) {
+  if (!text) return null;
+  let s = text.trim();
+  // 마크다운 제거
+  s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+  // 첫 { 부터 시작
+  const firstBrace = s.indexOf('{');
+  if (firstBrace === -1) return null;
+  s = s.slice(firstBrace);
+
+  // 균형 안 맞는 괄호 카운트
+  let depth = 0, inString = false, escape = false;
+  let lastSafeIdx = -1;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\') { escape = true; continue; }
+    if (ch === '"') inString = !inString;
+    if (inString) continue;
+    if (ch === '{' || ch === '[') depth++;
+    else if (ch === '}' || ch === ']') {
+      depth--;
+      if (depth === 0) lastSafeIdx = i;
+    }
+  }
+  // 균형 맞으면 끝까지 OK
+  if (depth === 0 && lastSafeIdx > 0) return s.slice(0, lastSafeIdx + 1);
+  // 안 맞으면 자르면서 부족한 닫는 괄호 추가
+  // 마지막 쉼표·콜론 잘라내기
+  let cut = s;
+  // 미완성 문자열 제거
+  if (inString) {
+    const lastQuote = cut.lastIndexOf('"');
+    cut = cut.slice(0, lastQuote);
+  }
+  // 마지막에 매달려있는 쉼표/콜론 제거
+  cut = cut.replace(/,\s*$/, '').replace(/:\s*$/, ': null');
+  // 부족한 닫는 괄호 추가
+  let recovered = cut;
+  // 다시 카운트
+  let d2 = 0, in2 = false, e2 = false;
+  for (let i = 0; i < recovered.length; i++) {
+    const ch = recovered[i];
+    if (e2) { e2 = false; continue; }
+    if (ch === '\\') { e2 = true; continue; }
+    if (ch === '"') in2 = !in2;
+    if (in2) continue;
+    if (ch === '{' || ch === '[') d2++;
+    else if (ch === '}' || ch === ']') d2--;
+  }
+  // 부족한 만큼 } 추가
+  recovered = recovered + '}'.repeat(Math.max(0, d2));
+  return recovered;
 }
 
 function buildProfileHint(p) {
