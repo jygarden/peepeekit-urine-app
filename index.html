@@ -2182,8 +2182,18 @@
 // PWA 서비스워커 등록
 // ══════════════════════════════════════
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  window.addEventListener('load', async () => {
+    try {
+      // 캐시 전부 비우기 (옛 SW가 캐싱한 망가진 응답 제거)
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+      // 새 SW 발견 시 즉시 활성화
+      reg.update();
+      if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } catch(e) { /* 무시 */ }
   });
 }
 
@@ -3397,20 +3407,36 @@ async function confirmAndAnalyze() {
   // 오늘 다른 식사들 (개인화)
   const todayMeals = getTodayMeals();
   try {
-    const res = await fetch('/api/analyze-food', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        imageB64: foodImageB64, mealTime: selectedMealTime, userProfile,
-        target: foodTarget, mode: 'analyze',
-        confirmedFoods: detectedFoodsData,
-        todayMeals
-      })
-    });
+    // 28초 timeout 보호 (Vercel 10초 + Service Worker 여유)
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 28000);
+    let res;
+    try {
+      res = await fetch('/api/analyze-food', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageB64: foodImageB64, mealTime: selectedMealTime, userProfile,
+          target: foodTarget, mode: 'analyze',
+          confirmedFoods: detectedFoodsData,
+          todayMeals
+        }),
+        signal: ctrl.signal,
+        cache: 'no-store' // Service Worker 캐시 무시
+      });
+    } catch(netErr) {
+      clearTimeout(timeoutId);
+      if (netErr.name === 'AbortError') {
+        throw new Error('⏱ 서버 응답이 너무 느려요 (28초 초과). 반찬이 많아 AI가 헐떡거리는 중. 잠시 후 다시 시도해주세요.');
+      }
+      throw new Error('🌐 네트워크 오류: ' + (netErr.message || '연결 확인 후 다시 시도해주세요.'));
+    }
+    clearTimeout(timeoutId);
     const txt = await res.text();
     let result;
     try { result = JSON.parse(txt); }
     catch(e) {
+      console.error('JSON parse 실패. 응답 일부:', txt.slice(0, 300));
       throw new Error('AI가 분석하는데 어려움을 겪었어요. 반찬이 너무 많거나 사진이 복잡할 수 있어요. 더 가까이서 다시 찍어보세요.');
     }
     if (result.error) throw new Error(result.error);
