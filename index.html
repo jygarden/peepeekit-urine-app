@@ -648,6 +648,10 @@
     .card-pair-row.bad{background:#FEF2F2;color:#991B1B;border-left:3px solid #EF4444}
     .card-pair-row strong{font-weight:700}
     .card-pair-reason{opacity:.85;font-size:10.5px;margin-left:2px}
+    /* 사진 전체 통합 궁합 박스 */
+    .overall-pairings-box{background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);border:1.5px solid #F59E0B;border-radius:16px;padding:14px;margin-top:14px;box-shadow:0 4px 12px rgba(245,158,11,.12)}
+    .overall-pairings-title{font-size:15px;font-weight:800;color:#78350F;margin-bottom:3px;letter-spacing:-.3px}
+    .overall-pairings-sub{font-size:11px;color:#92400E;opacity:.75;margin-bottom:6px}
     /* 궁합 마무리 안내 박스 */
     .pairing-note{background:linear-gradient(135deg,#EFF6FF 0%,#EEF2FF 100%);border:1.5px solid #BFDBFE;border-radius:14px;padding:14px;margin-top:14px;display:flex;gap:11px;align-items:flex-start}
     .pairing-note-icon{font-size:22px;flex-shrink:0;line-height:1}
@@ -3928,46 +3932,8 @@ function renderFoodResult(r) {
       `<div class="food-game-skill-detail"><strong>${stripEng(n.name)}</strong> — ${stripEng(n.benefit)}</div>`
     ).join('');
 
-    // 🔗 이 음식의 모든 좋은 궁합·상극을 통합 수집 + 중복 제거
-    const goodPairings = [];
-    const badPairings = [];
-    (f.ingredients || []).forEach(ing => {
-      if (!ing.pairings) return;
-      (ing.pairings.good || []).forEach(g => goodPairings.push(g));
-      (ing.pairings.bad || []).forEach(b => badPairings.push(b));
-    });
-    if (f.dishPairings) {
-      (f.dishPairings.good || []).forEach(g => goodPairings.push(g));
-      (f.dishPairings.bad || []).forEach(b => badPairings.push(b));
-    }
-    // 중복 제거 (with 기준) + 📸 사진 안 음식·재료만 필터
-    const dedupe = (arr) => {
-      const seen = new Set();
-      return arr.filter(item => {
-        const key = stripEng(item.with || '');
-        if (!key || seen.has(key)) return false;
-        // 사진 안에 있는 음식·재료와 매칭되는 것만 통과
-        if (!isInPhoto(item.with)) return false;
-        seen.add(key);
-        return true;
-      });
-    };
-    const uniqueGoods = dedupe(goodPairings);
-    const uniqueBads = dedupe(badPairings);
-
-    const goodRows = uniqueGoods.map(g =>
-      `<div class="card-pair-row good">💚 <strong>${stripEng(g.with)}</strong> <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`
-    ).join('');
-    const badRows = uniqueBads.map(b =>
-      `<div class="card-pair-row bad">💔 <strong>${stripEng(b.with)}</strong> <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`
-    ).join('');
-
-    const pairingsSection = (goodRows || badRows)
-      ? `<div class="card-pairings">
-          ${goodRows ? `<div class="card-pairings-title good-title">🤝 함께 먹으면 좋은 재료</div>${goodRows}` : ''}
-          ${badRows ? `<div class="card-pairings-title bad-title">⚠️ 같이 먹으면 효율↓ 재료</div>${badRows}` : ''}
-        </div>`
-      : '';
+    // 음식 카드 내 궁합 섹션은 비움 — 사진 전체 통합 박스에 한 번에 표시
+    const pairingsSection = '';
 
     return `<div class="food-game-card">
       <div class="food-game-top">
@@ -4170,6 +4136,57 @@ function renderFoodResult(r) {
   const oldTipsBox = document.getElementById('foodTipsBox');
   if (oldTipsBox) oldTipsBox.style.display = 'none';
 
+  // ⚔️ 사진 전체의 궁합·상극 모음 (한 박스에 통합)
+  const allGoods = [];
+  const allBads = [];
+  (r.foods || []).forEach(f => {
+    const fname = stripEng(f.name);
+    (f.ingredients || []).forEach(ing => {
+      if (!ing.pairings) return;
+      const iname = stripEng(ing.name);
+      (ing.pairings.good || []).forEach(g => allGoods.push({ from: iname, fromFood: fname, with: g.with, reason: g.reason }));
+      (ing.pairings.bad || []).forEach(b => allBads.push({ from: iname, fromFood: fname, with: b.with, reason: b.reason }));
+    });
+    if (f.dishPairings) {
+      (f.dishPairings.good || []).forEach(g => allGoods.push({ from: fname, fromFood: fname, with: g.with, reason: g.reason }));
+      (f.dishPairings.bad || []).forEach(b => allBads.push({ from: fname, fromFood: fname, with: b.with, reason: b.reason }));
+    }
+  });
+  // 중복 제거 (with 기준만 — 한 식재료당 한 번만) + 사진 안 매칭 필터
+  const dedupePair = (arr) => {
+    const seen = new Set();
+    return arr.filter(item => {
+      const key = stripEng(item.with || '');
+      if (!key || seen.has(key)) return false;
+      if (!isInPhoto(item.with)) return false;
+      seen.add(key);
+      return true;
+    });
+  };
+  const finalGoods = dedupePair(allGoods);
+  const finalBads = dedupePair(allBads);
+
+  const overallGoodRows = finalGoods.map(g =>
+    `<div class="card-pair-row good">💚 <strong>${stripEng(g.with)}</strong> + ${g.from} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`
+  ).join('');
+  const overallBadRows = finalBads.map(b =>
+    `<div class="card-pair-row bad">💔 <strong>${stripEng(b.with)}</strong> + ${b.from} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`
+  ).join('');
+
+  const overallPairingsBox = (overallGoodRows || overallBadRows)
+    ? `<div class="overall-pairings-box">
+        <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
+        <div class="overall-pairings-sub">📸 사진 안의 음식·재료끼리만 매칭</div>
+        ${overallGoodRows ? `<div class="card-pairings-title good-title" style="margin-top:12px">🤝 함께 먹으면 좋은 조합</div>${overallGoodRows}` : ''}
+        ${overallBadRows ? `<div class="card-pairings-title bad-title" style="margin-top:14px">⚠️ 같이 먹으면 효율↓ 조합</div>${overallBadRows}` : ''}
+      </div>`
+    : `<div class="overall-pairings-box">
+        <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
+        <div style="padding:12px;color:#92400E;font-size:12.5px;line-height:1.6;text-align:center">
+          이 사진 안에서는 특별한 궁합·효율↓ 조합이 발견되지 않았어요. 균형있게 잘 드시고 있네요 👍
+        </div>
+      </div>`;
+
   // 💡 궁합 안내 마무리 멘트
   const pairingNoteHtml = `
     <div class="pairing-note">
@@ -4177,13 +4194,13 @@ function renderFoodResult(r) {
       <div class="pairing-note-text">
         <strong>꼭 알아두세요!</strong><br>
         궁합 정보는 <strong>이 사진 안의 음식·재료끼리</strong>만 매칭해서 보여드려요.<br><br>
-        "효율↓ 재료"라고 해서 몸에 나쁜 건 아니에요. 영양소 흡수율을 높이거나 소화 부담을 줄이려면 좋은 궁합은 챙기시고, 효율↓ 조합은 살짝 피해주시면 같은 음식도 훨씬 알차게 드실 수 있어요 😊
+        "효율↓ 조합"이라고 해서 몸에 나쁜 건 아니에요. 영양소 흡수율을 높이거나 소화 부담을 줄이려면 좋은 궁합은 챙기시고, 효율↓ 조합은 살짝 피해주시면 같은 음식도 훨씬 알차게 드실 수 있어요 😊
       </div>
     </div>`;
 
   // 컨테이너에 모두 모아서 삽입 (highlights는 영양소 균형 박스랑 중복이라 제거)
   const container = document.getElementById('foodHighlights');
-  container.innerHTML = todayHtml + nutrientDictHtml + pairingsHtml + lightTipsHtml + nextMealHtml + pairingNoteHtml;
+  container.innerHTML = todayHtml + nutrientDictHtml + overallPairingsBox + lightTipsHtml + nextMealHtml + pairingNoteHtml;
   // 영양소 막대 (대략적 기준치 기반)
   const n = r.nutrition || {};
   const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
