@@ -260,8 +260,21 @@ ${profile}${confirmHint}${todayHint}
       "amount": "양 (예: 1공기, 1인분)",
       "calories": 정수,
       "keyNutrients": [
-        { "name": "기능성 성분명 (예: 라이코펜)", "benefit": "효능 한 줄 (예: 강력한 항산화·전립선 건강)" }
-      ]
+        { "name": "기능성 성분명 (예: 라이코펜)", "benefit": "효능 한 줄" }
+      ],
+      "ingredients": [
+        {
+          "name": "재료명 (예: 토마토, 계란, 마늘)",
+          "pairings": {
+            "good": [{ "with": "함께 좋은 음식·재료", "reason": "왜 좋은지 한 줄" }],
+            "bad": [{ "with": "상극 음식·재료", "reason": "왜 안 좋은지 한 줄" }]
+          }
+        }
+      ],
+      "dishPairings": {
+        "good": [{ "with": "이 음식과 좋은 음식", "reason": "한 줄" }],
+        "bad": [{ "with": "상극 음식", "reason": "한 줄" }]
+      }
     }
   ],
   "totalCalories": 정수,
