@@ -2,6 +2,29 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8"/>
+  <!-- 🚨 글로벌 에러 핸들러 (흰 화면 디버그용) -->
+  <script>
+  window.addEventListener('error', function(e) {
+    try {
+      var msg = 'JS Error: ' + (e.message || '') + ' @ ' + (e.filename || '') + ':' + (e.lineno || '');
+      console.error(msg);
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;top:50px;left:8px;right:8px;background:#dc2626;color:#fff;padding:10px;z-index:99999;font-size:11px;font-family:monospace;line-height:1.4;border-radius:6px;max-height:40vh;overflow:auto;white-space:pre-wrap';
+      d.textContent = '🚨 ' + msg;
+      (document.body || document.documentElement).appendChild(d);
+    } catch(_) {}
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    try {
+      var msg = 'Promise Error: ' + (e.reason && (e.reason.message || e.reason) || 'unknown');
+      console.error(msg);
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;top:120px;left:8px;right:8px;background:#7c2d12;color:#fff;padding:10px;z-index:99999;font-size:11px;font-family:monospace;border-radius:6px';
+      d.textContent = '🚨 ' + msg;
+      (document.body || document.documentElement).appendChild(d);
+    } catch(_) {}
+  });
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>건강어때 — AI 건강검진</title>
 
@@ -3764,9 +3787,7 @@ function renderFoodResult(r) {
     (f.ingredients && f.ingredients.some(i => i.pairings && (i.pairings.good?.length || i.pairings.bad?.length)))
   );
   // 별도 ⚔️ 궁합 매칭 박스는 안 보여줌 — 이미 각 음식 카드에 표시
-  if (false && hasNested) {
-  console.log('[궁합 디버그] hasNested:', hasNested, 'foodPairings:', r.foodPairings?.length || 0);
-  if (hasNested) {
+  if (false) {
     pairingsHtml = `<div class="pairings-box"><div class="pairings-title">⚔️ 궁합 매칭</div>`;
     (r.foods || []).forEach(f => {
       const fname = stripEng(f.name);
