@@ -31,10 +31,9 @@ module.exports = async function handler(req, res) {
         : buildFoodPrompt(mealTime, userProfile, null, todayMeals);
     }
 
-    // 🎯 하이브리드 모델 선택
-    // - 인식(detect): Gemini Flash (빠르고 저렴)
-    // - 분석(analyze): Gemini 2.5 Pro (더 정확하고 안정적)
-    const model = mode === 'analyze' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
+    // 🎯 모델 선택 — Flash 통일 (Pro는 timeout 자주 남)
+    // Flash도 충분히 정확함. 사전 fallback이 궁합 빈칸 채워줌.
+    const model = 'gemini-2.5-flash';
 
     // 첫 시도
     let response = await callGemini(apiKey, model, prompt, imageB64);
