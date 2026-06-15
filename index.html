@@ -3783,6 +3783,39 @@ const DISH_PAIRING_DICT = {
   },
 };
 
+// 한식 음식 → 일반적 재료 사전 (재료 추정 강화)
+const FOOD_TO_INGS = {
+  '소고기 미역국': ['소고기', '미역'],
+  '미역국': ['미역'],
+  '제육볶음': ['돼지고기', '고추장', '마늘', '양파'],
+  '잡채': ['당면', '시금치', '당근', '버섯', '소고기'],
+  '비빔밥': ['쌀', '시금치', '당근', '계란', '고추장'],
+  '김치찌개': ['김치', '돼지고기', '두부'],
+  '된장찌개': ['된장', '두부', '호박', '양파'],
+  '불고기': ['소고기', '양파', '마늘'],
+  '김밥': ['쌀', '계란', '시금치', '당근', '단무지'],
+  '라면': ['면', '계란', '파'],
+  '국밥': ['쌀', '소고기'],
+  '냉면': ['면', '오이', '계란'],
+  '흰쌀밥': ['쌀', '흰쌀'],
+  '잡곡밥': ['쌀', '잡곡', '콩'],
+  '고사리나물': ['고사리', '들기름'],
+  '미역줄기볶음': ['미역', '참기름'],
+  '시금치나물': ['시금치', '참기름'],
+  '계란말이': ['계란', '파'],
+  '깻잎장아찌': ['깻잎'],
+  '깍두기': ['무'],
+  '단무지': ['무'],
+  '오이무침': ['오이', '고춧가루'],
+  '무말랭이무침': ['무'],
+  '우엉조림': ['우엉', '간장'],
+  '멸치볶음': ['멸치', '견과류'],
+  '콩나물무침': ['콩나물', '마늘'],
+  '나물반찬': ['들기름'],
+  '나물': ['들기름'],
+  '쌈장': ['된장', '고추장', '마늘'],
+};
+
 // 영양소명 → 대표 재료 매핑 (재료 추정용)
 const NUT_TO_ING = {
   '요오드':'미역', '철분':'소고기', '비타민B1':'돼지고기', '비타민 B1':'돼지고기',
@@ -3815,23 +3848,30 @@ function enrichWithPairings(r) {
     const hasIngWithPairing = f.ingredients && f.ingredients.some(i => i.pairings && (i.pairings.good?.length || i.pairings.bad?.length));
     if (!hasIngWithPairing) {
       const guessed = [];
-      // 음식명에서 재료 추출
-      Object.keys(ING_PAIRING_DICT).forEach(ing => {
-        if (fname.includes(ing) && !guessed.find(g => g.name === ing)) {
+      const addIfHasPair = (ing) => {
+        if (!ing) return;
+        if (guessed.find(g => g.name === ing)) return;
+        if (ING_PAIRING_DICT[ing]) {
           guessed.push({ name: ing, pairings: ING_PAIRING_DICT[ing] });
         }
+      };
+      // ⭐ FOOD_TO_INGS 사전에서 음식 → 재료 리스트 직접 매핑
+      let foodIngs = FOOD_TO_INGS[fname];
+      if (!foodIngs) {
+        // 부분 매칭
+        const key = Object.keys(FOOD_TO_INGS).find(k => fname.includes(k) || k.includes(fname));
+        if (key) foodIngs = FOOD_TO_INGS[key];
+      }
+      (foodIngs || []).forEach(addIfHasPair);
+      // 음식명에서 재료 추출 (사전 키 부분 매칭)
+      Object.keys(ING_PAIRING_DICT).forEach(ing => {
+        if (fname.includes(ing)) addIfHasPair(ing);
       });
       // keyNutrients에서 재료 역추정
       (f.keyNutrients || []).forEach(n => {
         const cleanN = stripEng2(n.name);
         for (const k of Object.keys(NUT_TO_ING)) {
-          if (cleanN.includes(k)) {
-            const ing = NUT_TO_ING[k];
-            if (ING_PAIRING_DICT[ing] && !guessed.find(g => g.name === ing)) {
-              guessed.push({ name: ing, pairings: ING_PAIRING_DICT[ing] });
-            }
-            break;
-          }
+          if (cleanN.includes(k)) { addIfHasPair(NUT_TO_ING[k]); break; }
         }
       });
       // AI가 보낸 ingredients가 있지만 pairings 없을 때
@@ -3842,7 +3882,7 @@ function enrichWithPairings(r) {
           if (match) guessed.push({ name: iname || match, pairings: ING_PAIRING_DICT[match] });
         }
       });
-      if (guessed.length > 0) f.ingredients = guessed.slice(0, 4); // 너무 많지 않게 4개까지
+      if (guessed.length > 0) f.ingredients = guessed.slice(0, 6); // 6개까지
     }
   });
   return r;
@@ -3901,9 +3941,30 @@ function renderFoodResult(r) {
   // 📸 사진 안에 있는 모든 음식·재료 set 구축 (궁합 필터링용)
   const itemsInPhoto = new Set();
   (r.foods || []).forEach(f => {
-    if (f.name) itemsInPhoto.add(stripEng(f.name));
+    if (f.name) {
+      const fname = stripEng(f.name);
+      itemsInPhoto.add(fname);
+      // FOOD_TO_INGS 매핑으로 음식 → 일반 재료 추출
+      let foodIngs = FOOD_TO_INGS[fname];
+      if (!foodIngs) {
+        const key = Object.keys(FOOD_TO_INGS).find(k => fname.includes(k) || k.includes(fname));
+        if (key) foodIngs = FOOD_TO_INGS[key];
+      }
+      (foodIngs || []).forEach(i => itemsInPhoto.add(i));
+      // 음식 이름에 포함된 모든 사전 키 추가
+      Object.keys(ING_PAIRING_DICT).forEach(k => {
+        if (fname.includes(k)) itemsInPhoto.add(k);
+      });
+    }
     (f.ingredients || []).forEach(ing => {
       if (ing.name) itemsInPhoto.add(stripEng(ing.name));
+    });
+    // keyNutrients에서 역추정 재료도 추가
+    (f.keyNutrients || []).forEach(n => {
+      const cleanN = stripEng(n.name);
+      for (const k of Object.keys(NUT_TO_ING)) {
+        if (cleanN.includes(k)) itemsInPhoto.add(NUT_TO_ING[k]);
+      }
     });
   });
   // 사진 안 음식·재료와 매칭되는지 체크 (정확/부분 매칭)
