@@ -31,35 +31,26 @@ module.exports = async function handler(req, res) {
         : buildFoodPrompt(mealTime, userProfile, null, todayMeals);
     }
 
-    // responseMimeType 제거 — 너무 strict해서 "string did not match pattern" 에러 자주 남
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inline_data: { mime_type: 'image/jpeg', data: imageB64 } }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 16384,
-            responseMimeType: 'application/json'
-          }
-        })
-      }
-    );
+    // 🎯 하이브리드 모델 선택
+    // - 인식(detect): Gemini Flash (빠르고 저렴)
+    // - 분석(analyze): Gemini 2.5 Pro (더 정확하고 안정적)
+    const model = mode === 'analyze' ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ error: 'AI 분석 오류: ' + errText.slice(0, 150) });
+    // 첫 시도
+    let response = await callGemini(apiKey, model, prompt, imageB64);
+    let textOutput = await extractText(response);
+
+    // 분석 모드에서 실패하면 1회 자동 재시도 (더 짧은 응답 유도)
+    if (mode === 'analyze' && !textOutput) {
+      console.log('첫 시도 실패, 재시도 중...');
+      const retryPrompt = prompt + '\n\n⚠️ 응답을 매우 간결하게! 각 reason 5단어 이내, JSON 빠짐없이.';
+      response = await callGemini(apiKey, model, retryPrompt, imageB64);
+      textOutput = await extractText(response);
     }
 
-    const data = await response.json();
-    let textOutput = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    if (!textOutput) {
+      return res.status(500).json({ error: 'AI가 분석에 실패했어요. 사진을 다시 찍어주세요.' });
+    }
 
     // JSON 정리 — 마크다운 코드 블록 제거
     textOutput = textOutput.trim();
@@ -363,6 +354,45 @@ function buildPetFoodPrompt(mealTime, confirmedFoods) {
     }
   ]
 }`;
+}
+
+// 🎯 Gemini API 호출 (재사용)
+async function callGemini(apiKey, model, prompt, imageB64) {
+  return fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            ...(imageB64 ? [{ inline_data: { mime_type: 'image/jpeg', data: imageB64 } }] : [])
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.3,
+          maxOutputTokens: 16384,
+          responseMimeType: 'application/json'
+        }
+      })
+    }
+  );
+}
+
+async function extractText(response) {
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error('Gemini 오류:', errText.slice(0, 200));
+    return null;
+  }
+  try {
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+  } catch(e) {
+    console.error('응답 파싱 실패:', e.message);
+    return null;
+  }
 }
 
 // 🛡 잘린 JSON 자동 복구 — 응답이 중간에 끊겨도 살리기
