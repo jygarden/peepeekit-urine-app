@@ -3673,6 +3673,9 @@ function renderFoodResult(r) {
   }
   // 요약
   document.getElementById('foodSummary').textContent = r.summary || '';
+  // 옛 영양사 코멘트 박스 숨김 (새 말풍선이 위에서 같은 내용 보여줌)
+  const oldSumBox = document.getElementById('foodSummary')?.parentElement;
+  if (oldSumBox && oldSumBox.classList.contains('card')) oldSumBox.style.display = 'none';
   // 하이라이트
   const hl = (r.highlights || []).map(h => {
     const ic = h.type === 'good' ? '✅' : h.type === 'warning' ? '⚠️' : '🚨';
