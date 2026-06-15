@@ -563,6 +563,89 @@
     .report-section-title{font-size:13.5px;font-weight:800;color:#1D1D1F;margin-bottom:12px;display:flex;align-items:center;gap:6px}
     .nutri-deficit-bar{height:6px;border-radius:3px;background:#F1F5F9;overflow:hidden;margin-top:5px}
     .nutri-deficit-fill{height:100%;background:linear-gradient(90deg,#EF4444,#F59E0B);border-radius:3px}
+    /* ════════════ 🎮 게임 스타일 식단 결과 ════════════ */
+    /* 영양사 캐릭터 + 말풍선 */
+    .nutritionist-talk{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;animation:bounceIn .6s ease-out}
+    @keyframes bounceIn{0%{transform:scale(.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(.95)}100%{transform:scale(1);opacity:1}}
+    .nutri-char{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#FCD34D,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:34px;flex-shrink:0;box-shadow:0 6px 18px rgba(245,158,11,.35);animation:floatChar 3s ease-in-out infinite;position:relative}
+    @keyframes floatChar{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
+    .nutri-char::after{content:"";position:absolute;top:-3px;right:-3px;width:18px;height:18px;background:#10B981;border:3px solid #fff;border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+    .speech-bubble{flex:1;background:#fff;border-radius:18px;border-bottom-left-radius:4px;padding:14px 16px;box-shadow:0 4px 14px rgba(0,0,0,.08);position:relative;font-size:13px;color:#1D1D1F;line-height:1.55}
+    .speech-bubble::before{content:"";position:absolute;left:-7px;top:14px;width:0;height:0;border-style:solid;border-width:6px 10px 6px 0;border-color:transparent #fff transparent transparent;filter:drop-shadow(-1px 1px 1px rgba(0,0,0,.04))}
+    .speech-name{font-size:11px;font-weight:800;color:#F59E0B;margin-bottom:4px;letter-spacing:-.1px}
+    .speech-text{font-weight:500}
+    /* 게임 점수 카드 (원형) */
+    .game-score-card{background:linear-gradient(135deg,#FEF3C7 0%,#FCD34D 50%,#F59E0B 100%);border-radius:24px;padding:24px 18px;text-align:center;color:#78350F;margin-bottom:16px;box-shadow:0 10px 30px rgba(245,158,11,.30);position:relative;overflow:hidden}
+    .game-score-card::before{content:"";position:absolute;top:-30%;right:-30%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.3) 0%,transparent 60%)}
+    .game-rank-badge{display:inline-block;background:#fff;color:#78350F;font-size:11px;font-weight:900;padding:4px 12px;border-radius:999px;margin-bottom:10px;letter-spacing:1px}
+    .game-score-ring{width:120px;height:120px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center}
+    .game-score-ring svg{transform:rotate(-90deg)}
+    .game-score-ring .ring-bg{fill:none;stroke:rgba(255,255,255,.4);stroke-width:8}
+    .game-score-ring .ring-fill{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease-out}
+    .game-score-num{position:absolute;font-size:38px;font-weight:900;color:#78350F;font-family:ui-rounded,'SF Pro Rounded',system-ui;letter-spacing:-1px}
+    .game-score-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;margin-top:8px}
+    .game-grade-stars{font-size:18px;letter-spacing:3px;margin-top:6px}
+    /* 게임 스텟 바 (HP·MP 스타일) */
+    .game-stats-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+    .game-stats-title{font-size:13px;font-weight:800;color:#1D1D1F;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+    .game-stat-row{margin-bottom:11px}
+    .game-stat-row:last-child{margin-bottom:0}
+    .game-stat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:11.5px;font-weight:700}
+    .game-stat-name{color:#1D1D1F;display:flex;align-items:center;gap:5px}
+    .game-stat-value{color:#6E6E73;font-weight:600}
+    .game-stat-bar-wrap{height:10px;background:#F1F5F9;border-radius:5px;overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
+    .game-stat-bar{height:100%;border-radius:5px;transition:width .8s cubic-bezier(.2,.8,.2,1);position:relative;background-size:20px 20px;background-image:linear-gradient(45deg,rgba(255,255,255,.2) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.2) 50%,rgba(255,255,255,.2) 75%,transparent 75%,transparent);animation:barShine 1.5s linear infinite}
+    @keyframes barShine{0%{background-position:0 0}100%{background-position:20px 0}}
+    .game-stat-bar.carbs{background-color:#F59E0B}
+    .game-stat-bar.protein{background-color:#7C3AED}
+    .game-stat-bar.fat{background-color:#EF4444}
+    .game-stat-bar.fiber{background-color:#10B981}
+    .game-stat-bar.sodium{background-color:#64748B}
+    .game-stat-bar.sugar{background-color:#EC4899}
+    /* 음식 게임 카드 */
+    .food-game-card{background:linear-gradient(135deg,#fff,#FFFBEB);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 3px 12px rgba(245,158,11,.12);border:2px solid #FCD34D;position:relative;overflow:hidden}
+    .food-game-card::before{content:"";position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(252,211,77,.4) 0%,transparent 70%)}
+    .food-game-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;position:relative}
+    .food-game-name{font-size:15px;font-weight:800;color:#1D1D1F;letter-spacing:-.3px}
+    .food-game-amount{font-size:11px;color:#92400E;font-weight:600;margin-top:2px}
+    .food-game-cal-badge{background:#F59E0B;color:#fff;font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px;box-shadow:0 2px 6px rgba(245,158,11,.4)}
+    .food-game-skills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+    .skill-badge{background:linear-gradient(135deg,#FEF3C7,#FCD34D);color:#78350F;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:8px;border:1px solid #F59E0B;display:inline-flex;align-items:center;gap:4px;letter-spacing:-.1px}
+    .skill-badge::before{content:"⭐"}
+    .food-game-skill-detail{font-size:10.5px;color:#92400E;margin-top:5px;line-height:1.5;padding-left:14px;border-left:2px solid #FCD34D;margin-left:2px}
+    /* 궁합 VS 카드 */
+    .pair-vs-card{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1.5px solid #f1f5f9}
+    .pair-vs-card.good{border-color:#86EFAC;background:linear-gradient(135deg,#F0FDF4,#fff)}
+    .pair-vs-card.bad{border-color:#FECACA;background:linear-gradient(135deg,#FEF2F2,#fff)}
+    .pair-side{background:#F8FAFC;border-radius:8px;padding:5px 9px;font-size:11.5px;font-weight:700;color:#1D1D1F;flex-shrink:0}
+    .pair-vs-card.good .pair-side{background:#DCFCE7;color:#065F46}
+    .pair-vs-card.bad .pair-side{background:#FEE2E2;color:#991B1B}
+    .pair-vs-icon{font-size:18px;flex-shrink:0;animation:heartBeat 1.5s ease-in-out infinite}
+    @keyframes heartBeat{0%,100%{transform:scale(1)}30%{transform:scale(1.15)}}
+    .pair-vs-reason{flex:1;font-size:10.5px;color:#475569;line-height:1.5}
+    .pair-section-header{font-size:11px;font-weight:800;color:#6E6E73;margin:12px 0 6px;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+    /* 라이트 팁 (귀여운 캐릭터들) */
+    .tip-game-row{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:flex-start;gap:11px;box-shadow:0 2px 8px rgba(0,0,0,.05);border-left:4px solid #C4B5FD}
+    .tip-game-emoji{font-size:24px;flex-shrink:0;animation:floatChar 2.5s ease-in-out infinite}
+    .tip-game-text{flex:1;font-size:12px;color:#1D1D1F;line-height:1.55;padding-top:2px}
+    /* 다음 식사 추천 카드 */
+    .next-meal-game{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border-radius:18px;padding:18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;box-shadow:0 6px 18px rgba(245,158,11,.25)}
+    .next-meal-game-emoji{width:54px;height:54px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,.1);animation:floatChar 3s ease-in-out infinite}
+    .next-meal-game-text{flex:1;color:#78350F}
+    .next-meal-game-label{font-size:10px;font-weight:800;letter-spacing:1px;opacity:.8}
+    .next-meal-game-menu{font-size:15px;font-weight:800;margin-top:2px;line-height:1.3}
+    .next-meal-game-reason{font-size:11.5px;font-weight:500;margin-top:5px;opacity:.9;line-height:1.5}
+    /* 영양소 사전 - 게임 스킬북 스타일 */
+    .nutrient-skillbook{background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border-radius:18px;padding:16px;margin-bottom:14px;border:1.5px solid #C4B5FD}
+    .nutrient-skillbook-title{font-size:13px;font-weight:800;color:#5B21B6;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .nutrient-skill{background:#fff;border-radius:12px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:flex-start;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .nutrient-skill-emoji{font-size:24px;flex-shrink:0;margin-top:-2px}
+    .nutrient-skill-body{flex:1}
+    .nutrient-skill-name{font-size:13px;font-weight:800;color:#5B21B6;letter-spacing:-.2px}
+    .nutrient-skill-benefit{font-size:11.5px;color:#4C1D95;margin-top:2px;line-height:1.5}
+    .nutrient-skill-source{font-size:10.5px;color:#7C3AED;margin-top:4px;font-weight:600}
+    .nutrient-skill-source::before{content:"📍 "}
     /* ── 접기·펼치기 카드 (UX 정리) ── */
     .collapse-card{background:#fff;border-radius:18px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.04);border:1px solid #f1f5f9;overflow:hidden;transition:box-shadow .2s}
     .collapse-card.open{box-shadow:0 2px 10px rgba(0,0,0,.06)}
@@ -3366,68 +3449,126 @@ function getTodayMeals() {
 }
 
 function renderFoodResult(r) {
-  // Hero
-  document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
-  document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
+  // 게임화된 Hero (영양사 캐릭터 + 점수 원형)
+  const score = r.balanceScore || 0;
   const grade = r.balanceGrade || 'B';
   const label = r.balanceLabel || '양호';
-  document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
-  // 음식 목록 + 기능성 영양소
-  const items = (r.foods || []).map(f => {
-    const nutrients = (f.keyNutrients || []).map(n =>
-      `<div style="margin-top:4px"><strong>${n.name}</strong> — ${n.benefit}</div>`
-    ).join('');
-    return `<div class="food-detail-card">
-      <div class="food-detail-name">
-        <div><span style="font-weight:800">${f.name}</span> <span class="food-detail-amount">${f.amount || ''}</span></div>
-        <div class="food-detail-cal">${(f.calories || 0).toLocaleString()} kcal</div>
+  const stars = score >= 90 ? '⭐⭐⭐⭐⭐' : score >= 80 ? '⭐⭐⭐⭐' : score >= 70 ? '⭐⭐⭐' : score >= 60 ? '⭐⭐' : '⭐';
+  // 원형 진행률 (radius 52, circumference ≈ 327)
+  const circ = 327;
+  const offset = circ - (score / 100) * circ;
+  // 영양사 캐릭터 말풍선 (요약 코멘트)
+  const charHero = `
+    <div class="nutritionist-talk">
+      <div class="nutri-char">👩‍⚕️</div>
+      <div class="speech-bubble">
+        <div class="speech-name">AI 영양사</div>
+        <div class="speech-text">${r.summary || '맛있는 한 끼였네요! 분석 결과를 확인해보세요 😊'}</div>
       </div>
-      ${nutrients ? `<div class="key-nutrient-row">⭐ <strong>핵심 영양소</strong>${nutrients}</div>` : ''}
+    </div>`;
+  const scoreCard = `
+    <div class="game-score-card">
+      <div class="game-rank-badge">${selectedMealTime} · ${label}</div>
+      <div class="game-score-ring">
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-fill" cx="60" cy="60" r="52" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"></circle>
+        </svg>
+        <div class="game-score-num">${score}</div>
+      </div>
+      <div class="game-score-label">영양 균형 [${grade}]</div>
+      <div class="game-grade-stars">${stars}</div>
+    </div>`;
+  // 기존 자리에 안 보이게 처리 + 위에 새 디자인 삽입
+  const oldHero = document.querySelector('.calorie-hero');
+  if (oldHero) oldHero.style.display = 'none';
+  let heroWrap = document.getElementById('foodGameHero');
+  if (!heroWrap) {
+    heroWrap = document.createElement('div');
+    heroWrap.id = 'foodGameHero';
+    document.getElementById('foodResultCapture').prepend(heroWrap);
+  }
+  heroWrap.innerHTML = charHero + scoreCard;
+  // 호환용 (PDF에서도 보이게 옛 데이터 유지)
+  document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
+  document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
+  document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
+  // 🎮 음식 게임 카드 + 스킬 뱃지
+  const items = (r.foods || []).map(f => {
+    const skills = (f.keyNutrients || []).slice(0, 4).map(n =>
+      `<span class="skill-badge">${n.name.replace(/\s*\(.*?\)\s*/, '')}</span>`
+    ).join('');
+    const skillDetails = (f.keyNutrients || []).slice(0, 3).map(n =>
+      `<div class="food-game-skill-detail"><strong>${n.name}</strong> — ${n.benefit}</div>`
+    ).join('');
+    return `<div class="food-game-card">
+      <div class="food-game-top">
+        <div>
+          <div class="food-game-name">🍴 ${f.name}</div>
+          <div class="food-game-amount">${f.amount || ''}</div>
+        </div>
+        <div class="food-game-cal-badge">${(f.calories || 0).toLocaleString()} kcal</div>
+      </div>
+      ${skills ? `<div class="food-game-skills">${skills}</div>` : ''}
+      ${skillDetails || ''}
     </div>`;
   }).join('');
   document.getElementById('foodItemsList').innerHTML = items || '<div style="color:#94A3B8;font-size:12px;padding:8px">음식 인식 결과 없음</div>';
 
-  // 🍱 다음 식사 (현실적·센스있게)
+  // 🍱 다음 식사 (게임 캐릭터 스타일)
   let nextMealHtml = '';
   if (r.nextMeal && typeof r.nextMeal === 'object') {
-    nextMealHtml = `<div class="next-meal-cta">
-      <div class="next-meal-title">🍱 다음 식사 추천</div>
-      <div class="next-meal-menu">${r.nextMeal.menu || ''}</div>
-      <div class="next-meal-reason">${r.nextMeal.reason || ''}</div>
+    nextMealHtml = `<div class="next-meal-game">
+      <div class="next-meal-game-emoji">🍱</div>
+      <div class="next-meal-game-text">
+        <div class="next-meal-game-label">NEXT MEAL · 다음 식사 추천</div>
+        <div class="next-meal-game-menu">${r.nextMeal.menu || ''}</div>
+        <div class="next-meal-game-reason">💬 ${r.nextMeal.reason || ''}</div>
+      </div>
     </div>`;
   } else if (r.nextMeal) {
-    nextMealHtml = `<div class="next-meal-cta">
-      <div class="next-meal-title">🍱 다음 식사 추천</div>
-      <div class="next-meal-menu">${r.nextMeal}</div>
+    nextMealHtml = `<div class="next-meal-game">
+      <div class="next-meal-game-emoji">🍱</div>
+      <div class="next-meal-game-text">
+        <div class="next-meal-game-label">NEXT MEAL</div>
+        <div class="next-meal-game-menu">${r.nextMeal}</div>
+      </div>
     </div>`;
   }
-  // 음식·재료 궁합 박스 — 음식 단위와 재료 단위 분리
+  // 🎮 궁합 VS 카드 (음식 + 재료 분리)
   let pairingsHtml = '';
   if (r.foodPairings && r.foodPairings.length > 0) {
-    // 음식·재료 분리
     const dishes = r.foodPairings.filter(fp => fp.type === '음식' || (!fp.type && fp.food));
     const ingredients = r.foodPairings.filter(fp => fp.type === '재료');
-    const renderPairing = (fp, emoji) => {
-      const itemName = fp.item || fp.food;  // 옛 포맷 호환
-      const goods = (fp.good || []).map(g =>
-        `<div style="margin-top:4px;font-size:11.5px;color:#065F46">✨ <strong>+ ${g.with}</strong> — ${g.reason}</div>`
-      ).join('');
-      const bads = (fp.bad || []).map(b =>
-        `<div style="margin-top:4px;font-size:11.5px;color:#9A3412">⚠️ <strong>− ${b.with}</strong> — ${b.reason}</div>`
-      ).join('');
-      return `<div class="pair-item good" style="background:rgba(255,255,255,.8)">
-        <div class="pair-combo" style="font-size:13px;color:#1D1D1F;margin-bottom:6px">${emoji} ${itemName}</div>
-        ${goods}${bads}
-      </div>`;
+    const renderVS = (fp) => {
+      const itemName = fp.item || fp.food;
+      let cards = '';
+      (fp.good || []).forEach(g => {
+        cards += `<div class="pair-vs-card good">
+          <span class="pair-side">${itemName}</span>
+          <span class="pair-vs-icon">💚</span>
+          <span class="pair-side">${g.with}</span>
+          <span class="pair-vs-reason">${g.reason}</span>
+        </div>`;
+      });
+      (fp.bad || []).forEach(b => {
+        cards += `<div class="pair-vs-card bad">
+          <span class="pair-side">${itemName}</span>
+          <span class="pair-vs-icon">💔</span>
+          <span class="pair-side">${b.with}</span>
+          <span class="pair-vs-reason">${b.reason}</span>
+        </div>`;
+      });
+      return cards;
     };
-    pairingsHtml = `<div class="pairings-box"><div class="pairings-title">🤝 궁합·상극</div>`;
+    pairingsHtml = `<div class="pairings-box"><div class="pairings-title">⚔️ 궁합 매칭</div>`;
     if (dishes.length > 0) {
-      pairingsHtml += `<div style="font-size:11px;font-weight:700;color:#065F46;margin:6px 0 4px 4px;letter-spacing:.5px">🍽 음식 단위</div>` +
-        dishes.map(fp => renderPairing(fp, '🍴')).join('');
+      pairingsHtml += `<div class="pair-section-header">🍽 음식 단위</div>` +
+        dishes.map(fp => renderVS(fp)).join('');
     }
     if (ingredients.length > 0) {
-      pairingsHtml += `<div style="font-size:11px;font-weight:700;color:#065F46;margin:10px 0 4px 4px;letter-spacing:.5px">🥘 재료 단위</div>` +
-        ingredients.map(fp => renderPairing(fp, '🌿')).join('');
+      pairingsHtml += `<div class="pair-section-header">🌿 재료 단위</div>` +
+        ingredients.map(fp => renderVS(fp)).join('');
     }
     pairingsHtml += `</div>`;
   } else if (r.pairings && (r.pairings.good?.length || r.pairings.warning?.length)) {
@@ -3438,12 +3579,16 @@ function renderFoodResult(r) {
   }
   // 오늘 비교
   const todayHtml = r.todayComparison ? `<div class="today-compare-box">${r.todayComparison}</div>` : '';
-  // 라이트 팁
+  // 🎮 라이트 팁 (귀여운 캐릭터들)
+  const tipEmojis = ['🍵','🚶','🛌','💧','🥗','🧘','☀️','🌙'];
   let lightTipsHtml = '';
   if (r.lightTips && r.lightTips.length > 0) {
     lightTipsHtml = `<div class="light-tips-box">
-      <div class="light-tips-title">🌿 건강 관리 꿀팁</div>
-      ${r.lightTips.map(t => `<div class="light-tip-item"><span>${t}</span></div>`).join('')}
+      <div class="light-tips-title">💡 건강 관리 꿀팁</div>
+      ${r.lightTips.map((t, i) => `<div class="tip-game-row">
+        <div class="tip-game-emoji">${tipEmojis[i % tipEmojis.length]}</div>
+        <div class="tip-game-text">${t}</div>
+      </div>`).join('')}
     </div>`;
   }
   // ⭐ 영양소 사전 — 모든 keyNutrients를 한 곳에 모음 (어떤 재료에서 왔는지)
@@ -3454,15 +3599,32 @@ function renderFoodResult(r) {
       nutrientMap[n.name].foods.push(f.name);
     });
   });
+  // 🎮 영양소 사전 (스킬북 스타일)
+  const nutEmojiMap = {
+    '라이코펜':'🍅','오메가3':'🐟','DHA':'🧠','EPA':'🐟','비타민C':'🍋','비타민A':'🥕','비타민D':'☀️',
+    '비타민E':'🥑','비타민K':'🌿','비타민B':'🥩','콜린':'🥚','엽산':'🥬','철분':'🩸','칼슘':'🥛',
+    '마그네슘':'🥜','칼륨':'🍌','셀레늄':'🌰','아연':'🦪','알리신':'🧄','안토시아닌':'🫐',
+    '베타카로틴':'🥕','이소플라본':'🫘','프로바이오틱스':'🥬','케르세틴':'🧅','설포라판':'🥦',
+    '식이섬유':'🌾','단백질':'💪'
+  };
+  const getNutEmoji = (name) => {
+    for (const k of Object.keys(nutEmojiMap)) {
+      if (name.includes(k)) return nutEmojiMap[k];
+    }
+    return '✨';
+  };
   let nutrientDictHtml = '';
   if (Object.keys(nutrientMap).length > 0) {
-    nutrientDictHtml = `<div class="pairings-box" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border-color:#FBBF24">
-      <div class="pairings-title" style="color:#92400E">⭐ 이 식사의 핵심 영양소</div>
+    nutrientDictHtml = `<div class="nutrient-skillbook">
+      <div class="nutrient-skillbook-title">📖 핵심 영양소 도감</div>
       ${Object.entries(nutrientMap).map(([name, d]) => `
-        <div class="pair-item" style="color:#78350F;background:rgba(255,255,255,.8)">
-          <div class="pair-combo">${name}</div>
-          <div class="pair-reason" style="margin-bottom:3px">${d.benefit}</div>
-          <div style="font-size:10.5px;color:#A16207;font-weight:600">📍 ${d.foods.join(', ')}에서</div>
+        <div class="nutrient-skill">
+          <div class="nutrient-skill-emoji">${getNutEmoji(name)}</div>
+          <div class="nutrient-skill-body">
+            <div class="nutrient-skill-name">${name}</div>
+            <div class="nutrient-skill-benefit">${d.benefit}</div>
+            <div class="nutrient-skill-source">${d.foods.join(', ')}에서</div>
+          </div>
         </div>
       `).join('')}
     </div>`;
@@ -3486,18 +3648,29 @@ function renderFoodResult(r) {
   const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
   const labels = { carbs:'탄수화물', protein:'단백질', fat:'지방', fiber:'식이섬유', sodium:'나트륨', sugar:'당류' };
   const units = { carbs:'g', protein:'g', fat:'g', fiber:'g', sodium:'mg', sugar:'g' };
+  // 🎮 게임 스텟 스타일 영양소 바
+  const emojis = { carbs:'🌾', protein:'💪', fat:'🥑', fiber:'🌿', sodium:'🧂', sugar:'🍯' };
   const nutriHtml = Object.keys(targets).map(k => {
     const val = n[k] || 0;
     const pct = Math.min(100, Math.round(val / targets[k] * 100));
-    return `<div class="nutri-item">
-      <div class="nutri-row">
-        <span class="nutri-name">${labels[k]}</span>
-        <span class="nutri-val">${val}${units[k]} <span style="color:#94A3B8;font-weight:500">/ ${targets[k]}${units[k]}</span></span>
+    return `<div class="game-stat-row">
+      <div class="game-stat-head">
+        <span class="game-stat-name">${emojis[k]} ${labels[k]}</span>
+        <span class="game-stat-value">${val}${units[k]} / ${targets[k]}${units[k]} (${pct}%)</span>
       </div>
-      <div class="nutri-bar"><div class="nutri-fill ${k}" style="width:${pct}%"></div></div>
+      <div class="game-stat-bar-wrap">
+        <div class="game-stat-bar ${k}" style="width:${pct}%"></div>
+      </div>
     </div>`;
   }).join('');
   document.getElementById('foodNutriItems').innerHTML = nutriHtml;
+  // 영양소 분석 박스를 게임 카드로 스타일 변경
+  const nutriGrid = document.querySelector('.nutri-grid');
+  if (nutriGrid) {
+    nutriGrid.className = 'game-stats-card';
+    const t = nutriGrid.querySelector('.nutri-title');
+    if (t) { t.className = 'game-stats-title'; t.innerHTML = '🎯 영양 스텟'; }
+  }
   // 요약
   document.getElementById('foodSummary').textContent = r.summary || '';
   // 하이라이트
