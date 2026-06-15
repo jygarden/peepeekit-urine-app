@@ -3416,7 +3416,9 @@ async function confirmAndAnalyze() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageB64: foodImageB64, mealTime: selectedMealTime, userProfile,
+          // 🚀 분석 단계엔 이미지 안 보냄! 확정 음식·재료만 텍스트로
+          // → body 크기 4.5MB 안 넘고, AI도 5~10배 빨라짐
+          mealTime: selectedMealTime, userProfile,
           target: foodTarget, mode: 'analyze',
           confirmedFoods: detectedFoodsData,
           todayMeals
