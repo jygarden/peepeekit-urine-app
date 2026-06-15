@@ -3893,14 +3893,32 @@ function renderFoodResult(r) {
   document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
   // 🎮 음식 게임 카드 + 스킬 뱃지 + 재료별 궁합 (한 카드에 통합!)
   const stripEng = (s) => (s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
+
+  // 📸 사진 안에 있는 모든 음식·재료 set 구축 (궁합 필터링용)
+  const itemsInPhoto = new Set();
+  (r.foods || []).forEach(f => {
+    if (f.name) itemsInPhoto.add(stripEng(f.name));
+    (f.ingredients || []).forEach(ing => {
+      if (ing.name) itemsInPhoto.add(stripEng(ing.name));
+    });
+  });
+  // 사진 안 음식·재료와 매칭되는지 체크 (정확/부분 매칭)
+  const isInPhoto = (candidate) => {
+    const w = stripEng(candidate || '').trim();
+    if (!w) return false;
+    for (const item of itemsInPhoto) {
+      const i = String(item).trim();
+      if (!i) continue;
+      if (i === w) return true;
+      if (w.length >= 2 && i.includes(w)) return true;
+      if (i.length >= 2 && w.includes(i)) return true;
+    }
+    return false;
+  };
+
   // 궁합 디버그 (에러 나도 페이지 죽지 않게)
   try {
-    const dbg = (r.foods || []).map(f => ({
-      name: f.name,
-      dishPairings: !!f.dishPairings,
-      ingredientsCount: (f.ingredients && f.ingredients.length) || 0
-    }));
-    console.log('[궁합 디버그]', dbg);
+    console.log('[사진 안 재료]', Array.from(itemsInPhoto));
   } catch(e) { /* ignore */ }
   const items = (r.foods || []).map(f => {
     const skills = (f.keyNutrients || []).slice(0, 4).map(n =>
@@ -3922,12 +3940,14 @@ function renderFoodResult(r) {
       (f.dishPairings.good || []).forEach(g => goodPairings.push(g));
       (f.dishPairings.bad || []).forEach(b => badPairings.push(b));
     }
-    // 중복 제거 (with 기준)
+    // 중복 제거 (with 기준) + 📸 사진 안 음식·재료만 필터
     const dedupe = (arr) => {
       const seen = new Set();
       return arr.filter(item => {
         const key = stripEng(item.with || '');
         if (!key || seen.has(key)) return false;
+        // 사진 안에 있는 음식·재료와 매칭되는 것만 통과
+        if (!isInPhoto(item.with)) return false;
         seen.add(key);
         return true;
       });
@@ -4156,7 +4176,8 @@ function renderFoodResult(r) {
       <div class="pairing-note-icon">💡</div>
       <div class="pairing-note-text">
         <strong>꼭 알아두세요!</strong><br>
-        "효율↓ 재료"라고 해서 몸에 나쁘다는 뜻은 아니에요. 영양소 흡수율을 더 높이거나 소화 부담을 줄이려면 좋은 궁합을 챙기시고, 상극 조합은 살짝 피해주시면 같은 음식도 훨씬 알차게 드실 수 있어요 😊
+        궁합 정보는 <strong>이 사진 안의 음식·재료끼리</strong>만 매칭해서 보여드려요.<br><br>
+        "효율↓ 재료"라고 해서 몸에 나쁜 건 아니에요. 영양소 흡수율을 높이거나 소화 부담을 줄이려면 좋은 궁합은 챙기시고, 효율↓ 조합은 살짝 피해주시면 같은 음식도 훨씬 알차게 드실 수 있어요 😊
       </div>
     </div>`;
 
