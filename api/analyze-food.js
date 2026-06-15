@@ -15,7 +15,9 @@ module.exports = async function handler(req, res) {
 
   try {
     const { imageB64, mealTime, userProfile, target, mode, confirmedFoods, todayMeals } = req.body;
-    if (!imageB64 && mode !== 'analyze-text') return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
+    // analyze 모드 + 확정 음식이 있으면 이미지 없어도 OK (텍스트만으로 빠른 분석)
+    const allowNoImage = (mode === 'analyze' && confirmedFoods) || mode === 'analyze-text';
+    if (!imageB64 && !allowNoImage) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
     // mode: 'detect' = 1차 인식만 / 'analyze' = 확정 재료로 풀 분석 / undefined = 한 번에 처리 (구버전 호환)
     let prompt;
@@ -35,15 +37,19 @@ module.exports = async function handler(req, res) {
     // Flash도 충분히 정확함. 사전 fallback이 궁합 빈칸 채워줌.
     const model = 'gemini-2.5-flash';
 
+    // 🚀 핵심 최적화: analyze 모드는 이미 detect에서 음식·재료 확정됐으니
+    //    이미지 안 보냄! 텍스트만으로 분석 → 5~10배 빨라짐 (Vercel 10초 timeout 안전)
+    const imageForGemini = (mode === 'analyze' && confirmedFoods) ? null : imageB64;
+
     // 첫 시도
-    let response = await callGemini(apiKey, model, prompt, imageB64);
+    let response = await callGemini(apiKey, model, prompt, imageForGemini);
     let textOutput = await extractText(response);
 
     // 분석 모드에서 실패하면 1회 자동 재시도 (더 짧은 응답 유도)
     if (mode === 'analyze' && !textOutput) {
       console.log('첫 시도 실패, 재시도 중...');
       const retryPrompt = prompt + '\n\n⚠️ 응답을 매우 간결하게! 각 reason 5단어 이내, JSON 빠짐없이.';
-      response = await callGemini(apiKey, model, retryPrompt, imageB64);
+      response = await callGemini(apiKey, model, retryPrompt, imageForGemini);
       textOutput = await extractText(response);
     }
 
@@ -141,106 +147,29 @@ function buildFoodPrompt(mealTime, userProfile, confirmedFoods, todayMeals) {
   const confirmHint = confirmedFoods ? `\n\n=== 사용자가 확인한 음식·재료 (이걸 기준으로 정확히 분석!) ===\n${JSON.stringify(confirmedFoods, null, 2)}` : '';
   const todayHint = todayMeals && todayMeals.length > 0 ? `\n\n=== 오늘 이미 먹은 다른 식사들 (개인화·비교에 활용) ===\n${todayMeals.map(m => `${m.mealTime || '식사'}: ${m.foods}${m.totalCalories ? ` (${m.totalCalories}kcal)` : ''}`).join('\n')}` : '';
 
-  return `🇰🇷 **언어 규칙 (절대 준수)**: 모든 JSON 응답값을 **한국어로만** 작성. 영문 병기 금지! (X "탄수화물 (Carbohydrate)"  → O "탄수화물")
+  return `🇰🇷 한국어만! 영문 병기 X. 매우 간결하게! (Vercel 10초 timeout — 응답 빨라야 함)
 
-당신은 20년 경력의 임상 영양사이자 한국 식단 전문가입니다. 사용자가 ${time}으로 먹은 음식 사진을 보고 깊이 있는 영양 분석을 제공하세요.
+당신은 한국 식단 영양사. ${time} 분석.
 
 ${profile}${confirmHint}${todayHint}
 
-=== 분석 핵심 규칙 ===
-1. **음식 인식**: 사진 속 **모든 음식**을 한국어로 식별 (반찬도 다 별개로!)
-2. **칼로리·영양소**: 1인분 기준 추정 (한국 음식 표준 영양 DB)
-3. **균형 점수 (0~100)**: 매크로 비율 + 식이섬유 + 비타민/미네랄 + 나트륨·당 + 한국인 권장량
-4. **개인화**: 사용자 프로필 + 오늘 다른 식사 데이터 반영
+=== 분석 규칙 ===
+1. 확정된 음식·재료 그대로 사용
+2. 1인분 칼로리·영양소 추정 (한국 표준)
+3. 균형 점수 0~100
+4. 각 음식 keyNutrients 1~2개 (예: 소고기→철분, 토마토→라이코펜, 돼지→비타민B1, 미역→요오드, 가지→안토시아닌, 시금치→엽산, 마늘→알리신, 김치→프로바이오틱스)
+5. 모든 항목 짧고 간결하게! summary는 1~2문장만!
 
-⚠️ **토큰 절약 규칙** (반찬 많을 때):
-- 음식 수가 8개 이상이면 각 항목 설명을 짧고 간결하게
-- keyNutrients: 음식당 1~2개 (가장 대표적인 것만)
-- ingredients: 음식당 핵심 2~3개만
-- 각 reason은 10자 이내 핵심만
-- 모든 음식 다 분석하되, 길이만 짧게! (절대 음식 빼먹지 X)
-
-=== ⭐ 영양소 강조 규칙 (필수 출력) ===
-각 음식이 가진 **고유 기능성 성분**을 \`keyNutrients\`에 **반드시 포함**!
-대표 예시:
-- 토마토 → 라이코펜, 비타민C
-- 연어/생선 → 오메가3, DHA
-- 시금치 → 엽산, 철분
-- 견과류 → 비타민E, 셀레늄
-- 마늘 → 알리신
-- 가지 → 안토시아닌
-- 고구마/당근 → 베타카로틴
-- 콩/두부 → 이소플라본
-- 김치 → 프로바이오틱스
-- 양파 → 케르세틴
-- 브로콜리 → 설포라판
-- 블루베리 → 안토시아닌
-- 돼지고기 → 비타민B1
-- 계란 → 콜린
-→ 각 음식마다 keyNutrients에 2~3개 (name 한글만, benefit 한 줄)
-
-=== 🔥 음식·재료 궁합·상극 규칙 (필수 출력 — 절대 빠뜨리면 안 됨!) ===
-**각 음식 객체 안에** 반드시 두 필드를 채우세요:
-
-1️⃣ \`ingredients\` (재료별 궁합) — 음식당 핵심 재료 2~3개 + 각각 궁합/상극
-2️⃣ \`dishPairings\` (음식 단위 궁합) — 이 음식 전체와 잘 맞는/안 맞는 음식
-
-⚠️ 이 두 필드가 비어있으면 **무효한 응답**입니다.
-
-좋은 궁합 예시:
-- 토마토 + 올리브유 → 라이코펜 흡수↑
-- 시금치 + 참기름 → 지용성 영양소↑
-- 가지 + 마늘 → 알리신 시너지
-- 돼지고기 + 마늘 → 비타민B1 흡수↑
-- 계란 + 시금치 → 콜린·엽산 시너지
-- 어묵 + 무 → 소화·단백질
-- 양파 + 견과류 → 케르세틴 흡수↑
-- 소고기 + 무 → 소화↑
-- 미역 + 참기름 → 미네랄 흡수↑
-
-상극 예시:
-- 시금치 + 두부 → 옥살산이 칼슘 방해
-- 시금치 + 우유 → 칼슘 결합
-- 토마토 + 오이 → 비타민C 파괴
-- 게/새우 + 감 → 단백질 변성
-- 돼지고기 + 도라지 → 한방 상극
-- 미역 + 녹차 → 탄닌이 철분 방해
-- 계란 + 감 → 변비 유발
-
-=== ⭐ 오늘 다른 식사 비교 (todayMeals 있을 때) ===
-"점심에 고기 드셨는데 저녁에도 또 고기네요? OOO 추가하면 좋아요" 같은 **개인적 코멘트**.
-
-=== ⭐ 다음 식사 추천 (필수, 객체!) ===
-\`nextMeal\` = { menu, reason } — **실제 사람이 쉽게 먹는 구체 메뉴**!
-예: "두부김밥 + 미역국 추천!", "닭가슴살 샐러드 + 통밀빵"
-
-=== ⭐ 라이트 관리 팁 (필수 출력 3~5개) ===
-\`lightTips\` — 친구가 알려주는 느낌!
-예: "식후 30분 후 가벼운 산책 좋아요 🚶", "녹차·커피는 식후 1시간 뒤에 — 철분 흡수 방해"
-
-=== 🚨 JSON 응답 형식 (이대로만, 한국어만!) ===
+=== JSON 응답 (이대로만) ===
 {
   "foods": [
     {
-      "name": "음식명 (한글만)",
-      "amount": "양 (예: 1공기, 1인분)",
+      "name": "음식명 (한글)",
+      "amount": "1인분",
       "calories": 정수,
       "keyNutrients": [
-        { "name": "성분명 (한글만)", "benefit": "효능 한 줄" }
-      ],
-      "ingredients": [
-        {
-          "name": "재료명 (한글)",
-          "pairings": {
-            "good": [{ "with": "함께 좋은 재료", "reason": "왜 좋은지 10자" }],
-            "bad": [{ "with": "상극 재료", "reason": "왜 안 좋은지 10자" }]
-          }
-        }
-      ],
-      "dishPairings": {
-        "good": [{ "with": "이 음식과 좋은 음식", "reason": "한 줄" }],
-        "bad": [{ "with": "상극 음식", "reason": "한 줄" }]
-      }
+        { "name": "성분명 (한글)", "benefit": "효능 짧게" }
+      ]
     }
   ],
   "totalCalories": 정수,
@@ -252,26 +181,18 @@ ${profile}${confirmHint}${todayHint}
   "balanceGrade": "A/B/C/D",
   "balanceLabel": "최상/우수/양호/주의/개선필요",
   "macroRatio": { "carbsPercent": 정수, "proteinPercent": 정수, "fatPercent": 정수 },
-  "summary": "친근한 톤의 종합 평가 2~3문장",
-  "todayComparison": "오늘 다른 식사 있으면 비교 코멘트 1~2문장 (없으면 null)",
-  "missing": ["부족한 영양소·성분 (한글만)"],
-  "excessive": ["과다 영양소 (한글만)"],
-  "lightTips": ["꿀팁1", "꿀팁2", "꿀팁3"],
-  "nextMeal": { "menu": "구체 메뉴", "reason": "이유 한 줄" },
+  "summary": "1~2문장 친근하게",
+  "todayComparison": null,
+  "missing": ["부족 영양소 1~3개"],
+  "excessive": ["과다 영양소 1~3개"],
+  "lightTips": ["꿀팁1 (식후 산책 등)", "꿀팁2 (수분 타이밍)", "꿀팁3"],
+  "nextMeal": { "menu": "구체 메뉴", "reason": "한 줄" },
   "supplements": [
-    { "name": "추천 영양제명 (한글만)", "reason": "보충 이유 1문장" }
+    { "name": "영양제명", "reason": "한 줄" }
   ]
 }
 
-=== 🚨 응답 전 최종 체크리스트 ===
-☐ 모든 응답값 **한국어만** (영문 병기 X)
-☐ foods[*].keyNutrients — 음식당 2~3개
-☐ **foods[*].ingredients[*].pairings — 재료별 good·bad 필수!** (이게 빠지면 무효!)
-☐ **foods[*].dishPairings — 음식 단위 good·bad 필수!** (이게 빠지면 무효!)
-☐ lightTips — 3~5개
-☐ nextMeal — { menu, reason } 객체
-
-🔥 ingredients/dishPairings 빠뜨리면 절대 안 됩니다. 반드시 채우세요!`;
+⚡ 빠르게! keyNutrients는 음식당 1~2개, summary 짧게. 궁합 데이터는 클라이언트가 자체 사전으로 처리하니 생성 X.`;
 }
 
 // 반려동물 사료 분석 프롬프트
@@ -344,8 +265,8 @@ async function callGemini(apiKey, model, prompt, imageB64) {
           ]
         }],
         generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 16384,
+          temperature: 0.2,
+          maxOutputTokens: 4096, // 짧게 — Flash가 빨리 끝남 (10초 timeout 안전)
           responseMimeType: 'application/json'
         }
       })
