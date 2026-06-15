@@ -3494,12 +3494,13 @@ function renderFoodResult(r) {
   document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
   document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
   // 🎮 음식 게임 카드 + 스킬 뱃지
+  const stripEng = (s) => (s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
   const items = (r.foods || []).map(f => {
     const skills = (f.keyNutrients || []).slice(0, 4).map(n =>
-      `<span class="skill-badge">${n.name.replace(/\s*\(.*?\)\s*/, '')}</span>`
+      `<span class="skill-badge">${stripEng(n.name)}</span>`
     ).join('');
     const skillDetails = (f.keyNutrients || []).slice(0, 3).map(n =>
-      `<div class="food-game-skill-detail"><strong>${n.name}</strong> — ${n.benefit}</div>`
+      `<div class="food-game-skill-detail"><strong>${stripEng(n.name)}</strong> — ${stripEng(n.benefit)}</div>`
     ).join('');
     return `<div class="food-game-card">
       <div class="food-game-top">
@@ -3538,48 +3539,54 @@ function renderFoodResult(r) {
   // 🎮 궁합 VS 카드 (음식 nested 우선, 옛 foodPairings 호환)
   let pairingsHtml = '';
   // 새 구조: 각 food 안에 dishPairings + ingredients[].pairings
-  const hasNested = (r.foods || []).some(f => f.dishPairings || (f.ingredients && f.ingredients[0]?.pairings));
+  const hasNested = (r.foods || []).some(f =>
+    (f.dishPairings && (f.dishPairings.good?.length || f.dishPairings.bad?.length)) ||
+    (f.ingredients && f.ingredients.some(i => i.pairings && (i.pairings.good?.length || i.pairings.bad?.length)))
+  );
+  console.log('[궁합 디버그] hasNested:', hasNested, 'foodPairings:', r.foodPairings?.length || 0);
   if (hasNested) {
     pairingsHtml = `<div class="pairings-box"><div class="pairings-title">⚔️ 궁합 매칭</div>`;
     (r.foods || []).forEach(f => {
+      const fname = stripEng(f.name);
       // 음식 단위
       if (f.dishPairings && (f.dishPairings.good?.length || f.dishPairings.bad?.length)) {
-        pairingsHtml += `<div class="pair-section-header">🍴 ${f.name}</div>`;
+        pairingsHtml += `<div class="pair-section-header">🍴 ${fname}</div>`;
         (f.dishPairings.good || []).forEach(g => {
           pairingsHtml += `<div class="pair-vs-card good">
-            <span class="pair-side">${f.name}</span>
+            <span class="pair-side">${fname}</span>
             <span class="pair-vs-icon">💚</span>
-            <span class="pair-side">${g.with}</span>
-            <span class="pair-vs-reason">${g.reason}</span>
+            <span class="pair-side">${stripEng(g.with)}</span>
+            <span class="pair-vs-reason">${stripEng(g.reason)}</span>
           </div>`;
         });
         (f.dishPairings.bad || []).forEach(b => {
           pairingsHtml += `<div class="pair-vs-card bad">
-            <span class="pair-side">${f.name}</span>
+            <span class="pair-side">${fname}</span>
             <span class="pair-vs-icon">💔</span>
-            <span class="pair-side">${b.with}</span>
-            <span class="pair-vs-reason">${b.reason}</span>
+            <span class="pair-side">${stripEng(b.with)}</span>
+            <span class="pair-vs-reason">${stripEng(b.reason)}</span>
           </div>`;
         });
       }
       // 재료별
       (f.ingredients || []).forEach(ing => {
         if (!ing.pairings || (!ing.pairings.good?.length && !ing.pairings.bad?.length)) return;
-        pairingsHtml += `<div class="pair-section-header">🌿 ${ing.name}</div>`;
+        const iname = stripEng(ing.name);
+        pairingsHtml += `<div class="pair-section-header">🌿 ${iname}</div>`;
         (ing.pairings.good || []).forEach(g => {
           pairingsHtml += `<div class="pair-vs-card good">
-            <span class="pair-side">${ing.name}</span>
+            <span class="pair-side">${iname}</span>
             <span class="pair-vs-icon">💚</span>
-            <span class="pair-side">${g.with}</span>
-            <span class="pair-vs-reason">${g.reason}</span>
+            <span class="pair-side">${stripEng(g.with)}</span>
+            <span class="pair-vs-reason">${stripEng(g.reason)}</span>
           </div>`;
         });
         (ing.pairings.bad || []).forEach(b => {
           pairingsHtml += `<div class="pair-vs-card bad">
-            <span class="pair-side">${ing.name}</span>
+            <span class="pair-side">${iname}</span>
             <span class="pair-vs-icon">💔</span>
-            <span class="pair-side">${b.with}</span>
-            <span class="pair-vs-reason">${b.reason}</span>
+            <span class="pair-side">${stripEng(b.with)}</span>
+            <span class="pair-vs-reason">${stripEng(b.reason)}</span>
           </div>`;
         });
       });
@@ -3624,6 +3631,15 @@ function renderFoodResult(r) {
     const goods = (r.pairings.good||[]).map(p => `<div class="pair-item good"><div class="pair-combo">✨ ${p.combo}</div><div class="pair-reason">${p.benefit}</div></div>`).join('');
     const warns = (r.pairings.warning||[]).map(p => `<div class="pair-item warning"><div class="pair-combo">⚠️ ${p.combo}</div><div class="pair-reason">${p.reason}</div></div>`).join('');
     pairingsHtml = `<div class="pairings-box"><div class="pairings-title">🤝 음식 궁합 분석</div>${goods}${warns}</div>`;
+  } else if (r.foods && r.foods.length > 0) {
+    // 궁합 데이터가 아예 없을 때 친절한 안내
+    pairingsHtml = `<div class="pairings-box" style="background:linear-gradient(135deg,#FEF3C7 0%,#FFE4E6 100%);">
+      <div class="pairings-title">⚔️ 궁합 매칭</div>
+      <div style="padding:12px;color:#92400E;font-size:13px;line-height:1.5;">
+        💭 이번엔 AI가 궁합 데이터를 못 만들었어요.<br>
+        한 번 더 분석하시면 보일 거예요 🙏
+      </div>
+    </div>`;
   }
   // 오늘 비교
   const todayHtml = r.todayComparison ? `<div class="today-compare-box">${r.todayComparison}</div>` : '';
@@ -3643,8 +3659,10 @@ function renderFoodResult(r) {
   const nutrientMap = {};
   (r.foods || []).forEach(f => {
     (f.keyNutrients || []).forEach(n => {
-      if (!nutrientMap[n.name]) nutrientMap[n.name] = { benefit: n.benefit, foods: [] };
-      nutrientMap[n.name].foods.push(f.name);
+      const cleanName = stripEng(n.name);
+      const cleanBenefit = stripEng(n.benefit);
+      if (!nutrientMap[cleanName]) nutrientMap[cleanName] = { benefit: cleanBenefit, foods: [] };
+      nutrientMap[cleanName].foods.push(f.name);
     });
   });
   // 🎮 영양소 사전 (스킬북 스타일)
@@ -3684,13 +3702,9 @@ function renderFoodResult(r) {
   const oldTipsBox = document.getElementById('foodTipsBox');
   if (oldTipsBox) oldTipsBox.style.display = 'none';
 
-  // 컨테이너에 모두 모아서 삽입
+  // 컨테이너에 모두 모아서 삽입 (highlights는 영양소 균형 박스랑 중복이라 제거)
   const container = document.getElementById('foodHighlights');
-  const baseHighlights = (r.highlights || []).map(h => {
-    const ic = h.type === 'good' ? '✅' : h.type === 'warning' ? '⚠️' : '🚨';
-    return `<div class="highlight-item ${h.type || 'good'}">${ic} ${h.text}</div>`;
-  }).join('');
-  container.innerHTML = baseHighlights + todayHtml + nutrientDictHtml + pairingsHtml + lightTipsHtml + nextMealHtml;
+  container.innerHTML = todayHtml + nutrientDictHtml + pairingsHtml + lightTipsHtml + nextMealHtml;
   // 영양소 막대 (대략적 기준치 기반)
   const n = r.nutrition || {};
   const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
