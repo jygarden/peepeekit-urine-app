@@ -3507,76 +3507,268 @@ function getTodayMeals() {
   } catch(e) { return []; }
 }
 
-// 🍱 한식 재료 궁합 사전 (AI fallback)
+// 🍱 한식 재료 궁합 사전 (AI fallback) — reason은 사람이 바로 이해되게 풀어서
 const ING_PAIRING_DICT = {
-  '소고기': { good: [{'with':'무', reason:'소화 도움'}, {'with':'마늘', reason:'풍미·항균 시너지'}], bad: [{'with':'밤', reason:'영양 흡수 감소'}] },
-  '돼지고기': { good: [{'with':'마늘', reason:'비타민B1 흡수↑'}, {'with':'새우젓', reason:'단백질 소화↑'}], bad: [{'with':'도라지', reason:'한방 상극'}] },
-  '닭고기': { good: [{'with':'브로콜리', reason:'단백질·항산화'}, {'with':'마늘', reason:'면역력↑'}], bad: [{'with':'자두', reason:'설사 유발 가능'}] },
-  '닭가슴살': { good: [{'with':'브로콜리', reason:'단백질·항산화'}, {'with':'고구마', reason:'근육 회복↑'}], bad: [] },
-  '미역': { good: [{'with':'참기름', reason:'미네랄 흡수↑'}, {'with':'두부', reason:'단백질·미네랄'}], bad: [{'with':'녹차', reason:'탄닌이 철분 방해'}] },
-  '시금치': { good: [{'with':'참기름', reason:'지용성 영양소↑'}, {'with':'레몬', reason:'철분 흡수↑'}], bad: [{'with':'두부', reason:'옥살산이 칼슘 방해'}] },
-  '계란': { good: [{'with':'시금치', reason:'콜린·엽산 시너지'}, {'with':'양파', reason:'케르세틴 시너지'}], bad: [{'with':'감', reason:'변비 유발 가능'}] },
-  '토마토': { good: [{'with':'올리브유', reason:'라이코펜 흡수↑'}, {'with':'아보카도', reason:'지용성 영양↑'}], bad: [{'with':'오이', reason:'비타민C 파괴'}] },
-  '두부': { good: [{'with':'미역', reason:'미네랄 보완'}, {'with':'견과류', reason:'단백질·지방 시너지'}], bad: [{'with':'시금치', reason:'옥살산 + 칼슘 방해'}] },
-  '마늘': { good: [{'with':'돼지고기', reason:'비타민B1 흡수↑'}, {'with':'올리브유', reason:'알리신 흡수↑'}], bad: [] },
-  '양파': { good: [{'with':'견과류', reason:'케르세틴 흡수↑'}, {'with':'고기', reason:'육질 부드럽게'}], bad: [] },
-  '브로콜리': { good: [{'with':'올리브유', reason:'설포라판 활성↑'}, {'with':'닭가슴살', reason:'단백질·항산화'}], bad: [] },
-  '당근': { good: [{'with':'기름', reason:'베타카로틴 흡수↑'}, {'with':'견과류', reason:'지용성 영양↑'}], bad: [{'with':'무', reason:'아스코르비나아제 효소'}] },
-  '김치': { good: [{'with':'두부', reason:'단백질·유산균'}, {'with':'돼지고기', reason:'소화·풍미'}], bad: [] },
-  '어묵': { good: [{'with':'무', reason:'소화·단백질'}, {'with':'시금치', reason:'영양 균형'}], bad: [] },
-  '고추장': { good: [{'with':'참기름', reason:'매운맛 완화'}, {'with':'우유', reason:'캡사이신 완화'}], bad: [] },
-  '쌀': { good: [{'with':'콩', reason:'필수아미노산 보완'}, {'with':'잡곡', reason:'식이섬유↑'}], bad: [] },
-  '흰쌀': { good: [{'with':'콩', reason:'필수아미노산 보완'}, {'with':'잡곡', reason:'식이섬유↑'}], bad: [] },
-  '잡곡': { good: [{'with':'콩', reason:'단백질·식이섬유'}, {'with':'견과류', reason:'영양 균형'}], bad: [] },
-  '고사리': { good: [{'with':'소고기', reason:'단백질 보완'}, {'with':'들기름', reason:'고소함·항산화'}], bad: [{'with':'생것', reason:'반드시 익혀서 섭취'}] },
-  '오이': { good: [{'with':'식초', reason:'아삭함 유지'}, {'with':'미역', reason:'칼륨·미네랄'}], bad: [{'with':'토마토', reason:'비타민C 파괴'}] },
-  '연어': { good: [{'with':'아보카도', reason:'오메가3·지용성↑'}, {'with':'레몬', reason:'비린내↓·흡수↑'}], bad: [] },
-  '가지': { good: [{'with':'마늘', reason:'알리신 시너지'}, {'with':'들기름', reason:'안토시아닌 흡수↑'}], bad: [] },
-  '오징어': { good: [{'with':'마늘', reason:'타우린·항산화'}, {'with':'채소', reason:'영양 균형'}], bad: [{'with':'감', reason:'단백질 변성'}] },
-  '새우': { good: [{'with':'마늘', reason:'비린내↓·풍미↑'}, {'with':'아보카도', reason:'지방·단백질'}], bad: [{'with':'감', reason:'단백질 변성'}] },
-  '감자': { good: [{'with':'버터', reason:'지용성 비타민 흡수↑'}, {'with':'양파', reason:'풍미↑'}], bad: [] },
-  '고구마': { good: [{'with':'우유', reason:'섬유질·단백질'}, {'with':'견과류', reason:'영양 균형'}], bad: [] },
-  '콩나물': { good: [{'with':'고춧가루', reason:'비타민C 활성'}, {'with':'마늘', reason:'아미노산 시너지'}], bad: [] },
-  '버섯': { good: [{'with':'마늘', reason:'면역력↑'}, {'with':'들기름', reason:'고소함·항산화'}], bad: [] },
-  '무': { good: [{'with':'소고기', reason:'소화·단백질'}, {'with':'어묵', reason:'시원한 국물'}], bad: [{'with':'당근', reason:'아스코르비나아제'}] },
-  '깻잎': { good: [{'with':'고기', reason:'풍미·소화↑'}, {'with':'쌈장', reason:'한식 한상'}], bad: [] },
-  '당면': { good: [{'with':'시금치', reason:'비타민 보충'}, {'with':'소고기', reason:'단백질 보완'}], bad: [{'with':'탄산음료', reason:'위 부담'}] },
-  '면': { good: [{'with':'계란', reason:'단백질 보충'}, {'with':'김치', reason:'유산균·비타민'}], bad: [] },
-  '떡': { good: [{'with':'견과류', reason:'영양 균형'}, {'with':'우유', reason:'단백질 보충'}], bad: [{'with':'탄산음료', reason:'소화 방해'}] },
-  '참기름': { good: [{'with':'시금치', reason:'지용성↑'}, {'with':'미역', reason:'미네랄 흡수↑'}], bad: [] },
-  '들기름': { good: [{'with':'나물', reason:'오메가3·고소함'}, {'with':'가지', reason:'안토시아닌 흡수↑'}], bad: [] },
+  '소고기': {
+    good: [{'with':'무', reason:'무의 효소가 소고기 소화를 도와줘요'}, {'with':'마늘', reason:'마늘 알리신이 풍미와 항균 효과를 더해줘요'}],
+    bad:  [{'with':'밤', reason:'밤의 타닌이 철분 흡수를 방해해요'}]
+  },
+  '돼지고기': {
+    good: [{'with':'마늘', reason:'마늘이 돼지고기의 비타민B1 흡수를 2배 높여줘요'}, {'with':'새우젓', reason:'새우젓 효소가 기름진 단백질 소화를 도와요'}],
+    bad:  [{'with':'도라지', reason:'한의학적으로 같이 먹으면 소화 부담↑'}]
+  },
+  '닭고기': {
+    good: [{'with':'브로콜리', reason:'단백질과 항산화 영양소가 균형 잡혀요'}, {'with':'마늘', reason:'면역력 강화 시너지'}],
+    bad:  [{'with':'자두', reason:'함께 먹으면 설사 유발 가능'}]
+  },
+  '닭가슴살': {
+    good: [{'with':'브로콜리', reason:'근육 회복 + 항산화 효과'}, {'with':'고구마', reason:'운동 후 회복 최적 조합'}],
+    bad:  []
+  },
+  '미역': {
+    good: [{'with':'참기름', reason:'기름이 미역 미네랄 흡수를 도와줘요'}, {'with':'두부', reason:'식물성 단백질 + 해조 미네랄'}],
+    bad:  [{'with':'녹차', reason:'녹차 탄닌이 미역의 철분 흡수를 막아요'}]
+  },
+  '시금치': {
+    good: [{'with':'참기름', reason:'지용성 비타민 A·K 흡수가 좋아져요'}, {'with':'레몬', reason:'비타민C가 철분 흡수를 도와요'}],
+    bad:  [{'with':'두부', reason:'시금치 옥살산이 두부 칼슘과 결합해 흡수 방해'}]
+  },
+  '계란': {
+    good: [{'with':'시금치', reason:'콜린 + 엽산이 뇌·세포에 시너지'}, {'with':'양파', reason:'케르세틴 흡수 도움'}],
+    bad:  [{'with':'감', reason:'감의 타닌과 계란 단백질이 굳어 변비 유발'}]
+  },
+  '토마토': {
+    good: [{'with':'올리브유', reason:'기름이 라이코펜 흡수를 4배 높여줘요'}, {'with':'아보카도', reason:'좋은 지방이 항산화 흡수를 도와요'}],
+    bad:  [{'with':'오이', reason:'오이 효소가 토마토 비타민C를 파괴해요'}]
+  },
+  '두부': {
+    good: [{'with':'미역', reason:'식물성 단백질 + 미네랄 균형'}, {'with':'견과류', reason:'단백질과 좋은 지방의 시너지'}],
+    bad:  [{'with':'시금치', reason:'시금치 옥살산이 두부 칼슘 흡수를 방해'}]
+  },
+  '마늘': {
+    good: [{'with':'돼지고기', reason:'알리신이 비타민B1 흡수를 도와요'}, {'with':'올리브유', reason:'기름이 알리신 효능을 보존해요'}],
+    bad:  []
+  },
+  '양파': {
+    good: [{'with':'견과류', reason:'견과 지방이 케르세틴 흡수를 도와요'}, {'with':'고기', reason:'양파 효소가 육질을 부드럽게'}],
+    bad:  []
+  },
+  '브로콜리': {
+    good: [{'with':'올리브유', reason:'기름이 설포라판 활성을 높여요'}, {'with':'닭가슴살', reason:'단백질·항산화 균형'}],
+    bad:  []
+  },
+  '당근': {
+    good: [{'with':'기름', reason:'기름이 베타카로틴 흡수를 8배 높여요'}, {'with':'견과류', reason:'좋은 지방이 비타민A 흡수를 도와요'}],
+    bad:  [{'with':'무', reason:'당근 효소가 무의 비타민C를 파괴해요'}]
+  },
+  '김치': {
+    good: [{'with':'두부', reason:'유산균 + 식물성 단백질의 황금조합'}, {'with':'돼지고기', reason:'유산균이 고기 소화를 도와요'}],
+    bad:  []
+  },
+  '어묵': {
+    good: [{'with':'무', reason:'무가 어묵의 짠맛을 잡고 소화를 도와요'}, {'with':'시금치', reason:'단백질 + 비타민 균형'}],
+    bad:  []
+  },
+  '고추장': {
+    good: [{'with':'참기름', reason:'기름이 매운맛을 부드럽게 잡아줘요'}, {'with':'우유', reason:'유지방이 캡사이신 자극을 완화'}],
+    bad:  []
+  },
+  '쌀': {
+    good: [{'with':'콩', reason:'쌀+콩이 만나면 완전 단백질이 돼요'}, {'with':'잡곡', reason:'식이섬유와 미네랄을 보충'}],
+    bad:  []
+  },
+  '흰쌀': {
+    good: [{'with':'콩', reason:'쌀+콩이 만나면 완전 단백질이 돼요'}, {'with':'잡곡', reason:'부족한 식이섬유를 보충'}],
+    bad:  []
+  },
+  '잡곡': {
+    good: [{'with':'콩', reason:'단백질·식이섬유 듀오'}, {'with':'견과류', reason:'영양 균형 완성'}],
+    bad:  []
+  },
+  '고사리': {
+    good: [{'with':'소고기', reason:'식이섬유 + 단백질 보완'}, {'with':'들기름', reason:'오메가3 + 고소한 풍미'}],
+    bad:  [{'with':'생것', reason:'생고사리는 독성 — 반드시 데쳐서 드세요'}]
+  },
+  '오이': {
+    good: [{'with':'식초', reason:'아삭함 유지 + 식욕 자극'}, {'with':'미역', reason:'칼륨·미네랄 시너지'}],
+    bad:  [{'with':'토마토', reason:'오이 효소가 토마토 비타민C를 파괴해요'}]
+  },
+  '연어': {
+    good: [{'with':'아보카도', reason:'오메가3 + 좋은 지방으로 지용성↑'}, {'with':'레몬', reason:'비린내 잡고 비타민C 흡수 시너지'}],
+    bad:  []
+  },
+  '가지': {
+    good: [{'with':'마늘', reason:'알리신이 가지 항산화 효능을 높여요'}, {'with':'들기름', reason:'기름이 안토시아닌 흡수를 도와요'}],
+    bad:  []
+  },
+  '오징어': {
+    good: [{'with':'마늘', reason:'타우린 + 알리신의 항산화 시너지'}, {'with':'채소', reason:'단백질·식이섬유 균형'}],
+    bad:  [{'with':'감', reason:'감의 타닌이 단백질을 굳혀 소화 방해'}]
+  },
+  '새우': {
+    good: [{'with':'마늘', reason:'마늘이 비린내 잡고 풍미↑'}, {'with':'아보카도', reason:'좋은 지방 + 양질 단백질'}],
+    bad:  [{'with':'감', reason:'감의 타닌이 새우 단백질을 굳혀요'}]
+  },
+  '감자': {
+    good: [{'with':'버터', reason:'지용성 비타민A·D 흡수↑'}, {'with':'양파', reason:'풍미와 단맛 시너지'}],
+    bad:  []
+  },
+  '고구마': {
+    good: [{'with':'우유', reason:'섬유질 + 단백질 균형'}, {'with':'견과류', reason:'좋은 지방으로 베타카로틴 흡수↑'}],
+    bad:  []
+  },
+  '콩나물': {
+    good: [{'with':'고춧가루', reason:'캡사이신이 비타민C 활성↑'}, {'with':'마늘', reason:'아미노산 시너지'}],
+    bad:  []
+  },
+  '버섯': {
+    good: [{'with':'마늘', reason:'면역력 강화 듀오'}, {'with':'들기름', reason:'고소함과 항산화 영양↑'}],
+    bad:  []
+  },
+  '무': {
+    good: [{'with':'소고기', reason:'무 효소가 고기 소화를 도와요'}, {'with':'어묵', reason:'시원한 국물 + 단백질 균형'}],
+    bad:  [{'with':'당근', reason:'당근 효소가 무의 비타민C를 파괴해요'}]
+  },
+  '깻잎': {
+    good: [{'with':'고기', reason:'특유 향이 느끼함 잡고 소화 도움'}, {'with':'쌈장', reason:'한식 쌈의 정석'}],
+    bad:  []
+  },
+  '당면': {
+    good: [{'with':'시금치', reason:'탄수화물 + 비타민 보충'}, {'with':'소고기', reason:'탄수+단백질 균형'}],
+    bad:  [{'with':'탄산음료', reason:'면+탄산은 위 부담이 커요'}]
+  },
+  '면': {
+    good: [{'with':'계란', reason:'단백질로 영양 균형'}, {'with':'김치', reason:'유산균 + 비타민 보충'}],
+    bad:  []
+  },
+  '떡': {
+    good: [{'with':'견과류', reason:'단백질·지방으로 혈당 안정'}, {'with':'우유', reason:'부족한 단백질 보충'}],
+    bad:  [{'with':'탄산음료', reason:'함께 먹으면 소화가 어려워요'}]
+  },
+  '참기름': {
+    good: [{'with':'시금치', reason:'지용성 비타민 흡수↑'}, {'with':'미역', reason:'미네랄 흡수를 도와요'}],
+    bad:  []
+  },
+  '들기름': {
+    good: [{'with':'나물', reason:'오메가3 + 고소한 풍미'}, {'with':'가지', reason:'안토시아닌 흡수를 도와요'}],
+    bad:  []
+  },
 };
 
-// 음식 단위 궁합 사전
+// 음식 단위 궁합 사전 — reason은 친절하게 풀어서
 const DISH_PAIRING_DICT = {
-  '미역국': { good: [{'with':'잡곡밥', reason:'균형 한 끼'}, {'with':'나물반찬', reason:'식이섬유↑'}], bad: [{'with':'녹차', reason:'철분 흡수 방해'}] },
-  '소고기 미역국': { good: [{'with':'잡곡밥', reason:'균형 한 끼'}, {'with':'나물반찬', reason:'식이섬유↑'}], bad: [{'with':'녹차', reason:'철분 흡수 방해'}] },
-  '제육볶음': { good: [{'with':'상추쌈', reason:'기름기 잡고 영양↑'}, {'with':'된장국', reason:'장 건강'}], bad: [{'with':'탄산음료', reason:'위 부담↑'}] },
-  '잡채': { good: [{'with':'밥', reason:'한식 한상'}, {'with':'된장국', reason:'영양 균형'}], bad: [] },
-  '비빔밥': { good: [{'with':'된장국', reason:'영양 균형'}, {'with':'미역국', reason:'미네랄 보충'}], bad: [] },
-  '김치찌개': { good: [{'with':'두부', reason:'단백질 보충'}, {'with':'잡곡밥', reason:'식이섬유↑'}], bad: [] },
-  '된장찌개': { good: [{'with':'쌈채소', reason:'식이섬유↑'}, {'with':'생선구이', reason:'단백질 보완'}], bad: [] },
-  '불고기': { good: [{'with':'상추쌈', reason:'영양 균형'}, {'with':'잡곡밥', reason:'섬유질 보충'}], bad: [{'with':'탄산음료', reason:'소화 방해'}] },
-  '김밥': { good: [{'with':'어묵국', reason:'따뜻함·국물'}, {'with':'단무지', reason:'개운함'}], bad: [] },
-  '라면': { good: [{'with':'계란', reason:'단백질 보충'}, {'with':'김치', reason:'유산균·비타민'}], bad: [{'with':'밥', reason:'탄수화물 과다'}] },
-  '국밥': { good: [{'with':'깍두기', reason:'유산균·소화'}, {'with':'양파', reason:'풍미↑'}], bad: [] },
-  '냉면': { good: [{'with':'편육', reason:'단백질 보충'}, {'with':'무절임', reason:'소화↑'}], bad: [] },
-  '흰쌀밥': { good: [{'with':'국·찌개', reason:'한식 정석'}, {'with':'단백질 반찬', reason:'영양 균형'}], bad: [] },
-  '잡곡밥': { good: [{'with':'된장찌개', reason:'영양 균형'}, {'with':'나물', reason:'한식 한상'}], bad: [] },
-  '고사리나물': { good: [{'with':'잡곡밥', reason:'식이섬유 시너지'}], bad: [] },
-  '미역줄기볶음': { good: [{'with':'밥', reason:'미네랄·탄수'}], bad: [{'with':'녹차', reason:'철분 방해'}] },
-  '시금치나물': { good: [{'with':'참기름', reason:'지용성 영양↑'}], bad: [{'with':'두부', reason:'옥살산 + 칼슘 방해'}] },
-  '계란말이': { good: [{'with':'시금치나물', reason:'콜린·엽산'}], bad: [] },
-  '깻잎장아찌': { good: [{'with':'밥', reason:'반찬으로 좋음'}, {'with':'고기', reason:'느끼함 잡음'}], bad: [] },
-  '깍두기': { good: [{'with':'국밥', reason:'아삭·유산균'}, {'with':'고기', reason:'느끼함 잡음'}], bad: [] },
-  '단무지': { good: [{'with':'김밥', reason:'한식 짝꿍'}, {'with':'분식', reason:'개운함'}], bad: [] },
-  '오이무침': { good: [{'with':'밥', reason:'개운함·반찬'}], bad: [{'with':'토마토', reason:'비타민C 파괴'}] },
-  '무말랭이무침': { good: [{'with':'밥', reason:'반찬·식이섬유'}, {'with':'국', reason:'한식 한상'}], bad: [] },
-  '우엉조림': { good: [{'with':'밥', reason:'섬유질·미네랄'}, {'with':'생선구이', reason:'영양 균형'}], bad: [] },
-  '멸치볶음': { good: [{'with':'밥', reason:'칼슘·단백질'}, {'with':'견과류', reason:'영양 시너지'}], bad: [] },
-  '콩나물무침': { good: [{'with':'밥', reason:'반찬·아미노산'}], bad: [] },
-  '나물': { good: [{'with':'잡곡밥', reason:'식이섬유↑'}, {'with':'들기름', reason:'고소함·항산화'}], bad: [] },
-  '장아찌': { good: [{'with':'밥', reason:'개운한 반찬'}], bad: [] },
+  '미역국': {
+    good: [{'with':'잡곡밥', reason:'미역 미네랄 + 잡곡 식이섬유로 균형 한 끼'}, {'with':'나물반찬', reason:'식이섬유와 비타민 시너지'}],
+    bad:  [{'with':'녹차', reason:'녹차 탄닌이 미역 철분 흡수를 막아요'}]
+  },
+  '소고기 미역국': {
+    good: [{'with':'잡곡밥', reason:'단백질·미네랄·식이섬유 황금 균형'}, {'with':'나물반찬', reason:'부족한 비타민 보충'}],
+    bad:  [{'with':'녹차', reason:'녹차 탄닌이 철분 흡수를 막아요'}]
+  },
+  '제육볶음': {
+    good: [{'with':'상추쌈', reason:'기름기 잡고 식이섬유 보충'}, {'with':'된장국', reason:'유산균이 장 건강을 도와요'}],
+    bad:  [{'with':'탄산음료', reason:'기름진 음식 + 탄산은 위 부담↑'}]
+  },
+  '잡채': {
+    good: [{'with':'밥', reason:'한식 한 상의 정석 조합'}, {'with':'된장국', reason:'영양 균형 완성'}],
+    bad:  []
+  },
+  '비빔밥': {
+    good: [{'with':'된장국', reason:'전통 한식 한 상'}, {'with':'미역국', reason:'미네랄 보충'}],
+    bad:  []
+  },
+  '김치찌개': {
+    good: [{'with':'두부', reason:'식물성 단백질 보충'}, {'with':'잡곡밥', reason:'식이섬유 보충'}],
+    bad:  []
+  },
+  '된장찌개': {
+    good: [{'with':'쌈채소', reason:'식이섬유 + 비타민↑'}, {'with':'생선구이', reason:'단백질·오메가3 보완'}],
+    bad:  []
+  },
+  '불고기': {
+    good: [{'with':'상추쌈', reason:'기름 잡고 식이섬유↑'}, {'with':'잡곡밥', reason:'섬유질 보충'}],
+    bad:  [{'with':'탄산음료', reason:'기름진 음식 소화 방해'}]
+  },
+  '김밥': {
+    good: [{'with':'어묵국', reason:'따뜻한 국물이 소화 도움'}, {'with':'단무지', reason:'개운함과 효소가 소화↑'}],
+    bad:  []
+  },
+  '라면': {
+    good: [{'with':'계란', reason:'부족한 단백질 보충'}, {'with':'김치', reason:'유산균이 라면 소화 도움'}],
+    bad:  [{'with':'밥', reason:'탄수화물 과다 — 혈당 급상승'}]
+  },
+  '국밥': {
+    good: [{'with':'깍두기', reason:'유산균이 소화와 풍미를 도와요'}, {'with':'양파', reason:'개운한 맛과 풍미↑'}],
+    bad:  []
+  },
+  '냉면': {
+    good: [{'with':'편육', reason:'부족한 단백질 보충'}, {'with':'무절임', reason:'시원함과 소화 시너지'}],
+    bad:  []
+  },
+  '흰쌀밥': {
+    good: [{'with':'국·찌개', reason:'한식 정석 조합'}, {'with':'단백질 반찬', reason:'혈당 안정과 영양 균형'}],
+    bad:  []
+  },
+  '잡곡밥': {
+    good: [{'with':'된장찌개', reason:'영양 균형 한 상'}, {'with':'나물', reason:'식이섬유 시너지'}],
+    bad:  []
+  },
+  '고사리나물': {
+    good: [{'with':'잡곡밥', reason:'식이섬유 시너지'}],
+    bad:  []
+  },
+  '미역줄기볶음': {
+    good: [{'with':'밥', reason:'미네랄과 탄수화물 균형'}],
+    bad:  [{'with':'녹차', reason:'녹차 탄닌이 미역 철분 흡수를 방해'}]
+  },
+  '시금치나물': {
+    good: [{'with':'참기름', reason:'지용성 비타민 흡수↑'}],
+    bad:  [{'with':'두부', reason:'시금치 옥살산이 두부 칼슘 흡수를 방해'}]
+  },
+  '계란말이': {
+    good: [{'with':'시금치나물', reason:'콜린 + 엽산이 시너지'}],
+    bad:  []
+  },
+  '깻잎장아찌': {
+    good: [{'with':'밥', reason:'개운한 반찬으로 입맛↑'}, {'with':'고기', reason:'특유 향이 느끼함을 잡아줘요'}],
+    bad:  []
+  },
+  '깍두기': {
+    good: [{'with':'국밥', reason:'아삭함 + 유산균으로 소화↑'}, {'with':'고기', reason:'느끼함 잡고 입맛 살아나요'}],
+    bad:  []
+  },
+  '단무지': {
+    good: [{'with':'김밥', reason:'한식 분식 짝꿍'}, {'with':'분식', reason:'개운한 마무리'}],
+    bad:  []
+  },
+  '오이무침': {
+    good: [{'with':'밥', reason:'개운한 여름 반찬'}],
+    bad:  [{'with':'토마토', reason:'오이 효소가 토마토 비타민C를 파괴해요'}]
+  },
+  '무말랭이무침': {
+    good: [{'with':'밥', reason:'쫄깃한 식감 + 식이섬유'}, {'with':'국', reason:'한식 한 상의 정석'}],
+    bad:  []
+  },
+  '우엉조림': {
+    good: [{'with':'밥', reason:'식이섬유·미네랄 보충'}, {'with':'생선구이', reason:'단백질·오메가3로 영양 균형'}],
+    bad:  []
+  },
+  '멸치볶음': {
+    good: [{'with':'밥', reason:'칼슘 + 단백질 보충'}, {'with':'견과류', reason:'미네랄·좋은 지방 시너지'}],
+    bad:  []
+  },
+  '콩나물무침': {
+    good: [{'with':'밥', reason:'아삭한 식감 + 아미노산 보충'}],
+    bad:  []
+  },
+  '나물': {
+    good: [{'with':'잡곡밥', reason:'식이섬유 시너지'}, {'with':'들기름', reason:'고소함과 항산화 영양↑'}],
+    bad:  []
+  },
+  '장아찌': {
+    good: [{'with':'밥', reason:'개운한 반찬으로 입맛↑'}],
+    bad:  []
+  },
 };
 
 // 영양소명 → 대표 재료 매핑 (재료 추정용)
