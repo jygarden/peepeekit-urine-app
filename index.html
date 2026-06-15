@@ -3535,9 +3535,57 @@ function renderFoodResult(r) {
       </div>
     </div>`;
   }
-  // 🎮 궁합 VS 카드 (음식 + 재료 분리)
+  // 🎮 궁합 VS 카드 (음식 nested 우선, 옛 foodPairings 호환)
   let pairingsHtml = '';
-  if (r.foodPairings && r.foodPairings.length > 0) {
+  // 새 구조: 각 food 안에 dishPairings + ingredients[].pairings
+  const hasNested = (r.foods || []).some(f => f.dishPairings || (f.ingredients && f.ingredients[0]?.pairings));
+  if (hasNested) {
+    pairingsHtml = `<div class="pairings-box"><div class="pairings-title">⚔️ 궁합 매칭</div>`;
+    (r.foods || []).forEach(f => {
+      // 음식 단위
+      if (f.dishPairings && (f.dishPairings.good?.length || f.dishPairings.bad?.length)) {
+        pairingsHtml += `<div class="pair-section-header">🍴 ${f.name}</div>`;
+        (f.dishPairings.good || []).forEach(g => {
+          pairingsHtml += `<div class="pair-vs-card good">
+            <span class="pair-side">${f.name}</span>
+            <span class="pair-vs-icon">💚</span>
+            <span class="pair-side">${g.with}</span>
+            <span class="pair-vs-reason">${g.reason}</span>
+          </div>`;
+        });
+        (f.dishPairings.bad || []).forEach(b => {
+          pairingsHtml += `<div class="pair-vs-card bad">
+            <span class="pair-side">${f.name}</span>
+            <span class="pair-vs-icon">💔</span>
+            <span class="pair-side">${b.with}</span>
+            <span class="pair-vs-reason">${b.reason}</span>
+          </div>`;
+        });
+      }
+      // 재료별
+      (f.ingredients || []).forEach(ing => {
+        if (!ing.pairings || (!ing.pairings.good?.length && !ing.pairings.bad?.length)) return;
+        pairingsHtml += `<div class="pair-section-header">🌿 ${ing.name}</div>`;
+        (ing.pairings.good || []).forEach(g => {
+          pairingsHtml += `<div class="pair-vs-card good">
+            <span class="pair-side">${ing.name}</span>
+            <span class="pair-vs-icon">💚</span>
+            <span class="pair-side">${g.with}</span>
+            <span class="pair-vs-reason">${g.reason}</span>
+          </div>`;
+        });
+        (ing.pairings.bad || []).forEach(b => {
+          pairingsHtml += `<div class="pair-vs-card bad">
+            <span class="pair-side">${ing.name}</span>
+            <span class="pair-vs-icon">💔</span>
+            <span class="pair-side">${b.with}</span>
+            <span class="pair-vs-reason">${b.reason}</span>
+          </div>`;
+        });
+      });
+    });
+    pairingsHtml += `</div>`;
+  } else if (r.foodPairings && r.foodPairings.length > 0) {
     const dishes = r.foodPairings.filter(fp => fp.type === '음식' || (!fp.type && fp.food));
     const ingredients = r.foodPairings.filter(fp => fp.type === '재료');
     const renderVS = (fp) => {
