@@ -614,6 +614,14 @@
     .skill-badge{background:linear-gradient(135deg,#FEF3C7,#FCD34D);color:#78350F;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:8px;border:1px solid #F59E0B;display:inline-flex;align-items:center;gap:4px;letter-spacing:-.1px}
     .skill-badge::before{content:"⭐"}
     .food-game-skill-detail{font-size:10.5px;color:#92400E;margin-top:5px;line-height:1.5;padding-left:14px;border-left:2px solid #FCD34D;margin-left:2px}
+    /* 음식 카드 안에 통합된 궁합 섹션 */
+    .card-pairings{margin-top:10px;padding-top:10px;border-top:1.5px dashed #FCD34D}
+    .card-pairings-title{font-size:11.5px;font-weight:800;color:#78350F;margin-bottom:6px;letter-spacing:-.2px}
+    .card-pair-row{font-size:11px;line-height:1.55;padding:4px 8px;margin-bottom:3px;border-radius:7px;display:flex;align-items:baseline;flex-wrap:wrap;gap:3px}
+    .card-pair-row.good{background:#ECFDF5;color:#065F46;border-left:3px solid #10B981}
+    .card-pair-row.bad{background:#FEF2F2;color:#991B1B;border-left:3px solid #EF4444}
+    .card-pair-row strong{font-weight:700}
+    .card-pair-reason{opacity:.85;font-size:10.5px;margin-left:2px}
     /* 궁합 VS 카드 */
     .pair-vs-card{background:#fff;border-radius:14px;padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1.5px solid #f1f5f9}
     .pair-vs-card.good{border-color:#86EFAC;background:linear-gradient(135deg,#F0FDF4,#fff)}
@@ -3508,6 +3516,12 @@ const ING_PAIRING_DICT = {
   '콩나물': { good: [{with:'고춧가루', reason:'비타민C 활성'}, {with:'마늘', reason:'아미노산 시너지'}], bad: [] },
   '버섯': { good: [{with:'마늘', reason:'면역력↑'}, {with:'들기름', reason:'고소함·항산화'}], bad: [] },
   '무': { good: [{with:'소고기', reason:'소화·단백질'}, {with:'어묵', reason:'시원한 국물'}], bad: [{with:'당근', reason:'아스코르비나아제'}] },
+  '깻잎': { good: [{with:'고기', reason:'풍미·소화↑'}, {with:'쌈장', reason:'한식 한상'}], bad: [] },
+  '당면': { good: [{with:'시금치', reason:'비타민 보충'}, {with:'소고기', reason:'단백질 보완'}], bad: [{with:'탄산음료', reason:'위 부담'}] },
+  '면': { good: [{with:'계란', reason:'단백질 보충'}, {with:'김치', reason:'유산균·비타민'}], bad: [] },
+  '떡': { good: [{with:'견과류', reason:'영양 균형'}, {with:'우유', reason:'단백질 보충'}], bad: [{with:'탄산음료', reason:'소화 방해'}] },
+  '참기름': { good: [{with:'시금치', reason:'지용성↑'}, {with:'미역', reason:'미네랄 흡수↑'}], bad: [] },
+  '들기름': { good: [{with:'나물', reason:'오메가3·고소함'}, {with:'가지', reason:'안토시아닌 흡수↑'}], bad: [] },
 };
 
 // 음식 단위 궁합 사전
@@ -3530,6 +3544,16 @@ const DISH_PAIRING_DICT = {
   '미역줄기볶음': { good: [{with:'밥', reason:'미네랄·탄수'}], bad: [{with:'녹차', reason:'철분 방해'}] },
   '시금치나물': { good: [{with:'참기름', reason:'지용성 영양↑'}], bad: [{with:'두부', reason:'옥살산 + 칼슘 방해'}] },
   '계란말이': { good: [{with:'시금치나물', reason:'콜린·엽산'}], bad: [] },
+  '깻잎장아찌': { good: [{with:'밥', reason:'반찬으로 좋음'}, {with:'고기', reason:'느끼함 잡음'}], bad: [] },
+  '깍두기': { good: [{with:'국밥', reason:'아삭·유산균'}, {with:'고기', reason:'느끼함 잡음'}], bad: [] },
+  '단무지': { good: [{with:'김밥', reason:'한식 짝꿍'}, {with:'분식', reason:'개운함'}], bad: [] },
+  '오이무침': { good: [{with:'밥', reason:'개운함·반찬'}], bad: [{with:'토마토', reason:'비타민C 파괴'}] },
+  '무말랭이무침': { good: [{with:'밥', reason:'반찬·식이섬유'}, {with:'국', reason:'한식 한상'}], bad: [] },
+  '우엉조림': { good: [{with:'밥', reason:'섬유질·미네랄'}, {with:'생선구이', reason:'영양 균형'}], bad: [] },
+  '멸치볶음': { good: [{with:'밥', reason:'칼슘·단백질'}, {with:'견과류', reason:'영양 시너지'}], bad: [] },
+  '콩나물무침': { good: [{with:'밥', reason:'반찬·아미노산'}], bad: [] },
+  '나물': { good: [{with:'잡곡밥', reason:'식이섬유↑'}, {with:'들기름', reason:'고소함·항산화'}], bad: [] },
+  '장아찌': { good: [{with:'밥', reason:'개운한 반찬'}], bad: [] },
 };
 
 // 영양소명 → 대표 재료 매핑 (재료 추정용)
@@ -3644,8 +3668,15 @@ function renderFoodResult(r) {
   document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
   document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
   document.getElementById('foodGradeLabel').textContent = `영양 균형: ${label} (${grade}) · ${r.balanceScore || 0}점`;
-  // 🎮 음식 게임 카드 + 스킬 뱃지
+  // 🎮 음식 게임 카드 + 스킬 뱃지 + 재료별 궁합 (한 카드에 통합!)
   const stripEng = (s) => (s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
+  // 궁합 디버그
+  console.log('[궁합 디버그] 음식별 상태:', (r.foods || []).map(f => ({
+    name: f.name,
+    dishPairings: !!f.dishPairings,
+    ingredientsCount: f.ingredients?.length || 0,
+    ingredientsWithPairings: f.ingredients?.filter(i => i.pairings).length || 0
+  })));
   const items = (r.foods || []).map(f => {
     const skills = (f.keyNutrients || []).slice(0, 4).map(n =>
       `<span class="skill-badge">${stripEng(n.name)}</span>`
@@ -3653,6 +3684,41 @@ function renderFoodResult(r) {
     const skillDetails = (f.keyNutrients || []).slice(0, 3).map(n =>
       `<div class="food-game-skill-detail"><strong>${stripEng(n.name)}</strong> — ${stripEng(n.benefit)}</div>`
     ).join('');
+
+    // 🔗 재료별 궁합 (음식 카드 안에 표시)
+    const ingPairingRows = (f.ingredients || []).map(ing => {
+      if (!ing.pairings || (!ing.pairings.good?.length && !ing.pairings.bad?.length)) return '';
+      const iname = stripEng(ing.name);
+      const goods = (ing.pairings.good || []).map(g =>
+        `<div class="card-pair-row good">💚 <strong>${iname}</strong> + ${stripEng(g.with)} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`
+      ).join('');
+      const bads = (ing.pairings.bad || []).map(b =>
+        `<div class="card-pair-row bad">💔 <strong>${iname}</strong> + ${stripEng(b.with)} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`
+      ).join('');
+      return goods + bads;
+    }).filter(Boolean).join('');
+
+    // 🍴 음식 단위 궁합
+    let dishPairRows = '';
+    if (f.dishPairings && (f.dishPairings.good?.length || f.dishPairings.bad?.length)) {
+      const fname = stripEng(f.name);
+      const dGoods = (f.dishPairings.good || []).map(g =>
+        `<div class="card-pair-row good">💚 <strong>${fname}</strong> + ${stripEng(g.with)} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`
+      ).join('');
+      const dBads = (f.dishPairings.bad || []).map(b =>
+        `<div class="card-pair-row bad">💔 <strong>${fname}</strong> + ${stripEng(b.with)} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`
+      ).join('');
+      dishPairRows = dGoods + dBads;
+    }
+
+    const pairingsSection = (ingPairingRows || dishPairRows)
+      ? `<div class="card-pairings">
+          <div class="card-pairings-title">🔗 궁합 매칭</div>
+          ${ingPairingRows}
+          ${dishPairRows}
+        </div>`
+      : '';
+
     return `<div class="food-game-card">
       <div class="food-game-top">
         <div>
@@ -3663,6 +3729,7 @@ function renderFoodResult(r) {
       </div>
       ${skills ? `<div class="food-game-skills">${skills}</div>` : ''}
       ${skillDetails || ''}
+      ${pairingsSection}
     </div>`;
   }).join('');
   document.getElementById('foodItemsList').innerHTML = items || '<div style="color:#94A3B8;font-size:12px;padding:8px">음식 인식 결과 없음</div>';
@@ -3688,12 +3755,14 @@ function renderFoodResult(r) {
     </div>`;
   }
   // 🎮 궁합 VS 카드 (음식 nested 우선, 옛 foodPairings 호환)
+  // 궁합은 위에서 각 음식 카드에 통합 표시했으니 별도 박스 비움
   let pairingsHtml = '';
-  // 새 구조: 각 food 안에 dishPairings + ingredients[].pairings
   const hasNested = (r.foods || []).some(f =>
     (f.dishPairings && (f.dishPairings.good?.length || f.dishPairings.bad?.length)) ||
     (f.ingredients && f.ingredients.some(i => i.pairings && (i.pairings.good?.length || i.pairings.bad?.length)))
   );
+  // 별도 ⚔️ 궁합 매칭 박스는 안 보여줌 — 이미 각 음식 카드에 표시
+  if (false && hasNested) {
   console.log('[궁합 디버그] hasNested:', hasNested, 'foodPairings:', r.foodPairings?.length || 0);
   if (hasNested) {
     pairingsHtml = `<div class="pairings-box"><div class="pairings-title">⚔️ 궁합 매칭</div>`;
