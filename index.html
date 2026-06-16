@@ -4385,16 +4385,37 @@ function renderFoodResult(r) {
     });
     return [...seen.values()];
   };
-  const finalGoods = dedupePair(allGoods);
-  const finalBads = dedupePair(allBads);
+  // 2단계 정규화 dedupe — 정규화된 페어 키로 한 번 더 중복 제거 (안전망)
+  const finalDedupe = (arr) => {
+    const seen = new Map();
+    arr.forEach(item => {
+      const w = normalizeIngName(stripEng(item.with || ''));
+      const f = normalizeIngName(stripEng(item.from || ''));
+      if (!w || !f || w === f) return;
+      const key = [w, f].sort().join('|');
+      if (!seen.has(key)) {
+        seen.set(key, { ...item, with: w, from: f });
+      }
+    });
+    return [...seen.values()];
+  };
+  const finalGoods = finalDedupe(dedupePair(allGoods));
+  const finalBads = finalDedupe(dedupePair(allBads));
 
   // 🎯 가독성을 위해 처음 5개만 + 더 보기 버튼
   const GOOD_VISIBLE = 5;
   const BAD_VISIBLE = 3;
-  const renderGoodRow = g =>
-    `<div class="card-pair-row good"><i class="ph-fill ph-heart pair-icon-good"></i> <strong>${stripEng(g.with)}</strong> + ${g.from} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`;
-  const renderBadRow = b =>
-    `<div class="card-pair-row bad"><i class="ph-fill ph-heart-break pair-icon-bad"></i> <strong>${stripEng(b.with)}</strong> + ${b.from} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`;
+  // 렌더 시에도 한 번 더 정규화 (보호막)
+  const renderGoodRow = g => {
+    const w = normalizeIngName(stripEng(g.with));
+    const f = normalizeIngName(stripEng(g.from));
+    return `<div class="card-pair-row good"><i class="ph-fill ph-heart pair-icon-good"></i> <strong>${w}</strong> + ${f} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`;
+  };
+  const renderBadRow = b => {
+    const w = normalizeIngName(stripEng(b.with));
+    const f = normalizeIngName(stripEng(b.from));
+    return `<div class="card-pair-row bad"><i class="ph-fill ph-heart-break pair-icon-bad"></i> <strong>${w}</strong> + ${f} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`;
+  };
 
   const goodTop = finalGoods.slice(0, GOOD_VISIBLE);
   const goodMore = finalGoods.slice(GOOD_VISIBLE);
@@ -6010,10 +6031,50 @@ function _showFoodReportImpl(period) {
           <div class="reco-foods">${(reco?.tips||[]).map(f => `<span class="reco-food-tag strong">${f}</span>`).join('')}</div>
         </div>`;
       }).join('');
+
+      // 💊 영양제 추천 — 부족 영양소 기준
+      const NUT_SUPPLEMENTS = {
+        carbs:   [],
+        protein: ['단백질 보충제 (WPI)','필수아미노산 (EAA)','BCAA'],
+        fat:     ['오메가3 (EPA·DHA)','MCT 오일','비타민D'],
+        fiber:   ['차전자피 (사일리움)','이눌린','식이섬유 보충제'],
+        sodium:  [],
+        sugar:   ['크롬 (혈당 안정)','베르베린']
+      };
+      const allSupps = [];
+      lackedItems.forEach(it => {
+        (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSupps.push({ s, reason: `${it.label} 보충` }));
+      });
+      excessItems.forEach(it => {
+        (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSupps.push({ s, reason: `${it.label} 관리` }));
+      });
+      // 종합 비타민·미네랄은 부족 영양소 2개 이상이면 추천
+      if (lackedItems.length >= 2) {
+        allSupps.push({ s: '종합 비타민·미네랄', reason: '전반적인 영양 부족 보완' });
+      }
+      // 중복 제거
+      const seenS = new Set();
+      const uniqueSupps = allSupps.filter(x => {
+        if (seenS.has(x.s)) return false;
+        seenS.add(x.s); return true;
+      });
+      const suppHtml = uniqueSupps.length > 0 ? `
+        <div class="reco-card reco-strong" style="background:linear-gradient(135deg,#F3E8FF,#FAE8FF);border-color:#A855F7">
+          <div class="reco-head" style="color:#6B21A8">💊 <strong>권장 영양제</strong></div>
+          <div class="reco-body" style="color:#581C87">
+            한 달간 누적된 부족·과다 영양소를 보완하려면 다음 영양제를 고려하세요.<br>
+            <strong>약국·전문가 상담 후 복용을 권장드립니다.</strong>
+          </div>
+          <div class="reco-foods">${uniqueSupps.map(x => `<span class="reco-food-tag strong" style="background:#7C3AED;border-color:#7C3AED">💊 ${x.s}</span>`).join('')}</div>
+          <div style="margin-top:8px;font-size:10.5px;color:#6B21A8;line-height:1.55">
+            ${uniqueSupps.map(x => `• <strong>${x.s}</strong> — ${x.reason}`).join('<br>')}
+          </div>
+        </div>` : '';
+
       recoHtml = `<div class="report-section">
         <div class="report-section-title">🚨 한달 누적 영양 경고</div>
         <div style="font-size:11.5px;color:#92400E;margin-bottom:10px;line-height:1.5">한 달간 누적된 부족·과다 영양소예요. 건강을 위해 식습관 개선이 필요해요.</div>
-        ${lackHtml}${excessHtml}
+        ${lackHtml}${excessHtml}${suppHtml}
       </div>`;
     } else {
       recoHtml = `<div class="report-section">
