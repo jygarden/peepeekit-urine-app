@@ -4333,20 +4333,22 @@ function renderFoodResult(r) {
       (f.dishPairings.bad || []).forEach(b => allBads.push({ from: fname, fromFood: fname, with: b.with, reason: b.reason }));
     }
   });
-  // 🌿 본 재료로 정규화 (깻잎장아찌 → 깻잎, 미역줄기볶음 → 미역 등)
-  const normalizeFrom = (name) => {
+  // 🌿 본 재료로 정규화 (무말랭이무침 → 무, 깻잎장아찌 → 깻잎, 미역줄기 → 미역 등)
+  const normalizeIngName = (name) => {
     const n = stripEng(name);
     if (!n) return n;
-    // ING_PAIRING_DICT 키 중 n에 포함된 본 재료 — 가장 긴 매칭 우선
+    // ING_PAIRING_DICT에 정확히 있으면 그대로 (예: '무'는 그대로)
+    if (ING_PAIRING_DICT[n]) return n;
+    // 포함된 본 재료 찾기 — 가장 긴 매칭 우선
     const matches = Object.keys(ING_PAIRING_DICT).filter(k =>
       k !== n && k.length >= 2 && n.includes(k)
     );
     if (matches.length === 0) return n;
-    matches.sort((a, b) => b.length - a.length); // 긴 것 우선 (소고기 vs 미역 → 소고기)
+    matches.sort((a, b) => b.length - a.length); // 긴 것 우선
     return matches[0];
   };
 
-  // 중복 제거 — 양방향 페어 + from 정규화 + 사진 안 매칭 필터
+  // 중복 제거 — 양방향 페어 + from·with 모두 정규화 + 사진 안 매칭 필터
   const dedupePair = (arr) => {
     const seen = new Map();
     arr.forEach(item => {
@@ -4354,12 +4356,16 @@ function renderFoodResult(r) {
       if (!w) return;
       if (!isInPhoto(item.with)) return;
       const fr = stripEng(item.from || '');
-      const frNorm = normalizeFrom(fr); // 본 재료로 정규화
+      // 🔑 양쪽 모두 본 재료로 정규화
+      const frNorm = normalizeIngName(fr);
+      const wNorm = normalizeIngName(w);
+      // 같은 재료끼리는 페어 제외 (예: 무 + 무)
+      if (frNorm && wNorm && frNorm === wNorm) return;
       // 양방향 페어 키 (정렬해서 같은 조합은 한 번만)
-      const pairKey = [w, frNorm].sort().join('|');
+      const pairKey = [wNorm, frNorm].sort().join('|');
       if (!seen.has(pairKey)) {
-        // 표시할 때도 정규화된 from 사용 → "깻잎 + 고기" 같이
-        seen.set(pairKey, { ...item, from: frNorm });
+        // 표시할 때도 정규화된 이름 사용
+        seen.set(pairKey, { ...item, from: frNorm, with: wNorm });
       }
     });
     return [...seen.values()];
