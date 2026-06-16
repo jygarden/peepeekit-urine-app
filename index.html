@@ -682,6 +682,20 @@
     .report-nut-bar{flex:1;height:9px;background:#F1F5F9;border-radius:5px;overflow:hidden}
     .report-nut-fill{height:100%;border-radius:5px}
     .report-nut-val{font-size:10.5px;color:#64748B;width:78px;text-align:right;flex-shrink:0;font-weight:600}
+    /* 📊 영양 추천/권장 카드 */
+    .reco-card{border-radius:12px;padding:12px;margin-bottom:8px;border:1.5px solid}
+    .reco-soft{background:#EFF6FF;border-color:#BFDBFE}
+    .reco-soft.warn{background:#FFFBEB;border-color:#FCD34D}
+    .reco-strong{background:#FEF2F2;border-color:#FCA5A5;box-shadow:0 2px 6px rgba(239,68,68,.15)}
+    .reco-strong.danger{background:#FEF2F2;border-color:#EF4444;border-width:2px}
+    .reco-head{font-size:13px;font-weight:800;color:#1E3A8A;margin-bottom:6px;letter-spacing:-.2px}
+    .reco-strong .reco-head{color:#991B1B;font-size:13.5px}
+    .reco-body{font-size:11.5px;color:#475569;line-height:1.55;margin-bottom:8px}
+    .reco-strong .reco-body{color:#7F1D1D}
+    .reco-foods{display:flex;flex-wrap:wrap;gap:5px}
+    .reco-food-tag{background:#fff;color:#1E40AF;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;border:1px solid #BFDBFE}
+    .reco-strong .reco-food-tag{color:#991B1B;border-color:#FCA5A5}
+    .reco-food-tag.strong{background:#991B1B;color:#fff;border-color:#991B1B;font-weight:800}
     /* 궁합 "더 보기" 버튼 */
     .pair-more-btn{display:block;width:100%;margin-top:8px;padding:9px;background:#fff;border:1.5px dashed #F59E0B;color:#92400E;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:-.2px}
     .pair-more-btn:active{background:#FEF3C7}
@@ -1835,6 +1849,11 @@
         <div class="calorie-num"><span id="foodTotalCal">0</span><span class="calorie-unit">kcal</span></div>
         <div class="calorie-sub" id="foodGradeLabel">영양 균형: 양호 (B)</div>
       </div>
+      <!-- 📊 일주일/한달 리포트 버튼 (점수 바로 아래) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px">
+        <button class="report-btn" onclick="showFoodReport('week')">📊 일주일 리포트</button>
+        <button class="report-btn" onclick="showFoodReport('month')">📅 한달 리포트</button>
+      </div>
       <!-- 인식된 음식 -->
       <div class="food-list">
         <div class="nutri-title">🍴 인식된 음식</div>
@@ -1885,10 +1904,6 @@
       <img id="foodResultImg" src="" alt="식단 이미지" style="width:100%;border-radius:12px;margin-bottom:14px"/>
     </div>
     <div style="margin-top:14px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <button class="report-btn" onclick="showFoodReport('week')">📊 일주일 리포트</button>
-        <button class="report-btn" onclick="showFoodReport('month')">📅 한달 리포트</button>
-      </div>
       <button class="btn-download" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 3px 10px rgba(245,158,11,.35)" onclick="downloadFoodResult()">📥 결과 이미지 저장</button>
       <div class="action-row">
         <button class="btn-retake" style="border-color:#F59E0B;color:#F59E0B" onclick="showScreen('screenFoodCapture')">📷 다시 찍기</button>
@@ -1965,7 +1980,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -5921,6 +5936,95 @@ function _showFoodReportImpl(period) {
     return `<div class="report-nut-row"><div class="report-nut-label">${label}</div><div class="report-nut-bar"><div class="report-nut-fill" style="width:${pct}%;background:${color}"></div></div><div class="report-nut-val">${v}/${t}${nutUnits[k]}</div></div>`;
   }).join('');
 
+  // 🥗 부족·과다 영양소 추천 (주간: 부드러운 톤 / 월간: 강한 권장)
+  const NUT_RECO = {
+    carbs:   { lacked:'에너지·집중력 저하 위험', foods:['잡곡밥','고구마','통밀빵','오트밀'] },
+    protein: { lacked:'근육 손실·면역력 약화 위험', foods:['닭가슴살','두부','계란','연어','콩'] },
+    fat:     { lacked:'호르몬·뇌 기능 저하 위험', foods:['아보카도','견과류','올리브유','연어'] },
+    fiber:   { lacked:'장 건강·변비·혈당 문제 위험', foods:['나물 반찬','잡곡밥','브로콜리','사과','콩나물'] },
+    sodium:  { excess:'고혈압·신장 부담', tips:['국물 줄이기','싱겁게 조리','김치 적게'] },
+    sugar:   { excess:'혈당·체지방·당뇨 위험', tips:['과일로 대체','믹스커피·음료 줄이기','달콤한 빵 자제'] }
+  };
+
+  const lackedItems = [];
+  const excessItems = [];
+  Object.entries(nutLabels).forEach(([k, label]) => {
+    const v = nutAvg[k] || 0;
+    const t = nutTargets[k];
+    const pct = Math.round((v / t) * 100);
+    if (k === 'sodium' || k === 'sugar') {
+      if (pct >= 100) excessItems.push({ k, label, pct });
+    } else {
+      if (pct < 70) lackedItems.push({ k, label, pct });
+    }
+  });
+
+  let recoHtml = '';
+  if (period === 'week') {
+    // 주간 — 부드러운 추천 톤
+    if (lackedItems.length > 0 || excessItems.length > 0) {
+      const lackHtml = lackedItems.map(it => {
+        const reco = NUT_RECO[it.k];
+        return `<div class="reco-card reco-soft">
+          <div class="reco-head">💡 <strong>${it.label}</strong> ${it.pct}% 수준</div>
+          <div class="reco-body">${reco?.lacked || ''} 가능성이 있어요. 다음 음식들을 추가해보면 좋아요:</div>
+          <div class="reco-foods">${(reco?.foods||[]).map(f => `<span class="reco-food-tag">${f}</span>`).join('')}</div>
+        </div>`;
+      }).join('');
+      const excessHtml = excessItems.map(it => {
+        const reco = NUT_RECO[it.k];
+        return `<div class="reco-card reco-soft warn">
+          <div class="reco-head">⚠️ <strong>${it.label}</strong> ${it.pct}% (권장량 초과)</div>
+          <div class="reco-body">${reco?.excess || ''} 우려가 있어요. 다음을 시도해보세요:</div>
+          <div class="reco-foods">${(reco?.tips||[]).map(f => `<span class="reco-food-tag">${f}</span>`).join('')}</div>
+        </div>`;
+      }).join('');
+      recoHtml = `<div class="report-section">
+        <div class="report-section-title">💡 이번 주 영양 추천</div>
+        ${lackHtml}${excessHtml}
+      </div>`;
+    } else {
+      recoHtml = `<div class="report-section">
+        <div class="report-section-title">💡 이번 주 영양 추천</div>
+        <div style="padding:14px;text-align:center;color:#10B981;font-size:12.5px;background:#ECFDF5;border-radius:10px;border:1px solid #A7F3D0">
+          이번 주 영양 균형이 좋아요! 지금처럼 유지해주세요 👍
+        </div>
+      </div>`;
+    }
+  } else {
+    // 월간 — 강한 권장 톤
+    if (lackedItems.length > 0 || excessItems.length > 0) {
+      const lackHtml = lackedItems.map(it => {
+        const reco = NUT_RECO[it.k];
+        return `<div class="reco-card reco-strong">
+          <div class="reco-head">🚨 <strong>${it.label} 만성 부족 (${it.pct}%)</strong></div>
+          <div class="reco-body">한 달 누적 데이터에서 ${reco?.lacked || ''}가 심각하게 우려됩니다.<br><strong>매끼 다음 음식을 반드시 챙겨 드셔야 합니다:</strong></div>
+          <div class="reco-foods">${(reco?.foods||[]).map(f => `<span class="reco-food-tag strong">${f}</span>`).join('')}</div>
+        </div>`;
+      }).join('');
+      const excessHtml = excessItems.map(it => {
+        const reco = NUT_RECO[it.k];
+        return `<div class="reco-card reco-strong danger">
+          <div class="reco-head">🚨 <strong>${it.label} 만성 과다 (${it.pct}%)</strong></div>
+          <div class="reco-body">${reco?.excess || ''} 위험이 누적되고 있습니다.<br><strong>지금 당장 다음 습관을 들이셔야 합니다:</strong></div>
+          <div class="reco-foods">${(reco?.tips||[]).map(f => `<span class="reco-food-tag strong">${f}</span>`).join('')}</div>
+        </div>`;
+      }).join('');
+      recoHtml = `<div class="report-section">
+        <div class="report-section-title">🚨 한달 누적 영양 경고</div>
+        <div style="font-size:11.5px;color:#92400E;margin-bottom:10px;line-height:1.5">한 달간 누적된 부족·과다 영양소예요. 건강을 위해 식습관 개선이 필요해요.</div>
+        ${lackHtml}${excessHtml}
+      </div>`;
+    } else {
+      recoHtml = `<div class="report-section">
+        <div class="report-section-title">🌟 한달 누적 영양 분석</div>
+        <div style="padding:14px;text-align:center;color:#065F46;font-size:13px;background:#ECFDF5;border-radius:10px;border:1.5px solid #10B981;font-weight:700">
+          🎉 한 달간 영양 균형이 매우 우수했어요!<br>지금처럼 꾸준히 유지해주세요.
+        </div>
+      </div>`;
+    }
+  }
+
   // 평가 멘트
   const scoreMsg = avgScore >= 85 ? '🌟 영양 균형이 정말 훌륭해요!' : avgScore >= 70 ? '👍 균형있게 잘 드시고 있어요' : avgScore >= 55 ? '💪 조금만 더 신경 쓰면 좋아질 거예요' : '🙌 다양한 음식을 더 챙겨보세요';
 
@@ -5962,6 +6066,8 @@ function _showFoodReportImpl(period) {
       <div class="report-section-title">🍎 평균 영양소 (1회당)</div>
       ${nutHtml}
     </div>
+
+    ${recoHtml}
   `;
   modal.style.display = 'block';
 }
