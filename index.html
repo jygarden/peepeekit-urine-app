@@ -4234,15 +4234,17 @@ function renderFoodResult(r) {
     `<div class="card-pair-row bad">💔 <strong>${stripEng(b.with)}</strong> + ${b.from} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`
   ).join('');
 
+  const photoItemList = Array.from(itemsInPhoto).join(', ');
   const overallPairingsBox = (overallGoodRows || overallBadRows)
     ? `<div class="overall-pairings-box">
         <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
-        <div class="overall-pairings-sub">📸 사진 안의 음식·재료끼리만 매칭</div>
+        <div class="overall-pairings-sub">📸 사진 안: ${photoItemList}</div>
         ${overallGoodRows ? `<div class="card-pairings-title good-title" style="margin-top:12px">🤝 함께 먹으면 좋은 조합</div>${overallGoodRows}` : ''}
         ${overallBadRows ? `<div class="card-pairings-title bad-title" style="margin-top:14px">⚠️ 같이 먹으면 효율↓ 조합</div>${overallBadRows}` : ''}
       </div>`
     : `<div class="overall-pairings-box">
         <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
+        <div class="overall-pairings-sub">📸 사진 안: ${photoItemList}</div>
         <div style="padding:12px;color:#92400E;font-size:12.5px;line-height:1.6;text-align:center">
           이 사진 안에서는 특별한 궁합·효율↓ 조합이 발견되지 않았어요. 균형있게 잘 드시고 있네요 👍
         </div>
@@ -4261,7 +4263,24 @@ function renderFoodResult(r) {
 
   // 컨테이너에 모두 모아서 삽입 (highlights는 영양소 균형 박스랑 중복이라 제거)
   const container = document.getElementById('foodHighlights');
-  container.innerHTML = todayHtml + nutrientDictHtml + overallPairingsBox + lightTipsHtml + nextMealHtml + pairingNoteHtml;
+  container.innerHTML = todayHtml + nutrientDictHtml + lightTipsHtml + nextMealHtml + pairingNoteHtml;
+
+  // ⭐ 통합 궁합 박스를 음식 카드 바로 아래에 강제 삽입 (반드시 보이게)
+  try {
+    const itemsList = document.getElementById('foodItemsList');
+    if (itemsList) {
+      let pairBox = document.getElementById('overallPairBoxWrap');
+      if (!pairBox) {
+        pairBox = document.createElement('div');
+        pairBox.id = 'overallPairBoxWrap';
+        itemsList.parentNode.insertBefore(pairBox, itemsList.nextSibling);
+      }
+      pairBox.innerHTML = overallPairingsBox;
+    } else {
+      // foodItemsList 못 찾으면 container 맨 위에라도 삽입
+      container.insertAdjacentHTML('afterbegin', overallPairingsBox);
+    }
+  } catch(e) { console.error('통합 궁합 박스 삽입 실패:', e); }
   // 영양소 막대 (대략적 기준치 기반)
   const n = r.nutrition || {};
   const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
