@@ -674,6 +674,9 @@
     .report-nut-bar{flex:1;height:9px;background:#F1F5F9;border-radius:5px;overflow:hidden}
     .report-nut-fill{height:100%;border-radius:5px}
     .report-nut-val{font-size:10.5px;color:#64748B;width:78px;text-align:right;flex-shrink:0;font-weight:600}
+    /* 궁합 "더 보기" 버튼 */
+    .pair-more-btn{display:block;width:100%;margin-top:8px;padding:9px;background:#fff;border:1.5px dashed #F59E0B;color:#92400E;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:-.2px}
+    .pair-more-btn:active{background:#FEF3C7}
     /* 사진 전체 통합 궁합 박스 */
     .overall-pairings-box{background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);border:1.5px solid #F59E0B;border-radius:16px;padding:14px;margin-top:14px;box-shadow:0 4px 12px rgba(245,158,11,.12)}
     .overall-pairings-title{font-size:15px;font-weight:800;color:#78350F;margin-bottom:3px;letter-spacing:-.3px}
@@ -4303,12 +4306,29 @@ function renderFoodResult(r) {
   const finalGoods = dedupePair(allGoods);
   const finalBads = dedupePair(allBads);
 
-  const overallGoodRows = finalGoods.map(g =>
-    `<div class="card-pair-row good">💚 <strong>${stripEng(g.with)}</strong> + ${g.from} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`
-  ).join('');
-  const overallBadRows = finalBads.map(b =>
-    `<div class="card-pair-row bad">💔 <strong>${stripEng(b.with)}</strong> + ${b.from} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`
-  ).join('');
+  // 🎯 가독성을 위해 처음 5개만 + 더 보기 버튼
+  const GOOD_VISIBLE = 5;
+  const BAD_VISIBLE = 3;
+  const renderGoodRow = g =>
+    `<div class="card-pair-row good">💚 <strong>${stripEng(g.with)}</strong> + ${g.from} <span class="card-pair-reason">— ${stripEng(g.reason)}</span></div>`;
+  const renderBadRow = b =>
+    `<div class="card-pair-row bad">💔 <strong>${stripEng(b.with)}</strong> + ${b.from} <span class="card-pair-reason">— ${stripEng(b.reason)}</span></div>`;
+
+  const goodTop = finalGoods.slice(0, GOOD_VISIBLE);
+  const goodMore = finalGoods.slice(GOOD_VISIBLE);
+  const badTop = finalBads.slice(0, BAD_VISIBLE);
+  const badMore = finalBads.slice(BAD_VISIBLE);
+
+  const overallGoodRows = goodTop.map(renderGoodRow).join('') +
+    (goodMore.length > 0 ? `
+      <div id="goodMoreRows" style="display:none">${goodMore.map(renderGoodRow).join('')}</div>
+      <button id="goodMoreBtn" class="pair-more-btn" onclick="togglePairMore('good')">▼ 좋은 조합 ${goodMore.length}개 더 보기</button>
+    ` : '');
+  const overallBadRows = badTop.map(renderBadRow).join('') +
+    (badMore.length > 0 ? `
+      <div id="badMoreRows" style="display:none">${badMore.map(renderBadRow).join('')}</div>
+      <button id="badMoreBtn" class="pair-more-btn" onclick="togglePairMore('bad')">▼ 효율↓ 조합 ${badMore.length}개 더 보기</button>
+    ` : '');
 
   const photoItemList = Array.from(itemsInPhoto).join(', ');
   const overallPairingsBox = (overallGoodRows || overallBadRows)
@@ -5814,6 +5834,14 @@ function _showFoodReportImpl(period) {
 function closeFoodReport() {
   const m = document.getElementById('foodReportModal');
   if (m) m.style.display = 'none';
+}
+
+// 궁합 더 보기 토글
+function togglePairMore(type) {
+  const rowsEl = document.getElementById(type === 'good' ? 'goodMoreRows' : 'badMoreRows');
+  const btnEl = document.getElementById(type === 'good' ? 'goodMoreBtn' : 'badMoreBtn');
+  if (rowsEl) rowsEl.style.display = 'block';
+  if (btnEl) btnEl.style.display = 'none';
 }
 
 // ════════════════════════════════════════════════════════════════
