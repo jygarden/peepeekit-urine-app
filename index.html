@@ -656,6 +656,23 @@
     .card-pair-row.bad{background:#FEF2F2;color:#991B1B;border-left:3px solid #EF4444}
     .card-pair-row strong{font-weight:700}
     .card-pair-reason{opacity:.85;font-size:10.5px;margin-left:2px}
+    /* 🧬 맞춤 분석 카드 */
+    .personal-empty{background:linear-gradient(135deg,#EEF2FF,#F3E8FF);border:1.5px dashed #A78BFA;border-radius:16px;padding:14px;text-align:center}
+    .personal-card{background:linear-gradient(135deg,#EEF2FF 0%,#F3E8FF 100%);border:1.5px solid #C7D2FE;border-radius:16px;padding:14px;box-shadow:0 3px 10px rgba(99,102,241,.12)}
+    .personal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .personal-edit-btn{background:#fff;border:1px solid #C7D2FE;color:#4F46E5;font-size:11px;font-weight:700;padding:5px 9px;border-radius:8px;cursor:pointer}
+    .personal-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:11px}
+    .pstat{background:#fff;border-radius:10px;padding:9px 7px;text-align:center;border:1px solid #E0E7FF}
+    .pstat-v{font-size:18px;font-weight:800;color:#4338CA;line-height:1.1}
+    .pstat-l{font-size:10px;color:#6366F1;margin-top:3px;font-weight:600}
+    .personal-section{background:#fff;border-radius:11px;padding:11px;margin-top:8px;border:1px solid #E0E7FF}
+    .personal-section.sasang{background:#ECFDF5;border-color:#A7F3D0}
+    .personal-section.saju{background:#FFFBEB;border-color:#FCD34D}
+    .psect-title{font-size:12.5px;font-weight:800;color:#1F2937;margin-bottom:5px}
+    .psect-tip{font-size:11.5px;color:#475569;line-height:1.55;margin-bottom:6px}
+    .psect-row{font-size:11px;color:#475569;padding:3px 0;line-height:1.5}
+    .psect-row strong{margin-right:4px}
+    .psect-reason{font-size:10.5px;color:#6B7280;padding:5px 8px;background:#F9FAFB;border-radius:6px;margin-bottom:6px;font-weight:600}
     /* 📊 리포트 버튼 + 모달 */
     .report-btn{background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;border:none;border-radius:14px;padding:13px 8px;font-size:13px;font-weight:800;box-shadow:0 3px 10px rgba(99,102,241,.35);cursor:pointer;letter-spacing:-.2px}
     .report-btn:active{transform:scale(.98)}
@@ -1850,10 +1867,12 @@
         <div class="calorie-sub" id="foodGradeLabel">영양 균형: 양호 (B)</div>
       </div>
       <!-- 📊 일주일/한달 리포트 버튼 (점수 바로 아래) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 10px">
         <button class="report-btn" onclick="showFoodReport('week')">📊 일주일 리포트</button>
         <button class="report-btn" onclick="showFoodReport('month')">📅 한달 리포트</button>
       </div>
+      <!-- 🧬 맞춤 분석 카드 -->
+      <div id="personalAnalysisCard" style="margin-bottom:14px"></div>
       <!-- 인식된 음식 -->
       <div class="food-list">
         <div class="nutri-title">🍴 인식된 음식</div>
@@ -1909,6 +1928,40 @@
         <button class="btn-retake" style="border-color:#F59E0B;color:#F59E0B" onclick="showScreen('screenFoodCapture')">📷 다시 찍기</button>
         <button class="btn-new" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 3px 10px rgba(245,158,11,.35)" onclick="goHome()">🏠 홈으로</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 🧬 맞춤 분석 정보 입력 모달 (최소 입력만) -->
+  <div id="personalProfileModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);overflow-y:auto;padding:16px" onclick="if(event.target===this)closePersonalProfile()">
+    <div style="background:#fff;border-radius:20px;max-width:430px;margin:20px auto;padding:20px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.3)">
+      <button onclick="closePersonalProfile()" style="position:absolute;top:12px;right:12px;background:#F1F5F9;border:none;font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer">✕</button>
+      <h2 style="font-size:18px;margin:0 0 6px;color:#1F2937">🧬 내 정보 입력</h2>
+      <div style="font-size:12px;color:#64748B;margin-bottom:16px;line-height:1.55">간단한 정보만 입력하시면 BMI·권장 칼로리·사상체질·사주 영양 조언을 <strong>자동으로 분석</strong>해드려요.</div>
+      <div class="field"><label>성별</label>
+        <select id="pp_gender" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px">
+          <option value="">선택</option>
+          <option value="male">남성</option>
+          <option value="female">여성</option>
+        </select>
+      </div>
+      <div class="field"><label>생년월일</label>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:8px">
+          <input id="pp_birthYear" type="number" placeholder="1990" style="padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px" oninput="updateAgePreview()"/>
+          <input id="pp_birthMonth" type="number" placeholder="월" min="1" max="12" style="padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px"/>
+          <input id="pp_birthDay" type="number" placeholder="일" min="1" max="31" style="padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px"/>
+        </div>
+        <div id="pp_agePreview" style="font-size:11.5px;color:#6366F1;margin-top:5px;font-weight:600"></div>
+      </div>
+      <div class="field"><label>키 / 몸무게</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <input id="pp_height" type="number" placeholder="170 (cm)" style="padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px"/>
+          <input id="pp_weight" type="number" placeholder="65 (kg)" style="padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px"/>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:11px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;font-size:11.5px;color:#075985;line-height:1.55">
+        💡 사상체질(태양인·태음인·소양인·소음인)은 BMI와 사주 오행으로 자동 추정됩니다.
+      </div>
+      <button onclick="savePersonalProfile()" style="width:100%;margin-top:12px;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;font-size:14px;font-weight:800;cursor:pointer">저장 후 맞춤 분석 보기</button>
     </div>
   </div>
 
@@ -3580,25 +3633,43 @@ async function confirmAndAnalyze() {
     }
 
     // 🚫 사용자가 detect 결과에서 삭제·교체한 재료들 = 제외 리스트
-    // (예: 시금치 → 참나물로 바꾸면 "시금치"가 excludeIngs에 들어감)
+    // 음식별로 비교해서, 어디든 사용자가 삭제한 재료는 다 exclude
+    // (예: 시금치나물에서 시금치→참나물로 바꿨으면 잡채의 시금치도 제외)
     try {
-      const originalIngs = new Set();
-      const currentIngs = new Set();
-      (originalDetectedFoodsData || []).forEach(f => {
-        (f.ingredients || []).forEach(ing => {
-          const s = String(ing).trim();
-          if (s) originalIngs.add(s);
+      const removedSet = new Set();
+      const minLen = Math.min(
+        (originalDetectedFoodsData || []).length,
+        (detectedFoodsData || []).length
+      );
+      for (let i = 0; i < minLen; i++) {
+        const origIngs = new Set(((originalDetectedFoodsData[i]?.ingredients) || [])
+          .map(s => String(s).trim()).filter(Boolean));
+        const curIngs = new Set(((detectedFoodsData[i]?.ingredients) || [])
+          .map(s => String(s).trim()).filter(Boolean));
+        origIngs.forEach(item => {
+          if (!curIngs.has(item)) removedSet.add(item);
         });
-      });
-      (detectedFoodsData || []).forEach(f => {
-        (f.ingredients || []).forEach(ing => {
-          const s = String(ing).trim();
-          if (s) currentIngs.add(s);
+      }
+      result.__excludeIngs = [...removedSet];
+      console.log('[제외 재료 (어디든 사용자가 삭제한 것)]:', [...removedSet]);
+
+      // 🚫 모든 음식의 ingredients에서 excluded 재료 자동 제거
+      // (예: 잡채의 ingredients에 시금치가 있어도 시금치=excluded면 제거)
+      if (removedSet.size > 0 && Array.isArray(result.foods)) {
+        result.foods.forEach(f => {
+          if (Array.isArray(f.ingredients)) {
+            f.ingredients = f.ingredients.filter(ing => {
+              const name = String((typeof ing === 'string' ? ing : (ing && ing.name)) || '').trim();
+              if (!name) return false;
+              // 정확/부분 매칭으로 차단
+              for (const ex of removedSet) {
+                if (name === ex || name.includes(ex) || ex.includes(name)) return false;
+              }
+              return true;
+            });
+          }
         });
-      });
-      const excludeIngs = [...originalIngs].filter(i => !currentIngs.has(i));
-      result.__excludeIngs = excludeIngs;
-      console.log('[제외 재료 (사용자가 삭제·교체)]:', excludeIngs);
+      }
     } catch(e) { result.__excludeIngs = []; }
     currentFoodResult = result;
     renderFoodResult(result);
@@ -4009,6 +4080,8 @@ function enrichWithPairings(r) {
 function renderFoodResult(r) {
   // 🍱 궁합·상극이 비어있으면 사전에서 자동 채우기 (AI 보완용)
   try { r = enrichWithPairings(r); } catch(e) { console.error('enrichWithPairings 에러:', e); }
+  // 🧬 맞춤 분석 카드 렌더링
+  try { renderPersonalAnalysis(r); } catch(e) { console.error('맞춤 분석 에러:', e); }
   // 게임화된 Hero (영양사 캐릭터 + 점수 원형)
   const score = r.balanceScore || 0;
   const grade = r.balanceGrade || 'B';
@@ -5811,6 +5884,226 @@ function resetAllData() {
   closeSettings();
   alert('모든 데이터가 삭제되었어요. 처음 화면으로 돌아갑니다.');
   location.reload();
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🧬 맞춤 분석 (개인 프로필 기반 BMI·BMR·사상체질·사주 영양 조언)
+// ════════════════════════════════════════════════════════════════
+function getPersonalProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('userPhysicalProfile') || 'null');
+    if (saved) return saved;
+  } catch(e) {}
+  // 기존 프로필에서 자동 추출 시도
+  const hp = (getProfiles() || []).filter(p => p.type === 'human')[0];
+  if (hp) return { gender: hp.gender, birthYear: hp.birthYear, birthMonth: hp.birthMonth, lifestyle: hp.lifestyle };
+  return null;
+}
+function openPersonalProfile() {
+  const p = getPersonalProfile() || {};
+  document.getElementById('pp_gender').value = p.gender || '';
+  document.getElementById('pp_birthYear').value = p.birthYear || '';
+  document.getElementById('pp_birthMonth').value = p.birthMonth || '';
+  document.getElementById('pp_birthDay').value = p.birthDay || '';
+  document.getElementById('pp_height').value = p.height || '';
+  document.getElementById('pp_weight').value = p.weight || '';
+  updateAgePreview();
+  document.getElementById('personalProfileModal').style.display = 'block';
+}
+function closePersonalProfile() {
+  document.getElementById('personalProfileModal').style.display = 'none';
+}
+function updateAgePreview() {
+  const y = parseInt(document.getElementById('pp_birthYear').value);
+  const preview = document.getElementById('pp_agePreview');
+  if (preview && y && y > 1900 && y < 2100) {
+    const age = new Date().getFullYear() - y;
+    preview.textContent = `만 ${age}세`;
+  } else if (preview) preview.textContent = '';
+}
+function savePersonalProfile() {
+  const data = {
+    gender: document.getElementById('pp_gender').value,
+    birthYear: document.getElementById('pp_birthYear').value,
+    birthMonth: document.getElementById('pp_birthMonth').value,
+    birthDay: document.getElementById('pp_birthDay').value,
+    height: document.getElementById('pp_height').value,
+    weight: document.getElementById('pp_weight').value
+  };
+  localStorage.setItem('userPhysicalProfile', JSON.stringify(data));
+  closePersonalProfile();
+  renderPersonalAnalysis(currentFoodResult);
+}
+
+// 🔮 사상체질 자동 추정 (BMI + 키·몸무게 + 사주 오행)
+function inferSasangType(gender, height, weight, birthYear, birthMonth) {
+  const h = parseFloat(height);
+  const w = parseFloat(weight);
+  if (!h || !w) return null;
+  const bmi = w / ((h/100)*(h/100));
+
+  // 사주 오행 (천간 기준)
+  let fiveEl = null;
+  if (birthYear) {
+    const stemIdx = ((parseInt(birthYear) - 4) % 10 + 10) % 10;
+    fiveEl = ['목','목','화','화','토','토','금','금','수','수'][stemIdx];
+  }
+
+  // BMI 임계값 (한국 기준)
+  // 태음인: 체격이 크고 살집 있음 (BMI 25+, 또는 키 큰 편 + BMI 23+)
+  // 태양인: 마르고 뼈가 가늘음 (BMI 18.5-)
+  // 소양인: 활동적·열많음, 보통 체격~약간 마름 (BMI 19-23 + 화·목 기운)
+  // 소음인: 차갑고 마른 편, 작은 체격 (BMI 19-23 + 토·금·수 기운)
+
+  let type = null, reason = '';
+  if (bmi >= 25) {
+    type = '태음인';
+    reason = `BMI ${bmi.toFixed(1)} — 체격이 크고 살집 있는 편`;
+  } else if (bmi >= 23) {
+    if (fiveEl === '토' || fiveEl === '수') {
+      type = '태음인';
+      reason = `BMI ${bmi.toFixed(1)} + ${fiveEl}(土·水) 기운 — 살집 있고 차분한 체질`;
+    } else {
+      type = '소양인';
+      reason = `BMI ${bmi.toFixed(1)} + ${fiveEl||'?'} 기운 — 단단하고 활동적인 체질`;
+    }
+  } else if (bmi < 18.5) {
+    if (fiveEl === '목' || fiveEl === '금') {
+      type = '태양인';
+      reason = `BMI ${bmi.toFixed(1)} (매우 마름) + ${fiveEl}(木·金) 기운 — 마르고 예민한 체질`;
+    } else {
+      type = '소음인';
+      reason = `BMI ${bmi.toFixed(1)} (매우 마름) — 차고 약한 체질`;
+    }
+  } else {
+    // BMI 18.5 ~ 23 (정상)
+    if (fiveEl === '화' || fiveEl === '목') {
+      type = '소양인';
+      reason = `BMI ${bmi.toFixed(1)} + ${fiveEl}(火·木) 기운 — 활동적·열 많은 체질`;
+    } else {
+      type = '소음인';
+      reason = `BMI ${bmi.toFixed(1)} + ${fiveEl||'?'} 기운 — 차분하고 차가운 체질`;
+    }
+  }
+  return { type, reason, bmi: bmi.toFixed(1) };
+}
+
+// BMR 계산 (Mifflin-St Jeor) + TDEE
+function calcBMR(gender, weight, height, age) {
+  const w = parseFloat(weight); const h = parseFloat(height); const a = parseFloat(age);
+  if (!w || !h || !a) return null;
+  if (gender === 'female') return Math.round(10*w + 6.25*h - 5*a - 161);
+  return Math.round(10*w + 6.25*h - 5*a + 5);
+}
+function calcTDEE(bmr, activity) {
+  const mult = { sedentary:1.2, light:1.375, moderate:1.55, active:1.725, very_active:1.9 }[activity || 'sedentary'] || 1.2;
+  return Math.round(bmr * mult);
+}
+
+// 사상체질별 식단 가이드
+const SASANG_GUIDE = {
+  '태양인': { good: ['해산물', '메밀', '냉성 채소(오이·배추)', '포도', '키위'], bad: ['매운 음식', '뜨거운 음식', '소고기', '꿀'], tip: '간(肝) 기능을 도와 열을 식히는 시원한 음식이 좋아요. 자극적인 양념은 피하세요.' },
+  '태음인': { good: ['소고기', '뿌리채소(무·당근)', '콩류', '땅콩', '버섯'], bad: ['닭고기', '돼지고기 과다', '맵고 짠 음식'], tip: '폐(肺) 기능이 약한 편이라 단백질·식이섬유 풍부한 음식과 적절한 운동이 중요해요.' },
+  '소양인': { good: ['돼지고기', '오리고기', '신선한 채소', '수박', '참외'], bad: ['닭고기', '인삼·홍삼', '맵고 뜨거운 음식'], tip: '소화 빠르고 열이 많은 체질이라 차가운 성질의 음식과 수분 섭취를 늘리세요.' },
+  '소음인': { good: ['닭고기', '인삼', '대추', '생강', '꿀'], bad: ['차가운 음식', '돼지고기', '냉면', '맥주'], tip: '소화력이 약하니 따뜻하고 부드러운 음식을 천천히 드세요. 과식 절대 금물.' }
+};
+
+// 사주 오행 → 영양 권장 (간단 매핑)
+function getSajuNutritionAdvice(birthYear, birthMonth) {
+  if (!birthYear || !birthMonth) return null;
+  // 천간(년) 기준 오행
+  const stemIdx = ((parseInt(birthYear) - 4) % 10 + 10) % 10;
+  // 0,1=목 / 2,3=화 / 4,5=토 / 6,7=금 / 8,9=수
+  const fiveEl = ['목','목','화','화','토','토','금','금','수','수'][stemIdx];
+  const advice = {
+    '목': { name:'木(목) 기운', good:['녹색 채소','신맛(레몬·식초)','간 건강 식품'], focus:'간 기능 강화. 푸른 잎채소·새싹·매실차가 잘 맞아요.' },
+    '화': { name:'火(화) 기운', good:['붉은 음식(토마토·당근)','쓴맛','심장 건강 식품'], focus:'심혈관 관리. 토마토·견과류·등푸른 생선이 좋아요.' },
+    '토': { name:'土(토) 기운', good:['노란 음식(고구마·호박)','단맛','소화기 식품'], focus:'비위(소화) 강화. 부드럽고 따뜻한 음식, 규칙적인 식사가 중요.' },
+    '금': { name:'金(금) 기운', good:['흰 음식(무·도라지)','매운맛 적당히','폐 건강 식품'], focus:'폐·기관지 관리. 배·도라지·무를 자주 드세요.' },
+    '수': { name:'水(수) 기운', good:['검은 음식(검은콩·미역)','짠맛 적당히','신장 건강 식품'], focus:'신장·생식 건강. 검은콩·해조류·견과류가 잘 맞아요.' }
+  };
+  return { element: fiveEl, ...advice[fiveEl] };
+}
+
+function renderPersonalAnalysis(foodResult) {
+  const card = document.getElementById('personalAnalysisCard');
+  if (!card) return;
+  const p = getPersonalProfile();
+
+  // 프로필 없으면 입력 유도 카드
+  if (!p || (!p.height && !p.weight && !p.birthYear)) {
+    card.innerHTML = `<div class="personal-empty">
+      <div style="font-size:14px;font-weight:800;color:#1F2937;margin-bottom:5px">🧬 맞춤 분석 시작하기</div>
+      <div style="font-size:11.5px;color:#64748B;margin-bottom:10px;line-height:1.55">키·몸무게·생년월·체질을 입력하면<br>BMI·권장 칼로리·사상체질 식단·사주 영양 조언이 표시돼요.</div>
+      <button onclick="openPersonalProfile()" style="width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;font-size:12.5px;font-weight:800;cursor:pointer">📝 내 정보 입력하기</button>
+    </div>`;
+    return;
+  }
+
+  // 나이·BMI·BMR·TDEE 계산
+  const age = p.birthYear ? new Date().getFullYear() - parseInt(p.birthYear) : null;
+  const h = parseFloat(p.height) || 0;
+  const w = parseFloat(p.weight) || 0;
+  const bmi = (h && w) ? (w / ((h/100)*(h/100))).toFixed(1) : null;
+  const bmiCat = bmi
+    ? (bmi < 18.5 ? {label:'저체중', color:'#3B82F6'} :
+       bmi < 23   ? {label:'정상',   color:'#10B981'} :
+       bmi < 25   ? {label:'과체중', color:'#F59E0B'} :
+       bmi < 30   ? {label:'비만',   color:'#EF4444'} :
+                    {label:'고도비만', color:'#991B1B'})
+    : null;
+  const bmr = calcBMR(p.gender, p.weight, p.height, age);
+  // 활동 수준은 기본 'moderate' 사용 (사용자 입력 없이 자동)
+  const tdee = bmr ? calcTDEE(bmr, 'moderate') : null;
+
+  // 이번 식단 칼로리 vs 권장 칼로리
+  const mealCal = foodResult?.totalCalories || 0;
+  const mealRatio = tdee ? Math.round((mealCal / (tdee/3)) * 100) : null; // 1끼 = TDEE/3 기준
+
+  // 🔮 사상체질 자동 추정 (입력 안 받고 BMI + 사주로 자동)
+  const sasangInfo = inferSasangType(p.gender, p.height, p.weight, p.birthYear, p.birthMonth);
+  const sasangType = sasangInfo?.type;
+  const sasangGuide = sasangType ? SASANG_GUIDE[sasangType] : null;
+  // 사주 오행 조언
+  const sajuAdvice = getSajuNutritionAdvice(p.birthYear, p.birthMonth);
+
+  // ── 카드 HTML ──
+  const statsHtml = `
+    <div class="personal-stats">
+      ${age ? `<div class="pstat"><div class="pstat-v">${age}</div><div class="pstat-l">세</div></div>` : ''}
+      ${bmi ? `<div class="pstat"><div class="pstat-v" style="color:${bmiCat.color}">${bmi}</div><div class="pstat-l">BMI · ${bmiCat.label}</div></div>` : ''}
+      ${tdee ? `<div class="pstat"><div class="pstat-v">${tdee}</div><div class="pstat-l">권장 kcal/일</div></div>` : ''}
+      ${mealRatio !== null ? `<div class="pstat"><div class="pstat-v" style="color:${mealRatio>120?'#EF4444':mealRatio<70?'#F59E0B':'#10B981'}">${mealRatio}%</div><div class="pstat-l">1끼 권장 대비</div></div>` : ''}
+    </div>`;
+
+  const sasangHtml = sasangGuide ? `
+    <div class="personal-section sasang">
+      <div class="psect-title">🌿 ${sasangType} <span style="font-size:10px;color:#94A3B8;font-weight:600">(자동 추정)</span></div>
+      <div class="psect-reason">📊 ${sasangInfo.reason}</div>
+      <div class="psect-tip">${sasangGuide.tip}</div>
+      <div class="psect-row"><strong style="color:#065F46">✓ 잘 맞음</strong> ${sasangGuide.good.join(', ')}</div>
+      <div class="psect-row"><strong style="color:#991B1B">✗ 피해야</strong> ${sasangGuide.bad.join(', ')}</div>
+    </div>` : '';
+
+  const sajuHtml = sajuAdvice ? `
+    <div class="personal-section saju">
+      <div class="psect-title">☯ 사주 ${sajuAdvice.name} 영양 조언</div>
+      <div class="psect-tip">${sajuAdvice.focus}</div>
+      <div class="psect-row"><strong style="color:#1E40AF">✓ 권장</strong> ${sajuAdvice.good.join(', ')}</div>
+    </div>` : '';
+
+  card.innerHTML = `
+    <div class="personal-card">
+      <div class="personal-header">
+        <div style="font-size:14.5px;font-weight:800;color:#1F2937">🧬 ${age||'?'}세 ${p.gender==='female'?'여성':p.gender==='male'?'남성':''} 맞춤 분석</div>
+        <button onclick="openPersonalProfile()" class="personal-edit-btn">✏️ 수정</button>
+      </div>
+      ${statsHtml}
+      ${sasangHtml}
+      ${sajuHtml}
+      ${!sasangGuide && !sajuAdvice ? `<div style="font-size:11px;color:#94A3B8;text-align:center;padding:8px">체질·생년월을 추가하면 더 자세한 조언이 나옵니다</div>` : ''}
+    </div>
+  `;
 }
 
 // ════════════════════════════════════════════════════════════════
