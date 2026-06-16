@@ -3533,6 +3533,22 @@ async function confirmAndAnalyze() {
       nextMealType: typeof result.nextMeal,
       hasKeyNutrients: result.foods?.some(f => f.keyNutrients?.length)
     });
+    // 🎯 사용자가 수정한 재료를 결과에 강제 덮어쓰기 (AI 자체 판단 무시)
+    if (detectedFoodsData && Array.isArray(result.foods)) {
+      detectedFoodsData.forEach((confirmed, i) => {
+        if (!result.foods[i]) return;
+        if (Array.isArray(confirmed.ingredients) && confirmed.ingredients.length > 0) {
+          // 사용자 수정 재료를 객체 형태로 변환 (pairings는 enrichWithPairings가 채움)
+          result.foods[i].ingredients = confirmed.ingredients
+            .filter(s => s && String(s).trim())
+            .map(s => ({ name: String(s).trim() }));
+          // 음식 이름도 사용자가 수정했으면 반영
+          if (confirmed.name && confirmed.name.trim()) {
+            result.foods[i].name = confirmed.name.trim();
+          }
+        }
+      });
+    }
     currentFoodResult = result;
     renderFoodResult(result);
     saveFoodHistory(result);
@@ -3882,9 +3898,34 @@ function enrichWithPairings(r) {
       if (dishMatch) f.dishPairings = dishMatch;
     }
 
-    // 2) ingredients 비어있으면 음식명/영양소에서 추정
-    const hasIngWithPairing = f.ingredients && f.ingredients.some(i => i.pairings && (i.pairings.good?.length || i.pairings.bad?.length));
-    if (!hasIngWithPairing) {
+    // 2) ingredients 처리
+    // 🎯 사용자가 명시한 재료가 있으면 그것만 우선시 (음식 이름 자동 추출 무시)
+    const userIngNames = (f.ingredients || [])
+      .map(i => stripEng2(typeof i === 'string' ? i : (i && i.name) || ''))
+      .filter(Boolean);
+
+    if (userIngNames.length > 0) {
+      // 사용자가 명시한 재료 → 사전 매칭으로 pairings 부여 (없으면 이름만)
+      const finalIngs = [];
+      userIngNames.forEach(iname => {
+        if (finalIngs.find(g => g.name === iname)) return;
+        // 정확 매칭 우선
+        if (ING_PAIRING_DICT[iname]) {
+          finalIngs.push({ name: iname, pairings: ING_PAIRING_DICT[iname] });
+          return;
+        }
+        // 부분 매칭
+        const matchKey = Object.keys(ING_PAIRING_DICT).find(k => iname.includes(k) || k.includes(iname));
+        if (matchKey) {
+          finalIngs.push({ name: iname, pairings: ING_PAIRING_DICT[matchKey] });
+        } else {
+          // 사전에 없으면 이름만 (궁합 데이터 없음 — 표시 안 됨)
+          finalIngs.push({ name: iname });
+        }
+      });
+      f.ingredients = finalIngs.slice(0, 8);
+    } else {
+      // 사용자 명시 재료 없을 때만 음식 이름·영양소에서 자동 추출
       const guessed = [];
       const addIfHasPair = (ing) => {
         if (!ing) return;
@@ -3893,34 +3934,22 @@ function enrichWithPairings(r) {
           guessed.push({ name: ing, pairings: ING_PAIRING_DICT[ing] });
         }
       };
-      // ⭐ FOOD_TO_INGS 사전에서 음식 → 재료 리스트 직접 매핑
       let foodIngs = FOOD_TO_INGS[fname];
       if (!foodIngs) {
-        // 부분 매칭
         const key = Object.keys(FOOD_TO_INGS).find(k => fname.includes(k) || k.includes(fname));
         if (key) foodIngs = FOOD_TO_INGS[key];
       }
       (foodIngs || []).forEach(addIfHasPair);
-      // 음식명에서 재료 추출 (사전 키 부분 매칭)
       Object.keys(ING_PAIRING_DICT).forEach(ing => {
         if (fname.includes(ing)) addIfHasPair(ing);
       });
-      // keyNutrients에서 재료 역추정
       (f.keyNutrients || []).forEach(n => {
         const cleanN = stripEng2(n.name);
         for (const k of Object.keys(NUT_TO_ING)) {
           if (cleanN.includes(k)) { addIfHasPair(NUT_TO_ING[k]); break; }
         }
       });
-      // AI가 보낸 ingredients가 있지만 pairings 없을 때
-      (f.ingredients || []).forEach(ing => {
-        const iname = stripEng2(ing.name);
-        if (iname && !guessed.find(g => g.name === iname)) {
-          const match = Object.keys(ING_PAIRING_DICT).find(k => iname.includes(k) || k.includes(iname));
-          if (match) guessed.push({ name: iname || match, pairings: ING_PAIRING_DICT[match] });
-        }
-      });
-      if (guessed.length > 0) f.ingredients = guessed.slice(0, 6); // 6개까지
+      if (guessed.length > 0) f.ingredients = guessed.slice(0, 6);
     }
   });
   return r;
@@ -3979,31 +4008,36 @@ function renderFoodResult(r) {
   // 📸 사진 안에 있는 모든 음식·재료 set 구축 (궁합 필터링용)
   const itemsInPhoto = new Set();
   (r.foods || []).forEach(f => {
+    const hasUserIngs = f.ingredients && f.ingredients.length > 0;
     if (f.name) {
       const fname = stripEng(f.name);
       itemsInPhoto.add(fname);
-      // FOOD_TO_INGS 매핑으로 음식 → 일반 재료 추출
-      let foodIngs = FOOD_TO_INGS[fname];
-      if (!foodIngs) {
-        const key = Object.keys(FOOD_TO_INGS).find(k => fname.includes(k) || k.includes(fname));
-        if (key) foodIngs = FOOD_TO_INGS[key];
+      // 사용자 명시 재료 없을 때만 음식 이름에서 자동 추출
+      if (!hasUserIngs) {
+        let foodIngs = FOOD_TO_INGS[fname];
+        if (!foodIngs) {
+          const key = Object.keys(FOOD_TO_INGS).find(k => fname.includes(k) || k.includes(fname));
+          if (key) foodIngs = FOOD_TO_INGS[key];
+        }
+        (foodIngs || []).forEach(i => itemsInPhoto.add(i));
+        Object.keys(ING_PAIRING_DICT).forEach(k => {
+          if (fname.includes(k)) itemsInPhoto.add(k);
+        });
       }
-      (foodIngs || []).forEach(i => itemsInPhoto.add(i));
-      // 음식 이름에 포함된 모든 사전 키 추가
-      Object.keys(ING_PAIRING_DICT).forEach(k => {
-        if (fname.includes(k)) itemsInPhoto.add(k);
-      });
     }
+    // 사용자가 명시(또는 enrich가 채운)한 ingredients
     (f.ingredients || []).forEach(ing => {
       if (ing.name) itemsInPhoto.add(stripEng(ing.name));
     });
-    // keyNutrients에서 역추정 재료도 추가
-    (f.keyNutrients || []).forEach(n => {
-      const cleanN = stripEng(n.name);
-      for (const k of Object.keys(NUT_TO_ING)) {
-        if (cleanN.includes(k)) itemsInPhoto.add(NUT_TO_ING[k]);
-      }
-    });
+    // keyNutrients 역추정도 사용자 명시 없을 때만
+    if (!hasUserIngs) {
+      (f.keyNutrients || []).forEach(n => {
+        const cleanN = stripEng(n.name);
+        for (const k of Object.keys(NUT_TO_ING)) {
+          if (cleanN.includes(k)) itemsInPhoto.add(NUT_TO_ING[k]);
+        }
+      });
+    }
   });
   // 사진 안 음식·재료와 매칭되는지 체크 (정확/부분 매칭)
   const isInPhoto = (candidate) => {
