@@ -687,8 +687,10 @@
     .pair-more-btn:active{background:#FEF3C7}
     /* 사진 전체 통합 궁합 박스 */
     .overall-pairings-box{background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);border:1.5px solid #F59E0B;border-radius:16px;padding:14px;margin-top:14px;box-shadow:0 4px 12px rgba(245,158,11,.12)}
-    .overall-pairings-title{font-size:15px;font-weight:800;color:#78350F;margin-bottom:3px;letter-spacing:-.3px}
+    .overall-pairings-title{font-size:15px;font-weight:800;color:#78350F;margin-bottom:8px;letter-spacing:-.3px}
     .overall-pairings-sub{font-size:11px;color:#92400E;opacity:.75;margin-bottom:6px}
+    .overall-pairings-summary{font-size:12.5px;color:#78350F;line-height:1.65;padding:11px 13px;background:#FFFBEB;border-radius:11px;border:1px solid #FDE68A;margin-bottom:4px}
+    .overall-pairings-summary strong{color:#B45309;font-weight:800}
     /* 궁합 마무리 안내 박스 */
     .pairing-note{background:linear-gradient(135deg,#EFF6FF 0%,#EEF2FF 100%);border:1.5px solid #BFDBFE;border-radius:14px;padding:14px;margin-top:14px;display:flex;gap:11px;align-items:flex-start}
     .pairing-note-icon{font-size:22px;flex-shrink:0;line-height:1}
@@ -4331,20 +4333,36 @@ function renderFoodResult(r) {
       (f.dishPairings.bad || []).forEach(b => allBads.push({ from: fname, fromFood: fname, with: b.with, reason: b.reason }));
     }
   });
-  // 중복 제거 — 양방향 페어 (A+B = B+A) 한 번만 + 사진 안 매칭 필터
+  // 🌿 본 재료로 정규화 (깻잎장아찌 → 깻잎, 미역줄기볶음 → 미역 등)
+  const normalizeFrom = (name) => {
+    const n = stripEng(name);
+    if (!n) return n;
+    // ING_PAIRING_DICT 키 중 n에 포함된 본 재료 — 가장 긴 매칭 우선
+    const matches = Object.keys(ING_PAIRING_DICT).filter(k =>
+      k !== n && k.length >= 2 && n.includes(k)
+    );
+    if (matches.length === 0) return n;
+    matches.sort((a, b) => b.length - a.length); // 긴 것 우선 (소고기 vs 미역 → 소고기)
+    return matches[0];
+  };
+
+  // 중복 제거 — 양방향 페어 + from 정규화 + 사진 안 매칭 필터
   const dedupePair = (arr) => {
-    const seen = new Set();
-    return arr.filter(item => {
+    const seen = new Map();
+    arr.forEach(item => {
       const w = stripEng(item.with || '');
+      if (!w) return;
+      if (!isInPhoto(item.with)) return;
       const fr = stripEng(item.from || '');
-      if (!w) return false;
-      // 정렬해서 양방향 같은 페어로 처리
-      const pairKey = [w, fr].sort().join('|');
-      if (seen.has(pairKey)) return false;
-      if (!isInPhoto(item.with)) return false;
-      seen.add(pairKey);
-      return true;
+      const frNorm = normalizeFrom(fr); // 본 재료로 정규화
+      // 양방향 페어 키 (정렬해서 같은 조합은 한 번만)
+      const pairKey = [w, frNorm].sort().join('|');
+      if (!seen.has(pairKey)) {
+        // 표시할 때도 정규화된 from 사용 → "깻잎 + 고기" 같이
+        seen.set(pairKey, { ...item, from: frNorm });
+      }
     });
+    return [...seen.values()];
   };
   const finalGoods = dedupePair(allGoods);
   const finalBads = dedupePair(allBads);
@@ -4373,20 +4391,36 @@ function renderFoodResult(r) {
       <button id="badMoreBtn" class="pair-more-btn" onclick="togglePairMore('bad')">▼ 효율↓ 조합 ${badMore.length}개 더 보기</button>
     ` : '');
 
-  const photoItemList = Array.from(itemsInPhoto).join(', ');
+  // 📝 이 식단의 궁합 총평 — 좋은/효율↓ 조합 수 기반
+  const goodCount = finalGoods.length;
+  const badCount = finalBads.length;
+  let pairingSummary = '';
+  if (goodCount >= 5 && badCount === 0) {
+    pairingSummary = `이번 식단은 영양소 흡수에 좋은 조합이 <strong>${goodCount}개</strong>나 있어 균형이 정말 잘 잡힌 식사예요. 단백질·미네랄·비타민이 효율적으로 흡수될 거예요 ✨`;
+  } else if (goodCount >= 3 && badCount === 0) {
+    pairingSummary = `좋은 궁합 <strong>${goodCount}개</strong>로 영양소 흡수가 잘 되는 식단이에요. 균형있게 잘 드시고 계세요 👍`;
+  } else if (goodCount >= 3 && badCount <= 2) {
+    pairingSummary = `좋은 궁합 <strong>${goodCount}개</strong>가 있어 전반적으로 균형 잡힌 식단이에요. 효율↓ 조합 <strong>${badCount}개</strong>는 가능하면 시간차를 두고 드시면 더 좋아요.`;
+  } else if (goodCount >= 1 && badCount >= 3) {
+    pairingSummary = `좋은 궁합 <strong>${goodCount}개</strong>가 있지만, 효율↓ 조합 <strong>${badCount}개</strong>가 영양소 흡수를 떨어뜨릴 수 있어요. 일부 재료는 따로 드시면 좋아요.`;
+  } else if (goodCount === 0 && badCount === 0) {
+    pairingSummary = `사진 안 음식들끼리 특별한 시너지나 충돌이 없어요. 부담 없이 드실 수 있는 무난한 한 끼예요 🍽`;
+  } else if (goodCount === 0 && badCount >= 1) {
+    pairingSummary = `영양소 시너지 조합은 없고, 효율↓ 조합 <strong>${badCount}개</strong>가 흡수율을 낮출 수 있어요. 다음에는 좋은 궁합 재료를 함께 드시면 좋아요.`;
+  } else {
+    pairingSummary = `좋은 궁합 <strong>${goodCount}개</strong>${badCount > 0 ? `, 효율↓ 조합 <strong>${badCount}개</strong>` : ''}를 분석했어요.`;
+  }
+
   const overallPairingsBox = (overallGoodRows || overallBadRows)
     ? `<div class="overall-pairings-box">
         <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
-        <div class="overall-pairings-sub">📸 사진 안: ${photoItemList}</div>
-        ${overallGoodRows ? `<div class="card-pairings-title good-title" style="margin-top:12px">🤝 함께 먹으면 좋은 조합</div>${overallGoodRows}` : ''}
+        <div class="overall-pairings-summary">${pairingSummary}</div>
+        ${overallGoodRows ? `<div class="card-pairings-title good-title" style="margin-top:14px">🤝 함께 먹으면 좋은 조합</div>${overallGoodRows}` : ''}
         ${overallBadRows ? `<div class="card-pairings-title bad-title" style="margin-top:14px">⚠️ 같이 먹으면 효율↓ 조합</div>${overallBadRows}` : ''}
       </div>`
     : `<div class="overall-pairings-box">
         <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
-        <div class="overall-pairings-sub">📸 사진 안: ${photoItemList}</div>
-        <div style="padding:12px;color:#92400E;font-size:12.5px;line-height:1.6;text-align:center">
-          이 사진 안에서는 특별한 궁합·효율↓ 조합이 발견되지 않았어요. 균형있게 잘 드시고 있네요 👍
-        </div>
+        <div class="overall-pairings-summary">${pairingSummary}</div>
       </div>`;
 
   // 💡 궁합 안내 마무리 멘트
