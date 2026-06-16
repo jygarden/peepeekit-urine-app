@@ -5626,6 +5626,23 @@ function resetAllData() {
 // 📊 식단 주간/월간 리포트
 // ════════════════════════════════════════════════════════════════
 function showFoodReport(period) {
+  try {
+    return _showFoodReportImpl(period);
+  } catch(err) {
+    console.error('리포트 생성 실패:', err);
+    const content = document.getElementById('foodReportContent');
+    if (content) {
+      content.innerHTML = `
+        <h2 style="font-size:18px;margin:0 0 14px;color:#1F2937">📊 리포트</h2>
+        <div style="text-align:center;padding:40px 20px;color:#94A3B8">
+          <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+          <div style="font-size:13px;line-height:1.6;color:#64748B">리포트 생성에 문제가 생겼어요.<br>식단을 한 번 더 분석한 후 다시 시도해주세요.</div>
+        </div>`;
+      document.getElementById('foodReportModal').style.display = 'block';
+    }
+  }
+}
+function _showFoodReportImpl(period) {
   const days = period === 'week' ? 7 : 30;
   const periodLabel = period === 'week' ? '주간 (최근 7일)' : '월간 (최근 30일)';
 
@@ -5653,10 +5670,11 @@ function showFoodReport(period) {
     return;
   }
 
-  // 통계
-  const totalCal = filtered.reduce((s, h) => s + (h.totalCalories || 0), 0);
+  // 통계 (안전한 숫자 변환)
+  const num = (v) => { const n = Number(v); return isFinite(n) ? n : 0; };
+  const totalCal = filtered.reduce((s, h) => s + num(h.totalCalories), 0);
   const avgCal = Math.round(totalCal / filtered.length);
-  const avgScore = Math.round(filtered.reduce((s, h) => s + (h.balanceScore || 0), 0) / filtered.length);
+  const avgScore = Math.round(filtered.reduce((s, h) => s + num(h.balanceScore), 0) / filtered.length);
 
   // 일별 데이터
   const dailyMap = {};
@@ -5666,32 +5684,40 @@ function showFoodReport(period) {
     dailyMap[key] = { cal: 0, score: 0, count: 0, label: `${d.getMonth()+1}/${d.getDate()}` };
   }
   filtered.forEach(h => {
-    const dt = new Date(h.date || h.timestamp || 0);
-    const key = dt.toISOString().split('T')[0];
-    if (dailyMap[key]) {
-      dailyMap[key].cal += h.totalCalories || 0;
-      dailyMap[key].score += h.balanceScore || 0;
-      dailyMap[key].count++;
-    }
+    try {
+      const dt = new Date(h.date || h.timestamp || 0);
+      const key = dt.toISOString().split('T')[0];
+      if (dailyMap[key]) {
+        dailyMap[key].cal += num(h.totalCalories);
+        dailyMap[key].score += num(h.balanceScore);
+        dailyMap[key].count++;
+      }
+    } catch(e) { /* 손상된 데이터 무시 */ }
   });
 
-  // 자주 먹은 음식 top 5
+  // 자주 먹은 음식 top 5 (옛 데이터 호환: string / array / object 다 처리)
   const foodCount = {};
   filtered.forEach(h => {
-    (h.foods || []).forEach(f => {
-      const name = (typeof f === 'string' ? f : f.name) || '';
+    let foods = h.foods;
+    // 문자열이면 쉼표로 분리해서 배열로
+    if (typeof foods === 'string') {
+      foods = foods.split(/[,、+·]/).map(s => s.trim()).filter(Boolean);
+    }
+    if (!Array.isArray(foods)) return;
+    foods.forEach(f => {
+      const name = (typeof f === 'string' ? f : (f && f.name)) || '';
       const cleanName = String(name).replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
       if (cleanName) foodCount[cleanName] = (foodCount[cleanName] || 0) + 1;
     });
   });
   const topFoods = Object.entries(foodCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
 
-  // 평균 영양소
+  // 평균 영양소 (안전 처리)
   const nutSum = { carbs:0, protein:0, fat:0, fiber:0, sodium:0, sugar:0 };
   let nutCount = 0;
   filtered.forEach(h => {
-    if (h.nutrition) {
-      Object.keys(nutSum).forEach(k => nutSum[k] += (h.nutrition[k] || 0));
+    if (h.nutrition && typeof h.nutrition === 'object') {
+      Object.keys(nutSum).forEach(k => nutSum[k] += num(h.nutrition[k]));
       nutCount++;
     }
   });
