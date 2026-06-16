@@ -3411,6 +3411,7 @@ function compressImageForUpload(dataUrl, maxDim=1200, quality=0.78) {
 
 // 1단계: AI가 음식·재료 인식 → 확인 화면으로
 let detectedFoodsData = null;
+let originalDetectedFoodsData = null; // detect 원본 (사용자 수정 추적용)
 async function analyzeFood() {
   if (!foodImageB64) return;
   const btn = document.getElementById('btnFoodAnalyze');
@@ -3434,6 +3435,8 @@ async function analyzeFood() {
     }
     if (result.error) throw new Error(result.error);
     detectedFoodsData = result.detectedFoods || [];
+    // 원본 깊은 복사 (사용자 수정 후 비교용)
+    try { originalDetectedFoodsData = JSON.parse(JSON.stringify(detectedFoodsData)); } catch(e) { originalDetectedFoodsData = null; }
     renderConfirmFoods();
     showScreen('screenFoodConfirm');
   } catch (err) {
@@ -3549,17 +3552,37 @@ async function confirmAndAnalyze() {
       detectedFoodsData.forEach((confirmed, i) => {
         if (!result.foods[i]) return;
         if (Array.isArray(confirmed.ingredients) && confirmed.ingredients.length > 0) {
-          // 사용자 수정 재료를 객체 형태로 변환 (pairings는 enrichWithPairings가 채움)
           result.foods[i].ingredients = confirmed.ingredients
             .filter(s => s && String(s).trim())
             .map(s => ({ name: String(s).trim() }));
-          // 음식 이름도 사용자가 수정했으면 반영
           if (confirmed.name && confirmed.name.trim()) {
             result.foods[i].name = confirmed.name.trim();
           }
         }
       });
     }
+
+    // 🚫 사용자가 detect 결과에서 삭제·교체한 재료들 = 제외 리스트
+    // (예: 시금치 → 참나물로 바꾸면 "시금치"가 excludeIngs에 들어감)
+    try {
+      const originalIngs = new Set();
+      const currentIngs = new Set();
+      (originalDetectedFoodsData || []).forEach(f => {
+        (f.ingredients || []).forEach(ing => {
+          const s = String(ing).trim();
+          if (s) originalIngs.add(s);
+        });
+      });
+      (detectedFoodsData || []).forEach(f => {
+        (f.ingredients || []).forEach(ing => {
+          const s = String(ing).trim();
+          if (s) currentIngs.add(s);
+        });
+      });
+      const excludeIngs = [...originalIngs].filter(i => !currentIngs.has(i));
+      result.__excludeIngs = excludeIngs;
+      console.log('[제외 재료 (사용자가 삭제·교체)]:', excludeIngs);
+    } catch(e) { result.__excludeIngs = []; }
     currentFoodResult = result;
     renderFoodResult(result);
     saveFoodHistory(result);
@@ -3882,6 +3905,17 @@ const NUT_TO_ING = {
 function enrichWithPairings(r) {
   if (!r || !r.foods) return r;
   const stripEng2 = (s) => (s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
+  // 🚫 사용자가 삭제·교체한 재료 (excludeIngs) — 자동 추출 시 제외
+  const excludeSet = new Set((r.__excludeIngs || []).map(stripEng2));
+  const isExcluded = (name) => {
+    const n = stripEng2(name);
+    if (excludeSet.has(n)) return true;
+    // 부분 매칭도 제외 (예: '시금치나물'에서 시금치가 excluded면 차단)
+    for (const ex of excludeSet) {
+      if (ex && (n === ex || n.includes(ex) || ex.includes(n))) return true;
+    }
+    return false;
+  };
   r.foods.forEach(f => {
     const fname = stripEng2(f.name);
 
@@ -3928,6 +3962,7 @@ function enrichWithPairings(r) {
       const guessed = [];
       const addIfHasPair = (ing) => {
         if (!ing) return;
+        if (isExcluded(ing)) return; // 🚫 제외 리스트 차단
         if (guessed.find(g => g.name === ing)) return;
         if (ING_PAIRING_DICT[ing]) {
           guessed.push({ name: ing, pairings: ING_PAIRING_DICT[ing] });
@@ -4004,13 +4039,25 @@ function renderFoodResult(r) {
   // 🎮 음식 게임 카드 + 스킬 뱃지 + 재료별 궁합 (한 카드에 통합!)
   const stripEng = (s) => (s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
 
+  // 🚫 사용자가 detect에서 삭제·교체한 재료들 — set에 절대 안 넣음
+  const excludeSetForItems = new Set((r.__excludeIngs || []).map(stripEng));
+  const isExcludedItem = (name) => {
+    const n = stripEng(name);
+    if (excludeSetForItems.has(n)) return true;
+    for (const ex of excludeSetForItems) {
+      if (ex && (n === ex || n.includes(ex) || ex.includes(n))) return true;
+    }
+    return false;
+  };
+
   // 📸 사진 안에 있는 모든 음식·재료 set 구축 (궁합 필터링용)
   const itemsInPhoto = new Set();
+  const safeAdd = (v) => { if (v && !isExcludedItem(v)) itemsInPhoto.add(v); };
   (r.foods || []).forEach(f => {
     const hasUserIngs = f.ingredients && f.ingredients.length > 0;
     if (f.name) {
       const fname = stripEng(f.name);
-      itemsInPhoto.add(fname);
+      itemsInPhoto.add(fname); // 음식 이름 자체는 그대로
       // 사용자 명시 재료 없을 때만 음식 이름에서 자동 추출
       if (!hasUserIngs) {
         let foodIngs = FOOD_TO_INGS[fname];
@@ -4018,22 +4065,22 @@ function renderFoodResult(r) {
           const key = Object.keys(FOOD_TO_INGS).find(k => fname.includes(k) || k.includes(fname));
           if (key) foodIngs = FOOD_TO_INGS[key];
         }
-        (foodIngs || []).forEach(i => itemsInPhoto.add(i));
+        (foodIngs || []).forEach(safeAdd);
         Object.keys(ING_PAIRING_DICT).forEach(k => {
-          if (fname.includes(k)) itemsInPhoto.add(k);
+          if (fname.includes(k)) safeAdd(k);
         });
       }
     }
     // 사용자가 명시(또는 enrich가 채운)한 ingredients
     (f.ingredients || []).forEach(ing => {
-      if (ing.name) itemsInPhoto.add(stripEng(ing.name));
+      if (ing.name) safeAdd(stripEng(ing.name));
     });
     // keyNutrients 역추정도 사용자 명시 없을 때만
     if (!hasUserIngs) {
       (f.keyNutrients || []).forEach(n => {
         const cleanN = stripEng(n.name);
         for (const k of Object.keys(NUT_TO_ING)) {
-          if (cleanN.includes(k)) itemsInPhoto.add(NUT_TO_ING[k]);
+          if (cleanN.includes(k)) safeAdd(NUT_TO_ING[k]);
         }
       });
     }
