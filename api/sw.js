@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v14-pairings-nutrition-only-2026-06-15';
+const SW_VERSION = 'v15-exclude-user-removed-ings-2026-06-15';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
