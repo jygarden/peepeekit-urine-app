@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v8-pairings-overall-box-2026-06-15';
+const SW_VERSION = 'v9-report-and-dedupe-2026-06-15';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
