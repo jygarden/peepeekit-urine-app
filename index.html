@@ -656,6 +656,21 @@
     .card-pair-row.bad{background:#FEF2F2;color:#991B1B;border-left:3px solid #EF4444}
     .card-pair-row strong{font-weight:700}
     .card-pair-reason{opacity:.85;font-size:10.5px;margin-left:2px}
+    /* 📸 사진 찍기 화면 — 프로필 입력 배너 */
+    .capture-profile-empty{background:linear-gradient(135deg,#EEF2FF,#F3E8FF);border:1.5px dashed #A78BFA;border-radius:14px;padding:13px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:0 2px 8px rgba(139,92,246,.08)}
+    .capture-profile-empty:active{transform:scale(.99)}
+    .cpe-icon{font-size:28px;flex-shrink:0;line-height:1}
+    .cpe-body{flex:1;min-width:0}
+    .cpe-title{font-size:13.5px;font-weight:800;color:#4338CA;margin-bottom:3px;letter-spacing:-.2px}
+    .cpe-sub{font-size:11px;color:#6366F1;line-height:1.5}
+    .cpe-arrow{font-size:24px;color:#A78BFA;font-weight:800;flex-shrink:0}
+    .capture-profile-filled{background:linear-gradient(135deg,#EEF2FF,#F3E8FF);border:1.5px solid #C7D2FE;border-radius:14px;padding:11px 13px;box-shadow:0 2px 6px rgba(99,102,241,.1)}
+    .cpf-row{display:flex;align-items:center;gap:8px}
+    .cpf-stats{flex:1;display:flex;flex-wrap:wrap;gap:4px}
+    .cpf-chip{background:#fff;border:1px solid #C7D2FE;color:#4338CA;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;white-space:nowrap}
+    .cpf-chip-sasang{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
+    .cpf-edit{background:#fff;border:1px solid #C7D2FE;color:#4338CA;font-size:13px;width:30px;height:30px;border-radius:8px;cursor:pointer;flex-shrink:0}
+    .cpf-note{font-size:10px;color:#6366F1;margin-top:6px;font-weight:600;text-align:right}
     /* 🧬 맞춤 분석 카드 */
     .personal-empty{background:linear-gradient(135deg,#EEF2FF,#F3E8FF);border:1.5px dashed #A78BFA;border-radius:16px;padding:14px;text-align:center}
     .personal-card{background:linear-gradient(135deg,#EEF2FF 0%,#F3E8FF 100%);border:1.5px solid #C7D2FE;border-radius:16px;padding:14px;box-shadow:0 3px 10px rgba(99,102,241,.12)}
@@ -1777,6 +1792,8 @@
   <!-- ════════════ 식단 사진 업로드 화면 ════════════ -->
   <div class="screen" id="screenFoodCapture">
     <div class="section-title">🍽 식단 분석</div>
+    <!-- 🧬 맞춤 분석 프로필 (사진 찍기 전 입력) -->
+    <div id="captureProfileBanner" style="margin-bottom:12px"></div>
     <div class="card">
       <div class="field">
         <label>어떤 식사·사료인가요?</label>
@@ -2413,6 +2430,8 @@ function showScreen(id) {
   if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); }
   // 촬영 화면 첫 진입 시 팁 표시
   if (id === 'screenCapture') maybeShowCaptureTip();
+  // 식단 사진 화면 진입 시 프로필 배너 렌더링
+  if (id === 'screenFoodCapture') { try { renderCaptureProfileBanner(); } catch(e){} }
   // 헤더 부제목 (홈 외 화면)
   const headerSub = document.getElementById('headerSub');
   if (headerSub) {
@@ -5932,7 +5951,47 @@ function savePersonalProfile() {
   };
   localStorage.setItem('userPhysicalProfile', JSON.stringify(data));
   closePersonalProfile();
-  renderPersonalAnalysis(currentFoodResult);
+  // 양쪽 다 갱신
+  try { renderCaptureProfileBanner(); } catch(e){}
+  try { renderPersonalAnalysis(currentFoodResult); } catch(e){}
+}
+
+// 📸 사진 찍기 화면의 프로필 배너 (사진 찍기 전 입력 유도)
+function renderCaptureProfileBanner() {
+  const el = document.getElementById('captureProfileBanner');
+  if (!el) return;
+  const p = getPersonalProfile();
+  const hasMin = p && p.gender && p.birthYear && p.height && p.weight;
+  if (!hasMin) {
+    // 프로필 없을 때 — 입력 유도
+    el.innerHTML = `<div class="capture-profile-empty" onclick="openPersonalProfile()">
+      <div class="cpe-icon">🧬</div>
+      <div class="cpe-body">
+        <div class="cpe-title">맞춤 분석을 위해 내 정보 입력</div>
+        <div class="cpe-sub">성별·생년월일·키·몸무게만 입력하면 BMI·사상체질·사주 영양 조언까지 자동!</div>
+      </div>
+      <div class="cpe-arrow">›</div>
+    </div>`;
+  } else {
+    // 프로필 있을 때 — 요약 + 수정 버튼
+    const age = p.birthYear ? new Date().getFullYear() - parseInt(p.birthYear) : '?';
+    const sasangInfo = inferSasangType(p.gender, p.height, p.weight, p.birthYear, p.birthMonth);
+    const sasangType = sasangInfo?.type || '';
+    const bmi = sasangInfo?.bmi || '';
+    const genderStr = p.gender === 'female' ? '여성' : p.gender === 'male' ? '남성' : '';
+    el.innerHTML = `<div class="capture-profile-filled">
+      <div class="cpf-row">
+        <div class="cpf-stats">
+          <span class="cpf-chip">${age}세 ${genderStr}</span>
+          ${p.height && p.weight ? `<span class="cpf-chip">${p.height}cm · ${p.weight}kg</span>` : ''}
+          ${bmi ? `<span class="cpf-chip">BMI ${bmi}</span>` : ''}
+          ${sasangType ? `<span class="cpf-chip cpf-chip-sasang">🌿 ${sasangType}</span>` : ''}
+        </div>
+        <button class="cpf-edit" onclick="openPersonalProfile()">✏️</button>
+      </div>
+      <div class="cpf-note">맞춤 영양 분석 적용 중</div>
+    </div>`;
+  }
 }
 
 // 🔮 사상체질 자동 추정 (BMI + 키·몸무게 + 사주 오행)
