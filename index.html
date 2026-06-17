@@ -1953,7 +1953,7 @@
     <div style="background:#fff;border-radius:20px;max-width:430px;margin:20px auto;padding:20px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.3)">
       <button onclick="closePersonalProfile()" style="position:absolute;top:12px;right:12px;background:#F1F5F9;border:none;font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer">✕</button>
       <h2 style="font-size:18px;margin:0 0 6px;color:#1F2937">🧬 내 정보 입력</h2>
-      <div style="font-size:12px;color:#64748B;margin-bottom:16px;line-height:1.55">간단한 정보만 입력하시면 <strong>자동으로 분석</strong>해드려요.</div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:16px;line-height:1.55">간단한 정보만 입력하시면 BMI·권장 칼로리·사상체질·사주 영양 조언을 <strong>자동으로 분석</strong>해드려요.</div>
       <div class="field"><label>성별</label>
         <select id="pp_gender" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px">
           <option value="">선택</option>
@@ -1976,7 +1976,7 @@
         </div>
       </div>
       <div style="margin-top:14px;padding:11px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;font-size:11.5px;color:#075985;line-height:1.55">
-        💡 체질은 자동 추정됩니다.
+        💡 사상체질(태양인·태음인·소양인·소음인)은 BMI와 사주 오행으로 자동 추정됩니다.
       </div>
       <button onclick="savePersonalProfile()" style="width:100%;margin-top:12px;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;font-size:14px;font-weight:800;cursor:pointer">저장 후 맞춤 분석 보기</button>
     </div>
@@ -6061,10 +6061,10 @@ function calcTDEE(bmr, activity) {
 
 // 사상체질별 식단 가이드
 const SASANG_GUIDE = {
-  '태양인': { good: ['해산물', '메밀', '냉성 채소(오이·배추)', '포도', '키위'], bad: ['매운 음식', '뜨거운 음식', '소고기', '꿀'], tip: '간(肝) 기능을 도와 열을 식히는 시원한 음식이 좋아요. 자극적인 양념은 피하세요.' },
-  '태음인': { good: ['소고기', '뿌리채소(무·당근)', '콩류', '땅콩', '버섯'], bad: ['닭고기', '돼지고기 과다', '맵고 짠 음식'], tip: '폐(肺) 기능이 약한 편이라 단백질·식이섬유 풍부한 음식과 적절한 운동이 중요해요.' },
-  '소양인': { good: ['돼지고기', '오리고기', '신선한 채소', '수박', '참외'], bad: ['닭고기', '인삼·홍삼', '맵고 뜨거운 음식'], tip: '소화 빠르고 열이 많은 체질이라 차가운 성질의 음식과 수분 섭취를 늘리세요.' },
-  '소음인': { good: ['닭고기', '인삼', '대추', '생강', '꿀'], bad: ['차가운 음식', '돼지고기', '냉면', '맥주'], tip: '소화력이 약하니 따뜻하고 부드러운 음식을 천천히 드세요. 과식 절대 금물.' }
+  '태양인': { good: ['해산물', '메밀', '냉성 채소(오이·배추)', '포도', '키위'], bad: ['매운 음식', '뜨거운 음식', '소고기', '꿀'], tip: '간(肝) 기능을 도와 열을 식히는 시원한 음식이 잘 맞아요. 자극적인 양념은 조금만 즐기시면 좋아요.' },
+  '태음인': { good: ['소고기', '뿌리채소(무·당근)', '콩류', '땅콩', '버섯'], bad: ['닭고기', '돼지고기 과다', '맵고 짠 음식'], tip: '폐(肺) 기능이 약한 편이라 단백질·식이섬유 풍부한 음식과 적절한 운동이 잘 어울려요.' },
+  '소양인': { good: ['돼지고기', '오리고기', '신선한 채소', '수박', '참외'], bad: ['닭고기', '인삼·홍삼', '맵고 뜨거운 음식'], tip: '소화 빠르고 열이 많은 체질이라 차가운 성질의 음식과 충분한 수분이 잘 맞아요.' },
+  '소음인': { good: ['닭고기', '인삼', '대추', '생강', '꿀'], bad: ['차가운 음식', '돼지고기', '냉면', '맥주'], tip: '소화력이 섬세한 편이라 따뜻하고 부드러운 음식을 천천히 즐기시면 좋아요. 적당량이 베스트!' }
 };
 
 // 사주 오행 → 영양 권장 (간단 매핑)
@@ -6140,8 +6140,8 @@ function renderPersonalAnalysis(foodResult) {
       <div class="psect-title">🌿 ${sasangType} <span style="font-size:10px;color:#94A3B8;font-weight:600">(자동 추정)</span></div>
       <div class="psect-reason">📊 ${sasangInfo.reason}</div>
       <div class="psect-tip">${sasangGuide.tip}</div>
-      <div class="psect-row"><strong style="color:#065F46">✓ 잘 맞음</strong> ${sasangGuide.good.join(', ')}</div>
-      <div class="psect-row"><strong style="color:#991B1B">✗ 피해야</strong> ${sasangGuide.bad.join(', ')}</div>
+      <div class="psect-row"><strong style="color:#065F46">💚 체질에 더 잘 맞아요</strong> ${sasangGuide.good.join(', ')}</div>
+      <div class="psect-row"><strong style="color:#B45309">🍃 조금만 즐기시면 좋아요</strong> ${sasangGuide.bad.join(', ')}</div>
     </div>` : '';
 
   const sajuHtml = sajuAdvice ? `
@@ -6333,6 +6333,16 @@ function _showFoodReportImpl(period) {
   });
 
   let recoHtml = '';
+  // 💊 공통 영양제 사전 (주간/월간 둘 다 사용)
+  const NUT_SUPPLEMENTS = {
+    carbs:   [],
+    protein: ['단백질 보충제 (WPI)','필수아미노산 (EAA)','BCAA'],
+    fat:     ['오메가3 (EPA·DHA)','MCT 오일','비타민D'],
+    fiber:   ['차전자피 (사일리움)','이눌린','식이섬유 보충제'],
+    sodium:  [],
+    sugar:   ['크롬 (혈당 안정)','베르베린']
+  };
+
   if (period === 'week') {
     // 주간 — 부드러운 추천 톤
     if (lackedItems.length > 0 || excessItems.length > 0) {
@@ -6352,9 +6362,26 @@ function _showFoodReportImpl(period) {
           <div class="reco-foods">${(reco?.tips||[]).map(f => `<span class="reco-food-tag">${f}</span>`).join('')}</div>
         </div>`;
       }).join('');
+
+      // 💊 영양제 부드러운 추천
+      const allSuppsW = [];
+      lackedItems.forEach(it => (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSuppsW.push({ s, reason: `${it.label} 보충` })));
+      excessItems.forEach(it => (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSuppsW.push({ s, reason: `${it.label} 관리` })));
+      const seenW = new Set();
+      const uniqueSuppsW = allSuppsW.filter(x => seenW.has(x.s) ? false : (seenW.add(x.s), true));
+      const suppHtmlW = uniqueSuppsW.length > 0 ? `
+        <div class="reco-card reco-soft" style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);border-color:#D8B4FE">
+          <div class="reco-head" style="color:#6B21A8">💊 <strong>이번 주 추천 영양제</strong></div>
+          <div class="reco-body" style="color:#7C3AED">음식으로 부족한 부분을 영양제로 가볍게 보완해보세요. (전문가 상담 후 복용을 권장드려요)</div>
+          <div class="reco-foods">${uniqueSuppsW.map(x => `<span class="reco-food-tag" style="background:#F3E8FF;border-color:#D8B4FE;color:#6B21A8">💊 ${x.s}</span>`).join('')}</div>
+          <div style="margin-top:7px;font-size:10.5px;color:#6B21A8;line-height:1.55">
+            ${uniqueSuppsW.map(x => `• <strong>${x.s}</strong> — ${x.reason}`).join('<br>')}
+          </div>
+        </div>` : '';
+
       recoHtml = `<div class="report-section">
         <div class="report-section-title">💡 이번 주 영양 추천</div>
-        ${lackHtml}${excessHtml}
+        ${lackHtml}${excessHtml}${suppHtmlW}
       </div>`;
     } else {
       recoHtml = `<div class="report-section">
@@ -6384,15 +6411,7 @@ function _showFoodReportImpl(period) {
         </div>`;
       }).join('');
 
-      // 💊 영양제 추천 — 부족 영양소 기준
-      const NUT_SUPPLEMENTS = {
-        carbs:   [],
-        protein: ['단백질 보충제 (WPI)','필수아미노산 (EAA)','BCAA'],
-        fat:     ['오메가3 (EPA·DHA)','MCT 오일','비타민D'],
-        fiber:   ['차전자피 (사일리움)','이눌린','식이섬유 보충제'],
-        sodium:  [],
-        sugar:   ['크롬 (혈당 안정)','베르베린']
-      };
+      // 💊 영양제 추천 — 부족 영양소 기준 (NUT_SUPPLEMENTS는 위에서 정의됨)
       const allSupps = [];
       lackedItems.forEach(it => {
         (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSupps.push({ s, reason: `${it.label} 보충` }));
