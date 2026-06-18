@@ -714,6 +714,16 @@
     .report-nut-bar{flex:1;height:9px;background:#F1F5F9;border-radius:5px;overflow:hidden}
     .report-nut-fill{height:100%;border-radius:5px}
     .report-nut-val{font-size:10.5px;color:#64748B;width:78px;text-align:right;flex-shrink:0;font-weight:600}
+    /* 영양소 그룹 (매크로/미네랄/비타민) */
+    .nut-group{margin-bottom:11px;padding:9px 10px;background:#FAFBFC;border-radius:10px;border:1px solid #F1F5F9}
+    .nut-group:last-child{margin-bottom:0}
+    .nut-group-title{font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;letter-spacing:-.2px}
+    /* 칭찬·따끔 멘트 */
+    .coach-msg{padding:13px 14px;border-radius:13px;margin-bottom:14px;font-size:12.5px;line-height:1.6;border-width:1.5px;border-style:solid}
+    .coach-msg.praise{background:linear-gradient(135deg,#ECFDF5,#D1FAE5);color:#065F46;border-color:#A7F3D0}
+    .coach-msg.neutral{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);color:#78350F;border-color:#FCD34D}
+    .coach-msg.warn{background:linear-gradient(135deg,#FEF2F2,#FEE2E2);color:#991B1B;border-color:#FCA5A5}
+    .coach-msg strong{font-weight:800}
     /* 📊 영양 추천/권장 카드 */
     .reco-card{border-radius:12px;padding:12px;margin-bottom:8px;border:1.5px solid}
     .reco-soft{background:#EFF6FF;border-color:#BFDBFE}
@@ -6255,17 +6265,23 @@ function _showFoodReportImpl(period) {
   });
   const topFoods = Object.entries(foodCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
 
-  // 평균 영양소 (안전 처리)
+  // 평균 영양소 — 매크로 + 비타민 + 미네랄 다 누적 (안전 처리)
   const nutSum = { carbs:0, protein:0, fat:0, fiber:0, sodium:0, sugar:0 };
+  const microSum = { vitaminA:0, vitaminC:0, vitaminD:0, vitaminE:0, vitaminB:0, folate:0, calcium:0, iron:0, magnesium:0, zinc:0, potassium:0 };
   let nutCount = 0;
   filtered.forEach(h => {
     if (h.nutrition && typeof h.nutrition === 'object') {
       Object.keys(nutSum).forEach(k => nutSum[k] += num(h.nutrition[k]));
       nutCount++;
     }
+    if (h.micronutrients && typeof h.micronutrients === 'object') {
+      Object.keys(microSum).forEach(k => microSum[k] += num(h.micronutrients[k]));
+    }
   });
   const nutAvg = {};
   Object.keys(nutSum).forEach(k => nutAvg[k] = nutCount ? Math.round(nutSum[k] / nutCount) : 0);
+  const microAvg = {};
+  Object.keys(microSum).forEach(k => microAvg[k] = nutCount ? Math.round(microSum[k] / nutCount * 10) / 10 : 0);
 
   // 칼로리 막대 차트
   const dailyArray = Object.entries(dailyMap);
@@ -6294,53 +6310,163 @@ function _showFoodReportImpl(period) {
     return `<div class="topfood-row"><div class="topfood-rank">${i+1}</div><div class="topfood-info"><div class="topfood-name">${name}</div><div class="topfood-bar"><div class="topfood-bar-fill" style="width:${width}%;background:${topColors[i]}"></div></div></div><div class="topfood-count">${count}회</div></div>`;
   }).join('') || '<div style="color:#94A3B8;font-size:12px;padding:10px;text-align:center">기록된 음식이 없어요</div>';
 
-  // 영양소 평균
-  const nutLabels = { carbs:'탄수화물', protein:'단백질', fat:'지방', fiber:'식이섬유', sodium:'나트륨', sugar:'당류' };
-  const nutTargets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
-  const nutUnits = { carbs:'g', protein:'g', fat:'g', fiber:'g', sodium:'mg', sugar:'g' };
-  const nutHtml = Object.entries(nutLabels).map(([k, label]) => {
-    const v = nutAvg[k] || 0;
-    const t = nutTargets[k];
-    const pct = Math.min(100, Math.round((v / t) * 100));
-    const isBad = (k === 'sodium' || k === 'sugar');
-    const color = isBad
-      ? (pct >= 90 ? '#EF4444' : pct >= 50 ? '#F59E0B' : '#10B981')
-      : (pct >= 80 ? '#10B981' : pct >= 50 ? '#F59E0B' : '#94A3B8');
-    return `<div class="report-nut-row"><div class="report-nut-label">${label}</div><div class="report-nut-bar"><div class="report-nut-fill" style="width:${pct}%;background:${color}"></div></div><div class="report-nut-val">${v}/${t}${nutUnits[k]}</div></div>`;
+  // 📊 영양소 그룹 — 매크로 / 미네랄 / 비타민
+  const NUT_GROUPS = {
+    macro: {
+      title: '🍚 매크로 영양소',
+      items: {
+        carbs:    { label:'탄수화물',  target:300,  unit:'g',  bad:false },
+        protein:  { label:'단백질',    target:60,   unit:'g',  bad:false },
+        fat:      { label:'지방',      target:65,   unit:'g',  bad:false },
+        fiber:    { label:'식이섬유',  target:25,   unit:'g',  bad:false },
+        sodium:   { label:'나트륨',    target:2000, unit:'mg', bad:true },
+        sugar:    { label:'당류',      target:50,   unit:'g',  bad:true }
+      },
+      src: nutAvg
+    },
+    mineral: {
+      title: '⛏ 미네랄',
+      items: {
+        calcium:   { label:'칼슘',      target:800,  unit:'mg' },
+        iron:      { label:'철분',      target:12,   unit:'mg' },
+        magnesium: { label:'마그네슘',  target:320,  unit:'mg' },
+        zinc:      { label:'아연',      target:9,    unit:'mg' },
+        potassium: { label:'칼륨',      target:3500, unit:'mg' }
+      },
+      src: microAvg
+    },
+    vitamin: {
+      title: '💊 비타민',
+      items: {
+        vitaminA: { label:'비타민 A',  target:800, unit:'μg' },
+        vitaminC: { label:'비타민 C',  target:100, unit:'mg' },
+        vitaminD: { label:'비타민 D',  target:10,  unit:'μg' },
+        vitaminE: { label:'비타민 E',  target:12,  unit:'mg' },
+        vitaminB: { label:'비타민 B군',target:5,   unit:'mg' },
+        folate:   { label:'엽산',      target:400, unit:'μg' }
+      },
+      src: microAvg
+    }
+  };
+
+  // 영양소 행 렌더 — 색상: 좋음(초록)·보통(주황)·부족/과다(빨강)
+  const renderNutRow = ([k, info], src) => {
+    const v = src[k] || 0;
+    const t = info.target;
+    const rawPct = (v / t) * 100;
+    const pct = Math.min(100, Math.round(rawPct));
+    const isBad = !!info.bad;
+    let color, status;
+    if (isBad) {
+      // 적게 먹을수록 좋음
+      if (rawPct >= 110) { color = '#EF4444'; status = '과다'; }
+      else if (rawPct >= 70) { color = '#F59E0B'; status = '주의'; }
+      else { color = '#10B981'; status = '좋음'; }
+    } else {
+      // 많이 먹을수록 좋음
+      if (rawPct >= 80) { color = '#10B981'; status = '좋음'; }
+      else if (rawPct >= 50) { color = '#F59E0B'; status = '보통'; }
+      else { color = '#EF4444'; status = '부족'; }
+    }
+    return `<div class="report-nut-row">
+      <div class="report-nut-label">${info.label}</div>
+      <div class="report-nut-bar"><div class="report-nut-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="report-nut-val">${v}/${t}${info.unit}</div>
+    </div>`;
+  };
+
+  const nutHtml = Object.values(NUT_GROUPS).map(grp => {
+    const rows = Object.entries(grp.items).map(e => renderNutRow(e, grp.src)).join('');
+    return `<div class="nut-group">
+      <div class="nut-group-title">${grp.title}</div>
+      ${rows}
+    </div>`;
   }).join('');
 
-  // 🥗 부족·과다 영양소 추천 (주간: 부드러운 톤 / 월간: 강한 권장)
+  // 🥗 부족·과다 영양소 — 매크로 + 비타민 + 미네랄 다 검사
   const NUT_RECO = {
-    carbs:   { lacked:'에너지·집중력 저하 위험', foods:['잡곡밥','고구마','통밀빵','오트밀'] },
-    protein: { lacked:'근육 손실·면역력 약화 위험', foods:['닭가슴살','두부','계란','연어','콩'] },
-    fat:     { lacked:'호르몬·뇌 기능 저하 위험', foods:['아보카도','견과류','올리브유','연어'] },
-    fiber:   { lacked:'장 건강·변비·혈당 문제 위험', foods:['나물 반찬','잡곡밥','브로콜리','사과','콩나물'] },
-    sodium:  { excess:'고혈압·신장 부담', tips:['국물 줄이기','싱겁게 조리','김치 적게'] },
-    sugar:   { excess:'혈당·체지방·당뇨 위험', tips:['과일로 대체','믹스커피·음료 줄이기','달콤한 빵 자제'] }
+    carbs:    { lacked:'에너지·집중력 저하 위험', foods:['잡곡밥','고구마','통밀빵','오트밀'] },
+    protein:  { lacked:'근육 손실·면역력 약화 위험', foods:['닭가슴살','두부','계란','연어','콩'] },
+    fat:      { lacked:'호르몬·뇌 기능 저하 위험', foods:['아보카도','견과류','올리브유','연어'] },
+    fiber:    { lacked:'장 건강·변비·혈당 문제 위험', foods:['나물 반찬','잡곡밥','브로콜리','사과','콩나물'] },
+    sodium:   { excess:'고혈압·신장 부담', tips:['국물 줄이기','싱겁게 조리','김치 적게'] },
+    sugar:    { excess:'혈당·체지방·당뇨 위험', tips:['과일로 대체','믹스커피·음료 줄이기','달콤한 빵 자제'] },
+    calcium:  { lacked:'골다공증·뼈 건강 약화 위험', foods:['우유','치즈','두부','멸치','브로콜리'] },
+    iron:     { lacked:'빈혈·피로감 누적 위험', foods:['소고기','시금치','굴','콩','달걀'] },
+    magnesium:{ lacked:'근육 경련·수면 장애 위험', foods:['견과류','시금치','검은콩','아보카도','다크초콜릿'] },
+    zinc:     { lacked:'면역력 저하·상처 회복 지연', foods:['굴','소고기','호박씨','병아리콩'] },
+    potassium:{ lacked:'근육 약화·혈압 조절 어려움', foods:['바나나','고구마','시금치','아보카도','감자'] },
+    vitaminA: { lacked:'시력·점막 건강 저하', foods:['당근','시금치','고구마','브로콜리','계란노른자'] },
+    vitaminC: { lacked:'면역력·피부 건강 저하', foods:['오렌지','딸기','키위','피망','브로콜리'] },
+    vitaminD: { lacked:'뼈·근육·면역 약화 위험', foods:['연어','계란노른자','버섯','참치','적절한 햇볕'] },
+    vitaminE: { lacked:'항산화 기능 저하', foods:['아몬드','해바라기씨','아보카도','시금치'] },
+    vitaminB: { lacked:'에너지 대사·신경 기능 저하', foods:['돼지고기','현미','달걀','시금치','연어'] },
+    folate:   { lacked:'세포 분열·신경 발달 저하', foods:['시금치','브로콜리','아스파라거스','콩'] }
   };
 
   const lackedItems = [];
   const excessItems = [];
-  Object.entries(nutLabels).forEach(([k, label]) => {
-    const v = nutAvg[k] || 0;
-    const t = nutTargets[k];
-    const pct = Math.round((v / t) * 100);
-    if (k === 'sodium' || k === 'sugar') {
-      if (pct >= 100) excessItems.push({ k, label, pct });
-    } else {
-      if (pct < 70) lackedItems.push({ k, label, pct });
-    }
+  // 모든 그룹 순회
+  Object.values(NUT_GROUPS).forEach(grp => {
+    Object.entries(grp.items).forEach(([k, info]) => {
+      const v = grp.src[k] || 0;
+      const t = info.target;
+      const pct = Math.round((v / t) * 100);
+      if (info.bad) {
+        if (pct >= 100) excessItems.push({ k, label: info.label, pct });
+      } else {
+        if (pct < 70 && NUT_RECO[k]) lackedItems.push({ k, label: info.label, pct });
+      }
+    });
   });
+  // 심한 순서로 정렬 (가장 부족한 것 위로)
+  lackedItems.sort((a, b) => a.pct - b.pct);
+  excessItems.sort((a, b) => b.pct - a.pct);
+
+  // 🌟 칭찬·따끔 멘트
+  const lackedCnt = lackedItems.length;
+  const excessCnt = excessItems.length;
+  let coachMsg = '', coachClass = '';
+  if (avgScore >= 85 && lackedCnt === 0 && excessCnt === 0) {
+    coachMsg = `🌟 <strong>정말 훌륭해요!</strong> ${avgScore}점에 부족·과다 영양소도 없어요. 이 페이스 그대로 유지해주세요!`;
+    coachClass = 'praise';
+  } else if (avgScore >= 75 && lackedCnt <= 2) {
+    coachMsg = `👍 <strong>잘 드시고 계세요!</strong> 점수 ${avgScore}점, 균형도 괜찮아요. ${lackedCnt > 0 ? `다만 ${lackedCnt}가지 영양소가 살짝 부족하니 채워보세요.` : '지금처럼 유지하세요.'}`;
+    coachClass = 'praise';
+  } else if (lackedCnt >= 5 || excessCnt >= 2) {
+    coachMsg = period === 'month'
+      ? `🚨 <strong>한 달간 식단 관리가 부족하셨어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지. 이대로 가면 건강에 문제가 생길 수 있어요. 식습관 개선이 시급합니다.`
+      : `⚠️ <strong>이번 주는 신경 더 써야겠어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지가 보여요. 추천 음식을 챙겨보세요.`;
+    coachClass = 'warn';
+  } else if (lackedCnt >= 3 || excessCnt >= 1) {
+    coachMsg = `💪 <strong>괜찮지만 더 좋아질 수 있어요.</strong> 부족·과다 영양소가 ${lackedCnt+excessCnt}가지 보여요. 신경 쓰면 점수도 올라갈 거예요!`;
+    coachClass = 'neutral';
+  } else {
+    coachMsg = `🍽 ${avgScore}점, 평균적인 식단이에요. 조금만 더 챙기면 좋아질 거예요.`;
+    coachClass = 'neutral';
+  }
+  const coachHtml = `<div class="coach-msg ${coachClass}">${coachMsg}</div>`;
 
   let recoHtml = '';
   // 💊 공통 영양제 사전 (주간/월간 둘 다 사용)
   const NUT_SUPPLEMENTS = {
-    carbs:   [],
-    protein: ['단백질 보충제 (WPI)','필수아미노산 (EAA)','BCAA'],
-    fat:     ['오메가3 (EPA·DHA)','MCT 오일','비타민D'],
-    fiber:   ['차전자피 (사일리움)','이눌린','식이섬유 보충제'],
-    sodium:  [],
-    sugar:   ['크롬 (혈당 안정)','베르베린']
+    carbs:    [],
+    protein:  ['단백질 보충제 (WPI)','필수아미노산 (EAA)','BCAA'],
+    fat:      ['오메가3 (EPA·DHA)','MCT 오일'],
+    fiber:    ['차전자피 (사일리움)','이눌린','식이섬유 보충제'],
+    sodium:   [],
+    sugar:    ['크롬 (혈당 안정)','베르베린'],
+    calcium:  ['칼슘+비타민D','마그네슘+칼슘 복합제'],
+    iron:     ['철분제 (페로글로빈/훼럼)','비타민C+철분'],
+    magnesium:['마그네슘 (비스글리시네이트)','ZMA'],
+    zinc:     ['아연 (피콜리네이트)','종합 미네랄'],
+    potassium:['종합 미네랄'],
+    vitaminA: ['비타민A 보충제','종합 비타민'],
+    vitaminC: ['비타민C 1000mg'],
+    vitaminD: ['비타민D3 2000IU','오메가3+비타민D'],
+    vitaminE: ['비타민E','종합 비타민'],
+    vitaminB: ['비타민B 컴플렉스','액티폴린'],
+    folate:   ['엽산 (활성형 메틸엽산)','비타민B 컴플렉스']
   };
 
   if (period === 'week') {
@@ -6462,7 +6588,9 @@ function _showFoodReportImpl(period) {
 
   content.innerHTML = `
     <h2 style="font-size:18px;margin:0 0 4px;color:#1F2937">📊 ${periodLabel} 리포트</h2>
-    <div style="font-size:12px;color:#64748B;margin-bottom:14px">${scoreMsg}</div>
+    <div style="font-size:12px;color:#64748B;margin-bottom:10px">${scoreMsg}</div>
+
+    ${coachHtml}
 
     <div class="report-stats">
       <div class="report-stat">
