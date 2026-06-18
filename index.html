@@ -2073,7 +2073,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>제미나이 AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -4059,8 +4059,12 @@ const FOOD_MICRO_DICT = {
 function estimateMicronutrients(foods) {
   const totals = { vitaminA:0, vitaminC:0, vitaminD:0, vitaminE:0, vitaminB:0, folate:0, calcium:0, iron:0, magnesium:0, zinc:0, potassium:0 };
   const strip = (s) => String(s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
-  (foods || []).forEach(f => {
-    const fname = strip(typeof f === 'string' ? f : f.name);
+  // 🛡 옛 데이터 호환: string·null·undefined 다 처리
+  let foodsArr = foods;
+  if (typeof foodsArr === 'string') foodsArr = foodsArr.split(/[,、+·]/).map(s => s.trim()).filter(Boolean);
+  if (!Array.isArray(foodsArr)) foodsArr = [];
+  foodsArr.forEach(f => {
+    const fname = strip(typeof f === 'string' ? f : (f && f.name));
     if (!fname) return;
     // 정확 매칭
     let m = FOOD_MICRO_DICT[fname];
@@ -4070,10 +4074,11 @@ function estimateMicronutrients(foods) {
       if (key) m = FOOD_MICRO_DICT[key];
     }
     if (m) Object.keys(m).forEach(k => { if (totals[k] !== undefined) totals[k] += m[k]; });
-    // 재료들로도 추가 (30% 가중)
-    const ings = (typeof f === 'object' ? f.ingredients : null) || [];
+    // 재료들로도 추가 (30% 가중) — 안전 처리
+    let ings = (typeof f === 'object' && f) ? f.ingredients : null;
+    if (!Array.isArray(ings)) ings = [];
     ings.forEach(ing => {
-      const iname = strip(typeof ing === 'string' ? ing : ing.name);
+      const iname = strip(typeof ing === 'string' ? ing : (ing && ing.name));
       const im = FOOD_MICRO_DICT[iname];
       if (im) Object.keys(im).forEach(k => { if (totals[k] !== undefined) totals[k] += im[k] * 0.3; });
     });
