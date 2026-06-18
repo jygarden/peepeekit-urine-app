@@ -1451,7 +1451,7 @@
 
       <!-- 인사 + 새 슬로건 -->
       <div class="home-hello">
-        <h1>건강한 하루,<br>오늘도 응원해요 💚</h1>
+        <h1>건강한 하루,<br>오늘도 응원해요</h1>
         <div class="sub">AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
       </div>
 
@@ -2032,7 +2032,7 @@
   <div class="screen" id="screenReport">
     <div class="report-wrap">
       <button class="report-back" onclick="goHome()">← 홈으로</button>
-      <div style="font-size:21px;font-weight:800;color:#1D1D1F;margin-bottom:6px">📊 종합 영양 리포트</div>
+      <div style="font-size:21px;font-weight:800;color:var(--gray-900);margin-bottom:6px">종합 영양 리포트</div>
       <div style="font-size:12px;color:#6E6E73;margin-bottom:18px">식단 데이터 기반 자동 리포트</div>
       <div class="report-tabs">
         <button class="report-tab active" id="rtToday" onclick="switchReport('today')">오늘</button>
@@ -2053,8 +2053,8 @@
       </div>
       <!-- 📊 일주일/한달 리포트 버튼 (점수 바로 아래) -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 10px">
-        <button class="report-btn" onclick="showFoodReport('week')">📊 일주일 리포트</button>
-        <button class="report-btn" onclick="showFoodReport('month')">📅 한달 리포트</button>
+        <button class="report-btn" onclick="showFoodReport('week')">일주일 리포트</button>
+        <button class="report-btn" onclick="showFoodReport('month')">한달 리포트</button>
       </div>
       <!-- 🧬 맞춤 분석 카드 -->
       <div id="personalAnalysisCard" style="margin-bottom:14px"></div>
@@ -2079,19 +2079,19 @@
       <div id="foodHighlights" style="margin-bottom:14px"></div>
       <!-- 부족/과다 -->
       <div class="env-health-box" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fbbf24" id="foodMissingBox">
-        <div class="etitle" style="color:#92400E">⚖️ 영양소 균형</div>
+        <div class="etitle" style="color:var(--gray-700)">영양소 균형</div>
         <div class="env-health-item" id="foodMissingItem" style="display:none">
-          <div class="elabel" style="color:#92400E">📉 더 필요한 영양소</div>
+          <div class="elabel" style="color:var(--gray-600)">더 필요한 영양소</div>
           <div id="foodMissingText"></div>
         </div>
         <div class="env-health-item" id="foodExcessiveItem" style="display:none">
-          <div class="elabel" style="color:#9F1239">📈 과다 섭취</div>
+          <div class="elabel" style="color:#9F1239">과다 섭취</div>
           <div id="foodExcessiveText"></div>
         </div>
       </div>
       <!-- 다음 식사 -->
       <div class="saju-box" id="foodNextMealBox" style="display:none">
-        <div class="stitle">🍱 다음 식사 추천</div>
+        <div class="stitle">다음 식사 추천</div>
         <div id="foodNextMeal" style="font-size:13px;color:#1E40AF;line-height:1.7"></div>
       </div>
       <!-- 추천 영양제 -->
@@ -2220,7 +2220,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -4399,7 +4399,7 @@ function renderFoodResult(r) {
         <div class="game-score-num">${score}</div>
       </div>
       <div class="game-score-label">영양 균형 [${grade}]</div>
-      <div class="game-grade-stars">${stars}</div>
+      <div class="game-grade-stars" style="display:none">${stars}</div>
     </div>`;
   // 기존 자리에 안 보이게 처리 + 위에 새 디자인 삽입
   const oldHero = document.querySelector('.calorie-hero');
@@ -4512,7 +4512,7 @@ function renderFoodResult(r) {
   let nextMealHtml = '';
   if (r.nextMeal && typeof r.nextMeal === 'object') {
     nextMealHtml = `<div class="next-meal-game">
-      <div class="next-meal-game-emoji">🍱</div>
+      <div class="next-meal-game-emoji" style="display:none">🍱</div>
       <div class="next-meal-game-text">
         <div class="next-meal-game-label">NEXT MEAL · 다음 식사 추천</div>
         <div class="next-meal-game-menu">${r.nextMeal.menu || ''}</div>
@@ -4521,7 +4521,7 @@ function renderFoodResult(r) {
     </div>`;
   } else if (r.nextMeal) {
     nextMealHtml = `<div class="next-meal-game">
-      <div class="next-meal-game-emoji">🍱</div>
+      <div class="next-meal-game-emoji" style="display:none">🍱</div>
       <div class="next-meal-game-text">
         <div class="next-meal-game-label">NEXT MEAL</div>
         <div class="next-meal-game-menu">${r.nextMeal}</div>
@@ -4869,13 +4869,13 @@ function renderFoodResult(r) {
 
   const overallPairingsBox = (overallGoodRows || overallBadRows)
     ? `<div class="overall-pairings-box">
-        <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
+        <div class="overall-pairings-title">이 식단의 궁합 모음</div>
         <div class="overall-pairings-summary">${pairingSummary}</div>
-        ${overallGoodRows ? `<div class="card-pairings-title good-title" style="margin-top:14px">🤝 함께 먹으면 좋은 조합</div>${overallGoodRows}` : ''}
-        ${overallBadRows ? `<div class="card-pairings-title bad-title" style="margin-top:14px">⚠️ 같이 먹으면 효율↓ 조합</div>${overallBadRows}` : ''}
+        ${overallGoodRows ? `<div class="card-pairings-title good-title" style="margin-top:14px">함께 먹으면 좋은 조합</div>${overallGoodRows}` : ''}
+        ${overallBadRows ? `<div class="card-pairings-title bad-title" style="margin-top:14px">같이 먹으면 효율 떨어지는 조합</div>${overallBadRows}` : ''}
       </div>`
     : `<div class="overall-pairings-box">
-        <div class="overall-pairings-title">⚔️ 이 식단의 궁합 모음</div>
+        <div class="overall-pairings-title">이 식단의 궁합 모음</div>
         <div class="overall-pairings-summary">${pairingSummary}</div>
       </div>`;
 
@@ -5033,7 +5033,7 @@ function renderFoodResult(r) {
   if (supp.length > 0) {
     document.getElementById('foodSuppList').innerHTML = supp.map(s =>
       `<div class="supp-card priority-권장">
-        <div class="supp-top"><span class="supp-name">💊 ${s.name}</span></div>
+        <div class="supp-top"><span class="supp-name">${s.name}</span></div>
         <div class="supp-reason">${s.reason}</div>
       </div>`).join('');
     document.getElementById('foodSuppSection').style.display = 'block';
@@ -5122,7 +5122,7 @@ function renderReport() {
     const mult = isWeek ? 7 : 1;
     const NUT_GROUPS_R = {
       macro: {
-        title: '🍚 기본 영양소',
+        title: '기본 영양소',
         items: {
           carbs:    { label:'탄수화물',  target:300*mult,  unit:'g',  bad:false },
           protein:  { label:'단백질',    target:60*mult,   unit:'g',  bad:false },
@@ -5134,7 +5134,7 @@ function renderReport() {
         src: totalNutri
       },
       mineral: {
-        title: '⛏ 미네랄',
+        title: '미네랄',
         items: {
           calcium:   { label:'칼슘',      target:800*mult,  unit:'mg' },
           iron:      { label:'철분',      target:12*mult,   unit:'mg' },
@@ -5145,7 +5145,7 @@ function renderReport() {
         src: totalMicro
       },
       vitamin: {
-        title: '💊 비타민',
+        title: '비타민',
         items: {
           vitaminA: { label:'비타민 A',  target:800*mult, unit:'μg' },
           vitaminC: { label:'비타민 C',  target:100*mult, unit:'mg' },
@@ -5229,7 +5229,7 @@ function renderReport() {
       coachMsg = `👍 <strong>잘 드시고 계세요!</strong> ${avgScore}점 균형 좋아요. ${lackedKeys.length > 0 ? `${lackedKeys.length}가지만 살짝 채워주세요.` : '유지 부탁!'}`;
       coachClass = 'praise';
     } else if (lackedKeys.length >= 5) {
-      coachMsg = `⚠️ <strong>${reportTab === 'today' ? '오늘은' : '이번 주는'} 신경 더 써야겠어요.</strong> 부족 ${lackedKeys.length}가지가 보여요. 추천 음식을 챙기세요.`;
+      coachMsg = `<strong>${reportTab === 'today' ? '오늘은' : '이번 주는'} 신경 더 써야겠어요.</strong> 부족 ${lackedKeys.length}가지가 보여요. 추천 음식을 챙기세요.`;
       coachClass = 'warn';
     } else if (lackedKeys.length >= 3) {
       coachMsg = `💪 <strong>괜찮지만 더 좋아질 수 있어요.</strong> 부족 ${lackedKeys.length}가지가 있어요.`;
@@ -5273,27 +5273,27 @@ function renderReport() {
         </div>
       </div>
       <div class="report-section">
-        <div class="report-section-title">📊 누적 영양소 (${reportTab === 'today' ? '오늘' : '이번 주'} 권장량 대비)</div>
+        <div class="report-section-title">누적 영양소 (${reportTab === 'today' ? '오늘' : '이번 주'} 권장량 대비)</div>
         ${nutriHtml}
       </div>
       ${topMissing.length > 0 ? `
       <div class="report-section">
-        <div class="report-section-title">📉 자주 부족한 영양소</div>
+        <div class="report-section-title">자주 부족한 영양소</div>
         ${topMissing.map(([n, c]) => `<div style="font-size:12.5px;color:#9F1239;margin-bottom:5px;display:flex;justify-content:space-between"><span>• ${n}</span><span style="color:#94A3B8">${c}회 부족</span></div>`).join('')}
       </div>` : ''}
       ${topExcessive.length > 0 ? `
       <div class="report-section">
-        <div class="report-section-title">📈 자주 과다 섭취</div>
+        <div class="report-section-title">자주 과다 섭취</div>
         ${topExcessive.map(([n, c]) => `<div style="font-size:12.5px;color:#9A3412;margin-bottom:5px;display:flex;justify-content:space-between"><span>• ${n}</span><span style="color:#94A3B8">${c}회</span></div>`).join('')}
       </div>` : ''}
       <div class="report-section" style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1.5px solid #C4B5FD">
-        <div class="report-section-title" style="color:#5B21B6">💊 추천 영양제 (가장 부족한 3개)</div>
+        <div class="report-section-title" style="color:var(--gray-800)">추천 영양제 (가장 부족한 3개)</div>
         <div style="font-size:12px;color:#4C1D95;line-height:1.8">
           ${top3Supps.length > 0 ? top3Supps.map(s => `<div style="margin-bottom:4px">${s}</div>`).join('') : '<div>현재 부족한 영양소 없음 ✨</div>'}
         </div>
       </div>
       <div class="report-section" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7">
-        <div class="report-section-title" style="color:#065F46">🏃 추천 운동</div>
+        <div class="report-section-title" style="color:var(--gray-800)">추천 운동</div>
         <div style="font-size:12px;color:#064E3B;line-height:1.7">
           ${avgScore >= 80
             ? '✓ 식단 균형 좋아요! 가벼운 유산소 30분/일 (걷기·자전거)<br>✓ 주 2회 근력 운동으로 근육 유지'
@@ -5301,7 +5301,7 @@ function renderReport() {
         </div>
       </div>
       <div class="report-section">
-        <div class="report-section-title">📝 식단 기록 관리</div>
+        <div class="report-section-title">식단 기록 관리</div>
         <div style="font-size:11.5px;color:#64748B;margin-bottom:8px;line-height:1.5">잘못 입력된 식단이 있으면 삭제하세요. 리포트가 정확해져요.</div>
         <div class="food-records-list">${recordsHtml}</div>
       </div>`;
@@ -5890,7 +5890,7 @@ function renderResult(r, info) {
       return `
         <div class="supp-card priority-${pri}">
           <div class="supp-top">
-            <span class="supp-name">💊 ${s.name || ''}</span>
+            <span class="supp-name">${s.name || ''}</span>
             <div class="supp-badges">${catBadge}<span class="supp-badge ${pri}">${pri}</span></div>
           </div>
           <div class="supp-reason">${s.reason || ''}</div>
@@ -6653,7 +6653,7 @@ function renderPersonalAnalysis(foodResult) {
   // 프로필 없으면 입력 유도 카드
   if (!p || (!p.height && !p.weight && !p.birthYear)) {
     card.innerHTML = `<div class="personal-empty">
-      <div style="font-size:14px;font-weight:800;color:#1F2937;margin-bottom:5px">🧬 맞춤 분석 시작하기</div>
+      <div style="font-size:14px;font-weight:800;color:var(--gray-900);margin-bottom:5px">맞춤 분석 시작하기</div>
       <div style="font-size:11.5px;color:#64748B;margin-bottom:10px;line-height:1.55">키·몸무게·생년월·체질을 입력하면<br>BMI·권장 칼로리·사상체질 식단·사주 영양 조언이 표시돼요.</div>
       <button onclick="openPersonalProfile()" style="width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;font-size:12.5px;font-weight:800;cursor:pointer">📝 내 정보 입력하기</button>
     </div>`;
@@ -6698,7 +6698,7 @@ function renderPersonalAnalysis(foodResult) {
 
   const sasangHtml = sasangGuide ? `
     <div class="personal-section sasang">
-      <div class="psect-title">🌿 ${sasangType} <span style="font-size:10px;color:#94A3B8;font-weight:600">(자동 추정)</span></div>
+      <div class="psect-title">${sasangType} <span style="font-size:10px;color:var(--gray-400);font-weight:600">(자동 추정)</span></div>
       <div class="psect-reason">📊 ${sasangInfo.reason}</div>
       <div class="psect-tip">${sasangGuide.tip}</div>
       <div class="psect-row"><strong style="color:#065F46">💚 체질에 더 잘 맞아요</strong> ${sasangGuide.good.join(', ')}</div>
@@ -6707,7 +6707,7 @@ function renderPersonalAnalysis(foodResult) {
 
   const sajuHtml = sajuAdvice ? `
     <div class="personal-section saju">
-      <div class="psect-title">☯ 사주 ${sajuAdvice.name} 영양 조언</div>
+      <div class="psect-title">사주 ${sajuAdvice.name} 영양 조언</div>
       <div class="psect-tip">${sajuAdvice.focus}</div>
       <div class="psect-row"><strong style="color:#1E40AF">✓ 권장</strong> ${sajuAdvice.good.join(', ')}</div>
     </div>` : '';
@@ -6715,7 +6715,7 @@ function renderPersonalAnalysis(foodResult) {
   card.innerHTML = `
     <div class="personal-card">
       <div class="personal-header">
-        <div style="font-size:14.5px;font-weight:800;color:#1F2937">🧬 ${age||'?'}세 ${p.gender==='female'?'여성':p.gender==='male'?'남성':''} 맞춤 분석</div>
+        <div style="font-size:14.5px;font-weight:800;color:var(--gray-900)">${age||'?'}세 ${p.gender==='female'?'여성':p.gender==='male'?'남성':''} 맞춤 분석</div>
         <button onclick="openPersonalProfile()" class="personal-edit-btn">✏️ 수정</button>
       </div>
       ${statsHtml}
@@ -6992,8 +6992,8 @@ function _showFoodReportImpl(period) {
     coachClass = 'praise';
   } else if (lackedCnt >= 5 || excessCnt >= 2) {
     coachMsg = period === 'month'
-      ? `🚨 <strong>한 달간 식단 관리가 부족하셨어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지. 이대로 가면 건강에 문제가 생길 수 있어요. 식습관 개선이 시급합니다.`
-      : `⚠️ <strong>이번 주는 신경 더 써야겠어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지가 보여요. 추천 음식을 챙겨보세요.`;
+      ? `<strong>한 달간 식단 관리가 부족하셨어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지. 이대로 가면 건강에 문제가 생길 수 있어요. 식습관 개선이 시급합니다.`
+      : `<strong>이번 주는 신경 더 써야겠어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지가 보여요. 추천 음식을 챙겨보세요.`;
     coachClass = 'warn';
   } else if (lackedCnt >= 3 || excessCnt >= 1) {
     coachMsg = `💪 <strong>괜찮지만 더 좋아질 수 있어요.</strong> 부족·과다 영양소가 ${lackedCnt+excessCnt}가지 보여요. 신경 쓰면 점수도 올라갈 거예요!`;
@@ -7032,7 +7032,7 @@ function _showFoodReportImpl(period) {
       const lackHtml = lackedItems.map(it => {
         const reco = NUT_RECO[it.k];
         return `<div class="reco-card reco-soft">
-          <div class="reco-head">💡 <strong>${it.label}</strong> ${it.pct}% 수준</div>
+          <div class="reco-head"><strong>${it.label}</strong> ${it.pct}% 수준</div>
           <div class="reco-body">${reco?.lacked || ''} 가능성이 있어요. 다음 음식들을 추가해보면 좋아요:</div>
           <div class="reco-foods">${(reco?.foods||[]).map(f => `<span class="reco-food-tag">${f}</span>`).join('')}</div>
         </div>`;
@@ -7040,7 +7040,7 @@ function _showFoodReportImpl(period) {
       const excessHtml = excessItems.map(it => {
         const reco = NUT_RECO[it.k];
         return `<div class="reco-card reco-soft warn">
-          <div class="reco-head">⚠️ <strong>${it.label}</strong> ${it.pct}% (권장량 초과)</div>
+          <div class="reco-head"><strong>${it.label}</strong> ${it.pct}% (권장량 초과)</div>
           <div class="reco-body">${reco?.excess || ''} 우려가 있어요. 다음을 시도해보세요:</div>
           <div class="reco-foods">${(reco?.tips||[]).map(f => `<span class="reco-food-tag">${f}</span>`).join('')}</div>
         </div>`;
@@ -7054,21 +7054,21 @@ function _showFoodReportImpl(period) {
       }).filter(Boolean);
       const suppHtmlW = uniqueSuppsW.length > 0 ? `
         <div class="reco-card reco-soft" style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);border-color:#D8B4FE">
-          <div class="reco-head" style="color:#6B21A8">💊 <strong>이번 주 추천 영양제</strong></div>
+          <div class="reco-head" style="color:var(--gray-800)"><strong>이번 주 추천 영양제</strong></div>
           <div class="reco-body" style="color:#7C3AED">음식으로 부족한 부분을 영양제로 가볍게 보완해보세요. (전문가 상담 후 복용을 권장드려요)</div>
-          <div class="reco-foods">${uniqueSuppsW.map(x => `<span class="reco-food-tag" style="background:#F3E8FF;border-color:#D8B4FE;color:#6B21A8">💊 ${x.s}</span>`).join('')}</div>
+          <div class="reco-foods">${uniqueSuppsW.map(x => `<span class="reco-food-tag" style="background:var(--gray-50);border-color:var(--gray-200);color:var(--gray-700)">${x.s}</span>`).join('')}</div>
           <div style="margin-top:7px;font-size:10.5px;color:#6B21A8;line-height:1.55">
             ${uniqueSuppsW.map(x => `• <strong>${x.s}</strong> — ${x.reason}`).join('<br>')}
           </div>
         </div>` : '';
 
       recoHtml = `<div class="report-section">
-        <div class="report-section-title">💡 이번 주 영양 추천</div>
+        <div class="report-section-title">이번 주 영양 추천</div>
         ${lackHtml}${excessHtml}${suppHtmlW}
       </div>`;
     } else {
       recoHtml = `<div class="report-section">
-        <div class="report-section-title">💡 이번 주 영양 추천</div>
+        <div class="report-section-title">이번 주 영양 추천</div>
         <div style="padding:14px;text-align:center;color:#10B981;font-size:12.5px;background:#ECFDF5;border-radius:10px;border:1px solid #A7F3D0">
           이번 주 영양 균형이 좋아요! 지금처럼 유지해주세요 👍
         </div>
@@ -7080,7 +7080,7 @@ function _showFoodReportImpl(period) {
       const lackHtml = lackedItems.map(it => {
         const reco = NUT_RECO[it.k];
         return `<div class="reco-card reco-strong">
-          <div class="reco-head">🚨 <strong>${it.label} 만성 부족 (${it.pct}%)</strong></div>
+          <div class="reco-head"><strong>${it.label} 만성 부족 (${it.pct}%)</strong></div>
           <div class="reco-body">한 달 누적 데이터에서 ${reco?.lacked || ''}가 심각하게 우려됩니다.<br><strong>매끼 다음 음식을 반드시 챙겨 드셔야 합니다:</strong></div>
           <div class="reco-foods">${(reco?.foods||[]).map(f => `<span class="reco-food-tag strong">${f}</span>`).join('')}</div>
         </div>`;
@@ -7088,7 +7088,7 @@ function _showFoodReportImpl(period) {
       const excessHtml = excessItems.map(it => {
         const reco = NUT_RECO[it.k];
         return `<div class="reco-card reco-strong danger">
-          <div class="reco-head">🚨 <strong>${it.label} 만성 과다 (${it.pct}%)</strong></div>
+          <div class="reco-head"><strong>${it.label} 만성 과다 (${it.pct}%)</strong></div>
           <div class="reco-body">${reco?.excess || ''} 위험이 누적되고 있습니다.<br><strong>지금 당장 다음 습관을 들이셔야 합니다:</strong></div>
           <div class="reco-foods">${(reco?.tips||[]).map(f => `<span class="reco-food-tag strong">${f}</span>`).join('')}</div>
         </div>`;
@@ -7106,25 +7106,25 @@ function _showFoodReportImpl(period) {
       }
       const suppHtml = uniqueSupps.length > 0 ? `
         <div class="reco-card reco-strong" style="background:linear-gradient(135deg,#F3E8FF,#FAE8FF);border-color:#A855F7">
-          <div class="reco-head" style="color:#6B21A8">💊 <strong>권장 영양제</strong></div>
+          <div class="reco-head" style="color:var(--gray-800)"><strong>권장 영양제</strong></div>
           <div class="reco-body" style="color:#581C87">
             한 달간 누적된 부족·과다 영양소를 보완하려면 다음 영양제를 고려하세요.<br>
             <strong>약국·전문가 상담 후 복용을 권장드립니다.</strong>
           </div>
-          <div class="reco-foods">${uniqueSupps.map(x => `<span class="reco-food-tag strong" style="background:#7C3AED;border-color:#7C3AED">💊 ${x.s}</span>`).join('')}</div>
+          <div class="reco-foods">${uniqueSupps.map(x => `<span class="reco-food-tag strong" style="background:#991B1B;border-color:#991B1B">${x.s}</span>`).join('')}</div>
           <div style="margin-top:8px;font-size:10.5px;color:#6B21A8;line-height:1.55">
             ${uniqueSupps.map(x => `• <strong>${x.s}</strong> — ${x.reason}`).join('<br>')}
           </div>
         </div>` : '';
 
       recoHtml = `<div class="report-section">
-        <div class="report-section-title">🚨 한달 누적 영양 경고</div>
+        <div class="report-section-title">한달 누적 영양 경고</div>
         <div style="font-size:11.5px;color:#92400E;margin-bottom:10px;line-height:1.5">한 달간 누적된 부족·과다 영양소예요. 건강을 위해 식습관 개선이 필요해요.</div>
         ${lackHtml}${excessHtml}${suppHtml}
       </div>`;
     } else {
       recoHtml = `<div class="report-section">
-        <div class="report-section-title">🌟 한달 누적 영양 분석</div>
+        <div class="report-section-title">한달 누적 영양 분석</div>
         <div style="padding:14px;text-align:center;color:#065F46;font-size:13px;background:#ECFDF5;border-radius:10px;border:1.5px solid #10B981;font-weight:700">
           🎉 한 달간 영양 균형이 매우 우수했어요!<br>지금처럼 꾸준히 유지해주세요.
         </div>
@@ -7157,22 +7157,22 @@ function _showFoodReportImpl(period) {
     </div>
 
     <div class="report-section">
-      <div class="report-section-title">📈 일별 칼로리</div>
+      <div class="report-section-title">일별 칼로리</div>
       <div class="chart-bars">${calBars}</div>
     </div>
 
     <div class="report-section">
-      <div class="report-section-title">⭐ 일별 균형 점수</div>
+      <div class="report-section-title">일별 균형 점수</div>
       <div class="chart-bars">${scoreBars}</div>
     </div>
 
     <div class="report-section">
-      <div class="report-section-title">🏆 자주 먹은 음식 Top 5</div>
+      <div class="report-section-title">자주 먹은 음식 Top 5</div>
       ${topFoodsHtml}
     </div>
 
     <div class="report-section">
-      <div class="report-section-title">🍎 평균 영양소 (1회당)</div>
+      <div class="report-section-title">평균 영양소 (1회당)</div>
       ${nutHtml}
     </div>
 
