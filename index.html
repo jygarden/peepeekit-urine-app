@@ -2073,7 +2073,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>제미나이 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -4808,15 +4808,12 @@ function renderFoodResult(r) {
     const rawPct = (val / info.target) * 100;
     const pct = Math.min(100, Math.round(rawPct));
     const isBad = !!info.bad;
+    // 색상 — 단순 색 (background-color로 적용해서 빗금 애니메이션이 살아남)
     let barColor;
     if (isBad) {
-      barColor = rawPct >= 110 ? 'linear-gradient(90deg,#EF4444,#DC2626)'
-              : rawPct >= 70  ? 'linear-gradient(90deg,#F59E0B,#EA580C)'
-              : 'linear-gradient(90deg,#10B981,#059669)';
+      barColor = rawPct >= 110 ? '#EF4444' : rawPct >= 70 ? '#F59E0B' : '#10B981';
     } else {
-      barColor = rawPct >= 80 ? 'linear-gradient(90deg,#10B981,#059669)'
-              : rawPct >= 50 ? 'linear-gradient(90deg,#F59E0B,#EA580C)'
-              : 'linear-gradient(90deg,#EF4444,#DC2626)';
+      barColor = rawPct >= 80 ? '#10B981' : rawPct >= 50 ? '#F59E0B' : '#EF4444';
     }
     return `<div class="game-stat-row">
       <div class="game-stat-head">
@@ -4824,7 +4821,7 @@ function renderFoodResult(r) {
         <span class="game-stat-value">${val}${info.unit} / ${info.target}${info.unit} (${pct}%)</span>
       </div>
       <div class="game-stat-bar-wrap">
-        <div class="game-stat-bar" style="width:${pct}%;background:${barColor}"></div>
+        <div class="game-stat-bar" style="width:${pct}%;background-color:${barColor}"></div>
       </div>
     </div>`;
   };
@@ -6941,8 +6938,12 @@ function _showFoodReportImpl(period) {
           const id = h.timestamp || h.date || JSON.stringify(h).slice(0,40);
           const dt = new Date(h.date || h.timestamp || Date.now());
           const dateStr = `${dt.getMonth()+1}/${dt.getDate()}`;
-          const foods = (h.foods || []).map(f => typeof f === 'string' ? f : (f.name || '')).filter(Boolean).slice(0, 3).join(', ');
-          const moreFoods = (h.foods || []).length > 3 ? ` 외 ${(h.foods||[]).length - 3}개` : '';
+          // 옛 데이터 호환: foods가 string·null일 수 있음
+          let foodsArr = h.foods;
+          if (typeof foodsArr === 'string') foodsArr = foodsArr.split(/[,、+·]/).map(s => s.trim()).filter(Boolean);
+          if (!Array.isArray(foodsArr)) foodsArr = [];
+          const foods = foodsArr.map(f => typeof f === 'string' ? f : (f && f.name) || '').filter(Boolean).slice(0, 3).join(', ');
+          const moreFoods = foodsArr.length > 3 ? ` 외 ${foodsArr.length - 3}개` : '';
           return `<div class="food-record-row">
             <div class="food-record-info">
               <div class="food-record-date">📅 ${dateStr} · ${h.mealTime || '식사'}</div>
