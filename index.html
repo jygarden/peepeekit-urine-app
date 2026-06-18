@@ -8,8 +8,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"/>
   <!-- 🔤 Pretendard 폰트 (한국 헬스 앱 표준급) -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <!-- 🗄 Supabase 클라이언트 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 🗄 Supabase 클라이언트 (UMD 빌드) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin="anonymous"></script>
   <script>
     window.SUPABASE_URL = 'https://guvzbtemficekutgxngb.supabase.co';
     window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
@@ -6478,15 +6478,28 @@ function resetAllData() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// 🗄 Supabase 클라이언트
+// 🗄 Supabase 클라이언트 (CDN 로드 안 됐어도 안전)
 // ════════════════════════════════════════════════════════════════
 let supabase = null;
-try {
-  if (window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+function initSupabase() {
+  try {
+    if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+      console.warn('[Supabase] URL/KEY 없음'); return false;
+    }
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      console.warn('[Supabase] SDK 로드 아직 안됨'); return false;
+    }
     supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
     console.log('[Supabase] 연결됨');
-  }
-} catch(e) { console.warn('[Supabase] 초기화 실패:', e); }
+    return true;
+  } catch(e) { console.warn('[Supabase] 초기화 실패:', e); return false; }
+}
+// 즉시 시도
+initSupabase();
+// 안 됐으면 DOM 로드 후 재시도
+if (!supabase) {
+  window.addEventListener('load', () => { if (!supabase) initSupabase(); });
+}
 
 // 현재 사용자 UUID 가져오기 (없으면 새로 생성)
 function getCurrentUserUuid() {
