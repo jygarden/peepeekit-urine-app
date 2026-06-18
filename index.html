@@ -334,6 +334,11 @@
 
     /* 상단 (타이틀 + 벨 버튼) */
     .home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:32px}
+    /* 🆕 새 홈 레이아웃 */
+    .home-top-bar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:18px}
+    .home-hello{margin-bottom:22px;padding:0 2px}
+    .home-hello h1{font-size:24px;font-weight:800;letter-spacing:-.7px;color:var(--gray-900);line-height:1.32;margin-bottom:12px}
+    .home-hello .sub{font-size:12.5px;color:var(--gray-500);letter-spacing:-.2px;font-weight:500;line-height:1.6}
     .home-title{flex:1;min-width:0}
     .home-title h1{font-size:23px;font-weight:800;letter-spacing:-.7px;color:#1D1D1F;line-height:1.3}
     .home-title .sub{font-size:11px;color:#6E6E73;letter-spacing:-.2px;margin-top:10px;font-weight:500;line-height:1.5}
@@ -346,6 +351,15 @@
     .bell-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
     .bell-btn:active{transform:scale(.95)}
     .bell-btn svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    /* 🆕 설정 버튼 (톱니바퀴) */
+    .settings-btn{
+      width:42px;height:42px;border-radius:50%;background:#fff;border:1px solid var(--gray-200);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+      color:var(--gray-700);box-shadow:var(--shadow-xs);padding:0;font-family:inherit;
+      transition:transform .2s ease,box-shadow .2s ease,color .2s ease
+    }
+    .settings-btn:hover{box-shadow:var(--shadow-sm);color:var(--primary)}
+    .settings-btn:active{transform:scale(.92) rotate(45deg)}
 
     /* 카드 — 크고 푹신한 박스 */
     .home-cards{display:flex;flex-direction:column;gap:16px;width:100%}
@@ -1234,6 +1248,8 @@
     .profile-edit-toggle{background:none;border:none;color:#6366f1;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
     /* ── 포인트 뱃지 (홈 상단) ── */
     .points-badge-wrap{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+    /* 옛 points-badge-wrap 제거된 자리 — 빈 마진 없게 */
+    .points-badge-wrap:empty{margin:0;display:none}
     .points-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FEF3C7,#FBBF24);border:none;border-radius:999px;padding:8px 14px 8px 11px;cursor:pointer;box-shadow:0 2px 10px rgba(251,191,36,.30);font-family:inherit;color:#78350F;font-size:12.5px;font-weight:800;letter-spacing:-.2px;transition:transform .15s,box-shadow .2s}
     .points-badge:hover{box-shadow:0 4px 14px rgba(251,191,36,.45)}
     .points-badge:active{transform:scale(.97)}
@@ -1417,25 +1433,24 @@
         </div>
         <button class="close-btn" onclick="dismissReminder()">✕</button>
       </div>
-      <div class="points-badge-wrap">
+      <!-- 상단 행: 포인트 + 설정 (오른쪽 정렬) -->
+      <div class="home-top-bar">
         <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
           <span class="gem">💎</span> <span id="homePointsNum">0</span>P
         </button>
-      </div>
-      <!-- 💧 물 섭취 위젯 -->
-      <div id="homeWaterWidget"></div>
-      <div class="home-top">
-        <div class="home-title">
-          <h1>오늘, 작은 신호를<br>확인해보세요</h1>
-          <div class="sub">사람과 반려동물의 건강 지표를 1분 만에 기록해요</div>
-        </div>
-        <button class="bell-btn" onclick="openSettings()" aria-label="설정">
-          <svg viewBox="0 0 24 24">
-            <path d="M6 8 C 6 5, 8.5 3, 12 3 C 15.5 3, 18 5, 18 8 V13 L 20 17 H 4 L 6 13 V8 Z"/>
-            <path d="M10 20 C 10 21, 11 22, 12 22 C 13 22, 14 21, 14 20"/>
-          </svg>
+        <button class="settings-btn" onclick="openSettings()" aria-label="설정">
+          <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
         </button>
       </div>
+
+      <!-- 인사 + 새 슬로건 -->
+      <div class="home-hello">
+        <h1>건강한 하루,<br>오늘도 응원해요 💚</h1>
+        <div class="sub">AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
+      </div>
+
+      <!-- 오늘의 미션 — 물 위젯 -->
+      <div id="homeWaterWidget"></div>
 
       <div class="home-cards">
 
