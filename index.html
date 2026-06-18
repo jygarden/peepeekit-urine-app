@@ -746,7 +746,7 @@
     .stat-group{margin-bottom:14px;padding:11px 12px;background:linear-gradient(135deg,#FAFBFC,#F8FAFC);border-radius:13px;border:1.5px solid #E2E8F0}
     .stat-group:last-child{margin-bottom:0}
     .stat-group-title{font-size:13px;font-weight:800;color:#334155;margin-bottom:9px;letter-spacing:-.3px;padding-bottom:6px;border-bottom:1px dashed #CBD5E1}
-    /* 영양소 그룹 (매크로/미네랄/비타민) */
+    /* 영양소 그룹 (영양소/미네랄/비타민) */
     .nut-group{margin-bottom:11px;padding:9px 10px;background:#FAFBFC;border-radius:10px;border:1px solid #F1F5F9}
     .nut-group:last-child{margin-bottom:0}
     .nut-group-title{font-size:12px;font-weight:800;color:#475569;margin-bottom:6px;letter-spacing:-.2px}
@@ -4795,7 +4795,7 @@ function renderFoodResult(r) {
       container.insertAdjacentHTML('afterbegin', overallPairingsBox);
     }
   } catch(e) { console.error('통합 궁합 박스 삽입 실패:', e); }
-  // 영양소 막대 — 매크로 + 미네랄 + 비타민 (17종)
+  // 영양소 막대 — 영양소 + 미네랄 + 비타민 (17종)
   const n = r.nutrition || {};
   // micronutrients가 비어있으면 음식 기반 추정
   let m = r.micronutrients;
@@ -4805,7 +4805,7 @@ function renderFoodResult(r) {
   // 그룹 정의
   const STAT_GROUPS = {
     macro: {
-      title: '🎯 매크로 영양 스텟',
+      title: '🎯 영양소 스텟',
       src: n,
       items: {
         carbs:   { label:'탄수화물', emoji:'🌾', target:300,  unit:'g',  bad:false },
@@ -4999,12 +4999,12 @@ function renderReport() {
     const topMissing = Object.entries(missCount).sort((a,b) => b[1]-a[1]).slice(0, 5);
     const topExcessive = Object.entries(excCount).sort((a,b) => b[1]-a[1]).slice(0, 3);
 
-    // 권장량 비교 (오늘 vs 일주일) — 매크로/미네랄/비타민 3그룹
+    // 권장량 비교 (오늘 vs 일주일) — 영양소/미네랄/비타민 3그룹
     const isWeek = reportTab !== 'today';
     const mult = isWeek ? 7 : 1;
     const NUT_GROUPS_R = {
       macro: {
-        title: '🍚 매크로 영양소',
+        title: '🍚 영양소',
         items: {
           carbs:    { label:'탄수화물',  target:300*mult,  unit:'g',  bad:false },
           protein:  { label:'단백질',    target:60*mult,   unit:'g',  bad:false },
@@ -6699,7 +6699,7 @@ function _showFoodReportImpl(period) {
   });
   const topFoods = Object.entries(foodCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
 
-  // 평균 영양소 — 매크로 + 비타민 + 미네랄 다 누적 (안전 처리)
+  // 평균 영양소 — 영양소 + 비타민 + 미네랄 다 누적 (안전 처리)
   const nutSum = { carbs:0, protein:0, fat:0, fiber:0, sodium:0, sugar:0 };
   const microSum = { vitaminA:0, vitaminC:0, vitaminD:0, vitaminE:0, vitaminB:0, folate:0, calcium:0, iron:0, magnesium:0, zinc:0, potassium:0 };
   let nutCount = 0;
@@ -6749,10 +6749,10 @@ function _showFoodReportImpl(period) {
     return `<div class="topfood-row"><div class="topfood-rank">${i+1}</div><div class="topfood-info"><div class="topfood-name">${name}</div><div class="topfood-bar"><div class="topfood-bar-fill" style="width:${width}%;background:${topColors[i]}"></div></div></div><div class="topfood-count">${count}회</div></div>`;
   }).join('') || '<div style="color:#94A3B8;font-size:12px;padding:10px;text-align:center">기록된 음식이 없어요</div>';
 
-  // 📊 영양소 그룹 — 매크로 / 미네랄 / 비타민
+  // 📊 영양소 그룹 — 영양소 / 미네랄 / 비타민
   const NUT_GROUPS = {
     macro: {
-      title: '🍚 매크로 영양소',
+      title: '🍚 영양소',
       items: {
         carbs:    { label:'탄수화물',  target:300,  unit:'g',  bad:false },
         protein:  { label:'단백질',    target:60,   unit:'g',  bad:false },
@@ -6822,7 +6822,7 @@ function _showFoodReportImpl(period) {
     </div>`;
   }).join('');
 
-  // 🥗 부족·과다 영양소 — 매크로 + 비타민 + 미네랄 다 검사
+  // 🥗 부족·과다 영양소 — 영양소 + 비타민 + 미네랄 다 검사
   const NUT_RECO = {
     carbs:    { lacked:'에너지·집중력 저하 위험', foods:['잡곡밥','고구마','통밀빵','오트밀'] },
     protein:  { lacked:'근육 손실·면역력 약화 위험', foods:['닭가슴살','두부','계란','연어','콩'] },
