@@ -110,11 +110,35 @@
   </div>
 
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">📊 대시보드</button>
-    <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">🎁 보상 주문</button>
-    <button class="tab-btn" onclick="switchTab('pets')" id="tab-pets">🐾 반려동물 기록</button>
-    <button class="tab-btn" onclick="switchTab('humans')" id="tab-humans">🧑 사람 기록</button>
+    <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">대시보드</button>
+    <button class="tab-btn" onclick="switchTab('users')" id="tab-users">사용자</button>
+    <button class="tab-btn" onclick="switchTab('foods')" id="tab-foods">식단 기록</button>
+    <button class="tab-btn" onclick="switchTab('waters')" id="tab-waters">물 섭취</button>
+    <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">보상 주문</button>
+    <button class="tab-btn" onclick="switchTab('pets')" id="tab-pets">반려동물 기록</button>
+    <button class="tab-btn" onclick="switchTab('humans')" id="tab-humans">사람 기록</button>
   </div>
+
+  <!-- 사용자 탭 -->
+  <main id="content-users" style="display:none">
+    <h2 style="font-size:18px;margin-bottom:14px">사용자 목록</h2>
+    <div style="background:#0f172a;border-radius:12px;padding:14px;margin-bottom:14px">
+      <input id="users-search" placeholder="이름·휴대폰 검색..." oninput="filterUsers()" style="width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:13px"/>
+    </div>
+    <div id="users-list"></div>
+  </main>
+
+  <!-- 식단 기록 탭 -->
+  <main id="content-foods" style="display:none">
+    <h2 style="font-size:18px;margin-bottom:14px">식단 분석 기록</h2>
+    <div id="foods-list"></div>
+  </main>
+
+  <!-- 물 섭취 탭 -->
+  <main id="content-waters" style="display:none">
+    <h2 style="font-size:18px;margin-bottom:14px">물 섭취 기록</h2>
+    <div id="waters-list"></div>
+  </main>
 
   <!-- 대시보드 탭 -->
   <main id="content-dashboard">
@@ -123,6 +147,21 @@
         <div class="stat-label">처리 대기 주문</div>
         <div class="stat-value" id="stat-pending">-</div>
         <div class="stat-sub">즉시 처리 필요</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#10b981,#059669)">
+        <div class="stat-label">전체 사용자</div>
+        <div class="stat-value" id="stat-users">-</div>
+        <div class="stat-sub">통합 가입자 수</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">
+        <div class="stat-label">식단 분석</div>
+        <div class="stat-value" id="stat-foods">-</div>
+        <div class="stat-sub">누적 분석 수</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
+        <div class="stat-label">물 섭취 기록</div>
+        <div class="stat-value" id="stat-waters">-</div>
+        <div class="stat-sub">누적 일자 수</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">반려동물 기록</div>
@@ -295,11 +334,125 @@ if (sessionStorage.getItem('admin_logged_in') === '1') {
 
 // ─── 탭 전환 ───
 function switchTab(tab) {
-  ['dashboard','orders','pets','humans'].forEach(t => {
-    document.getElementById('content-'+t).style.display = t === tab ? '' : 'none';
-    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+  ['dashboard','users','foods','waters','orders','pets','humans'].forEach(t => {
+    const c = document.getElementById('content-'+t);
+    if (c) c.style.display = t === tab ? '' : 'none';
+    const b = document.getElementById('tab-'+t);
+    if (b) b.classList.toggle('active', t === tab);
   });
   window.scrollTo(0,0);
+  // 탭 진입 시 데이터 로드
+  if (tab === 'users') loadUsers();
+  else if (tab === 'foods') loadFoods();
+  else if (tab === 'waters') loadWaters();
+}
+
+// ─── 사용자 목록 ───
+let allUsers = [];
+async function loadUsers() {
+  try {
+    const data = await sbGet('users', 'select=*&order=created_at.desc&limit=200');
+    allUsers = data;
+    renderUsers(data);
+  } catch(e) { document.getElementById('users-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
+}
+function filterUsers() {
+  const q = document.getElementById('users-search').value.toLowerCase();
+  const filtered = allUsers.filter(u =>
+    (u.name||'').toLowerCase().includes(q) || (u.phone||'').includes(q)
+  );
+  renderUsers(filtered);
+}
+function renderUsers(data) {
+  const el = document.getElementById('users-list');
+  if (!data || data.length === 0) { el.innerHTML = '<div style="color:#64748b;padding:30px;text-align:center">사용자 없음</div>'; return; }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
+    <thead><tr style="background:#1e293b;color:#94a3b8;font-size:11px;letter-spacing:.5px;text-transform:uppercase">
+      <th style="padding:11px;text-align:left">이름</th>
+      <th style="padding:11px;text-align:left">휴대폰</th>
+      <th style="padding:11px;text-align:left">성별</th>
+      <th style="padding:11px;text-align:left">나이</th>
+      <th style="padding:11px;text-align:left">키/몸무게</th>
+      <th style="padding:11px;text-align:left">체질</th>
+      <th style="padding:11px;text-align:left">가입일</th>
+      <th style="padding:11px;text-align:left">최근접속</th>
+    </tr></thead>
+    <tbody>${data.map(u => `
+      <tr style="border-top:1px solid #1e293b;font-size:13px">
+        <td style="padding:10px"><strong>${u.name||'-'}</strong></td>
+        <td style="padding:10px">${u.phone||'-'}</td>
+        <td style="padding:10px">${u.gender==='male'?'남':u.gender==='female'?'여':'-'}</td>
+        <td style="padding:10px">${u.birth_year ? (new Date().getFullYear()-u.birth_year)+'세' : '-'}</td>
+        <td style="padding:10px">${u.height||'?'}/${u.weight||'?'}</td>
+        <td style="padding:10px">${u.sasang_type||'-'}</td>
+        <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(u.created_at)}</td>
+        <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(u.last_active)}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ─── 식단 기록 ───
+async function loadFoods() {
+  try {
+    const data = await sbGet('food_records', 'select=*&order=created_at.desc&limit=200');
+    const usersData = allUsers.length ? allUsers : await sbGet('users', 'select=user_uuid,name');
+    const userMap = {};
+    usersData.forEach(u => userMap[u.user_uuid] = u.name);
+    const el = document.getElementById('foods-list');
+    if (!data.length) { el.innerHTML = '<div style="color:#64748b;padding:30px;text-align:center">기록 없음</div>'; return; }
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
+      <thead><tr style="background:#1e293b;color:#94a3b8;font-size:11px;text-transform:uppercase">
+        <th style="padding:11px;text-align:left">날짜</th>
+        <th style="padding:11px;text-align:left">사용자</th>
+        <th style="padding:11px;text-align:left">식사</th>
+        <th style="padding:11px;text-align:left">음식</th>
+        <th style="padding:11px;text-align:left">칼로리</th>
+        <th style="padding:11px;text-align:left">점수</th>
+      </tr></thead>
+      <tbody>${data.map(r => {
+        const foods = (Array.isArray(r.foods) ? r.foods : []).map(f => f.name||f).filter(Boolean).slice(0,3).join(', ');
+        return `<tr style="border-top:1px solid #1e293b;font-size:13px">
+          <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(r.created_at)}</td>
+          <td style="padding:10px">${userMap[r.user_uuid] || '-'}</td>
+          <td style="padding:10px">${r.meal_time||'-'}</td>
+          <td style="padding:10px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foods||'-'}</td>
+          <td style="padding:10px">${r.total_calories||0} kcal</td>
+          <td style="padding:10px;font-weight:700;color:${r.balance_score>=80?'#10b981':r.balance_score>=60?'#f59e0b':'#ef4444'}">${r.balance_score||0}</td>
+        </tr>`;
+      }).join('')}
+      </tbody></table>`;
+  } catch(e) { document.getElementById('foods-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
+}
+
+// ─── 물 섭취 ───
+async function loadWaters() {
+  try {
+    const data = await sbGet('water_intake', 'select=*&order=date.desc&limit=300');
+    const usersData = allUsers.length ? allUsers : await sbGet('users', 'select=user_uuid,name');
+    const userMap = {};
+    usersData.forEach(u => userMap[u.user_uuid] = u.name);
+    const el = document.getElementById('waters-list');
+    if (!data.length) { el.innerHTML = '<div style="color:#64748b;padding:30px;text-align:center">기록 없음</div>'; return; }
+    el.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
+      <thead><tr style="background:#1e293b;color:#94a3b8;font-size:11px;text-transform:uppercase">
+        <th style="padding:11px;text-align:left">날짜</th>
+        <th style="padding:11px;text-align:left">사용자</th>
+        <th style="padding:11px;text-align:left">섭취량</th>
+      </tr></thead>
+      <tbody>${data.map(r => `
+        <tr style="border-top:1px solid #1e293b;font-size:13px">
+          <td style="padding:10px">${r.date}</td>
+          <td style="padding:10px">${userMap[r.user_uuid] || '-'}</td>
+          <td style="padding:10px;font-weight:700;color:${r.amount_ml>=2000?'#10b981':r.amount_ml>=1000?'#f59e0b':'#ef4444'}">${r.amount_ml} ml</td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  } catch(e) { document.getElementById('waters-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
+}
+
+function formatDate(ts) {
+  if (!ts) return '-';
+  const d = new Date(ts);
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
 // ─── Supabase fetch helper ───
@@ -330,14 +483,24 @@ let orderFilter = 'all', petFilter = 'all', humanFilter = 'all';
 
 async function loadAllData() {
   try {
-    const [orders, pets, humans] = await Promise.all([
+    const [orders, pets, humans, users, foods, waters] = await Promise.all([
       sbGet('reward_orders', 'select=*&order=created_at.desc').catch(()=>[]),
       sbGet('pet_records', 'select=*&order=created_at.desc').catch(()=>[]),
-      sbGet('human_records', 'select=*&order=created_at.desc').catch(()=>[])
+      sbGet('human_records', 'select=*&order=created_at.desc').catch(()=>[]),
+      sbGet('users', 'select=id').catch(()=>[]),
+      sbGet('food_records', 'select=id').catch(()=>[]),
+      sbGet('water_intake', 'select=id').catch(()=>[])
     ]);
     allOrders = orders || [];
     allPets = pets || [];
     allHumans = humans || [];
+    // 새 통계
+    const usersCount = (users || []).length;
+    const foodsCount = (foods || []).length;
+    const watersCount = (waters || []).length;
+    const su = document.getElementById('stat-users'); if (su) su.textContent = usersCount.toLocaleString();
+    const sf = document.getElementById('stat-foods'); if (sf) sf.textContent = foodsCount.toLocaleString();
+    const sw = document.getElementById('stat-waters'); if (sw) sw.textContent = watersCount.toLocaleString();
     renderDashboard();
     renderOrders();
     renderPets();
