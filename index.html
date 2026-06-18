@@ -4865,20 +4865,30 @@ function renderReport() {
     const cutoff = reportTab === 'today'
       ? new Date(new Date().toISOString().split('T')[0]).getTime()
       : Date.now() - 7*24*60*60*1000;
-    const list = all.filter(h => new Date(h.date).getTime() >= cutoff);
+    const list = all.filter(h => new Date(h.date || h.timestamp || 0).getTime() >= cutoff);
     if (list.length === 0) {
       target.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#94A3B8;font-size:13px;line-height:1.7">
         ${reportTab === 'today' ? '오늘' : '이번 주'} 식단 기록이 없어요!<br>식단 분석을 한 번 해보세요 🍽
       </div>`;
       return;
     }
+    const num = (v) => { const n = Number(v); return isFinite(n) ? n : 0; };
+
     // 누적 통계
-    const totalCal = list.reduce((s,h) => s + (h.totalCalories || 0), 0);
-    const avgScore = Math.round(list.reduce((s,h) => s + (h.balanceScore || 0), 0) / list.length);
+    const totalCal = list.reduce((s,h) => s + num(h.totalCalories), 0);
+    const avgScore = Math.round(list.reduce((s,h) => s + num(h.balanceScore), 0) / list.length);
     const totalNutri = { carbs:0, protein:0, fat:0, fiber:0, sodium:0, sugar:0 };
+    const totalMicro = { vitaminA:0, vitaminC:0, vitaminD:0, vitaminE:0, vitaminB:0, folate:0, calcium:0, iron:0, magnesium:0, zinc:0, potassium:0 };
     list.forEach(h => {
-      if (h.nutrition) Object.keys(totalNutri).forEach(k => totalNutri[k] += (h.nutrition[k] || 0));
+      if (h.nutrition) Object.keys(totalNutri).forEach(k => totalNutri[k] += num(h.nutrition[k]));
+      // 비타민·미네랄 — 없으면 음식 기반 자동 추정
+      let micro = h.micronutrients;
+      if (!micro || typeof micro !== 'object' || Object.keys(micro).filter(k => num(micro[k]) > 0).length < 3) {
+        try { micro = estimateMicronutrients(h.foods || []); } catch(e) { micro = null; }
+      }
+      if (micro) Object.keys(totalMicro).forEach(k => totalMicro[k] += num(micro[k]));
     });
+
     // 부족·과다 영양소 빈도
     const missCount = {}, excCount = {};
     list.forEach(h => {
@@ -4887,32 +4897,152 @@ function renderReport() {
     });
     const topMissing = Object.entries(missCount).sort((a,b) => b[1]-a[1]).slice(0, 5);
     const topExcessive = Object.entries(excCount).sort((a,b) => b[1]-a[1]).slice(0, 3);
-    // 권장량 비교 (오늘 vs 일주일)
-    const target_targets = reportTab === 'today'
-      ? { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 }
-      : { carbs:2100, protein:420, fat:455, fiber:175, sodium:14000, sugar:350 };
-    const nutriHtml = Object.keys(target_targets).map(k => {
-      const val = totalNutri[k];
-      const tg = target_targets[k];
-      const pct = Math.min(100, Math.round(val / tg * 100));
-      const labels = { carbs:'탄수화물', protein:'단백질', fat:'지방', fiber:'식이섬유', sodium:'나트륨', sugar:'당류' };
-      const units = { carbs:'g', protein:'g', fat:'g', fiber:'g', sodium:'mg', sugar:'g' };
-      const cls = pct >= 90 ? '#10B981' : pct >= 50 ? '#6366F1' : '#EF4444';
-      return `<div style="margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-          <span>${labels[k]}</span>
-          <span style="font-weight:700">${val}${units[k]} <span style="color:#94A3B8">/ ${tg}${units[k]} (${pct}%)</span></span>
+
+    // 권장량 비교 (오늘 vs 일주일) — 매크로/미네랄/비타민 3그룹
+    const isWeek = reportTab !== 'today';
+    const mult = isWeek ? 7 : 1;
+    const NUT_GROUPS_R = {
+      macro: {
+        title: '🍚 매크로 영양소',
+        items: {
+          carbs:    { label:'탄수화물',  target:300*mult,  unit:'g',  bad:false },
+          protein:  { label:'단백질',    target:60*mult,   unit:'g',  bad:false },
+          fat:      { label:'지방',      target:65*mult,   unit:'g',  bad:false },
+          fiber:    { label:'식이섬유',  target:25*mult,   unit:'g',  bad:false },
+          sodium:   { label:'나트륨',    target:2000*mult, unit:'mg', bad:true },
+          sugar:    { label:'당류',      target:50*mult,   unit:'g',  bad:true }
+        },
+        src: totalNutri
+      },
+      mineral: {
+        title: '⛏ 미네랄',
+        items: {
+          calcium:   { label:'칼슘',      target:800*mult,  unit:'mg' },
+          iron:      { label:'철분',      target:12*mult,   unit:'mg' },
+          magnesium: { label:'마그네슘',  target:320*mult,  unit:'mg' },
+          zinc:      { label:'아연',      target:9*mult,    unit:'mg' },
+          potassium: { label:'칼륨',      target:3500*mult, unit:'mg' }
+        },
+        src: totalMicro
+      },
+      vitamin: {
+        title: '💊 비타민',
+        items: {
+          vitaminA: { label:'비타민 A',  target:800*mult, unit:'μg' },
+          vitaminC: { label:'비타민 C',  target:100*mult, unit:'mg' },
+          vitaminD: { label:'비타민 D',  target:10*mult,  unit:'μg' },
+          vitaminE: { label:'비타민 E',  target:12*mult,  unit:'mg' },
+          vitaminB: { label:'비타민 B군',target:5*mult,   unit:'mg' },
+          folate:   { label:'엽산',      target:400*mult, unit:'μg' }
+        },
+        src: totalMicro
+      }
+    };
+
+    const renderRow = ([k, info], src) => {
+      const v = Math.round(src[k] * 10) / 10 || 0;
+      const t = info.target;
+      const rawPct = (v / t) * 100;
+      const pct = Math.min(100, Math.round(rawPct));
+      const isBad = !!info.bad;
+      let color;
+      if (isBad) {
+        color = rawPct >= 110 ? '#EF4444' : rawPct >= 70 ? '#F59E0B' : '#10B981';
+      } else {
+        color = rawPct >= 80 ? '#10B981' : rawPct >= 50 ? '#F59E0B' : '#EF4444';
+      }
+      return `<div style="margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px">
+          <span style="color:#475569;font-weight:600">${info.label}</span>
+          <span style="font-weight:700">${v}${info.unit} <span style="color:#94A3B8">/ ${t}${info.unit} (${pct}%)</span></span>
         </div>
-        <div style="height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:${cls};border-radius:3px"></div>
+        <div style="height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${color};border-radius:3px"></div>
         </div>
       </div>`;
+    };
+
+    const nutriHtml = Object.values(NUT_GROUPS_R).map(grp => {
+      const rows = Object.entries(grp.items).map(e => renderRow(e, grp.src)).join('');
+      return `<div class="nut-group">
+        <div class="nut-group-title">${grp.title}</div>
+        ${rows}
+      </div>`;
     }).join('');
+
+    // 부족·과다 영양소 keyed 분석 (영양제 추천용)
+    const NUT_SUPPS_MAP = {
+      carbs:[], protein:['유청 단백질 25g — 근육·회복'],
+      fat:['오메가3 (EPA·DHA) — 혈관·두뇌'],
+      fiber:['차전자피 분말 — 장 건강·포만감'],
+      sodium:[], sugar:['크롬 보충제 — 혈당 안정'],
+      calcium:['칼슘+비타민D — 뼈 건강'],
+      iron:['철분 18mg + 비타민C — 빈혈 예방'],
+      magnesium:['마그네슘 (비스글리시네이트)'],
+      zinc:['아연 (피콜리네이트)'],
+      potassium:['종합 미네랄'],
+      vitaminA:['비타민A 보충제'], vitaminC:['비타민C 1000mg — 항산화·면역'],
+      vitaminD:['비타민D3 2000IU — 면역·뼈 건강'], vitaminE:['비타민E 보충제'],
+      vitaminB:['비타민B 컴플렉스'], folate:['엽산 (활성형 메틸엽산)']
+    };
+    // 그룹의 부족 항목 (pct < 70 %) 모음
+    const lackedKeys = [];
+    Object.values(NUT_GROUPS_R).forEach(grp => {
+      Object.entries(grp.items).forEach(([k, info]) => {
+        if (info.bad) return;
+        const v = grp.src[k] || 0;
+        const pct = (v / info.target) * 100;
+        if (pct < 70) lackedKeys.push({ k, label: info.label, pct: Math.round(pct) });
+      });
+    });
+    lackedKeys.sort((a,b) => a.pct - b.pct);
+    const top3Supps = lackedKeys.slice(0, 3).map(it => {
+      const opts = NUT_SUPPS_MAP[it.k] || [];
+      return opts[0] ? `✓ ${opts[0]} <span style="color:#94A3B8">(${it.pct}%)</span>` : null;
+    }).filter(Boolean);
+
+    // 칭찬·따끔 멘트
+    let coachMsg = '', coachClass = 'neutral';
+    if (avgScore >= 85 && lackedKeys.length === 0) {
+      coachMsg = `🌟 <strong>정말 훌륭해요!</strong> ${avgScore}점, 부족·과다 없음. 이대로 계속!`;
+      coachClass = 'praise';
+    } else if (avgScore >= 75 && lackedKeys.length <= 2) {
+      coachMsg = `👍 <strong>잘 드시고 계세요!</strong> ${avgScore}점 균형 좋아요. ${lackedKeys.length > 0 ? `${lackedKeys.length}가지만 살짝 채워주세요.` : '유지 부탁!'}`;
+      coachClass = 'praise';
+    } else if (lackedKeys.length >= 5) {
+      coachMsg = `⚠️ <strong>${reportTab === 'today' ? '오늘은' : '이번 주는'} 신경 더 써야겠어요.</strong> 부족 ${lackedKeys.length}가지가 보여요. 추천 음식을 챙기세요.`;
+      coachClass = 'warn';
+    } else if (lackedKeys.length >= 3) {
+      coachMsg = `💪 <strong>괜찮지만 더 좋아질 수 있어요.</strong> 부족 ${lackedKeys.length}가지가 있어요.`;
+      coachClass = 'neutral';
+    } else {
+      coachMsg = `🍽 ${avgScore}점, 평균적인 식단이에요.`;
+      coachClass = 'neutral';
+    }
+
+    // 📝 식단 기록 관리 섹션 (잘못 입력한 거 삭제)
+    const recordsHtml = list.slice().reverse().slice(0, 30).map(h => {
+      const id = h.timestamp || h.date || JSON.stringify(h).slice(0,40);
+      const dt = new Date(h.date || h.timestamp || Date.now());
+      const dateStr = `${dt.getMonth()+1}/${dt.getDate()}`;
+      const foods = (h.foods || []).map(f => typeof f === 'string' ? f : (f.name || '')).filter(Boolean).slice(0, 3).join(', ');
+      const moreFoods = (h.foods || []).length > 3 ? ` 외 ${(h.foods||[]).length - 3}개` : '';
+      return `<div class="food-record-row">
+        <div class="food-record-info">
+          <div class="food-record-date">📅 ${dateStr} · ${h.mealTime || '식사'}</div>
+          <div class="food-record-foods">${foods}${moreFoods}</div>
+          <div class="food-record-cal">${h.totalCalories || 0} kcal</div>
+        </div>
+        <button class="food-record-del" onclick="deleteReportRecord('${String(id).replace(/'/g,'')}')">🗑</button>
+      </div>`;
+    }).join('');
+
     target.innerHTML = `
       <div class="report-summary-card">
         <div class="report-summary-num">${avgScore}<span style="font-size:14px"> 점</span></div>
         <div class="report-summary-label">평균 영양 균형 점수</div>
       </div>
+      <div class="coach-msg ${coachClass}">${coachMsg}</div>
       <div class="report-stats-grid">
         <div class="report-stat-card">
           <div class="report-stat-num">${list.length}</div>
@@ -4938,20 +5068,9 @@ function renderReport() {
         ${topExcessive.map(([n, c]) => `<div style="font-size:12.5px;color:#9A3412;margin-bottom:5px;display:flex;justify-content:space-between"><span>• ${n}</span><span style="color:#94A3B8">${c}회</span></div>`).join('')}
       </div>` : ''}
       <div class="report-section" style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1.5px solid #C4B5FD">
-        <div class="report-section-title" style="color:#5B21B6">💊 추천 영양제 (자주 부족한 거 기반)</div>
-        <div style="font-size:12px;color:#4C1D95;line-height:1.7">
-          ${topMissing.slice(0, 3).map(([n]) => {
-            const map = {
-              '비타민C': '비타민C 1000mg — 항산화·면역 강화',
-              '칼슘': '칼슘+비타민D — 뼈 건강',
-              '오메가3': '오메가3 EPA+DHA 1000mg — 혈관·두뇌',
-              '식이섬유': '차전자피 분말 — 장 건강·포만감',
-              '단백질': '유청 단백질 25g — 근육·회복',
-              '철분': '철분 18mg + 비타민C — 빈혈 예방',
-              '비타민D': '비타민D3 2000IU — 면역·뼈 건강'
-            };
-            return `<div style="margin-bottom:4px">✓ ${map[n] || `${n} 보충제`}</div>`;
-          }).join('') || '<div>현재 부족한 영양소 없음 ✨</div>'}
+        <div class="report-section-title" style="color:#5B21B6">💊 추천 영양제 (가장 부족한 3개)</div>
+        <div style="font-size:12px;color:#4C1D95;line-height:1.8">
+          ${top3Supps.length > 0 ? top3Supps.map(s => `<div style="margin-bottom:4px">${s}</div>`).join('') : '<div>현재 부족한 영양소 없음 ✨</div>'}
         </div>
       </div>
       <div class="report-section" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7">
@@ -4961,10 +5080,30 @@ function renderReport() {
             ? '✓ 식단 균형 좋아요! 가벼운 유산소 30분/일 (걷기·자전거)<br>✓ 주 2회 근력 운동으로 근육 유지'
             : '✓ 식이섬유·단백질 더 챙기면서<br>✓ 가벼운 산책 20~30분/일 — 소화 + 혈당 관리<br>✓ 식후 30분~1시간 후가 베스트'}
         </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">📝 식단 기록 관리</div>
+        <div style="font-size:11.5px;color:#64748B;margin-bottom:8px;line-height:1.5">잘못 입력된 식단이 있으면 삭제하세요. 리포트가 정확해져요.</div>
+        <div class="food-records-list">${recordsHtml}</div>
       </div>`;
   } catch(e) {
+    console.error(e);
     target.innerHTML = '<div style="color:#EF4444;padding:20px">리포트 생성 중 오류가 발생했어요</div>';
   }
+}
+
+// 종합 리포트 화면의 식단 삭제
+function deleteReportRecord(id) {
+  if (!confirm('이 식단 기록을 삭제할까요?\n삭제 후 리포트가 다시 계산돼요.')) return;
+  try {
+    let history = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    history = history.filter(h => {
+      const hid = h.timestamp || h.date || JSON.stringify(h).slice(0,40);
+      return String(hid) !== String(id);
+    });
+    localStorage.setItem('foodHistoryV1', JSON.stringify(history));
+    renderReport();
+  } catch(e) { alert('삭제 중 오류: ' + (e.message || '')); }
 }
 
 async function downloadFoodResult() {
