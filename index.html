@@ -714,6 +714,10 @@
     .report-nut-bar{flex:1;height:9px;background:#F1F5F9;border-radius:5px;overflow:hidden}
     .report-nut-fill{height:100%;border-radius:5px}
     .report-nut-val{font-size:10.5px;color:#64748B;width:78px;text-align:right;flex-shrink:0;font-weight:600}
+    /* 영양 스텟 그룹 (식단 결과 화면) */
+    .stat-group{margin-bottom:14px;padding:11px 12px;background:linear-gradient(135deg,#FAFBFC,#F8FAFC);border-radius:13px;border:1.5px solid #E2E8F0}
+    .stat-group:last-child{margin-bottom:0}
+    .stat-group-title{font-size:13px;font-weight:800;color:#334155;margin-bottom:9px;letter-spacing:-.3px;padding-bottom:6px;border-bottom:1px dashed #CBD5E1}
     /* 영양소 그룹 (매크로/미네랄/비타민) */
     .nut-group{margin-bottom:11px;padding:9px 10px;background:#FAFBFC;border-radius:10px;border:1px solid #F1F5F9}
     .nut-group:last-child{margin-bottom:0}
@@ -4752,26 +4756,87 @@ function renderFoodResult(r) {
       container.insertAdjacentHTML('afterbegin', overallPairingsBox);
     }
   } catch(e) { console.error('통합 궁합 박스 삽입 실패:', e); }
-  // 영양소 막대 (대략적 기준치 기반)
+  // 영양소 막대 — 매크로 + 미네랄 + 비타민 (17종)
   const n = r.nutrition || {};
-  const targets = { carbs:300, protein:60, fat:65, fiber:25, sodium:2000, sugar:50 };
-  const labels = { carbs:'탄수화물', protein:'단백질', fat:'지방', fiber:'식이섬유', sodium:'나트륨', sugar:'당류' };
-  const units = { carbs:'g', protein:'g', fat:'g', fiber:'g', sodium:'mg', sugar:'g' };
-  // 🎮 게임 스텟 스타일 영양소 바
-  const emojis = { carbs:'🌾', protein:'💪', fat:'🥑', fiber:'🌿', sodium:'🧂', sugar:'🍯' };
-  const nutriHtml = Object.keys(targets).map(k => {
-    const val = n[k] || 0;
-    const pct = Math.min(100, Math.round(val / targets[k] * 100));
+  // micronutrients가 비어있으면 음식 기반 추정
+  let m = r.micronutrients;
+  if (!m || typeof m !== 'object' || Object.keys(m).filter(k => Number(m[k]) > 0).length < 3) {
+    try { m = estimateMicronutrients(r.foods || []); } catch(e) { m = {}; }
+  }
+  // 그룹 정의
+  const STAT_GROUPS = {
+    macro: {
+      title: '🎯 매크로 영양 스텟',
+      src: n,
+      items: {
+        carbs:   { label:'탄수화물', emoji:'🌾', target:300,  unit:'g',  bad:false },
+        protein: { label:'단백질',   emoji:'💪', target:60,   unit:'g',  bad:false },
+        fat:     { label:'지방',     emoji:'🥑', target:65,   unit:'g',  bad:false },
+        fiber:   { label:'식이섬유', emoji:'🌿', target:25,   unit:'g',  bad:false },
+        sodium:  { label:'나트륨',   emoji:'🧂', target:2000, unit:'mg', bad:true },
+        sugar:   { label:'당류',     emoji:'🍯', target:50,   unit:'g',  bad:true }
+      }
+    },
+    mineral: {
+      title: '⛏ 미네랄 스텟',
+      src: m,
+      items: {
+        calcium:   { label:'칼슘',     emoji:'🦴', target:800,  unit:'mg' },
+        iron:      { label:'철분',     emoji:'🩸', target:12,   unit:'mg' },
+        magnesium: { label:'마그네슘', emoji:'🥜', target:320,  unit:'mg' },
+        zinc:      { label:'아연',     emoji:'🦪', target:9,    unit:'mg' },
+        potassium: { label:'칼륨',     emoji:'🍌', target:3500, unit:'mg' }
+      }
+    },
+    vitamin: {
+      title: '💊 비타민 스텟',
+      src: m,
+      items: {
+        vitaminA: { label:'비타민 A',  emoji:'🥕', target:800, unit:'μg' },
+        vitaminC: { label:'비타민 C',  emoji:'🍋', target:100, unit:'mg' },
+        vitaminD: { label:'비타민 D',  emoji:'☀️', target:10,  unit:'μg' },
+        vitaminE: { label:'비타민 E',  emoji:'🌰', target:12,  unit:'mg' },
+        vitaminB: { label:'비타민 B군',emoji:'🥚', target:5,   unit:'mg' },
+        folate:   { label:'엽산',      emoji:'🥬', target:400, unit:'μg' }
+      }
+    }
+  };
+
+  // 그룹별 HTML
+  const renderStatRow = (k, info, src) => {
+    const val = Math.round((src[k] || 0) * 10) / 10;
+    const rawPct = (val / info.target) * 100;
+    const pct = Math.min(100, Math.round(rawPct));
+    const isBad = !!info.bad;
+    let barColor;
+    if (isBad) {
+      barColor = rawPct >= 110 ? 'linear-gradient(90deg,#EF4444,#DC2626)'
+              : rawPct >= 70  ? 'linear-gradient(90deg,#F59E0B,#EA580C)'
+              : 'linear-gradient(90deg,#10B981,#059669)';
+    } else {
+      barColor = rawPct >= 80 ? 'linear-gradient(90deg,#10B981,#059669)'
+              : rawPct >= 50 ? 'linear-gradient(90deg,#F59E0B,#EA580C)'
+              : 'linear-gradient(90deg,#EF4444,#DC2626)';
+    }
     return `<div class="game-stat-row">
       <div class="game-stat-head">
-        <span class="game-stat-name">${emojis[k]} ${labels[k]}</span>
-        <span class="game-stat-value">${val}${units[k]} / ${targets[k]}${units[k]} (${pct}%)</span>
+        <span class="game-stat-name">${info.emoji} ${info.label}</span>
+        <span class="game-stat-value">${val}${info.unit} / ${info.target}${info.unit} (${pct}%)</span>
       </div>
       <div class="game-stat-bar-wrap">
-        <div class="game-stat-bar ${k}" style="width:${pct}%"></div>
+        <div class="game-stat-bar" style="width:${pct}%;background:${barColor}"></div>
       </div>
     </div>`;
+  };
+
+  const nutriHtml = Object.values(STAT_GROUPS).map(grp => {
+    const rows = Object.entries(grp.items).map(([k, info]) => renderStatRow(k, info, grp.src)).join('');
+    return `<div class="stat-group">
+      <div class="stat-group-title">${grp.title}</div>
+      ${rows}
+    </div>`;
   }).join('');
+
   document.getElementById('foodNutriItems').innerHTML = nutriHtml;
   // 영양소 분석 박스를 게임 카드로 스타일 변경
   const nutriGrid = document.querySelector('.nutri-grid');
@@ -6430,7 +6495,8 @@ function showFoodReport(period) {
         <h2 style="font-size:18px;margin:0 0 14px;color:#1F2937">📊 리포트</h2>
         <div style="text-align:center;padding:40px 20px;color:#94A3B8">
           <div style="font-size:48px;margin-bottom:12px">⚠️</div>
-          <div style="font-size:13px;line-height:1.6;color:#64748B">리포트 생성에 문제가 생겼어요.<br>식단을 한 번 더 분석한 후 다시 시도해주세요.</div>
+          <div style="font-size:13px;line-height:1.6;color:#64748B">리포트 생성에 문제가 생겼어요.</div>
+          <div style="font-size:10.5px;color:#EF4444;margin-top:14px;padding:10px;background:#FEF2F2;border-radius:8px;text-align:left;font-family:monospace;word-break:break-all;line-height:1.5">${(err && (err.stack || err.message)) || String(err)}</div>
         </div>`;
       document.getElementById('foodReportModal').style.display = 'block';
     }
