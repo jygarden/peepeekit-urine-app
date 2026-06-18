@@ -8,6 +8,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"/>
   <!-- 🔤 Pretendard 폰트 (한국 헬스 앱 표준급) -->
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <!-- 🗄 Supabase 클라이언트 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.SUPABASE_URL = 'https://guvzbtemficekutgxngb.supabase.co';
+    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
+  </script>
   <!-- 🚨 글로벌 에러 핸들러 (흰 화면 디버그용) -->
   <script>
   window.addEventListener('error', function(e) {
@@ -746,6 +752,32 @@
     .cpf-edit{background:#fff;border:1px solid var(--gray-200);color:var(--gray-600);font-size:13px;width:30px;height:30px;border-radius:8px;cursor:pointer;flex-shrink:0;transition:all .15s ease}
     .cpf-edit:hover{border-color:var(--primary);color:var(--primary)}
     .cpf-note{font-size:10px;color:var(--gray-400);margin-top:8px;font-weight:600;text-align:right}
+    /* 📋 통합 가입 폼 */
+    .signup-form{width:100%;max-width:340px;margin:24px auto 0;text-align:left}
+    .signup-field{margin-bottom:14px}
+    .signup-field label{display:block;font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:6px;letter-spacing:-.2px}
+    .signup-field .req{color:var(--danger);font-weight:800;margin-left:2px}
+    .signup-field .opt{color:var(--gray-400);font-weight:500;font-size:10.5px;margin-left:2px}
+    .signup-field input[type=text],.signup-field input[type=tel],.signup-field input[type=number]{width:100%;padding:12px 14px;border-radius:var(--r-md);border:1.5px solid var(--gray-200);font-size:14px;font-family:inherit;background:#fff;color:var(--gray-900);transition:border-color .15s ease}
+    .signup-field input:focus{outline:none;border-color:var(--primary)}
+    .signup-radio-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .signup-radio{display:flex;align-items:center;justify-content:center;padding:12px;border:1.5px solid var(--gray-200);border-radius:var(--r-md);cursor:pointer;font-size:13.5px;font-weight:700;color:var(--gray-700);background:#fff;transition:all .15s ease}
+    .signup-radio:hover{border-color:var(--primary)}
+    .signup-radio input{display:none}
+    .signup-radio input:checked + span{color:var(--primary)}
+    .signup-radio:has(input:checked){border-color:var(--primary);background:var(--primary-pale)}
+    .signup-date-row{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px}
+    .signup-hw-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .signup-hint{font-size:11.5px;color:var(--primary);margin-top:6px;font-weight:600}
+    .signup-consent{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r-md);padding:12px 14px;margin:18px 0 14px}
+    .signup-check{display:flex;align-items:flex-start;gap:8px;padding:5px 0;cursor:pointer;font-size:11.5px;color:var(--gray-600);line-height:1.5}
+    .signup-check input{margin-top:2px;flex-shrink:0;accent-color:var(--primary);width:15px;height:15px}
+    .signup-check strong{color:var(--danger);font-weight:800;margin-right:3px}
+    .signup-submit{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-md);font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px;transition:all .15s ease}
+    .signup-submit:hover{background:var(--primary-dark)}
+    .signup-submit:active{transform:scale(.98)}
+    .signup-submit:disabled{background:var(--gray-300);cursor:not-allowed}
+    .signup-help{font-size:11px;color:var(--gray-400);text-align:center;margin-top:10px;line-height:1.5}
     /* ✨ 통합 카드 시스템 v2 (새 컴포넌트용) */
     .card-v2{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r-md);padding:var(--s-4);box-shadow:var(--shadow-xs);margin-bottom:var(--s-3);transition:box-shadow .2s ease}
     .card-v2:hover{box-shadow:var(--shadow-sm)}
@@ -1400,26 +1432,62 @@
           <div class="welcome-sub">오늘도 건강한 하루 보내세요</div>
         </div>
 
-        <!-- 첫 방문: 카카오 로그인 모드 -->
+        <!-- 첫 방문: 통합 가입 폼 -->
         <div id="welcomeFirst" style="display:none">
           <div class="welcome-greet">건강 관리의 시작</div>
           <div class="welcome-name">건강어때에 오신 걸<br>환영해요</div>
-          <div class="welcome-sub">이름만 입력하면<br>바로 시작할 수 있어요</div>
-          <div class="welcome-input-wrap">
-            <button class="kakao-btn" onclick="loginWithKakao()">
-              <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <path fill="#1A1A1A" d="M9 1C4.58 1 1 3.84 1 7.34c0 2.23 1.45 4.19 3.65 5.31l-.92 3.39c-.08.3.25.54.51.36l4.04-2.69c.24.02.48.04.72.04 4.42 0 8-2.84 8-6.41C17 3.84 13.42 1 9 1z"/>
-              </svg>
-              카카오로 시작하기
-            </button>
-            <div class="welcome-divider">또는</div>
-            <input type="text" class="welcome-input" id="nameInput" placeholder="이름으로 시작 (예: 진영)" maxlength="10"
-                   onkeydown="if(event.key==='Enter')saveName()"/>
-            <button class="welcome-btn-secondary" onclick="saveName()">이름으로 시작하기</button>
-            <div class="welcome-hint">
-              <svg viewBox="0 0 24 24"><path d="M7 11 V 8 C 7 5, 9 3, 12 3 C 15 3, 17 5, 17 8 V 11"/><rect x="5" y="11" width="14" height="10" rx="2"/></svg>
-              개인정보는 안전하게 보호돼요
+          <div class="welcome-sub">한 번만 입력하면 식단 분석 · 소변검사 · 맞춤 영양 조언까지 모두 자동으로 적용돼요</div>
+
+          <div class="signup-form">
+            <div class="signup-field">
+              <label>이름 <span class="req">*</span></label>
+              <input type="text" id="su_name" placeholder="예: 김민수" maxlength="20"/>
             </div>
+            <div class="signup-field">
+              <label>휴대폰번호 <span class="req">*</span></label>
+              <input type="tel" id="su_phone" placeholder="010-1234-5678" maxlength="13" oninput="formatPhone(this)"/>
+            </div>
+            <div class="signup-field">
+              <label>성별 <span class="req">*</span></label>
+              <div class="signup-radio-row">
+                <label class="signup-radio"><input type="radio" name="su_gender" value="male"/> <span>남성</span></label>
+                <label class="signup-radio"><input type="radio" name="su_gender" value="female"/> <span>여성</span></label>
+              </div>
+            </div>
+            <div class="signup-field">
+              <label>생년월일 <span class="req">*</span></label>
+              <div class="signup-date-row">
+                <input type="number" id="su_year" placeholder="년도" min="1920" max="2025" oninput="updateAgeHint()"/>
+                <input type="number" id="su_month" placeholder="월" min="1" max="12"/>
+                <input type="number" id="su_day" placeholder="일" min="1" max="31"/>
+              </div>
+              <div id="su_ageHint" class="signup-hint"></div>
+            </div>
+            <div class="signup-field">
+              <label>키 / 몸무게 <span class="opt">선택</span></label>
+              <div class="signup-hw-row">
+                <input type="number" id="su_height" placeholder="170 (cm)" min="50" max="250"/>
+                <input type="number" id="su_weight" placeholder="65 (kg)" min="20" max="200"/>
+              </div>
+            </div>
+
+            <div class="signup-consent">
+              <label class="signup-check">
+                <input type="checkbox" id="su_consent_privacy"/>
+                <span><strong>(필수)</strong> 개인정보 수집 및 이용 동의</span>
+              </label>
+              <label class="signup-check">
+                <input type="checkbox" id="su_consent_terms"/>
+                <span><strong>(필수)</strong> 서비스 이용약관 동의</span>
+              </label>
+              <label class="signup-check">
+                <input type="checkbox" id="su_consent_marketing"/>
+                <span>(선택) 마케팅 정보 수신 동의</span>
+              </label>
+            </div>
+
+            <button class="signup-submit" onclick="submitSignup()">시작하기</button>
+            <div class="signup-help">개인정보는 안전하게 암호화되어 저장돼요</div>
           </div>
         </div>
       </div>
@@ -2220,7 +2288,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -2674,18 +2742,30 @@ function timeGreeting() {
 async function initWelcome() {
   // 카카오 콜백으로 돌아왔는지 확인
   const came = await handleKakaoCallback();
-  if (came) return; // 처리 완료, 인사 → 홈 자동 전환됨
+  if (came) return;
 
-  const name = localStorage.getItem('userName');
-  if (!name) {
+  // 통합 프로필 V2가 있으면 = 가입 완료된 사용자
+  const v2 = getUserProfile();
+  const name = v2?.name || localStorage.getItem('userName');
+
+  if (!name || !v2) {
+    // 신규 또는 옛 사용자(이름만 있는) → 통합 가입 폼
     document.getElementById('welcomeFirst').style.display = 'block';
     document.getElementById('welcomeReturn').style.display = 'none';
+    // 옛 사용자면 이름 미리 채워줌
+    if (name && !v2) {
+      const nameInput = document.getElementById('su_name');
+      if (nameInput) nameInput.value = name;
+    }
   } else {
+    // 가입 완료된 사용자 → 인사 후 홈
     document.getElementById('welcomeReturn').style.display = 'block';
     document.getElementById('welcomeFirst').style.display = 'none';
     document.getElementById('welcomeGreet').textContent = timeGreeting();
     document.getElementById('welcomeName').textContent = name;
-    setTimeout(() => goHome(), 2500);
+    // Supabase에 last_active 갱신
+    try { syncUserToSupabase(v2); } catch(e){}
+    setTimeout(() => goHome(), 2000);
   }
 }
 
@@ -5042,6 +5122,28 @@ function renderFoodResult(r) {
 }
 
 function saveFoodHistory(result) {
+  // 🗄 Supabase에도 저장 (백그라운드)
+  try {
+    if (supabase) {
+      const uuid = getCurrentUserUuid();
+      supabase.from('food_records').insert({
+        user_uuid: uuid,
+        meal_time: selectedMealTime,
+        foods: result.foods || [],
+        nutrition: result.nutrition || {},
+        micronutrients: result.micronutrients || {},
+        balance_score: result.balanceScore,
+        balance_grade: result.balanceGrade,
+        pairings: { foodPairings: result.foodPairings, dishPairings: null },
+        summary: result.summary,
+        total_calories: result.totalCalories
+      }).then(({ error }) => {
+        if (error) console.error('[Supabase] food_records:', error);
+      });
+      logActivity('analyze_food', { score: result.balanceScore, cal: result.totalCalories });
+    }
+  } catch(e) { console.error('[Supabase] saveFood:', e); }
+
   try {
     const key = 'foodHistoryV1';
     const history = JSON.parse(localStorage.getItem(key) || '[]');
@@ -6376,6 +6478,178 @@ function resetAllData() {
 }
 
 // ════════════════════════════════════════════════════════════════
+// 🗄 Supabase 클라이언트
+// ════════════════════════════════════════════════════════════════
+let supabase = null;
+try {
+  if (window.supabase && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+    supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    console.log('[Supabase] 연결됨');
+  }
+} catch(e) { console.warn('[Supabase] 초기화 실패:', e); }
+
+// 현재 사용자 UUID 가져오기 (없으면 새로 생성)
+function getCurrentUserUuid() {
+  let uuid = localStorage.getItem('userUuid');
+  if (!uuid) {
+    uuid = crypto.randomUUID ? crypto.randomUUID() : (Date.now() + '-' + Math.random().toString(36).slice(2));
+    localStorage.setItem('userUuid', uuid);
+  }
+  return uuid;
+}
+
+// 현재 사용자 프로필 가져오기 (통합)
+function getUserProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem('userProfileV2') || 'null');
+    return p;
+  } catch(e) { return null; }
+}
+
+function saveUserProfileLocal(profile) {
+  localStorage.setItem('userProfileV2', JSON.stringify(profile));
+  // 옛 키들도 동기화 (호환성)
+  if (profile.name) localStorage.setItem('userName', profile.name);
+  if (profile.gender || profile.birthYear || profile.height) {
+    const old = {
+      gender: profile.gender,
+      birthYear: profile.birthYear,
+      birthMonth: profile.birthMonth,
+      birthDay: profile.birthDay,
+      height: profile.height,
+      weight: profile.weight
+    };
+    localStorage.setItem('userPhysicalProfile', JSON.stringify(old));
+  }
+}
+
+// Supabase에 사용자 저장 (insert or update)
+async function syncUserToSupabase(profile) {
+  if (!supabase) return null;
+  try {
+    const uuid = getCurrentUserUuid();
+    const payload = {
+      user_uuid: uuid,
+      name: profile.name,
+      phone: profile.phone,
+      gender: profile.gender,
+      birth_year: profile.birthYear ? parseInt(profile.birthYear) : null,
+      birth_month: profile.birthMonth ? parseInt(profile.birthMonth) : null,
+      birth_day: profile.birthDay ? parseInt(profile.birthDay) : null,
+      height: profile.height ? parseFloat(profile.height) : null,
+      weight: profile.weight ? parseFloat(profile.weight) : null,
+      sasang_type: profile.sasangType || null,
+      consent_privacy: !!profile.consentPrivacy,
+      consent_terms: !!profile.consentTerms,
+      consent_marketing: !!profile.consentMarketing,
+      last_active: new Date().toISOString()
+    };
+    // upsert (있으면 업데이트, 없으면 insert)
+    const { data, error } = await supabase
+      .from('users')
+      .upsert(payload, { onConflict: 'user_uuid' })
+      .select();
+    if (error) { console.error('[Supabase] users upsert:', error); return null; }
+    console.log('[Supabase] users saved:', data?.[0]?.id);
+    return data?.[0];
+  } catch(e) { console.error('[Supabase] sync 에러:', e); return null; }
+}
+
+// 활동 로그 기록
+async function logActivity(action, metadata = {}) {
+  if (!supabase) return;
+  try {
+    const uuid = getCurrentUserUuid();
+    await supabase.from('activity_logs').insert({
+      user_uuid: uuid, action, metadata
+    });
+  } catch(e) { /* 무시 */ }
+}
+
+// 동의 기록
+async function logConsent(type, consented) {
+  if (!supabase) return;
+  try {
+    const uuid = getCurrentUserUuid();
+    await supabase.from('consent_logs').insert({
+      user_uuid: uuid,
+      consent_type: type,
+      consented,
+      user_agent: navigator.userAgent
+    });
+  } catch(e) { /* 무시 */ }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 📋 통합 가입 폼 함수들
+// ════════════════════════════════════════════════════════════════
+function formatPhone(input) {
+  let v = input.value.replace(/[^0-9]/g, '');
+  if (v.length > 11) v = v.slice(0, 11);
+  if (v.length >= 8) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+  else if (v.length >= 4) v = v.slice(0,3) + '-' + v.slice(3);
+  input.value = v;
+}
+
+function updateAgeHint() {
+  const y = parseInt(document.getElementById('su_year').value);
+  const hint = document.getElementById('su_ageHint');
+  if (hint && y && y >= 1920 && y <= new Date().getFullYear()) {
+    const age = new Date().getFullYear() - y;
+    hint.textContent = `만 ${age}세`;
+  } else if (hint) hint.textContent = '';
+}
+
+async function submitSignup() {
+  const name = document.getElementById('su_name').value.trim();
+  const phone = document.getElementById('su_phone').value.trim();
+  const gender = document.querySelector('input[name="su_gender"]:checked')?.value;
+  const birthYear = document.getElementById('su_year').value;
+  const birthMonth = document.getElementById('su_month').value;
+  const birthDay = document.getElementById('su_day').value;
+  const height = document.getElementById('su_height').value;
+  const weight = document.getElementById('su_weight').value;
+  const consentPrivacy = document.getElementById('su_consent_privacy').checked;
+  const consentTerms = document.getElementById('su_consent_terms').checked;
+  const consentMarketing = document.getElementById('su_consent_marketing').checked;
+
+  // 검증
+  if (!name) return alert('이름을 입력해주세요.');
+  if (name.length < 1) return alert('이름은 1글자 이상이어야 해요.');
+  if (!phone || phone.replace(/-/g,'').length < 10) return alert('휴대폰번호를 정확히 입력해주세요.');
+  if (!gender) return alert('성별을 선택해주세요.');
+  if (!birthYear || !birthMonth || !birthDay) return alert('생년월일을 모두 입력해주세요.');
+  const yNum = parseInt(birthYear), mNum = parseInt(birthMonth), dNum = parseInt(birthDay);
+  if (yNum < 1920 || yNum > new Date().getFullYear()) return alert('생년이 올바르지 않아요.');
+  if (mNum < 1 || mNum > 12) return alert('월이 올바르지 않아요.');
+  if (dNum < 1 || dNum > 31) return alert('일이 올바르지 않아요.');
+  if (!consentPrivacy) return alert('개인정보 수집 및 이용에 동의해주세요. (필수)');
+  if (!consentTerms) return alert('서비스 이용약관에 동의해주세요. (필수)');
+
+  const profile = {
+    name, phone, gender, birthYear, birthMonth, birthDay, height, weight,
+    consentPrivacy, consentTerms, consentMarketing
+  };
+
+  // 로컬 저장
+  saveUserProfileLocal(profile);
+
+  // Supabase 동기화
+  const submitBtn = document.querySelector('.signup-submit');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '저장 중...'; }
+  try {
+    await syncUserToSupabase(profile);
+    await logConsent('privacy', consentPrivacy);
+    await logConsent('terms', consentTerms);
+    await logConsent('marketing', consentMarketing);
+    await logActivity('signup', { name, phone: phone.slice(0,3) + '****' });
+  } catch(e) { console.error('가입 동기화 실패:', e); }
+
+  // 홈으로
+  showScreen('screenHome');
+}
+
+// ════════════════════════════════════════════════════════════════
 // 💧 물 섭취 시스템
 // ════════════════════════════════════════════════════════════════
 function getWaterAll() { try { return JSON.parse(localStorage.getItem('waterIntakeV1') || '{}'); } catch(e) { return {}; } }
@@ -6385,6 +6659,19 @@ function setWaterToday(ml) {
   const all = getWaterAll();
   all[today] = Math.max(0, Math.round(ml));
   localStorage.setItem('waterIntakeV1', JSON.stringify(all));
+  // 🗄 Supabase 동기화 (upsert, 디바운스 X — 단순)
+  try {
+    if (supabase) {
+      const uuid = getCurrentUserUuid();
+      supabase.from('water_intake').upsert({
+        user_uuid: uuid,
+        date: today,
+        amount_ml: all[today]
+      }, { onConflict: 'user_uuid,date' }).then(({ error }) => {
+        if (error) console.error('[Supabase] water:', error);
+      });
+    }
+  } catch(e) { /* 무시 */ }
 }
 function addWater(ml) {
   setWaterToday(getWaterToday() + ml);
@@ -6470,11 +6757,17 @@ function renderHomeWaterWidget() {
 // 🧬 맞춤 분석 (개인 프로필 기반 BMI·BMR·사상체질·사주 영양 조언)
 // ════════════════════════════════════════════════════════════════
 function getPersonalProfile() {
+  // 1순위: 통합 가입 프로필 V2
+  try {
+    const v2 = JSON.parse(localStorage.getItem('userProfileV2') || 'null');
+    if (v2 && v2.gender) return v2;
+  } catch(e) {}
+  // 2순위: 옛 physical profile
   try {
     const saved = JSON.parse(localStorage.getItem('userPhysicalProfile') || 'null');
     if (saved) return saved;
   } catch(e) {}
-  // 기존 프로필에서 자동 추출 시도
+  // 3순위: 옛 가족 프로필
   const hp = (getProfiles() || []).filter(p => p.type === 'human')[0];
   if (hp) return { gender: hp.gender, birthYear: hp.birthYear, birthMonth: hp.birthMonth, lifestyle: hp.lifestyle };
   return null;
