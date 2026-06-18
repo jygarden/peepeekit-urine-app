@@ -676,43 +676,43 @@
     .speech-name{font-size:11px;font-weight:800;color:#F59E0B;margin-bottom:4px;letter-spacing:-.1px}
     .speech-text{font-weight:500}
     /* 게임 점수 카드 (원형) */
-    .game-score-card{background:linear-gradient(135deg,#FEF3C7 0%,#FCD34D 50%,#F59E0B 100%);border-radius:24px;padding:24px 18px;text-align:center;color:#78350F;margin-bottom:16px;box-shadow:0 10px 30px rgba(245,158,11,.30);position:relative;overflow:hidden}
-    .game-score-card::before{content:"";position:absolute;top:-30%;right:-30%;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.3) 0%,transparent 60%)}
-    .game-rank-badge{display:inline-block;background:#fff;color:#78350F;font-size:11px;font-weight:900;padding:4px 12px;border-radius:999px;margin-bottom:10px;letter-spacing:1px}
+    .game-score-card{background:linear-gradient(135deg,var(--primary-pale) 0%,#fff 70%);border-radius:var(--r-xl);padding:28px 20px;text-align:center;color:var(--primary-text);margin-bottom:var(--s-4);box-shadow:var(--shadow-sm);border:1px solid var(--primary-light);position:relative}
+    .game-score-card::before{display:none}
+    .game-rank-badge{display:inline-block;background:#fff;color:var(--primary-text);font-size:10.5px;font-weight:800;padding:5px 14px;border-radius:999px;margin-bottom:12px;letter-spacing:.5px;border:1px solid var(--primary-light)}
     .game-score-ring{width:120px;height:120px;margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center}
     .game-score-ring svg{transform:rotate(-90deg)}
-    .game-score-ring .ring-bg{fill:none;stroke:rgba(255,255,255,.4);stroke-width:8}
-    .game-score-ring .ring-fill{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease-out}
-    .game-score-num{position:absolute;font-size:38px;font-weight:900;color:#78350F;font-family:ui-rounded,'SF Pro Rounded',system-ui;letter-spacing:-1px}
+    .game-score-ring .ring-bg{fill:none;stroke:var(--gray-100);stroke-width:8}
+    .game-score-ring .ring-fill{fill:none;stroke:var(--primary);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s ease-out}
+    .game-score-num{position:absolute;font-size:40px;font-weight:800;color:var(--gray-900);letter-spacing:-1.5px}
     .game-score-label{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;margin-top:8px}
     .game-grade-stars{font-size:18px;letter-spacing:3px;margin-top:6px}
     /* 게임 스텟 바 (HP·MP 스타일) */
-    .game-stats-card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-    .game-stats-title{font-size:13px;font-weight:800;color:#1D1D1F;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-    .game-stat-row{margin-bottom:11px}
+    .game-stats-card{background:#fff;border-radius:var(--r-md);padding:20px;margin-bottom:var(--s-3);border:1px solid var(--gray-200);box-shadow:var(--shadow-xs)}
+    .game-stats-title{font-size:15px;font-weight:800;color:var(--gray-900);margin-bottom:18px;letter-spacing:-.3px}
+    .game-stat-row{margin-bottom:14px}
     .game-stat-row:last-child{margin-bottom:0}
-    .game-stat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:11.5px;font-weight:700}
-    .game-stat-name{color:#1D1D1F;display:flex;align-items:center;gap:5px}
+    .game-stat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:12.5px}
+    .game-stat-name{color:var(--gray-700);font-weight:600;letter-spacing:-.2px}
     .game-stat-value{color:#6E6E73;font-weight:600}
-    .game-stat-bar-wrap{height:10px;background:#F1F5F9;border-radius:5px;overflow:hidden;position:relative;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
-    .game-stat-bar{height:100%;border-radius:5px;transition:width .8s cubic-bezier(.2,.8,.2,1);position:relative;background-size:20px 20px;background-image:linear-gradient(45deg,rgba(255,255,255,.2) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.2) 50%,rgba(255,255,255,.2) 75%,transparent 75%,transparent);animation:barShine 1.5s linear infinite}
-    @keyframes barShine{0%{background-position:0 0}100%{background-position:20px 0}}
-    .game-stat-bar.carbs{background-color:#F59E0B}
-    .game-stat-bar.protein{background-color:#7C3AED}
-    .game-stat-bar.fat{background-color:#EF4444}
-    .game-stat-bar.fiber{background-color:#10B981}
-    .game-stat-bar.sodium{background-color:#64748B}
-    .game-stat-bar.sugar{background-color:#EC4899}
-    /* 음식 게임 카드 */
-    .food-game-card{background:linear-gradient(135deg,#fff,#FFFBEB);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 3px 12px rgba(245,158,11,.12);border:2px solid #FCD34D;position:relative;overflow:hidden}
-    .food-game-card::before{content:"";position:absolute;top:-30px;right:-30px;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,rgba(252,211,77,.4) 0%,transparent 70%)}
+    .game-stat-bar-wrap{height:8px;background:var(--gray-100);border-radius:99px;overflow:hidden;position:relative}
+    .game-stat-bar{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+    .game-stat-bar.carbs{background-color:var(--primary)}
+    .game-stat-bar.protein{background-color:var(--primary)}
+    .game-stat-bar.fat{background-color:var(--primary)}
+    .game-stat-bar.fiber{background-color:var(--primary)}
+    .game-stat-bar.sodium{background-color:var(--gray-400)}
+    .game-stat-bar.sugar{background-color:var(--gray-400)}
+    /* 음식 게임 카드 — 깔끔한 솔리드 */
+    .food-game-card{background:#fff;border-radius:var(--r-md);padding:18px;margin-bottom:var(--s-3);box-shadow:var(--shadow-xs);border:1px solid var(--gray-200);position:relative;transition:box-shadow .2s ease}
+    .food-game-card:hover{box-shadow:var(--shadow-sm)}
+    .food-game-card::before{display:none}
     .food-game-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;position:relative}
     .food-game-name{font-size:15px;font-weight:800;color:#1D1D1F;letter-spacing:-.3px}
     .food-game-amount{font-size:11px;color:#92400E;font-weight:600;margin-top:2px}
-    .food-game-cal-badge{background:#F59E0B;color:#fff;font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px;box-shadow:0 2px 6px rgba(245,158,11,.4)}
+    .food-game-cal-badge{background:var(--primary-pale);color:var(--primary-text);font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:999px;border:1px solid var(--primary-light)}
     .food-game-skills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-    .skill-badge{background:linear-gradient(135deg,#FEF3C7,#FCD34D);color:#78350F;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:8px;border:1px solid #F59E0B;display:inline-flex;align-items:center;gap:4px;letter-spacing:-.1px}
-    .skill-badge::before{content:"⭐"}
+    .skill-badge{background:var(--gray-100);color:var(--gray-700);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--gray-200);display:inline-flex;align-items:center;gap:4px;letter-spacing:-.1px}
+    .skill-badge::before{content:""}
     .food-game-skill-detail{font-size:10.5px;color:#92400E;margin-top:5px;line-height:1.5;padding-left:14px;border-left:2px solid #FCD34D;margin-left:2px}
     /* 🎨 Phosphor 아이콘 데모 스타일 */
     .pair-icon-good{color:#10B981;font-size:15px;margin-right:2px;filter:drop-shadow(0 1px 2px rgba(16,185,129,.3))}
@@ -850,10 +850,10 @@
     .report-nut-bar{flex:1;height:9px;background:#F1F5F9;border-radius:5px;overflow:hidden}
     .report-nut-fill{height:100%;border-radius:5px}
     .report-nut-val{font-size:10.5px;color:#64748B;width:78px;text-align:right;flex-shrink:0;font-weight:600}
-    /* 영양 스텟 그룹 (식단 결과 화면) */
-    .stat-group{margin-bottom:14px;padding:11px 12px;background:linear-gradient(135deg,#FAFBFC,#F8FAFC);border-radius:13px;border:1.5px solid #E2E8F0}
+    /* 영양 스텟 그룹 (식단 결과 화면) — 솔리드 + 미묘 */
+    .stat-group{margin-bottom:20px;padding:0}
     .stat-group:last-child{margin-bottom:0}
-    .stat-group-title{font-size:13px;font-weight:800;color:#334155;margin-bottom:9px;letter-spacing:-.3px;padding-bottom:6px;border-bottom:1px dashed #CBD5E1}
+    .stat-group-title{font-size:11px;font-weight:700;color:var(--gray-500);margin-bottom:14px;letter-spacing:.6px;text-transform:uppercase}
     /* 영양소 그룹 (매크로/미네랄/비타민) */
     .nut-group{margin-bottom:11px;padding:9px 10px;background:#FAFBFC;border-radius:10px;border:1px solid #F1F5F9}
     .nut-group:last-child{margin-bottom:0}
@@ -4490,7 +4490,7 @@ function renderFoodResult(r) {
     return `<div class="food-game-card">
       <div class="food-game-top">
         <div>
-          <div class="food-game-name"><i class="ph-duotone ph-fork-knife food-icon"></i> ${f.name}</div>
+          <div class="food-game-name">${f.name}</div>
           <div class="food-game-amount">${f.amount || ''}</div>
         </div>
         <div class="food-game-cal-badge">${(f.calories || 0).toLocaleString()} kcal</div>
@@ -4914,59 +4914,62 @@ function renderFoodResult(r) {
   // 그룹 정의
   const STAT_GROUPS = {
     macro: {
-      title: '🎯 기본 영양 스텟',
+      title: '기본 영양소',
       src: n,
       items: {
-        carbs:   { label:'탄수화물', emoji:'🌾', target:300,  unit:'g',  bad:false },
-        protein: { label:'단백질',   emoji:'💪', target:60,   unit:'g',  bad:false },
-        fat:     { label:'지방',     emoji:'🥑', target:65,   unit:'g',  bad:false },
-        fiber:   { label:'식이섬유', emoji:'🌿', target:25,   unit:'g',  bad:false },
-        sodium:  { label:'나트륨',   emoji:'🧂', target:2000, unit:'mg', bad:true },
-        sugar:   { label:'당류',     emoji:'🍯', target:50,   unit:'g',  bad:true }
+        carbs:   { label:'탄수화물', target:300,  unit:'g',  bad:false },
+        protein: { label:'단백질',   target:60,   unit:'g',  bad:false },
+        fat:     { label:'지방',     target:65,   unit:'g',  bad:false },
+        fiber:   { label:'식이섬유', target:25,   unit:'g',  bad:false },
+        sodium:  { label:'나트륨',   target:2000, unit:'mg', bad:true },
+        sugar:   { label:'당류',     target:50,   unit:'g',  bad:true }
       }
     },
     mineral: {
-      title: '⛏ 미네랄 스텟',
+      title: '미네랄',
       src: m,
       items: {
-        calcium:   { label:'칼슘',     emoji:'🦴', target:800,  unit:'mg' },
-        iron:      { label:'철분',     emoji:'🩸', target:12,   unit:'mg' },
-        magnesium: { label:'마그네슘', emoji:'🥜', target:320,  unit:'mg' },
-        zinc:      { label:'아연',     emoji:'🦪', target:9,    unit:'mg' },
-        potassium: { label:'칼륨',     emoji:'🍌', target:3500, unit:'mg' }
+        calcium:   { label:'칼슘',     target:800,  unit:'mg' },
+        iron:      { label:'철분',     target:12,   unit:'mg' },
+        magnesium: { label:'마그네슘', target:320,  unit:'mg' },
+        zinc:      { label:'아연',     target:9,    unit:'mg' },
+        potassium: { label:'칼륨',     target:3500, unit:'mg' }
       }
     },
     vitamin: {
-      title: '💊 비타민 스텟',
+      title: '비타민',
       src: m,
       items: {
-        vitaminA: { label:'비타민 A',  emoji:'🥕', target:800, unit:'μg' },
-        vitaminC: { label:'비타민 C',  emoji:'🍋', target:100, unit:'mg' },
-        vitaminD: { label:'비타민 D',  emoji:'☀️', target:10,  unit:'μg' },
-        vitaminE: { label:'비타민 E',  emoji:'🌰', target:12,  unit:'mg' },
-        vitaminB: { label:'비타민 B군',emoji:'🥚', target:5,   unit:'mg' },
-        folate:   { label:'엽산',      emoji:'🥬', target:400, unit:'μg' }
+        vitaminA: { label:'비타민 A',  target:800, unit:'μg' },
+        vitaminC: { label:'비타민 C',  target:100, unit:'mg' },
+        vitaminD: { label:'비타민 D',  target:10,  unit:'μg' },
+        vitaminE: { label:'비타민 E',  target:12,  unit:'mg' },
+        vitaminB: { label:'비타민 B군',target:5,   unit:'mg' },
+        folate:   { label:'엽산',      target:400, unit:'μg' }
       }
     }
   };
 
-  // 그룹별 HTML
+  // 그룹별 HTML — 깔끔한 라인 디자인
   const renderStatRow = (k, info, src) => {
     const val = Math.round((src[k] || 0) * 10) / 10;
     const rawPct = (val / info.target) * 100;
     const pct = Math.min(100, Math.round(rawPct));
     const isBad = !!info.bad;
-    // 색상 — 단순 색 (background-color로 적용해서 빗금 애니메이션이 살아남)
-    let barColor;
+    let barColor, statusColor;
     if (isBad) {
-      barColor = rawPct >= 110 ? '#EF4444' : rawPct >= 70 ? '#F59E0B' : '#10B981';
+      if (rawPct >= 110) { barColor = '#EF4444'; statusColor = '#EF4444'; }
+      else if (rawPct >= 70) { barColor = '#F59E0B'; statusColor = '#F59E0B'; }
+      else { barColor = '#10B981'; statusColor = '#10B981'; }
     } else {
-      barColor = rawPct >= 80 ? '#10B981' : rawPct >= 50 ? '#F59E0B' : '#EF4444';
+      if (rawPct >= 80) { barColor = '#10B981'; statusColor = '#10B981'; }
+      else if (rawPct >= 50) { barColor = '#94A3B8'; statusColor = '#64748B'; }
+      else { barColor = '#EF4444'; statusColor = '#EF4444'; }
     }
     return `<div class="game-stat-row">
       <div class="game-stat-head">
-        <span class="game-stat-name">${info.emoji} ${info.label}</span>
-        <span class="game-stat-value">${val}${info.unit} / ${info.target}${info.unit} (${pct}%)</span>
+        <span class="game-stat-name">${info.label}</span>
+        <span class="game-stat-value"><span style="color:${statusColor};font-weight:800">${val}${info.unit}</span> <span style="color:#94A3B8;font-weight:500">/ ${info.target}${info.unit}</span></span>
       </div>
       <div class="game-stat-bar-wrap">
         <div class="game-stat-bar" style="width:${pct}%;background-color:${barColor}"></div>
@@ -4988,7 +4991,7 @@ function renderFoodResult(r) {
   if (nutriGrid) {
     nutriGrid.className = 'game-stats-card';
     const t = nutriGrid.querySelector('.nutri-title');
-    if (t) { t.className = 'game-stats-title'; t.innerHTML = '🎯 영양 스텟'; }
+    if (t) { t.className = 'game-stats-title'; t.innerHTML = '영양 스텟'; }
   }
   // 요약
   document.getElementById('foodSummary').textContent = r.summary || '';
