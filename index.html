@@ -671,6 +671,34 @@
     .cpf-chip-sasang{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
     .cpf-edit{background:#fff;border:1px solid #C7D2FE;color:#4338CA;font-size:13px;width:30px;height:30px;border-radius:8px;cursor:pointer;flex-shrink:0}
     .cpf-note{font-size:10px;color:#6366F1;margin-top:6px;font-weight:600;text-align:right}
+    /* 💧 물 섭취 위젯 (결과 페이지) */
+    .water-widget{background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border:1.5px solid #93C5FD;border-radius:16px;padding:14px;box-shadow:0 3px 10px rgba(59,130,246,.12)}
+    .water-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+    .water-title{font-size:14px;font-weight:800;color:#1E40AF;margin-bottom:2px;letter-spacing:-.3px}
+    .water-stats{font-size:13px;color:#1E3A8A;font-weight:700}
+    .water-unit{font-size:10px;color:#64748B;font-weight:600;margin-left:1px}
+    .water-pct{font-weight:800}
+    .water-cups{font-size:14px;font-weight:700;color:#1E40AF;background:#fff;padding:5px 10px;border-radius:999px;border:1px solid #BFDBFE;white-space:nowrap}
+    .water-bar-wrap{height:10px;background:#fff;border-radius:5px;overflow:hidden;border:1px solid #BFDBFE;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
+    .water-bar{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.2,.8,.2,1);background-size:18px 18px;background-image:linear-gradient(45deg,rgba(255,255,255,.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.3) 50%,rgba(255,255,255,.3) 75%,transparent 75%,transparent);animation:barShine 1.4s linear infinite}
+    .water-msg{font-size:11.5px;color:#1E40AF;margin-top:8px;padding:7px 10px;background:#fff;border-radius:8px;border:1px solid #BFDBFE;line-height:1.5;font-weight:600}
+    .water-buttons{display:grid;grid-template-columns:2fr 1fr .55fr .55fr;gap:6px;margin-top:10px}
+    .water-btn{background:#fff;border:1.5px solid #93C5FD;color:#1E40AF;font-size:12px;font-weight:800;padding:9px 6px;border-radius:10px;cursor:pointer;letter-spacing:-.2px}
+    .water-btn.primary{background:linear-gradient(135deg,#3B82F6,#2563EB);color:#fff;border-color:#2563EB;box-shadow:0 2px 6px rgba(59,130,246,.3)}
+    .water-btn.small{font-size:13px;padding:7px 4px}
+    .water-btn.reset{background:#F8FAFC;color:#64748B;border-color:#E2E8F0}
+    .water-btn:active{transform:scale(.96)}
+    /* 💧 홈 화면 미니 물 위젯 */
+    .home-water{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1.5px solid #93C5FD;border-radius:14px;padding:11px 13px;margin-bottom:10px;box-shadow:0 2px 8px rgba(59,130,246,.1)}
+    .home-water-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .home-water-label{font-size:12.5px;font-weight:800;color:#1E40AF;letter-spacing:-.2px}
+    .home-water-val{font-size:12px;color:#1E3A8A;font-weight:700}
+    .home-water-bar{height:7px;background:#fff;border-radius:4px;overflow:hidden;border:1px solid #BFDBFE}
+    .home-water-fill{height:100%;border-radius:4px;transition:width .5s ease-out}
+    .home-water-actions{display:flex;gap:5px;margin-top:7px}
+    .home-water-btn{flex:1;background:#fff;border:1px solid #BFDBFE;color:#1E40AF;font-size:11px;font-weight:700;padding:5px 4px;border-radius:7px;cursor:pointer}
+    .home-water-btn.small{flex:.4}
+    .home-water-btn:active{background:#DBEAFE}
     /* 🧬 맞춤 분석 카드 */
     .personal-empty{background:linear-gradient(135deg,#EEF2FF,#F3E8FF);border:1.5px dashed #A78BFA;border-radius:16px;padding:14px;text-align:center}
     .personal-card{background:linear-gradient(135deg,#EEF2FF 0%,#F3E8FF 100%);border:1.5px solid #C7D2FE;border-radius:16px;padding:14px;box-shadow:0 3px 10px rgba(99,102,241,.12)}
@@ -1300,6 +1328,8 @@
           <span class="gem">💎</span> <span id="homePointsNum">0</span>P
         </button>
       </div>
+      <!-- 💧 물 섭취 위젯 -->
+      <div id="homeWaterWidget"></div>
       <div class="home-top">
         <div class="home-title">
           <h1>오늘, 작은 신호를<br>확인해보세요</h1>
@@ -1913,6 +1943,8 @@
       </div>
       <!-- 🧬 맞춤 분석 카드 -->
       <div id="personalAnalysisCard" style="margin-bottom:14px"></div>
+      <!-- 💧 물 섭취 위젯 (결과 페이지) -->
+      <div id="waterWidget" style="margin-bottom:14px"></div>
       <!-- 인식된 음식 -->
       <div class="food-list">
         <div class="nutri-title">🍴 인식된 음식</div>
@@ -2449,8 +2481,8 @@ function showScreen(id) {
   // body 클래스 (배경색 제어)
   document.body.classList.toggle('home-active', id === 'screenHome');
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
-  // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크
-  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); }
+  // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯
+  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시
   if (id === 'screenCapture') maybeShowCaptureTip();
   // 식단 사진 화면 진입 시 프로필 배너 렌더링
@@ -4222,6 +4254,8 @@ function renderFoodResult(r) {
   try { r = enrichWithPairings(r); } catch(e) { console.error('enrichWithPairings 에러:', e); }
   // 🧬 맞춤 분석 카드 렌더링
   try { renderPersonalAnalysis(r); } catch(e) { console.error('맞춤 분석 에러:', e); }
+  // 💧 물 섭취 위젯
+  try { renderWaterWidget(); } catch(e) { console.error('물 위젯 에러:', e); }
   // 게임화된 Hero (영양사 캐릭터 + 점수 원형)
   const score = r.balanceScore || 0;
   const grade = r.balanceGrade || 'B';
@@ -6221,6 +6255,97 @@ function resetAllData() {
   closeSettings();
   alert('모든 데이터가 삭제되었어요. 처음 화면으로 돌아갑니다.');
   location.reload();
+}
+
+// ════════════════════════════════════════════════════════════════
+// 💧 물 섭취 시스템
+// ════════════════════════════════════════════════════════════════
+function getWaterAll() { try { return JSON.parse(localStorage.getItem('waterIntakeV1') || '{}'); } catch(e) { return {}; } }
+function getWaterToday() { const today = new Date().toISOString().split('T')[0]; return getWaterAll()[today] || 0; }
+function setWaterToday(ml) {
+  const today = new Date().toISOString().split('T')[0];
+  const all = getWaterAll();
+  all[today] = Math.max(0, Math.round(ml));
+  localStorage.setItem('waterIntakeV1', JSON.stringify(all));
+}
+function addWater(ml) {
+  setWaterToday(getWaterToday() + ml);
+  renderWaterWidget();
+  renderHomeWaterWidget();
+}
+function resetWaterToday() {
+  if (!confirm('오늘 물 섭취 기록을 리셋할까요?')) return;
+  setWaterToday(0);
+  renderWaterWidget();
+  renderHomeWaterWidget();
+}
+function getWaterRecommendation() {
+  const p = getPersonalProfile();
+  const w = parseFloat(p?.weight);
+  if (!w || w <= 0) return 2000; // 기본 2L
+  return Math.round(w * 33); // 체중 × 33ml (중간값)
+}
+function getWaterEvalColor(pct) {
+  if (pct >= 80) return '#10B981';
+  if (pct >= 50) return '#F59E0B';
+  return '#3B82F6';
+}
+function renderWaterWidget() {
+  const el = document.getElementById('waterWidget');
+  if (!el) return;
+  const today = getWaterToday();
+  const target = getWaterRecommendation();
+  const pct = Math.min(100, Math.round((today / target) * 100));
+  const rawPct = (today / target) * 100;
+  const color = getWaterEvalColor(rawPct);
+  const cups = Math.floor(today / 250);
+  const cupsDisplay = cups === 0 ? '🥛 0잔' : `💧 ${cups}잔`;
+  let msg;
+  if (rawPct >= 100) msg = '💪 오늘 물 섭취 목표 달성! 신장·피부 건강에 좋아요';
+  else if (rawPct >= 80) msg = '👍 거의 다 왔어요! 한 컵만 더 마셔보세요';
+  else if (rawPct >= 50) msg = '💧 절반은 했어요. 천천히 더 마셔주세요';
+  else if (rawPct >= 25) msg = '⚠️ 부족해요. 컵 옆에 두고 자주 마셔주세요';
+  else msg = '🚨 너무 적어요! 지금 한 컵 마시는 거 추천!';
+  el.innerHTML = `<div class="water-widget">
+    <div class="water-head">
+      <div>
+        <div class="water-title">💧 오늘 물 섭취량</div>
+        <div class="water-stats">${today.toLocaleString()}<span class="water-unit">ml</span> / ${target.toLocaleString()}ml <span class="water-pct" style="color:${color}">(${pct}%)</span></div>
+      </div>
+      <div class="water-cups">${cupsDisplay}</div>
+    </div>
+    <div class="water-bar-wrap">
+      <div class="water-bar" style="width:${pct}%;background-color:${color}"></div>
+    </div>
+    <div class="water-msg">${msg}</div>
+    <div class="water-buttons">
+      <button class="water-btn primary" onclick="addWater(250)">💧 +한 컵 (250ml)</button>
+      <button class="water-btn" onclick="addWater(500)">+500ml</button>
+      <button class="water-btn small" onclick="addWater(-250)">−</button>
+      <button class="water-btn small reset" onclick="resetWaterToday()" title="리셋">↺</button>
+    </div>
+  </div>`;
+}
+function renderHomeWaterWidget() {
+  const el = document.getElementById('homeWaterWidget');
+  if (!el) return;
+  const today = getWaterToday();
+  const target = getWaterRecommendation();
+  const pct = Math.min(100, Math.round((today / target) * 100));
+  const rawPct = (today / target) * 100;
+  const color = getWaterEvalColor(rawPct);
+  el.innerHTML = `<div class="home-water">
+    <div class="home-water-top">
+      <div class="home-water-label">💧 오늘 물 섭취</div>
+      <div class="home-water-val">${today.toLocaleString()} / ${target.toLocaleString()}<span style="color:#94A3B8">ml</span></div>
+    </div>
+    <div class="home-water-bar"><div class="home-water-fill" style="width:${pct}%;background-color:${color}"></div></div>
+    <div class="home-water-actions">
+      <button class="home-water-btn" onclick="event.stopPropagation();addWater(250)">+250ml</button>
+      <button class="home-water-btn" onclick="event.stopPropagation();addWater(500)">+500ml</button>
+      <button class="home-water-btn small" onclick="event.stopPropagation();addWater(-250)">−</button>
+    </div>
+  </div>`;
 }
 
 // ════════════════════════════════════════════════════════════════
