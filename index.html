@@ -724,6 +724,15 @@
     .coach-msg.neutral{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);color:#78350F;border-color:#FCD34D}
     .coach-msg.warn{background:linear-gradient(135deg,#FEF2F2,#FEE2E2);color:#991B1B;border-color:#FCA5A5}
     .coach-msg strong{font-weight:800}
+    /* 식단 기록 관리 */
+    .food-records-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+    .food-record-row{display:flex;align-items:center;gap:8px;padding:9px 11px;background:#FAFBFC;border-radius:10px;border:1px solid #F1F5F9}
+    .food-record-info{flex:1;min-width:0}
+    .food-record-date{font-size:11px;font-weight:700;color:#64748B;margin-bottom:2px}
+    .food-record-foods{font-size:12px;color:#1F2937;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+    .food-record-cal{font-size:10.5px;color:#F59E0B;font-weight:700}
+    .food-record-del{background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;font-size:14px;width:34px;height:34px;border-radius:10px;cursor:pointer;flex-shrink:0;font-weight:700}
+    .food-record-del:active{background:#FECACA}
     /* 📊 영양 추천/권장 카드 */
     .reco-card{border-radius:12px;padding:12px;margin-bottom:8px;border:1.5px solid}
     .reco-soft{background:#EFF6FF;border-color:#BFDBFE}
@@ -3976,6 +3985,99 @@ const DISH_PAIRING_DICT = {
   },
 };
 
+// 🧬 음식 → 비타민·미네랄 1인분 추정 (AI 응답 없을 때 폴백)
+const FOOD_MICRO_DICT = {
+  // 단백질
+  '소고기':   { vitaminB:2.0,  iron:2.5, zinc:4.0 },
+  '돼지고기': { vitaminB:1.5,  vitaminD:0.5, iron:1.0, zinc:2.5 },
+  '닭가슴살': { vitaminB:1.2,  magnesium:27, zinc:0.7 },
+  '닭고기':   { vitaminB:1.0,  zinc:0.8 },
+  '연어':     { vitaminD:11,   vitaminB:4.7, vitaminE:1.5, magnesium:29 },
+  '계란':     { vitaminA:89,   vitaminB:0.5, vitaminD:1.0, calcium:50, iron:1.2, folate:47 },
+  '두부':     { calcium:200,   magnesium:30, iron:1.5, zinc:0.8 },
+  '오징어':   { vitaminB:1.3,  zinc:1.5, magnesium:33 },
+  '새우':     { vitaminB:1.1,  zinc:1.4, calcium:50 },
+  // 채소·나물
+  '시금치':   { vitaminA:470,  vitaminC:28, folate:194, iron:2.7, magnesium:79, potassium:558, calcium:99 },
+  '브로콜리': { vitaminC:89,   folate:63, vitaminA:31, calcium:47, potassium:316 },
+  '당근':     { vitaminA:835,  vitaminC:6, potassium:320, vitaminE:0.7 },
+  '토마토':   { vitaminA:42,   vitaminC:14, potassium:237, folate:15, vitaminE:0.5 },
+  '오이':     { vitaminC:3,    potassium:147 },
+  '양파':     { vitaminC:7,    folate:19, potassium:146 },
+  '마늘':     { vitaminC:31,   vitaminB:1.2, magnesium:25 },
+  '버섯':     { vitaminD:0.2,  vitaminB:3.6, potassium:318, folate:17 },
+  '콩나물':   { vitaminC:13,   folate:172, vitaminB:0.7 },
+  '깻잎':     { vitaminA:354,  vitaminC:12, calcium:296, iron:2.2, folate:150 },
+  '고사리':   { folate:50,     calcium:30, iron:1.5 },
+  '가지':     { vitaminC:2,    folate:22, potassium:229 },
+  // 해조류
+  '미역':     { calcium:152,   iron:3.0, magnesium:107, folate:196, potassium:50 },
+  '김치':     { vitaminC:18,   vitaminA:220, calcium:33, folate:40, vitaminB:0.3 },
+  // 탄수화물
+  '잡곡밥':   { magnesium:80,  vitaminB:0.3, iron:1.0, folate:20 },
+  '흰쌀밥':   { magnesium:12,  vitaminB:0.1 },
+  '쌀':       { magnesium:25,  vitaminB:0.1 },
+  '잡곡':     { magnesium:80,  vitaminB:0.3, iron:1.5 },
+  '흰쌀':     { magnesium:12,  vitaminB:0.1 },
+  '고구마':   { vitaminA:709,  vitaminC:2, potassium:337, magnesium:25 },
+  '감자':     { vitaminC:20,   potassium:421, folate:18 },
+  '면':       { magnesium:18,  vitaminB:0.2 },
+  '당면':     { iron:1.5 },
+  // 양념·기름
+  '참기름':   { vitaminE:5.0 },
+  '들기름':   { vitaminE:4.0 },
+  '올리브유': { vitaminE:14 },
+  '고추장':   { vitaminC:5,    vitaminA:50 },
+  // 과일·견과
+  '견과류':   { vitaminE:7,    magnesium:75, zinc:1.0 },
+  '아보카도': { vitaminE:2,    vitaminB:0.3, potassium:485, magnesium:29, folate:81 },
+  '바나나':   { vitaminC:10,   potassium:358, vitaminB:0.4 },
+  '사과':     { vitaminC:8,    potassium:195 },
+  '오렌지':   { vitaminC:70,   folate:39, calcium:43 },
+  '레몬':     { vitaminC:51 },
+  '키위':     { vitaminC:90,   vitaminE:1.5, potassium:215 },
+  // 유제품
+  '우유':     { calcium:300,   vitaminD:2.5, vitaminB:0.4 },
+  '치즈':     { calcium:200,   vitaminA:80, zinc:1.0 },
+  '요거트':   { calcium:180,   vitaminB:0.3 },
+  // 기타
+  '깍두기':   { vitaminC:10,   calcium:25 },
+  '단무지':   { vitaminC:5 },
+  '깻잎장아찌':{ vitaminA:200,  vitaminC:7, calcium:200, iron:1.5 },
+  '무말랭이무침':{ vitaminC:8,  calcium:30 },
+  '미역줄기볶음':{ calcium:120, iron:2.5, magnesium:80 },
+  '미역줄기': { calcium:100,   iron:2.0, magnesium:60 },
+  '우엉':     { folate:23,     magnesium:54, potassium:308 },
+  '멸치':     { calcium:902,   vitaminD:3, vitaminB:0.9 }
+};
+
+// AI가 micronutrients 안 보냈을 때 음식 기반 추정으로 보완
+function estimateMicronutrients(foods) {
+  const totals = { vitaminA:0, vitaminC:0, vitaminD:0, vitaminE:0, vitaminB:0, folate:0, calcium:0, iron:0, magnesium:0, zinc:0, potassium:0 };
+  const strip = (s) => String(s || '').replace(/\s*\([A-Za-z][^)]*\)\s*/g, '').trim();
+  (foods || []).forEach(f => {
+    const fname = strip(typeof f === 'string' ? f : f.name);
+    if (!fname) return;
+    // 정확 매칭
+    let m = FOOD_MICRO_DICT[fname];
+    // 부분 매칭
+    if (!m) {
+      const key = Object.keys(FOOD_MICRO_DICT).find(k => fname.includes(k) || k.includes(fname));
+      if (key) m = FOOD_MICRO_DICT[key];
+    }
+    if (m) Object.keys(m).forEach(k => { if (totals[k] !== undefined) totals[k] += m[k]; });
+    // 재료들로도 추가 (30% 가중)
+    const ings = (typeof f === 'object' ? f.ingredients : null) || [];
+    ings.forEach(ing => {
+      const iname = strip(typeof ing === 'string' ? ing : ing.name);
+      const im = FOOD_MICRO_DICT[iname];
+      if (im) Object.keys(im).forEach(k => { if (totals[k] !== undefined) totals[k] += im[k] * 0.3; });
+    });
+  });
+  Object.keys(totals).forEach(k => totals[k] = Math.round(totals[k] * 10) / 10);
+  return totals;
+}
+
 // 한식 음식 → 일반적 재료 사전 (재료 추정 강화)
 const FOOD_TO_INGS = {
   '소고기 미역국': ['소고기', '미역'],
@@ -6274,8 +6376,13 @@ function _showFoodReportImpl(period) {
       Object.keys(nutSum).forEach(k => nutSum[k] += num(h.nutrition[k]));
       nutCount++;
     }
-    if (h.micronutrients && typeof h.micronutrients === 'object') {
-      Object.keys(microSum).forEach(k => microSum[k] += num(h.micronutrients[k]));
+    // micronutrients 없으면 음식 기반 자동 추정
+    let micro = h.micronutrients;
+    if (!micro || typeof micro !== 'object' || Object.keys(micro).filter(k => num(micro[k]) > 0).length < 3) {
+      try { micro = estimateMicronutrients(h.foods || []); } catch(e) { micro = null; }
+    }
+    if (micro && typeof micro === 'object') {
+      Object.keys(microSum).forEach(k => microSum[k] += num(micro[k]));
     }
   });
   const nutAvg = {};
@@ -6489,12 +6596,12 @@ function _showFoodReportImpl(period) {
         </div>`;
       }).join('');
 
-      // 💊 영양제 부드러운 추천
-      const allSuppsW = [];
-      lackedItems.forEach(it => (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSuppsW.push({ s, reason: `${it.label} 보충` })));
-      excessItems.forEach(it => (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSuppsW.push({ s, reason: `${it.label} 관리` })));
-      const seenW = new Set();
-      const uniqueSuppsW = allSuppsW.filter(x => seenW.has(x.s) ? false : (seenW.add(x.s), true));
+      // 💊 영양제 부드러운 추천 — 가장 부족한 3개 영양소만, 각 1개씩
+      const top3Lacked = lackedItems.slice(0, 3);
+      const uniqueSuppsW = top3Lacked.map(it => {
+        const opts = NUT_SUPPLEMENTS[it.k] || [];
+        return opts[0] ? { s: opts[0], reason: `${it.label} 보충 (${it.pct}%)` } : null;
+      }).filter(Boolean);
       const suppHtmlW = uniqueSuppsW.length > 0 ? `
         <div class="reco-card reco-soft" style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);border-color:#D8B4FE">
           <div class="reco-head" style="color:#6B21A8">💊 <strong>이번 주 추천 영양제</strong></div>
@@ -6537,24 +6644,16 @@ function _showFoodReportImpl(period) {
         </div>`;
       }).join('');
 
-      // 💊 영양제 추천 — 부족 영양소 기준 (NUT_SUPPLEMENTS는 위에서 정의됨)
-      const allSupps = [];
-      lackedItems.forEach(it => {
-        (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSupps.push({ s, reason: `${it.label} 보충` }));
-      });
-      excessItems.forEach(it => {
-        (NUT_SUPPLEMENTS[it.k] || []).forEach(s => allSupps.push({ s, reason: `${it.label} 관리` }));
-      });
-      // 종합 비타민·미네랄은 부족 영양소 2개 이상이면 추천
-      if (lackedItems.length >= 2) {
-        allSupps.push({ s: '종합 비타민·미네랄', reason: '전반적인 영양 부족 보완' });
+      // 💊 영양제 추천 — 가장 부족한 3개 영양소만 (각 1개씩)
+      const top3LackedM = lackedItems.slice(0, 3);
+      const uniqueSupps = top3LackedM.map(it => {
+        const opts = NUT_SUPPLEMENTS[it.k] || [];
+        return opts[0] ? { s: opts[0], reason: `${it.label} 만성 부족 ${it.pct}%` } : null;
+      }).filter(Boolean);
+      // 부족 영양소가 4개 이상이면 종합 비타민·미네랄 추가
+      if (lackedItems.length >= 4 && uniqueSupps.length < 3) {
+        uniqueSupps.push({ s: '종합 비타민·미네랄', reason: '전반적인 영양 부족 보완' });
       }
-      // 중복 제거
-      const seenS = new Set();
-      const uniqueSupps = allSupps.filter(x => {
-        if (seenS.has(x.s)) return false;
-        seenS.add(x.s); return true;
-      });
       const suppHtml = uniqueSupps.length > 0 ? `
         <div class="reco-card reco-strong" style="background:linear-gradient(135deg,#F3E8FF,#FAE8FF);border-color:#A855F7">
           <div class="reco-head" style="color:#6B21A8">💊 <strong>권장 영양제</strong></div>
@@ -6628,8 +6727,47 @@ function _showFoodReportImpl(period) {
     </div>
 
     ${recoHtml}
+
+    <div class="report-section">
+      <div class="report-section-title">📝 식단 기록 관리</div>
+      <div style="font-size:11.5px;color:#64748B;margin-bottom:8px;line-height:1.5">잘못 입력된 식단이 있으면 삭제하세요. 리포트가 정확해져요.</div>
+      <div class="food-records-list">
+        ${filtered.slice().reverse().slice(0, 30).map(h => {
+          const id = h.timestamp || h.date || JSON.stringify(h).slice(0,40);
+          const dt = new Date(h.date || h.timestamp || Date.now());
+          const dateStr = `${dt.getMonth()+1}/${dt.getDate()}`;
+          const foods = (h.foods || []).map(f => typeof f === 'string' ? f : (f.name || '')).filter(Boolean).slice(0, 3).join(', ');
+          const moreFoods = (h.foods || []).length > 3 ? ` 외 ${(h.foods||[]).length - 3}개` : '';
+          return `<div class="food-record-row">
+            <div class="food-record-info">
+              <div class="food-record-date">📅 ${dateStr} · ${h.mealTime || '식사'}</div>
+              <div class="food-record-foods">${foods}${moreFoods}</div>
+              <div class="food-record-cal">${h.totalCalories || 0} kcal</div>
+            </div>
+            <button class="food-record-del" onclick="deleteFoodRecord('${String(id).replace(/'/g,'')}', '${period}')">🗑</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
   `;
   modal.style.display = 'block';
+}
+
+// 🗑 식단 기록 삭제
+function deleteFoodRecord(id, period) {
+  if (!confirm('이 식단 기록을 삭제할까요?\n삭제 후 리포트가 다시 계산돼요.')) return;
+  try {
+    let history = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    history = history.filter(h => {
+      const hid = h.timestamp || h.date || JSON.stringify(h).slice(0,40);
+      return String(hid) !== String(id);
+    });
+    localStorage.setItem('foodHistoryV1', JSON.stringify(history));
+    // 리포트 즉시 갱신
+    showFoodReport(period || 'week');
+  } catch(e) {
+    alert('삭제 중 오류: ' + (e.message || ''));
+  }
 }
 
 function closeFoodReport() {
