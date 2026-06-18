@@ -176,6 +176,19 @@ ${profile}${confirmHint}${todayHint}
     "carbs": 정수, "protein": 정수, "fat": 정수,
     "fiber": 정수, "sodium": 정수, "sugar": 정수
   },
+  "micronutrients": {
+    "vitaminA": 정수(μg RAE),
+    "vitaminC": 정수(mg),
+    "vitaminD": 정수(μg),
+    "vitaminE": 정수(mg),
+    "vitaminB": 정수(mg, B군 합계),
+    "folate": 정수(μg, 엽산),
+    "calcium": 정수(mg),
+    "iron": 정수(mg),
+    "magnesium": 정수(mg),
+    "zinc": 정수(mg),
+    "potassium": 정수(mg)
+  },
   "balanceScore": 0~100,
   "balanceGrade": "A/B/C/D",
   "balanceLabel": "최상/우수/양호/주의/개선필요",
