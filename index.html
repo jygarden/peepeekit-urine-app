@@ -163,9 +163,9 @@
     /* ════════════ 환영(Welcome) 화면 ════════════ */
     body.welcome-active{
       background:linear-gradient(180deg,#FAFCFF 0%,#EBF3FE 60%,#D5E6FB 100%);
-      overflow:hidden
+      overflow-y:auto;-webkit-overflow-scrolling:touch
     }
-    #screenWelcome{padding:0;display:none;position:relative;z-index:2}
+    #screenWelcome{padding:0;display:none;position:relative;z-index:2;min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
     #screenWelcome.active{display:block}
 
     /* ── 오로라 배경 (더 강하게, 화면 전체 흐름) ── */
@@ -207,9 +207,10 @@
 
     .welcome-wrap{
       min-height:100vh;display:flex;flex-direction:column;align-items:center;
-      padding:40px 24px 60px;position:relative;z-index:3;text-align:center;
-      overflow-y:auto;-webkit-overflow-scrolling:touch
+      padding:40px 24px 80px;position:relative;z-index:3;text-align:center
     }
+    /* 환영 화면 활성 상태에서 body 스크롤 활성화 */
+    body:has(#screenWelcome.active){overflow-y:auto;height:auto}
     .welcome-brand{
       font-size:15px;font-weight:700;color:var(--primary);letter-spacing:-.2px;
       opacity:0;animation:fadeSlideUp .7s cubic-bezier(.2,.8,.2,1) .15s forwards
