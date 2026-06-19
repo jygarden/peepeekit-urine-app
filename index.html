@@ -773,6 +773,8 @@
     .signup-check{display:flex;align-items:flex-start;gap:8px;padding:5px 0;cursor:pointer;font-size:11.5px;color:var(--gray-600);line-height:1.5}
     .signup-check input{margin-top:2px;flex-shrink:0;accent-color:var(--primary);width:15px;height:15px}
     .signup-check strong{color:var(--danger);font-weight:800;margin-right:3px}
+    .consent-link{color:var(--primary);text-decoration:underline;font-size:11px;margin-left:4px;font-weight:700}
+    .consent-link:hover{color:var(--primary-dark)}
     .signup-submit{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:var(--r-md);font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px;transition:all .15s ease}
     .signup-submit:hover{background:var(--primary-dark)}
     .signup-submit:active{transform:scale(.98)}
@@ -1473,12 +1475,20 @@
 
             <div class="signup-consent">
               <label class="signup-check">
+                <input type="checkbox" id="su_consent_age"/>
+                <span><strong>(필수)</strong> 만 14세 이상입니다</span>
+              </label>
+              <label class="signup-check">
                 <input type="checkbox" id="su_consent_privacy"/>
-                <span><strong>(필수)</strong> 개인정보 수집 및 이용 동의</span>
+                <span><strong>(필수)</strong> 개인정보 수집 및 이용 동의 <a href="privacy.html" target="_blank" class="consent-link">[보기]</a></span>
               </label>
               <label class="signup-check">
                 <input type="checkbox" id="su_consent_terms"/>
-                <span><strong>(필수)</strong> 서비스 이용약관 동의</span>
+                <span><strong>(필수)</strong> 서비스 이용약관 동의 <a href="terms.html" target="_blank" class="consent-link">[보기]</a></span>
+              </label>
+              <label class="signup-check">
+                <input type="checkbox" id="su_consent_medical"/>
+                <span><strong>(필수)</strong> 본 서비스가 의학적 진단·치료가 아님을 이해합니다</span>
               </label>
               <label class="signup-check">
                 <input type="checkbox" id="su_consent_marketing"/>
@@ -2584,7 +2594,9 @@
     <button class="settings-btn settings-btn-primary" onclick="saveNewName()">이름 변경</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">취소</button>
     <div class="settings-divider"></div>
-    <button class="settings-btn settings-btn-secondary" style="color:#6366f1" onclick="manageProfilesFromSettings()">👨‍👩‍👧 프로필 관리 (가족·반려동물)</button>
+    <button class="settings-btn settings-btn-secondary" onclick="manageProfilesFromSettings()">프로필 관리 (가족·반려동물)</button>
+    <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
+    <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
   </div>
 </div>
@@ -6623,8 +6635,10 @@ async function submitSignup() {
   const birthDay = document.getElementById('su_day').value;
   const height = document.getElementById('su_height').value;
   const weight = document.getElementById('su_weight').value;
+  const consentAge = document.getElementById('su_consent_age').checked;
   const consentPrivacy = document.getElementById('su_consent_privacy').checked;
   const consentTerms = document.getElementById('su_consent_terms').checked;
+  const consentMedical = document.getElementById('su_consent_medical').checked;
   const consentMarketing = document.getElementById('su_consent_marketing').checked;
 
   // 검증
@@ -6637,12 +6651,15 @@ async function submitSignup() {
   if (yNum < 1920 || yNum > new Date().getFullYear()) return alert('생년이 올바르지 않아요.');
   if (mNum < 1 || mNum > 12) return alert('월이 올바르지 않아요.');
   if (dNum < 1 || dNum > 31) return alert('일이 올바르지 않아요.');
+  if (!consentAge) return alert('만 14세 이상이어야 가입할 수 있어요.');
   if (!consentPrivacy) return alert('개인정보 수집 및 이용에 동의해주세요. (필수)');
   if (!consentTerms) return alert('서비스 이용약관에 동의해주세요. (필수)');
+  if (!consentMedical) return alert('본 서비스가 의학적 진단·치료가 아님을 이해하고 동의해주세요. (필수)');
 
   const profile = {
     name, phone, gender, birthYear, birthMonth, birthDay, height, weight,
-    consentPrivacy, consentTerms, consentMarketing
+    consentPrivacy, consentTerms, consentMarketing,
+    consentAge, consentMedical
   };
 
   // 로컬 저장
@@ -6653,8 +6670,10 @@ async function submitSignup() {
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = '저장 중...'; }
   try {
     await syncUserToSupabase(profile);
+    await logConsent('age_14plus', consentAge);
     await logConsent('privacy', consentPrivacy);
     await logConsent('terms', consentTerms);
+    await logConsent('medical_disclaimer', consentMedical);
     await logConsent('marketing', consentMarketing);
     await logActivity('signup', { name, phone: phone.slice(0,3) + '****' });
   } catch(e) { console.error('가입 동기화 실패:', e); }
