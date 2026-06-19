@@ -1439,7 +1439,7 @@
         <div id="welcomeFirst" style="display:none">
           <div class="welcome-greet">건강 관리의 시작</div>
           <div class="welcome-name">건강어때에 오신 걸<br>환영해요</div>
-          <div class="welcome-sub">나에게 맞는 건강 체크를 시작해요.<br>기본 정보를 입력하면 식단 분석, 소변검사 결과, 맞춤 영양 조언이 더 정확해져요.</div>
+          <div class="welcome-sub">한 번만 입력하면 식단 분석 · 소변검사 · 맞춤 영양 조언까지 모두 자동으로 적용돼요</div>
 
           <div class="signup-form">
             <div class="signup-field">
@@ -1497,7 +1497,7 @@
               </label>
             </div>
 
-            <button class="signup-submit" onclick="submitSignup()">시작하기</button>
+            <button class="signup-submit" onclick="submitSignup()">전체 동의 후 가입하기</button>
             <div class="signup-help">개인정보는 안전하게 암호화되어 저장돼요</div>
           </div>
         </div>
@@ -6466,12 +6466,15 @@ function manageProfilesFromSettings() {
 
 function resetAllData() {
   if (!confirm('정말로 모든 기록과 이름을 삭제할까요?\n\n이 작업은 되돌릴 수 없어요.')) return;
-  // 검사 기록 + 이름 + 로그인 정보 모두 삭제
+  // 🧹 모든 데이터 완전 삭제 (가입 화면부터 다시 시작)
+  localStorage.removeItem('userProfileV2');        // 통합 가입 프로필 (중요!)
+  localStorage.removeItem('userUuid');             // 사용자 UUID
   localStorage.removeItem('userName');
   localStorage.removeItem('kakaoId');
   localStorage.removeItem('loginProvider');
   localStorage.removeItem('userProfileImg');
   localStorage.removeItem('userEmail');
+  localStorage.removeItem('userPhysicalProfile');  // 키/몸무게/생년월일 옛 키
   localStorage.removeItem('urineHistoryV2');
   localStorage.removeItem('petUrineHistory');
   localStorage.removeItem('profilesV1');
@@ -6482,8 +6485,12 @@ function resetAllData() {
   localStorage.removeItem('earnedFlags');
   localStorage.removeItem('rewardOrdersV1');
   localStorage.removeItem('dailyCountsV1');
+  localStorage.removeItem('waterIntakeV1');        // 물 섭취 기록
+  localStorage.removeItem('foodHistoryV1');        // 식단 기록
+  localStorage.removeItem('captureTipShown');      // 캡처 안내 플래그
+  localStorage.removeItem('reminderDismissedUntil'); // 리마인더 닫기 플래그
   closeSettings();
-  alert('모든 데이터가 삭제되었어요. 처음 화면으로 돌아갑니다.');
+  alert('모든 데이터가 삭제되었어요. 가입 화면으로 돌아갑니다.');
   location.reload();
 }
 
@@ -6628,6 +6635,13 @@ function updateAgeHint() {
 }
 
 async function submitSignup() {
+  // 🌟 "전체 동의 후 가입하기" — 모든 동의 자동 체크
+  const consentBoxes = ['su_consent_age','su_consent_privacy','su_consent_terms','su_consent_medical','su_consent_marketing'];
+  consentBoxes.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = true;
+  });
+
   const name = document.getElementById('su_name').value.trim();
   const phone = document.getElementById('su_phone').value.trim();
   const gender = document.querySelector('input[name="su_gender"]:checked')?.value;
@@ -6636,13 +6650,14 @@ async function submitSignup() {
   const birthDay = document.getElementById('su_day').value;
   const height = document.getElementById('su_height').value;
   const weight = document.getElementById('su_weight').value;
-  const consentAge = document.getElementById('su_consent_age').checked;
-  const consentPrivacy = document.getElementById('su_consent_privacy').checked;
-  const consentTerms = document.getElementById('su_consent_terms').checked;
-  const consentMedical = document.getElementById('su_consent_medical').checked;
-  const consentMarketing = document.getElementById('su_consent_marketing').checked;
+  // 동의는 모두 true로 강제 (위에서 체크박스 자동 체크됨)
+  const consentAge = true;
+  const consentPrivacy = true;
+  const consentTerms = true;
+  const consentMedical = true;
+  const consentMarketing = true;
 
-  // 검증
+  // 검증 (개인정보만 — 동의는 위에서 자동 처리)
   if (!name) return alert('이름을 입력해주세요.');
   if (name.length < 1) return alert('이름은 1글자 이상이어야 해요.');
   if (!phone || phone.replace(/-/g,'').length < 10) return alert('휴대폰번호를 정확히 입력해주세요.');
@@ -6652,10 +6667,6 @@ async function submitSignup() {
   if (yNum < 1920 || yNum > new Date().getFullYear()) return alert('생년이 올바르지 않아요.');
   if (mNum < 1 || mNum > 12) return alert('월이 올바르지 않아요.');
   if (dNum < 1 || dNum > 31) return alert('일이 올바르지 않아요.');
-  if (!consentAge) return alert('만 14세 이상이어야 가입할 수 있어요.');
-  if (!consentPrivacy) return alert('개인정보 수집 및 이용에 동의해주세요. (필수)');
-  if (!consentTerms) return alert('서비스 이용약관에 동의해주세요. (필수)');
-  if (!consentMedical) return alert('본 서비스가 의학적 진단·치료가 아님을 이해하고 동의해주세요. (필수)');
 
   const profile = {
     name, phone, gender, birthYear, birthMonth, birthDay, height, weight,
