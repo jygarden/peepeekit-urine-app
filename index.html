@@ -146,6 +146,22 @@
 
     /* ── 공통 ── */
     .section-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:8px}
+    /* ── 페이지 헤더 (뒤로가기 + 제목) ── */
+    .page-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-top:4px}
+    .page-header .back-btn{
+      flex-shrink:0;width:36px;height:36px;border-radius:10px;
+      background:#F1F5F9;border:1px solid #E2E8F0;color:#334155;
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;font-weight:700;cursor:pointer;
+      transition:background .15s,transform .12s;
+      font-family:inherit;line-height:1
+    }
+    .page-header .back-btn:hover{background:#E2E8F0}
+    .page-header .back-btn:active{transform:scale(.92)}
+    .page-header .page-title{
+      font-size:16px;font-weight:800;color:#0F172A;
+      letter-spacing:-.3px;flex:1
+    }
     .card{background:#fff;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.07)}
 
     /* ── 입력 필드 ── */
@@ -298,7 +314,7 @@
     /* ════════════ 홈 화면 — 시안과 동일 ════════════ */
     body.home-active{background:#F7F7F5}
     #screenHome{padding:0}
-    .home-wrap{padding:70px 26px 0;min-height:100vh;display:flex;flex-direction:column}
+    .home-wrap{padding:20px 26px 0;min-height:100vh;display:flex;flex-direction:column;position:relative}
 
     /* ── 진입 애니메이션 ── */
     @keyframes fadeSlideUp{
@@ -342,7 +358,7 @@
     /* 상단 (타이틀 + 벨 버튼) */
     .home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:32px}
     /* 🆕 새 홈 레이아웃 */
-    .home-top-bar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:18px}
+    .home-top-bar{position:absolute;top:20px;right:26px;display:flex;align-items:center;gap:8px;z-index:5}
     .home-hello{margin-bottom:22px;padding:0 2px}
     .home-hello h1{font-size:24px;font-weight:800;letter-spacing:-.7px;color:var(--gray-900);line-height:1.32;margin-bottom:12px}
     .home-hello .sub{font-size:12.5px;color:var(--gray-500);letter-spacing:-.2px;font-weight:500;line-height:1.6}
@@ -2038,7 +2054,10 @@
 
   <!-- ════════════ 식단 사진 업로드 화면 ════════════ -->
   <div class="screen" id="screenFoodCapture">
-    <div class="section-title">🍽 식단 분석</div>
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🍽 식단 분석</div>
+    </div>
     <!-- 🧬 맞춤 분석 프로필 (사진 찍기 전 입력) -->
     <div id="captureProfileBanner" style="margin-bottom:12px"></div>
     <div class="card">
@@ -6515,7 +6534,17 @@ const SB = {
         headers: { ...this.headers(), Prefer: 'return=minimal' },
         body: JSON.stringify(body)
       });
-      if (!res.ok) console.warn(`[SB] insert ${table} 실패:`, res.status, await res.text());
+      if (!res.ok) {
+        const errText = await res.text();
+        console.warn(`[SB] insert ${table} 실패:`, res.status, errText);
+        // 첫 실패면 사용자에게 알림 (디버그용)
+        if (!window._sbErrorShown) {
+          window._sbErrorShown = true;
+          console.error(`🚨 Supabase 동기화 실패\n테이블: ${table}\n상태: ${res.status}\n에러: ${errText}`);
+        }
+      } else {
+        console.log(`[SB] ✅ insert ${table} 성공`);
+      }
       return res.ok;
     } catch(e) { console.warn(`[SB] insert ${table} 오류:`, e); return false; }
   },
@@ -6526,7 +6555,16 @@ const SB = {
         headers: { ...this.headers(), Prefer: 'return=minimal,resolution=merge-duplicates' },
         body: JSON.stringify(body)
       });
-      if (!res.ok) console.warn(`[SB] upsert ${table} 실패:`, res.status, await res.text());
+      if (!res.ok) {
+        const errText = await res.text();
+        console.warn(`[SB] upsert ${table} 실패:`, res.status, errText);
+        if (!window._sbErrorShown) {
+          window._sbErrorShown = true;
+          console.error(`🚨 Supabase 동기화 실패\n테이블: ${table}\n상태: ${res.status}\n에러: ${errText}`);
+        }
+      } else {
+        console.log(`[SB] ✅ upsert ${table} 성공`);
+      }
       return res.ok;
     } catch(e) { console.warn(`[SB] upsert ${table} 오류:`, e); return false; }
   }
