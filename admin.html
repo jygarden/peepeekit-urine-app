@@ -33,7 +33,10 @@
     main{padding:24px;max-width:1400px;margin:0 auto}
     /* ── 대시보드 카드 ── */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
-    .stat-card{background:#1E293B;border-radius:16px;padding:18px;border:1px solid #334155}
+    .stat-card{background:#1E293B;border-radius:16px;padding:18px;border:1px solid #334155;transition:transform .15s,box-shadow .15s}
+    .stat-card.clickable{cursor:pointer}
+    .stat-card.clickable:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(99,102,241,.25)}
+    .stat-card.clickable:active{transform:translateY(0)}
     .stat-label{font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px}
     .stat-value{font-size:30px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1}
     .stat-sub{font-size:11px;color:#64748B;margin-top:6px}
@@ -143,32 +146,32 @@
   <!-- 대시보드 탭 -->
   <main id="content-dashboard">
     <div class="stats-grid">
-      <div class="stat-card accent">
+      <div class="stat-card accent clickable" onclick="switchTab('orders')">
         <div class="stat-label">처리 대기 주문</div>
         <div class="stat-value" id="stat-pending">-</div>
         <div class="stat-sub">즉시 처리 필요</div>
       </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#10b981,#059669)">
+      <div class="stat-card clickable" onclick="switchTab('users')" style="background:linear-gradient(135deg,#10b981,#059669)">
         <div class="stat-label">전체 사용자</div>
         <div class="stat-value" id="stat-users">-</div>
         <div class="stat-sub">통합 가입자 수</div>
       </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">
+      <div class="stat-card clickable" onclick="switchTab('foods')" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">
         <div class="stat-label">식단 분석</div>
         <div class="stat-value" id="stat-foods">-</div>
         <div class="stat-sub">누적 분석 수</div>
       </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
+      <div class="stat-card clickable" onclick="switchTab('waters')" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
         <div class="stat-label">물 섭취 기록</div>
         <div class="stat-value" id="stat-waters">-</div>
         <div class="stat-sub">누적 일자 수</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="switchTab('pets')">
         <div class="stat-label">반려동물 기록</div>
         <div class="stat-value" id="stat-pets">-</div>
         <div class="stat-sub">누적 검사 수</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card clickable" onclick="switchTab('humans')">
         <div class="stat-label">사람 기록</div>
         <div class="stat-value" id="stat-humans">-</div>
         <div class="stat-sub">누적 검사 수</div>
@@ -178,7 +181,7 @@
         <div class="stat-value" id="stat-today">-</div>
         <div class="stat-sub">24시간 이내</div>
       </div>
-      <div class="stat-card success">
+      <div class="stat-card success clickable" onclick="switchTab('orders')">
         <div class="stat-label">완료된 주문</div>
         <div class="stat-value" id="stat-fulfilled">-</div>
         <div class="stat-sub">누적 발송</div>
