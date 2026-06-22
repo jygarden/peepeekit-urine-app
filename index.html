@@ -5170,6 +5170,9 @@ function saveFoodHistory(result) {
         total_calories: result.totalCalories
       });
       logActivity('analyze_food', { score: result.balanceScore, cal: result.totalCalories });
+
+      // 🎯 마케팅 인사이트 자동 업데이트 (영양제 추천 자동 판정)
+      try { updateNutritionInsights(result); } catch(e) { console.warn('[SB] insights:', e); }
     }
   } catch(e) { console.warn('[SB] saveFood:', e); }
 
@@ -5191,6 +5194,233 @@ function saveFoodHistory(result) {
     });
     localStorage.setItem(key, JSON.stringify(history.slice(0, 60)));
   } catch(e) {}
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🎯 마케팅 인사이트 자동 업데이트 (영양제 추천 판정)
+// ════════════════════════════════════════════════════════════════
+// 한국인 일일 권장량 (RDA)
+const RDA = {
+  protein_g: 55,       // 단백질
+  iron_mg: 12,         // 철분 (남 10 / 여 14 평균)
+  calcium_mg: 750,     // 칼슘
+  vitamin_d_iu: 400,   // 비타민D
+  vitamin_c_mg: 100,   // 비타민C
+  vitamin_b12_mcg: 2.4,// 비타민B12
+  omega3_mg: 1000,     // 오메가3
+  fiber_g: 25,         // 식이섬유
+  calories: 2200       // 칼로리
+};
+
+// 영양제 카탈로그 (확장 가능 — 추후 본인 제품으로 교체)
+const SUPPLEMENT_CATALOG = {
+  iron:       { name: '철분제',         tag: 'iron_supp',     price: 25000 },
+  calcium:    { name: '칼슘+비타민D 복합', tag: 'calcium_supp',  price: 32000 },
+  vitamin_d:  { name: '비타민D 5000IU',  tag: 'vd_supp',       price: 18000 },
+  vitamin_c:  { name: '비타민C 1000mg',  tag: 'vc_supp',       price: 22000 },
+  vitamin_b12:{ name: '비타민B12 메코발', tag: 'b12_supp',      price: 28000 },
+  omega3:     { name: 'rTG 오메가3',     tag: 'omega3_supp',   price: 45000 },
+  fiber:      { name: '프리바이오틱 식이섬유', tag: 'fiber_supp', price: 35000 },
+  protein:    { name: 'WPI 단백질 파우더', tag: 'protein_supp', price: 55000 },
+  multi:      { name: '종합비타민',       tag: 'multi_supp',    price: 38000 }
+};
+
+async function updateNutritionInsights(result) {
+  if (!SB.ready) return;
+  const userUuid = getCurrentUserUuid();
+  if (!userUuid) return;
+
+  // 1. 현재 인사이트 가져오기 (없으면 새로 시작)
+  let existing = null;
+  try {
+    const res = await fetch(`${SB.url}/rest/v1/nutrition_insights?user_uuid=eq.${userUuid}&select=*`, {
+      headers: SB.headers()
+    });
+    if (res.ok) {
+      const data = await res.json();
+      existing = data && data[0] ? data[0] : null;
+    }
+  } catch(e) {}
+
+  // 2. 현재 분석 결과의 영양소 추출
+  const macro = result.nutrition || {};
+  const micro = result.micronutrients || {};
+  const cur = {
+    protein:  Number(macro.protein) || 0,
+    carbs:    Number(macro.carbs) || 0,
+    fat:      Number(macro.fat) || 0,
+    calories: Number(result.totalCalories) || 0,
+    iron:     Number(micro.iron) || 0,
+    calcium:  Number(micro.calcium) || 0,
+    vitaminD: Number(micro.vitaminD) || 0,
+    vitaminC: Number(micro.vitaminC) || 0,
+    vitaminB12: Number(micro.vitaminB12) || 0,
+    omega3:   Number(micro.omega3) || 0,
+    fiber:    Number(micro.fiber) || 0,
+    balance:  Number(result.balanceScore) || 0
+  };
+
+  // 3. 누적 합계 계산 (러닝 평균)
+  const prev = existing || {};
+  const count = (prev.analyses_count || 0) + 1;
+  const totals = {
+    total_protein_g:     (Number(prev.total_protein_g) || 0) + cur.protein,
+    total_carbs_g:       (Number(prev.total_carbs_g) || 0) + cur.carbs,
+    total_fat_g:         (Number(prev.total_fat_g) || 0) + cur.fat,
+    total_iron_mg:       (Number(prev.total_iron_mg) || 0) + cur.iron,
+    total_calcium_mg:    (Number(prev.total_calcium_mg) || 0) + cur.calcium,
+    total_vitamin_d_iu:  (Number(prev.total_vitamin_d_iu) || 0) + cur.vitaminD,
+    total_vitamin_c_mg:  (Number(prev.total_vitamin_c_mg) || 0) + cur.vitaminC,
+    total_vitamin_b12_mcg:(Number(prev.total_vitamin_b12_mcg) || 0) + cur.vitaminB12,
+    total_omega3_mg:     (Number(prev.total_omega3_mg) || 0) + cur.omega3,
+    total_fiber_g:       (Number(prev.total_fiber_g) || 0) + cur.fiber,
+    total_calories:      (Number(prev.total_calories) || 0) + cur.calories,
+    total_balance_score: (Number(prev.total_balance_score) || 0) + cur.balance
+  };
+
+  // 4. 평균 계산
+  const avgs = {
+    avg_protein_g:      totals.total_protein_g / count,
+    avg_carbs_g:        totals.total_carbs_g / count,
+    avg_fat_g:          totals.total_fat_g / count,
+    avg_iron_mg:        totals.total_iron_mg / count,
+    avg_calcium_mg:     totals.total_calcium_mg / count,
+    avg_vitamin_d_iu:   totals.total_vitamin_d_iu / count,
+    avg_vitamin_c_mg:   totals.total_vitamin_c_mg / count,
+    avg_vitamin_b12_mcg:totals.total_vitamin_b12_mcg / count,
+    avg_omega3_mg:      totals.total_omega3_mg / count,
+    avg_fiber_g:        totals.total_fiber_g / count,
+    avg_calories:       totals.total_calories / count,
+    avg_balance_score:  totals.total_balance_score / count
+  };
+
+  // 5. 부족 영양소 판정 (3회 이상 분석 + 평균이 RDA의 60% 미만)
+  const deficient = [];
+  const flags = {
+    needs_iron_supplement:       false,
+    needs_calcium_supplement:    false,
+    needs_vitamin_d_supplement:  false,
+    needs_vitamin_c_supplement:  false,
+    needs_vitamin_b12_supplement:false,
+    needs_omega3_supplement:     false,
+    needs_fiber_supplement:      false,
+    needs_protein_supplement:    false,
+    needs_multivitamin:          false
+  };
+  if (count >= 3) {
+    if (avgs.avg_iron_mg < RDA.iron_mg * 0.6)             { deficient.push('iron');       flags.needs_iron_supplement = true; }
+    if (avgs.avg_calcium_mg < RDA.calcium_mg * 0.6)       { deficient.push('calcium');    flags.needs_calcium_supplement = true; }
+    if (avgs.avg_vitamin_d_iu < RDA.vitamin_d_iu * 0.6)   { deficient.push('vitamin_d');  flags.needs_vitamin_d_supplement = true; }
+    if (avgs.avg_vitamin_c_mg < RDA.vitamin_c_mg * 0.6)   { deficient.push('vitamin_c');  flags.needs_vitamin_c_supplement = true; }
+    if (avgs.avg_vitamin_b12_mcg < RDA.vitamin_b12_mcg*0.6){deficient.push('vitamin_b12');flags.needs_vitamin_b12_supplement = true;}
+    if (avgs.avg_omega3_mg < RDA.omega3_mg * 0.6)         { deficient.push('omega3');     flags.needs_omega3_supplement = true; }
+    if (avgs.avg_fiber_g < RDA.fiber_g * 0.6)             { deficient.push('fiber');      flags.needs_fiber_supplement = true; }
+    if (avgs.avg_protein_g < RDA.protein_g * 0.6)         { deficient.push('protein');    flags.needs_protein_supplement = true; }
+    if (deficient.length >= 3)                            { flags.needs_multivitamin = true; }
+  }
+
+  // 6. 추천 제품 태그 생성
+  const recommendedTags = deficient.map(n => {
+    const sup = SUPPLEMENT_CATALOG[n] || SUPPLEMENT_CATALOG[n === 'vitamin_d' ? 'vitamin_d' : n];
+    return sup ? sup.tag : null;
+  }).filter(Boolean);
+  if (flags.needs_multivitamin) recommendedTags.push('multi_supp');
+
+  // 7. nutrition_insights upsert
+  await SB.upsert('nutrition_insights', {
+    user_uuid: userUuid,
+    ...totals,
+    ...avgs,
+    deficient_nutrients: deficient,
+    ...flags,
+    recommended_product_tags: recommendedTags,
+    analyses_count: count,
+    last_analyzed_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }, 'user_uuid');
+
+  // 8. users 테이블에 마케팅 세그먼트 업데이트
+  await updateUserMarketingSegments(userUuid, deficient, count);
+
+  // 9. supplement_opportunities 생성 (영양제 추천 기회)
+  for (const nutrient of deficient) {
+    const sup = SUPPLEMENT_CATALOG[nutrient];
+    if (!sup) continue;
+    const ratio = (avgs['avg_'+nutrient+'_mg'] || avgs['avg_'+nutrient+'_iu'] || avgs['avg_'+nutrient+'_mcg'] || avgs['avg_'+nutrient+'_g'] || 0)
+                  / (RDA[nutrient+'_mg'] || RDA[nutrient+'_iu'] || RDA[nutrient+'_mcg'] || RDA[nutrient+'_g'] || 1);
+    const confidence = Math.min(100, Math.round((1 - ratio) * 100 + count * 2));
+    await SB.insert('supplement_opportunities', {
+      user_uuid: userUuid,
+      supplement_type: nutrient,
+      product_name: sup.name,
+      reason: `최근 ${count}회 분석 평균이 권장량의 ${Math.round(ratio*100)}%입니다`,
+      confidence_score: confidence,
+      status: 'pending',
+      revenue_potential_krw: sup.price
+    });
+  }
+
+  console.log(`[마케팅] 인사이트 업데이트 — ${count}회 분석, 부족: ${deficient.join(',') || '없음'}`);
+}
+
+// 사용자 마케팅 세그먼트 자동 분류
+async function updateUserMarketingSegments(userUuid, deficient, totalAnalyses) {
+  try {
+    const profile = getUserProfile() || {};
+    const age = profile.birthYear ? new Date().getFullYear() - parseInt(profile.birthYear) : 0;
+    const gender = profile.gender;
+
+    const segments = [];
+
+    // 부족 영양소 기반
+    deficient.forEach(n => segments.push('low_' + n));
+
+    // 인구통계 기반
+    if (gender === '여' && age >= 40) segments.push('menopause_risk');
+    if (gender === '여' && age >= 20 && age < 50) segments.push('female_reproductive_age');
+    if (age >= 50) segments.push('senior_health');
+    if (age >= 20 && age < 35) segments.push('young_adult');
+    if (profile.sasangType) segments.push('sasang_' + profile.sasangType);
+
+    // 행동 기반
+    if (totalAnalyses >= 10) segments.push('engaged_user');
+    if (totalAnalyses >= 30) segments.push('loyal_user');
+
+    // LTV 점수 (0-100)
+    let ltv = 0;
+    if (totalAnalyses >= 5) ltv += 20;
+    if (totalAnalyses >= 20) ltv += 20;
+    if (deficient.length >= 2) ltv += 30;
+    if (profile.sasangType) ltv += 15;
+    if (profile.height && profile.weight) ltv += 15;
+    ltv = Math.min(100, ltv);
+
+    // 영양제 구매 가능성 (0-100)
+    let propensity = 0;
+    propensity += deficient.length * 15;
+    if (totalAnalyses >= 7) propensity += 20;
+    if (deficient.length >= 3) propensity += 25;
+    propensity = Math.min(100, propensity);
+
+    // 추천 제품 (마케팅에 즉시 활용)
+    const recommendedProducts = deficient
+      .map(n => SUPPLEMENT_CATALOG[n])
+      .filter(Boolean)
+      .map(s => ({ name: s.name, tag: s.tag, price: s.price }));
+
+    await SB.upsert('users', {
+      user_uuid: userUuid,
+      marketing_segments: segments,
+      recommended_products: recommendedProducts,
+      total_analyses: totalAnalyses,
+      lifetime_value_score: ltv,
+      supplement_propensity: propensity,
+      last_analyzed_at: new Date().toISOString(),
+      last_active: new Date().toISOString()
+    }, 'user_uuid');
+  } catch(e) {
+    console.warn('[마케팅] 세그먼트 업데이트 실패:', e);
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
