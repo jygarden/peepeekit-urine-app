@@ -2085,12 +2085,12 @@
         <li>한 식사의 음식 전부 다 한 사진에</li>
       </ul>
     </div>
-    <button class="upload-btn accent" style="border-color:#F59E0B" onclick="document.getElementById('foodCameraInput').click()">
+    <button class="upload-btn accent" style="border-color:#F59E0B" onclick="openFileInput('foodCameraInput')">
       <div class="icon">📷</div>
       <div class="lbl" style="color:#F59E0B">카메라로 촬영</div>
       <div class="sub">지금 바로 식사 사진을 찍어주세요</div>
     </button>
-    <button class="upload-btn" onclick="document.getElementById('foodGalleryInput').click()">
+    <button class="upload-btn" onclick="openFileInput('foodGalleryInput')">
       <div class="icon">🖼️</div>
       <div class="lbl">갤러리에서 선택</div>
       <div class="sub">저장된 사진을 불러오세요</div>
@@ -2277,12 +2277,12 @@
       </ul>
     </div>
 
-    <button class="upload-btn accent" onclick="document.getElementById('cameraInput').click()">
+    <button class="upload-btn accent" onclick="openFileInput('cameraInput')">
       <div class="icon">📷</div>
       <div class="lbl">카메라로 촬영</div>
       <div class="sub">지금 바로 검사 키트를 찍어주세요</div>
     </button>
-    <button class="upload-btn" onclick="document.getElementById('galleryInput').click()">
+    <button class="upload-btn" onclick="openFileInput('galleryInput')">
       <div class="icon">🖼️</div>
       <div class="lbl">갤러리에서 선택</div>
       <div class="sub">저장된 사진을 불러오세요</div>
@@ -2621,10 +2621,10 @@
   </div>
 </div>
 
-<input type="file" id="foodCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleFoodFile(this)"/>
-<input type="file" id="foodGalleryInput" accept="image/*" style="display:none" onchange="handleFoodFile(this)"/>
-<input type="file" id="cameraInput"  accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)"/>
-<input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleFile(this)"/>
+<input type="file" id="foodCameraInput" accept="image/*" capture="environment" style="position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true" onchange="handleFoodFile(this)"/>
+<input type="file" id="foodGalleryInput" accept="image/*" style="position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true" onchange="handleFoodFile(this)"/>
+<input type="file" id="cameraInput"  accept="image/*" capture="environment" style="position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true" onchange="handleFile(this)"/>
+<input type="file" id="galleryInput" accept="image/*" style="position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true" onchange="handleFile(this)"/>
 
 <script>
 // ══════════════════════════════════════
@@ -2688,6 +2688,30 @@ let currentResult  = null;
 // ══════════════════════════════════════
 // 화면 전환
 // ══════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// 📸 파일 input 안정적으로 열기 (Android WebView 호환)
+// ════════════════════════════════════════════════════════════════
+function openFileInput(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) {
+    console.warn('[openFileInput] 못 찾음:', inputId);
+    return;
+  }
+  // Android WebView 호환성: 값 초기화 + 살짝 지연시켜 click
+  try {
+    input.value = ''; // 같은 파일 두 번 선택 가능하게
+  } catch(e) {}
+  // 약간의 지연을 줘서 onclick 이벤트 핸들러가 끝난 후 트리거
+  setTimeout(() => {
+    try {
+      input.click();
+    } catch(e) {
+      console.error('[openFileInput] click 실패:', e);
+      alert('파일 선택을 열 수 없어요. 앱을 다시 실행해주세요.');
+    }
+  }, 50);
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
