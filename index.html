@@ -2085,7 +2085,7 @@
         <li>한 식사의 음식 전부 다 한 사진에</li>
       </ul>
     </div>
-    <button class="upload-btn accent" style="border-color:#F59E0B" onclick="openFileInput('foodCameraInput')">
+    <button class="upload-btn accent" style="border-color:#F59E0B" onclick="safeCameraClick('foodCameraInput')">
       <div class="icon">📷</div>
       <div class="lbl" style="color:#F59E0B">카메라로 촬영</div>
       <div class="sub">지금 바로 식사 사진을 찍어주세요</div>
@@ -2277,7 +2277,7 @@
       </ul>
     </div>
 
-    <button class="upload-btn accent" onclick="openFileInput('cameraInput')">
+    <button class="upload-btn accent" onclick="safeCameraClick('cameraInput')">
       <div class="icon">📷</div>
       <div class="lbl">카메라로 촬영</div>
       <div class="sub">지금 바로 검사 키트를 찍어주세요</div>
@@ -2710,6 +2710,78 @@ function openFileInput(inputId) {
       alert('파일 선택을 열 수 없어요. 앱을 다시 실행해주세요.');
     }
   }, 50);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 📸 카메라 권한 안전 호출 (거부 시 친절한 안내 모달)
+// ════════════════════════════════════════════════════════════════
+async function safeCameraClick(inputId) {
+  // 1. 권한 상태 미리 체크 (지원 브라우저 한정)
+  try {
+    if (navigator.permissions && navigator.permissions.query) {
+      const camPerm = await navigator.permissions.query({ name: 'camera' });
+      if (camPerm.state === 'denied') {
+        showCameraPermissionGuide();
+        return;
+      }
+    }
+  } catch(e) {
+    // permissions API 미지원 → 그냥 진행 (Android WebView 일부 버전)
+  }
+
+  // 2. 첫 사용자에게 안내 토스트 (1회만)
+  if (!localStorage.getItem('cameraGuideShown')) {
+    localStorage.setItem('cameraGuideShown', '1');
+    showCameraFirstTimeToast();
+  }
+
+  // 3. 카메라 input 호출 (기존 openFileInput 활용)
+  openFileInput(inputId);
+}
+
+// 첫 카메라 사용자에게 짧은 안내 토스트
+function showCameraFirstTimeToast() {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-10px);background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:12px 18px;border-radius:14px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(16,185,129,.45);z-index:99999;letter-spacing:-.2px;max-width:90%;text-align:center;line-height:1.5;opacity:0;transition:opacity .3s,transform .3s;';
+  toast.innerHTML = '📸 카메라 권한 알림이 뜨면<br><strong>"허용"</strong>을 눌러주세요!';
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  }, 10);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(-10px)';
+    setTimeout(() => toast.remove(), 350);
+  }, 3500);
+}
+
+// 권한 거부 시 친절한 안내 모달
+function showCameraPermissionGuide() {
+  if (document.getElementById('cameraPermissionGuide')) return; // 중복 방지
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const stepsHtml = isIOS ? '\n    1. <strong>설정</strong> 앱 열기<br>\n    2. 아래로 스크롤 → <strong>건강어때</strong> 선택<br>\n    3. <strong>카메라</strong>를 <strong>"켜기"</strong>로 변경<br>\n    4. 앱으로 돌아와서 다시 시도\n  ' : '\n    1. 휴대폰 <strong>설정</strong> 앱 열기<br>\n    2. <strong>애플리케이션</strong> 또는 <strong>앱</strong> 선택<br>\n    3. <strong>건강어때</strong> 찾기<br>\n    4. <strong>권한</strong> → <strong>카메라</strong><br>\n    5. <strong>"허용"</strong>으로 변경<br>\n    6. 앱 다시 실행\n  ';
+
+  const modal = document.createElement('div');
+  modal.id = 'cameraPermissionGuide';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;animation:fadeSlideIn .3s ease-out';
+  modal.innerHTML = '<div style="background:#fff;border-radius:22px;padding:28px 24px 20px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);font-family:inherit">' +
+    '<div style="font-size:48px;text-align:center;margin-bottom:10px">📷</div>' +
+    '<div style="font-size:18px;font-weight:800;text-align:center;color:#065F46;margin-bottom:8px;letter-spacing:-.3px">카메라 권한이 필요해요</div>' +
+    '<div style="font-size:13px;color:#475569;text-align:center;margin-bottom:18px;line-height:1.55">사진 촬영을 위해<br>카메라 권한을 허용해주세요</div>' +
+    '<div style="background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:14px;padding:15px 17px;margin-bottom:14px;font-size:13px;color:#166534;line-height:1.85">' +
+      '<div style="font-weight:800;color:#065F46;margin-bottom:8px;font-size:13px">📱 설정 방법</div>' +
+      stepsHtml +
+    '</div>' +
+    '<div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:10px 13px;margin-bottom:16px;font-size:11.5px;color:#92400E;line-height:1.55">💡 <strong>갤러리 기능은 권한 없이도</strong> 사용할 수 있어요. 갤러리에 저장된 사진으로 분석할 수도 있습니다.</div>' +
+    '<button onclick="document.getElementById(\'cameraPermissionGuide\').remove()" style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;letter-spacing:-.2px;box-shadow:0 4px 14px rgba(16,185,129,.4)">확인했어요</button>' +
+  '</div>';
+  document.body.appendChild(modal);
+  // 배경 클릭 시 닫기
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
 }
 
 function showScreen(id) {
