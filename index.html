@@ -3877,16 +3877,112 @@ function compressImageForUpload(dataUrl, maxDim=1200, quality=0.78) {
   });
 }
 
+// ════════════════════════════════════════════════════════════════
+// 🎬 식단 분석 로딩 상태 (진행률 + 단계별 메시지)
+// ════════════════════════════════════════════════════════════════
+let foodLoadingInterval = null;
+let foodLoadingProgress = 0;
+const FOOD_LOADING_STAGES = [
+  { emoji: '📸', msg: '사진을 분석하고 있어요...', sub: 'AI가 음식을 인식 중', threshold: 0 },
+  { emoji: '🤖', msg: 'AI 영양사가 보는 중이에요', sub: '재료와 양을 추정 중', threshold: 25 },
+  { emoji: '🔬', msg: '영양소 계산 중이에요', sub: '칼로리·단백질·비타민 분석 중', threshold: 50 },
+  { emoji: '🍱', msg: '음식 궁합 분석 중이에요', sub: '재료별 시너지 체크 중', threshold: 75 },
+  { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
+];
+
+function startFoodLoading() {
+  const loadingBox = document.getElementById('foodLoadingBox');
+  if (!loadingBox) return;
+
+  loadingBox.classList.add('show');
+
+  const emojiEl = loadingBox.querySelector('.emoji');
+  const msgEl = loadingBox.querySelector('p');
+  const subEl = loadingBox.querySelector('small');
+
+  // 진행률 바 추가 (없으면 생성)
+  let progressWrap = loadingBox.querySelector('.food-loading-progress-wrap');
+  if (!progressWrap) {
+    progressWrap = document.createElement('div');
+    progressWrap.className = 'food-loading-progress-wrap';
+    progressWrap.style.cssText = 'background:#F1F5F9;border-radius:99px;height:8px;overflow:hidden;margin:14px auto 6px;max-width:240px';
+    const bar = document.createElement('div');
+    bar.className = 'food-loading-progress-bar';
+    bar.style.cssText = 'height:100%;background:linear-gradient(90deg,#F59E0B,#EA580C);border-radius:99px;width:0%;transition:width .3s ease-out';
+    progressWrap.appendChild(bar);
+    loadingBox.appendChild(progressWrap);
+
+    const pctEl = document.createElement('div');
+    pctEl.className = 'food-loading-pct';
+    pctEl.style.cssText = 'font-size:11px;color:#94A3B8;font-weight:700;margin-top:2px';
+    pctEl.textContent = '0%';
+    loadingBox.appendChild(pctEl);
+  }
+
+  const progressBar = loadingBox.querySelector('.food-loading-progress-bar');
+  const pctEl = loadingBox.querySelector('.food-loading-pct');
+
+  let stageIdx = -1;
+  foodLoadingProgress = 0;
+
+  const updateStage = (newIdx) => {
+    if (newIdx === stageIdx) return;
+    stageIdx = newIdx;
+    const stage = FOOD_LOADING_STAGES[newIdx];
+    if (emojiEl) { emojiEl.style.transition = 'opacity .25s'; emojiEl.style.opacity = '0'; }
+    setTimeout(() => {
+      if (emojiEl) { emojiEl.textContent = stage.emoji; emojiEl.style.opacity = '1'; }
+      if (msgEl) msgEl.textContent = stage.msg;
+      if (subEl) subEl.textContent = stage.sub;
+    }, 200);
+  };
+  updateStage(0);
+
+  foodLoadingInterval = setInterval(() => {
+    // 진행률 증가 (95%까지 천천히)
+    if (foodLoadingProgress < 95) {
+      const step = foodLoadingProgress < 30 ? 1.8 : foodLoadingProgress < 70 ? 1.2 : 0.6;
+      foodLoadingProgress = Math.min(95, foodLoadingProgress + step);
+      if (progressBar) progressBar.style.width = foodLoadingProgress + '%';
+      if (pctEl) pctEl.textContent = Math.floor(foodLoadingProgress) + '%';
+    }
+    // 단계 자동 전환
+    let newStage = 0;
+    for (let i = FOOD_LOADING_STAGES.length - 1; i >= 0; i--) {
+      if (foodLoadingProgress >= FOOD_LOADING_STAGES[i].threshold) { newStage = i; break; }
+    }
+    updateStage(newStage);
+  }, 250);
+}
+
+function stopFoodLoading() {
+  if (foodLoadingInterval) {
+    clearInterval(foodLoadingInterval);
+    foodLoadingInterval = null;
+  }
+  const loadingBox = document.getElementById('foodLoadingBox');
+  if (!loadingBox) return;
+  // 100% 도달 애니메이션
+  const progressBar = loadingBox.querySelector('.food-loading-progress-bar');
+  const pctEl = loadingBox.querySelector('.food-loading-pct');
+  if (progressBar) progressBar.style.width = '100%';
+  if (pctEl) pctEl.textContent = '100%';
+  setTimeout(() => {
+    loadingBox.classList.remove('show');
+    if (progressBar) progressBar.style.width = '0%';
+    if (pctEl) pctEl.textContent = '0%';
+  }, 400);
+}
+
 // 1단계: AI가 음식·재료 인식 → 확인 화면으로
 let detectedFoodsData = null;
 let originalDetectedFoodsData = null; // detect 원본 (사용자 수정 추적용)
 async function analyzeFood() {
   if (!foodImageB64) return;
   const btn = document.getElementById('btnFoodAnalyze');
-  const loading = document.getElementById('foodLoadingBox');
   btn.disabled = true;
   btn.textContent = '🔍 음식 인식 중...';
-  loading.classList.add('show');
+  startFoodLoading();  // 🎬 진행률 + 단계별 메시지
   document.getElementById('foodErrorBox').classList.remove('show');
   try {
     const res = await fetch('/api/analyze-food', {
@@ -3914,7 +4010,7 @@ async function analyzeFood() {
   } finally {
     btn.disabled = false;
     btn.textContent = '🤖 AI 식단 분석 시작';
-    loading.classList.remove('show');
+    stopFoodLoading();
   }
 }
 
@@ -3964,6 +4060,9 @@ async function confirmAndAnalyze() {
   const originalText = btn.textContent;
   btn.disabled = true;
   btn.textContent = '🤖 AI 영양사 분석 중...';
+  // 🎬 분석 화면으로 이동 + 진행률 로딩 표시
+  showScreen('screenFoodPreview');
+  startFoodLoading();
   // 사용자 프로필
   const humanProfiles = getProfiles().filter(p => p.type === 'human');
   const userProfile = humanProfiles[0] || null;
@@ -4079,6 +4178,7 @@ async function confirmAndAnalyze() {
   } finally {
     btn.disabled = false;
     btn.textContent = originalText;
+    stopFoodLoading();
   }
 }
 
