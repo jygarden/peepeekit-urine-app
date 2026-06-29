@@ -1653,7 +1653,7 @@
       <!-- 인사 + 새 슬로건 -->
       <div class="home-hello">
         <h1>건강한 하루,<br>오늘도 응원해요</h1>
-        <div class="sub">AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
+        <div class="sub">우리가족 소변건강 체크부터 AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
       </div>
 
       <!-- 오늘의 미션 — 물 위젯 -->
@@ -1725,7 +1725,38 @@
           </div>
         </button>
 
-      </div>
+        <!-- 식단 분석 -->
+        <button class="home-card food" onclick="enterFood()">
+          <div class="card-top">
+            <div class="hc-icon-wrap">
+              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <!-- 그릇 + 밥 -->
+                <path d="M5 17 Q 5 23, 16 23 Q 27 23, 27 17"/>
+                <path d="M5 17 L 27 17"/>
+                <ellipse cx="16" cy="14" rx="9" ry="3"/>
+                <circle cx="13" cy="13" r=".6" data-fill/>
+                <circle cx="16" cy="13" r=".6" data-fill/>
+                <circle cx="19" cy="13" r=".6" data-fill/>
+                <!-- 김 -->
+                <path d="M11 10 Q 10 7, 11 5"/>
+                <path d="M16 9 Q 15 5, 16 3"/>
+                <path d="M21 10 Q 22 7, 21 5"/>
+              </svg>
+            </div>
+            <div class="hc-content">
+              <h3>🍽 식단 분석</h3>
+              <p>음식 사진 한 장으로<br>칼로리·영양 분석</p>
+            </div>
+            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+          </div>
+          <div class="card-footer">
+            <span class="card-pill subj-pill"><span class="dot"></span><span id="foodLastInfo">기록 없음</span></span>
+            <span class="card-pill time-pill">
+              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
+              약 30초
+            </span>
+          </div>
+        </button>
 
         <!-- 식품 성분 분석 (NEW) -->
         <button class="home-card ingredient" onclick="enterIngredient()">
@@ -1760,38 +1791,7 @@
           </div>
         </button>
 
-<!-- 식단 분석 (NEW) -->
-        <button class="home-card food" onclick="enterFood()">
-          <div class="card-top">
-            <div class="hc-icon-wrap">
-              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <!-- 그릇 + 밥 -->
-                <path d="M5 17 Q 5 23, 16 23 Q 27 23, 27 17"/>
-                <path d="M5 17 L 27 17"/>
-                <ellipse cx="16" cy="14" rx="9" ry="3"/>
-                <circle cx="13" cy="13" r=".6" data-fill/>
-                <circle cx="16" cy="13" r=".6" data-fill/>
-                <circle cx="19" cy="13" r=".6" data-fill/>
-                <!-- 김 -->
-                <path d="M11 10 Q 10 7, 11 5"/>
-                <path d="M16 9 Q 15 5, 16 3"/>
-                <path d="M21 10 Q 22 7, 21 5"/>
-              </svg>
-            </div>
-            <div class="hc-content">
-              <h3>🍽 식단 분석</h3>
-              <p>음식 사진 한 장으로<br>칼로리·영양 분석</p>
-            </div>
-            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-          </div>
-          <div class="card-footer">
-            <span class="card-pill subj-pill"><span class="dot"></span><span id="foodLastInfo">기록 없음</span></span>
-            <span class="card-pill time-pill">
-              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
-              약 30초
-            </span>
-          </div>
-        </button>
+      </div>
 
       <!-- 최근 검사 기록 -->
       <div class="recent-section">
