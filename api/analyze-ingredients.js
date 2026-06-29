@@ -95,61 +95,72 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
   }
 }
 
-// ── 프롬프트 1: ingredients first ──
+// ── 프롬프트 1: ingredients first (안전·객관적 톤) ──
 function buildIngredientsFirstPrompt() {
   return `🇰🇷 한국어 JSON. 마크다운 X.
 
-당신은 식품 성분 전문가. 사진의 식품 성분표(원재료명)를 읽고 모든 성분을 추출.
+당신은 식품 성분 전문가. 사진의 식품 성분표를 읽고 모든 성분을 추출.
 
 ★ 절대 규칙 ★
-1. "원재료명" 또는 성분 나열을 찾아 모두 추출
-2. 괄호 안 성분도 별도로 추가 — 예: "준초콜릿(설탕, 가공유지, 혼합분유, 코코아분말, 유당)" → 6개로 분리
-3. ingredients 배열에 최소 5개 이상, 빈 배열 절대 금지
-4. summary는 짧게 (성분명 나열 X, 3문장 이내)
+1. "원재료명"의 성분을 모두 추출
+2. 괄호 안 성분도 별도로 분리 — 예: "준초콜릿(설탕, 가공유지, 혼합분유, 코코아분말, 유당)" → 6개로 분리
+3. ingredients 배열 최소 5개, 빈 배열 금지
+4. **productName 필드는 빈 문자열("")로** — 제품명 절대 표시 X
+5. summary는 **객관적·중립적 톤**, 제품 비판 X
 
 === 안전 분류 ===
-- safe: 정제수, 비타민, 천연재료 (찹쌀, 밀가루, 천연색소)
-- caution: 설탕, 올리고당, 가공유지, 카페인, 카라멜색소, 일반 첨가물
+- safe: 정제수, 비타민, 천연재료
+- caution: 설탕, 가공유지, 카페인, 카라멜색소 등 일반 첨가물
 - warning: 합성첨가물 (아스파탐, 적색40호, 폴리글리세린지방산에스테르, 프로필렌글리콜, MSG 등)
-- danger: 트랜스지방, 아질산나트륨
+- danger: 트랜스지방, 아질산나트륨 등 (식약처 사용 기준 초과 시 우려)
 
-=== 응답 형식 (ingredients 먼저!) ===
+=== summary 작성 규칙 ★ ===
+- 절대 금지: "이 제품은 나쁘다", "위험해요", 제품명·브랜드 언급
+- 안전한 패턴 사용:
+  · "총 N개 성분 중 주의 X개, 경고 Y개가 포함되어 있습니다."
+  · "그중 ○○ 성분은 다량·장기 섭취 시 ○○○ 영향이 보고된 바 있습니다."
+  · "적정량 섭취를 권장하며, 균형 잡힌 식단과 함께 드시는 것이 좋습니다."
+- 출처 기반 단어 사용: "보고된 바 있습니다", "가능성이 있습니다"
+
+=== recommendation 작성 규칙 ===
+- "이 제품은~" 시작 X
+- "본 성분 구성을 기준으로, 일일 권장 섭취 한도 내에서 적당량 드시는 것이 좋습니다." 같은 톤
+- 단정 표현 X ("암 걸려요" 절대 X)
+
+=== 응답 형식 ===
 {
   "ingredients": [
-    {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"영향 1줄","description":"설명 1줄","dailyLimit":"한도"}
+    {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"인체 영향 (1~2문장, 객관적 표현)","description":"이 성분 설명 (1~2문장)","dailyLimit":"식약처/WHO 기준 (있으면)"}
   ],
-  "productName": "제품명",
+  "productName": "",
   "overallScore": 0~100,
   "overallGrade": "A|B|C|D|F",
-  "summary": "3문장 이내",
-  "recommendation": "2~3문장"
+  "summary": "객관적 3문장 (위 규칙대로)",
+  "recommendation": "객관적 2~3문장 (위 규칙대로)"
+}`;
 }
 
-성분표 인식 어렵더라도 제품명으로 추정해서라도 ingredients 채우세요.`;
-}
-
-// ── 프롬프트 2: 더 강력하게 ──
+// ── 프롬프트 2: 더 강력하게 (객관적 톤 유지) ──
 function buildForcePrompt() {
-  return `🇰🇷 한국어 JSON. 사진의 식품 제품을 분석.
+  return `🇰🇷 한국어 JSON. 사진의 식품 성분을 분석.
 
-★★★ ingredients 배열에 최소 10개 성분 필수. 빈 배열 절대 금지 ★★★
+★★★ ingredients 배열 최소 10개 필수. 빈 배열 금지 ★★★
+★★★ productName은 빈 문자열("")로. 제품명 절대 노출 X ★★★
+★★★ summary는 객관적 톤 — 제품 비판·단정 표현 금지 ★★★
 
-성분표가 안 보이면 제품 이름으로 추정. 예:
-- 과자 → 밀가루, 설탕, 식물성유지, 우유, 계란, 베이킹파우더, 유화제, 향료 등
-- 콜라 → 정제수, 탄산, 설탕, 카페인, 카라멜색소, 인산, 향료 등
-- 초콜릿 → 코코아매스, 설탕, 코코아버터, 우유, 레시틴, 향료, 유화제 등
+각 성분: {"name":"...","type":"...","safety":"safe|caution|warning|danger","impact":"...","description":"...","dailyLimit":"..."}
 
-각 성분 객체:
-{"name":"...","type":"...","safety":"safe|caution|warning|danger","impact":"...","description":"...","dailyLimit":"..."}
+summary 패턴 (이대로):
+"분석된 N개 성분 중 안전 X개, 주의 Y개, 경고 Z개가 확인되었습니다. ○○ 등의 성분은 다량·장기 섭취 시 ○○○ 영향이 보고된 바 있어, 적정량 섭취가 권장됩니다."
 
 응답:
 {
   "ingredients": [최소 10개],
-  "productName": "...",
+  "productName": "",
   "overallScore": 정수,
   "overallGrade": "A|B|C|D|F",
-  "summary": "짧게 3문장",
-  "recommendation": "2~3문장"
+  "summary": "객관적 3문장 (위 패턴)",
+  "recommendation": "적정량 섭취 권장 톤 2~3문장"
 }`;
 }
 
@@ -378,7 +389,8 @@ function fillMissingFields(r) {
     const s = r.overallScore;
     r.overallGrade = s >= 90 ? 'A' : s >= 75 ? 'B' : s >= 60 ? 'C' : s >= 40 ? 'D' : 'F';
   }
-  if (!r.productName) r.productName = '';
+  // 🔒 법적 안전장치: productName 절대 노출 X (AI가 채워도 강제로 빈 값)
+  r.productName = '';
   if (!Array.isArray(r.ingredients)) r.ingredients = [];
   r.ingredients = r.ingredients.map(ing => ({
     name: ing?.name || '알 수 없음',
