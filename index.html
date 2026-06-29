@@ -4462,10 +4462,34 @@ async function analyzeIngredient() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageB64: ingredientImageB64 })
     });
-    const data = await res.json();
+
+    // ── 디버깅: 응답 상태 + raw 텍스트 콘솔 출력 ──
+    console.log('[성분분석] HTTP status:', res.status);
+    const rawText = await res.text();
+    console.log('[성분분석] raw response (첫 500자):', rawText.slice(0, 500));
+
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch(parseErr) {
+      // JSON이 아닌 응답이 옴 (API 파일 안 올라갔거나 HTML 페이지 받았을 때)
+      stopIngredientLoading();
+      showIngredientError(
+        'API 응답 형식 오류 (' + res.status + '). ' +
+        'GitHub에 /api/analyze-ingredients.js 파일이 올라갔는지 확인해주세요.\n\n' +
+        '받은 응답 처음 100자: ' + rawText.slice(0, 100)
+      );
+      document.getElementById('btnIngredientAnalyze').disabled = false;
+      return;
+    }
+
+    console.log('[성분분석] parsed data:', data);
+
     if (data.error) {
       stopIngredientLoading();
-      showIngredientError(data.error);
+      let msg = data.error;
+      if (data.debug) msg += '\n\n[디버그] ' + JSON.stringify(data.debug).slice(0, 200);
+      showIngredientError(msg);
       document.getElementById('btnIngredientAnalyze').disabled = false;
       return;
     }
