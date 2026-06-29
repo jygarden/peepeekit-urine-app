@@ -1403,6 +1403,77 @@
     .shipping-form .field label{font-size:11.5px}
     .shipping-form .field input,.shipping-form .field textarea{font-size:13px;padding:9px 12px}
     .shipping-form textarea{resize:none;min-height:60px;font-family:inherit}
+
+    /* ════════ 🎯 영양소 균형 카드 v2 (강화) ════════ */
+    .nut-balance-card-v2{background:linear-gradient(135deg,#FFFBEB 0%,#FEF3C7 100%);border:1.5px solid #FCD34D;border-radius:20px;padding:20px 18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(251,191,36,.18)}
+    .nbc-v2-title{font-size:15px;font-weight:800;color:#78350F;margin-bottom:14px;display:flex;align-items:center;gap:6px;letter-spacing:-.3px}
+    .nbc-v2-section{background:rgba(255,255,255,.75);border-radius:14px;padding:14px;margin-bottom:10px}
+    .nbc-v2-section:last-child{margin-bottom:0}
+    .nbc-v2-section-label{font-size:11.5px;font-weight:800;color:#92400E;margin-bottom:12px;letter-spacing:.3px;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+    .nbc-v2-item{padding:10px 0;border-bottom:1px solid rgba(146,64,14,.1)}
+    .nbc-v2-item:last-child{border-bottom:none;padding-bottom:0}
+    .nbc-v2-item:first-child{padding-top:0}
+    .nbc-v2-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .nbc-v2-item-name{font-size:13.5px;font-weight:800;color:#1F2937;letter-spacing:-.2px}
+    .nbc-v2-item-tag{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;letter-spacing:-.1px}
+    .nbc-v2-item-tag.urgent{background:#FEE2E2;color:#991B1B}
+    .nbc-v2-item-tag.warn{background:#FED7AA;color:#9A3412}
+    .nbc-v2-item-tag.excess{background:#FECACA;color:#7F1D1D}
+    .nbc-v2-item-bar{height:7px;background:#F8FAFC;border-radius:99px;overflow:hidden;margin-bottom:6px;border:1px solid rgba(0,0,0,.04)}
+    .nbc-v2-item-bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+    .nbc-v2-item-bar-fill.urgent{background:linear-gradient(90deg,#DC2626,#EF4444)}
+    .nbc-v2-item-bar-fill.warn{background:linear-gradient(90deg,#EA580C,#F59E0B)}
+    .nbc-v2-item-bar-fill.excess{background:linear-gradient(90deg,#991B1B,#DC2626)}
+    .nbc-v2-item-impact{font-size:11.5px;color:#6B7280;line-height:1.55;display:flex;gap:5px;align-items:flex-start;margin-top:2px}
+    .nbc-v2-item-impact::before{content:"⚠";flex-shrink:0;color:#F59E0B}
+    .nbc-v2-cta{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;border:none;border-radius:14px;padding:14px;font-size:13.5px;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 6px 18px rgba(99,102,241,.4);font-family:inherit;letter-spacing:-.2px;transition:transform .15s,box-shadow .2s}
+    .nbc-v2-cta:active{transform:scale(.98)}
+    .nbc-v2-cta:hover{box-shadow:0 8px 22px rgba(99,102,241,.5)}
+
+    /* ════════ 💊 영양제 추천 카드 v2 (강화) ════════ */
+    .supp-section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:0 2px}
+    .supp-section-icon{width:44px;height:44px;background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .supp-section-title-v2{font-size:15.5px;font-weight:800;color:#1F2937;letter-spacing:-.3px}
+    .supp-section-sub{font-size:11.5px;color:#6B7280;margin-top:2px;font-weight:500}
+    .supp-card-v2{background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.04);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+    .supp-card-v2:hover{box-shadow:0 4px 14px rgba(0,0,0,.08)}
+    .supp-card-v2::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+    .supp-card-v2.priority-필수::before{background:linear-gradient(180deg,#EF4444,#DC2626)}
+    .supp-card-v2.priority-권장::before{background:linear-gradient(180deg,#F59E0B,#EA580C)}
+    .supp-card-v2.priority-선택::before{background:linear-gradient(180deg,#6366F1,#8B5CF6)}
+    .supp-v2-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .supp-v2-icon{width:46px;height:46px;background:linear-gradient(135deg,#F5F3FF,#DBEAFE);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;box-shadow:inset 0 1px 2px rgba(255,255,255,.5)}
+    .supp-v2-info{flex:1;min-width:0}
+    .supp-v2-name{font-size:15px;font-weight:800;color:#1F2937;letter-spacing:-.3px;line-height:1.3}
+    .supp-v2-tags{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+    .supp-v2-tag{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;letter-spacing:-.1px}
+    .supp-v2-tag.priority-필수{background:#EF4444;color:#fff}
+    .supp-v2-tag.priority-권장{background:#F59E0B;color:#fff}
+    .supp-v2-tag.priority-선택{background:#6366F1;color:#fff}
+    .supp-v2-tag.cat{background:#F1F5F9;color:#475569}
+    .supp-v2-reason{font-size:12.5px;color:#475569;line-height:1.65;margin-bottom:10px;padding:9px 12px;background:#F9FAFB;border-radius:10px;border-left:3px solid #E5E7EB}
+    .supp-v2-meta{display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap}
+    .supp-v2-meta-item{font-size:11.5px;color:#64748B;background:#F8FAFC;padding:6px 11px;border-radius:8px;border:1px solid #E5E7EB;display:inline-flex;align-items:center;gap:4px;font-weight:600}
+    .supp-v2-buy{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:#03C75A;color:#fff;border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;font-family:inherit;letter-spacing:-.2px;box-shadow:0 3px 10px rgba(3,199,90,.3);transition:transform .15s,box-shadow .2s}
+    .supp-v2-buy:active{transform:scale(.98)}
+    .supp-v2-buy:hover{box-shadow:0 5px 14px rgba(3,199,90,.4)}
+    .supp-v2-buy::before{content:"N";background:#fff;color:#03C75A;width:18px;height:18px;border-radius:4px;font-size:11px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;margin-right:2px}
+
+    /* 종합 패키지 CTA */
+    .supp-package-cta{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#FEF3C7 0%,#FBBF24 100%);border-radius:18px;padding:16px 18px;margin-top:14px;text-decoration:none;color:inherit;box-shadow:0 6px 18px rgba(251,191,36,.35);cursor:pointer;transition:transform .15s,box-shadow .2s}
+    .supp-package-cta:hover{box-shadow:0 8px 24px rgba(251,191,36,.5)}
+    .supp-package-cta:active{transform:scale(.98)}
+    .spc-emoji{font-size:36px;flex-shrink:0;animation:wiggle 2.5s ease-in-out infinite}
+    @keyframes wiggle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+    .spc-text{flex:1;min-width:0}
+    .spc-title{font-size:14.5px;font-weight:800;color:#78350F;letter-spacing:-.3px;line-height:1.3}
+    .spc-sub{font-size:11.5px;color:#92400E;margin-top:3px;font-weight:600}
+    .spc-arrow{font-size:24px;color:#78350F;font-weight:700}
+
+    /* 영양제 요약 박스 */
+    .supp-summary{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#1E40AF;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;line-height:1.5}
+    .supp-summary::before{content:"💡";font-size:18px;flex-shrink:0}
+    .supp-summary strong{color:#1E3A8A;font-weight:800}
   </style>
 </head>
 <body>
@@ -5401,34 +5472,186 @@ function renderFoodResult(r) {
     return `<div class="highlight-item ${h.type || 'good'}">${ic} ${h.text}</div>`;
   }).join('');
   document.getElementById('foodHighlights').innerHTML = hl;
-  // 부족/과다
-  const missing = (r.missing || []).join(', ');
-  const excessive = (r.excessive || []).join(', ');
+  // 🎯 영양소 균형 카드 v2 (시각적 강화)
+  const missing = r.missing || [];
+  const excessive = r.excessive || [];
   const missBox = document.getElementById('foodMissingBox');
-  if (missing) {
-    document.getElementById('foodMissingText').textContent = missing;
-    document.getElementById('foodMissingItem').style.display = '';
-  } else { document.getElementById('foodMissingItem').style.display = 'none'; }
-  if (excessive) {
-    document.getElementById('foodExcessiveText').textContent = excessive;
-    document.getElementById('foodExcessiveItem').style.display = '';
-  } else { document.getElementById('foodExcessiveItem').style.display = 'none'; }
-  missBox.style.display = (missing || excessive) ? 'block' : 'none';
+
+  // 영양소별 영향 사전
+  const NUT_IMPACT = {
+    '단백질': '근육·면역력 약화 위험',
+    '철분': '빈혈·피로감 누적 위험',
+    '칼슘': '뼈·치아 약화',
+    '비타민D': '면역력·뼈 건강 저하',
+    '비타민C': '면역력·피부 건강 저하',
+    '비타민B': '에너지 대사 저하',
+    '비타민A': '시력·점막 건강 저하',
+    '비타민E': '항산화 기능 저하',
+    '식이섬유': '장 건강·변비 위험',
+    '오메가3': '뇌·심혈관 건강 저하',
+    '마그네슘': '근육 경련·수면 장애',
+    '아연': '면역력·상처 회복 저하',
+    '엽산': '세포 분열·신경 발달 저하',
+    '칼륨': '혈압 조절 어려움',
+    '나트륨': '고혈압·신장 부담 위험',
+    '당류': '혈당·체지방·당뇨 위험',
+    '지방': '심혈관·체중 부담',
+    '포화지방': '심혈관 질환 위험',
+    '콜레스테롤': '혈관·심장 부담'
+  };
+
+  const findImpact = (n) => {
+    const clean = n.replace(/\s*\([^)]*\)\s*/g, '').trim();
+    if (NUT_IMPACT[clean]) return NUT_IMPACT[clean];
+    for (const k of Object.keys(NUT_IMPACT)) {
+      if (clean.includes(k) || k.includes(clean)) return NUT_IMPACT[k];
+    }
+    return '건강 관리 필요';
+  };
+
+  if (missing.length > 0 || excessive.length > 0) {
+    // 우선순위 — 처음 1개는 시급, 나머지는 부족
+    const missingHtml = missing.map((m, i) => {
+      const isUrgent = i === 0;
+      const pct = isUrgent ? 25 : 50;
+      return `
+        <div class="nbc-v2-item">
+          <div class="nbc-v2-item-head">
+            <span class="nbc-v2-item-name">${m}</span>
+            <span class="nbc-v2-item-tag ${isUrgent ? 'urgent' : 'warn'}">${isUrgent ? '🚨 시급' : '🟡 부족'}</span>
+          </div>
+          <div class="nbc-v2-item-bar"><div class="nbc-v2-item-bar-fill ${isUrgent ? 'urgent' : 'warn'}" style="width:${pct}%"></div></div>
+          <div class="nbc-v2-item-impact">${findImpact(m)}</div>
+        </div>`;
+    }).join('');
+
+    const excessiveHtml = excessive.map(e => `
+      <div class="nbc-v2-item">
+        <div class="nbc-v2-item-head">
+          <span class="nbc-v2-item-name">${e}</span>
+          <span class="nbc-v2-item-tag excess">🔴 과다</span>
+        </div>
+        <div class="nbc-v2-item-bar"><div class="nbc-v2-item-bar-fill excess" style="width:115%"></div></div>
+        <div class="nbc-v2-item-impact">${findImpact(e)}</div>
+      </div>`).join('');
+
+    missBox.innerHTML = `
+      <div class="nut-balance-card-v2">
+        <div class="nbc-v2-title">⚠️ 영양소 균형 분석</div>
+        ${missing.length > 0 ? `
+          <div class="nbc-v2-section">
+            <div class="nbc-v2-section-label">📉 부족한 영양소 (${missing.length}개)</div>
+            ${missingHtml}
+          </div>` : ''}
+        ${excessive.length > 0 ? `
+          <div class="nbc-v2-section">
+            <div class="nbc-v2-section-label">📈 과다 섭취 (${excessive.length}개)</div>
+            ${excessiveHtml}
+          </div>` : ''}
+        ${missing.length > 0 ? `
+          <button class="nbc-v2-cta" onclick="document.getElementById('foodSuppSection').scrollIntoView({behavior:'smooth',block:'start'})">
+            💊 맞춤 영양제 추천 보기 →
+          </button>` : ''}
+      </div>`;
+    missBox.style.display = 'block';
+    // 옛 자식 요소 제거 위해 className·style 초기화
+    missBox.className = '';
+    missBox.style.cssText = 'display:block;background:none;border:none;padding:0;margin-bottom:14px';
+  } else {
+    missBox.style.display = 'none';
+  }
   // 옛 nextMeal / tips 박스는 새 디자인으로 대체 (옛 박스 강제 숨김)
   const oldNextBoxEl = document.getElementById('foodNextMealBox');
   if (oldNextBoxEl) oldNextBoxEl.style.display = 'none';
   const oldTipsBoxEl = document.getElementById('foodTipsBox');
   if (oldTipsBoxEl) oldTipsBoxEl.style.display = 'none';
-  // 영양제
+  // 💊 영양제 추천 v2 (시각·CTA 강화)
   const supp = r.supplements || [];
   if (supp.length > 0) {
-    document.getElementById('foodSuppList').innerHTML = supp.map(s =>
-      `<div class="supp-card priority-권장">
-        <div class="supp-top"><span class="supp-name">${s.name}</span></div>
-        <div class="supp-reason">${s.reason}</div>
-      </div>`).join('');
-    document.getElementById('foodSuppSection').style.display = 'block';
-  } else { document.getElementById('foodSuppSection').style.display = 'none'; }
+    // 우선순위 emoji
+    const priorityEmoji = (p) => p === '필수' ? '🚨' : p === '권장' ? '⭐' : '💡';
+    // 영양제 아이콘
+    const suppEmoji = (name) => {
+      const n = name || '';
+      if (n.includes('비타민D')) return '☀️';
+      if (n.includes('비타민C')) return '🍋';
+      if (n.includes('비타민A')) return '🥕';
+      if (n.includes('비타민E')) return '🥑';
+      if (n.includes('비타민B')) return '🥩';
+      if (n.includes('철')) return '🩸';
+      if (n.includes('칼슘')) return '🥛';
+      if (n.includes('마그네슘')) return '🥜';
+      if (n.includes('아연')) return '🦪';
+      if (n.includes('오메가')) return '🐟';
+      if (n.includes('단백질') || n.includes('프로틴')) return '💪';
+      if (n.includes('식이섬유') || n.includes('사일리움')) return '🌾';
+      if (n.includes('엽산')) return '🥬';
+      if (n.includes('프로바이오틱') || n.includes('유산균')) return '🦠';
+      return '💊';
+    };
+
+    const cardsHtml = supp.map(s => {
+      const pri = s.priority || '권장';
+      const cat = s.category || '';
+      const tags = [];
+      tags.push(`<span class="supp-v2-tag priority-${pri}">${priorityEmoji(pri)} ${pri}</span>`);
+      if (cat) tags.push(`<span class="supp-v2-tag cat">${cat}</span>`);
+
+      const metaItems = [];
+      if (s.dosage) metaItems.push(`<span class="supp-v2-meta-item">💊 ${s.dosage}</span>`);
+      if (s.timing) metaItems.push(`<span class="supp-v2-meta-item">⏰ ${s.timing}</span>`);
+      if (s.synergy && s.synergy !== '단독 복용 OK') metaItems.push(`<span class="supp-v2-meta-item">🔗 ${s.synergy}</span>`);
+
+      return `
+        <div class="supp-card-v2 priority-${pri}">
+          <div class="supp-v2-top">
+            <div class="supp-v2-icon">${suppEmoji(s.name)}</div>
+            <div class="supp-v2-info">
+              <div class="supp-v2-name">${s.name || ''}</div>
+              <div class="supp-v2-tags">${tags.join('')}</div>
+            </div>
+          </div>
+          <div class="supp-v2-reason">${s.reason || ''}</div>
+          ${metaItems.length > 0 ? `<div class="supp-v2-meta">${metaItems.join('')}</div>` : ''}
+          <a class="supp-v2-buy" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
+            스마트스토어에서 보기
+          </a>
+        </div>`;
+    }).join('');
+
+    // 헤더 + 요약 + 카드 + 종합 패키지 CTA
+    const urgentCount = supp.filter(s => s.priority === '필수').length;
+    const summary = urgentCount > 0
+      ? `<strong>${urgentCount}개 영양소</strong>는 지금 바로 보충이 필요해요`
+      : `<strong>${supp.length}가지 영양제</strong>로 부족한 영양소를 한 번에 보완하세요`;
+
+    document.getElementById('foodSuppList').innerHTML = `
+      <div class="supp-section-header">
+        <div class="supp-section-icon">💊</div>
+        <div>
+          <div class="supp-section-title-v2">당신을 위한 맞춤 영양제</div>
+          <div class="supp-section-sub">검사·식단 분석 결과 기반 추천</div>
+        </div>
+      </div>
+      <div class="supp-summary">${summary}</div>
+      ${cardsHtml}
+      <a class="supp-package-cta" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
+        <div class="spc-emoji">🎁</div>
+        <div class="spc-text">
+          <div class="spc-title">맞춤 영양제 패키지로 한 번에</div>
+          <div class="spc-sub">스마트스토어 정품 · 빠른 배송</div>
+        </div>
+        <div class="spc-arrow">›</div>
+      </a>`;
+
+    // 옛 reco-header 숨기기
+    const suppSection = document.getElementById('foodSuppSection');
+    const oldHeader = suppSection.querySelector('.reco-header');
+    if (oldHeader) oldHeader.style.display = 'none';
+    suppSection.style.display = 'block';
+  } else {
+    document.getElementById('foodSuppSection').style.display = 'none';
+  }
   document.getElementById('foodResultImg').src = foodImageSrc;
 }
 
