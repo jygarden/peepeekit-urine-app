@@ -106,48 +106,46 @@ module.exports = async function handler(req, res) {
 
 // ── 단순한 프롬프트 (Gemini가 더 잘 따르도록) ──
 function buildSimplePrompt() {
-  return `한국어로만 응답. JSON 형식으로만 출력 (마크다운 코드블럭 X).
+  return `🇰🇷 한국어로만 응답. 반드시 JSON만 출력 (마크다운 X).
 
-사진에 보이는 식품 제품의 성분표(원재료명)를 읽고 각 성분을 분석해요.
+당신은 식품학·영양학 전문가. 사진에서 식품/음료 제품의 정보를 분석하세요.
 
-각 성분마다:
-- name: 성분명 (한글)
-- type: 종류 (예: 천연성분/인공감미료/착색료/보존료/산도조절제/유화제/향료 등)
-- safety: "safe" 또는 "caution" 또는 "warning" 또는 "danger" 중 하나
-- impact: 인체 영향 (1~2문장, 일반인 눈높이)
-- description: 이 성분이 뭔지 (1~2문장)
-- dailyLimit: 알려진 일일 한도 (없으면 "정해진 한도 없음")
+=== 분석 가이드 (매우 중요) ===
+1. 사진에 성분표(원재료명)가 보이면 → 모든 성분을 ingredients에 나열
+2. 성분표가 안 보여도 제품명·라벨이 보이면 → **추정 성분**으로라도 ingredients 채우기 (예: 콜라면 정제수/탄산/카페인/카라멜색소/인산/카페인/액상과당 등)
+3. 사진이 너무 흐릿하거나 식품과 무관 → {"error": "사진이 흐릿해요. 제품 라벨이 잘 보이게 다시 찍어주세요."}
+4. **ingredients는 절대 빈 배열로 두지 마세요!** 최소 3개 이상.
 
-종합 점수 (overallScore, 0~100):
-- 90~100: 천연 성분 위주
-- 75~89: 대부분 안전
-- 60~74: 첨가물 다수
-- 40~59: 합성 첨가물 많음
-- 0~39: 다량의 유해 첨가물
+=== 각 성분 ===
+- name: 성분명 (한글, 예: "아스파탐", "정제수", "카라멜색소")
+- type: 분류 (천연성분/인공감미료/착색료/보존료/산도조절제/유화제/향료/카페인 등)
+- safety: "safe" / "caution" / "warning" / "danger" 중 하나
+  · safe: 정제수, 비타민, 천연추출물
+  · caution: 카페인, 일부 인공감미료
+  · warning: 아스파탐, 적색40호, 합성착색료
+  · danger: 트랜스지방, 아질산나트륨
+- impact: 인체 영향 (일반인 눈높이, 1~2문장)
+- description: 성분 설명 (1~2문장)
+- dailyLimit: 일일 한도 (없으면 "정해진 한도 없음")
 
-JSON 구조:
+=== 종합 점수 (overallScore 0~100) ===
+- 90+ A: 천연 위주
+- 75+ B: 대부분 안전
+- 60+ C: 첨가물 다수
+- 40+ D: 합성 첨가물 많음
+- <40 F: 유해 첨가물 다량
+
+=== JSON 응답 형식 ===
 {
-  "productName": "제품명 (보이면, 아니면 빈 문자열)",
+  "productName": "제품명 (보이면)",
   "overallScore": 정수,
-  "overallGrade": "A 또는 B 또는 C 또는 D 또는 F",
-  "ingredients": [
-    {
-      "name": "...",
-      "type": "...",
-      "safety": "safe|caution|warning|danger",
-      "impact": "...",
-      "description": "...",
-      "dailyLimit": "..."
-    }
-  ],
-  "summary": "이 제품 종합 평가 3~4문장",
-  "recommendation": "어떻게 섭취하면 좋을지 2~3문장"
+  "overallGrade": "A|B|C|D|F",
+  "ingredients": [...최소 3개...],
+  "summary": "종합 평가 3~4문장",
+  "recommendation": "섭취 가이드 2~3문장"
 }
 
-만약 사진에 성분표가 안 보이면:
-{"error": "성분표 부분을 더 가까이 찍어주세요."}
-
-⚡ 모든 값 한국어. ingredients는 사진의 모든 성분 포함 (보통 5~30개).`;
+⚡ ingredients 빈 배열은 절대 X. 보이는 거 + 추정 + 일반적 성분이라도 채우세요.`;
 }
 
 // ── Gemini 호출 + responseSchema ──
