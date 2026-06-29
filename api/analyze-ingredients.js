@@ -1,6 +1,6 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v4 — required ingredients + 강제 재시도 + JSON 순서 변경
+// v5 — rawText 항상 보존 + 확장 사전 + 무조건 _debug
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,40 +10,55 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용됩니다.' });
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: '서버에 GEMINI_API_KEY가 설정되지 않았어요.' });
-  }
+  if (!apiKey) return res.status(500).json({ error: '서버에 GEMINI_API_KEY가 설정되지 않았어요.' });
 
   try {
     const { imageB64 } = req.body || {};
     if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
     const model = 'gemini-2.5-flash';
+    const allRawTexts = [];
 
-    // ── 1차 호출: ingredients-first 프롬프트 ──
-    let result = await tryAnalyze(apiKey, model, buildIngredientsFirstPrompt(), imageB64);
+    // ── 1차 호출 ──
+    const r1 = await tryAnalyze(apiKey, model, buildIngredientsFirstPrompt(), imageB64);
+    if (r1.rawText) allRawTexts.push('### 1차 응답\n' + r1.rawText);
+    let result = r1.result;
 
-    // ── ingredients 빈 배열이면 더 강한 prompt로 재시도 ──
+    // ── 빈 ingredients면 2차 호출 ──
     if (!result || !Array.isArray(result.ingredients) || result.ingredients.length === 0) {
-      console.log('[성분분석] 1차 빈 결과, 강제 재시도');
-      result = await tryAnalyze(apiKey, model, buildForcePrompt(), imageB64);
-    }
-
-    // ── 그래도 빈 배열이면 summary에서 성분명 강제 추출 ──
-    if (result && (!Array.isArray(result.ingredients) || result.ingredients.length === 0)) {
-      const extracted = extractIngredientsFromText(result.summary || '');
-      if (extracted.length > 0) {
-        result.ingredients = extracted;
-        result._debug = { reason: 'extracted_from_summary', count: extracted.length };
+      const r2 = await tryAnalyze(apiKey, model, buildForcePrompt(), imageB64);
+      if (r2.rawText) allRawTexts.push('### 2차 응답\n' + r2.rawText);
+      if (r2.result && Array.isArray(r2.result.ingredients) && r2.result.ingredients.length > 0) {
+        result = r2.result;
+      } else {
+        result = result || r2.result || {};
       }
     }
 
-    if (!result) {
-      return res.status(500).json({ error: 'AI 응답을 받지 못했어요.' });
+    const combinedRaw = allRawTexts.join('\n\n');
+
+    // ── 그래도 빈 ingredients면 전체 raw text에서 추출 ──
+    if (!result || !Array.isArray(result.ingredients) || result.ingredients.length === 0) {
+      if (!result) result = {};
+      const extracted = extractIngredientsFromText(combinedRaw);
+      if (extracted.length > 0) {
+        result.ingredients = extracted;
+        result._debug = {
+          reason: 'extracted_from_raw_text',
+          count: extracted.length,
+          rawSample: combinedRaw.slice(0, 400)
+        };
+      } else {
+        // 정말 0개면 raw text 전체를 디버그에 노출
+        result._debug = {
+          reason: 'all_methods_failed',
+          rawText: combinedRaw.slice(0, 800) || '(빈 응답)'
+        };
+      }
     }
+
     if (result.error) return res.status(400).json(result);
 
-    // 필드 채우기
     result = fillMissingFields(result);
     return res.status(200).json(result);
   } catch (err) {
@@ -54,13 +69,12 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// ── tryAnalyze: 호출 + 파싱 한 사이클 ──
+// ── tryAnalyze: result + rawText 같이 반환 ──
 async function tryAnalyze(apiKey, model, prompt, imageB64) {
   let geminiRes = await callGemini(apiKey, model, prompt, imageB64);
   let rawText = await extractText(geminiRes);
-  if (!rawText) return null;
+  if (!rawText) return { result: null, rawText: null };
 
-  // 정리
   let cleaned = rawText.trim()
     .replace(/^```(?:json)?\s*/i, '')
     .replace(/\s*```\s*$/i, '');
@@ -70,150 +84,208 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
     cleaned = cleaned.slice(firstBrace, lastBrace + 1);
   }
 
-  try { return JSON.parse(cleaned); }
-  catch(e) {
+  try {
+    return { result: JSON.parse(cleaned), rawText };
+  } catch(e) {
     const recovered = tryRecoverTruncatedJSON(cleaned);
     if (recovered) {
-      try { return JSON.parse(recovered); } catch(e2) {}
+      try { return { result: JSON.parse(recovered), rawText }; } catch(e2) {}
     }
-    // 파싱 다 실패해도 raw 텍스트 정보는 남겨두기
-    return { _rawTextHead: rawText.slice(0, 300), _parseError: true };
+    return { result: null, rawText };
   }
 }
 
-// ── 프롬프트 1: ingredients 먼저 작성하도록 ──
+// ── 프롬프트 1: ingredients first ──
 function buildIngredientsFirstPrompt() {
   return `🇰🇷 한국어 JSON. 마크다운 X.
 
-당신은 식품 성분 전문가. 사진의 식품 성분표를 분석.
+당신은 식품 성분 전문가. 사진의 식품 성분표(원재료명)를 읽고 모든 성분을 추출.
 
-★ 매우 중요 ★
-1. ingredients 배열을 **반드시 먼저** 작성 (최소 3개, 보통 10~25개)
-2. summary에는 **성분명 절대 나열 X** (3문장 이내 짧게)
-3. summary는 ingredients 작성 끝난 후 마지막에
+★ 절대 규칙 ★
+1. "원재료명" 또는 성분 나열을 찾아 모두 추출
+2. 괄호 안 성분도 별도로 추가 — 예: "준초콜릿(설탕, 가공유지, 혼합분유, 코코아분말, 유당)" → 6개로 분리
+3. ingredients 배열에 최소 5개 이상, 빈 배열 절대 금지
+4. summary는 짧게 (성분명 나열 X, 3문장 이내)
 
-=== 분석 규칙 ===
-사진에서 "원재료명:" 또는 성분 나열을 찾아 모두 추출.
-괄호 안 부속 성분도 별도로 추가.
-예: "준초콜릿(설탕, 가공유지, 혼합분유, 코코아분말, 유당)" → 6개 성분으로 분리.
+=== 안전 분류 ===
+- safe: 정제수, 비타민, 천연재료 (찹쌀, 밀가루, 천연색소)
+- caution: 설탕, 올리고당, 가공유지, 카페인, 카라멜색소, 일반 첨가물
+- warning: 합성첨가물 (아스파탐, 적색40호, 폴리글리세린지방산에스테르, 프로필렌글리콜, MSG 등)
+- danger: 트랜스지방, 아질산나트륨
 
-각 성분 분류:
-- safe: 정제수, 비타민, 천연재료 (밀가루, 찹쌀, 정제소금 등)
-- caution: 일반 첨가물 (정제소금 다량, 설탕, 올리고당, 카페인, 카라멜색소, 식이섬유 등)
-- warning: 합성첨가물 (아스파탐, 합성착색료, 적색40호, 안식향산나트륨, MSG, 글리세린, 폴리글리세린지방산에스테르, 프로필렌글리콜 등)
-- danger: 알려진 유해성분 (트랜스지방, 아질산나트륨 등)
-
-=== JSON (이 순서 그대로!) ===
+=== 응답 형식 (ingredients 먼저!) ===
 {
   "ingredients": [
-    {"name": "올리고당", "type": "당류", "safety": "caution", "impact": "혈당 영향 적음 / 과다 섭취 시 복부 불편감", "description": "포도당이 결합된 당. 설탕 대체용", "dailyLimit": "정해진 한도 없음"},
-    {"name": "준초콜릿", "type": "혼합 가공품", "safety": "caution", "impact": "당분·지방 함량 높아 과다 섭취 주의", "description": "코코아 분말과 가공유지를 혼합한 초콜릿", "dailyLimit": "정해진 한도 없음"}
+    {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"영향 1줄","description":"설명 1줄","dailyLimit":"한도"}
   ],
   "productName": "제품명",
-  "overallScore": 정수,
+  "overallScore": 0~100,
   "overallGrade": "A|B|C|D|F",
-  "summary": "3문장 이내 종합 평가 (성분명 X)",
-  "recommendation": "섭취 가이드 2~3문장"
+  "summary": "3문장 이내",
+  "recommendation": "2~3문장"
 }
 
-⚡ ingredients 빈 배열은 절대 금지! 최소 3개 이상.`;
+성분표 인식 어렵더라도 제품명으로 추정해서라도 ingredients 채우세요.`;
 }
 
-// ── 프롬프트 2: 더 강한 재시도용 ──
+// ── 프롬프트 2: 더 강력하게 ──
 function buildForcePrompt() {
-  return `🇰🇷 한국어 JSON만.
+  return `🇰🇷 한국어 JSON. 사진의 식품 제품을 분석.
 
-★ ingredients 배열에 사진에 보이는 성분명을 모두 적으세요. 빈 배열 절대 금지! ★
+★★★ ingredients 배열에 최소 10개 성분 필수. 빈 배열 절대 금지 ★★★
 
-각 성분: {"name": "성분명", "type": "분류", "safety": "safe|caution|warning|danger", "impact": "영향 1줄", "description": "설명 1줄", "dailyLimit": "한도"}
+성분표가 안 보이면 제품 이름으로 추정. 예:
+- 과자 → 밀가루, 설탕, 식물성유지, 우유, 계란, 베이킹파우더, 유화제, 향료 등
+- 콜라 → 정제수, 탄산, 설탕, 카페인, 카라멜색소, 인산, 향료 등
+- 초콜릿 → 코코아매스, 설탕, 코코아버터, 우유, 레시틴, 향료, 유화제 등
 
-성분이 안 보이면 제품 이름으로 일반적 성분을 추정해서 작성 (예: 초콜릿 과자 → 밀가루, 설탕, 코코아, 식물성유지, 우유, 유화제 등).
+각 성분 객체:
+{"name":"...","type":"...","safety":"safe|caution|warning|danger","impact":"...","description":"...","dailyLimit":"..."}
 
-⚠️ summary에 성분명 나열 절대 금지. summary 짧게 (2~3문장).
-
-JSON 응답:
+응답:
 {
-  "ingredients": [최소 5개 객체],
+  "ingredients": [최소 10개],
   "productName": "...",
   "overallScore": 정수,
   "overallGrade": "A|B|C|D|F",
-  "summary": "3문장 이내",
+  "summary": "짧게 3문장",
   "recommendation": "2~3문장"
 }`;
 }
 
-// ── summary 텍스트에서 성분명 추출 (백업) ──
+// ── 텍스트에서 알려진 성분 추출 (확장 사전) ──
 function extractIngredientsFromText(text) {
   if (!text) return [];
-
-  // 알려진 성분명 사전
-  const knownIngredients = {
-    '정제수': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'물입니다' },
-    '올리고당': { type:'당류', safety:'caution', impact:'혈당 영향 적음, 과다 시 복부 불편', desc:'설탕 대체 당류' },
-    '설탕': { type:'당류', safety:'caution', impact:'과다 섭취 시 혈당·체중 증가', desc:'정제 당류' },
-    '말티톨': { type:'당알코올', safety:'caution', impact:'과다 시 설사·복부 팽만', desc:'당알코올 감미료' },
-    '말티톨액': { type:'당알코올', safety:'caution', impact:'과다 시 설사·복부 팽만', desc:'당알코올 감미료' },
-    '준초콜릿': { type:'가공식품', safety:'caution', impact:'당분·지방 함량 높음', desc:'코코아+가공유지 혼합' },
-    '가공유지': { type:'유지', safety:'caution', impact:'트랜스지방 가능성, 과다 시 심혈관 위험', desc:'가공된 식물성 기름' },
-    '혼합분유': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'우유 가공품' },
-    '코코아분말': { type:'천연성분', safety:'safe', impact:'카페인 미량 포함', desc:'카카오 분말' },
-    '유당': { type:'당류', safety:'caution', impact:'유당불내증인 경우 소화 불편', desc:'우유 속 당분' },
-    '옥수수전분': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'옥수수에서 추출한 전분' },
-    '찰옥수수전분': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'찰옥수수 전분' },
-    '쇼트닝': { type:'유지', safety:'warning', impact:'트랜스지방 가능, 심혈관 영향', desc:'반고체 식용유' },
-    '팜유': { type:'유지', safety:'caution', impact:'포화지방 다량, 과다 시 콜레스테롤 영향', desc:'팜 열매 기름' },
-    '토코페롤': { type:'비타민', safety:'safe', impact:'항산화 효과', desc:'비타민E' },
-    '레시틴': { type:'유화제', safety:'safe', impact:'안전합니다', desc:'대두/계란 유화제' },
-    '구연산': { type:'산도조절제', safety:'safe', impact:'안전합니다', desc:'산미·보존제' },
-    '식물성크림': { type:'가공식품', safety:'caution', impact:'가공 지방·당분 함유', desc:'식물성 유지 기반 크림' },
-    '물엿': { type:'당류', safety:'caution', impact:'당분 다량', desc:'옥수수·전분 시럽' },
-    '유청분말': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'유청 단백질' },
-    '제이인산칼륨': { type:'산도조절제', safety:'caution', impact:'과다 시 신장 부담', desc:'완충제·안정제' },
-    '덱스트린': { type:'당류', safety:'safe', impact:'안전합니다', desc:'전분 분해물' },
-    '시클로덱스트린': { type:'당류', safety:'safe', impact:'안전합니다', desc:'고리 모양 당류' },
-    '찹쌀분말': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'찹쌀 분쇄' },
-    '찹쌀': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'찹쌀' },
-    '피스타치오': { type:'천연성분', safety:'safe', impact:'견과류 알레르기 주의', desc:'피스타치오 견과' },
-    '글리세린': { type:'유화제', safety:'caution', impact:'과다 시 두통·메스꺼움', desc:'보습·감미용 가공물' },
-    '옥수수기름': { type:'유지', safety:'caution', impact:'오메가6 다량', desc:'옥수수 추출 기름' },
-    '정제소금': { type:'무기물', safety:'caution', impact:'과다 섭취 시 혈압 영향', desc:'정제된 소금' },
-    '밀가루': { type:'천연성분', safety:'safe', impact:'밀 알레르기·글루텐 주의', desc:'밀 분쇄' },
-    '주정': { type:'알코올', safety:'caution', impact:'알코올 미량 함유', desc:'식용 알코올' },
-    '폴리글리세린지방산에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제, 과다 시 소화 불편', desc:'합성 유화제' },
-    '글리세린에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제', desc:'글리세롤 에스테르' },
-    '프로필렌글리콜에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제, 일부 민감 반응', desc:'합성 유화제' },
-    '프로필렌글리콜': { type:'용매', safety:'warning', impact:'다량 시 알레르기·간 부담', desc:'합성 용매·보습제' },
-    '향료': { type:'향료', safety:'caution', impact:'합성향료일 수 있음', desc:'풍미 첨가물' },
-    '유화제': { type:'유화제', safety:'caution', impact:'종류에 따라 영향 다름', desc:'유지 안정화제' },
-    '홍화황색소': { type:'착색료', safety:'safe', impact:'천연 색소 (홍화)', desc:'홍화에서 추출' },
-    '치자청색소': { type:'착색료', safety:'safe', impact:'천연 색소 (치자)', desc:'치자 추출' },
-    '아스파탐': { type:'인공감미료', safety:'warning', impact:'페닐알라닌 다량, 페닐케톤뇨증 환자 금지', desc:'합성 감미료' },
-    '카페인': { type:'각성제', safety:'caution', impact:'과다 시 불면·심박 증가', desc:'카페인' },
-    '카라멜색소': { type:'착색료', safety:'caution', impact:'4-MEI 함유 가능', desc:'갈색 합성 착색료' },
-    '인산': { type:'산도조절제', safety:'caution', impact:'과다 시 칼슘 흡수 방해', desc:'산미료' },
-    '액상과당': { type:'당류', safety:'warning', impact:'비만·지방간 위험 ↑', desc:'고과당 옥수수 시럽' },
-    '안식향산나트륨': { type:'보존료', safety:'warning', impact:'비타민C와 반응 시 벤젠 가능', desc:'합성 보존제' },
-    'MSG': { type:'조미료', safety:'caution', impact:'민감 시 두통·홍조', desc:'L-글루탐산나트륨' }
-  };
-
   const found = [];
-  const lowerText = text.toLowerCase();
-  for (const [name, info] of Object.entries(knownIngredients)) {
-    if (text.includes(name)) {
+  const seenNames = new Set();
+
+  const dict = getIngredientDict();
+  // 긴 이름부터 매칭 (예: "준초콜릿"이 "초콜릿"보다 먼저 매칭되도록)
+  const sortedNames = Object.keys(dict).sort((a, b) => b.length - a.length);
+
+  for (const name of sortedNames) {
+    if (seenNames.has(name)) continue;
+    // 정규식: 띄어쓰기 0개~1개 변형 허용
+    const flexPattern = name.split('').join('\\s*');
+    const regex = new RegExp(flexPattern, 'i');
+    if (regex.test(text)) {
+      const info = dict[name];
       found.push({
         name,
         type: info.type,
         safety: info.safety,
         impact: info.impact,
         description: info.desc,
-        dailyLimit: '정해진 한도 없음'
+        dailyLimit: info.limit || '정해진 한도 없음'
       });
+      seenNames.add(name);
     }
   }
   return found;
 }
 
-// ── Gemini 호출 + responseSchema (ingredients required) ──
+// ── 성분 사전 (확장) ──
+function getIngredientDict() {
+  return {
+    // 천연 / 안전
+    '정제수': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'물' },
+    '물': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'물' },
+    '밀가루': { type:'천연성분', safety:'safe', impact:'밀 알레르기 주의', desc:'밀 분쇄물' },
+    '찹쌀': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'찹쌀' },
+    '찹쌀분말': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'찹쌀 가루' },
+    '쌀가루': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'쌀 가루' },
+    '옥수수전분': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'옥수수 전분' },
+    '찰옥수수전분': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'찰옥수수 전분' },
+    '피스타치오': { type:'천연성분', safety:'safe', impact:'견과류 알레르기 주의', desc:'피스타치오 견과' },
+    '아몬드': { type:'천연성분', safety:'safe', impact:'견과류 알레르기 주의', desc:'아몬드' },
+    '코코아분말': { type:'천연성분', safety:'safe', impact:'카페인 미량', desc:'카카오 분말' },
+    '코코아매스': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'카카오 원료' },
+    '코코아버터': { type:'유지', safety:'safe', impact:'안전합니다', desc:'카카오에서 추출한 지방' },
+    '토코페롤': { type:'비타민', safety:'safe', impact:'항산화 효과', desc:'비타민E' },
+    '비타민C': { type:'비타민', safety:'safe', impact:'항산화', desc:'아스코르브산' },
+    '레시틴': { type:'유화제', safety:'safe', impact:'안전합니다', desc:'대두/계란 유화제' },
+    '구연산': { type:'산도조절제', safety:'safe', impact:'안전합니다', desc:'산미료' },
+    '홍화황색소': { type:'착색료', safety:'safe', impact:'천연 색소', desc:'홍화 추출' },
+    '치자청색소': { type:'착색료', safety:'safe', impact:'천연 색소', desc:'치자 추출' },
+    '치자황색소': { type:'착색료', safety:'safe', impact:'천연 색소', desc:'치자 추출' },
+    '파프리카추출색소': { type:'착색료', safety:'safe', impact:'천연 색소', desc:'파프리카 추출' },
+
+    // 당류
+    '올리고당': { type:'당류', safety:'caution', impact:'혈당 영향 적음, 과다 시 복부 불편', desc:'설탕 대체 당' },
+    '설탕': { type:'당류', safety:'caution', impact:'과다 섭취 시 혈당·체중↑', desc:'정제당' },
+    '원당': { type:'당류', safety:'caution', impact:'정제 안 된 설탕', desc:'사탕수수 원당' },
+    '말티톨': { type:'당알코올', safety:'caution', impact:'과다 시 설사·복부 팽만', desc:'당알코올' },
+    '말티톨액': { type:'당알코올', safety:'caution', impact:'과다 시 설사·복부 팽만', desc:'당알코올 액상' },
+    '에리스리톨': { type:'당알코올', safety:'caution', impact:'칼로리 없음, 과다 시 가스', desc:'당알코올' },
+    '자일리톨': { type:'당알코올', safety:'caution', impact:'과다 시 설사. 개에게 독성', desc:'당알코올' },
+    '물엿': { type:'당류', safety:'caution', impact:'당분 다량', desc:'전분 시럽' },
+    '액상과당': { type:'당류', safety:'warning', impact:'비만·지방간 위험 ↑', desc:'고과당 옥수수 시럽' },
+    '덱스트린': { type:'당류', safety:'safe', impact:'안전합니다', desc:'전분 분해물' },
+    '시클로덱스트린': { type:'당류', safety:'safe', impact:'안전합니다', desc:'고리형 당' },
+    '시클로덱스트린액': { type:'당류', safety:'safe', impact:'안전합니다', desc:'시클로덱스트린 액' },
+
+    // 유지
+    '준초콜릿': { type:'가공식품', safety:'caution', impact:'당분·지방 함량 높음', desc:'코코아+가공유지' },
+    '가공유지': { type:'유지', safety:'caution', impact:'트랜스지방 가능, 과다 시 심혈관 위험', desc:'가공된 식물성 기름' },
+    '식물성유지': { type:'유지', safety:'caution', impact:'종류에 따라 영향 다름', desc:'식물성 기름' },
+    '식물성크림': { type:'가공식품', safety:'caution', impact:'가공 지방·당분 함유', desc:'식물성 크림' },
+    '쇼트닝': { type:'유지', safety:'warning', impact:'트랜스지방 가능', desc:'반고체 식용유' },
+    '팜유': { type:'유지', safety:'caution', impact:'포화지방 다량', desc:'팜 열매 기름' },
+    '팜핵유': { type:'유지', safety:'caution', impact:'포화지방 다량', desc:'팜 핵 기름' },
+    '대두유': { type:'유지', safety:'caution', impact:'오메가6 다량', desc:'콩 기름' },
+    '카놀라유': { type:'유지', safety:'safe', impact:'비교적 안전', desc:'유채 기름' },
+    '옥수수기름': { type:'유지', safety:'caution', impact:'오메가6 다량', desc:'옥수수 추출유' },
+    '해바라기유': { type:'유지', safety:'safe', impact:'비교적 안전', desc:'해바라기 기름' },
+
+    // 유제품
+    '혼합분유': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'우유 가공품' },
+    '전지분유': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'전지 우유 분말' },
+    '탈지분유': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'지방 제거 우유 분말' },
+    '유당': { type:'당류', safety:'caution', impact:'유당불내증 시 소화 불편', desc:'우유 속 당' },
+    '유청분말': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'유청 단백질' },
+    '카제인': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'우유 단백질' },
+
+    // 가공/첨가물
+    '제이인산칼륨': { type:'산도조절제', safety:'caution', impact:'과다 시 신장 부담', desc:'완충제' },
+    '글리세린': { type:'유화제', safety:'caution', impact:'과다 시 두통·메스꺼움', desc:'보습·감미제' },
+    '글리세롤': { type:'유화제', safety:'caution', impact:'과다 시 두통·메스꺼움', desc:'보습제' },
+    '폴리글리세린지방산에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제', desc:'합성 유화제' },
+    '글리세린에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제', desc:'글리세롤 에스테르' },
+    '프로필렌글리콜에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제', desc:'합성 유화제' },
+    '프로필렌글리콜': { type:'용매', safety:'warning', impact:'다량 시 알레르기·간 부담', desc:'합성 보습제·용매' },
+    '소르비탄지방산에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제', desc:'합성 유화제' },
+    '향료': { type:'향료', safety:'caution', impact:'합성향료 가능', desc:'풍미 첨가물' },
+    '합성향료': { type:'향료', safety:'warning', impact:'합성 향료', desc:'합성 풍미료' },
+    '천연향료': { type:'향료', safety:'safe', impact:'천연 추출', desc:'천연 풍미료' },
+    '유화제': { type:'유화제', safety:'caution', impact:'종류에 따라 다름', desc:'유지 안정제' },
+    '정제소금': { type:'무기물', safety:'caution', impact:'과다 시 혈압↑', desc:'정제 소금' },
+    '소금': { type:'무기물', safety:'caution', impact:'과다 시 혈압↑', desc:'염화나트륨' },
+    '주정': { type:'알코올', safety:'caution', impact:'알코올 미량 함유', desc:'식용 알코올' },
+    '효모': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'효모균' },
+    '베이킹파우더': { type:'팽창제', safety:'safe', impact:'안전합니다', desc:'팽창제' },
+    '탄산수소나트륨': { type:'팽창제', safety:'safe', impact:'안전합니다', desc:'베이킹소다' },
+
+    // 위험 첨가물
+    '아스파탐': { type:'인공감미료', safety:'warning', impact:'페닐알라닌 함유, PKU 환자 금지', desc:'합성 감미료' },
+    '수크랄로스': { type:'인공감미료', safety:'warning', impact:'장내 미생물 영향 우려', desc:'합성 감미료' },
+    '아세설팜칼륨': { type:'인공감미료', safety:'warning', impact:'합성 감미료', desc:'합성 감미료' },
+    '사카린': { type:'인공감미료', safety:'warning', impact:'합성 감미료', desc:'합성 감미료' },
+    '안식향산나트륨': { type:'보존료', safety:'warning', impact:'비타민C와 반응 시 벤젠 가능', desc:'합성 보존제' },
+    '소르빈산칼륨': { type:'보존료', safety:'warning', impact:'알레르기 반응 가능', desc:'합성 보존제' },
+    '아질산나트륨': { type:'보존료', safety:'danger', impact:'발암 가능성', desc:'육가공 보존제' },
+    '카라멜색소': { type:'착색료', safety:'caution', impact:'4-MEI 함유 가능', desc:'갈색 합성 착색료' },
+    '적색40호': { type:'착색료', safety:'warning', impact:'어린이 과잉행동 연관 보고', desc:'합성 적색 색소' },
+    '황색4호': { type:'착색료', safety:'warning', impact:'알레르기 반응 가능', desc:'합성 황색 색소' },
+    '황색5호': { type:'착색료', safety:'warning', impact:'알레르기 반응 가능', desc:'합성 황색 색소' },
+    '청색1호': { type:'착색료', safety:'warning', impact:'합성 색소', desc:'합성 청색 색소' },
+    'MSG': { type:'조미료', safety:'caution', impact:'민감 시 두통·홍조', desc:'글루탐산나트륨' },
+    '글루탐산나트륨': { type:'조미료', safety:'caution', impact:'민감 시 두통·홍조', desc:'MSG' },
+    '인산': { type:'산도조절제', safety:'caution', impact:'과다 시 칼슘 흡수 방해', desc:'산미료' },
+    '카페인': { type:'각성제', safety:'caution', impact:'과다 시 불면·심박↑', desc:'카페인' },
+    '탄산': { type:'기체', safety:'safe', impact:'안전합니다', desc:'이산화탄소' }
+  };
+}
+
 async function callGemini(apiKey, model, prompt, imageB64) {
   const body = {
     contents: [{
@@ -225,35 +297,7 @@ async function callGemini(apiKey, model, prompt, imageB64) {
     generationConfig: {
       temperature: 0.1,
       maxOutputTokens: 8192,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: 'OBJECT',
-        properties: {
-          ingredients: {
-            type: 'ARRAY',
-            minItems: 3,
-            items: {
-              type: 'OBJECT',
-              properties: {
-                name: { type: 'STRING' },
-                type: { type: 'STRING' },
-                safety: { type: 'STRING' },
-                impact: { type: 'STRING' },
-                description: { type: 'STRING' },
-                dailyLimit: { type: 'STRING' }
-              },
-              required: ['name', 'safety', 'impact']
-            }
-          },
-          productName: { type: 'STRING' },
-          overallScore: { type: 'INTEGER' },
-          overallGrade: { type: 'STRING' },
-          summary: { type: 'STRING' },
-          recommendation: { type: 'STRING' },
-          error: { type: 'STRING' }
-        },
-        required: ['ingredients']
-      }
+      responseMimeType: 'application/json'
     }
   };
 
