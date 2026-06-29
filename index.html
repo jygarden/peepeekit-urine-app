@@ -1002,6 +1002,12 @@
     .collapse-preview{font-size:11px;color:#6E6E73;margin-top:3px;letter-spacing:-.1px;line-height:1.4}
     .collapse-icon{color:#94A3B8;font-size:18px;flex-shrink:0;margin-left:10px;transition:transform .25s}
     .collapse-card.open .collapse-icon{transform:rotate(180deg);color:#6366F1}
+    /* ⭐ 새 토글 버튼 (상세보기 / 접기) */
+    .collapse-toggle-btn{display:inline-flex;align-items:center;gap:5px;flex-shrink:0;margin-left:10px;background:#F1F5F9;color:#475569;font-size:12px;font-weight:800;padding:7px 13px;border-radius:999px;letter-spacing:-.2px;transition:all .2s;border:1px solid #E2E8F0}
+    .collapse-card.open .collapse-toggle-btn{background:rgba(99,102,241,.10);color:#6366F1;border-color:rgba(99,102,241,.2)}
+    .collapse-toggle-arrow{transition:transform .3s;display:inline-block;font-size:11px;line-height:1}
+    .collapse-card.open .collapse-toggle-arrow{transform:rotate(180deg)}
+    .collapse-header:active .collapse-toggle-btn{transform:scale(.95)}
     .collapse-body{display:none;padding:4px 16px 16px}
     .collapse-card.open .collapse-body{display:block;animation:fadeSlideDown .25s ease-out}
     @keyframes fadeSlideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
@@ -2475,14 +2481,17 @@
       <!-- 📅 이번 주 액션 플랜 -->
       <div id="actionPlanWrap"></div>
 
-      <!-- 📋 검사 결과 상세 (펼침 기본) -->
-      <div class="collapse-card open" id="collapseDetail">
+      <!-- 📋 검사 결과 상세 (기본 닫힘) -->
+      <div class="collapse-card" id="collapseDetail">
         <div class="collapse-header" onclick="toggleCollapse(this)">
           <div class="collapse-header-left">
             <div class="collapse-title-row">📋 검사 결과 상세 <span class="collapse-badge" id="detailBadge"></span></div>
             <div class="collapse-preview">항목별 수치 · 의료 안내 · 패턴 분석</div>
           </div>
-          <span class="collapse-icon">▾</span>
+          <span class="collapse-toggle-btn">
+            <span class="collapse-toggle-text">상세보기</span>
+            <span class="collapse-toggle-arrow">▾</span>
+          </span>
         </div>
         <div class="collapse-body">
 
@@ -2522,7 +2531,10 @@
             <div class="collapse-title-row">💊 맞춤 처방 & 영양 관리 <span class="collapse-badge good">상세</span></div>
             <div class="collapse-preview">약사 영양제 처방 · 식단 · 운동 · 체질 분석</div>
           </div>
-          <span class="collapse-icon">▾</span>
+          <span class="collapse-toggle-btn">
+            <span class="collapse-toggle-text">상세보기</span>
+            <span class="collapse-toggle-arrow">▾</span>
+          </span>
         </div>
         <div class="collapse-body">
 
@@ -2565,7 +2577,10 @@
             <div class="collapse-title-row">📸 검사 이미지 & 입력 정보</div>
             <div class="collapse-preview">촬영한 키트 사진 · 입력 정보</div>
           </div>
-          <span class="collapse-icon">▾</span>
+          <span class="collapse-toggle-btn">
+            <span class="collapse-toggle-text">상세보기</span>
+            <span class="collapse-toggle-arrow">▾</span>
+          </span>
         </div>
         <div class="collapse-body">
 
@@ -3777,7 +3792,13 @@ let currentFoodResult = null;
 // ════════════════════════════════════════════════════════════════
 function toggleCollapse(headerEl) {
   const card = headerEl.closest('.collapse-card');
-  if (card) card.classList.toggle('open');
+  if (!card) return;
+  card.classList.toggle('open');
+  // 텍스트 자동 변경
+  const textEl = headerEl.querySelector('.collapse-toggle-text');
+  if (textEl) {
+    textEl.textContent = card.classList.contains('open') ? '접기' : '상세보기';
+  }
 }
 function updateCollapseBadges(r) {
   // 검사 항목 개수
@@ -4167,6 +4188,98 @@ function stopFoodLoading() {
   // 100% 도달 애니메이션
   const progressBar = loadingBox.querySelector('.food-loading-progress-bar');
   const pctEl = loadingBox.querySelector('.food-loading-pct');
+  if (progressBar) progressBar.style.width = '100%';
+  if (pctEl) pctEl.textContent = '100%';
+  setTimeout(() => {
+    loadingBox.classList.remove('show');
+    if (progressBar) progressBar.style.width = '0%';
+    if (pctEl) pctEl.textContent = '0%';
+  }, 400);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🔬 소변검사 분석 로딩 (진행률 + 단계별 메시지)
+// ════════════════════════════════════════════════════════════════
+let urineLoadingInterval = null;
+let urineLoadingProgress = 0;
+const URINE_LOADING_STAGES = [
+  { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
+  { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
+  { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
+];
+
+function startUrineLoading() {
+  const loadingBox = document.getElementById('loadingBox');
+  if (!loadingBox) return;
+  loadingBox.classList.add('show');
+
+  const emojiEl = loadingBox.querySelector('.emoji');
+  const msgEl = loadingBox.querySelector('p');
+  const subEl = loadingBox.querySelector('small');
+
+  let progressWrap = loadingBox.querySelector('.urine-loading-progress-wrap');
+  if (!progressWrap) {
+    progressWrap = document.createElement('div');
+    progressWrap.className = 'urine-loading-progress-wrap';
+    progressWrap.style.cssText = 'background:#F1F5F9;border-radius:99px;height:8px;overflow:hidden;margin:14px auto 6px;max-width:240px';
+    const bar = document.createElement('div');
+    bar.className = 'urine-loading-progress-bar';
+    bar.style.cssText = 'height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:99px;width:0%;transition:width .3s ease-out';
+    progressWrap.appendChild(bar);
+    loadingBox.appendChild(progressWrap);
+
+    const pctEl = document.createElement('div');
+    pctEl.className = 'urine-loading-pct';
+    pctEl.style.cssText = 'font-size:11px;color:#94A3B8;font-weight:700;margin-top:2px';
+    pctEl.textContent = '0%';
+    loadingBox.appendChild(pctEl);
+  }
+
+  const progressBar = loadingBox.querySelector('.urine-loading-progress-bar');
+  const pctEl = loadingBox.querySelector('.urine-loading-pct');
+
+  let stageIdx = -1;
+  urineLoadingProgress = 0;
+
+  const updateStage = (newIdx) => {
+    if (newIdx === stageIdx) return;
+    stageIdx = newIdx;
+    const stage = URINE_LOADING_STAGES[newIdx];
+    if (emojiEl) { emojiEl.style.transition = 'opacity .25s'; emojiEl.style.opacity = '0'; }
+    setTimeout(() => {
+      if (emojiEl) { emojiEl.textContent = stage.emoji; emojiEl.style.opacity = '1'; }
+      if (msgEl) msgEl.textContent = stage.msg;
+      if (subEl) subEl.textContent = stage.sub;
+    }, 200);
+  };
+  updateStage(0);
+
+  urineLoadingInterval = setInterval(() => {
+    if (urineLoadingProgress < 95) {
+      const step = urineLoadingProgress < 30 ? 1.5 : urineLoadingProgress < 70 ? 1.0 : 0.5;
+      urineLoadingProgress = Math.min(95, urineLoadingProgress + step);
+      if (progressBar) progressBar.style.width = urineLoadingProgress + '%';
+      if (pctEl) pctEl.textContent = Math.floor(urineLoadingProgress) + '%';
+    }
+    let newStage = 0;
+    for (let i = URINE_LOADING_STAGES.length - 1; i >= 0; i--) {
+      if (urineLoadingProgress >= URINE_LOADING_STAGES[i].threshold) { newStage = i; break; }
+    }
+    updateStage(newStage);
+  }, 250);
+}
+
+function stopUrineLoading() {
+  if (urineLoadingInterval) {
+    clearInterval(urineLoadingInterval);
+    urineLoadingInterval = null;
+  }
+  const loadingBox = document.getElementById('loadingBox');
+  if (!loadingBox) return;
+  const progressBar = loadingBox.querySelector('.urine-loading-progress-bar');
+  const pctEl = loadingBox.querySelector('.urine-loading-pct');
   if (progressBar) progressBar.style.width = '100%';
   if (pctEl) pctEl.textContent = '100%';
   setTimeout(() => {
@@ -6444,11 +6557,10 @@ function getSajuHealth(birthYear, birthMonth, mode) {
 async function analyze() {
   if (!imageB64) return;
 
-  const btn     = document.getElementById('btnAnalyze');
-  const loading = document.getElementById('loadingBox');
+  const btn = document.getElementById('btnAnalyze');
   btn.disabled = true;
   btn.textContent = '🔄 AI 분석 중...';
-  loading.classList.add('show');
+  startUrineLoading();
   clearError();
 
   let recordData, petHint = '', sajuInput = null;
@@ -6540,7 +6652,7 @@ async function analyze() {
   } finally {
     btn.disabled = false;
     btn.textContent = '🔬 AI 분석 시작';
-    loading.classList.remove('show');
+    stopUrineLoading();
   }
 }
 
