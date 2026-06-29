@@ -127,11 +127,19 @@ function buildIngredientsFirstPrompt() {
 - "본 성분 구성을 기준으로, 일일 권장 섭취 한도 내에서 적당량 드시는 것이 좋습니다." 같은 톤
 - 단정 표현 X ("암 걸려요" 절대 X)
 
+=== 알레르기 유발 가능 성분 추출 ===
+한국 식약처 알레르기 표시 권고 22종 기준:
+알류(가금류), 우유, 메밀, 땅콩, 대두, 밀, 고등어, 게, 새우, 돼지고기, 복숭아,
+토마토, 아황산류, 호두, 닭고기, 쇠고기, 오징어, 조개류(굴/홍합/전복/조개 포함),
+잣, 견과류가공품, 콩기름(대두유), 레시틴(대두/계란 유래)
+→ 사진의 성분 중 위에 해당하는 항목을 allergens 배열에 한국어로
+
 === 응답 형식 ===
 {
   "ingredients": [
     {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"인체 영향 (1~2문장, 객관적 표현)","description":"이 성분 설명 (1~2문장)","dailyLimit":"식약처/WHO 기준 (있으면)"}
   ],
+  "allergens": ["땅콩", "대두유", "레시틴", "혼합분유" /* 해당되는 것만 */],
   "productName": "",
   "overallScore": 0~100,
   "overallGrade": "A|B|C|D|F",
@@ -156,6 +164,7 @@ summary 패턴 (이대로):
 응답:
 {
   "ingredients": [최소 10개],
+  "allergens": ["알레르기 유발 가능 성분명들 — 우유/땅콩/대두/밀/달걀/견과류/조개류 등 해당되는 것만"],
   "productName": "",
   "overallScore": 정수,
   "overallGrade": "A|B|C|D|F",
@@ -403,5 +412,36 @@ function fillMissingFields(r) {
   }));
   if (!r.summary) r.summary = '분석을 완료했어요!';
   if (!r.recommendation) r.recommendation = '제품을 적당히 섭취하시고, 다른 식품과 균형 있게 드세요.';
+
+  // 알레르기 표기 자동 추출 (AI가 누락한 경우 백업)
+  if (!Array.isArray(r.allergens)) r.allergens = [];
+  if (r.allergens.length === 0 && r.ingredients.length > 0) {
+    const allergenKeywords = {
+      '우유': ['우유', '분유', '혼합분유', '전지분유', '탈지분유', '유당', '유청', '카제인'],
+      '대두': ['대두', '콩', '대두유', '레시틴'],
+      '땅콩': ['땅콩', '낙화생'],
+      '견과류': ['아몬드', '호두', '잣', '캐슈넛', '피스타치오', '헤이즐넛', '브라질너트'],
+      '밀': ['밀', '밀가루', '글루텐'],
+      '달걀': ['난백', '난황', '계란', '달걀'],
+      '메밀': ['메밀'],
+      '복숭아': ['복숭아'],
+      '토마토': ['토마토'],
+      '돼지고기': ['돼지고기', '돼지'],
+      '쇠고기': ['쇠고기', '소고기'],
+      '닭고기': ['닭고기'],
+      '고등어': ['고등어'],
+      '게': ['게'],
+      '새우': ['새우'],
+      '오징어': ['오징어'],
+      '조개류': ['굴', '홍합', '전복', '조개', '바지락'],
+      '아황산류': ['아황산']
+    };
+    const ingredientText = r.ingredients.map(i => (i.name||'') + ' ' + (i.description||'')).join(' ');
+    for (const [allergen, keywords] of Object.entries(allergenKeywords)) {
+      if (keywords.some(kw => ingredientText.includes(kw))) {
+        r.allergens.push(allergen);
+      }
+    }
+  }
   return r;
 }
