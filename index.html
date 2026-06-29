@@ -2701,13 +2701,21 @@
       </div>
     </div>
     <div class="warning-banner" style="background:#FAF5FF;border-color:#C4B5FD">
-      <div class="wtitle" style="color:#5B21B6">📸 촬영 팁</div>
+      <div class="wtitle" style="color:#5B21B6">📸 정확한 분석을 위해</div>
       <ul style="color:#6B21A8">
-        <li>제품 뒷면 <b>성분 표시</b> 부분만 크게</li>
-        <li>글자가 또렷이 보이게 가까이서</li>
-        <li>반사·그림자 없도록 밝은 곳에서</li>
-        <li>가로보다 세로로 길게 찍으면 더 좋아요</li>
+        <li><b>가까이</b> — 글자가 화면을 꽉 채우게</li>
+        <li><b>정면으로</b> — 비스듬한 측면 사진은 인식 어려움</li>
+        <li><b>성분 표시 부분만</b> — 손가락·배경 가리기</li>
+        <li><b>밝은 곳</b>에서 반사·그림자 없이</li>
+        <li>흔들리지 않게 꽉 잡고 한 박자 기다린 후 촬영</li>
       </ul>
+    </div>
+    <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px;flex-shrink:0">💡</span>
+      <div style="font-size:12px;color:#92400E;line-height:1.6">
+        <b>안 읽힐 때는?</b><br>
+        제품을 세워서 성분표만 화면 가득 담아보세요. 글자가 손가락 굵기 정도로 크게 보여야 잘 인식돼요!
+      </div>
     </div>
     <button class="upload-btn accent" style="border-color:#8B5CF6" onclick="safeCameraClick('ingredientCameraInput')">
       <div class="icon">📷</div>
@@ -3097,11 +3105,11 @@ function safeCameraClick(inputId) {
 
   openCustomCamera(async (dataUrl) => {
     try {
-      // 압축 (성분표는 글자가 보여야 해서 화질 살짝 높게)
+      // 압축 — 성분표는 글자가 생명! 거의 안 줄이기
       const compressed = await compressImageForUpload(
         dataUrl,
-        isIngredient ? 1400 : (isFood ? 1000 : 1500),
-        isIngredient ? 0.82 : (isFood ? 0.7 : 0.85)
+        isIngredient ? 2000 : (isFood ? 1000 : 1500),
+        isIngredient ? 0.92 : (isFood ? 0.7 : 0.85)
       );
 
       if (isFood) {
@@ -4394,7 +4402,8 @@ function handleIngredientFile(event) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(e) {
-    compressImageForUpload(e.target.result, 1400, 0.82).then(compressed => {
+    // 성분표는 글자가 생명! 거의 압축 안 함
+    compressImageForUpload(e.target.result, 2000, 0.92).then(compressed => {
       ingredientImageSrc = compressed;
       ingredientImageB64 = compressed.split(',')[1];
       document.getElementById('ingredientPreviewImg').src = compressed;
