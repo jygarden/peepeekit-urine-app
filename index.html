@@ -2221,7 +2221,7 @@
     <div style="background:#fff;border-radius:20px;max-width:430px;margin:20px auto;padding:20px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.3)">
       <button onclick="closePersonalProfile()" style="position:absolute;top:12px;right:12px;background:#F1F5F9;border:none;font-size:18px;width:34px;height:34px;border-radius:50%;cursor:pointer">✕</button>
       <h2 style="font-size:18px;margin:0 0 6px;color:#1F2937">🧬 내 정보 입력</h2>
-      <div style="font-size:12px;color:#64748B;margin-bottom:16px;line-height:1.55">간단한 정보만 입력하시면 BMI·권장 칼로리·사상체질·사주 영양 조언을 <strong>자동으로 분석</strong>해드려요.</div>
+      <div style="font-size:12px;color:#64748B;margin-bottom:16px;line-height:1.55">간단한 정보만 입력하시면 BMI·권장 칼로리·맞춤 영양 조언을 <strong>자동으로 분석</strong>해드려요.</div>
       <div class="field"><label>성별</label>
         <select id="pp_gender" style="width:100%;padding:10px;border-radius:10px;border:1.5px solid #E2E8F0;font-size:14px">
           <option value="">선택</option>
@@ -2244,7 +2244,7 @@
         </div>
       </div>
       <div style="margin-top:14px;padding:11px;background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;font-size:11.5px;color:#075985;line-height:1.55">
-        💡 사상체질(태양인·태음인·소양인·소음인)은 BMI와 사주 오행으로 자동 추정됩니다.
+        💡 입력하신 정보로 BMI·권장 칼로리·맞춤 영양 조언을 자동으로 분석해드려요.
       </div>
       <button onclick="savePersonalProfile()" style="width:100%;margin-top:12px;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#8B5CF6,#6366F1);color:#fff;font-size:14px;font-weight:800;cursor:pointer">저장 후 맞춤 분석 보기</button>
     </div>
@@ -7255,7 +7255,6 @@ function renderCaptureProfileBanner() {
     // 프로필 있을 때 — 요약 + 수정 버튼
     const age = p.birthYear ? new Date().getFullYear() - parseInt(p.birthYear) : '?';
     const sasangInfo = inferSasangType(p.gender, p.height, p.weight, p.birthYear, p.birthMonth);
-    const sasangType = sasangInfo?.type || '';
     const bmi = sasangInfo?.bmi || '';
     const genderStr = p.gender === 'female' ? '여성' : p.gender === 'male' ? '남성' : '';
     el.innerHTML = `<div class="capture-profile-filled">
@@ -7264,7 +7263,6 @@ function renderCaptureProfileBanner() {
           <span class="cpf-chip">${age}세 ${genderStr}</span>
           ${p.height && p.weight ? `<span class="cpf-chip">${p.height}cm · ${p.weight}kg</span>` : ''}
           ${bmi ? `<span class="cpf-chip">BMI ${bmi}</span>` : ''}
-          ${sasangType ? `<span class="cpf-chip cpf-chip-sasang">🌿 ${sasangType}</span>` : ''}
         </div>
         <button class="cpf-edit" onclick="openPersonalProfile()">✏️</button>
       </div>
@@ -7416,10 +7414,9 @@ function renderPersonalAnalysis(foodResult) {
 
   const sasangHtml = sasangGuide ? `
     <div class="personal-section sasang">
-      <div class="psect-title">${sasangType} <span style="font-size:10px;color:var(--gray-400);font-weight:600">(자동 추정)</span></div>
-      <div class="psect-reason">📊 ${sasangInfo.reason}</div>
+      <div class="psect-title">맞춤 영양 조언</div>
       <div class="psect-tip">${sasangGuide.tip}</div>
-      <div class="psect-row"><strong style="color:#065F46">💚 체질에 더 잘 맞아요</strong> ${sasangGuide.good.join(', ')}</div>
+      <div class="psect-row"><strong style="color:#065F46">💚 잘 맞는 음식</strong> ${sasangGuide.good.join(', ')}</div>
       <div class="psect-row"><strong style="color:#B45309">🍃 조금만 즐기시면 좋아요</strong> ${sasangGuide.bad.join(', ')}</div>
     </div>` : '';
 
