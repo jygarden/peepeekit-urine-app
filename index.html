@@ -4543,6 +4543,17 @@ function renderIngredientResult(data) {
   if (!el) return;
   const ingredients = Array.isArray(data.ingredients) ? data.ingredients : [];
 
+  // 🐛 디버그 정보 (관리자/개발자용 — _debug 있을 때만 표시)
+  let debugHtml = '';
+  if (data._debug) {
+    debugHtml = `
+      <div style="background:#FEE2E2;border:2px solid #DC2626;border-radius:14px;padding:14px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:#991B1B;margin-bottom:6px">🐛 디버그 정보 (관리자용)</div>
+        <div style="font-size:11px;color:#7F1D1D;line-height:1.6;white-space:pre-wrap;word-break:break-all;font-family:monospace">${escapeHtml(JSON.stringify(data._debug, null, 2))}</div>
+      </div>
+    `;
+  }
+
   // 안전 등급별 카운트
   const counts = { safe:0, caution:0, warning:0, danger:0 };
   ingredients.forEach(ing => {
@@ -4555,7 +4566,7 @@ function renderIngredientResult(data) {
   const gradeColor = score >= 80 ? '#10B981' : score >= 60 ? '#F59E0B' : score >= 40 ? '#F97316' : '#EF4444';
   const gradeBg = score >= 80 ? 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' : score >= 60 ? 'linear-gradient(135deg,#FEF3C7,#FDE68A)' : score >= 40 ? 'linear-gradient(135deg,#FED7AA,#FDBA74)' : 'linear-gradient(135deg,#FECACA,#FCA5A5)';
 
-  let html = `
+  let html = debugHtml + `
     <!-- 종합 점수 Hero -->
     <div style="background:${gradeBg};border-radius:20px;padding:22px 20px;text-align:center;margin-bottom:14px;box-shadow:0 4px 18px rgba(0,0,0,.06)">
       <div style="font-size:11px;color:${gradeColor};font-weight:800;letter-spacing:.5px;margin-bottom:4px">${data.productName ? data.productName + ' · ' : ''}성분 안전도</div>
