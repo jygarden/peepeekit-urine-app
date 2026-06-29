@@ -3917,6 +3917,13 @@ function getActionPlanState() {
     const data = JSON.parse(localStorage.getItem('actionPlanV1') || '{}');
     const week = getWeekKey();
     if (data.week !== week) return { week, checks: [false,false,false,false,false,false,false], bonusEarned: false };
+    // 🛡 미래 요일은 무조건 false로 강제 (잘못된 데이터 자동 정리)
+    const today = new Date().getDay();
+    if (Array.isArray(data.checks)) {
+      data.checks = data.checks.map((c, i) => i > today ? false : !!c);
+    } else {
+      data.checks = [false,false,false,false,false,false,false];
+    }
     return data;
   } catch(e) { return { week: getWeekKey(), checks: [false,false,false,false,false,false,false], bonusEarned: false }; }
 }
