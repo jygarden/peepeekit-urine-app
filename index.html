@@ -1058,8 +1058,8 @@
     .upload-btn .sub{font-size:12px;color:#94a3b8;margin-top:4px}
 
     /* ── 미리보기 ── */
-    .preview-wrap{position:relative;margin-bottom:14px}
-    .preview-wrap img{width:100%;border-radius:16px;display:block;box-shadow:0 4px 16px rgba(0,0,0,.12)}
+    .preview-wrap{position:relative;margin-bottom:14px;display:flex;justify-content:center}
+    .preview-wrap img{width:auto;max-width:100%;max-height:240px;border-radius:16px;display:block;box-shadow:0 4px 16px rgba(0,0,0,.12);object-fit:contain}
     .btn-close-img{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:18px;cursor:pointer;line-height:34px;text-align:center}
 
     /* ── 에러 ── */
@@ -2284,7 +2284,7 @@
         <div class="ttitle">💡 관리 팁</div>
         <div id="foodTipsList"></div>
       </div>
-      <img id="foodResultImg" src="" alt="식단 이미지" style="width:100%;border-radius:12px;margin-bottom:14px"/>
+      <img id="foodResultImg" src="" alt="식단 이미지" style="display:none"/>
     </div>
     <div style="margin-top:14px">
       <button class="btn-download" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 3px 10px rgba(245,158,11,.35)" onclick="downloadFoodResult()">📥 결과 이미지 저장</button>
