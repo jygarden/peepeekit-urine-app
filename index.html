@@ -1800,8 +1800,10 @@
       <!-- 오늘 적립 가능 한도 -->
       <div style="background:#fff;border-radius:14px;padding:13px 15px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,.04);font-size:11.5px;color:#475569;line-height:1.7">
         <div style="font-weight:700;color:#1D1D1F;margin-bottom:4px">📊 오늘 적립 가능</div>
-        <div>🔬 검사 분석 <span id="todayTestLeft" style="color:#6366f1;font-weight:700">3</span>회 남음 (+100P × 회)</div>
-        <div>👨‍👩‍👧 프로필 추가 <span id="todayProfileLeft" style="color:#6366f1;font-weight:700">5</span>명 남음 (+50P × 명)</div>
+        <div>💎 하루 한도 <span id="todayTotalLeft" style="color:#F59E0B;font-weight:800">500</span>P 남음</div>
+        <div>🔬 검사 분석 <span id="todayTestLeft" style="color:#6366f1;font-weight:700">3</span>회 (+100P × 회)</div>
+        <div>👨‍👩‍👧 프로필 추가 <span id="todayProfileLeft" style="color:#6366f1;font-weight:700">5</span>명 (+50P × 명)</div>
+        <div>📅 출석 체크 +50P (1회/일)</div>
       </div>
       <!-- 보상 카탈로그 -->
       <div class="reward-section">
@@ -3134,7 +3136,7 @@ function saveName() {
     return;
   }
   localStorage.setItem('userName', v);
-  // 첫 가입 보너스 +500P (1회만)
+  // 첫 가입 보너스 +300P (1회만)
   maybeEarnSignupBonus();
   // 인사 모드로 부드럽게 전환
   document.getElementById('welcomeFirst').style.display = 'none';
@@ -3170,15 +3172,31 @@ const ORDERS_KEY = 'rewardOrdersV1';
 // 보상 카탈로그 (운영자가 여기서 수정 — id/cost/name/desc 자유롭게)
 const REWARD_CATALOG = [
   // 기프티콘 (카카오톡 선물하기로 발송 — 폰번호만 필요)
-  { id:'mega',  type:'gifticon', cost:1000,  emoji:'☕', name:'메가커피 아메리카노', desc:'카카오톡으로 받아요' },
-  { id:'star',  type:'gifticon', cost:2500,  emoji:'⭐', name:'스타벅스 아메리카노', desc:'카카오톡으로 받아요' },
+  { id:'mega',  type:'gifticon', cost:10000,  emoji:'☕', name:'메가커피 아메리카노', desc:'카카오톡으로 받아요' },
+  { id:'star',  type:'gifticon', cost:25000,  emoji:'⭐', name:'스타벅스 아메리카노', desc:'카카오톡으로 받아요' },
   // 키트 할인 쿠폰 (스마트스토어 결제 시 사용)
-  { id:'c5k',   type:'coupon',   cost:3000,  emoji:'🎟️', name:'키트 5,000원 할인 쿠폰', desc:'스마트스토어 결제 시 사용' },
+  { id:'c5k',   type:'coupon',   cost:30000,  emoji:'🎟️', name:'키트 5,000원 할인 쿠폰', desc:'스마트스토어 결제 시 사용' },
   // 실물 배송
-  { id:'freekit', type:'physical', cost:5000, emoji:'🎁', name:'키트 1박스 무료 (배송)', desc:'정품 키트 1박스 무료 발송' },
-  { id:'sample',  type:'physical', cost:7000, emoji:'💊', name:'영양제 샘플팩', desc:'엄선된 영양제 샘플 1세트' },
-  { id:'snack',   type:'physical', cost:10000, emoji:'🥨', name:'반려동물 간식 박스', desc:'프리미엄 간식 모음' },
+  { id:'freekit', type:'physical', cost:50000, emoji:'🎁', name:'키트 1박스 무료 (배송)', desc:'정품 키트 1박스 무료 발송' },
+  { id:'sample',  type:'physical', cost:70000, emoji:'💊', name:'영양제 샘플팩', desc:'엄선된 영양제 샘플 1세트' },
+  { id:'snack',   type:'physical', cost:100000, emoji:'🥨', name:'반려동물 간식 박스', desc:'프리미엄 간식 모음' },
 ];
+
+// 🔄 포인트 시스템 v2 마이그레이션 (한 번만 실행)
+// — 보상 가격 10배 인상에 따른 포인트 초기화
+(function pointMigrationV2() {
+  if (localStorage.getItem('pointReset_v2_done')) return;
+  try {
+    localStorage.removeItem('userPoints');
+    localStorage.removeItem('pointHistoryV1');
+    localStorage.removeItem('lastCheckIn');
+    localStorage.removeItem('streakCount');
+    localStorage.removeItem('earnedFlags');
+    localStorage.removeItem('dailyCountsV1');
+    localStorage.setItem('pointReset_v2_done', '1');
+    console.log('[포인트 v2] 시스템 개편 — 기존 포인트 초기화 완료');
+  } catch(e) { console.warn('[포인트 v2] 마이그레이션 실패:', e); }
+})();
 
 function getPoints() { return parseInt(localStorage.getItem(POINTS_KEY) || '0', 10); }
 function setPoints(p) { localStorage.setItem(POINTS_KEY, String(Math.max(0, p))); refreshPointsBadge(); }
@@ -3188,6 +3206,23 @@ function setEarnedFlag(key) { const f = getEarnedFlags(); f[key] = true; localSt
 function hasEarnedFlag(key) { return !!getEarnedFlags()[key]; }
 
 function addPoints(amount, reason) {
+  // 🛡 하루 적립 한도 체크 (양수일 때만 — 사용은 항상 OK)
+  // 단, "🎁 가입 보너스"는 한도 무시 (1회만 받는 거니까)
+  if (amount > 0 && !(reason && reason.includes('가입 보너스'))) {
+    const counts = getDailyCounts();
+    const todayEarned = counts.earnedTotal || 0;
+    const allowed = DAILY_LIMITS.totalEarn - todayEarned;
+    if (allowed <= 0) {
+      showPointToast(`오늘 한도 도달! (${DAILY_LIMITS.totalEarn}P/일)`);
+      return;
+    }
+    if (amount > allowed) {
+      amount = allowed; // 한도까지만 적립
+    }
+    counts.earnedTotal = todayEarned + amount;
+    localStorage.setItem(DAILY_COUNTS_KEY, JSON.stringify(counts));
+  }
+
   const cur = getPoints();
   setPoints(cur + amount);
   const history = getPointHistory();
@@ -3232,8 +3267,14 @@ function renderPointsPage() {
   // 오늘 적립 가능 한도 표시
   const tLeft = document.getElementById('todayTestLeft');
   const pLeft = document.getElementById('todayProfileLeft');
+  const totalLeft = document.getElementById('todayTotalLeft');
   if (tLeft) tLeft.textContent = remainingToday('test');
   if (pLeft) pLeft.textContent = remainingToday('profile');
+  if (totalLeft) {
+    const counts = getDailyCounts();
+    const earned = counts.earnedTotal || 0;
+    totalLeft.textContent = Math.max(0, DAILY_LIMITS.totalEarn - earned);
+  }
   // 출석 상태
   const lastCheckIn = localStorage.getItem(CHECKIN_KEY);
   const today = new Date().toISOString().split('T')[0];
@@ -3314,8 +3355,9 @@ function doCheckIn() {
 
 // ── 일일 한도 관리 (어뷰징 방지) ──
 const DAILY_LIMITS = {
-  test: 3,      // 검사 적립 하루 3회까지
-  profile: 5,   // 프로필 추가 적립 하루 5명까지
+  test: 3,         // 검사 적립 하루 3회까지
+  profile: 5,      // 프로필 추가 적립 하루 5명까지
+  totalEarn: 500,  // ⭐ 하루 총 적립 한도 500P
 };
 const DAILY_COUNTS_KEY = 'dailyCountsV1';
 function getTodayKey() { return new Date().toISOString().split('T')[0]; }
@@ -3361,11 +3403,11 @@ function earnFromNewProfile(name) {
     addPoints(50, `새 프로필 추가 (${name})`);
   }
 }
-// 첫 가입 보너스 500P
+// 첫 가입 보너스 300P
 function maybeEarnSignupBonus() {
   if (hasEarnedFlag('signup_bonus')) return;
   setEarnedFlag('signup_bonus');
-  addPoints(500, '🎁 첫 가입 환영 보너스!');
+  addPoints(300, '🎁 첫 가입 환영 보너스!');
 }
 
 // 보상 교환
