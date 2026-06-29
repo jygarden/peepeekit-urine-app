@@ -1060,6 +1060,13 @@
     /* ── 미리보기 ── */
     .preview-wrap{position:relative;margin-bottom:14px;display:flex;justify-content:center}
     .preview-wrap img{width:auto;max-width:100%;max-height:240px;border-radius:16px;display:block;box-shadow:0 4px 16px rgba(0,0,0,.12);object-fit:contain}
+    /* 미리보기 화면 — 세로 중앙 정렬 */
+    #screenFoodPreview.active, #screenPreview.active{
+      min-height:calc(100vh - 40px);
+      display:flex !important;
+      flex-direction:column;
+      justify-content:center;
+    }
     .btn-close-img{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:18px;cursor:pointer;line-height:34px;text-align:center}
 
     /* ── 에러 ── */
@@ -3136,7 +3143,7 @@ function saveName() {
     return;
   }
   localStorage.setItem('userName', v);
-  // 첫 가입 보너스 +300P (1회만)
+  // 첫 가입 보너스 +500P (1회만)
   maybeEarnSignupBonus();
   // 인사 모드로 부드럽게 전환
   document.getElementById('welcomeFirst').style.display = 'none';
@@ -5590,10 +5597,6 @@ function renderFoodResult(r) {
             <div class="nbc-v2-section-label">📈 과다 섭취 (${excessive.length}개)</div>
             ${excessiveHtml}
           </div>` : ''}
-        ${missing.length > 0 ? `
-          <button class="nbc-v2-cta" onclick="document.getElementById('foodSuppSection').scrollIntoView({behavior:'smooth',block:'start'})">
-            💊 맞춤 영양제 추천 보기 →
-          </button>` : ''}
       </div>`;
     missBox.style.display = 'block';
     // 옛 자식 요소 제거 위해 className·style 초기화
@@ -5655,9 +5658,6 @@ function renderFoodResult(r) {
           </div>
           <div class="supp-v2-reason">${s.reason || ''}</div>
           ${metaItems.length > 0 ? `<div class="supp-v2-meta">${metaItems.join('')}</div>` : ''}
-          <a class="supp-v2-buy" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
-            스마트스토어에서 보기
-          </a>
         </div>`;
     }).join('');
 
@@ -5676,15 +5676,7 @@ function renderFoodResult(r) {
         </div>
       </div>
       <div class="supp-summary">${summary}</div>
-      ${cardsHtml}
-      <a class="supp-package-cta" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
-        <div class="spc-emoji">🎁</div>
-        <div class="spc-text">
-          <div class="spc-title">맞춤 영양제 패키지로 한 번에</div>
-          <div class="spc-sub">스마트스토어 정품 · 빠른 배송</div>
-        </div>
-        <div class="spc-arrow">›</div>
-      </a>`;
+      ${cardsHtml}`;
 
     // 옛 reco-header 숨기기
     const suppSection = document.getElementById('foodSuppSection');
