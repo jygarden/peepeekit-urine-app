@@ -2713,30 +2713,31 @@ function openFileInput(inputId) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// 📸 카메라 권한 안전 호출 (거부 시 친절한 안내 모달)
+// 📸 카메라 권한 안전 호출 (iOS WKWebView 호환 — 사용자 제스처 유지)
 // ════════════════════════════════════════════════════════════════
-async function safeCameraClick(inputId) {
-  // 1. 권한 상태 미리 체크 (지원 브라우저 한정)
-  try {
-    if (navigator.permissions && navigator.permissions.query) {
-      const camPerm = await navigator.permissions.query({ name: 'camera' });
-      if (camPerm.state === 'denied') {
-        showCameraPermissionGuide();
-        return;
-      }
-    }
-  } catch(e) {
-    // permissions API 미지원 → 그냥 진행 (Android WebView 일부 버전)
+function safeCameraClick(inputId) {
+  // ⚡ iOS WKWebView는 await 후 input.click()을 막음 → 동기적으로 즉시 호출!
+  const input = document.getElementById(inputId);
+  if (!input) {
+    console.warn('[safeCameraClick] input 없음:', inputId);
+    return;
   }
 
-  // 2. 첫 사용자에게 안내 토스트 (1회만)
+  try { input.value = ''; } catch(e) {}
+
+  // 첫 사용자 안내 토스트 (비동기로 — 제스처 영향 X)
   if (!localStorage.getItem('cameraGuideShown')) {
     localStorage.setItem('cameraGuideShown', '1');
-    showCameraFirstTimeToast();
+    setTimeout(() => showCameraFirstTimeToast(), 0);
   }
 
-  // 3. 카메라 input 호출 (기존 openFileInput 활용)
-  openFileInput(inputId);
+  // ⚡ 사용자 제스처 안에서 즉시 click — iOS 호환!
+  try {
+    input.click();
+  } catch(e) {
+    console.error('[safeCameraClick] click 실패:', e);
+    showCameraPermissionGuide();
+  }
 }
 
 // 첫 카메라 사용자에게 짧은 안내 토스트
