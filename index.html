@@ -5702,8 +5702,12 @@ function renderReport() {
       const id = h.timestamp || h.date || JSON.stringify(h).slice(0,40);
       const dt = new Date(h.date || h.timestamp || Date.now());
       const dateStr = `${dt.getMonth()+1}/${dt.getDate()}`;
-      const foods = (h.foods || []).map(f => typeof f === 'string' ? f : (f.name || '')).filter(Boolean).slice(0, 3).join(', ');
-      const moreFoods = (h.foods || []).length > 3 ? ` 외 ${(h.foods||[]).length - 3}개` : '';
+      // foods가 string·array·null 다 처리 (옛 저장 형식 호환)
+      let foodsArr = h.foods;
+      if (typeof foodsArr === 'string') foodsArr = foodsArr.split(/[,、+·]/).map(s => s.trim()).filter(Boolean);
+      if (!Array.isArray(foodsArr)) foodsArr = [];
+      const foods = foodsArr.map(f => typeof f === 'string' ? f : (f.name || '')).filter(Boolean).slice(0, 3).join(', ');
+      const moreFoods = foodsArr.length > 3 ? ` 외 ${foodsArr.length - 3}개` : '';
       return `<div class="food-record-row">
         <div class="food-record-info">
           <div class="food-record-date">📅 ${dateStr} · ${h.mealTime || '식사'}</div>
@@ -5783,15 +5787,37 @@ function deleteReportRecord(id) {
   } catch(e) { alert('삭제 중 오류: ' + (e.message || '')); }
 }
 
+// 📸 범용 이미지 저장 (iOS·Android·PC 모두 OK)
+async function saveImageUniversal(captureId, fileName, bgColor) {
+  const el = document.getElementById(captureId);
+  const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: bgColor || '#FAFCFF' });
+  const dataUrl = canvas.toDataURL('image/png');
+  // 1. navigator.share 시도 (iOS/Android 사진앱 저장)
+  if (navigator.share) {
+    try {
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], fileName, { type: 'image/png' });
+      await navigator.share({ files: [file], title: '건강어때' });
+      return;
+    } catch(e) {
+      if (e.name === 'AbortError') return;
+      console.warn('share 실패, 모달 폴백:', e);
+    }
+  }
+  // 2. 모달로 이미지 표시 (확실한 폴백)
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;overflow:auto;padding:20px;display:flex;flex-direction:column;align-items:center;font-family:inherit';
+  modal.innerHTML = '<div style="background:#FEF3C7;padding:14px 18px;border-radius:14px;margin-bottom:14px;font-size:14px;color:#78350F;line-height:1.55;text-align:center;max-width:400px">📸 <strong>아래 이미지를 길게 눌러서</strong><br><strong>"사진에 추가"</strong> 또는 <strong>"이미지 저장"</strong>을 선택하세요!</div>' +
+    '<img src="' + dataUrl + '" style="max-width:100%;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)">' +
+    '<button onclick="this.parentElement.remove()" style="margin-top:18px;padding:14px 32px;background:#fff;color:#1D1D1F;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer">닫기</button>';
+  document.body.appendChild(modal);
+}
+
 async function downloadFoodResult() {
   try {
-    const el = document.getElementById('foodResultCapture');
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#FAFCFF' });
-    const link = document.createElement('a');
-    link.download = `식단분석_${selectedMealTime}_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  } catch(e) { alert('저장 중 오류'); }
+    const dateStr = new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'');
+    await saveImageUniversal('foodResultCapture', `식단분석_${selectedMealTime||''}_${dateStr}.png`, '#FAFCFF');
+  } catch(e) { alert('저장 중 오류: ' + e.message); }
 }
 
 // 촬영 화면에서 뒤로
@@ -6588,25 +6614,17 @@ async function downloadPDF() {
 
 async function downloadResult() {
   const btn = document.querySelector('.btn-download');
-  btn.textContent = '⏳ 저장 중...';
-  btn.disabled = true;
+  if (btn) { btn.textContent = '⏳ 저장 중...'; btn.disabled = true; }
   try {
-    const el = document.getElementById('resultCapture');
-    const canvas = await html2canvas(el, {
-      scale: 2, useCORS: true, backgroundColor: '#f1f5f9', scrollY: -window.scrollY
-    });
-    const link = document.createElement('a');
     const baseName = subjectMode === 'human'
       ? (document.getElementById('humanName').value.trim() || '본인')
       : (document.getElementById('petName').value.trim() || '반려동물');
-    link.download = `${baseName}_소변검사_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    const dateStr = new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'');
+    await saveImageUniversal('resultCapture', `${baseName}_소변검사_${dateStr}.png`, '#f1f5f9');
   } catch(e) {
-    alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+    alert('저장 중 오류가 발생했습니다: ' + e.message);
   } finally {
-    btn.textContent = '📥 결과 이미지 저장';
-    btn.disabled = false;
+    if (btn) { btn.textContent = '📥 결과 이미지 저장'; btn.disabled = false; }
   }
 }
 
