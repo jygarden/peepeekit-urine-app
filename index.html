@@ -3867,37 +3867,91 @@ function renderCompareCard(r, info) {
           </div>`;
         }).join('')}
       </div>` : '';
+    // 기간 표시 (1일~365일 자동)
+    let periodText;
+    if (daysSince === 0) periodText = '오늘';
+    else if (daysSince === 1) periodText = '어제';
+    else if (daysSince < 7) periodText = `${daysSince}일 전`;
+    else if (daysSince < 30) periodText = `${Math.floor(daysSince/7)}주 전`;
+    else if (daysSince < 365) periodText = `${Math.floor(daysSince/30)}개월 전`;
+    else periodText = `${Math.floor(daysSince/365)}년 전`;
+
     wrap.innerHTML = `
       <div class="compare-card ${cardClass}">
-        <div class="compare-title">🎯 한 달 전 vs 지금</div>
+        <div class="compare-title">📊 내 건강 변화</div>
         <div class="compare-score-row">
           <div class="compare-score-item">
-            <div class="compare-score-label">이전</div>
+            <div class="compare-score-label">이전 검사</div>
             <div class="compare-score-num">${prevScore}</div>
           </div>
           <div class="compare-arrow">${arrow}</div>
           <div class="compare-score-item">
-            <div class="compare-score-label">현재</div>
+            <div class="compare-score-label">이번 검사</div>
             <div class="compare-score-num">${curScore}</div>
             <div class="compare-diff">${diffText}</div>
           </div>
         </div>
         ${itemsHtml}
         <div class="compare-message">${message}</div>
-        <div class="compare-period">📅 ${daysSince}일 전 검사와 비교</div>
+        <div class="compare-period">📅 ${periodText} 검사와 비교</div>
       </div>`;
   } catch(e) {}
 }
 
 // ════════════════════════════════════════════════════════════════
-// 📅 이번 주 액션 플랜 자동 생성
+// 📅 이번 주 액션 플랜 자동 생성 (체크 시 +5P 적립)
 // ════════════════════════════════════════════════════════════════
+// 이번 주 키 (월요일 기준)
+function getWeekKey() {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // 월요일로
+  const monday = new Date(d.setDate(diff));
+  return monday.toISOString().split('T')[0];
+}
+function getActionPlanState() {
+  try {
+    const data = JSON.parse(localStorage.getItem('actionPlanV1') || '{}');
+    const week = getWeekKey();
+    if (data.week !== week) return { week, checks: [false,false,false,false,false,false,false], bonusEarned: false };
+    return data;
+  } catch(e) { return { week: getWeekKey(), checks: [false,false,false,false,false,false,false], bonusEarned: false }; }
+}
+function saveActionPlanState(state) {
+  localStorage.setItem('actionPlanV1', JSON.stringify(state));
+}
+function toggleActionPlan(idx, btnEl) {
+  const state = getActionPlanState();
+  const wasChecked = state.checks[idx];
+  state.checks[idx] = !wasChecked;
+  // 체크하면 +5P (체크 해제는 차감 X)
+  if (!wasChecked) {
+    addPoints(5, '📅 액션 플랜 완료');
+  }
+  // 7일 다 완료 보너스
+  const allDone = state.checks.every(c => c);
+  if (allDone && !state.bonusEarned) {
+    state.bonusEarned = true;
+    addPoints(30, '🎉 한 주 미션 완료 보너스!');
+  }
+  saveActionPlanState(state);
+  // UI 갱신
+  if (btnEl) {
+    btnEl.classList.toggle('done', state.checks[idx]);
+    btnEl.textContent = state.checks[idx] ? '✓' : '';
+  }
+  // 진행률 갱신
+  const progress = document.getElementById('actionPlanProgress');
+  if (progress) {
+    const doneCount = state.checks.filter(c => c).length;
+    progress.textContent = `${doneCount}/7 완료`;
+  }
+}
+
 function renderActionPlan(r, info) {
   const wrap = document.getElementById('actionPlanWrap');
   if (!wrap) return;
-  const focus = r.focusAreas?.[0] || '신장·방광';
   const isHuman = info.subject === 'human';
-  // 기본 7일 플랜 (요일별)
   const days = ['일','월','화','수','목','금','토'];
   const today = new Date().getDay();
   const plans = isHuman ? [
@@ -3917,18 +3971,28 @@ function renderActionPlan(r, info) {
     '🪥 양치질 + 털 관리',
     '🏥 한 주 컨디션 점검'
   ];
+
+  const state = getActionPlanState();
+  const doneCount = state.checks.filter(c => c).length;
+
   const dayItems = days.map((d, i) => {
     const isToday = i === today;
+    const isDone = state.checks[i];
     return `
       <div class="action-plan-day ${isToday ? 'today' : ''}">
         <div class="action-plan-dow">${d}${isToday ? ' (오늘)' : ''}</div>
         <div class="action-plan-text">${plans[i]}</div>
-        <button class="action-plan-check" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''"></button>
+        <button class="action-plan-check ${isDone ? 'done' : ''}" onclick="toggleActionPlan(${i}, this)">${isDone ? '✓' : ''}</button>
       </div>`;
   }).join('');
+
   wrap.innerHTML = `
     <div class="action-plan">
-      <div class="action-plan-title">📅 이번 주 맞춤 액션 플랜</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="action-plan-title" style="margin-bottom:0">📅 이번 주 액션 플랜</div>
+        <span style="font-size:11px;font-weight:800;color:#0369A1;background:rgba(125,211,252,.3);padding:5px 11px;border-radius:999px"><span id="actionPlanProgress">${doneCount}/7 완료</span></span>
+      </div>
+      <div style="font-size:11.5px;color:#0369A1;margin-bottom:12px;font-weight:600">✅ 완료 시 +5P · 🎉 한 주 다 완료 +30P 보너스</div>
       ${dayItems}
     </div>`;
 }
@@ -4205,7 +4269,7 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
   { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
