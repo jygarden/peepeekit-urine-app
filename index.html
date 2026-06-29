@@ -2741,6 +2741,83 @@
 <input type="file" id="galleryInput" accept="image/*" style="position:fixed;left:-9999px;top:-9999px;opacity:0;width:1px;height:1px;pointer-events:none" aria-hidden="true" onchange="handleFile(this)"/>
 
 <script>
+// ════════════════════════════════════════════════════════════════
+// 🔙 안드로이드 뒤로가기 처리 (홈에서 두 번 누르면 종료)
+// ════════════════════════════════════════════════════════════════
+let _backPressedOnce = false;
+let _backResetTimer = null;
+
+window.handleAppBackButton = function() {
+  try {
+    // 1️⃣ 카메라 모달 같은 풀스크린 모달 닫기
+    const cameraModal = document.getElementById('cameraPermissionGuide');
+    if (cameraModal) { cameraModal.remove(); return true; }
+
+    // 2️⃣ 일반 모달 (설정·쿠폰·팁 등)
+    const showingOverlays = [
+      'settingsOverlay', 'couponOverlay', 'tipOverlay',
+      'personalProfileModal', 'foodReportModal'
+    ];
+    for (const id of showingOverlays) {
+      const el = document.getElementById(id);
+      if (el && (el.classList.contains('show') || el.style.display === 'block' || el.style.display === 'flex')) {
+        el.classList.remove('show');
+        el.style.display = 'none';
+        return true;
+      }
+    }
+
+    // 3️⃣ 결과 화면의 큰 모달 (저장 이미지 모달 등)
+    const fixedModal = document.querySelector('div[style*="z-index:99999"]:not([id])');
+    if (fixedModal && fixedModal.style.position === 'fixed') {
+      fixedModal.remove();
+      return true;
+    }
+
+    // 4️⃣ 현재 활성 화면 확인
+    const activeScreen = document.querySelector('.screen.active');
+    const currentId = activeScreen ? activeScreen.id : '';
+
+    // 5️⃣ 홈/환영 화면이 아니면 → 홈으로 이동
+    if (currentId && currentId !== 'screenHome' && currentId !== 'screenWelcome') {
+      if (typeof goHome === 'function') goHome();
+      else if (typeof showScreen === 'function') showScreen('screenHome');
+      return true;
+    }
+
+    // 6️⃣ 홈 화면 — 두 번 누르기 처리
+    if (_backPressedOnce) {
+      // 두 번째 뒤로가기 → 앱 종료 허용
+      return false;
+    }
+    _backPressedOnce = true;
+    showBackToExitToast();
+    if (_backResetTimer) clearTimeout(_backResetTimer);
+    _backResetTimer = setTimeout(() => { _backPressedOnce = false; }, 2000);
+    return true; // 첫 번째 → 종료 막음
+  } catch(e) {
+    console.error('[handleAppBackButton]', e);
+    return false;
+  }
+};
+
+function showBackToExitToast() {
+  let toast = document.getElementById('backExitToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'backExitToast';
+    toast.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,23,42,.95);color:#fff;padding:14px 26px;border-radius:999px;font-size:13.5px;font-weight:700;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.4);letter-spacing:-.2px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = '한 번 더 누르면 종료됩니다';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2000);
+}
+
 // ══════════════════════════════════════
 // PWA 서비스워커 등록
 // ══════════════════════════════════════
