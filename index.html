@@ -1725,39 +1725,6 @@
           </div>
         </button>
 
-        <!-- 식품 성분 분석 (NEW) -->
-        <button class="home-card ingredient" onclick="enterIngredient()">
-          <span class="card-new-badge">NEW</span>
-          <div class="card-top">
-            <div class="hc-icon-wrap">
-              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <!-- 라벨 (성분표) -->
-                <path d="M7 4 H 22 L 26 8 V 28 H 7 Z"/>
-                <path d="M22 4 V 8 H 26"/>
-                <!-- 성분 줄들 -->
-                <line x1="10" y1="13" x2="22" y2="13"/>
-                <line x1="10" y1="17" x2="22" y2="17"/>
-                <line x1="10" y1="21" x2="18" y2="21"/>
-                <!-- 돋보기 -->
-                <circle cx="22" cy="22" r="3.2"/>
-                <line x1="24.5" y1="24.5" x2="26.5" y2="26.5"/>
-              </svg>
-            </div>
-            <div class="hc-content">
-              <h3>🏷 식품 성분 분석</h3>
-              <p>제품 성분표 사진으로<br>인공첨가물·인체 영향 분석</p>
-            </div>
-            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-          </div>
-          <div class="card-footer">
-            <span class="card-pill subj-pill"><span class="dot"></span><span id="ingredientLastInfo">기록 없음</span></span>
-            <span class="card-pill time-pill">
-              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
-              약 20초
-            </span>
-          </div>
-        </button>
-
         <!-- 식단 분석 -->
         <button class="home-card food" onclick="enterFood()">
           <div class="card-top">
@@ -1787,6 +1754,39 @@
             <span class="card-pill time-pill">
               <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
               약 30초
+            </span>
+          </div>
+        </button>
+
+        <!-- 식품 성분 분석 (NEW) -->
+        <button class="home-card ingredient" onclick="enterIngredient()">
+          <span class="card-new-badge">NEW</span>
+          <div class="card-top">
+            <div class="hc-icon-wrap">
+              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+                <!-- 라벨 (성분표) -->
+                <path d="M7 4 H 22 L 26 8 V 28 H 7 Z"/>
+                <path d="M22 4 V 8 H 26"/>
+                <!-- 성분 줄들 -->
+                <line x1="10" y1="13" x2="22" y2="13"/>
+                <line x1="10" y1="17" x2="22" y2="17"/>
+                <line x1="10" y1="21" x2="18" y2="21"/>
+                <!-- 돋보기 -->
+                <circle cx="22" cy="22" r="3.2"/>
+                <line x1="24.5" y1="24.5" x2="26.5" y2="26.5"/>
+              </svg>
+            </div>
+            <div class="hc-content">
+              <h3>🏷 식품 성분 분석</h3>
+              <p>제품 성분표 사진으로<br>인공첨가물·인체 영향 분석</p>
+            </div>
+            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
+          </div>
+          <div class="card-footer">
+            <span class="card-pill subj-pill"><span class="dot"></span><span id="ingredientLastInfo">기록 없음</span></span>
+            <span class="card-pill time-pill">
+              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
+              약 20초
             </span>
           </div>
         </button>
