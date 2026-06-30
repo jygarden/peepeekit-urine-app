@@ -6999,23 +6999,48 @@ async function saveImageUniversal(captureId, fileName, bgColor) {
     return;
   }
 
-  // 1️⃣ navigator.share (네이티브 공유 — iOS 우선)
+  const dataUrl = canvas.toDataURL('image/png');
+
+  // 0️⃣ Flutter Native 핸들러 우선 (Android InAppWebView — 갤러리 직접 저장!)
+  if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+    try {
+      progress.textContent = '💾 갤러리에 저장 중...';
+      const res = await window.flutter_inappwebview.callHandler('saveToGallery', dataUrl, fileName);
+      progress.remove();
+      if (res && res.success) {
+        try {
+          if (typeof showPointToast === 'function') showPointToast('💾 갤러리에 저장됐어요!');
+          else alert('💾 갤러리에 저장됐어요!');
+        } catch(e) { alert('💾 갤러리에 저장됐어요!'); }
+        return;
+      } else {
+        console.warn('[saveToGallery] 실패:', res?.error);
+        // 실패하면 아래 fallback으로 계속 진행
+        progress.textContent = '💾 이미지 만드는 중...';
+        document.body.appendChild(progress);
+      }
+    } catch(e) {
+      console.warn('[saveToGallery] handler 호출 실패:', e);
+    }
+  }
+
+  // 1️⃣ navigator.share (iOS 우선)
   if (navigator.canShare && navigator.share) {
     try {
       const blob = await new Promise(r => canvas.toBlob(r, 'image/png', 0.95));
       const file = new File([blob], fileName, { type: 'image/png' });
       if (navigator.canShare({ files: [file] })) {
-        progress.remove();
+        if (progress.parentNode) progress.remove();
         await navigator.share({ files: [file], title: '건강어때' });
         return;
       }
     } catch(e) {
-      if (e.name === 'AbortError') { progress.remove(); return; }
+      if (e.name === 'AbortError') { if (progress.parentNode) progress.remove(); return; }
       console.warn('share 실패, 다음 방법 시도:', e);
     }
   }
 
-  // 2️⃣ a[download] 시도 (Android WebView 다운로드 폴더 저장)
+  // 2️⃣ a[download] 시도
   try {
     const blob = await new Promise(r => canvas.toBlob(r, 'image/png', 0.95));
     const blobUrl = URL.createObjectURL(blob);
@@ -7029,8 +7054,7 @@ async function saveImageUniversal(captureId, fileName, bgColor) {
       a.remove();
       URL.revokeObjectURL(blobUrl);
     }, 200);
-    progress.remove();
-    // 사용자 확인 토스트
+    if (progress.parentNode) progress.remove();
     setTimeout(() => {
       try {
         if (typeof showPointToast === 'function') showPointToast('💾 다운로드 폴더에 저장됐어요!');
@@ -7042,8 +7066,7 @@ async function saveImageUniversal(captureId, fileName, bgColor) {
   }
 
   // 3️⃣ 모달 fallback (길게 눌러서 저장)
-  progress.remove();
-  const dataUrl = canvas.toDataURL('image/png');
+  if (progress.parentNode) progress.remove();
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;overflow:auto;padding:20px;display:flex;flex-direction:column;align-items:center;font-family:inherit';
   modal.innerHTML = '<div style="background:#FEF3C7;padding:14px 18px;border-radius:14px;margin-bottom:14px;font-size:14px;color:#78350F;line-height:1.55;text-align:center;max-width:400px">📸 <strong>아래 이미지를 길게 눌러서</strong><br><strong>"사진에 추가"</strong> 또는 <strong>"이미지 저장"</strong>을 선택하세요!</div>' +
