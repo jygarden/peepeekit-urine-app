@@ -4956,6 +4956,7 @@ async function analyzeFood() {
     detectedFoodsData = result.detectedFoods || [];
     // 원본 깊은 복사 (사용자 수정 후 비교용)
     try { originalDetectedFoodsData = JSON.parse(JSON.stringify(detectedFoodsData)); } catch(e) { originalDetectedFoodsData = null; }
+    _expandedFoods = new Set(); // 펼침 상태 초기화
     renderConfirmFoods();
     showScreen('screenFoodConfirm');
   } catch (err) {
@@ -4969,31 +4970,147 @@ async function analyzeFood() {
   }
 }
 
-// 확인 화면 렌더링
+// 음식별로 재료 펼침 상태 (기본 접힘)
+let _expandedFoods = new Set();
+// 🔙 마지막 삭제된 음식 (되돌리기용)
+let _lastRemovedFood = null;
+let _undoToastTimer = null;
+
+// 확인 화면 렌더링 — 음식 이름 위주 + 재료 접기/펼치기 + 음식 삭제
 function renderConfirmFoods() {
   const list = document.getElementById('confirmFoodList');
-  list.innerHTML = detectedFoodsData.map((food, fi) => `
-    <div class="confirm-food-card">
-      <div class="confirm-food-name">
+  if (detectedFoodsData.length === 0) {
+    list.innerHTML = `
+      <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:14px;padding:18px;text-align:center;font-size:13px;color:#92400E;line-height:1.6;margin-bottom:10px">
+        🍽 모든 음식을 제거하셨네요!<br>
+        <small style="color:#B45309">아래에서 직접 추가하거나 다시 찍어주세요.</small>
+      </div>
+      <button onclick="addNewFood()" style="width:100%;background:#fff;border:2px dashed #C7D2FE;color:#6366F1;font-size:14px;font-weight:700;padding:14px;border-radius:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
+        <span style="font-size:18px">＋</span> 음식 직접 추가하기
+      </button>
+    `;
+    return;
+  }
+  const cardsHtml = detectedFoodsData.map((food, fi) => {
+    const isExpanded = _expandedFoods.has(fi);
+    const ingredients = food.ingredients || [];
+    return `
+    <div class="confirm-food-card" style="position:relative">
+      <button onclick="removeFood(${fi})" title="이 음식 제외하기"
+        style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626;font-size:14px;font-weight:800;cursor:pointer;line-height:1;z-index:2;display:flex;align-items:center;justify-content:center;font-family:inherit">✕</button>
+
+      <div class="confirm-food-name" style="padding-right:38px">
         <span style="font-size:20px">🍽</span>
-        <input type="text" value="${escapeHtml(food.name)}" oninput="updateFoodName(${fi}, this.value)"/>
+        <input type="text" value="${escapeHtml(food.name)}" oninput="updateFoodName(${fi}, this.value)" placeholder="음식 이름"/>
       </div>
-      <div class="confirm-ingredients-label">재료 (수정·삭제·추가)</div>
-      <div id="ingredients-${fi}">
-        ${(food.ingredients || []).map((ing, ii) => `
-          <span class="confirm-ing-chip">
-            <input type="text" value="${escapeHtml(ing)}" oninput="updateIngredient(${fi}, ${ii}, this.value)" style="width:${Math.max(ing.length*8, 40)}px"/>
-            <button onclick="removeIngredient(${fi}, ${ii})">✕</button>
-          </span>
-        `).join('')}
-        <button class="confirm-add-btn" onclick="addIngredient(${fi})">＋ 재료 추가</button>
-      </div>
+
+      <button onclick="toggleFoodIngredients(${fi})" style="margin-top:8px;background:transparent;border:none;color:#6366F1;font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 0;font-family:inherit;display:inline-flex;align-items:center;gap:4px">
+        ${isExpanded ? '▾' : '▸'} 재료 ${ingredients.length}개 ${isExpanded ? '접기' : '보기·수정'}
+      </button>
+
+      ${isExpanded ? `
+        <div id="ingredients-${fi}" style="margin-top:6px">
+          ${ingredients.map((ing, ii) => `
+            <span class="confirm-ing-chip">
+              <input type="text" value="${escapeHtml(ing)}" oninput="updateIngredient(${fi}, ${ii}, this.value)" style="width:${Math.max(ing.length*8, 40)}px"/>
+              <button onclick="removeIngredient(${fi}, ${ii})">✕</button>
+            </span>
+          `).join('')}
+          <button class="confirm-add-btn" onclick="addIngredient(${fi})">＋ 재료 추가</button>
+        </div>
+      ` : ''}
     </div>
-  `).join('');
+  `;
+  }).join('');
+
+  // ＋ 음식 추가 버튼 (맨 아래)
+  const addFoodBtn = `
+    <button onclick="addNewFood()" style="width:100%;background:#fff;border:2px dashed #C7D2FE;color:#6366F1;font-size:14px;font-weight:700;padding:14px;border-radius:14px;cursor:pointer;font-family:inherit;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <span style="font-size:18px">＋</span> 음식 직접 추가하기
+    </button>
+  `;
+  list.innerHTML = cardsHtml + addFoodBtn;
 }
 function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function updateFoodName(fi, val) { if (detectedFoodsData[fi]) detectedFoodsData[fi].name = val; }
 function updateIngredient(fi, ii, val) { if (detectedFoodsData[fi] && detectedFoodsData[fi].ingredients) detectedFoodsData[fi].ingredients[ii] = val; }
+function toggleFoodIngredients(fi) {
+  if (_expandedFoods.has(fi)) _expandedFoods.delete(fi);
+  else _expandedFoods.add(fi);
+  renderConfirmFoods();
+}
+function removeFood(fi) {
+  const food = detectedFoodsData[fi];
+  if (!food) return;
+  // 백업 (Undo용 — 깊은 복사)
+  _lastRemovedFood = {
+    food: JSON.parse(JSON.stringify(food)),
+    index: fi,
+    wasExpanded: _expandedFoods.has(fi)
+  };
+  detectedFoodsData.splice(fi, 1);
+  // 펼침 상태도 정리
+  const newExpanded = new Set();
+  _expandedFoods.forEach(idx => {
+    if (idx < fi) newExpanded.add(idx);
+    else if (idx > fi) newExpanded.add(idx - 1);
+  });
+  _expandedFoods = newExpanded;
+  renderConfirmFoods();
+  showUndoToast(food.name || '음식');
+}
+
+// ＋ 음식 직접 추가
+function addNewFood() {
+  const name = prompt('추가할 음식 이름을 입력하세요\n(예: 김치찌개, 공기밥, 계란말이)');
+  if (!name || !name.trim()) return;
+  detectedFoodsData.push({ name: name.trim(), ingredients: [] });
+  renderConfirmFoods();
+}
+
+// 🔙 되돌리기 토스트 (Gmail 스타일)
+function showUndoToast(foodName) {
+  // 기존 토스트 제거
+  const existing = document.getElementById('undoFoodToast');
+  if (existing) existing.remove();
+  if (_undoToastTimer) { clearTimeout(_undoToastTimer); _undoToastTimer = null; }
+
+  const toast = document.createElement('div');
+  toast.id = 'undoFoodToast';
+  toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,23,42,.96);color:#fff;padding:12px 14px 12px 18px;border-radius:14px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 10px 30px rgba(0,0,0,.45);letter-spacing:-.2px;opacity:0;transition:opacity .3s,transform .3s;display:flex;align-items:center;gap:12px;max-width:90%;font-family:inherit';
+  toast.innerHTML = `
+    <span style="color:#FFF">🗑 <b>${escapeHtml(foodName)}</b> 제거됨</span>
+    <button onclick="undoRemoveFood()" style="background:#FCD34D;color:#1F2937;border:none;border-radius:10px;padding:7px 14px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit">↶ 되돌리기</button>
+  `;
+  document.body.appendChild(toast);
+
+  // 애니메이션
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  });
+
+  // 5초 후 자동 사라짐
+  _undoToastTimer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => { toast.remove(); _lastRemovedFood = null; }, 300);
+  }, 5000);
+}
+
+// ↶ 마지막 삭제 복원
+function undoRemoveFood() {
+  if (!_lastRemovedFood) return;
+  const idx = Math.min(_lastRemovedFood.index, detectedFoodsData.length);
+  detectedFoodsData.splice(idx, 0, _lastRemovedFood.food);
+  // 펼침 상태 복원
+  if (_lastRemovedFood.wasExpanded) _expandedFoods.add(idx);
+  _lastRemovedFood = null;
+  if (_undoToastTimer) { clearTimeout(_undoToastTimer); _undoToastTimer = null; }
+  const toast = document.getElementById('undoFoodToast');
+  if (toast) toast.remove();
+  renderConfirmFoods();
+}
 function removeIngredient(fi, ii) {
   if (detectedFoodsData[fi] && detectedFoodsData[fi].ingredients) {
     detectedFoodsData[fi].ingredients.splice(ii, 1);
@@ -5011,6 +5128,11 @@ function addIngredient(fi) {
 
 // 2단계: 확인된 데이터로 풀 분석
 async function confirmAndAnalyze() {
+  // 음식 0개면 막기
+  if (!detectedFoodsData || detectedFoodsData.length === 0) {
+    alert('분석할 음식이 없어요!\n다시 찍거나 음식을 추가해주세요.');
+    return;
+  }
   const btn = event.target;
   const originalText = btn.textContent;
   btn.disabled = true;
