@@ -333,7 +333,9 @@
     /* 홈에 들어왔을 때 한 번씩 등장 */
     #screenHome.active .home-title{animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) both}
     #screenHome.active .home-card:nth-child(1){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .12s both}
-    #screenHome.active .home-card:nth-child(2){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .22s both}
+    #screenHome.active .home-card:nth-child(2){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .18s both}
+    #screenHome.active .home-card:nth-child(3){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .24s both}
+    #screenHome.active .home-card:nth-child(4){animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .30s both}
     #screenHome.active .home-foot{animation:fadeSlideUp .55s cubic-bezier(.2,.8,.2,1) .34s both}
     /* 아이콘 안쪽 그림은 카드 등장 직후 살짝 팝 */
     #screenHome.active .home-card:nth-child(1) .hc-icon{animation:iconPop .55s cubic-bezier(.2,.8,.2,1) .35s both}
@@ -385,17 +387,82 @@
     .settings-btn:active{transform:scale(.92) rotate(45deg)}
 
     /* 카드 — 크고 푹신한 박스 */
-    .home-cards{display:flex;flex-direction:column;gap:16px;width:100%}
+    .home-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
     .home-card{
-      width:100%;background:#FFFFFF;border:none;border-radius:24px;
-      padding:22px 22px 16px;cursor:pointer;display:flex;flex-direction:column;text-align:left;
-      box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 26px rgba(0,0,0,.06);
-      transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s,outline-color .2s;
+      aspect-ratio:1;width:100%;background:#FFFFFF;border:none;border-radius:22px;
+      padding:16px;cursor:pointer;display:flex;flex-direction:column;text-align:left;
+      box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.06);
+      transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s;
       position:relative;overflow:hidden;-webkit-appearance:none;font-family:inherit;
-      outline:1.5px solid transparent;outline-offset:-1.5px
     }
-    .home-card:hover{box-shadow:0 1px 2px rgba(0,0,0,.04),0 14px 34px rgba(0,0,0,.09)}
-    .home-card:active{transform:scale(.985)}
+    .home-card:hover{box-shadow:0 2px 6px rgba(0,0,0,.06),0 10px 24px rgba(0,0,0,.10)}
+    .home-card:active{transform:scale(.97)}
+    .home-card .card-orb{
+      width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      margin-bottom:auto;font-size:24px;line-height:1
+    }
+    .home-card.human .card-orb{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #DBEAFE 55%, #60A5FA 100%);box-shadow:0 3px 10px rgba(96,165,250,.25)}
+    .home-card.pet .card-orb{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #D1FAE5 55%, #34D399 100%);box-shadow:0 3px 10px rgba(52,211,153,.25);gap:0;letter-spacing:-4px}
+    .home-card.food .card-orb{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #FED7AA 55%, #F97316 100%);box-shadow:0 3px 10px rgba(249,115,22,.25)}
+    .home-card.ingredient .card-orb{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #E9D5FF 55%, #A855F7 100%);box-shadow:0 3px 10px rgba(168,85,247,.25)}
+    .home-card .card-label{
+      font-size:9.5px;font-weight:800;letter-spacing:1.5px;margin-top:14px;line-height:1
+    }
+    .home-card.human .card-label{color:#3B82F6}
+    .home-card.pet .card-label{color:#10B981}
+    .home-card.food .card-label{color:#EA580C}
+    .home-card.ingredient .card-label{color:#8B5CF6}
+    .home-card .card-title{
+      font-size:15.5px;font-weight:900;color:#0F172A;margin-top:6px;letter-spacing:-.4px;line-height:1.2
+    }
+    .home-card .card-meta{
+      font-size:11px;font-weight:700;color:#94A3B8;margin-top:4px
+    }
+    .home-card .card-pet-orb{
+      width:56px;height:56px;border-radius:50%;
+      background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #D1FAE5 55%, #34D399 100%);
+      box-shadow:0 3px 10px rgba(52,211,153,.25);
+      display:flex;align-items:center;justify-content:center;line-height:1;
+      font-size:20px;letter-spacing:-2px;margin-bottom:auto
+    }
+
+    /* RECENT ACTIVITY 섹션 */
+    .recent-activity-section{margin-top:24px;display:flex;flex-direction:column;gap:10px;width:100%}
+    .ra-header{
+      font-size:10.5px;font-weight:800;color:#64748B;letter-spacing:1.8px;
+      margin-bottom:4px;padding-left:2px
+    }
+    .ra-card{
+      width:100%;background:#fff;border:none;border-radius:18px;
+      padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:14px;
+      box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 14px rgba(0,0,0,.06);
+      transition:transform .2s,box-shadow .2s;
+      font-family:inherit;text-decoration:none;text-align:left
+    }
+    .ra-card:hover{box-shadow:0 2px 6px rgba(0,0,0,.06),0 10px 24px rgba(0,0,0,.10)}
+    .ra-card:active{transform:scale(.98)}
+    .ra-orb{
+      width:44px;height:44px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1
+    }
+    .ra-orb-blue{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #DBEAFE 55%, #60A5FA 100%);box-shadow:0 2px 8px rgba(96,165,250,.25)}
+    .ra-orb-yellow{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #FEF3C7 55%, #FCD34D 100%);box-shadow:0 2px 8px rgba(252,211,77,.25)}
+    .ra-orb-green{background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #D1FAE5 55%, #34D399 100%);box-shadow:0 2px 8px rgba(52,211,153,.25)}
+    .ra-content{flex:1;min-width:0}
+    .ra-label{
+      font-size:9px;font-weight:800;color:#3B82F6;letter-spacing:1.5px;line-height:1;margin-bottom:4px
+    }
+    .ra-title{
+      font-size:13.5px;font-weight:900;color:#0F172A;letter-spacing:-.3px;line-height:1.3;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+    .ra-sub{
+      font-size:11px;font-weight:600;color:#64748B;margin-top:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+    .ra-arrow{
+      font-size:18px;font-weight:800;color:#94A3B8;flex-shrink:0
+    }
     .home-card.human:active{outline-color:#5E7CE2}
     .home-card.pet:active{outline-color:#8FC9B5}
     .card-top{display:flex;align-items:center;gap:18px}
@@ -487,10 +554,12 @@
 
     /* 하단 면책 (방패 아이콘) */
     .bottom-disclaimer{
-      margin-top:auto;padding:30px 0 26px;display:flex;align-items:center;justify-content:center;gap:6px;
-      font-size:10px;color:#6E6E73;text-align:center;letter-spacing:-.1px
+      margin-top:18px;margin-bottom:26px;padding:11px 14px;
+      background:#F1F5F9;border-radius:12px;
+      display:flex;align-items:center;justify-content:center;gap:6px;
+      font-size:10.5px;font-weight:700;color:#64748B;text-align:center;letter-spacing:-.1px
     }
-    .bottom-disclaimer svg{width:12px;height:12px;color:#6E6E73;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+    .bottom-disclaimer svg{width:13px;height:13px;color:#64748B;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
     /* ── 키트 구매 카드 (홈) ── */
     .kit-purchase{
       margin-top:24px;background:linear-gradient(135deg,#F0F4FF 0%,#FDF2F8 100%);
@@ -1661,175 +1730,78 @@
 
       <div class="home-cards">
 
-        <!-- 1) 사람 (내 건강) -->
+        <!-- 내 건강 체크 -->
         <button class="home-card human" onclick="enterHuman()">
-          <div class="card-top">
-            <div class="hc-icon-wrap">
-              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <circle cx="16" cy="11" r="5"/>
-                <path d="M6 27 C 6 21, 10 17.5, 16 17.5 C 22 17.5, 26 21, 26 27"/>
-              </svg>
-            </div>
-            <div class="hc-content">
-              <h3>내 건강 체크</h3>
-              <p>소변검사 키트로<br>주요 건강 지표 확인</p>
-            </div>
-            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-          </div>
-          <div class="card-footer">
-            <span class="card-pill subj-pill"><span class="dot"></span><span id="humanLastInfo">마지막 기록 없음</span></span>
-            <span class="card-pill time-pill">
-              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
-              약 1분
-            </span>
-          </div>
+          <div class="card-orb">🧑</div>
+          <div class="card-label">URINE</div>
+          <div class="card-title">내 건강 체크</div>
+          <div class="card-meta" id="humanLastInfo">약 1분</div>
         </button>
 
-        <!-- 2) 반려동물 -->
+        <!-- 반려동물 -->
         <button class="home-card pet" onclick="enterPet()">
-          <div class="card-top">
-            <div class="hc-icon-wrap">
-              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <!-- 강아지 -->
-                <path d="M7.2 12 C 6 13.5, 6 15.5, 7.5 16.2"/>
-                <path d="M13.8 12 C 15 13.5, 15 15.5, 13.5 16.2"/>
-                <circle cx="10.5" cy="16" r="3.5"/>
-                <circle cx="9.3" cy="15.5" r=".35" data-fill/>
-                <circle cx="11.7" cy="15.5" r=".35" data-fill/>
-                <ellipse cx="10.5" cy="17" rx=".45" ry=".38" data-fill/>
-                <path d="M9.9 17.7 C 10.2 18.2, 10.8 18.2, 11.1 17.7"/>
-                <!-- 고양이 -->
-                <path d="M18 13.4 L 18.6 10.4 L 20.2 12.7"/>
-                <path d="M23.4 13.4 L 22.8 10.4 L 21.2 12.7"/>
-                <circle cx="20.7" cy="16" r="3.5"/>
-                <circle cx="19.5" cy="15.5" r=".35" data-fill/>
-                <circle cx="21.9" cy="15.5" r=".35" data-fill/>
-                <path d="M20.7 16.7 L 21 17 L 20.4 17 Z" data-fill/>
-                <path d="M20.1 17.5 C 20.35 18, 20.7 18, 20.7 17.7 C 20.7 18, 21.05 18, 21.3 17.5"/>
-                <line x1="17.4" y1="16.4" x2="18.6" y2="16.4"/>
-                <line x1="22.8" y1="16.4" x2="24" y2="16.4"/>
-              </svg>
-            </div>
-            <div class="hc-content">
-              <h3>반려동물 건강 체크</h3>
-              <p>우리 아이의 건강 신호를<br>집에서 확인</p>
-            </div>
-            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-          </div>
-          <div class="card-footer">
-            <span class="card-pill subj-pill"><span class="dot"></span><span id="petLastInfo">최근 기록 없음</span></span>
-            <span class="card-pill time-pill">
-              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
-              약 1분
-            </span>
-          </div>
+          <div class="card-pet-orb">🐶🐱</div>
+          <div class="card-label">PET</div>
+          <div class="card-title">반려동물</div>
+          <div class="card-meta" id="petLastInfo">약 1분</div>
         </button>
 
         <!-- 식단 분석 -->
         <button class="home-card food" onclick="enterFood()">
-          <div class="card-top">
-            <div class="hc-icon-wrap">
-              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <!-- 그릇 + 밥 -->
-                <path d="M5 17 Q 5 23, 16 23 Q 27 23, 27 17"/>
-                <path d="M5 17 L 27 17"/>
-                <ellipse cx="16" cy="14" rx="9" ry="3"/>
-                <circle cx="13" cy="13" r=".6" data-fill/>
-                <circle cx="16" cy="13" r=".6" data-fill/>
-                <circle cx="19" cy="13" r=".6" data-fill/>
-                <!-- 김 -->
-                <path d="M11 10 Q 10 7, 11 5"/>
-                <path d="M16 9 Q 15 5, 16 3"/>
-                <path d="M21 10 Q 22 7, 21 5"/>
-              </svg>
-            </div>
-            <div class="hc-content">
-              <h3>🍽 식단 분석</h3>
-              <p>음식 사진 한 장으로<br>칼로리·영양 분석</p>
-            </div>
-            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-          </div>
-          <div class="card-footer">
-            <span class="card-pill subj-pill"><span class="dot"></span><span id="foodLastInfo">기록 없음</span></span>
-            <span class="card-pill time-pill">
-              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
-              약 30초
-            </span>
-          </div>
+          <div class="card-orb">🍱</div>
+          <div class="card-label">MEAL</div>
+          <div class="card-title">식단 분석</div>
+          <div class="card-meta" id="foodLastInfo">약 30초</div>
         </button>
 
         <!-- 식품 성분 분석 (NEW) -->
         <button class="home-card ingredient" onclick="enterIngredient()">
           <span class="card-new-badge">NEW</span>
-          <div class="card-top">
-            <div class="hc-icon-wrap">
-              <svg class="hc-icon" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
-                <!-- 라벨 (성분표) -->
-                <path d="M7 4 H 22 L 26 8 V 28 H 7 Z"/>
-                <path d="M22 4 V 8 H 26"/>
-                <!-- 성분 줄들 -->
-                <line x1="10" y1="13" x2="22" y2="13"/>
-                <line x1="10" y1="17" x2="22" y2="17"/>
-                <line x1="10" y1="21" x2="18" y2="21"/>
-                <!-- 돋보기 -->
-                <circle cx="22" cy="22" r="3.2"/>
-                <line x1="24.5" y1="24.5" x2="26.5" y2="26.5"/>
-              </svg>
-            </div>
-            <div class="hc-content">
-              <h3>🏷 식품 성분 분석</h3>
-              <p>제품 성분표 사진으로<br>인공첨가물·인체 영향 분석</p>
-            </div>
-            <svg class="hc-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-          </div>
-          <div class="card-footer">
-            <span class="card-pill subj-pill"><span class="dot"></span><span id="ingredientLastInfo">기록 없음</span></span>
-            <span class="card-pill time-pill">
-              <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5"/><path d="M7 4 V 7 L 9 8.5"/></svg>
-              약 20초
-            </span>
-          </div>
+          <div class="card-orb">🏷️</div>
+          <div class="card-label">LABEL</div>
+          <div class="card-title">식품 성분</div>
+          <div class="card-meta" id="ingredientLastInfo">약 20초</div>
         </button>
 
       </div>
 
-      <!-- 최근 검사 기록 -->
-      <div class="recent-section">
-        <div class="recent-title">최근 검사 기록</div>
-        <button class="recent-empty" id="recentEmpty" onclick="goHistory()">
-          <div class="recent-icon">
-            <svg viewBox="0 0 24 24">
-              <path d="M9 4 H 15 V 7 H 9 V 4 Z"/>
-              <path d="M7 5 H 5 V 21 H 19 V 5 H 17"/>
-              <path d="M8 11 H 16 M 8 14 H 13 M 8 17 H 14"/>
-            </svg>
+      <!-- RECENT ACTIVITY 섹션 -->
+      <div class="recent-activity-section">
+        <div class="ra-header">RECENT ACTIVITY</div>
+
+        <!-- 1) 최근 검사 기록 -->
+        <button class="ra-card ra-urine" id="recentEmpty" onclick="goHistory()">
+          <div class="ra-orb ra-orb-blue">🧑</div>
+          <div class="ra-content">
+            <div class="ra-label">URINE</div>
+            <div class="ra-title" id="recentTitle">아직 저장된 검사 기록이 없어요</div>
+            <div class="ra-sub" id="recentSub">첫 건강 체크를 시작해보세요</div>
           </div>
-          <div class="recent-text">
-            <div class="empty-title" id="recentTitle">아직 저장된 검사 기록이 없어요</div>
-            <div class="empty-sub" id="recentSub">첫 건강 체크를 시작해보세요</div>
-          </div>
+          <div class="ra-arrow">›</div>
         </button>
+
+        <!-- 2) 영양 리포트 -->
+        <button class="ra-card ra-report" onclick="goReport()">
+          <div class="ra-orb ra-orb-yellow">📊</div>
+          <div class="ra-content">
+            <div class="ra-label" style="color:#D97706">REPORT</div>
+            <div class="ra-title">오늘·이번 주 영양 리포트</div>
+            <div class="ra-sub">식단 데이터로 만든 종합 분석</div>
+          </div>
+          <div class="ra-arrow">›</div>
+        </button>
+
+        <!-- 3) 키트 구매 -->
+        <a class="ra-card ra-shop" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
+          <div class="ra-orb ra-orb-green">🛒</div>
+          <div class="ra-content">
+            <div class="ra-label" style="color:#10B981">SHOP</div>
+            <div class="ra-title">검사 키트 더 필요하세요?</div>
+            <div class="ra-sub"><span class="smartstore-badge">N</span>스마트스토어에서 정품 키트 구매하기</div>
+          </div>
+          <div class="ra-arrow">›</div>
+        </a>
       </div>
-
-      <!-- 📊 종합 영양 리포트 진입 -->
-      <button class="kit-purchase" onclick="goReport()" style="border:none;background:linear-gradient(135deg,#FEF3C7,#FCD34D);width:100%;cursor:pointer;font-family:inherit">
-        <div class="kit-emoji">📊</div>
-        <div class="kit-text">
-          <div class="kit-title">오늘·이번 주 영양 리포트</div>
-          <div class="kit-sub">식단 데이터로 만든 종합 분석</div>
-        </div>
-        <svg class="kit-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-      </button>
-
-      <!-- 키트 구매 카드 -->
-      <a class="kit-purchase" href="https://smartstore.naver.com/checkmyhealth/category/ALL?cp=1" target="_blank" rel="noopener">
-        <div class="kit-emoji">🧪</div>
-        <div class="kit-text">
-          <div class="kit-title">검사 키트 더 필요하세요?</div>
-          <div class="kit-sub"><span class="smartstore-badge">N</span>스마트스토어에서 정품 키트 구매하기</div>
-        </div>
-        <svg class="kit-arrow" viewBox="0 0 9 14"><path d="M1.5 1.5 L7 7 L1.5 12.5"/></svg>
-      </a>
 
       <!-- 하단 면책 -->
       <div class="bottom-disclaimer">
