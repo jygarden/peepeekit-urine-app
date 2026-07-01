@@ -426,6 +426,53 @@
       font-size:20px;letter-spacing:-2px;margin-bottom:auto
     }
 
+    /* 알레르기 칩 */
+    .allergy-chip{
+      display:inline-flex;align-items:center;gap:5px;background:#F9FAFB;border:1.5px solid #E5E7EB;
+      color:#6B7280;border-radius:99px;padding:8px 14px;font-size:12.5px;font-weight:700;
+      cursor:pointer;transition:all .15s;font-family:inherit;letter-spacing:-.2px;
+      user-select:none
+    }
+    .allergy-chip:hover{border-color:#FCA5A5;background:#FEF2F2}
+    .allergy-chip.selected{background:#FEE2E2;border-color:#EF4444;color:#991B1B;font-weight:900}
+    .allergy-chip.selected::before{content:'✓ ';color:#DC2626}
+    /* 알레르기 경고 배너 (결과 화면) */
+    .allergy-alert-banner{
+      background:linear-gradient(135deg,#DC2626 0%,#F97316 100%);
+      color:#fff;border-radius:18px;padding:18px 20px;margin-bottom:14px;
+      box-shadow:0 6px 20px rgba(220,38,38,.35);position:relative;overflow:hidden
+    }
+    .allergy-alert-banner::before{
+      content:'⚠️';position:absolute;font-size:80px;right:-10px;top:-20px;opacity:.12
+    }
+    .allergy-alert-title{
+      font-size:16px;font-weight:900;letter-spacing:-.4px;margin-bottom:6px;display:flex;align-items:center;gap:6px
+    }
+    .allergy-alert-sub{
+      font-size:12.5px;line-height:1.55;opacity:.95;margin-bottom:12px
+    }
+    .allergy-alert-chip{
+      display:inline-block;background:rgba(255,255,255,.25);color:#fff;
+      font-size:11.5px;font-weight:900;padding:5px 11px;border-radius:99px;margin:0 4px 4px 0;
+      letter-spacing:-.2px
+    }
+    .allergy-cta-btn{
+      background:#fff;color:#DC2626;border:none;border-radius:12px;
+      padding:9px 16px;font-size:12px;font-weight:900;cursor:pointer;
+      font-family:inherit;margin-top:6px;letter-spacing:-.2px;box-shadow:0 2px 8px rgba(0,0,0,.15)
+    }
+    /* 성분표 미등록 유도 배너 */
+    .allergy-onboard-banner{
+      background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 100%);
+      border:1px solid #FBBF24;border-radius:16px;padding:14px 16px;margin-bottom:14px;
+      display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s
+    }
+    .allergy-onboard-banner:hover{transform:translateY(-2px)}
+    .allergy-onboard-emoji{font-size:26px;flex-shrink:0}
+    .allergy-onboard-text{flex:1;min-width:0}
+    .allergy-onboard-title{font-size:13px;font-weight:900;color:#78350F;letter-spacing:-.3px}
+    .allergy-onboard-sub{font-size:11px;font-weight:700;color:#B45309;margin-top:2px}
+
     /* TODAY'S CHALLENGE 섹션 */
     .challenge-section{margin-top:24px;display:flex;flex-direction:column;gap:10px;width:100%}
     .challenge-card{
@@ -2800,6 +2847,7 @@
         </div>
       </div>
     </div>
+    <div id="ingredientAllergyPromo"></div>
     <div class="warning-banner" style="background:#FAF5FF;border-color:#C4B5FD">
       <div class="wtitle" style="color:#5B21B6">📸 정확한 분석을 위해</div>
       <ul style="color:#6B21A8">
@@ -2862,6 +2910,45 @@
       <button class="btn-retake" style="border-color:#8B5CF6;color:#8B5CF6" onclick="showScreen('screenIngredient')">📷 다시 찍기</button>
       <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
     </div>
+  </div>
+
+  <!-- ════════════ 🚨 알레르기 프로필 화면 ════════════ -->
+  <div class="screen" id="screenAllergyProfile">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🚨 내 알레르기</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#FEE2E2 0%,#FEF3C7 100%);border:1px solid #FCA5A5;border-radius:16px;padding:16px 18px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:900;color:#991B1B;margin-bottom:6px;letter-spacing:-.3px">알레르기 등록하면 안전해요 ✨</div>
+      <div style="font-size:12px;color:#7F1D1D;line-height:1.55">
+        식품 성분 분석 결과에서 <b>자동으로 크로스체크</b>해서<br>
+        위험 성분이 발견되면 크게 알려드려요!
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 16px">
+      <div style="font-size:12.5px;font-weight:800;color:#374151;margin-bottom:12px;letter-spacing:-.2px">
+        📋 해당되는 알레르기를 모두 선택해주세요
+      </div>
+      <div id="allergyChipGrid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+
+    <div class="card" style="padding:16px;margin-top:12px;background:#F9FAFB">
+      <div style="font-size:11px;color:#6B7280;line-height:1.6">
+        <b>📌 참고:</b> 식약처 알레르기 유발 성분 표시 권장 대상 <b>22종 기준</b>이에요.
+        기타 알레르기가 있으시면 하단에서 직접 추가 가능해요.
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px;margin-top:12px">
+      <label style="font-size:12px;font-weight:700;color:#374151">기타 (직접 입력, 쉼표로 구분)</label>
+      <input type="text" id="allergyCustomInput" placeholder="예: 코코넛, 참깨, 셀러리" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:13px;margin-top:6px;font-family:inherit"/>
+    </div>
+
+    <button onclick="saveAllergyProfile()" style="width:100%;margin-top:16px;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(239,68,68,.4);letter-spacing:-.3px">
+      ✅ 저장하기
+    </button>
+    <button onclick="goHome()" class="btn-outline" style="margin-top:10px">← 홈으로</button>
   </div>
 
   <!-- ════════════ 🎯 건강 퀴즈 화면 ════════════ -->
@@ -2974,6 +3061,7 @@
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">취소</button>
     <div class="settings-divider"></div>
     <button class="settings-btn settings-btn-secondary" onclick="manageProfilesFromSettings()">프로필 관리 (가족·반려동물)</button>
+    <button class="settings-btn settings-btn-secondary" onclick="closeSettings();goAllergyProfile()" style="background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border-color:#FCA5A5;color:#991B1B;font-weight:900">🚨 내 알레르기 관리</button>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
@@ -3309,6 +3397,21 @@ function showScreen(id) {
   if (id === 'screenCapture') maybeShowCaptureTip();
   // 식단 사진 화면 진입 시 프로필 배너 렌더링
   if (id === 'screenFoodCapture') { try { renderCaptureProfileBanner(); } catch(e){} }
+  // 성분 분석 화면 진입 시 알레르기 등록 유도 배너
+  if (id === 'screenIngredient') {
+    try {
+      const el = document.getElementById('ingredientAllergyPromo');
+      if (el) {
+        if (typeof hasAllergyProfile === 'function' && !hasAllergyProfile()) {
+          el.innerHTML = '<div class="allergy-onboard-banner" onclick="goAllergyProfile()"><div class="allergy-onboard-emoji">🚨</div><div class="allergy-onboard-text"><div class="allergy-onboard-title">알레르기 등록하고 자동 경고 받기</div><div class="allergy-onboard-sub">위험 성분 발견 시 즉시 알려드려요</div></div><div style="font-size:18px;color:#78350F;font-weight:900">›</div></div>';
+        } else if (typeof hasAllergyProfile === 'function' && hasAllergyProfile()) {
+          const profile = getAllergyProfile();
+          const count = (profile.selected?.length || 0) + (profile.custom ? profile.custom.split(',').filter(s=>s.trim()).length : 0);
+          el.innerHTML = '<div class="allergy-onboard-banner" style="background:linear-gradient(135deg,#D1FAE5,#FEF3C7);border-color:#10B981" onclick="goAllergyProfile()"><div class="allergy-onboard-emoji">✅</div><div class="allergy-onboard-text"><div class="allergy-onboard-title" style="color:#065F46">알레르기 ' + count + '개 등록됨</div><div class="allergy-onboard-sub" style="color:#059669">자동 크로스체크 활성화 · 관리하기 ›</div></div></div>';
+        }
+      }
+    } catch(e){}
+  }
   // 헤더 부제목 (홈 외 화면)
   const headerSub = document.getElementById('headerSub');
   if (headerSub) {
@@ -4687,7 +4790,34 @@ function renderIngredientResult(data) {
   const gradeColor = score >= 80 ? '#10B981' : score >= 60 ? '#F59E0B' : score >= 40 ? '#F97316' : '#EF4444';
   const gradeBg = score >= 80 ? 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' : score >= 60 ? 'linear-gradient(135deg,#FEF3C7,#FDE68A)' : score >= 40 ? 'linear-gradient(135deg,#FED7AA,#FDBA74)' : 'linear-gradient(135deg,#FECACA,#FCA5A5)';
 
-  let html = debugHtml + `
+  // 🚨 사용자 알레르기 크로스체크
+  const userRisks = checkUserAllergyRisks(data);
+  let userAllergyBanner = '';
+  if (userRisks.length > 0) {
+    const userName = localStorage.getItem('userName') || '고객';
+    userAllergyBanner = `
+      <div class="allergy-alert-banner">
+        <div class="allergy-alert-title">⚠️ ${escapeHtml(userName)}님 알레르기 성분 발견!</div>
+        <div class="allergy-alert-sub">등록하신 알레르기 성분이 <b>${userRisks.length}개</b> 포함되어 있어요. 섭취에 각별히 주의하세요.</div>
+        <div style="margin-bottom:8px">
+          ${userRisks.map(r => `<span class="allergy-alert-chip">⚠️ ${escapeHtml(r)}</span>`).join('')}
+        </div>
+      </div>
+    `;
+  } else if (!hasAllergyProfile()) {
+    userAllergyBanner = `
+      <div class="allergy-onboard-banner" onclick="goAllergyProfile()">
+        <div class="allergy-onboard-emoji">🚨</div>
+        <div class="allergy-onboard-text">
+          <div class="allergy-onboard-title">내 알레르기 등록하세요!</div>
+          <div class="allergy-onboard-sub">위험 성분 자동 검출 · 무료 · 30초</div>
+        </div>
+        <div style="font-size:18px;color:#78350F;font-weight:900">›</div>
+      </div>
+    `;
+  }
+
+  let html = debugHtml + userAllergyBanner + `
     <!-- 종합 점수 Hero (제품명 노출 X) -->
     <div style="background:${gradeBg};border-radius:20px;padding:22px 20px;text-align:center;margin-bottom:14px;box-shadow:0 4px 18px rgba(0,0,0,.06)">
       <div style="font-size:11px;color:${gradeColor};font-weight:800;letter-spacing:.5px;margin-bottom:4px">성분 안전도</div>
@@ -9006,6 +9136,129 @@ function exitQuiz() {
   _quizSession = null;
   goHome();
   setTimeout(() => renderQuizChallenge(), 100);
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🚨 알레르기 프로필 (Phase 3)
+// ════════════════════════════════════════════════════════════════
+const ALLERGY_LIST = [
+  { name:'우유',        keywords:['우유','분유','혼합분유','전지분유','탈지분유','유당','유청','카제인','치즈','버터','생크림','요거트'] },
+  { name:'달걀',        keywords:['달걀','계란','난백','난황','알부민'] },
+  { name:'대두',        keywords:['대두','콩','대두유','콩기름','두부','두유','간장','된장','청국장'] },
+  { name:'땅콩',        keywords:['땅콩','낙화생'] },
+  { name:'견과류',      keywords:['아몬드','호두','잣','캐슈넛','피스타치오','헤이즐넛','브라질너트','피칸','마카다미아'] },
+  { name:'밀',          keywords:['밀','밀가루','글루텐','밀단백','밀배아'] },
+  { name:'메밀',        keywords:['메밀'] },
+  { name:'게',          keywords:['게','대게','꽃게','대게살','게살'] },
+  { name:'새우',        keywords:['새우','대하','칵테일새우'] },
+  { name:'고등어',      keywords:['고등어'] },
+  { name:'오징어',      keywords:['오징어'] },
+  { name:'조개류',      keywords:['굴','홍합','전복','조개','바지락','키조개','가리비','대합','소라'] },
+  { name:'복숭아',      keywords:['복숭아'] },
+  { name:'토마토',      keywords:['토마토','토마토소스','케첩'] },
+  { name:'돼지고기',    keywords:['돼지고기','돼지','베이컨','햄','소시지'] },
+  { name:'쇠고기',      keywords:['쇠고기','소고기','우육'] },
+  { name:'닭고기',      keywords:['닭고기','치킨'] },
+  { name:'아황산류',    keywords:['아황산','아황산나트륨','메타중아황산'] },
+  { name:'레시틴',      keywords:['레시틴'] },
+  { name:'글루텐',      keywords:['글루텐','글리아딘'] },
+  { name:'유당',        keywords:['유당','락토스','락토오스'] },
+  { name:'인공감미료',  keywords:['아스파탐','수크랄로스','사카린','아세설팜칼륨','자일리톨','에리스리톨'] }
+];
+
+function getAllergyProfile() {
+  try { return JSON.parse(localStorage.getItem('userAllergyProfile') || 'null'); } catch(e) { return null; }
+}
+function saveAllergyProfileToStorage(profile) {
+  localStorage.setItem('userAllergyProfile', JSON.stringify(profile));
+}
+function hasAllergyProfile() {
+  const p = getAllergyProfile();
+  return !!(p && (p.selected?.length > 0 || p.custom));
+}
+
+function openAllergyProfile() {
+  const profile = getAllergyProfile() || { selected:[], custom:'' };
+  const grid = document.getElementById('allergyChipGrid');
+  if (!grid) return;
+
+  grid.innerHTML = ALLERGY_LIST.map(a => {
+    const selected = profile.selected?.includes(a.name);
+    return `<button class="allergy-chip ${selected ? 'selected' : ''}" onclick="toggleAllergy('${escapeHtml(a.name)}', this)">${escapeHtml(a.name)}</button>`;
+  }).join('');
+
+  const customInput = document.getElementById('allergyCustomInput');
+  if (customInput) customInput.value = profile.custom || '';
+
+  showScreen('screenAllergyProfile');
+}
+
+function toggleAllergy(name, btn) {
+  btn.classList.toggle('selected');
+}
+
+function saveAllergyProfile() {
+  const selected = [];
+  document.querySelectorAll('.allergy-chip.selected').forEach(el => {
+    const text = el.textContent.trim().replace(/^✓\s*/, '');
+    if (text) selected.push(text);
+  });
+  const custom = document.getElementById('allergyCustomInput').value.trim();
+  const profile = { selected, custom, updated: new Date().toISOString() };
+  saveAllergyProfileToStorage(profile);
+
+  const total = selected.length + (custom ? custom.split(',').filter(s => s.trim()).length : 0);
+  if (typeof showPointToast === 'function') showPointToast(`✅ 알레르기 ${total}개 저장됨`);
+  else alert(`알레르기 ${total}개가 저장됐어요!`);
+  goHome();
+}
+
+// 성분 분석 결과에서 사용자 알레르기와 크로스체크
+function checkUserAllergyRisks(data) {
+  const profile = getAllergyProfile();
+  if (!profile) return [];
+  const userAllergens = [
+    ...(profile.selected || []),
+    ...(profile.custom ? profile.custom.split(',').map(s => s.trim()).filter(Boolean) : [])
+  ];
+  if (userAllergens.length === 0) return [];
+
+  const risks = new Set();
+
+  // 1. AI가 감지한 allergens 배열에서 매칭
+  (data.allergens || []).forEach(detected => {
+    userAllergens.forEach(userAllergy => {
+      if (detected.includes(userAllergy) || userAllergy.includes(detected)) {
+        risks.add(userAllergy);
+      }
+    });
+  });
+
+  // 2. ingredients 전체에서 키워드 매칭 (사전 활용)
+  const allText = (data.ingredients || []).map(ing =>
+    (ing.name || '') + ' ' + (ing.type || '') + ' ' + (ing.description || '')
+  ).join(' ');
+
+  ALLERGY_LIST.forEach(entry => {
+    if (userAllergens.includes(entry.name)) {
+      const found = entry.keywords.some(kw => allText.includes(kw));
+      if (found) risks.add(entry.name);
+    }
+  });
+
+  // 3. 사용자 커스텀 알레르기도 직접 검색
+  userAllergens.forEach(userAllergy => {
+    if (!ALLERGY_LIST.find(a => a.name === userAllergy)) {
+      // ALLERGY_LIST에 없는 커스텀 알레르기
+      if (allText.includes(userAllergy)) risks.add(userAllergy);
+    }
+  });
+
+  return Array.from(risks);
+}
+
+function goAllergyProfile() {
+  openAllergyProfile();
 }
 
 function renderHomeWaterWidget() {
