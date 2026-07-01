@@ -1410,6 +1410,8 @@
     .points-badge-wrap{display:flex;align-items:center;gap:8px;margin-bottom:18px}
     /* 옛 points-badge-wrap 제거된 자리 — 빈 마진 없게 */
     .points-badge-wrap:empty{margin:0;display:none}
+    .streak-badge{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#FEF3C7,#FED7AA);border:1px solid #FCD34D;border-radius:999px;padding:6px 12px 6px 9px;cursor:pointer;box-shadow:0 2px 8px rgba(252,211,77,.3);font-family:inherit;color:#92400E;font-size:12.5px;font-weight:900;letter-spacing:-.2px;transition:all .15s ease}
+    .streak-badge:hover{transform:scale(1.05)}
     .points-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--gray-200);border-radius:999px;padding:8px 14px 8px 11px;cursor:pointer;box-shadow:var(--shadow-xs);font-family:inherit;color:var(--gray-800);font-size:12.5px;font-weight:800;letter-spacing:-.2px;transition:all .15s ease}
     .points-badge:hover{border-color:var(--accent);color:var(--accent-dark);box-shadow:var(--shadow-sm)}
     .points-badge:hover{box-shadow:0 4px 14px rgba(251,191,36,.45)}
@@ -1711,6 +1713,9 @@
       </div>
       <!-- 상단 행: 포인트 + 설정 (오른쪽 정렬) -->
       <div class="home-top-bar">
+        <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge" style="display:none">
+          <span style="font-size:14px">🔥</span> <span id="homeStreakNum">0</span>
+        </button>
         <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
           <span class="gem">💎</span> <span id="homePointsNum">0</span>P
         </button>
@@ -2371,6 +2376,35 @@
     </div>
   </div>
 
+  <!-- 🔥 아침 체크인 모달 -->
+  <div id="checkinModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);overflow-y:auto;padding:16px;font-family:inherit" onclick="if(event.target===this)closeCheckin()">
+    <div style="background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 100%);border-radius:24px;max-width:400px;margin:60px auto;padding:26px 24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25)">
+      <div style="text-align:center">
+        <div id="checkinStreakEmoji" style="font-size:60px;line-height:1;margin-bottom:8px">🔥</div>
+        <div id="checkinStreakTitle" style="font-size:24px;font-weight:900;color:#92400E;letter-spacing:-.5px;margin-bottom:4px">7일 연속 접속 중!</div>
+        <div id="checkinStreakSub" style="font-size:12.5px;color:#B45309;font-weight:700">멋져요, 오늘도 만나서 반가워요 🌸</div>
+      </div>
+      <div style="background:#fff;border-radius:18px;padding:20px 18px;margin-top:20px;box-shadow:0 4px 12px rgba(0,0,0,.06)">
+        <div style="font-size:14px;font-weight:800;color:#1F2937;text-align:center;margin-bottom:14px;letter-spacing:-.3px">오늘 컨디션 어때요?</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <button onclick="saveCheckin('great')" class="mood-btn" style="background:#F0FDF4;border:2px solid #86EFAC;border-radius:14px;padding:14px 6px;cursor:pointer;font-family:inherit;transition:transform .15s">
+            <div style="font-size:28px;line-height:1;margin-bottom:4px">✨</div>
+            <div style="font-size:11px;font-weight:800;color:#15803D">좋아요</div>
+          </button>
+          <button onclick="saveCheckin('ok')" class="mood-btn" style="background:#EFF6FF;border:2px solid #93C5FD;border-radius:14px;padding:14px 6px;cursor:pointer;font-family:inherit;transition:transform .15s">
+            <div style="font-size:28px;line-height:1;margin-bottom:4px">😊</div>
+            <div style="font-size:11px;font-weight:800;color:#1E40AF">보통</div>
+          </button>
+          <button onclick="saveCheckin('tired')" class="mood-btn" style="background:#FEF3C7;border:2px solid #FCD34D;border-radius:14px;padding:14px 6px;cursor:pointer;font-family:inherit;transition:transform .15s">
+            <div style="font-size:28px;line-height:1;margin-bottom:4px">😴</div>
+            <div style="font-size:11px;font-weight:800;color:#92400E">피곤</div>
+          </button>
+        </div>
+      </div>
+      <button onclick="closeCheckin()" style="width:100%;margin-top:14px;padding:10px;background:transparent;border:none;color:#78350F;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;opacity:.7">나중에</button>
+    </div>
+  </div>
+
   <!-- 📊 식단 리포트 모달 -->
   <div id="foodReportModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);overflow-y:auto;padding:16px" onclick="if(event.target===this)closeFoodReport()">
     <div style="background:#fff;border-radius:20px;max-width:480px;margin:20px auto;padding:18px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.3)">
@@ -2439,7 +2473,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -3152,8 +3186,8 @@ function showScreen(id) {
   // body 클래스 (배경색 제어)
   document.body.classList.toggle('home-active', id === 'screenHome');
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
-  // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯
-  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} }
+  // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯 + 스트릭·체크인
+  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시
   if (id === 'screenCapture') maybeShowCaptureTip();
   // 식단 사진 화면 진입 시 프로필 배너 렌더링
@@ -3355,6 +3389,7 @@ function saveName() {
 function goHome() {
   subjectMode = null;
   showScreen('screenHome');
+  try { initDailyCheckin(); } catch(e) {}
 }
 function goHistory() {
   renderHistory();
@@ -4805,8 +4840,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -8502,6 +8537,144 @@ function renderWaterWidget() {
     </div>
   </div>`;
 }
+// ════════════════════════════════════════════════════════════════
+// 🔥 데일리 스트릭 + 아침 체크인 (Phase 1)
+// ════════════════════════════════════════════════════════════════
+function getStreakData() {
+  try {
+    return JSON.parse(localStorage.getItem('streakData') || '{}');
+  } catch(e) { return {}; }
+}
+function saveStreakData(d) {
+  localStorage.setItem('streakData', JSON.stringify(d));
+}
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function daysBetween(a, b) {
+  const da = new Date(a), db = new Date(b);
+  return Math.round((db - da) / (1000*60*60*24));
+}
+
+function updateStreakOnAppOpen() {
+  const data = getStreakData();
+  const today = todayKey();
+  if (data.lastVisit === today) return data; // 오늘 이미 갱신됨
+
+  if (!data.lastVisit) {
+    // 첫 방문
+    data.streak = 1;
+    data.longestStreak = 1;
+  } else {
+    const gap = daysBetween(data.lastVisit, today);
+    if (gap === 1) {
+      // 연속!
+      data.streak = (data.streak || 0) + 1;
+      if (data.streak > (data.longestStreak || 0)) data.longestStreak = data.streak;
+    } else if (gap > 1) {
+      // 스트릭 끊김
+      data.streakBroken = data.streak || 0; // 잃은 스트릭
+      data.streak = 1;
+    }
+    // gap === 0 은 위에서 리턴함
+  }
+  data.lastVisit = today;
+  saveStreakData(data);
+  return data;
+}
+
+function renderStreakBadge() {
+  const data = getStreakData();
+  const badge = document.getElementById('homeStreakBadge');
+  const num = document.getElementById('homeStreakNum');
+  if (!badge || !num) return;
+  if (data.streak && data.streak > 0) {
+    num.textContent = data.streak;
+    badge.style.display = 'inline-flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function shouldShowCheckin() {
+  const data = getStreakData();
+  const today = todayKey();
+  return data.lastCheckin !== today;
+}
+
+function openCheckinModal() {
+  const data = getStreakData();
+  const streak = data.streak || 1;
+  const modal = document.getElementById('checkinModal');
+  const emoji = document.getElementById('checkinStreakEmoji');
+  const title = document.getElementById('checkinStreakTitle');
+  const sub = document.getElementById('checkinStreakSub');
+  if (!modal) return;
+
+  // 스트릭에 따른 메시지 변경
+  if (streak >= 100) { emoji.textContent = '👑'; title.textContent = `${streak}일 연속! 전설이에요`; sub.textContent = '진짜 대단해요, 존경합니다 👑'; }
+  else if (streak >= 30) { emoji.textContent = '💎'; title.textContent = `${streak}일 연속 접속 중!`; sub.textContent = '한 달 넘게 꾸준하다니, 최고예요 💎'; }
+  else if (streak >= 14) { emoji.textContent = '🔥'; title.textContent = `${streak}일 연속 접속 중!`; sub.textContent = '2주 넘게 꾸준하다니 진짜 멋져요 🔥'; }
+  else if (streak >= 7) { emoji.textContent = '🔥'; title.textContent = `${streak}일 연속 접속 중!`; sub.textContent = '일주일 넘었어요! 잘하고 있어요 🌟'; }
+  else if (streak >= 3) { emoji.textContent = '🌱'; title.textContent = `${streak}일 연속 접속 중!`; sub.textContent = '좋아요, 이 리듬 계속 가요 🌸'; }
+  else if (streak >= 1) { emoji.textContent = '🌸'; title.textContent = `첫걸음, ${streak}일차!`; sub.textContent = '만나서 반가워요, 오늘도 화이팅 🌸'; }
+
+  // 스트릭 끊긴 경우 안내
+  if (data.streakBroken && data.streakBroken > 0) {
+    title.textContent = `아! 스트릭이 끊어졌어요 😢`;
+    sub.textContent = `${data.streakBroken}일 연속이었는데... 다시 시작해요!`;
+    delete data.streakBroken;
+    saveStreakData(data);
+  }
+
+  modal.style.display = 'block';
+}
+function closeCheckin() {
+  document.getElementById('checkinModal').style.display = 'none';
+}
+function saveCheckin(mood) {
+  const data = getStreakData();
+  data.lastCheckin = todayKey();
+  data.moods = data.moods || {};
+  data.moods[todayKey()] = mood;
+  saveStreakData(data);
+  closeCheckin();
+
+  // 포인트 보상
+  try {
+    if (typeof addPoints === 'function') addPoints(5, '🔥 오늘 컨디션 체크');
+  } catch(e) {}
+
+  // 마일스톤 축하 (3/7/14/30/100)
+  const streak = data.streak || 0;
+  const milestones = [3, 7, 14, 30, 100];
+  if (milestones.includes(streak)) {
+    setTimeout(() => {
+      try { if (typeof addPoints === 'function') addPoints(streak * 10, `🎉 ${streak}일 스트릭 달성!`); } catch(e) {}
+    }, 500);
+  }
+
+  renderStreakBadge();
+}
+
+function openStreakInfo() {
+  const data = getStreakData();
+  const streak = data.streak || 0;
+  const longest = data.longestStreak || streak;
+  alert(`🔥 현재 스트릭: ${streak}일\n👑 최장 스트릭: ${longest}일\n\n매일 접속해서 컨디션 체크하면 스트릭이 유지돼요!`);
+}
+
+// 앱 초기화 시 스트릭 업데이트 (홈 화면 진입할 때)
+function initDailyCheckin() {
+  updateStreakOnAppOpen();
+  renderStreakBadge();
+  // 오늘 체크인 안 했으면 잠시 후 모달
+  if (shouldShowCheckin()) {
+    setTimeout(() => openCheckinModal(), 800);
+  }
+}
+
 function renderHomeWaterWidget() {
   const el = document.getElementById('homeWaterWidget');
   if (!el) return;
