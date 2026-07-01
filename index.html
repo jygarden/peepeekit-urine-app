@@ -463,30 +463,22 @@
     }
     /* 👨‍👩‍👧‍👦 다중 프로필 스위처 */
     .home-profile-section{margin-bottom:14px}
-    .active-profile-card{
-      background:#fff;border-radius:16px;padding:12px 14px;
-      display:flex;align-items:center;gap:12px;cursor:pointer;
-      box-shadow:0 2px 8px rgba(0,0,0,.05),0 6px 20px rgba(0,0,0,.06);
-      transition:transform .2s;font-family:inherit;width:100%;text-align:left;border:none
+    /* 미니 프로필 배지 (상단 오른쪽) */
+    .mini-profile-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      background:#fff;border:1px solid #F1F5F9;border-radius:99px;padding:4px 12px 4px 4px;
+      cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.06);
+      font-family:inherit;transition:all .15s;letter-spacing:-.2px
     }
-    .active-profile-card:hover{transform:translateY(-2px)}
-    .active-profile-avatar{
-      width:44px;height:44px;border-radius:50%;flex-shrink:0;
-      display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1
+    .mini-profile-badge:hover{transform:scale(1.03)}
+    .mpb-avatar{
+      width:26px;height:26px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1
     }
-    .apc-info{flex:1;min-width:0}
-    .apc-label{
-      font-size:9px;font-weight:900;color:#94A3B8;letter-spacing:1.5px;line-height:1;margin-bottom:3px
-    }
-    .apc-name{
-      font-size:14px;font-weight:900;color:#0F172A;letter-spacing:-.3px;line-height:1.2
-    }
-    .apc-meta{font-size:10.5px;font-weight:700;color:#64748B;margin-top:2px}
-    .apc-switch{
-      background:#F1F5F9;color:#475569;border:none;
-      font-size:10.5px;font-weight:900;padding:6px 11px;border-radius:99px;
-      cursor:pointer;font-family:inherit;letter-spacing:-.2px
-    }
+    .mpb-info{display:flex;flex-direction:column;line-height:1.15}
+    .mpb-name{font-size:11px;font-weight:900;color:#0F172A}
+    .mpb-meta{font-size:9px;font-weight:700;color:#94A3B8;margin-top:1px}
+    /* 인사글 아래 프로필 배너 (제거 대신 얇게) */
     /* 가족 아바타 그리드 */
     .family-avatars{
       display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;
@@ -2002,10 +1994,13 @@
         </button>
       </div>
 
+      <!-- 미니 프로필 배지 (상단바 아래 우측) -->
+      <div id="homeMiniProfile" style="position:absolute;top:56px;right:26px;z-index:5"></div>
+
       <!-- 인사 + 새 슬로건 -->
       <div class="home-hello">
-        <h1>건강한 하루,<br>오늘도 응원해요</h1>
-        <div class="sub">AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
+        <h1 id="homeGreeting">건강한 하루,<br>오늘도 응원해요</h1>
+        <div class="sub" id="homeGreetingSub">AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
       </div>
 
       <!-- 👨‍👩‍👧‍👦 다중 프로필 스위처 -->
@@ -2787,7 +2782,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -5310,8 +5305,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -9634,43 +9629,119 @@ function profileAgeMeta(profile) {
   return ageLabel || '나이 미등록';
 }
 
-// 홈 프로필 섹션 렌더
+// 홈 프로필 섹션 렌더 (본문 = 가족 아바타만)
 function renderHomeProfileSection() {
   initFamilyProfiles(); // 첫 실행 보장
-  const el = document.getElementById('homeProfileSection');
-  if (!el) return;
-  const profiles = getFamilyProfiles();
   const active = getActiveProfile();
   if (!active) return;
 
-  const avatarsHtml = profiles.map(p => `
-    <button class="family-avatar ${p.id === active.id ? 'active' : ''}" onclick="switchProfile('${p.id}')">
-      <div class="fa-circle" style="background:${profileAvatarBg(p.type)}">${p.emoji || '🧑'}</div>
-      <div class="fa-name">${escapeHtml(p.name)}</div>
-      <div class="fa-age">${escapeHtml(getAgeLabel(p) || (p.type === 'pet' ? '반려' : ''))}</div>
-    </button>
-  `).join('') + `
-    <button class="family-avatar add-avatar" onclick="openAddProfileForm()">
-      <div class="fa-circle">+</div>
-      <div class="fa-name">추가</div>
-      <div class="fa-age" style="opacity:0">·</div>
-    </button>
-  `;
-
-  el.innerHTML = `
-    <div class="home-profile-section">
-      <button class="active-profile-card" onclick="openProfileSwitcher()">
-        <div class="active-profile-avatar" style="background:${profileAvatarBg(active.type)}">${active.emoji || '🧑'}</div>
-        <div class="apc-info">
-          <div class="apc-label">CURRENT PROFILE</div>
-          <div class="apc-name">${escapeHtml(active.name)} · ${escapeHtml(getAgeLabel(active) || (active.type === 'pet' ? '반려동물' : ''))}</div>
-          <div class="apc-meta">${escapeHtml(profileAgeMeta(active))}</div>
+  // 1) 미니 프로필 배지 (상단 오른쪽)
+  const miniEl = document.getElementById('homeMiniProfile');
+  if (miniEl) {
+    miniEl.innerHTML = `
+      <button class="mini-profile-badge" onclick="openProfileSwitcher()">
+        <div class="mpb-avatar" style="background:${profileAvatarBg(active.type)}">${active.emoji || '🧑'}</div>
+        <div class="mpb-info">
+          <div class="mpb-name">${escapeHtml(active.name)} ▾</div>
+          <div class="mpb-meta">${escapeHtml(getAgeLabel(active) || (active.type === 'pet' ? '반려' : ''))}</div>
         </div>
-        <div class="apc-switch">전환 ▾</div>
       </button>
-      <div class="family-avatars">${avatarsHtml}</div>
-    </div>
-  `;
+    `;
+  }
+
+  // 2) 인사글 개인화
+  const greeting = document.getElementById('homeGreeting');
+  const greetingSub = document.getElementById('homeGreetingSub');
+  if (greeting) {
+    if (active.id === 'main') {
+      greeting.innerHTML = '건강한 하루,<br>오늘도 응원해요';
+    } else if (active.type === 'kid') {
+      greeting.innerHTML = `${escapeHtml(active.name)},<br>오늘도 함께 자라요 🌸`;
+    } else if (active.type === 'pet') {
+      greeting.innerHTML = `${escapeHtml(active.name)},<br>오늘도 건강하게 🐾`;
+    } else {
+      greeting.innerHTML = `${escapeHtml(active.name)},<br>오늘도 응원해요`;
+    }
+  }
+  if (greetingSub) {
+    if (active.type === 'kid') {
+      greetingSub.innerHTML = `AI 영양사가 ${escapeHtml(active.name)}의 <br>연령별 맞춤 케어를 도와드려요`;
+    } else if (active.type === 'pet') {
+      greetingSub.innerHTML = `AI가 우리 ${escapeHtml(active.name)}의 <br>건강·사료·성분을 챙겨드려요`;
+    } else {
+      greetingSub.innerHTML = 'AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요';
+    }
+  }
+
+  // 3) 홈 카드 4개 제목·설명 개인화
+  updateHomeCardsByProfile(active);
+
+  // 4) 가족 아바타 그리드 (홈 프로필 섹션)
+  const el = document.getElementById('homeProfileSection');
+  if (el) {
+    const profiles = getFamilyProfiles();
+    const avatarsHtml = profiles.map(p => `
+      <button class="family-avatar ${p.id === active.id ? 'active' : ''}" onclick="switchProfile('${p.id}')">
+        <div class="fa-circle" style="background:${profileAvatarBg(p.type)}">${p.emoji || '🧑'}</div>
+        <div class="fa-name">${escapeHtml(p.name)}</div>
+        <div class="fa-age">${escapeHtml(getAgeLabel(p) || (p.type === 'pet' ? '반려' : ''))}</div>
+      </button>
+    `).join('') + `
+      <button class="family-avatar add-avatar" onclick="openAddProfileForm()">
+        <div class="fa-circle">+</div>
+        <div class="fa-name">추가</div>
+        <div class="fa-age" style="opacity:0">·</div>
+      </button>
+    `;
+    el.innerHTML = `<div class="home-profile-section"><div class="family-avatars">${avatarsHtml}</div></div>`;
+  }
+}
+
+// 활성 프로필 기반 홈 카드 개인화
+function updateHomeCardsByProfile(active) {
+  if (!active) return;
+  // 카드 4개의 h3 텍스트 + 부제 변경
+  const cards = document.querySelectorAll('.home-cards .home-card');
+  if (cards.length < 4) return;
+
+  const isKid = active.type === 'kid';
+  const isPet = active.type === 'pet';
+  const isMain = active.id === 'main';
+  const nameProps = isMain ? '' : `${active.name} `;
+
+  // 카드별 데이터
+  const cardData = {
+    human: {
+      title: isMain ? '내 건강 체크' : `${active.name} 건강 체크`,
+      sub: isKid ? '유아·소아용 건강 지표' : (isPet ? '반려동물 건강 지표' : '소변검사 키트로'),
+      hide: isPet // 반려동물 프로필이면 human 카드 숨김
+    },
+    pet: {
+      title: '반려동물',
+      sub: '집에서 간편하게',
+      hide: !isPet && active.type === 'kid' // 아이 프로필일 때 반려동물 카드 숨김
+    },
+    food: {
+      title: isMain ? '식단 분석' : (isKid && (active.ageMonths != null && active.ageMonths < 24) ? `${active.name} 이유식` : `${active.name} 식단`),
+      sub: isKid ? '연령별 영양 맞춤' : '음식 사진 한 장으로'
+    },
+    ingredient: {
+      title: isMain ? '식품 성분' : `${active.name} 안전 성분`,
+      sub: isKid ? '아이에게 안전한지 검사' : '제품 성분표 사진으로'
+    }
+  };
+
+  cards.forEach(card => {
+    const cardClasses = card.className.split(' ');
+    const type = ['human','pet','food','ingredient'].find(t => cardClasses.includes(t));
+    if (!type || !cardData[type]) return;
+    const d = cardData[type];
+    const titleEl = card.querySelector('.card-title');
+    if (titleEl) titleEl.textContent = d.title;
+    // hide는 아이 프로필 시 반려동물, 반려동물 프로필 시 human 등 숨김
+    if (d.hide) card.style.display = 'none';
+    else card.style.display = '';
+  });
 }
 
 function openProfileSwitcher() {
