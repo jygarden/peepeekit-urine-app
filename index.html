@@ -2827,7 +2827,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -3111,6 +3111,164 @@
       <button class="btn-retake" style="border-color:#8B5CF6;color:#8B5CF6" onclick="showScreen('screenIngredient')">📷 다시 찍기</button>
       <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
     </div>
+  </div>
+
+  <!-- ════════════ 🍼 아이 이유식·식단 화면 ════════════ -->
+  <div class="screen" id="screenKidsMeal">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🍼 <span id="kidsMealTitle">아이 식단</span></div>
+    </div>
+
+    <!-- 아이 프로필 배너 (연령대 안내) -->
+    <div id="kidsMealProfileBanner"></div>
+
+    <div class="card">
+      <div class="field">
+        <label id="kidsMealTimeLabel">언제 먹었어요?</label>
+        <div class="meal-time-row" style="margin-bottom:12px">
+          <button class="meal-time-btn" id="kmtBreakfast" onclick="selectKidsMealTime('아침')">🌅<br>아침</button>
+          <button class="meal-time-btn" id="kmtLunch" onclick="selectKidsMealTime('점심')">☀️<br>점심</button>
+          <button class="meal-time-btn" id="kmtDinner" onclick="selectKidsMealTime('저녁')">🌙<br>저녁</button>
+          <button class="meal-time-btn" id="kmtSnack" onclick="selectKidsMealTime('간식')">🍪<br>간식</button>
+        </div>
+        <label id="kidsMealTypeLabel">어떤 식사예요?</label>
+        <div class="meal-time-row" id="kidsMealTypeRow"></div>
+      </div>
+    </div>
+
+    <div class="card" style="background:#FCE7F3;border:1px solid #FBCFE8">
+      <div style="font-size:13px;font-weight:900;color:#9D174D;margin-bottom:6px">💗 <span id="kidsMealNutriTitle">오늘 챙길 영양소</span></div>
+      <div id="kidsMealNutriList" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
+      <div style="font-size:11px;color:#BE185D;line-height:1.5" id="kidsMealNutriTip"></div>
+    </div>
+
+    <div class="warning-banner" style="background:#FFFBEB;border-color:#FCD34D">
+      <div class="wtitle" style="color:#78350F">📸 촬영 팁</div>
+      <ul style="color:#92400E">
+        <li>음식 전체가 잘 보이게 위에서</li>
+        <li>먹은 양 대비 남은 양도 함께</li>
+        <li>새로운 재료 시도 시 <b>알러지 관찰</b></li>
+      </ul>
+    </div>
+
+    <button class="upload-btn accent" style="border-color:#EC4899" onclick="safeCameraClick('kidsMealCameraInput')">
+      <div class="icon">📷</div>
+      <div class="lbl" style="color:#EC4899">카메라로 촬영</div>
+      <div class="sub">지금 먹은 식사 사진</div>
+    </button>
+    <button class="upload-btn" onclick="openFileInput('kidsMealGalleryInput')">
+      <div class="icon">🖼️</div>
+      <div class="lbl">갤러리에서 선택</div>
+      <div class="sub">저장된 사진 불러오기</div>
+    </button>
+    <input type="file" id="kidsMealCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleKidsMealFile(event)"/>
+    <input type="file" id="kidsMealGalleryInput" accept="image/*" style="display:none" onchange="handleKidsMealFile(event)"/>
+    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 🛡️ 아이 안전 성분 화면 ════════════ -->
+  <div class="screen" id="screenKidsIngredient">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🛡️ <span id="kidsIngTitle">아이 안전 성분</span></div>
+    </div>
+
+    <div id="kidsIngProfileBanner"></div>
+
+    <div class="card" style="background:linear-gradient(135deg,#FEE2E2 0%,#FCE7F3 100%);border:1px solid #FCA5A5">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="font-size:28px">👶</div>
+        <div>
+          <div style="font-size:14px;font-weight:900;color:#991B1B;margin-bottom:6px" id="kidsIngHeadline">이 제품, 우리 아이에게 안전한가요?</div>
+          <div style="font-size:11.5px;color:#7F1D1D;line-height:1.55">
+            <b>성인보다 훨씬 엄격한 기준</b>으로 분석해요.<br>
+            어린이 과잉행동 관련 합성 착색료·인공감미료·방부제 등을 강조합니다.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="warning-banner" style="background:#FAF5FF;border-color:#DDD6FE">
+      <div class="wtitle" style="color:#5B21B6">⚠️ 특히 주의할 성분 (어린이)</div>
+      <ul style="color:#6B21A8">
+        <li><b>합성 착색료</b> — 적색40호·황색5호 (과잉행동 연관 보고)</li>
+        <li><b>인공감미료</b> — 아스파탐·수크랄로스</li>
+        <li><b>합성 보존제</b> — 안식향산나트륨·소르빈산</li>
+        <li><b>카페인·나트륨</b> — 성인 대비 극미량 권장</li>
+      </ul>
+    </div>
+
+    <button class="upload-btn accent" style="border-color:#EF4444" onclick="safeCameraClick('kidsIngCameraInput')">
+      <div class="icon">📷</div>
+      <div class="lbl" style="color:#EF4444">성분표 촬영</div>
+      <div class="sub">아이 기준 재분석</div>
+    </button>
+    <button class="upload-btn" onclick="openFileInput('kidsIngGalleryInput')">
+      <div class="icon">🖼️</div>
+      <div class="lbl">갤러리에서 선택</div>
+      <div class="sub">저장된 사진 불러오기</div>
+    </button>
+    <input type="file" id="kidsIngCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleKidsIngFile(event)"/>
+    <input type="file" id="kidsIngGalleryInput" accept="image/*" style="display:none" onchange="handleKidsIngFile(event)"/>
+    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 🩺 아이 건강 체크 화면 ════════════ -->
+  <div class="screen" id="screenKidsCheck">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🩺 <span id="kidsCheckTitle">아이 건강 체크</span></div>
+    </div>
+
+    <div id="kidsCheckProfileBanner"></div>
+
+    <div class="card" style="background:linear-gradient(135deg,#DBEAFE 0%,#FCE7F3 100%);border:1px solid #93C5FD">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="font-size:28px">📈</div>
+        <div>
+          <div style="font-size:14px;font-weight:900;color:#1E40AF;margin-bottom:6px">우리 아이 성장 트래킹</div>
+          <div style="font-size:11.5px;color:#1E3A8A;line-height:1.55">
+            WHO 표준 대비 성장 그래프를 만들어드려요.<br>
+            <b>키·몸무게·머리둘레</b>를 기록하면 백분위수 자동 계산.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>오늘의 성장 기록</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <div>
+            <input type="number" id="kidsHeightInput" placeholder="키 (cm)" step="0.1" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">키 (cm)</div>
+          </div>
+          <div>
+            <input type="number" id="kidsWeightInput" placeholder="몸무게 (kg)" step="0.1" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">몸무게 (kg)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="kidsGrowthResult" style="display:none">
+      <div style="font-size:13px;font-weight:900;color:#0F172A;margin-bottom:10px">📊 <span id="kidsGrowthName"></span> 성장 분석</div>
+      <div id="kidsGrowthContent"></div>
+    </div>
+
+    <button onclick="saveKidsGrowth()" style="width:100%;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,#EC4899,#F97316);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(236,72,153,.4);letter-spacing:-.3px;margin-top:12px">
+      ✅ 성장 기록 저장
+    </button>
+
+    <div class="card" style="margin-top:14px">
+      <div style="font-size:12.5px;font-weight:900;color:#0F172A;margin-bottom:8px">🩺 유아 소변검사 안내</div>
+      <div style="font-size:11.5px;color:#64748B;line-height:1.6">
+        유아용 소변검사 키트는 곧 출시 예정이에요. 현재는 <b>성장 기록·이유식·성분 분석</b>으로 아이 건강을 관리해요.
+      </div>
+    </div>
+
+    <button onclick="goHome()" class="btn-outline" style="margin-top:12px">← 홈으로</button>
   </div>
 
   <!-- ════════════ 👨‍👩‍👧‍👦 프로필 추가·편집 화면 ════════════ -->
@@ -4465,6 +4623,11 @@ function enterPet() {
   }
 }
 function enterHuman() {
+  // 🔀 활성 프로필이 아이면 아이 건강 체크 화면으로
+  try {
+    const active = getActiveProfile();
+    if (active && active.type === 'kid') { enterKidsCheck(); return; }
+  } catch(e) {}
   subjectMode = 'human';
   const profiles = getProfiles().filter(p => p.type === 'human');
   if (profiles.length === 0) {
@@ -4820,6 +4983,11 @@ function selectFoodTarget(target) {
 }
 
 function enterFood() {
+  // 🔀 활성 프로필이 아이면 이유식·유아식 화면으로
+  try {
+    const active = getActiveProfile();
+    if (active && active.type === 'kid') { enterKidsMeal(); return; }
+  } catch(e) {}
   subjectMode = 'food';
   foodTarget = 'human';
   selectFoodTarget('human');
@@ -4868,6 +5036,12 @@ function handleFoodFile(input) {
 // 🏷 식품 성분 분석 — 진입 / 파일 처리 / 분석 / 결과 렌더
 // ════════════════════════════════════════════════════════════════
 function enterIngredient() {
+  // 🔀 활성 프로필이 아이면 아이 안전 성분 화면으로
+  try {
+    const active = getActiveProfile();
+    if (active && active.type === 'kid') { enterKidsIngredient(); return; }
+  } catch(e) {}
+  window._kidsIngredientMode = false;
   subjectMode = 'ingredient';
   ingredientImageB64 = null;
   ingredientImageSrc = null;
@@ -5350,8 +5524,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -9610,17 +9784,76 @@ function getAgeLabel(profile) {
   return '';
 }
 
-// 연령대별 카테고리
+// 연령대별 카테고리 (강화)
 function getAgeCategory(profile) {
   if (!profile || profile.type !== 'kid') return null;
   const months = profile.ageMonths != null ? profile.ageMonths : (profile.ageYears || 0) * 12;
-  if (months < 6) return { stage: '신생아', color:'#F472B6', tip:'모유·분유 중심, 알레르기 검사 권장' };
-  if (months < 12) return { stage: '이유식 초·중기', color:'#F97316', tip:'철분·아연 첫 이유식 필수 재료' };
-  if (months < 24) return { stage: '이유식 후기', color:'#F59E0B', tip:'단백질·칼슘 균형 필요' };
-  if (months < 60) return { stage: '유아식 (2~5세)', color:'#EC4899', tip:'철분·비타민D·칼슘 편식 주의' };
-  if (months < 96) return { stage: '학령전기 (5~7세)', color:'#8B5CF6', tip:'DHA·오메가3 두뇌 성장기' };
-  if (months < 156) return { stage: '학령기 (7~12세)', color:'#3B82F6', tip:'단백질·칼슘 뼈 성장 급증' };
-  return { stage: '청소년기', color:'#10B981', tip:'철분·아연·칼슘 급증기' };
+  if (months < 4) return {
+    stage: '신생아 (0~3개월)', color:'#F472B6',
+    tip:'모유·분유가 주식이에요',
+    todayTip:'이유식은 아직 이르니 모유·분유에 집중해요',
+    nutrients:['DHA(모유)','칼슘','비타민D','철분']
+  };
+  if (months < 6) return {
+    stage: '이유식 준비기 (4~5개월)', color:'#F472B6',
+    tip:'곧 이유식 시작이에요',
+    todayTip:'수유 텀 4시간, 이유식 계획 세워보세요',
+    nutrients:['철분','아연','비타민D']
+  };
+  if (months < 8) return {
+    stage: '이유식 초기 (6~7개월)', color:'#F97316',
+    tip:'미음·으깬 채소로 시작',
+    todayTip:'하루 1회, 한 가지씩 새 재료 시도 (알러지 관찰)',
+    nutrients:['철분','아연','비타민D']
+  };
+  if (months < 10) return {
+    stage: '이유식 중기 (8~9개월)', color:'#F97316',
+    tip:'죽·으깬 반찬 하루 2회',
+    todayTip:'단백질(고기·달걀노른자)·철분 강화',
+    nutrients:['철분','단백질','아연','칼슘']
+  };
+  if (months < 13) return {
+    stage: '이유식 후기 (10~12개월)', color:'#F59E0B',
+    tip:'진밥·손가락 음식 3회',
+    todayTip:'스스로 먹기 시작, 다양한 식감 경험',
+    nutrients:['철분','칼슘','아연','비타민D']
+  };
+  if (months < 24) return {
+    stage: '유아식 준비기 (13~24개월)', color:'#F59E0B',
+    tip:'가족식 함께, 소식 자주',
+    todayTip:'간·나트륨 최소화, 단맛 자제',
+    nutrients:['칼슘','철분','단백질']
+  };
+  if (months < 48) return {
+    stage: '유아기 (2~3세)', color:'#EC4899',
+    tip:'편식 시작 시기예요',
+    todayTip:'하루 3끼+간식 2회, 색깔 다양한 야채',
+    nutrients:['비타민D','칼슘','철분','아연']
+  };
+  if (months < 60) return {
+    stage: '유아 후기 (4~5세)', color:'#EC4899',
+    tip:'식습관 확립 중요',
+    todayTip:'단 음료·과자 최소화, 물·과일 우선',
+    nutrients:['칼슘','비타민D','철분','섬유질']
+  };
+  if (months < 96) return {
+    stage: '학령전기 (5~7세)', color:'#8B5CF6',
+    tip:'두뇌 발달기예요',
+    todayTip:'DHA·오메가3 (등푸른 생선 주 2회)',
+    nutrients:['DHA','칼슘','철분','비타민D']
+  };
+  if (months < 156) return {
+    stage: '학령기 (7~12세)', color:'#3B82F6',
+    tip:'뼈·근육 급성장',
+    todayTip:'단백질·칼슘 충분히, 아침 챙기기',
+    nutrients:['단백질','칼슘','철분','비타민D']
+  };
+  return {
+    stage: '청소년기 (13세+)', color:'#10B981',
+    tip:'2차 성장기',
+    todayTip:'철분·아연·칼슘 급증, 하루 3끼 규칙적',
+    nutrients:['철분','아연','칼슘','단백질']
+  };
 }
 
 // 프로필 추가
@@ -9743,6 +9976,262 @@ function renderHomeProfileSection() {
   }
 }
 
+// ════════════════════════════════════════════════════════════════
+// 👶 아이 전용 화면 로직 (Kids Steps 2~5)
+// ════════════════════════════════════════════════════════════════
+
+// 아이 프로필 배너 (모든 아이 화면 공통)
+function renderKidsProfileBanner(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const active = getActiveProfile();
+  if (!active || active.type !== 'kid') { el.innerHTML = ''; return; }
+  const cat = getAgeCategory(active);
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#FCE7F3 0%,#FEF3C7 100%);border:1px solid #FBCFE8;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #FCE7F3 55%, #F472B6 100%);display:flex;align-items:center;justify-content:center;font-size:20px">${active.emoji || '👶'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13.5px;font-weight:900;color:#831843;letter-spacing:-.3px">${escapeHtml(active.name)} · ${escapeHtml(getAgeLabel(active))}</div>
+        <div style="font-size:10.5px;font-weight:700;color:#BE185D;margin-top:2px">${cat ? escapeHtml(cat.stage) : ''}</div>
+      </div>
+      <button onclick="openProfileSwitcher()" style="background:#fff;border:none;font-size:10px;font-weight:900;padding:5px 10px;border-radius:99px;color:#DB2777;cursor:pointer;font-family:inherit">전환 ▾</button>
+    </div>
+  `;
+}
+
+// 🍼 아이 이유식·식단 화면
+let _kidsMealTime = null;
+let _kidsMealType = null;
+let _kidsMealImageSrc = null;
+let _kidsMealImageB64 = null;
+
+function enterKidsMeal() {
+  const active = getActiveProfile();
+  if (!active || active.type !== 'kid') { enterFood(); return; }
+  const cat = getAgeCategory(active);
+
+  document.getElementById('kidsMealTitle').textContent = `${active.name} 식단`;
+  renderKidsProfileBanner('kidsMealProfileBanner');
+
+  // 연령대별 식사 유형 옵션
+  const months = active.ageMonths != null ? active.ageMonths : (active.ageYears || 0) * 12;
+  let types = [];
+  if (months < 6) types = [['모유·분유','🍼']];
+  else if (months < 8) types = [['모유·분유','🍼'],['이유식 초기','🥣'],['간식','🍎']];
+  else if (months < 12) types = [['이유식','🥣'],['간식','🍎'],['모유·분유','🍼']];
+  else if (months < 24) types = [['이유식','🥣'],['가족식','🍚'],['간식','🍎']];
+  else if (months < 60) types = [['유아식','🍽'],['간식','🍎'],['외식','🍕']];
+  else types = [['식사','🍽'],['간식','🍎'],['외식','🍕']];
+
+  const row = document.getElementById('kidsMealTypeRow');
+  row.innerHTML = types.map(([label, emoji], i) =>
+    `<button class="meal-time-btn" id="kmType${i}" onclick="selectKidsMealType('${label}',${i})">${emoji}<br>${label}</button>`
+  ).join('');
+  _kidsMealType = types[0]?.[0] || null;
+  if (types.length > 0) document.getElementById('kmType0').classList.add('active');
+
+  // 오늘의 영양소
+  document.getElementById('kidsMealNutriTitle').textContent = `${active.name} 오늘 챙길 영양소`;
+  document.getElementById('kidsMealNutriList').innerHTML = (cat?.nutrients || []).map(n =>
+    `<span style="background:#fff;color:#9D174D;font-size:11px;font-weight:900;padding:5px 11px;border-radius:99px;letter-spacing:-.2px">${escapeHtml(n)}</span>`
+  ).join('');
+  document.getElementById('kidsMealNutriTip').textContent = cat?.todayTip || '';
+
+  _kidsMealTime = guessMealTime();
+  ['Breakfast','Lunch','Dinner','Snack'].forEach(t => {
+    const map = { Breakfast:'아침', Lunch:'점심', Dinner:'저녁', Snack:'간식' };
+    const btn = document.getElementById('kmt'+t);
+    if (btn) btn.classList.toggle('active', map[t] === _kidsMealTime);
+  });
+
+  showScreen('screenKidsMeal');
+}
+function selectKidsMealTime(time) {
+  _kidsMealTime = time;
+  const map = { '아침':'Breakfast', '점심':'Lunch', '저녁':'Dinner', '간식':'Snack' };
+  ['Breakfast','Lunch','Dinner','Snack'].forEach(t => {
+    document.getElementById('kmt'+t).classList.toggle('active', t === map[time]);
+  });
+}
+function selectKidsMealType(label, idx) {
+  _kidsMealType = label;
+  document.querySelectorAll('[id^="kmType"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('kmType'+idx);
+  if (btn) btn.classList.add('active');
+}
+
+function handleKidsMealFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    compressImageForUpload(e.target.result, 1000, 0.7).then(compressed => {
+      // 아이 식단은 기존 식단 분석 흐름으로 진행 (프로필 정보 자동 첨부)
+      foodImageSrc = compressed;
+      foodImageB64 = compressed.split(',')[1];
+      foodTarget = 'human'; // 반려동물 X
+      selectedMealTime = _kidsMealTime || guessMealTime();
+      document.getElementById('foodPreviewImg').src = compressed;
+      document.getElementById('foodErrorBox').classList.remove('show');
+      showScreen('screenFoodPreview');
+    });
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// 🛡️ 아이 안전 성분 화면
+function enterKidsIngredient() {
+  const active = getActiveProfile();
+  if (!active || active.type !== 'kid') { enterIngredient(); return; }
+  document.getElementById('kidsIngTitle').textContent = `${active.name} 안전 성분`;
+  document.getElementById('kidsIngHeadline').textContent = `이 제품, ${active.name}에게 안전한가요?`;
+  renderKidsProfileBanner('kidsIngProfileBanner');
+  subjectMode = 'ingredient';
+  ingredientImageB64 = null;
+  ingredientImageSrc = null;
+  currentIngredientResult = null;
+  window._kidsIngredientMode = true; // 결과에 아이 기준 강조 표시용
+  showScreen('screenKidsIngredient');
+}
+function handleKidsIngFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    compressImageForUpload(e.target.result, 2000, 0.92).then(compressed => {
+      ingredientImageSrc = compressed;
+      ingredientImageB64 = compressed.split(',')[1];
+      document.getElementById('ingredientPreviewImg').src = compressed;
+      const eb = document.getElementById('ingredientErrorBox');
+      if (eb) eb.classList.remove('show');
+      showScreen('screenIngredientPreview');
+    });
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// 🩺 아이 건강 체크 (성장 트래킹)
+function enterKidsCheck() {
+  const active = getActiveProfile();
+  if (!active || active.type !== 'kid') { enterHuman(); return; }
+  document.getElementById('kidsCheckTitle').textContent = `${active.name} 건강 체크`;
+  document.getElementById('kidsGrowthName').textContent = active.name;
+  renderKidsProfileBanner('kidsCheckProfileBanner');
+  // 이전 기록 불러오기
+  const history = getKidsGrowthHistory(active.id);
+  const latest = history[0];
+  if (latest) {
+    document.getElementById('kidsHeightInput').value = latest.height || '';
+    document.getElementById('kidsWeightInput').value = latest.weight || '';
+  } else {
+    document.getElementById('kidsHeightInput').value = '';
+    document.getElementById('kidsWeightInput').value = '';
+  }
+  document.getElementById('kidsGrowthResult').style.display = 'none';
+  showScreen('screenKidsCheck');
+}
+
+function getKidsGrowthHistory(profileId) {
+  try {
+    const all = JSON.parse(localStorage.getItem('kidsGrowthHistory') || '{}');
+    return all[profileId] || [];
+  } catch(e) { return []; }
+}
+function saveKidsGrowth() {
+  const active = getActiveProfile();
+  if (!active || active.type !== 'kid') return;
+  const height = parseFloat(document.getElementById('kidsHeightInput').value) || null;
+  const weight = parseFloat(document.getElementById('kidsWeightInput').value) || null;
+  if (!height && !weight) { alert('키 또는 몸무게를 입력해주세요'); return; }
+
+  try {
+    const all = JSON.parse(localStorage.getItem('kidsGrowthHistory') || '{}');
+    const list = all[active.id] || [];
+    list.unshift({ date: new Date().toISOString(), height, weight });
+    all[active.id] = list.slice(0, 100);
+    localStorage.setItem('kidsGrowthHistory', JSON.stringify(all));
+  } catch(e) {}
+
+  // 결과 표시 (WHO 표준 대비 대략적)
+  const months = active.ageMonths != null ? active.ageMonths : (active.ageYears || 0) * 12;
+  const percentile = estimateGrowthPercentile(height, weight, months, active.gender);
+  showKidsGrowthResult(height, weight, percentile);
+  try { if (typeof addPoints === 'function') addPoints(5, `📈 ${active.name} 성장 기록`); } catch(e) {}
+  if (typeof showPointToast === 'function') showPointToast(`✅ ${active.name} 성장 기록 저장됨`);
+}
+
+// WHO 표준 대비 대략적 백분위 추정 (간이 계산)
+function estimateGrowthPercentile(height, weight, months, gender) {
+  // WHO 성장곡선 중앙값 참고 (간이)
+  const heightMedian = {
+    male: [50,54.7,58.4,61.4,63.9,65.9,67.6,69.2,70.6,72,73.3,74.5,75.7,76.9,78,79.1,80.2,81.2,82.3,83.2,84.2,85.1,86,86.9],
+    female: [49.1,53.7,57.1,59.8,62.1,64,65.7,67.3,68.7,70.1,71.5,72.8,74,75.2,76.4,77.5,78.6,79.7,80.7,81.7,82.7,83.7,84.6,85.5]
+  };
+  const weightMedian = {
+    male: [3.3,4.5,5.6,6.4,7.0,7.5,7.9,8.3,8.6,8.9,9.2,9.4,9.6,9.9,10.1,10.3,10.5,10.7,10.9,11.1,11.3,11.5,11.7,11.8],
+    female: [3.2,4.2,5.1,5.8,6.4,6.9,7.3,7.6,7.9,8.2,8.5,8.7,8.9,9.2,9.4,9.6,9.8,10.0,10.2,10.4,10.6,10.7,10.9,11.1]
+  };
+  const g = gender === 'female' ? 'female' : 'male';
+  const idx = Math.min(23, Math.max(0, months));
+  const hMed = heightMedian[g][idx];
+  const wMed = weightMedian[g][idx];
+
+  let heightPercent = null, weightPercent = null;
+  if (height && hMed) {
+    const diff = ((height - hMed) / hMed) * 100;
+    if (diff > 5) heightPercent = '상위';
+    else if (diff > 0) heightPercent = '중상';
+    else if (diff > -5) heightPercent = '중하';
+    else heightPercent = '하위';
+  }
+  if (weight && wMed) {
+    const diff = ((weight - wMed) / wMed) * 100;
+    if (diff > 5) weightPercent = '상위';
+    else if (diff > 0) weightPercent = '중상';
+    else if (diff > -5) weightPercent = '중하';
+    else weightPercent = '하위';
+  }
+  return { heightMedian: hMed, weightMedian: wMed, heightPercent, weightPercent };
+}
+
+function showKidsGrowthResult(height, weight, p) {
+  const el = document.getElementById('kidsGrowthResult');
+  const content = document.getElementById('kidsGrowthContent');
+  if (!el || !content) return;
+  let html = '';
+  if (height) {
+    html += `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div style="font-size:11px;font-weight:800;color:#94A3B8;letter-spacing:1px">키</div>
+          <div style="font-size:11px;font-weight:900;color:#EC4899">${p.heightPercent || '측정 중'}</div>
+        </div>
+        <div style="font-size:18px;font-weight:900;color:#0F172A">${height} cm</div>
+        <div style="font-size:10.5px;font-weight:700;color:#64748B">WHO 표준 중앙값 ${p.heightMedian?.toFixed(1) || '-'} cm</div>
+      </div>
+    `;
+  }
+  if (weight) {
+    html += `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <div style="font-size:11px;font-weight:800;color:#94A3B8;letter-spacing:1px">몸무게</div>
+          <div style="font-size:11px;font-weight:900;color:#F97316">${p.weightPercent || '측정 중'}</div>
+        </div>
+        <div style="font-size:18px;font-weight:900;color:#0F172A">${weight} kg</div>
+        <div style="font-size:10.5px;font-weight:700;color:#64748B">WHO 표준 중앙값 ${p.weightMedian?.toFixed(1) || '-'} kg</div>
+      </div>
+    `;
+  }
+  html += `<div style="background:#F9FAFB;border-radius:12px;padding:10px 12px;margin-top:6px;font-size:10.5px;color:#64748B;line-height:1.55">
+    ⓘ 대략적 참고치예요. 정확한 성장 평가는 소아과 상담을 권장합니다.
+  </div>`;
+  content.innerHTML = html;
+  el.style.display = 'block';
+}
+
 // 👶 KIDS 카드 진입 로직
 function enterKidsSection() {
   const profiles = getFamilyProfiles();
@@ -9764,22 +10253,32 @@ function enterKidsSection() {
   }
 }
 
-// KIDS 카드 텍스트 동적 업데이트
+// KIDS 카드 텍스트 동적 업데이트 + 아이 프로필 활성 시 숨김
 function renderKidsCard() {
+  const cardEl = document.querySelector('.home-card-kids');
   const titleEl = document.getElementById('kidsCardTitle');
   const subEl = document.getElementById('kidsCardSub');
-  if (!titleEl || !subEl) return;
+  if (!titleEl || !subEl || !cardEl) return;
+
+  const active = getActiveProfile();
+  // 이미 아이 프로필 활성이면 카드 숨김 (인사이트 배너와 중복 방지)
+  if (active && active.type === 'kid') {
+    cardEl.style.display = 'none';
+    return;
+  }
+  cardEl.style.display = '';
+
   const kids = getFamilyProfiles().filter(p => p.type === 'kid');
   if (kids.length === 0) {
     titleEl.textContent = '우리 아이 건강 등록하기';
     subEl.textContent = '연령별 식단·성분·알레르기 관리';
   } else if (kids.length === 1) {
-    titleEl.textContent = `${kids[0].name} 건강 관리`;
+    titleEl.textContent = `${kids[0].name} 프로필로 전환`;
     const cat = getAgeCategory(kids[0]);
-    subEl.textContent = cat ? `${cat.stage} · ${cat.tip}` : '연령별 식단·성분·알레르기 관리';
+    subEl.textContent = cat ? `${cat.stage} 맞춤 케어 시작` : '아이 맞춤 케어 시작';
   } else {
     titleEl.textContent = `우리 아이들 (${kids.length}명)`;
-    subEl.textContent = kids.map(k => k.name).join(' · ') + ' · 프로필 전환';
+    subEl.textContent = kids.map(k => k.name).join(' · ');
   }
 }
 
@@ -9940,13 +10439,18 @@ function renderHomeKidsInsight() {
   if (!active || active.type !== 'kid') { el.innerHTML = ''; return; }
   const cat = getAgeCategory(active);
   if (!cat) { el.innerHTML = ''; return; }
+  const nutrientsHtml = (cat.nutrients || []).map(n =>
+    `<span style="display:inline-block;background:#fff;color:${cat.color};font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px;margin:0 4px 4px 0;letter-spacing:-.2px">✨ ${escapeHtml(n)}</span>`
+  ).join('');
   el.innerHTML = `
     <div class="kids-insight-banner">
       <div class="kib-emoji">💡</div>
       <div class="kib-text">
         <div class="kib-label">${escapeHtml(active.name)} 맞춤 인사이트</div>
         <div class="kib-title">${escapeHtml(cat.stage)}</div>
-        <div class="kib-tip">${escapeHtml(cat.tip)}</div>
+        <div class="kib-tip" style="margin-bottom:8px">${escapeHtml(cat.todayTip || cat.tip)}</div>
+        <div style="font-size:9.5px;font-weight:800;color:#9D174D;letter-spacing:1px;margin-bottom:4px">TODAY'S FOCUS</div>
+        <div>${nutrientsHtml}</div>
       </div>
     </div>
   `;
