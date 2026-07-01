@@ -461,6 +461,111 @@
       padding:9px 16px;font-size:12px;font-weight:900;cursor:pointer;
       font-family:inherit;margin-top:6px;letter-spacing:-.2px;box-shadow:0 2px 8px rgba(0,0,0,.15)
     }
+    /* 👨‍👩‍👧‍👦 다중 프로필 스위처 */
+    .home-profile-section{margin-bottom:14px}
+    .active-profile-card{
+      background:#fff;border-radius:16px;padding:12px 14px;
+      display:flex;align-items:center;gap:12px;cursor:pointer;
+      box-shadow:0 2px 8px rgba(0,0,0,.05),0 6px 20px rgba(0,0,0,.06);
+      transition:transform .2s;font-family:inherit;width:100%;text-align:left;border:none
+    }
+    .active-profile-card:hover{transform:translateY(-2px)}
+    .active-profile-avatar{
+      width:44px;height:44px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1
+    }
+    .apc-info{flex:1;min-width:0}
+    .apc-label{
+      font-size:9px;font-weight:900;color:#94A3B8;letter-spacing:1.5px;line-height:1;margin-bottom:3px
+    }
+    .apc-name{
+      font-size:14px;font-weight:900;color:#0F172A;letter-spacing:-.3px;line-height:1.2
+    }
+    .apc-meta{font-size:10.5px;font-weight:700;color:#64748B;margin-top:2px}
+    .apc-switch{
+      background:#F1F5F9;color:#475569;border:none;
+      font-size:10.5px;font-weight:900;padding:6px 11px;border-radius:99px;
+      cursor:pointer;font-family:inherit;letter-spacing:-.2px
+    }
+    /* 가족 아바타 그리드 */
+    .family-avatars{
+      display:flex;gap:8px;overflow-x:auto;padding:12px 0 2px;
+      scrollbar-width:none;-ms-overflow-style:none
+    }
+    .family-avatars::-webkit-scrollbar{display:none}
+    .family-avatar{
+      display:flex;flex-direction:column;align-items:center;flex-shrink:0;
+      cursor:pointer;padding:6px;border:2px solid transparent;
+      background:transparent;font-family:inherit;transition:all .15s
+    }
+    .family-avatar:hover .fa-circle{transform:scale(1.05)}
+    .family-avatar.active .fa-circle{border:2.5px solid #EC4899;box-shadow:0 4px 12px rgba(236,72,153,.35)}
+    .family-avatar.add-avatar .fa-circle{
+      background:#F1F5F9;border:2px dashed #CBD5E1;color:#94A3B8
+    }
+    .fa-circle{
+      width:52px;height:52px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;
+      transition:all .15s;margin-bottom:5px
+    }
+    .fa-name{
+      font-size:10px;font-weight:800;color:#0F172A;letter-spacing:-.2px;
+      max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+    .family-avatar.active .fa-name{color:#DB2777}
+    .fa-age{font-size:9px;font-weight:600;color:#94A3B8;margin-top:1px}
+    /* 프로필 전환 모달 */
+    .profile-switcher-modal{
+      position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);
+      overflow-y:auto;padding:16px;font-family:inherit;display:none
+    }
+    .profile-switcher-modal.show{display:block}
+    .psm-body{
+      background:#fff;border-radius:24px;max-width:400px;margin:60px auto;
+      padding:22px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25)
+    }
+    .psm-title{
+      font-size:18px;font-weight:900;color:#0F172A;margin-bottom:4px;letter-spacing:-.4px
+    }
+    .psm-sub{font-size:11.5px;color:#64748B;margin-bottom:16px}
+    .psm-item{
+      display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:14px;
+      cursor:pointer;transition:background .15s;font-family:inherit;width:100%;
+      background:transparent;border:none;text-align:left;margin-bottom:4px
+    }
+    .psm-item:hover{background:#F9FAFB}
+    .psm-item.active{background:#FCE7F3}
+    .psm-item-avatar{
+      width:38px;height:38px;border-radius:50%;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1
+    }
+    .psm-item-info{flex:1;min-width:0}
+    .psm-item-name{font-size:13.5px;font-weight:900;color:#0F172A;letter-spacing:-.3px}
+    .psm-item-meta{font-size:10.5px;font-weight:700;color:#64748B;margin-top:1px}
+    .psm-item-check{color:#EC4899;font-size:18px;font-weight:900}
+    .psm-add-btn{
+      display:flex;align-items:center;justify-content:center;gap:6px;
+      width:100%;background:linear-gradient(135deg,#EC4899,#F97316);color:#fff;
+      border:none;border-radius:14px;padding:13px;font-size:13.5px;font-weight:900;
+      cursor:pointer;font-family:inherit;margin-top:8px;letter-spacing:-.2px;
+      box-shadow:0 4px 12px rgba(236,72,153,.35)
+    }
+
+    /* 💡 아이 프로필 인사이트 */
+    .kids-insight-banner{
+      background:linear-gradient(135deg,#FCE7F3 0%,#FEF3C7 100%);
+      border:1px solid #FBCFE8;border-radius:16px;
+      padding:14px 16px;margin-bottom:14px;
+      display:flex;align-items:flex-start;gap:12px
+    }
+    .kib-emoji{font-size:28px;flex-shrink:0;line-height:1}
+    .kib-text{flex:1;min-width:0}
+    .kib-label{
+      font-size:9.5px;font-weight:900;color:#DB2777;letter-spacing:1.5px;margin-bottom:3px
+    }
+    .kib-title{font-size:13px;font-weight:900;color:#831843;letter-spacing:-.3px;margin-bottom:2px}
+    .kib-tip{font-size:11.5px;font-weight:700;color:#9D174D;line-height:1.5}
+
     /* 홈 알레르기 배너 (미등록 상태 - 빨간 강조) */
     .home-allergy-empty{
       display:flex;align-items:center;gap:12px;
@@ -1903,11 +2008,17 @@
         <div class="sub">AI 영양사가 식단 · 물 · 체질까지<br>하루를 똑똑하게 챙겨드려요</div>
       </div>
 
+      <!-- 👨‍👩‍👧‍👦 다중 프로필 스위처 -->
+      <div id="homeProfileSection"></div>
+
       <!-- 오늘의 미션 — 물 위젯 -->
       <div id="homeWaterWidget"></div>
 
       <!-- 🚨 알레르기 상태 배너 (홈 메인) -->
       <div id="homeAllergyBanner"></div>
+
+      <!-- 💡 아이 프로필 시 맞춤 인사이트 -->
+      <div id="homeKidsInsight"></div>
 
       <div class="home-cards">
 
@@ -2566,6 +2677,19 @@
     </div>
   </div>
 
+  <!-- 👨‍👩‍👧‍👦 프로필 전환 모달 -->
+  <div id="profileSwitcherModal" class="profile-switcher-modal" onclick="if(event.target===this)closeProfileSwitcher()">
+    <div class="psm-body">
+      <div class="psm-title">👨‍👩‍👧‍👦 프로필 전환</div>
+      <div class="psm-sub">누구를 위한 분석인가요?</div>
+      <div id="psmProfileList"></div>
+      <button class="psm-add-btn" onclick="openAddProfileForm()">
+        <span style="font-size:16px">+</span> 새 프로필 추가하기
+      </button>
+      <button onclick="closeProfileSwitcher()" style="width:100%;margin-top:10px;padding:10px;background:transparent;border:none;color:#94A3B8;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>
+    </div>
+  </div>
+
   <!-- 🔥 아침 체크인 모달 -->
   <div id="checkinModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);overflow-y:auto;padding:16px;font-family:inherit" onclick="if(event.target===this)closeCheckin()">
     <div style="background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 100%);border-radius:24px;max-width:400px;margin:60px auto;padding:26px 24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25)">
@@ -2663,7 +2787,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -2947,6 +3071,68 @@
       <button class="btn-retake" style="border-color:#8B5CF6;color:#8B5CF6" onclick="showScreen('screenIngredient')">📷 다시 찍기</button>
       <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
     </div>
+  </div>
+
+  <!-- ════════════ 👨‍👩‍👧‍👦 프로필 추가·편집 화면 ════════════ -->
+  <div class="screen" id="screenAddProfile">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title" id="addProfileTitle">👨‍👩‍👧‍👦 새 프로필 추가</div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label>어떤 유형인가요?</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <button id="apTypeAdult" class="meal-time-btn active" onclick="apSelectType('adult')">🧑<br>본인·가족</button>
+          <button id="apTypeKid" class="meal-time-btn" onclick="apSelectType('kid')">👶<br>아이</button>
+          <button id="apTypePet" class="meal-time-btn" onclick="apSelectType('pet')">🐶<br>반려동물</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>이모지 선택</label>
+        <div id="apEmojiGrid" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+
+      <div class="field">
+        <label>이름</label>
+        <input type="text" id="apName" placeholder="예: 지우" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+      </div>
+
+      <div class="field" id="apAgeYearsField">
+        <label>나이</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <input type="number" id="apAgeYears" placeholder="나이" min="0" max="120" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">세 (만 나이)</div>
+          </div>
+          <div id="apAgeMonthsWrap" style="display:none">
+            <input type="number" id="apAgeMonths" placeholder="개월" min="0" max="240" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">개월 (2세 미만)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>성별</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button id="apGenderM" class="meal-time-btn" onclick="apSelectGender('male')">🧑 남</button>
+          <button id="apGenderF" class="meal-time-btn" onclick="apSelectGender('female')">👩 여</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>알레르기 (선택, 쉼표로 구분)</label>
+        <input type="text" id="apAllergies" placeholder="예: 우유, 견과류" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+        <div style="font-size:11px;color:#94A3B8;margin-top:4px">이 프로필로 성분 분석 시 자동 크로스체크됩니다</div>
+      </div>
+    </div>
+
+    <button onclick="saveNewProfile()" style="width:100%;margin-top:16px;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,#EC4899,#F97316);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(236,72,153,.4);letter-spacing:-.3px">
+      ✅ 프로필 저장
+    </button>
+    <button onclick="goHome()" class="btn-outline" style="margin-top:10px">← 취소</button>
   </div>
 
   <!-- ════════════ 🚨 알레르기 프로필 화면 ════════════ -->
@@ -5124,8 +5310,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -8954,7 +9140,9 @@ function initDailyCheckin() {
   updateStreakOnAppOpen();
   renderStreakBadge();
   renderQuizChallenge();
+  try { renderHomeProfileSection(); } catch(e) {}
   try { renderHomeAllergyBanner(); } catch(e) {}
+  try { renderHomeKidsInsight(); } catch(e) {}
   // 오늘 체크인 안 했으면 잠시 후 모달
   if (shouldShowCheckin()) {
     setTimeout(() => openCheckinModal(), 800);
@@ -9251,14 +9439,22 @@ function saveAllergyProfile() {
   goHome();
 }
 
-// 성분 분석 결과에서 사용자 알레르기와 크로스체크
+// 성분 분석 결과에서 사용자 알레르기와 크로스체크 (활성 프로필 기준)
 function checkUserAllergyRisks(data) {
   const profile = getAllergyProfile();
-  if (!profile) return [];
-  const userAllergens = [
-    ...(profile.selected || []),
-    ...(profile.custom ? profile.custom.split(',').map(s => s.trim()).filter(Boolean) : [])
-  ];
+  const activeProfile = (typeof getActiveProfile === 'function') ? getActiveProfile() : null;
+
+  const userAllergens = [];
+  // 기본 알레르기 프로필
+  if (profile) {
+    userAllergens.push(...(profile.selected || []));
+    if (profile.custom) userAllergens.push(...profile.custom.split(',').map(s => s.trim()).filter(Boolean));
+  }
+  // 활성 가족 프로필의 알레르기도 추가
+  if (activeProfile && Array.isArray(activeProfile.allergies)) {
+    userAllergens.push(...activeProfile.allergies);
+  }
+
   if (userAllergens.length === 0) return [];
 
   const risks = new Set();
@@ -9297,6 +9493,331 @@ function checkUserAllergyRisks(data) {
 
 function goAllergyProfile() {
   openAllergyProfile();
+}
+
+// ════════════════════════════════════════════════════════════════
+// 👨‍👩‍👧‍👦 다중 프로필 시스템 (Kids-1)
+// ════════════════════════════════════════════════════════════════
+const FAMILY_KEY = 'familyProfiles';
+const ACTIVE_KEY = 'activeProfileId';
+
+function getFamilyProfiles() {
+  try {
+    const list = JSON.parse(localStorage.getItem(FAMILY_KEY) || '[]');
+    if (Array.isArray(list)) return list;
+  } catch(e) {}
+  return [];
+}
+function saveFamilyProfiles(list) {
+  localStorage.setItem(FAMILY_KEY, JSON.stringify(list));
+}
+function getActiveProfileId() {
+  return localStorage.getItem(ACTIVE_KEY) || 'main';
+}
+function setActiveProfileId(id) {
+  localStorage.setItem(ACTIVE_KEY, id);
+}
+function getActiveProfile() {
+  const list = getFamilyProfiles();
+  const id = getActiveProfileId();
+  return list.find(p => p.id === id) || list[0] || null;
+}
+
+// 첫 실행 시 본인 프로필 자동 생성 (기존 데이터 마이그레이션)
+function initFamilyProfiles() {
+  let list = getFamilyProfiles();
+  if (list.length > 0) return list;
+
+  // 기존 userProfileV2/userPhysicalProfile 마이그레이션
+  let existingName = localStorage.getItem('userName') || '';
+  let existingProfile = null;
+  try {
+    existingProfile = JSON.parse(localStorage.getItem('userProfileV2') || 'null');
+  } catch(e) {}
+  if (!existingProfile) {
+    try { existingProfile = JSON.parse(localStorage.getItem('userPhysicalProfile') || 'null'); } catch(e) {}
+  }
+  const existingAllergy = getAllergyProfile();
+
+  const mainProfile = {
+    id: 'main',
+    name: existingName || '나',
+    type: 'adult',
+    ageYears: existingProfile?.birthYear ? (new Date().getFullYear() - parseInt(existingProfile.birthYear)) : null,
+    ageMonths: null,
+    gender: existingProfile?.gender || null,
+    emoji: '🧑',
+    allergies: existingAllergy ? [
+      ...(existingAllergy.selected || []),
+      ...(existingAllergy.custom ? existingAllergy.custom.split(',').map(s => s.trim()).filter(Boolean) : [])
+    ] : [],
+    createdAt: new Date().toISOString()
+  };
+  list = [mainProfile];
+  saveFamilyProfiles(list);
+  setActiveProfileId('main');
+  return list;
+}
+
+// 나이 표시 헬퍼
+function getAgeLabel(profile) {
+  if (!profile) return '';
+  if (profile.type === 'kid' && profile.ageMonths != null && profile.ageMonths < 24) {
+    return `${profile.ageMonths}개월`;
+  }
+  if (profile.ageYears != null) return `${profile.ageYears}세`;
+  return '';
+}
+
+// 연령대별 카테고리
+function getAgeCategory(profile) {
+  if (!profile || profile.type !== 'kid') return null;
+  const months = profile.ageMonths != null ? profile.ageMonths : (profile.ageYears || 0) * 12;
+  if (months < 6) return { stage: '신생아', color:'#F472B6', tip:'모유·분유 중심, 알레르기 검사 권장' };
+  if (months < 12) return { stage: '이유식 초·중기', color:'#F97316', tip:'철분·아연 첫 이유식 필수 재료' };
+  if (months < 24) return { stage: '이유식 후기', color:'#F59E0B', tip:'단백질·칼슘 균형 필요' };
+  if (months < 60) return { stage: '유아식 (2~5세)', color:'#EC4899', tip:'철분·비타민D·칼슘 편식 주의' };
+  if (months < 96) return { stage: '학령전기 (5~7세)', color:'#8B5CF6', tip:'DHA·오메가3 두뇌 성장기' };
+  if (months < 156) return { stage: '학령기 (7~12세)', color:'#3B82F6', tip:'단백질·칼슘 뼈 성장 급증' };
+  return { stage: '청소년기', color:'#10B981', tip:'철분·아연·칼슘 급증기' };
+}
+
+// 프로필 추가
+function addFamilyProfile(data) {
+  const list = getFamilyProfiles();
+  const newId = 'p_' + Date.now();
+  list.push({
+    id: newId,
+    name: data.name || '이름없음',
+    type: data.type || 'adult',
+    ageYears: data.ageYears || null,
+    ageMonths: data.ageMonths || null,
+    gender: data.gender || null,
+    emoji: data.emoji || (data.type === 'kid' ? '👶' : data.type === 'pet' ? '🐶' : '🧑'),
+    allergies: data.allergies || [],
+    createdAt: new Date().toISOString()
+  });
+  saveFamilyProfiles(list);
+  return newId;
+}
+
+// 프로필 편집
+function updateFamilyProfile(id, updates) {
+  const list = getFamilyProfiles();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx === -1) return false;
+  list[idx] = { ...list[idx], ...updates };
+  saveFamilyProfiles(list);
+  return true;
+}
+
+// 프로필 삭제 (본인 제외)
+function deleteFamilyProfile(id) {
+  if (id === 'main') { alert('본인 프로필은 삭제할 수 없어요.'); return false; }
+  const list = getFamilyProfiles().filter(p => p.id !== id);
+  saveFamilyProfiles(list);
+  if (getActiveProfileId() === id) setActiveProfileId('main');
+  return true;
+}
+
+// 프로필 타입별 배경 (아바타 원)
+function profileAvatarBg(type) {
+  if (type === 'kid') return 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #FCE7F3 55%, #F472B6 100%)';
+  if (type === 'pet') return 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #D1FAE5 55%, #34D399 100%)';
+  return 'radial-gradient(circle at 35% 35%, #FFFFFF 0%, #DBEAFE 55%, #60A5FA 100%)';
+}
+function profileAgeMeta(profile) {
+  const ageLabel = getAgeLabel(profile);
+  const cat = getAgeCategory(profile);
+  if (cat) return `${ageLabel} · ${cat.stage}`;
+  if (profile.type === 'pet') return `${ageLabel} · 반려동물`;
+  return ageLabel || '나이 미등록';
+}
+
+// 홈 프로필 섹션 렌더
+function renderHomeProfileSection() {
+  initFamilyProfiles(); // 첫 실행 보장
+  const el = document.getElementById('homeProfileSection');
+  if (!el) return;
+  const profiles = getFamilyProfiles();
+  const active = getActiveProfile();
+  if (!active) return;
+
+  const avatarsHtml = profiles.map(p => `
+    <button class="family-avatar ${p.id === active.id ? 'active' : ''}" onclick="switchProfile('${p.id}')">
+      <div class="fa-circle" style="background:${profileAvatarBg(p.type)}">${p.emoji || '🧑'}</div>
+      <div class="fa-name">${escapeHtml(p.name)}</div>
+      <div class="fa-age">${escapeHtml(getAgeLabel(p) || (p.type === 'pet' ? '반려' : ''))}</div>
+    </button>
+  `).join('') + `
+    <button class="family-avatar add-avatar" onclick="openAddProfileForm()">
+      <div class="fa-circle">+</div>
+      <div class="fa-name">추가</div>
+      <div class="fa-age" style="opacity:0">·</div>
+    </button>
+  `;
+
+  el.innerHTML = `
+    <div class="home-profile-section">
+      <button class="active-profile-card" onclick="openProfileSwitcher()">
+        <div class="active-profile-avatar" style="background:${profileAvatarBg(active.type)}">${active.emoji || '🧑'}</div>
+        <div class="apc-info">
+          <div class="apc-label">CURRENT PROFILE</div>
+          <div class="apc-name">${escapeHtml(active.name)} · ${escapeHtml(getAgeLabel(active) || (active.type === 'pet' ? '반려동물' : ''))}</div>
+          <div class="apc-meta">${escapeHtml(profileAgeMeta(active))}</div>
+        </div>
+        <div class="apc-switch">전환 ▾</div>
+      </button>
+      <div class="family-avatars">${avatarsHtml}</div>
+    </div>
+  `;
+}
+
+function openProfileSwitcher() {
+  const modal = document.getElementById('profileSwitcherModal');
+  const list = document.getElementById('psmProfileList');
+  if (!modal || !list) return;
+  const profiles = getFamilyProfiles();
+  const activeId = getActiveProfileId();
+  list.innerHTML = profiles.map(p => `
+    <button class="psm-item ${p.id === activeId ? 'active' : ''}" onclick="switchProfile('${p.id}');closeProfileSwitcher()">
+      <div class="psm-item-avatar" style="background:${profileAvatarBg(p.type)}">${p.emoji || '🧑'}</div>
+      <div class="psm-item-info">
+        <div class="psm-item-name">${escapeHtml(p.name)}</div>
+        <div class="psm-item-meta">${escapeHtml(profileAgeMeta(p))}</div>
+      </div>
+      ${p.id === activeId ? '<div class="psm-item-check">✓</div>' : ''}
+    </button>
+  `).join('');
+  modal.classList.add('show');
+}
+function closeProfileSwitcher() {
+  const modal = document.getElementById('profileSwitcherModal');
+  if (modal) modal.classList.remove('show');
+}
+function switchProfile(id) {
+  setActiveProfileId(id);
+  renderHomeProfileSection();
+  try { renderHomeAllergyBanner(); } catch(e) {}
+  try { updateHomeStats(); } catch(e) {}
+  const p = getFamilyProfiles().find(x => x.id === id);
+  if (p && typeof showPointToast === 'function') showPointToast(`✨ ${p.name} 프로필로 전환됐어요`);
+}
+
+// 새 프로필 추가 폼 (정식 화면)
+function openAddProfileForm() {
+  closeProfileSwitcher();
+  goAddProfile();
+}
+
+const PROFILE_EMOJI_MAP = {
+  adult: ['🧑','👨','👩','👴','👵','👨‍💼','👩‍💼','🧑‍🦰','🧑‍🦱','🧑‍🦳'],
+  kid:   ['👶','🧒','👦','👧','🍼','🌸','⭐','🌱'],
+  pet:   ['🐶','🐱','🐰','🐹','🐦','🐢','🐠','🦎']
+};
+let _apType = 'adult';
+let _apEmoji = '🧑';
+let _apGender = null;
+let _apEditingId = null;
+
+function goAddProfile() {
+  _apType = 'adult';
+  _apEmoji = '🧑';
+  _apGender = null;
+  _apEditingId = null;
+  document.getElementById('addProfileTitle').textContent = '👨‍👩‍👧‍👦 새 프로필 추가';
+  document.getElementById('apName').value = '';
+  document.getElementById('apAgeYears').value = '';
+  const monthsInput = document.getElementById('apAgeMonths');
+  if (monthsInput) monthsInput.value = '';
+  document.getElementById('apAllergies').value = '';
+  apSelectType('adult');
+  showScreen('screenAddProfile');
+}
+
+function apSelectType(type) {
+  _apType = type;
+  ['adult','kid','pet'].forEach(t => {
+    const btn = document.getElementById('apType' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) btn.classList.toggle('active', t === type);
+  });
+  // 이모지 그리드 갱신
+  const grid = document.getElementById('apEmojiGrid');
+  if (grid) {
+    const emojis = PROFILE_EMOJI_MAP[type] || [];
+    _apEmoji = emojis[0] || '🧑';
+    grid.innerHTML = emojis.map(e => `
+      <button onclick="apSelectEmoji('${e}',this)" style="width:44px;height:44px;font-size:24px;border-radius:12px;border:2px solid ${e === _apEmoji ? '#EC4899' : '#E5E7EB'};background:${e === _apEmoji ? '#FCE7F3' : '#fff'};cursor:pointer;line-height:1;font-family:inherit;padding:0">${e}</button>
+    `).join('');
+  }
+  // 아이 유형이면 개월 필드 표시
+  document.getElementById('apAgeMonthsWrap').style.display = type === 'kid' ? 'block' : 'none';
+  // 반려동물이면 성별 숨김·유지
+}
+
+function apSelectEmoji(e, btn) {
+  _apEmoji = e;
+  const grid = document.getElementById('apEmojiGrid');
+  if (grid) {
+    grid.querySelectorAll('button').forEach(b => {
+      b.style.border = '2px solid #E5E7EB';
+      b.style.background = '#fff';
+    });
+    if (btn) {
+      btn.style.border = '2px solid #EC4899';
+      btn.style.background = '#FCE7F3';
+    }
+  }
+}
+
+function apSelectGender(g) {
+  _apGender = g;
+  document.getElementById('apGenderM').classList.toggle('active', g === 'male');
+  document.getElementById('apGenderF').classList.toggle('active', g === 'female');
+}
+
+function renderHomeKidsInsight() {
+  const el = document.getElementById('homeKidsInsight');
+  if (!el) return;
+  const active = getActiveProfile();
+  if (!active || active.type !== 'kid') { el.innerHTML = ''; return; }
+  const cat = getAgeCategory(active);
+  if (!cat) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="kids-insight-banner">
+      <div class="kib-emoji">💡</div>
+      <div class="kib-text">
+        <div class="kib-label">${escapeHtml(active.name)} 맞춤 인사이트</div>
+        <div class="kib-title">${escapeHtml(cat.stage)}</div>
+        <div class="kib-tip">${escapeHtml(cat.tip)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function saveNewProfile() {
+  const name = document.getElementById('apName').value.trim();
+  if (!name) { alert('이름을 입력해주세요'); return; }
+  const ageYears = parseInt(document.getElementById('apAgeYears').value) || null;
+  const monthsRaw = document.getElementById('apAgeMonths').value;
+  const ageMonths = _apType === 'kid' && monthsRaw ? parseInt(monthsRaw) : null;
+  const allergiesRaw = document.getElementById('apAllergies').value.trim();
+  const allergies = allergiesRaw ? allergiesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  const data = {
+    name, type: _apType, ageYears, ageMonths, gender: _apGender,
+    emoji: _apEmoji, allergies
+  };
+
+  if (_apEditingId) {
+    updateFamilyProfile(_apEditingId, data);
+    if (typeof showPointToast === 'function') showPointToast(`✏️ ${name} 프로필 수정됨`);
+  } else {
+    const newId = addFamilyProfile(data);
+    setActiveProfileId(newId);
+    if (typeof showPointToast === 'function') showPointToast(`✨ ${name} 프로필 추가! 자동 전환`);
+  }
+  goHome();
 }
 
 // 홈 화면 알레르기 배너 렌더링
