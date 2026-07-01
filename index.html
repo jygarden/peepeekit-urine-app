@@ -360,7 +360,8 @@
     /* 상단 (타이틀 + 벨 버튼) */
     .home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:32px}
     /* 🆕 새 홈 레이아웃 */
-    .home-top-bar{position:absolute;top:20px;right:26px;display:flex;align-items:center;gap:8px;z-index:5}
+    .home-top-bar{position:absolute;top:20px;right:26px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:5}
+    .htb-row{display:flex;align-items:center;gap:8px}
     .home-hello{margin-bottom:22px;padding:0 2px}
     .home-hello h1{font-size:24px;font-weight:800;letter-spacing:-.7px;color:var(--gray-900);line-height:1.32;margin-bottom:12px;padding-right:150px}
     .home-hello .sub{padding-right:0}
@@ -2017,15 +2018,19 @@
       </div>
       <!-- 상단 행: 포인트 + 설정 (오른쪽 정렬) -->
       <div class="home-top-bar">
-        <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge" style="display:none">
-          <span style="font-size:12px">🔥</span> <span id="homeStreakNum">0</span>
-        </button>
-        <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
-          <span class="gem">💎</span> <span id="homePointsNum">0</span>P
-        </button>
-        <button class="settings-btn" onclick="openSettings()" aria-label="설정">
-          <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
-        </button>
+        <div class="htb-row">
+          <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge" style="display:none">
+            <span style="font-size:12px">🔥</span> <span id="homeStreakNum">0</span>
+          </button>
+          <button class="settings-btn" onclick="openSettings()" aria-label="설정">
+            <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
+          </button>
+        </div>
+        <div class="htb-row">
+          <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
+            <span class="gem">💎</span> <span id="homePointsNum">0</span>P
+          </button>
+        </div>
       </div>
 
 
@@ -9934,11 +9939,11 @@ function renderHomeProfileSection() {
     if (active.id === 'main') {
       greeting.innerHTML = '건강한 하루,<br>오늘도 응원해요';
     } else if (active.type === 'kid') {
-      greeting.innerHTML = `${escapeHtml(active.name)},<br>오늘도 함께 자라요 🌸`;
+      greeting.innerHTML = `${escapeHtml(active.name)} 🌸<br>오늘도 함께 자라요`;
     } else if (active.type === 'pet') {
-      greeting.innerHTML = `${escapeHtml(active.name)},<br>오늘도 건강하게 🐾`;
+      greeting.innerHTML = `${escapeHtml(active.name)} 🐾<br>오늘도 건강하게`;
     } else {
-      greeting.innerHTML = `${escapeHtml(active.name)},<br>오늘도 응원해요`;
+      greeting.innerHTML = `${escapeHtml(active.name)}<br>오늘도 응원해요`;
     }
   }
   if (greetingSub) {
@@ -10302,7 +10307,7 @@ function updateHomeCardsByProfile(active) {
       label: isBaby ? 'BABY' : (isKid ? 'KIDS' : 'MEAL'),
       emoji: isBaby ? '🥣' : (isKid ? '🍱' : '🍱'),
       meta: '약 30초',
-      hide: false
+      hide: isKid && months < 6 // 이유식 시작 전(6개월 미만)은 숨김
     },
     ingredient: {
       title: isMain ? '식품 성분' : (isKid ? `${active.name} 안전 성분` : `${active.name} 안전 성분`),
