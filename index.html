@@ -426,6 +426,98 @@
       font-size:20px;letter-spacing:-2px;margin-bottom:auto
     }
 
+    /* TODAY'S CHALLENGE 섹션 */
+    .challenge-section{margin-top:24px;display:flex;flex-direction:column;gap:10px;width:100%}
+    .challenge-card{
+      width:100%;background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 50%,#EDE9FE 100%);
+      border:none;border-radius:20px;padding:16px 18px;cursor:pointer;
+      display:flex;align-items:center;gap:14px;
+      box-shadow:0 2px 8px rgba(252,211,77,.15),0 6px 20px rgba(236,72,153,.1);
+      transition:transform .2s,box-shadow .2s;
+      font-family:inherit;text-align:left;position:relative;overflow:hidden
+    }
+    .challenge-card:hover{box-shadow:0 4px 12px rgba(252,211,77,.25),0 10px 30px rgba(236,72,153,.18)}
+    .challenge-card:active{transform:scale(.98)}
+    .challenge-orb{
+      width:48px;height:48px;border-radius:50%;flex-shrink:0;
+      background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #FEF3C7 50%, #FCD34D 100%);
+      box-shadow:0 3px 10px rgba(252,211,77,.4);
+      display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1
+    }
+    .challenge-content{flex:1;min-width:0}
+    .challenge-label{
+      font-size:9px;font-weight:900;color:#D97706;letter-spacing:2px;line-height:1;margin-bottom:4px
+    }
+    .challenge-title{
+      font-size:14px;font-weight:900;color:#78350F;letter-spacing:-.3px;line-height:1.3
+    }
+    .challenge-sub{
+      font-size:11px;font-weight:700;color:#B45309;margin-top:2px
+    }
+    .challenge-badge{
+      background:#78350F;color:#FEF3C7;font-size:10px;font-weight:900;
+      letter-spacing:1.5px;padding:6px 12px;border-radius:99px;flex-shrink:0
+    }
+    .challenge-badge.done{background:#10B981;color:#fff}
+
+    /* 퀴즈 화면 */
+    #screenQuiz{background:linear-gradient(180deg,#FEF3C7 0%,#FCE7F3 100%)}
+    .quiz-header{
+      display:flex;justify-content:space-between;align-items:center;padding:16px 4px 20px
+    }
+    .quiz-progress{
+      background:rgba(255,255,255,.7);border-radius:99px;padding:6px 14px;
+      font-size:11px;font-weight:800;color:#78350F;letter-spacing:-.2px
+    }
+    .quiz-category-pill{
+      display:inline-block;background:rgba(255,255,255,.7);border-radius:99px;
+      padding:5px 12px;font-size:10.5px;font-weight:800;color:#D97706;letter-spacing:1.2px;margin-bottom:12px
+    }
+    .quiz-question{
+      font-size:20px;font-weight:900;color:#0F172A;line-height:1.4;letter-spacing:-.4px;margin-bottom:24px
+    }
+    .quiz-option{
+      width:100%;background:#fff;border:2px solid #FEF3C7;border-radius:16px;
+      padding:16px 18px;margin-bottom:10px;cursor:pointer;
+      font-family:inherit;font-size:14px;font-weight:700;color:#0F172A;
+      text-align:left;transition:all .2s;letter-spacing:-.2px;display:flex;align-items:center;gap:12px
+    }
+    .quiz-option:hover{border-color:#FCD34D;transform:translateY(-2px);box-shadow:0 4px 12px rgba(252,211,77,.2)}
+    .quiz-option:active{transform:scale(.99)}
+    .quiz-option.correct{background:#D1FAE5;border-color:#10B981;color:#065F46}
+    .quiz-option.wrong{background:#FEE2E2;border-color:#EF4444;color:#991B1B}
+    .quiz-option-letter{
+      width:26px;height:26px;border-radius:50%;background:#FEF3C7;color:#92400E;
+      display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0
+    }
+    .quiz-option.correct .quiz-option-letter{background:#10B981;color:#fff}
+    .quiz-option.wrong .quiz-option-letter{background:#EF4444;color:#fff}
+    .quiz-explain{
+      background:rgba(255,255,255,.9);border-radius:16px;padding:16px 18px;margin-top:16px;
+      font-size:12.5px;color:#78350F;line-height:1.65;font-weight:600
+    }
+    .quiz-next-btn{
+      width:100%;background:linear-gradient(135deg,#8B5CF6,#EC4899);color:#fff;
+      border:none;border-radius:16px;padding:16px;font-size:15px;font-weight:900;
+      cursor:pointer;font-family:inherit;letter-spacing:-.3px;margin-top:16px;
+      box-shadow:0 4px 14px rgba(139,92,246,.35)
+    }
+    .quiz-next-btn:active{transform:scale(.98)}
+    .quiz-result{
+      text-align:center;padding:40px 20px
+    }
+    .quiz-result-emoji{font-size:80px;line-height:1;margin-bottom:16px}
+    .quiz-result-title{font-size:24px;font-weight:900;color:#0F172A;letter-spacing:-.5px;margin-bottom:6px}
+    .quiz-result-sub{font-size:14px;font-weight:700;color:#78350F;margin-bottom:24px}
+    .quiz-result-stats{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px
+    }
+    .quiz-result-stat{
+      background:#fff;border-radius:16px;padding:16px;text-align:center
+    }
+    .quiz-result-stat-num{font-size:28px;font-weight:900;color:#0F172A;line-height:1}
+    .quiz-result-stat-label{font-size:11px;font-weight:700;color:#94A3B8;margin-top:4px;letter-spacing:.5px}
+
     /* RECENT ACTIVITY 섹션 */
     .recent-activity-section{margin-top:24px;display:flex;flex-direction:column;gap:10px;width:100%}
     .ra-header{
@@ -1770,6 +1862,20 @@
 
       </div>
 
+      <!-- TODAY'S CHALLENGE 섹션 -->
+      <div class="challenge-section">
+        <div class="ra-header">TODAY'S CHALLENGE</div>
+        <button class="challenge-card" onclick="startQuiz()" id="quizChallengeCard">
+          <div class="challenge-orb">🎯</div>
+          <div class="challenge-content">
+            <div class="challenge-label">QUIZ</div>
+            <div class="challenge-title" id="quizChallengeTitle">오늘의 건강 퀴즈</div>
+            <div class="challenge-sub" id="quizChallengeSub">3문제 풀고 +30P 받기</div>
+          </div>
+          <div class="challenge-badge" id="quizChallengeBadge">START</div>
+        </button>
+      </div>
+
       <!-- RECENT ACTIVITY 섹션 -->
       <div class="recent-activity-section">
         <div class="ra-header">RECENT ACTIVITY</div>
@@ -2755,6 +2861,17 @@
     <div class="action-row" style="margin-top:14px">
       <button class="btn-retake" style="border-color:#8B5CF6;color:#8B5CF6" onclick="showScreen('screenIngredient')">📷 다시 찍기</button>
       <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
+    </div>
+  </div>
+
+  <!-- ════════════ 🎯 건강 퀴즈 화면 ════════════ -->
+  <div class="screen" id="screenQuiz">
+    <div style="max-width:430px;margin:0 auto;padding:0 4px">
+      <div class="quiz-header">
+        <button onclick="exitQuiz()" style="background:rgba(255,255,255,.7);border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:800;color:#78350F;cursor:pointer;font-family:inherit">← 나가기</button>
+        <div class="quiz-progress" id="quizProgress">1 / 3</div>
+      </div>
+      <div id="quizBody"></div>
     </div>
   </div>
 
@@ -8669,10 +8786,226 @@ function openStreakInfo() {
 function initDailyCheckin() {
   updateStreakOnAppOpen();
   renderStreakBadge();
+  renderQuizChallenge();
   // 오늘 체크인 안 했으면 잠시 후 모달
   if (shouldShowCheckin()) {
     setTimeout(() => openCheckinModal(), 800);
   }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🎯 건강 퀴즈 (Phase 2)
+// ════════════════════════════════════════════════════════════════
+const QUIZ_DATA = [
+  { cat:'성분', q:'아스파탐은 어떤 종류의 성분일까요?', options:['천연 감미료','인공 감미료','착색료'], answer:1, explain:'아스파탐은 설탕보다 약 200배 단맛을 내는 합성 감미료예요. 페닐케톤뇨증 환자는 섭취를 피해야 합니다.' },
+  { cat:'성분', q:'카라멜색소는 무엇으로 분류될까요?', options:['천연 색소','합성 착색료','산도조절제'], answer:1, explain:'카라멜색소(카라멜 IV형)는 합성 착색료로 4-MEI 성분이 포함될 수 있어요.' },
+  { cat:'성분', q:'MSG의 정식 성분명은?', options:['글루탐산나트륨','아스파르트산','시트르산나트륨'], answer:0, explain:'MSG는 L-글루탐산나트륨이에요. 감칠맛을 내는 조미료로 예민한 분은 두통이 올 수도 있어요.' },
+  { cat:'성분', q:'트랜스지방이 많이 든 음식은?', options:['올리브유','마가린','아보카도'], answer:1, explain:'마가린·쇼트닝 같은 부분경화유에 트랜스지방이 많아요. 심혈관 위험을 높입니다.' },
+  { cat:'성분', q:'자일리톨은 어떤 동물에게 독성이 있을까요?', options:['개','고양이','토끼'], answer:0, explain:'자일리톨은 개에게는 강력한 독성이 있어요. 인슐린 급상승, 저혈당, 간 손상을 유발합니다.' },
+  { cat:'성분', q:'액상과당의 정식 이름은?', options:['고과당 옥수수 시럽','벌꿀 추출액','포도당 시럽'], answer:0, explain:'액상과당은 고과당 옥수수 시럽(HFCS)이에요. 비만·지방간 위험을 높일 수 있어요.' },
+  { cat:'성분', q:'홍화황색소는 어디에 속할까요?', options:['천연 색소','합성 착색료','산도조절제'], answer:0, explain:'홍화 꽃에서 추출한 천연 노란색소예요. 상대적으로 안전한 편입니다.' },
+  { cat:'성분', q:'프로필렌글리콜은 어떤 성분?', options:['천연 감미료','합성 용매·보습제','비타민'], answer:1, explain:'식품·화장품에 쓰이는 합성 용매예요. 다량 섭취 시 알레르기·간 부담이 생길 수 있어요.' },
+  { cat:'성분', q:'안식향산나트륨의 역할은?', options:['감미료','합성 보존제','착색료'], answer:1, explain:'합성 보존제(방부제)예요. 비타민C와 반응하면 벤젠(발암물질)이 미량 생길 수 있어요.' },
+  { cat:'성분', q:'적색 40호는 무엇?', options:['천연 색소','합성 착색료','유화제'], answer:1, explain:'합성 착색료예요. 일부 어린이에게 과잉행동을 유발한다는 보고가 있어 EU에서는 경고 표시가 필요합니다.' },
+  { cat:'영양', q:'단백질 1g은 몇 kcal일까요?', options:['4 kcal','7 kcal','9 kcal'], answer:0, explain:'단백질 1g = 4kcal, 탄수화물도 4kcal, 지방 1g = 9kcal, 알코올 1g = 7kcal예요.' },
+  { cat:'영양', q:'WHO가 권장하는 하루 나트륨 섭취량은?', options:['1000mg 이하','2000mg 이하','3000mg 이하'], answer:1, explain:'WHO는 하루 나트륨 2g(소금 5g) 이하를 권장해요. 한국인은 평균 3.5g 정도 섭취해요.' },
+  { cat:'영양', q:'오메가3가 가장 많은 음식은?', options:['닭가슴살','등푸른 생선','현미'], answer:1, explain:'고등어·정어리·연어 같은 등푸른 생선에 오메가3(EPA·DHA)가 풍부해요.' },
+  { cat:'영양', q:'유당불내증인 사람이 우유 대신?', options:['두유','생크림','치즈'], answer:0, explain:'두유·귀리우유·아몬드우유 등 식물성 대체제가 좋아요. 락토프리 우유도 옵션이에요.' },
+  { cat:'영양', q:'하루 식이섬유 권장량은?', options:['10g','25g','50g'], answer:1, explain:'성인 기준 하루 25~30g의 식이섬유가 권장돼요. 야채·과일·잡곡에 풍부해요.' },
+  { cat:'영양', q:'철분 흡수를 도와주는 성분은?', options:['칼슘','비타민 C','카페인'], answer:1, explain:'비타민 C는 철분 흡수를 촉진해요. 반대로 커피·차의 탄닌은 흡수를 방해해요.' },
+  { cat:'영양', q:'비타민 D는 무엇으로 활성화될까요?', options:['햇빛','물','식사'], answer:0, explain:'피부가 자외선을 받으면 비타민 D가 생성돼요. 하루 15~20분 햇빛이 좋아요.' },
+  { cat:'영양', q:'하루 물 권장 섭취량은?', options:['0.5L','1L','2L 내외'], answer:2, explain:'성인 기준 하루 1.5~2L 정도의 수분(음식 수분 포함) 섭취가 권장돼요.' },
+  { cat:'영양', q:'칼슘 흡수를 방해하는 것은?', options:['비타민 D','비타민 C','과다한 인·나트륨'], answer:2, explain:'인이 많은 탄산음료, 나트륨 다량은 칼슘 흡수를 방해하고 배출을 늘려요.' },
+  { cat:'영양', q:'식후 혈당을 급격히 올리는 지수?', options:['GI 지수','BMI 지수','pH 지수'], answer:0, explain:'GI(혈당지수)가 높을수록 혈당을 빨리 올려요. 흰쌀밥은 GI 높고, 잡곡·귀리는 낮아요.' },
+  { cat:'건강', q:'소변 색이 진한 노란색이면?', options:['건강한 상태','수분 부족','신장 문제'], answer:1, explain:'짙은 노란색은 대부분 수분 부족 신호예요. 물을 더 마셔 옅은 밀짚색으로 만들어보세요.' },
+  { cat:'건강', q:'건강한 사람 소변 pH 범위는?', options:['3~5','5~7','7~9'], answer:1, explain:'정상 소변 pH는 4.5~8, 평균 5~7 정도예요. 산성 식품 위주면 낮아지고 채식 위주면 높아져요.' },
+  { cat:'건강', q:'잠이 부족하면 어떤 호르몬이 증가?', options:['그렐린(식욕)','인슐린','세로토닌'], answer:0, explain:'수면 부족은 식욕 호르몬 그렐린을 증가시키고 포만감 호르몬 렙틴은 감소시켜요.' },
+  { cat:'건강', q:'만성 스트레스에서 부족해지기 쉬운 미네랄은?', options:['철분','마그네슘','아연'], answer:1, explain:'스트레스는 마그네슘 소비를 늘려요. 부족하면 근육 경련·불면·불안이 생길 수 있어요.' },
+  { cat:'건강', q:'성인 하루 카페인 한도는?', options:['100mg','400mg','800mg'], answer:1, explain:'식약처 기준 400mg 이하예요. 커피 1잔(에스프레소 샷)에 60~80mg 정도 들어있어요.' },
+  { cat:'건강', q:'식품 알레르기 유발 최다 원인 3가지?', options:['우유·달걀·땅콩','고추·마늘·양파','밀·쌀·감자'], answer:0, explain:'한국 식약처 알레르기 표시 22종 중 우유·달걀·땅콩이 가장 흔해요.' },
+  { cat:'건강', q:'물 마시기 최적 타이밍은?', options:['식사 중','식전 30분','식후 즉시'], answer:1, explain:'식전 30분 물 섭취는 위산 희석을 막고 포만감을 줘요. 식사 중 물은 소화액을 희석해요.' },
+  { cat:'건강', q:'속쓰림 완화에 좋은 수면 자세는?', options:['왼쪽으로 눕기','오른쪽으로 눕기','엎드려 자기'], answer:0, explain:'왼쪽으로 누우면 위산 역류가 줄어요. 오른쪽은 오히려 역류를 유발할 수 있어요.' },
+  { cat:'건강', q:'혈압 관리에 좋은 미네랄?', options:['나트륨','칼륨','철분'], answer:1, explain:'칼륨은 나트륨 배출을 도와 혈압을 낮춰요. 바나나·감자·아보카도에 풍부해요.' },
+  { cat:'건강', q:'장 건강에 좋은 균은?', options:['프로바이오틱스','안식향산','MSG'], answer:0, explain:'프로바이오틱스(유산균)는 장내 유익균이에요. 김치·요거트·발효식품에 많아요.' }
+];
+
+let _quizSession = null;
+
+function getQuizData() {
+  try { return JSON.parse(localStorage.getItem('quizData') || '{}'); } catch(e) { return {}; }
+}
+function saveQuizDataState(d) { localStorage.setItem('quizData', JSON.stringify(d)); }
+
+function renderQuizChallenge() {
+  const data = getQuizData();
+  const today = todayKey();
+  const badge = document.getElementById('quizChallengeBadge');
+  const title = document.getElementById('quizChallengeTitle');
+  const sub = document.getElementById('quizChallengeSub');
+  if (!badge) return;
+  if (data.lastCompleted === today) {
+    badge.textContent = 'DONE';
+    badge.classList.add('done');
+    title.textContent = '오늘의 퀴즈 완료!';
+    sub.textContent = '내일 새 문제로 만나요 🌸';
+  } else {
+    badge.textContent = 'START';
+    badge.classList.remove('done');
+    title.textContent = '오늘의 건강 퀴즈';
+    sub.textContent = '3문제 풀고 +30P 받기';
+  }
+}
+
+function pickTodayQuestions() {
+  const today = todayKey();
+  // 오늘 문제 seed (같은 날은 같은 문제)
+  let seed = 0;
+  for (let i = 0; i < today.length; i++) seed = (seed * 31 + today.charCodeAt(i)) | 0;
+  const rng = (s) => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s; };
+  const picked = [];
+  const used = new Set();
+  let s = Math.abs(seed);
+  while (picked.length < 3 && used.size < QUIZ_DATA.length) {
+    s = rng(s);
+    const idx = s % QUIZ_DATA.length;
+    if (!used.has(idx)) { used.add(idx); picked.push(QUIZ_DATA[idx]); }
+  }
+  return picked;
+}
+
+function startQuiz() {
+  const data = getQuizData();
+  const today = todayKey();
+  if (data.lastCompleted === today) {
+    alert('오늘의 퀴즈는 이미 풀었어요! 내일 다시 만나요 🌸');
+    return;
+  }
+  _quizSession = {
+    questions: pickTodayQuestions(),
+    currentIdx: 0,
+    correct: 0,
+    answered: false,
+    startTime: Date.now()
+  };
+  showScreen('screenQuiz');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  if (!_quizSession) return;
+  const q = _quizSession.questions[_quizSession.currentIdx];
+  const body = document.getElementById('quizBody');
+  const progress = document.getElementById('quizProgress');
+  if (!q || !body) return;
+
+  progress.textContent = `${_quizSession.currentIdx + 1} / ${_quizSession.questions.length}`;
+  _quizSession.answered = false;
+
+  body.innerHTML = `
+    <span class="quiz-category-pill">${escapeHtml(q.cat)}</span>
+    <div class="quiz-question">${escapeHtml(q.q)}</div>
+    <div id="quizOptions">
+      ${q.options.map((opt, i) => `
+        <button class="quiz-option" onclick="answerQuiz(${i})">
+          <span class="quiz-option-letter">${String.fromCharCode(65 + i)}</span>
+          <span>${escapeHtml(opt)}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div id="quizExplainArea"></div>
+  `;
+}
+
+function answerQuiz(pickedIdx) {
+  if (!_quizSession || _quizSession.answered) return;
+  _quizSession.answered = true;
+  const q = _quizSession.questions[_quizSession.currentIdx];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === pickedIdx && i !== q.answer) btn.classList.add('wrong');
+  });
+
+  const isCorrect = pickedIdx === q.answer;
+  if (isCorrect) _quizSession.correct++;
+
+  const explainArea = document.getElementById('quizExplainArea');
+  explainArea.innerHTML = `
+    <div class="quiz-explain">
+      <div style="font-size:12.5px;font-weight:900;color:${isCorrect ? '#065F46' : '#991B1B'};margin-bottom:6px">
+        ${isCorrect ? '🎉 정답!' : '💡 아쉬워요'}
+      </div>
+      ${escapeHtml(q.explain)}
+    </div>
+    <button class="quiz-next-btn" onclick="nextQuiz()">
+      ${_quizSession.currentIdx + 1 < _quizSession.questions.length ? '다음 문제 →' : '결과 보기 🎯'}
+    </button>
+  `;
+  explainArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function nextQuiz() {
+  if (!_quizSession) return;
+  _quizSession.currentIdx++;
+  if (_quizSession.currentIdx < _quizSession.questions.length) {
+    renderQuizQuestion();
+    window.scrollTo(0, 0);
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  const correct = _quizSession.correct;
+  const total = _quizSession.questions.length;
+  const elapsed = Math.round((Date.now() - _quizSession.startTime) / 1000);
+
+  // 결과에 따른 포인트 (기본 10P + 정답당 5P + 만점 보너스 5P)
+  let earned = 10 + correct * 5;
+  if (correct === total) earned += 5;
+
+  const data = getQuizData();
+  data.lastCompleted = todayKey();
+  data.totalPlayed = (data.totalPlayed || 0) + 1;
+  data.totalCorrect = (data.totalCorrect || 0) + correct;
+  saveQuizDataState(data);
+
+  try { if (typeof addPoints === 'function') addPoints(earned, `🎯 퀴즈 완료 (${correct}/${total})`); } catch(e) {}
+
+  const body = document.getElementById('quizBody');
+  const progress = document.getElementById('quizProgress');
+  if (progress) progress.textContent = '완료';
+
+  const emoji = correct === 3 ? '🏆' : correct === 2 ? '👍' : correct === 1 ? '🌱' : '📚';
+  const title = correct === 3 ? '완벽해요!' : correct === 2 ? '잘했어요!' : correct === 1 ? '아쉽지만 배움!' : '더 알아가요!';
+  const sub = correct === 3 ? '오늘도 건강 지식 만렙 ✨' : correct === 2 ? '조금만 더! 내일도 만나요' : correct === 1 ? '해설 다시 보면 다 기억나요' : '내일 새 문제로 다시 도전!';
+
+  body.innerHTML = `
+    <div class="quiz-result">
+      <div class="quiz-result-emoji">${emoji}</div>
+      <div class="quiz-result-title">${title}</div>
+      <div class="quiz-result-sub">${sub}</div>
+      <div class="quiz-result-stats">
+        <div class="quiz-result-stat">
+          <div class="quiz-result-stat-num">${correct}/${total}</div>
+          <div class="quiz-result-stat-label">정답</div>
+        </div>
+        <div class="quiz-result-stat">
+          <div class="quiz-result-stat-num" style="color:#10B981">+${earned}<span style="font-size:14px">P</span></div>
+          <div class="quiz-result-stat-label">획득</div>
+        </div>
+      </div>
+      <button class="quiz-next-btn" onclick="exitQuiz()">홈으로 돌아가기 🏠</button>
+    </div>
+  `;
+  _quizSession = null;
+}
+
+function exitQuiz() {
+  _quizSession = null;
+  goHome();
+  setTimeout(() => renderQuizChallenge(), 100);
 }
 
 function renderHomeWaterWidget() {
