@@ -2826,7 +2826,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어떄 AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -10270,37 +10270,46 @@ function renderKidsCard() {
   subEl.textContent = '연령별 식단·성분·알레르기 관리';
 }
 
-// 활성 프로필 기반 홈 카드 개인화
+// 활성 프로필 기반 홈 카드 개인화 (제목·라벨·이모지·표시 여부)
 function updateHomeCardsByProfile(active) {
   if (!active) return;
-  // 카드 4개의 h3 텍스트 + 부제 변경
   const cards = document.querySelectorAll('.home-cards .home-card');
   if (cards.length < 4) return;
 
   const isKid = active.type === 'kid';
   const isPet = active.type === 'pet';
   const isMain = active.id === 'main';
-  const nameProps = isMain ? '' : `${active.name} `;
+  const months = active.ageMonths != null ? active.ageMonths : (active.ageYears || 0) * 12;
+  const isBaby = isKid && months < 24; // 2세 미만 = 이유식·모유
 
-  // 카드별 데이터
   const cardData = {
     human: {
-      title: isMain ? '내 건강 체크' : `${active.name} 건강 체크`,
-      sub: isKid ? '유아·소아용 건강 지표' : (isPet ? '반려동물 건강 지표' : '소변검사 키트로'),
-      hide: isPet // 반려동물 프로필이면 human 카드 숨김
+      title: isMain ? '내 건강 체크' : (isKid ? `${active.name} 성장 체크` : (isPet ? '반려동물 건강' : `${active.name} 건강 체크`)),
+      label: isKid ? 'GROWTH' : (isPet ? 'PET' : 'URINE'),
+      emoji: isKid ? '📈' : (isPet ? '🐾' : '🧑'),
+      meta: isKid ? '키·몸무게' : '약 1분',
+      hide: isPet
     },
     pet: {
       title: '반려동물',
-      sub: '집에서 간편하게',
-      hide: !isPet && active.type === 'kid' // 아이 프로필일 때 반려동물 카드 숨김
+      label: 'PET',
+      emoji: '🐶🐱',
+      meta: '약 1분',
+      hide: isKid // 아이 프로필일 땐 반려동물 카드 숨김
     },
     food: {
-      title: isMain ? '식단 분석' : (isKid && (active.ageMonths != null && active.ageMonths < 24) ? `${active.name} 이유식` : `${active.name} 식단`),
-      sub: isKid ? '연령별 영양 맞춤' : '음식 사진 한 장으로'
+      title: isMain ? '식단 분석' : (isBaby ? `${active.name} 이유식` : (isKid ? `${active.name} 식단` : `${active.name} 식단`)),
+      label: isBaby ? 'BABY' : (isKid ? 'KIDS' : 'MEAL'),
+      emoji: isBaby ? '🥣' : (isKid ? '🍱' : '🍱'),
+      meta: '약 30초',
+      hide: false
     },
     ingredient: {
-      title: isMain ? '식품 성분' : `${active.name} 안전 성분`,
-      sub: isKid ? '아이에게 안전한지 검사' : '제품 성분표 사진으로'
+      title: isMain ? '식품 성분' : (isKid ? `${active.name} 안전 성분` : `${active.name} 안전 성분`),
+      label: isKid ? 'SAFE' : 'LABEL',
+      emoji: isKid ? '🛡️' : '🏷️',
+      meta: '약 20초',
+      hide: false
     }
   };
 
@@ -10310,10 +10319,14 @@ function updateHomeCardsByProfile(active) {
     if (!type || !cardData[type]) return;
     const d = cardData[type];
     const titleEl = card.querySelector('.card-title');
+    const labelEl = card.querySelector('.card-label');
+    const orbEl = card.querySelector('.card-orb, .card-pet-orb');
+    const metaEl = card.querySelector('.card-meta');
     if (titleEl) titleEl.textContent = d.title;
-    // hide는 아이 프로필 시 반려동물, 반려동물 프로필 시 human 등 숨김
-    if (d.hide) card.style.display = 'none';
-    else card.style.display = '';
+    if (labelEl) labelEl.textContent = d.label;
+    if (orbEl) orbEl.textContent = d.emoji;
+    if (metaEl && !metaEl.id.includes('Last')) metaEl.textContent = d.meta;
+    card.style.display = d.hide ? 'none' : '';
   });
 }
 
