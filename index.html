@@ -461,6 +461,40 @@
       padding:9px 16px;font-size:12px;font-weight:900;cursor:pointer;
       font-family:inherit;margin-top:6px;letter-spacing:-.2px;box-shadow:0 2px 8px rgba(0,0,0,.15)
     }
+    /* 홈 알레르기 배너 (미등록 상태 - 빨간 강조) */
+    .home-allergy-empty{
+      display:flex;align-items:center;gap:12px;
+      background:linear-gradient(135deg,#FEE2E2 0%,#FEF3C7 100%);
+      border:1.5px solid #FCA5A5;border-radius:14px;
+      padding:12px 14px;margin-bottom:14px;cursor:pointer;
+      transition:transform .2s,box-shadow .2s;
+      font-family:inherit;width:100%;text-align:left;box-shadow:0 3px 10px rgba(239,68,68,.12)
+    }
+    .home-allergy-empty:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(239,68,68,.2)}
+    .home-allergy-empty:active{transform:scale(.98)}
+    .hae-emoji{font-size:26px;flex-shrink:0;line-height:1}
+    .hae-text{flex:1;min-width:0}
+    .hae-title{
+      font-size:12.5px;font-weight:900;color:#991B1B;letter-spacing:-.3px;line-height:1.3
+    }
+    .hae-sub{font-size:10.5px;font-weight:700;color:#B91C1C;margin-top:2px;line-height:1.4}
+    .hae-arrow{font-size:16px;font-weight:900;color:#991B1B}
+    /* 홈 알레르기 배너 (등록 완료 상태 - 초록 확인) */
+    .home-allergy-ok{
+      display:flex;align-items:center;gap:10px;
+      background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;
+      padding:9px 12px;margin-bottom:14px;cursor:pointer;
+      transition:background .15s;font-family:inherit;width:100%;text-align:left
+    }
+    .home-allergy-ok:hover{background:#DCFCE7}
+    .hao-emoji{font-size:16px;flex-shrink:0}
+    .hao-text{flex:1;font-size:11.5px;font-weight:800;color:#065F46;letter-spacing:-.2px}
+    .hao-count{
+      background:#10B981;color:#fff;font-size:10px;font-weight:900;
+      padding:2px 8px;border-radius:99px;letter-spacing:-.2px
+    }
+    .hao-arrow{font-size:14px;color:#059669;font-weight:800}
+
     /* 성분표 미등록 유도 배너 */
     .allergy-onboard-banner{
       background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 100%);
@@ -1871,6 +1905,9 @@
 
       <!-- 오늘의 미션 — 물 위젯 -->
       <div id="homeWaterWidget"></div>
+
+      <!-- 🚨 알레르기 상태 배너 (홈 메인) -->
+      <div id="homeAllergyBanner"></div>
 
       <div class="home-cards">
 
@@ -8917,6 +8954,7 @@ function initDailyCheckin() {
   updateStreakOnAppOpen();
   renderStreakBadge();
   renderQuizChallenge();
+  try { renderHomeAllergyBanner(); } catch(e) {}
   // 오늘 체크인 안 했으면 잠시 후 모달
   if (shouldShowCheckin()) {
     setTimeout(() => openCheckinModal(), 800);
@@ -9259,6 +9297,40 @@ function checkUserAllergyRisks(data) {
 
 function goAllergyProfile() {
   openAllergyProfile();
+}
+
+// 홈 화면 알레르기 배너 렌더링
+function renderHomeAllergyBanner() {
+  const el = document.getElementById('homeAllergyBanner');
+  if (!el) return;
+  const profile = getAllergyProfile();
+  const hasProfile = profile && ((profile.selected?.length > 0) || profile.custom);
+
+  if (!hasProfile) {
+    // 미등록 → 유도 배너 (빨강)
+    el.innerHTML = `
+      <button class="home-allergy-empty" onclick="goAllergyProfile()">
+        <div class="hae-emoji">🚨</div>
+        <div class="hae-text">
+          <div class="hae-title">알레르기 등록하고 자동 경고 받기</div>
+          <div class="hae-sub">성분 분석 시 위험 성분 즉시 알림 · 30초</div>
+        </div>
+        <div class="hae-arrow">›</div>
+      </button>
+    `;
+  } else {
+    // 등록 완료 → 상태 배너 (초록)
+    const count = (profile.selected?.length || 0) +
+                  (profile.custom ? profile.custom.split(',').filter(s => s.trim()).length : 0);
+    el.innerHTML = `
+      <button class="home-allergy-ok" onclick="goAllergyProfile()">
+        <div class="hao-emoji">✅</div>
+        <div class="hao-text">알레르기 자동 크로스체크 활성화</div>
+        <div class="hao-count">${count}개</div>
+        <div class="hao-arrow">›</div>
+      </button>
+    `;
+  }
 }
 
 function renderHomeWaterWidget() {
