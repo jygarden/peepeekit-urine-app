@@ -696,6 +696,39 @@
     .quiz-result-stat-num{font-size:28px;font-weight:900;color:#0F172A;line-height:1}
     .quiz-result-stat-label{font-size:11px;font-weight:700;color:#94A3B8;margin-top:4px;letter-spacing:.5px}
 
+    /* 👶 KIDS 전용 카드 (가로 긴 형태) */
+    .home-card-kids{
+      width:100%;background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 100%);
+      border:none;border-radius:22px;
+      padding:14px 16px;margin-top:12px;cursor:pointer;
+      display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;
+      box-shadow:0 3px 10px rgba(244,114,182,.12),0 8px 22px rgba(252,211,77,.15);
+      transition:transform .2s,box-shadow .2s;
+      font-family:inherit;text-align:left
+    }
+    .home-card-kids:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(244,114,182,.22),0 12px 28px rgba(252,211,77,.22)}
+    .home-card-kids:active{transform:scale(.98)}
+    .home-card-kids .card-new-badge{top:12px;right:14px}
+    .card-orb-kids{
+      width:52px;height:52px;border-radius:50%;flex-shrink:0;
+      background:radial-gradient(circle at 35% 35%, #FFFFFF 0%, #FCE7F3 55%, #F472B6 100%);
+      box-shadow:0 3px 10px rgba(244,114,182,.35);
+      display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1
+    }
+    .hkc-info{flex:1;min-width:0}
+    .hkc-label{
+      font-size:9.5px;font-weight:900;color:#DB2777;letter-spacing:1.5px;line-height:1;margin-bottom:4px
+    }
+    .hkc-title{
+      font-size:14.5px;font-weight:900;color:#831843;letter-spacing:-.3px;line-height:1.25
+    }
+    .hkc-sub{
+      font-size:11px;font-weight:700;color:#BE185D;margin-top:3px;letter-spacing:-.2px
+    }
+    .hkc-arrow{
+      font-size:20px;font-weight:900;color:#BE185D;flex-shrink:0
+    }
+
     /* RECENT ACTIVITY 섹션 */
     .recent-activity-section{margin-top:24px;display:flex;flex-direction:column;gap:10px;width:100%}
     .ra-header{
@@ -2052,6 +2085,18 @@
 
       </div>
 
+      <!-- 👶 우리 아이 전용 카드 -->
+      <button class="home-card-kids" onclick="enterKidsSection()">
+        <span class="card-new-badge">NEW</span>
+        <div class="card-orb-kids">👶</div>
+        <div class="hkc-info">
+          <div class="hkc-label">KIDS</div>
+          <div class="hkc-title" id="kidsCardTitle">우리 아이 건강</div>
+          <div class="hkc-sub" id="kidsCardSub">연령별 식단·성분·알레르기 관리</div>
+        </div>
+        <div class="hkc-arrow">›</div>
+      </button>
+
       <!-- TODAY'S CHALLENGE 섹션 -->
       <div class="challenge-section">
         <div class="ra-header">TODAY'S CHALLENGE</div>
@@ -2782,7 +2827,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -5305,8 +5350,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -9138,6 +9183,7 @@ function initDailyCheckin() {
   try { renderHomeProfileSection(); } catch(e) {}
   try { renderHomeAllergyBanner(); } catch(e) {}
   try { renderHomeKidsInsight(); } catch(e) {}
+  try { renderKidsCard(); } catch(e) {}
   // 오늘 체크인 안 했으면 잠시 후 모달
   if (shouldShowCheckin()) {
     setTimeout(() => openCheckinModal(), 800);
@@ -9694,6 +9740,46 @@ function renderHomeProfileSection() {
       </button>
     `;
     el.innerHTML = `<div class="home-profile-section"><div class="family-avatars">${avatarsHtml}</div></div>`;
+  }
+}
+
+// 👶 KIDS 카드 진입 로직
+function enterKidsSection() {
+  const profiles = getFamilyProfiles();
+  const kids = profiles.filter(p => p.type === 'kid');
+  if (kids.length === 0) {
+    // 아이 프로필 없음 → 아이 등록 화면
+    goAddProfile();
+    setTimeout(() => {
+      try { apSelectType('kid'); } catch(e) {}
+    }, 100);
+    if (typeof showPointToast === 'function') showPointToast('👶 우리 아이 프로필을 등록해주세요');
+  } else if (kids.length === 1) {
+    // 아이 한 명 → 그 프로필로 자동 전환
+    switchProfile(kids[0].id);
+    if (typeof showPointToast === 'function') showPointToast(`✨ ${kids[0].name} 프로필로 전환됐어요`);
+  } else {
+    // 여러 아이 → 프로필 스위처 열기
+    openProfileSwitcher();
+  }
+}
+
+// KIDS 카드 텍스트 동적 업데이트
+function renderKidsCard() {
+  const titleEl = document.getElementById('kidsCardTitle');
+  const subEl = document.getElementById('kidsCardSub');
+  if (!titleEl || !subEl) return;
+  const kids = getFamilyProfiles().filter(p => p.type === 'kid');
+  if (kids.length === 0) {
+    titleEl.textContent = '우리 아이 건강 등록하기';
+    subEl.textContent = '연령별 식단·성분·알레르기 관리';
+  } else if (kids.length === 1) {
+    titleEl.textContent = `${kids[0].name} 건강 관리`;
+    const cat = getAgeCategory(kids[0]);
+    subEl.textContent = cat ? `${cat.stage} · ${cat.tip}` : '연령별 식단·성분·알레르기 관리';
+  } else {
+    titleEl.textContent = `우리 아이들 (${kids.length}명)`;
+    subEl.textContent = kids.map(k => k.name).join(' · ') + ' · 프로필 전환';
   }
 }
 
