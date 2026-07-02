@@ -7833,13 +7833,20 @@ async function saveImageUniversal(captureId, fileName, bgColor) {
   }
 
   // 1️⃣ navigator.share (iOS 우선)
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   if (navigator.canShare && navigator.share) {
     try {
       const blob = await new Promise(r => canvas.toBlob(r, 'image/png', 0.95));
       const file = new File([blob], fileName, { type: 'image/png' });
       if (navigator.canShare({ files: [file] })) {
         if (progress.parentNode) progress.remove();
+        if (isIOS) {
+          try { if (typeof showPointToast === 'function') showPointToast('📸 아래에서 "이미지 저장" 선택!'); } catch(e) {}
+        }
         await navigator.share({ files: [file], title: '건강어때' });
+        if (isIOS) {
+          try { if (typeof showPointToast === 'function') showPointToast('💾 사진첩을 확인해보세요!'); } catch(e) {}
+        }
         return;
       }
     } catch(e) {
@@ -7876,10 +7883,17 @@ async function saveImageUniversal(captureId, fileName, bgColor) {
   // 3️⃣ 모달 fallback (길게 눌러서 저장)
   if (progress.parentNode) progress.remove();
   const modal = document.createElement('div');
+  const iosGuide = isIOS
+    ? '<strong>📸 아래 이미지를 꾹 눌러서</strong><br>"<strong>사진에 추가</strong>" 선택하면 사진첩에 저장돼요!'
+    : '<strong>📸 아래 이미지를 길게 눌러서</strong><br>"<strong>이미지 저장</strong>"을 선택하세요!';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;overflow:auto;padding:20px;display:flex;flex-direction:column;align-items:center;font-family:inherit';
-  modal.innerHTML = '<div style="background:#FEF3C7;padding:14px 18px;border-radius:14px;margin-bottom:14px;font-size:14px;color:#78350F;line-height:1.55;text-align:center;max-width:400px">📸 <strong>아래 이미지를 길게 눌러서</strong><br><strong>"사진에 추가"</strong> 또는 <strong>"이미지 저장"</strong>을 선택하세요!</div>' +
+  modal.innerHTML =
+    '<div style="background:#FEF3C7;padding:14px 18px;border-radius:14px;margin-bottom:14px;font-size:14px;color:#78350F;line-height:1.55;text-align:center;max-width:400px">' + iosGuide + '</div>' +
     '<img src="' + dataUrl + '" style="max-width:100%;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3)">' +
-    '<button onclick="this.parentElement.remove()" style="margin-top:18px;padding:14px 32px;background:#fff;color:#1D1D1F;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer">닫기</button>';
+    '<div style="display:flex;gap:10px;margin-top:18px">' +
+    (isIOS ? '<button onclick="(async()=>{try{const r=await fetch(\'' + dataUrl + '\');const b=await r.blob();const f=new File([b],\'' + fileName + '\',{type:\'image/png\'});if(navigator.share){await navigator.share({files:[f]});}}catch(e){alert(\'공유 실패\');}})()" style="padding:14px 24px;background:#3B82F6;color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">📤 공유·저장</button>' : '') +
+    '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="padding:14px 24px;background:#fff;color:#1D1D1F;border:none;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">닫기</button>' +
+    '</div>';
   document.body.appendChild(modal);
 }
 
@@ -9150,9 +9164,17 @@ async function submitSignup() {
 // 💧 물 섭취 시스템
 // ════════════════════════════════════════════════════════════════
 function getWaterAll() { try { return JSON.parse(localStorage.getItem('waterIntakeV1') || '{}'); } catch(e) { return {}; } }
-function getWaterToday() { const today = new Date().toISOString().split('T')[0]; return getWaterAll()[today] || 0; }
+// 🔧 로컬 시간대 기준 오늘 날짜 (UTC 이슈 방지)
+function _todayLocalKey() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+function getWaterToday() { return getWaterAll()[_todayLocalKey()] || 0; }
 function setWaterToday(ml) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = _todayLocalKey();
   const all = getWaterAll();
   all[today] = Math.max(0, Math.round(ml));
   localStorage.setItem('waterIntakeV1', JSON.stringify(all));
