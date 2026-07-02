@@ -3815,6 +3815,31 @@ function showCameraFirstTimeToast() {
   }, 3500);
 }
 
+// 앱 설정 페이지 바로 열기 (native handler)
+async function openAppSettingsNative() {
+  // 모달 닫기
+  const modal = document.getElementById('cameraPermissionGuide');
+  if (modal) modal.remove();
+
+  // 진행 표시
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:800;box-shadow:0 8px 24px rgba(16,185,129,.45);z-index:99999;';
+  toast.textContent = '⚙️ 설정 앱 여는 중...';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2000);
+
+  // Flutter native handler 호출
+  if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+    try {
+      const res = await window.flutter_inappwebview.callHandler('openAppSettings');
+      if (res && res.success) return;
+    } catch(e) { console.warn('[openAppSettings]', e); }
+  }
+
+  // 웹 fallback: 다시 안내 모달 표시 (수동 방법)
+  setTimeout(() => showCameraPermissionGuide(), 500);
+}
+
 // 권한 거부 시 친절한 안내 모달
 function showCameraPermissionGuide() {
   if (document.getElementById('cameraPermissionGuide')) return; // 중복 방지
@@ -3834,7 +3859,8 @@ function showCameraPermissionGuide() {
       stepsHtml +
     '</div>' +
     '<div style="background:#FFFBEB;border:1px solid #FCD34D;border-radius:10px;padding:10px 13px;margin-bottom:16px;font-size:11.5px;color:#92400E;line-height:1.55">💡 <strong>갤러리 기능은 권한 없이도</strong> 사용할 수 있어요. 갤러리에 저장된 사진으로 분석할 수도 있습니다.</div>' +
-    '<button onclick="document.getElementById(\'cameraPermissionGuide\').remove()" style="width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;letter-spacing:-.2px;box-shadow:0 4px 14px rgba(16,185,129,.4)">확인했어요</button>' +
+    '<button onclick="openAppSettingsNative()" style="width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-weight:900;font-size:14.5px;cursor:pointer;font-family:inherit;letter-spacing:-.2px;box-shadow:0 4px 14px rgba(16,185,129,.4);margin-bottom:8px">⚙️ 설정 앱 바로 열기</button>' +
+    '<button onclick="document.getElementById(\'cameraPermissionGuide\').remove()" style="width:100%;padding:12px;border:none;border-radius:14px;background:#F1F5F9;color:#475569;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:-.2px">나중에</button>' +
   '</div>';
   document.body.appendChild(modal);
   // 배경 클릭 시 닫기
