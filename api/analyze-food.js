@@ -2,6 +2,9 @@
 // 위치: /api/analyze-food.js
 //
 // Gemini 2.5 Flash로 음식 사진 인식 → 칼로리·영양 추정 → 한국어 코멘트
+// v2 — Rate Limit 추가
+
+const { rateLimitMiddleware } = require('./_rateLimit');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,6 +12,9 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용됩니다.' });
+
+  // 🛡️ Rate Limit: IP당 1분에 15회
+  if (!rateLimitMiddleware(req, res, { name: 'food', limit: 15, window: 60000 })) return;
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
