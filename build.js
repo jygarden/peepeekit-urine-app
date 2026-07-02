@@ -103,12 +103,32 @@ async function build() {
   const outputPath = path.join(distDir, 'index.html');
   fs.writeFileSync(outputPath, html, 'utf8');
 
-  // 다른 정적 파일들도 dist로 복사
-  const filesToCopy = ['manifest.json', 'sw.js', 'icon-192.png', 'icon-512.png', 'privacy.html', 'terms.html'];
-  for (const f of filesToCopy) {
-    const src = path.join(rootDir, f);
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, path.join(distDir, f));
+  // 🗂 루트의 모든 정적 파일 자동 복사 (admin.html, pet-idcard.html 등 자동 감지)
+  const staticExts = ['.html', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.json', '.txt', '.xml', '.webp', '.woff', '.woff2', '.ttf', '.css'];
+  const excludeFiles = new Set(['build.js', 'package.json', 'package-lock.json', 'vercel.json', 'index.html', '.env', '.env.local', '.gitignore']);
+  const excludeDirs = new Set(['dist', 'node_modules', '.git', 'api', '.vercel', '.well-known']);
+
+  let copiedCount = 0;
+  for (const f of fs.readdirSync(rootDir)) {
+    const fullPath = path.join(rootDir, f);
+    let stat;
+    try { stat = fs.statSync(fullPath); } catch(e) { continue; }
+    if (stat.isDirectory()) continue;
+    if (excludeFiles.has(f)) continue;
+    if (f.startsWith('.')) continue;
+    const ext = path.extname(f).toLowerCase();
+    if (!staticExts.includes(ext)) continue;
+    fs.copyFileSync(fullPath, path.join(distDir, f));
+    copiedCount++;
+  }
+
+  // .well-known 폴더는 통째로 복사 (있는 경우)
+  const wellKnownSrc = path.join(rootDir, '.well-known');
+  if (fs.existsSync(wellKnownSrc) && fs.statSync(wellKnownSrc).isDirectory()) {
+    const wellKnownDest = path.join(distDir, '.well-known');
+    if (!fs.existsSync(wellKnownDest)) fs.mkdirSync(wellKnownDest, { recursive: true });
+    for (const f of fs.readdirSync(wellKnownSrc)) {
+      fs.copyFileSync(path.join(wellKnownSrc, f), path.join(wellKnownDest, f));
     }
   }
 
@@ -124,9 +144,9 @@ async function build() {
 
   const ratio = totalOriginal > 0 ? ((1 - totalMinified/totalOriginal) * 100).toFixed(1) : 0;
   console.log(`✅ 빌드 완료!`);
-  console.log(`   스크립트 ${count}개 처리`);
-  console.log(`   원본: ${(totalOriginal/1024).toFixed(1)} KB → 축약: ${(totalMinified/1024).toFixed(1)} KB (${ratio}% 절약)`);
-  console.log(`   → dist/index.html`);
+  console.log(`   스크립트 ${count}개 minify (${(totalOriginal/1024).toFixed(1)} KB → ${(totalMinified/1024).toFixed(1)} KB, ${ratio}% 절약)`);
+  console.log(`   정적 파일 ${copiedCount}개 복사`);
+  console.log(`   → dist/`);
 }
 
 build().catch(err => {
