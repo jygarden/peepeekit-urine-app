@@ -1,5 +1,12 @@
 {
-  "name": "pet-urine-test",
+  "name": "peepeekit-urine-app",
   "version": "1.0.0",
-  "description": "반려동물 소변검사 AI 분석 앱"
+  "description": "건강어때 - AI 건강 관리 앱",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "terser": "^5.36.0"
+  }
 }
