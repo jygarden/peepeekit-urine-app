@@ -1,6 +1,8 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v5 — rawText 항상 보존 + 확장 사전 + 무조건 _debug
+// v6 — Rate Limit 추가 (남용 방지)
+
+const { rateLimitMiddleware } = require('./_rateLimit');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -8,6 +10,9 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST만 허용됩니다.' });
+
+  // 🛡️ Rate Limit: IP당 1분에 10회, 시간당 60회
+  if (!rateLimitMiddleware(req, res, { name: 'ingredients', limit: 10, window: 60000 })) return;
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: '서버에 GEMINI_API_KEY가 설정되지 않았어요.' });
