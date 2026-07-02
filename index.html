@@ -3122,6 +3122,21 @@
     </div>
   </div>
 
+  <!-- ════════════ 🏆 월간 챌린지 스티커북 ════════════ -->
+  <div class="screen" id="screenChallenge">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🏆 <span id="challengeMonthTitle">월간 챌린지</span></div>
+    </div>
+
+    <div id="challengeContent"></div>
+
+    <button onclick="shareChallengeStory()" style="width:100%;margin-top:14px;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,#EC4899,#F97316);color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(236,72,153,.4)">
+      📸 진행 상황 인스타 스토리로
+    </button>
+    <button onclick="goHome()" class="btn-outline" style="margin-top:10px">← 홈으로</button>
+  </div>
+
   <!-- ════════════ 📊 위클리 리포트 화면 ════════════ -->
   <div class="screen" id="screenWeeklyReport">
     <div class="page-header">
@@ -9404,6 +9419,7 @@ function initDailyCheckin() {
   try { renderHomeAllergyBanner(); } catch(e) {}
   try { renderHomeKidsInsight(); } catch(e) {}
   try { renderKidsCard(); } catch(e) {}
+  try { renderMonthlyChallengeCard(); } catch(e) {}
   try { renderWeeklyReportBanner(); } catch(e) {}
   // 오늘 체크인 안 했으면 잠시 후 모달
   if (shouldShowCheckin()) {
@@ -10412,6 +10428,20 @@ function renderStoryCardDOM(type, data) {
         <div style="font-size:36px;font-weight:900;color:#334155;margin-top:8px">등급 ${escapeHtml(grade)}</div>
       </div>
     `;
+  } else if (type === 'challenge') {
+    const c = data;
+    bg = `linear-gradient(135deg,${c.color}30 0%,#FCE7F3 50%,#FEF3C7 100%)`;
+    mainHtml = `
+      <div style="text-align:center;color:#0F172A">
+        <div style="font-size:100px;line-height:1;margin-bottom:24px">${c.emoji}</div>
+        <div style="font-size:20px;font-weight:900;color:${c.color};letter-spacing:2px;margin-bottom:12px">MONTHLY CHALLENGE</div>
+        <div style="font-size:36px;font-weight:900;color:#0F172A;letter-spacing:-1px;margin-bottom:24px">${escapeHtml(c.title)}</div>
+        <div style="background:rgba(255,255,255,.7);border-radius:24px;padding:24px 12px;display:inline-block;min-width:280px">
+          <div style="font-size:80px;font-weight:900;color:${c.color};line-height:1">${c.count}<span style="font-size:32px;color:#94A3B8"> / ${c.total}일</span></div>
+          <div style="font-size:16px;font-weight:800;color:#64748B;margin-top:8px">${escapeHtml(c.stamp)} 도장 완료</div>
+        </div>
+      </div>
+    `;
   } else if (type === 'weekly') {
     const w = data;
     bg = 'linear-gradient(135deg,#FCE7F3 0%,#FEF3C7 50%,#DBEAFE 100%)';
@@ -10476,6 +10506,261 @@ function renderStoryCardDOM(type, data) {
     </div>
   `;
   return div;
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🏆 월간 챌린지 스티커북
+// ════════════════════════════════════════════════════════════════
+
+const MONTHLY_CHALLENGES = [
+  { month:1,  title:'새해 건강 다짐',    emoji:'✨', stamp:'⭐', goal:'매일 앱 접속하고 컨디션 체크', autoCheck:'checkin', color:'#8B5CF6' },
+  { month:2,  title:'따뜻한 물 마시기',  emoji:'☕', stamp:'💧', goal:'매일 1.5L 이상 물 마시기',    autoCheck:'water',   color:'#3B82F6', threshold:1500 },
+  { month:3,  title:'봄맞이 식단 관리',  emoji:'🌸', stamp:'🌷', goal:'매일 식단 분석 1회',          autoCheck:'food',    color:'#F472B6' },
+  { month:4,  title:'벚꽃 산책 챌린지',  emoji:'🌸', stamp:'🌷', goal:'매일 컨디션 체크',             autoCheck:'checkin', color:'#EC4899' },
+  { month:5,  title:'가족 건강 지키기',  emoji:'👨‍👩‍👧‍👦', stamp:'💗', goal:'매일 성분 검사 1회',        autoCheck:'ingredient', color:'#F97316' },
+  { month:6,  title:'여름 수분 챌린지',  emoji:'💧', stamp:'💦', goal:'매일 2L 이상 물 마시기',      autoCheck:'water',   color:'#0EA5E9', threshold:2000 },
+  { month:7,  title:'물 마시기 챌린지',  emoji:'💧', stamp:'💧', goal:'매일 2L 이상 물 마시기',      autoCheck:'water',   color:'#3B82F6', threshold:2000 },
+  { month:8,  title:'과일 챙기기',      emoji:'🍎', stamp:'🍑', goal:'매일 식단 기록',              autoCheck:'food',    color:'#EF4444' },
+  { month:9,  title:'퀴즈 마스터',      emoji:'🎯', stamp:'🌟', goal:'매일 퀴즈 완료',              autoCheck:'quiz',    color:'#F59E0B' },
+  { month:10, title:'가을 나트륨 줄이기', emoji:'🍂', stamp:'🍁', goal:'매일 식단 분석',              autoCheck:'food',    color:'#EA580C' },
+  { month:11, title:'몸에 좋은 성분만',  emoji:'🛡️', stamp:'✅', goal:'매일 성분 검사 1회',          autoCheck:'ingredient', color:'#8B5CF6' },
+  { month:12, title:'한 해 마무리 습관',  emoji:'🎄', stamp:'⭐', goal:'매일 앱 접속',                autoCheck:'checkin', color:'#DC2626' }
+];
+
+function getCurrentChallenge() {
+  const month = new Date().getMonth() + 1;
+  return MONTHLY_CHALLENGES.find(c => c.month === month) || MONTHLY_CHALLENGES[0];
+}
+
+function getChallengeData() {
+  try { return JSON.parse(localStorage.getItem('challengeData') || '{}'); } catch(e) { return {}; }
+}
+function saveChallengeData(d) { localStorage.setItem('challengeData', JSON.stringify(d)); }
+
+function getMonthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+// 오늘 챌린지 자동 완료 체크
+function checkTodayChallenge() {
+  const challenge = getCurrentChallenge();
+  const today = _todayLocalKey();
+  const monthKey = getMonthKey();
+  const data = getChallengeData();
+  data[monthKey] = data[monthKey] || { stamps: {}, completed: false };
+
+  let isCompleted = data[monthKey].stamps[today] === true;
+  if (isCompleted) return true;
+
+  // 자동 체크
+  let auto = false;
+  switch(challenge.autoCheck) {
+    case 'water':
+      auto = getWaterToday() >= (challenge.threshold || 2000);
+      break;
+    case 'checkin':
+      auto = (getStreakData().lastCheckin === today);
+      break;
+    case 'quiz':
+      auto = (getQuizData().lastCompleted === today);
+      break;
+    case 'food':
+      try {
+        const foods = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+        auto = foods.some(f => f.date && f.date.startsWith(today));
+      } catch(e) {}
+      break;
+    case 'ingredient':
+      try {
+        const ings = JSON.parse(localStorage.getItem('ingredientRecords') || '[]');
+        auto = ings.some(i => i.date && i.date.startsWith(today));
+      } catch(e) {}
+      break;
+  }
+
+  if (auto) {
+    data[monthKey].stamps[today] = true;
+    saveChallengeData(data);
+    return true;
+  }
+  return false;
+}
+
+function openChallenge() {
+  checkTodayChallenge(); // 오늘 조건 만족했으면 자동 도장
+  const challenge = getCurrentChallenge();
+  const data = getChallengeData();
+  const monthKey = getMonthKey();
+  const monthData = data[monthKey] || { stamps: {}, completed: false };
+
+  document.getElementById('challengeMonthTitle').textContent = `${new Date().getMonth()+1}월 챌린지`;
+
+  const el = document.getElementById('challengeContent');
+  if (!el) return;
+
+  // 달력 생성
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  const startWeekday = firstDay.getDay(); // 0=일
+
+  // 도장 개수
+  const stampCount = Object.values(monthData.stamps).filter(v => v === true).length;
+  const progress = Math.round((stampCount / daysInMonth) * 100);
+
+  // 달력 그리드
+  let calendarHtml = '';
+  const weekdays = ['일','월','화','수','목','금','토'];
+  calendarHtml += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:10.5px;font-weight:900;color:#94A3B8;letter-spacing:.5px;margin-bottom:6px">
+    ${weekdays.map(w => `<div>${w}</div>`).join('')}
+  </div>`;
+
+  calendarHtml += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">`;
+  // 빈 칸 (첫 요일 이전)
+  for (let i = 0; i < startWeekday; i++) {
+    calendarHtml += `<div></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === _todayLocalKey();
+    const isFuture = new Date(year, month, d) > new Date();
+    const hasStamp = monthData.stamps[dateStr] === true;
+
+    let bg = '#F9FAFB', color = '#94A3B8', border = 'transparent';
+    if (isFuture) { bg = '#F9FAFB'; color = '#CBD5E1'; }
+    else if (hasStamp) { bg = challenge.color + '25'; color = challenge.color; border = challenge.color; }
+    else { bg = '#fff'; color = '#64748B'; }
+    if (isToday) border = '#EC4899';
+
+    calendarHtml += `
+      <div style="aspect-ratio:1;background:${bg};border:2px solid ${border};border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;font-family:inherit">
+        ${hasStamp ? `<div style="font-size:18px;line-height:1">${challenge.stamp}</div>` : `<div style="font-size:12px;font-weight:900;color:${color}">${d}</div>`}
+        ${isToday ? `<div style="position:absolute;bottom:2px;font-size:7px;font-weight:900;color:#EC4899">TODAY</div>` : ''}
+      </div>
+    `;
+  }
+  calendarHtml += `</div>`;
+
+  // 오늘 도장 안 찍혔으면 수동 버튼
+  const todayHasStamp = monthData.stamps[_todayLocalKey()] === true;
+  const canManualStamp = !todayHasStamp && !['water','checkin','quiz','food','ingredient'].includes(challenge.autoCheck);
+
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,${challenge.color}20 0%,#FEF3C7 100%);border-radius:22px;padding:24px 20px;text-align:center;margin-bottom:14px">
+      <div style="font-size:48px;line-height:1;margin-bottom:8px">${challenge.emoji}</div>
+      <div style="font-size:11px;font-weight:900;color:${challenge.color};letter-spacing:2px;margin-bottom:4px">CHALLENGE</div>
+      <div style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.5px;margin-bottom:4px">${escapeHtml(challenge.title)}</div>
+      <div style="font-size:12px;font-weight:700;color:#64748B">${escapeHtml(challenge.goal)}</div>
+    </div>
+
+    <div style="background:#fff;border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,.06)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+        <div style="font-size:11.5px;font-weight:900;color:#64748B;letter-spacing:1.5px">이번 달 진행률</div>
+        <div style="font-size:14px;font-weight:900;color:${challenge.color}">${stampCount} / ${daysInMonth}일</div>
+      </div>
+      <div style="background:#F1F5F9;border-radius:99px;height:10px;overflow:hidden">
+        <div style="background:${challenge.color};height:100%;width:${progress}%;transition:width .5s"></div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,.06)">
+      <div style="font-size:13px;font-weight:900;color:#0F172A;margin-bottom:12px;text-align:center">📅 이번 달 스티커북</div>
+      ${calendarHtml}
+    </div>
+
+    ${canManualStamp ? `
+    <button onclick="stampToday()" style="width:100%;padding:16px;border:none;border-radius:16px;background:linear-gradient(135deg,${challenge.color},#EC4899);color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px ${challenge.color}55;margin-bottom:10px">
+      ✅ 오늘 도장 찍기
+    </button>
+    ` : (todayHasStamp ? `
+    <div style="background:#D1FAE5;border:1px solid #86EFAC;border-radius:14px;padding:14px;text-align:center;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:900;color:#065F46">🎉 오늘 도장 찍혔어요!</div>
+      <div style="font-size:11px;font-weight:700;color:#059669;margin-top:2px">내일도 만나요 ✨</div>
+    </div>
+    ` : `
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px;text-align:center;margin-bottom:10px">
+      <div style="font-size:12.5px;font-weight:800;color:#1E40AF">💡 오늘 도장을 받으려면?</div>
+      <div style="font-size:11px;font-weight:700;color:#1E3A8A;margin-top:4px">${
+        challenge.autoCheck === 'water' ? `물 ${(challenge.threshold||2000)/1000}L 마시기` :
+        challenge.autoCheck === 'checkin' ? '아침 컨디션 체크' :
+        challenge.autoCheck === 'quiz' ? '오늘의 퀴즈 완료' :
+        challenge.autoCheck === 'food' ? '식단 분석 1회' :
+        challenge.autoCheck === 'ingredient' ? '성분 검사 1회' : '오늘의 미션 완료'
+      }</div>
+    </div>
+    `)}
+
+    ${stampCount >= 20 ? `
+    <div style="background:linear-gradient(135deg,#FEF3C7,#FCE7F3);border:2px solid #F59E0B;border-radius:18px;padding:16px;text-align:center">
+      <div style="font-size:32px;line-height:1;margin-bottom:6px">🏆</div>
+      <div style="font-size:14px;font-weight:900;color:#78350F">${stampCount >= 25 ? '거의 완주! 대박' : '20일 달성! 멋져요'}</div>
+      <div style="font-size:11px;font-weight:700;color:#92400E;margin-top:4px">완주하면 +${daysInMonth * 10}P 보너스</div>
+    </div>
+    ` : ''}
+  `;
+
+  showScreen('screenChallenge');
+}
+
+function stampToday() {
+  const monthKey = getMonthKey();
+  const today = _todayLocalKey();
+  const data = getChallengeData();
+  data[monthKey] = data[monthKey] || { stamps: {}, completed: false };
+  if (data[monthKey].stamps[today]) return;
+  data[monthKey].stamps[today] = true;
+  saveChallengeData(data);
+  try { if (typeof addPoints === 'function') addPoints(15, '🏆 챌린지 도장'); } catch(e) {}
+  if (typeof showPointToast === 'function') showPointToast(`🎉 오늘 도장 찍었어요! +15P`);
+  openChallenge();
+}
+
+function shareChallengeStory() {
+  const challenge = getCurrentChallenge();
+  const monthKey = getMonthKey();
+  const data = getChallengeData();
+  const monthData = data[monthKey] || { stamps: {} };
+  const stampCount = Object.values(monthData.stamps).filter(v => v === true).length;
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+  shareToInstagramStory('challenge', {
+    title: challenge.title, emoji: challenge.emoji, stamp: challenge.stamp,
+    count: stampCount, total: daysInMonth, color: challenge.color
+  });
+}
+
+// 홈에 챌린지 배너 (TODAY'S CHALLENGE 섹션 안)
+function renderMonthlyChallengeCard() {
+  checkTodayChallenge();
+  const challenge = getCurrentChallenge();
+  const monthData = getChallengeData()[getMonthKey()] || { stamps: {} };
+  const stampCount = Object.values(monthData.stamps).filter(v => v === true).length;
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+  const todayStamp = monthData.stamps[_todayLocalKey()] === true;
+
+  // TODAY'S CHALLENGE 섹션에 챌린지 카드 추가
+  const section = document.querySelector('.challenge-section');
+  if (!section) return;
+  let card = section.querySelector('.monthly-challenge-card');
+  if (!card) {
+    card = document.createElement('button');
+    card.className = 'challenge-card monthly-challenge-card';
+    card.onclick = openChallenge;
+    section.appendChild(card);
+  }
+  card.style.background = `linear-gradient(135deg,${challenge.color}20 0%,#FCE7F3 50%,#FEF3C7 100%)`;
+  card.innerHTML = `
+    <div class="challenge-orb" style="background:radial-gradient(circle at 35% 35%, #fff 0%, ${challenge.color}30 55%, ${challenge.color} 100%);box-shadow:0 3px 10px ${challenge.color}55">${challenge.emoji}</div>
+    <div class="challenge-content">
+      <div class="challenge-label" style="color:${challenge.color}">${new Date().getMonth()+1}월 CHALLENGE</div>
+      <div class="challenge-title" style="color:#0F172A">${escapeHtml(challenge.title)}</div>
+      <div class="challenge-sub" style="color:${challenge.color}">${stampCount}/${daysInMonth}일 · ${todayStamp ? '오늘 완료!' : '오늘 미완료'}</div>
+    </div>
+    <div class="challenge-badge${todayStamp ? ' done' : ''}">${todayStamp ? 'DONE' : 'GO'}</div>
+  `;
 }
 
 // ════════════════════════════════════════════════════════════════
