@@ -103,8 +103,8 @@ async function build() {
   const outputPath = path.join(distDir, 'index.html');
   fs.writeFileSync(outputPath, html, 'utf8');
 
-  // 🗂 루트의 모든 정적 파일 자동 복사 (admin.html, pet-idcard.html 등 자동 감지)
-  const staticExts = ['.html', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.json', '.txt', '.xml', '.webp', '.woff', '.woff2', '.ttf', '.css'];
+  // 🗂 루트의 모든 정적 파일 자동 복사 (admin.html, sw.js, pet-idcard.html 등 자동 감지)
+  const staticExts = ['.html', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.json', '.js', '.txt', '.xml', '.webp', '.woff', '.woff2', '.ttf', '.css'];
   const excludeFiles = new Set(['build.js', 'package.json', 'package-lock.json', 'vercel.json', 'index.html', '.env', '.env.local', '.gitignore']);
   const excludeDirs = new Set(['dist', 'node_modules', '.git', 'api', '.vercel', '.well-known']);
 
