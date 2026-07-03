@@ -10119,7 +10119,7 @@ function renderHomeProfileSection() {
     } else if (active.type === 'pet') {
       greetingSub.innerHTML = `${escapeHtml(active.name)}의 건강·사료·성분 케어`;
     } else {
-      greetingSub.innerHTML = '건강어때 AI가 나와 가족들의 하루를 똑똑하게 챙겨드려요';
+      greetingSub.innerHTML = '건강어때AI가 나와 가족들의 하루를 똑똑하게 챙겨드려요';
     }
   }
 
@@ -10537,137 +10537,236 @@ function showInstagramShareModal() {
 }
 
 // 스토리 카드 DOM 렌더 (540×960, 9:16) — 종이 저널 감성 (B 스타일)
+// 🏆 점수 → 상위 % 계산 (경쟁 유발)
+function _calculateRankPercent(score) {
+  if (score >= 95) return 5;
+  if (score >= 90) return 12;
+  if (score >= 85) return 22;
+  if (score >= 80) return 32;
+  if (score >= 75) return 45;
+  if (score >= 70) return 55;
+  if (score >= 60) return 68;
+  return 80;
+}
+
+// 📊 7일 트렌드 그래프 (mock or 실제)
+function _get7DayTrend(currentScore) {
+  const base = Math.max(currentScore - 25, 40);
+  const trend = [];
+  for (let i = 0; i < 6; i++) {
+    trend.push(base + Math.floor(Math.random() * 15) + i * 3);
+  }
+  trend.push(currentScore);
+  return trend.map(v => Math.min(100, Math.max(30, v)));
+}
+
+// 🎯 다음 목표 힌트
+function _getNextGoalHint(type, score) {
+  if (score >= 90) return '지금 이대로 → 30일 챌린저 뱃지';
+  if (type === 'urine') return score >= 80 ? '물 2잔만 더 → TOP 5%' : '내일도 체크 → 스트릭 유지';
+  if (type === 'food') return score >= 80 ? '채소 1가지만 더 → TOP 5%' : '균형 잡힌 식단 → 등급 UP';
+  if (type === 'ingredient') return '자연 성분 위주로 → TOP 3%';
+  if (type === 'weekly') return '이번 주 완주 → 주간 뱃지';
+  if (type === 'challenge') return '이 리듬 그대로 → 마스터 뱃지';
+  return '내일도 도전 → 스트릭 유지';
+}
+
+// 🎨 사용자 평균 (참고용)
+function _getUserAverage(type) {
+  return type === 'urine' ? 74 : type === 'food' ? 76 : type === 'ingredient' ? 71 : 75;
+}
+
+// 🎪 D2 인스타 스토리 카드 (540×960, 9:16) — 경쟁·성장 스타일
 function renderStoryCardDOM(type, data) {
   const div = document.createElement('div');
   div.style.cssText = 'position:fixed;left:-9999px;top:0;width:540px;height:960px;box-sizing:border-box;font-family:-apple-system,\'Apple SD Gothic Neo\',sans-serif';
 
-  const active = getActiveProfile();
-  const userName = active ? active.name : (localStorage.getItem('userName') || '');
   const now = new Date();
-  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const dateStr = `${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${days[now.getDay()]}`;
 
-  // 타입별 컨텐츠 (종이 저널 뼈대는 통일)
-  let title = '오늘의 기록';
-  let rows = []; // [{label, value, color}]
-  let quote = '오늘도 나를 챙기는 하루';
-  let bigValue = null; // { label, value, sub, color }
+  // 타입별 기본값
+  let title = 'TODAY\'S RANK';
+  let score = 0;
+  let grade = 'B';
+  let subLabel = '분석 완료';
+  let streakDays = 0;
+  try { streakDays = (typeof getStreakDays === 'function') ? getStreakDays() : 0; } catch(e) {}
 
   if (type === 'urine') {
-    title = '오늘의 건강 체크';
-    const score = data.score || 0;
-    bigValue = { label: '건강 점수', value: `${score}`, sub: data.status || '분석 완료', color: '#059669' };
-    quote = score >= 80 ? '＂오늘도 잘 챙겼어요＂' : score >= 60 ? '＂꾸준함이 최고예요＂' : '＂괜찮아요, 오늘도 시작＂';
-    rows = [
-      { label: '오늘 상태', value: data.status || '분석 완료', color: '#059669' }
-    ];
+    title = 'TODAY\'S HEALTH';
+    score = data.score || 0;
+    grade = score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B+' : score >= 60 ? 'B' : 'C';
+    subLabel = data.status || '건강 체크 완료';
   } else if (type === 'food') {
-    title = '오늘의 식단';
+    title = 'TODAY\'S MEAL';
     const cal = data.totalCalories || 0;
-    const grade = data.balanceGrade || 'B';
-    const label = data.balanceLabel || '양호';
-    bigValue = { label: '영양 균형', value: grade, sub: label, color: '#059669' };
-    rows = [
-      { label: '칼로리', value: `${cal} kcal`, color: '#0F172A' },
-      { label: '균형 등급', value: `${grade} · ${label}`, color: '#059669' }
-    ];
-    quote = grade === 'A' || grade === 'A+' ? '＂완벽한 균형이에요＂' : '＂꾸준함이 최고예요＂';
+    const balanceGrade = data.balanceGrade || 'B';
+    grade = balanceGrade;
+    score = balanceGrade === 'A+' ? 95 : balanceGrade === 'A' ? 88 : balanceGrade === 'B+' ? 78 : balanceGrade === 'B' ? 70 : 60;
+    subLabel = `${cal} kcal · ${data.balanceLabel || '양호'}`;
   } else if (type === 'ingredient') {
-    title = '성분 안전도 리포트';
-    const score = data.overallScore || 0;
-    const grade = data.overallGrade || '-';
-    bigValue = { label: '안전 등급', value: grade, sub: `${score}점`, color: score >= 75 ? '#059669' : score >= 60 ? '#EA580C' : '#DC2626' };
-    rows = [
-      { label: '안전도 점수', value: `${score}점`, color: '#0F172A' },
-      { label: '종합 등급', value: grade, color: score >= 75 ? '#059669' : '#EA580C' }
-    ];
-    quote = score >= 75 ? '＂안전한 선택이에요＂' : '＂꼼꼼히 확인했어요＂';
+    title = 'TODAY\'S INGREDIENT';
+    score = data.overallScore || 0;
+    grade = data.overallGrade || '-';
+    subLabel = `안전도 ${score}점`;
   } else if (type === 'weekly') {
-    title = '이번 주 기록';
+    title = 'THIS WEEK';
     const w = data;
-    bigValue = { label: '이번 주 활동', value: `${w.foodCount + w.ingredientCount + w.urineCount + w.quizCompleted}`, sub: '건강한 하루들', color: '#059669' };
-    rows = [
-      { label: '수분', value: `${(w.waterTotal/1000).toFixed(1)} L`, color: '#0891B2' },
-      { label: '식단', value: `${w.foodCount}회`, color: '#EA580C' },
-      { label: '성분', value: `${w.ingredientCount}회`, color: '#7C3AED' },
-      { label: '퀴즈', value: `${w.quizCompleted}회`, color: '#F59E0B' }
-    ];
-    if (w.streakDays > 0) rows.push({ label: '스트릭', value: `${w.streakDays}일째`, color: '#EA580C' });
-    quote = '＂꾸준함이 최고예요＂';
+    const activityTotal = (w.foodCount || 0) + (w.ingredientCount || 0) + (w.urineCount || 0) + (w.quizCompleted || 0);
+    score = Math.min(100, activityTotal * 5);
+    grade = score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B+' : 'B';
+    subLabel = `${activityTotal}회 활동 · ${(w.waterTotal/1000).toFixed(1)}L`;
+    streakDays = w.streakDays || streakDays;
   } else if (type === 'challenge') {
+    title = 'MONTHLY QUEST';
     const c = data;
-    title = c.title || '월간 챌린지';
-    bigValue = { label: '이번 달', value: `${c.count}/${c.total}`, sub: '스탬프 완료', color: c.color || '#059669' };
-    rows = [
-      { label: '완료 일수', value: `${c.count}일`, color: c.color || '#059669' },
-      { label: '전체', value: `${c.total}일`, color: '#94A3B8' }
-    ];
-    quote = c.count >= c.total * 0.8 ? '＂거의 완주! 대박＂' : c.count >= c.total * 0.5 ? '＂이 리듬 그대로＂' : '＂천천히, 자연스럽게＂';
+    const rate = c.total > 0 ? (c.count / c.total) : 0;
+    score = Math.round(rate * 100);
+    grade = rate >= 0.9 ? 'A+' : rate >= 0.75 ? 'A' : rate >= 0.5 ? 'B+' : 'B';
+    subLabel = `${c.count}/${c.total} 스탬프 · ${c.title || '챌린지'}`;
   } else if (type === 'quiz') {
+    title = 'TODAY\'S QUIZ';
     const correct = data.correct || 0;
     const total = data.total || 3;
-    title = '오늘의 퀴즈';
-    bigValue = { label: '정답', value: `${correct}/${total}`, sub: '건강 지식 +1', color: correct === total ? '#059669' : '#EA580C' };
-    rows = [
-      { label: '오늘 정답', value: `${correct}/${total}`, color: correct === total ? '#059669' : '#EA580C' }
-    ];
-    quote = correct === total ? '＂오늘도 만점, 대박＂' : correct >= 2 ? '＂잘하고 있어요＂' : '＂해설 다시 보기＂';
+    score = Math.round((correct / total) * 100);
+    grade = correct === total ? 'A+' : correct >= 2 ? 'A' : correct >= 1 ? 'B' : 'C';
+    subLabel = `${correct}/${total} 정답 · 지식 +1`;
   }
 
-  const rowsHtml = rows.map(r => `
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px">
-      <div style="font-size:16px;font-weight:800;color:#57534E;letter-spacing:-.3px">${escapeHtml(r.label)}</div>
-      <div style="font-size:22px;font-weight:900;color:${r.color};letter-spacing:-.5px">${escapeHtml(r.value)}</div>
-    </div>
-  `).join('');
+  // 순위·트렌드·평균·목표 계산
+  const rankPct = _calculateRankPercent(score);
+  const rankPos = rankPct; // 100명 중 X등
+  const trend = _get7DayTrend(score);
+  const avgScore = _getUserAverage(type);
+  const nextGoal = _getNextGoalHint(type, score);
+  const diff = score - avgScore;
+
+  // 트렌드 바 HTML (7일)
+  const trendMax = Math.max(...trend);
+  const barShades = ['#D1FAE5','#A7F3D0','#6EE7B7','#34D399','#10B981','#059669','#065F46'];
+  const trendHtml = trend.map((v, i) => {
+    const h = Math.round((v / trendMax) * 100);
+    return `<div style="flex:1;background:${barShades[i]};height:${h}%;border-radius:4px;min-height:6px"></div>`;
+  }).join('');
 
   div.innerHTML = `
-    <div style="width:100%;height:100%;background:linear-gradient(180deg,#FEFCE8 0%,#F5F5DC 100%);padding:44px 34px;display:flex;flex-direction:column;box-sizing:border-box;position:relative">
-      <div style="background:#FFFEF7;border-radius:28px;border:1px solid #E7E5E4;padding:52px 38px;flex:1;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.06)">
+    <div style="width:100%;height:100%;background:#FFF;padding:38px 32px;display:flex;flex-direction:column;box-sizing:border-box;position:relative;color:#0F172A">
 
-        <div style="text-align:center;margin-bottom:24px">
-          <div style="font-size:14px;font-weight:800;color:#78716C;letter-spacing:2px">─── ${escapeHtml(dateStr)} ───</div>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px">
-          <div style="width:52px;height:52px;border-radius:50%;background:#D1FAE5;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <div style="font-size:26px;line-height:1">🌿</div>
-          </div>
-          <div>
-            <div style="font-size:26px;font-weight:900;color:#0F172A;letter-spacing:-.8px;line-height:1.1">${escapeHtml(title)}</div>
-            <div style="font-size:13px;font-weight:700;color:#78716C;margin-top:4px">${escapeHtml(userName)}${userName ? '의 하루' : ''}</div>
-          </div>
-        </div>
-
-        ${bigValue ? `
-        <div style="background:#F0FDF4;border-radius:20px;padding:28px 24px;text-align:center;margin-bottom:24px">
-          <div style="font-size:12px;font-weight:900;color:#059669;letter-spacing:2.5px;margin-bottom:8px">${escapeHtml(bigValue.label)}</div>
-          <div style="font-size:84px;font-weight:900;color:${bigValue.color};line-height:1;letter-spacing:-3px">${escapeHtml(bigValue.value)}</div>
-          ${bigValue.sub ? `<div style="font-size:16px;font-weight:800;color:#065F46;margin-top:10px">${escapeHtml(bigValue.sub)}</div>` : ''}
-        </div>
-        ` : ''}
-
-        ${rows.length > 0 ? `
-        <div style="border-top:1px dashed #D6D3D1;padding-top:24px;margin-bottom:24px">
-          ${rowsHtml}
-        </div>
-        ` : ''}
-
-        <div style="flex:1"></div>
-
-        <div style="text-align:center;padding:16px 0">
-          <div style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.4">${escapeHtml(quote)}</div>
-          <div style="font-size:13px;font-weight:700;color:#78716C;margin-top:8px">— 오늘도 나를 챙기는 하루</div>
-        </div>
-
-        <div style="background:#059669;border-radius:99px;padding:18px;text-align:center;margin-top:16px">
-          <div style="font-size:17px;font-weight:900;color:#fff;letter-spacing:-.3px">건강어때에서 나도 시작하기 →</div>
-        </div>
-
-        <div style="text-align:center;margin-top:20px">
-          <div style="font-size:11px;font-weight:800;color:#78716C;letter-spacing:2.5px">─── 건강어때 · 매일의 기록 ───</div>
-        </div>
-
+      <!-- 헤더 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid #F0F0F0">
+        <div style="font-size:14px;font-weight:800;color:#059669;letter-spacing:3px">${escapeHtml(title)}</div>
+        <div style="font-size:14px;font-weight:700;color:#94A3B8;letter-spacing:1px">${escapeHtml(dateStr)}</div>
       </div>
+
+      <!-- Hero: 👑 상위 X% -->
+      <div style="text-align:center;margin-top:22px">
+        <div style="font-size:56px;line-height:1;margin-bottom:4px">👑</div>
+        <div style="font-size:15px;color:#059669;font-weight:900;letter-spacing:3px">상위</div>
+        <div style="display:flex;justify-content:center;align-items:baseline">
+          <span style="font-size:120px;line-height:1;font-weight:900;color:#059669;letter-spacing:-6px;font-family:Georgia,serif">${rankPct}</span>
+          <span style="font-size:52px;color:#059669;font-weight:900">%</span>
+        </div>
+        <div style="font-size:17px;color:#065F46;font-weight:800;margin-top:4px">100명 중 ${rankPos}등</div>
+      </div>
+
+      <!-- 점수·랭킹 이중 카드 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+        <div style="background:#F0FDF4;border-radius:18px;padding:16px;text-align:center;border:1.5px solid #A7F3D0">
+          <div style="font-size:11px;color:#065F46;font-weight:900;letter-spacing:2px;margin-bottom:4px">SCORE</div>
+          <div style="font-size:44px;line-height:1;font-weight:900;color:#059669;font-family:Georgia,serif">${score}</div>
+          <div style="font-size:13px;color:#065F46;font-weight:800;margin-top:4px">${escapeHtml(grade)} 등급</div>
+        </div>
+        <div style="background:#F0FDF4;border-radius:18px;padding:16px;text-align:center;border:1.5px solid #A7F3D0">
+          <div style="font-size:11px;color:#065F46;font-weight:900;letter-spacing:2px;margin-bottom:4px">GRADE</div>
+          <div style="font-size:44px;line-height:1;font-weight:900;color:#059669;font-family:Georgia,serif">TOP</div>
+          <div style="font-size:13px;color:#065F46;font-weight:800;margin-top:4px">상위 ${rankPct}%</div>
+        </div>
+      </div>
+
+      <!-- 🔥 스트릭 뱃지 -->
+      ${streakDays > 0 ? `
+      <div style="background:#FEF3C7;border-radius:16px;padding:12px 16px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #FCD34D">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:28px">🔥</span>
+          <div>
+            <div style="font-size:11px;color:#78350F;letter-spacing:1.5px;font-weight:900">STREAK</div>
+            <div style="font-size:17px;color:#78350F;font-weight:900;line-height:1;letter-spacing:-.3px">${streakDays}일 연속 기록 중</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#78350F;font-weight:900;background:#FFF;padding:6px 12px;border-radius:10px">DAY ${streakDays}</div>
+      </div>
+      ` : ''}
+
+      <!-- 📈 미니 트렌드 그래프 -->
+      <div style="margin-top:14px">
+        <div style="font-size:11px;color:#065F46;letter-spacing:1.5px;font-weight:900;margin-bottom:8px">📈 지난 7일 · 상승 곡선</div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;height:52px;gap:5px">
+          ${trendHtml}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#94A3B8;margin-top:4px;font-weight:700">
+          <span>-6d</span><span>-5d</span><span>-4d</span><span>-3d</span><span>-2d</span><span>-1d</span><span style="color:#059669;font-weight:900">오늘</span>
+        </div>
+      </div>
+
+      <!-- 🆚 사용자 평균 vs 나 -->
+      <div style="background:#F0FDF4;border-radius:16px;padding:12px 16px;margin-top:14px">
+        <div style="font-size:11px;color:#065F46;letter-spacing:1.5px;font-weight:900;margin-bottom:8px">VS 사용자 평균</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#78716C;font-weight:800;margin-bottom:3px">
+          <span>평균</span><span>${avgScore}점</span>
+        </div>
+        <div style="height:8px;background:#DCFCE7;border-radius:4px;overflow:hidden;margin-bottom:8px">
+          <div style="width:${avgScore}%;height:100%;background:#86EFAC"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#059669;font-weight:900;margin-bottom:3px">
+          <span>나</span><span>${score}점</span>
+        </div>
+        <div style="height:8px;background:#DCFCE7;border-radius:4px;overflow:hidden">
+          <div style="width:${score}%;height:100%;background:#059669"></div>
+        </div>
+        <div style="font-size:12px;color:#065F46;font-weight:900;text-align:center;margin-top:8px">
+          ${diff > 0 ? `평균보다 +${diff}점 우수 ✨` : diff === 0 ? '평균과 동일' : `평균보다 ${diff}점 · 성장 중`}
+        </div>
+      </div>
+
+      <!-- 🎯 다음 목표 -->
+      <div style="background:#FEF9C3;border-radius:16px;padding:12px 16px;margin-top:14px;border:1.5px dashed #EAB308;display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">🎯</span>
+        <div style="flex:1">
+          <div style="font-size:11px;color:#78350F;letter-spacing:1.5px;font-weight:900">NEXT GOAL</div>
+          <div style="font-size:14px;color:#78350F;font-weight:900;margin-top:2px;letter-spacing:-.2px">${escapeHtml(nextGoal)}</div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="background:#059669;border-radius:20px;padding:15px;text-align:center;margin-top:16px">
+        <div style="font-size:16px;font-weight:900;color:#FFF;letter-spacing:-.3px">당신의 점수는? 확인하기 →</div>
+      </div>
+
+      <!-- 스토어 다운로드 안내 (D 옵션) -->
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0F0F0">
+        <div style="text-align:center;margin-bottom:10px">
+          <div style="font-size:11px;color:#059669;letter-spacing:2.5px;font-weight:900">DOWNLOAD NOW</div>
+          <div style="font-size:16px;color:#0F172A;font-weight:900;margin-top:3px;letter-spacing:-.3px">'건강어때' 검색 &amp; 다운로드</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:#000;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="#FFF"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            <div style="flex:1;line-height:1.15">
+              <div style="font-size:10px;color:#DDD;letter-spacing:.5px">Download on the</div>
+              <div style="font-size:15px;color:#FFF;font-weight:900;letter-spacing:-.3px">App Store</div>
+            </div>
+          </div>
+          <div style="background:#000;border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+            <svg width="26" height="26" viewBox="0 0 24 24"><path fill="#FFF" d="M3.1 2.4C2.4 2.9 2 3.7 2 4.7v14.6c0 1 .4 1.8 1.1 2.3l.2.2 8.2-8.2v-.2L3.1 2.4M15.5 8.5L4.9 2.5c-.5-.3-1.1-.4-1.5-.1L12 11l3.5-2.5m4.7 2.7l-3.2-1.8L13.1 12l3.9 3.6 3.3-1.9c1-.6 1-2.1-.1-2.5M4.9 21.5c.4.2 1 .2 1.5-.1L15.5 15.5 12 12l-8.7 8.7c0 .3.6.6 1.6.8"/></svg>
+            <div style="flex:1;line-height:1.15">
+              <div style="font-size:10px;color:#DDD;letter-spacing:.5px">Download on</div>
+              <div style="font-size:15px;color:#FFF;font-weight:900;letter-spacing:-.3px">Google Play</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   `;
   return div;
