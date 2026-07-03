@@ -5078,22 +5078,62 @@ function selectMealTime(time) {
   });
 }
 
+// 🛡 안전한 파일 → dataURL 헬퍼 (FileReader 없는 iOS 웹뷰 대비)
+function fileToDataUrlSafe(file) {
+  return new Promise((resolve, reject) => {
+    // Method 1: FileReader (표준)
+    if (typeof FileReader !== 'undefined') {
+      try {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = () => tryFallback();
+        reader.readAsDataURL(file);
+        return;
+      } catch(e) { console.warn('[FileReader] failed, using fallback:', e); }
+    }
+    tryFallback();
+
+    function tryFallback() {
+      // Method 2: URL.createObjectURL + canvas (iOS 웹뷰 fallback)
+      try {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = function() {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            URL.revokeObjectURL(url);
+            resolve(dataUrl);
+          } catch(e) { reject(e); }
+        };
+        img.onerror = () => reject(new Error('이미지 로드 실패'));
+        img.src = url;
+      } catch(e) { reject(e); }
+    }
+  });
+}
+
 function handleFoodFile(input) {
   const file = input.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
+  fileToDataUrlSafe(file).then(dataUrl => {
     // 이미지 압축 (반찬 많은 사진 대응 — Request Too Large 방지)
     // 1000px / 70% 품질 = 안전한 사이즈 (Vercel 4.5MB 한도 안전 통과)
-    compressImageForUpload(e.target.result, 1000, 0.7).then(compressed => {
-      foodImageSrc = compressed;
-      foodImageB64 = compressed.split(',')[1];
-      document.getElementById('foodPreviewImg').src = compressed;
-      document.getElementById('foodErrorBox').classList.remove('show');
-      showScreen('screenFoodPreview');
-    });
-  };
-  reader.readAsDataURL(file);
+    return compressImageForUpload(dataUrl, 1000, 0.7);
+  }).then(compressed => {
+    foodImageSrc = compressed;
+    foodImageB64 = compressed.split(',')[1];
+    document.getElementById('foodPreviewImg').src = compressed;
+    document.getElementById('foodErrorBox').classList.remove('show');
+    showScreen('screenFoodPreview');
+  }).catch(e => {
+    console.error('[handleFoodFile]', e);
+    alert('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
+  });
   input.value = '';
 }
 
@@ -5117,19 +5157,20 @@ function enterIngredient() {
 function handleIngredientFile(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
+  fileToDataUrlSafe(file).then(dataUrl => {
     // 성분표는 글자가 생명! 거의 압축 안 함
-    compressImageForUpload(e.target.result, 2000, 0.92).then(compressed => {
-      ingredientImageSrc = compressed;
-      ingredientImageB64 = compressed.split(',')[1];
-      document.getElementById('ingredientPreviewImg').src = compressed;
-      const eb = document.getElementById('ingredientErrorBox');
-      if (eb) eb.classList.remove('show');
-      showScreen('screenIngredientPreview');
-    });
-  };
-  reader.readAsDataURL(file);
+    return compressImageForUpload(dataUrl, 2000, 0.92);
+  }).then(compressed => {
+    ingredientImageSrc = compressed;
+    ingredientImageB64 = compressed.split(',')[1];
+    document.getElementById('ingredientPreviewImg').src = compressed;
+    const eb = document.getElementById('ingredientErrorBox');
+    if (eb) eb.classList.remove('show');
+    showScreen('screenIngredientPreview');
+  }).catch(e => {
+    console.error('[handleIngredientFile]', e);
+    alert('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
+  });
   event.target.value = '';
 }
 
@@ -8058,15 +8099,16 @@ function goCapture(mode) {
 function handleFile(input) {
   const file = input.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    imageSrc = e.target.result;
-    imageB64 = e.target.result.split(',')[1];
+  fileToDataUrlSafe(file).then(dataUrl => {
+    imageSrc = dataUrl;
+    imageB64 = dataUrl.split(',')[1];
     document.getElementById('previewImg').src = imageSrc;
     clearError();
     showScreen('screenPreview');
-  };
-  reader.readAsDataURL(file);
+  }).catch(e => {
+    console.error('[handleFile]', e);
+    showError('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
+  });
   input.value = '';
 }
 
@@ -10152,20 +10194,21 @@ function selectKidsMealType(label, idx) {
 function handleKidsMealFile(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    compressImageForUpload(e.target.result, 1000, 0.7).then(compressed => {
-      // 아이 식단은 기존 식단 분석 흐름으로 진행 (프로필 정보 자동 첨부)
-      foodImageSrc = compressed;
-      foodImageB64 = compressed.split(',')[1];
-      foodTarget = 'human'; // 반려동물 X
-      selectedMealTime = _kidsMealTime || guessMealTime();
-      document.getElementById('foodPreviewImg').src = compressed;
-      document.getElementById('foodErrorBox').classList.remove('show');
-      showScreen('screenFoodPreview');
-    });
-  };
-  reader.readAsDataURL(file);
+  fileToDataUrlSafe(file).then(dataUrl => {
+    return compressImageForUpload(dataUrl, 1000, 0.7);
+  }).then(compressed => {
+    // 아이 식단은 기존 식단 분석 흐름으로 진행 (프로필 정보 자동 첨부)
+    foodImageSrc = compressed;
+    foodImageB64 = compressed.split(',')[1];
+    foodTarget = 'human'; // 반려동물 X
+    selectedMealTime = _kidsMealTime || guessMealTime();
+    document.getElementById('foodPreviewImg').src = compressed;
+    document.getElementById('foodErrorBox').classList.remove('show');
+    showScreen('screenFoodPreview');
+  }).catch(e => {
+    console.error('[handleKidsMealFile]', e);
+    alert('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
+  });
   event.target.value = '';
 }
 
@@ -10186,18 +10229,19 @@ function enterKidsIngredient() {
 function handleKidsIngFile(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    compressImageForUpload(e.target.result, 2000, 0.92).then(compressed => {
-      ingredientImageSrc = compressed;
-      ingredientImageB64 = compressed.split(',')[1];
-      document.getElementById('ingredientPreviewImg').src = compressed;
-      const eb = document.getElementById('ingredientErrorBox');
-      if (eb) eb.classList.remove('show');
-      showScreen('screenIngredientPreview');
-    });
-  };
-  reader.readAsDataURL(file);
+  fileToDataUrlSafe(file).then(dataUrl => {
+    return compressImageForUpload(dataUrl, 2000, 0.92);
+  }).then(compressed => {
+    ingredientImageSrc = compressed;
+    ingredientImageB64 = compressed.split(',')[1];
+    document.getElementById('ingredientPreviewImg').src = compressed;
+    const eb = document.getElementById('ingredientErrorBox');
+    if (eb) eb.classList.remove('show');
+    showScreen('screenIngredientPreview');
+  }).catch(e => {
+    console.error('[handleKidsIngFile]', e);
+    alert('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
+  });
   event.target.value = '';
 }
 
