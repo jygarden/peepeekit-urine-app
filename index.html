@@ -10121,17 +10121,30 @@ function renderHomeProfileSection() {
   const greeting = document.getElementById('homeGreeting');
   const greetingSub = document.getElementById('homeGreetingSub');
   if (greeting) {
+    // 🎨 랜덤 응원 문구 (반복 지루함 방지)
+    const _greetLines = [
+      '오늘도 응원해요!',
+      '오늘 하루도 화이팅!',
+      '오늘도 반짝반짝한 하루!',
+      '오늘도 편안한 하루 되세요',
+      '오늘도 함께 건강 지켜요',
+      '좋은 하루 시작해봐요',
+      '오늘도 힘내봐요 ✨',
+      '오늘도 반가워요!'
+    ];
+    const _randomGreet = _greetLines[Math.floor(Math.random() * _greetLines.length)];
+
     if (active.id === 'main') {
       const userName = (typeof getPersonalProfile === 'function' && getPersonalProfile()?.name) || localStorage.getItem('userName') || '';
       greeting.innerHTML = userName
-        ? `${escapeHtml(userName)}<br>오늘도 응원해요`
-        : '건강한 하루,<br>오늘도 응원해요';
+        ? `${escapeHtml(userName)}님<br>${_randomGreet}`
+        : `건강한 하루,<br>${_randomGreet}`;
     } else if (active.type === 'kid') {
       greeting.innerHTML = `${escapeHtml(active.name)} 🌸<br>오늘도 함께 자라요`;
     } else if (active.type === 'pet') {
       greeting.innerHTML = `${escapeHtml(active.name)} 🐾<br>오늘도 건강하게`;
     } else {
-      greeting.innerHTML = `${escapeHtml(active.name)}<br>오늘도 응원해요`;
+      greeting.innerHTML = `${escapeHtml(active.name)}님<br>${_randomGreet}`;
     }
   }
   if (greetingSub) {
