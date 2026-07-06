@@ -1,882 +1,393 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>건강어때 관리자</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#0F172A;font-family:'Gowun Dodum',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#E2E8F0;min-height:100vh}
-    /* ── 로그인 ── */
-    #login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-    .login-box{background:#1E293B;border-radius:24px;padding:36px 30px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-    .login-box .logo{font-size:48px;margin-bottom:14px}
-    .login-box h1{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
-    .login-box p{font-size:13px;color:#94A3B8;margin-bottom:24px}
-    .login-box input{width:100%;padding:13px 16px;border:1.5px solid #334155;background:#0F172A;color:#fff;border-radius:12px;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit}
-    .login-box input:focus{border-color:#6366F1}
-    .login-box button{width:100%;padding:13px;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(99,102,241,.4)}
-    .error{color:#F87171;font-size:12px;margin-top:8px;min-height:16px}
-    /* ── 어드민 레이아웃 ── */
-    #admin-page{display:none;min-height:100vh}
-    .header{background:#1E293B;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #334155;position:sticky;top:0;z-index:10}
-    .header h1{font-size:18px;font-weight:800;color:#fff}
-    .header .badge{font-size:10px;background:#10B981;color:#fff;padding:2px 8px;border-radius:999px;margin-left:8px;font-weight:700;letter-spacing:.5px}
-    .logout{background:#334155;border:none;color:#fff;padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit}
-    .logout:hover{background:#475569}
-    .nav-tabs{background:#1E293B;padding:0 24px;display:flex;gap:4px;border-bottom:1px solid #334155;overflow-x:auto;position:sticky;top:53px;z-index:10}
-    .tab-btn{background:none;border:none;color:#94A3B8;padding:14px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
-    .tab-btn:hover{color:#E2E8F0}
-    .tab-btn.active{color:#A5B4FC;border-bottom-color:#6366F1}
-    main{padding:24px;max-width:1400px;margin:0 auto}
-    /* ── 대시보드 카드 ── */
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
-    .stat-card{background:#1E293B;border-radius:16px;padding:18px;border:1px solid #334155;transition:transform .15s,box-shadow .15s}
-    .stat-card.clickable{cursor:pointer}
-    .stat-card.clickable:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(99,102,241,.25)}
-    .stat-card.clickable:active{transform:translateY(0)}
-    .stat-label{font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px}
-    .stat-value{font-size:30px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1}
-    .stat-sub{font-size:11px;color:#64748B;margin-top:6px}
-    .stat-card.accent{background:linear-gradient(135deg,#4338CA,#6366F1);border:none}
-    .stat-card.accent .stat-label{color:rgba(255,255,255,.7)}
-    .stat-card.accent .stat-value{color:#fff}
-    .stat-card.accent .stat-sub{color:rgba(255,255,255,.7)}
-    .stat-card.warning{background:linear-gradient(135deg,#92400E,#F59E0B);border:none}
-    .stat-card.warning .stat-label{color:rgba(255,255,255,.85)}
-    .stat-card.warning .stat-value{color:#fff}
-    .stat-card.success{background:linear-gradient(135deg,#065F46,#10B981);border:none}
-    .stat-card.success .stat-label{color:rgba(255,255,255,.85)}
-    .stat-card.success .stat-value{color:#fff}
-    /* ── 섹션 ── */
-    .section{background:#1E293B;border-radius:16px;padding:20px;margin-bottom:18px;border:1px solid #334155}
-    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-    .section-title{font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:8px}
-    .section-title .count{background:#6366F1;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px}
-    .filter-bar{display:flex;gap:8px;flex-wrap:wrap}
-    .filter-btn{background:#0F172A;border:1px solid #334155;color:#94A3B8;padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
-    .filter-btn:hover{color:#E2E8F0;border-color:#475569}
-    .filter-btn.active{background:#6366F1;color:#fff;border-color:#6366F1}
-    .search-input{background:#0F172A;border:1px solid #334155;color:#fff;padding:7px 12px;border-radius:8px;font-size:12px;outline:none;font-family:inherit;width:180px}
-    .search-input:focus{border-color:#6366F1}
-    /* ── 테이블 ── */
-    .table-wrap{overflow-x:auto;background:#0F172A;border-radius:10px}
-    table{width:100%;border-collapse:collapse;font-size:12.5px}
-    thead{background:#1E293B}
-    th{text-align:left;padding:11px 12px;font-weight:700;color:#94A3B8;font-size:11px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid #334155}
-    td{padding:11px 12px;color:#E2E8F0;border-bottom:1px solid #1E293B;vertical-align:top}
-    tr:hover td{background:rgba(99,102,241,.05)}
-    tr:last-child td{border-bottom:none}
-    .status-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:-.1px}
-    .status-pending{background:rgba(245,158,11,.18);color:#FBBF24}
-    .status-processing{background:rgba(59,130,246,.18);color:#60A5FA}
-    .status-fulfilled{background:rgba(16,185,129,.18);color:#34D399}
-    .reward-emoji{font-size:18px;margin-right:6px}
-    .action-btn{background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-right:4px;box-shadow:0 2px 6px rgba(16,185,129,.3)}
-    .action-btn:hover{transform:translateY(-1px)}
-    .action-btn.secondary{background:#334155;box-shadow:none}
-    .action-btn.copy{background:#475569;font-size:10px;padding:4px 9px}
-    .empty-row{text-align:center;color:#64748B;padding:36px 20px;font-size:13px}
-    .loading{text-align:center;color:#94A3B8;padding:36px;font-size:13px}
-    .phone-cell{font-family:'SF Mono',Monaco,monospace;color:#A5B4FC;font-size:12px}
-    .toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(16,185,129,.4);z-index:99999;opacity:0;transition:opacity .3s,transform .3s}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    @media(max-width:600px){
-      .header{padding:12px 16px}
-      .nav-tabs{padding:0 16px}
-      main{padding:16px}
-      .section{padding:16px}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건강어때 · 관리자</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+    background: #0F172A;
+    color: #E2E8F0;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  /* 로그인 */
+  .login-card {
+    max-width: 400px;
+    margin: 100px auto;
+    background: #1E293B;
+    border-radius: 16px;
+    padding: 32px 28px;
+    border: 1px solid #334155;
+  }
+  .login-card h1 {
+    font-size: 20px; margin-bottom: 6px; color: #F8FAFC;
+  }
+  .login-card p { font-size: 13px; color: #94A3B8; margin-bottom: 20px; }
+  .login-card input {
+    width: 100%; padding: 12px 14px;
+    background: #0F172A; border: 1px solid #334155;
+    border-radius: 10px; color: #F8FAFC; font-size: 14px;
+    margin-bottom: 12px; outline: none;
+  }
+  .login-card input:focus { border-color: #10B981; }
+  .login-card button {
+    width: 100%; padding: 12px; background: #10B981;
+    border: none; border-radius: 10px; color: #FFF;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .login-card button:hover { background: #059669; }
+  .err { color: #F87171; font-size: 12px; margin-top: 8px; text-align: center; }
+
+  /* 헤더 */
+  .header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; padding-bottom: 20px;
+    border-bottom: 1px solid #334155;
+  }
+  .header h1 { font-size: 24px; color: #F8FAFC; }
+  .header .sub { font-size: 12px; color: #64748B; margin-top: 4px; }
+  .header button {
+    padding: 8px 16px; background: transparent;
+    border: 1px solid #475569; border-radius: 8px;
+    color: #94A3B8; cursor: pointer; font-size: 13px;
+  }
+  .header button:hover { background: #1E293B; color: #F8FAFC; }
+
+  /* 통계 카드 */
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: #1E293B; border-radius: 12px;
+    padding: 16px 20px; border: 1px solid #334155;
+  }
+  .stat-card .label { font-size: 11px; color: #64748B; letter-spacing: 1px; text-transform: uppercase; }
+  .stat-card .value { font-size: 24px; color: #F8FAFC; font-weight: 700; margin-top: 6px; }
+
+  /* 목록 */
+  .section-title { font-size: 18px; color: #F8FAFC; margin-bottom: 16px; }
+  .search-bar {
+    display: flex; gap: 10px; margin-bottom: 20px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .search-bar input {
+    flex: 1; min-width: 220px; padding: 12px 16px;
+    background: #1E293B; border: 1px solid #334155;
+    border-radius: 10px; color: #F8FAFC; font-size: 14px;
+    outline: none;
+  }
+  .search-bar input:focus { border-color: #10B981; }
+  .search-bar button {
+    padding: 12px 18px; background: transparent;
+    border: 1px solid #475569; border-radius: 10px;
+    color: #94A3B8; cursor: pointer; font-size: 13px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .search-bar button:hover { background: #1E293B; color: #F8FAFC; }
+  .search-bar .btn-danger {
+    background: #7F1D1D; border-color: #7F1D1D; color: #FEE2E2;
+  }
+  .search-bar .btn-danger:hover { background: #991B1B; color: #FFF; }
+  .search-bar .btn-refresh {
+    background: transparent; border-color: #334155; color: #94A3B8;
+  }
+
+  /* 테이블 */
+  .table-wrap {
+    background: #1E293B; border-radius: 14px;
+    border: 1px solid #334155; overflow-x: auto;
+  }
+  table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  th, td { padding: 14px 18px; text-align: left; }
+  th {
+    background: #0F172A; color: #94A3B8;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: .5px; text-transform: uppercase;
+    border-bottom: 1px solid #334155;
+  }
+  td { border-bottom: 1px solid #263449; color: #CBD5E1; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #263449; }
+  .checkbox-col { width: 40px; }
+  .action-col { width: 100px; text-align: right; }
+  .btn-del {
+    padding: 6px 12px; background: transparent;
+    border: 1px solid #7F1D1D; border-radius: 6px;
+    color: #FCA5A5; font-size: 12px; cursor: pointer;
+  }
+  .btn-del:hover { background: #7F1D1D; color: #FFF; }
+  .muted { color: #64748B; }
+  .loading, .empty {
+    text-align: center; padding: 60px 20px; color: #64748B;
+  }
+  input[type="checkbox"] { cursor: pointer; width: 16px; height: 16px; accent-color: #10B981; }
+
+  @media (max-width: 720px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    body { padding: 12px; }
+    th, td { padding: 10px 12px; font-size: 12px; }
+    .action-col { width: 70px; }
+  }
+</style>
 </head>
 <body>
 
-<!-- ════════ 로그인 페이지 ════════ -->
-<div id="login-page">
-  <div class="login-box">
-    <div class="logo">🛡️</div>
-    <h1>건강어때 관리자</h1>
-    <p>관리자 비밀번호를 입력해주세요</p>
-    <input type="password" id="pw-input" placeholder="비밀번호" onkeydown="if(event.key==='Enter')login()"/>
-    <button onclick="login()">로그인</button>
-    <div class="error" id="pw-error"></div>
+<!-- 로그인 화면 -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>🩺 건강어때 관리자</h1>
+    <p>비밀번호를 입력해주세요</p>
+    <input type="password" id="pwInput" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">로그인</button>
+    <div class="err" id="loginErr"></div>
   </div>
 </div>
 
-<!-- ════════ 어드민 페이지 ════════ -->
-<div id="admin-page">
+<!-- 관리자 화면 -->
+<div id="adminScreen" class="container" style="display:none">
+
   <div class="header">
-    <h1>🛡️ 건강어때 관리자 <span class="badge">v2.0</span></h1>
-    <button class="logout" onclick="logout()">로그아웃</button>
+    <div>
+      <h1>🩺 건강어때 관리자</h1>
+      <div class="sub" id="lastUpdate">-</div>
+    </div>
+    <button onclick="doLogout()">로그아웃</button>
   </div>
 
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-dashboard">대시보드</button>
-    <button class="tab-btn" onclick="switchTab('users')" id="tab-users">사용자</button>
-    <button class="tab-btn" onclick="switchTab('foods')" id="tab-foods">식단 기록</button>
-    <button class="tab-btn" onclick="switchTab('waters')" id="tab-waters">물 섭취</button>
-    <button class="tab-btn" onclick="switchTab('orders')" id="tab-orders">보상 주문</button>
-    <button class="tab-btn" onclick="switchTab('pets')" id="tab-pets">반려동물 기록</button>
-    <button class="tab-btn" onclick="switchTab('humans')" id="tab-humans">사람 기록</button>
-    <button class="tab-btn" onclick="switchTab('marketing')" id="tab-marketing" style="color:#F59E0B;font-weight:800">🎯 마케팅</button>
+  <!-- 통계 -->
+  <div class="stats" id="statsBox">
+    <div class="stat-card"><div class="label">총 사용자</div><div class="value" id="statTotal">-</div></div>
+    <div class="stat-card"><div class="label">오늘 가입</div><div class="value" id="statToday">-</div></div>
+    <div class="stat-card"><div class="label">이번 주 가입</div><div class="value" id="statWeek">-</div></div>
+    <div class="stat-card"><div class="label">최근 접속 (24시간)</div><div class="value" id="statActive">-</div></div>
   </div>
 
-  <!-- 마케팅 탭 -->
-  <main id="content-marketing" style="display:none">
-    <h2 style="font-size:18px;margin-bottom:14px">🎯 마케팅·영양제 추천 분석</h2>
+  <div class="section-title">사용자 목록</div>
 
-    <!-- 영양제별 추천 후보 통계 -->
-    <div class="stats-grid" style="margin-bottom:20px">
-      <div class="stat-card" style="background:linear-gradient(135deg,#DC2626,#B91C1C)">
-        <div class="stat-label">철분 필요</div>
-        <div class="stat-value" id="mkt-iron">-</div>
-        <div class="stat-sub">철분제 추천 대상</div>
-      </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#0891B2,#0E7490)">
-        <div class="stat-label">칼슘 필요</div>
-        <div class="stat-value" id="mkt-calcium">-</div>
-        <div class="stat-sub">칼슘+VD 복합 추천</div>
-      </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#F59E0B,#D97706)">
-        <div class="stat-label">비타민D 필요</div>
-        <div class="stat-value" id="mkt-vd">-</div>
-        <div class="stat-sub">비타민D 5000IU 추천</div>
-      </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">
-        <div class="stat-label">오메가3 필요</div>
-        <div class="stat-value" id="mkt-omega3">-</div>
-        <div class="stat-sub">rTG 오메가3 추천</div>
-      </div>
-      <div class="stat-card" style="background:linear-gradient(135deg,#059669,#047857)">
-        <div class="stat-label">종합비타민 필요</div>
-        <div class="stat-value" id="mkt-multi">-</div>
-        <div class="stat-sub">3개 이상 부족</div>
-      </div>
-      <div class="stat-card accent">
-        <div class="stat-label">고전환 후보</div>
-        <div class="stat-value" id="mkt-hot">-</div>
-        <div class="stat-sub">구매 가능성 70%+</div>
-      </div>
-    </div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="이름·휴대폰 검색" oninput="renderTable()">
+    <button class="btn-refresh" onclick="loadUsers(true)">🔄 새로고침</button>
+    <button class="btn-danger" id="btnDeleteSelected" onclick="deleteSelected()" style="display:none">🗑 선택 삭제 (<span id="selCount">0</span>)</button>
+  </div>
 
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🎯 영양제 추천 후보군 (구매 가능성 높음)</div>
-        <button class="logout" onclick="exportMarketingCSV()" style="background:#10B981">📥 CSV 내보내기</button>
-      </div>
-      <div id="marketing-list"></div>
-    </div>
+  <div class="table-wrap">
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th class="checkbox-col"><input type="checkbox" id="chkAll" onchange="toggleAll(this.checked)"></th>
+          <th>이름</th>
+          <th>휴대폰</th>
+          <th>성별</th>
+          <th>나이</th>
+          <th>키/몸무게</th>
+          <th>체질</th>
+          <th>가입일</th>
+          <th>최근접속</th>
+          <th class="action-col">삭제</th>
+        </tr>
+      </thead>
+      <tbody id="usersBody">
+        <tr><td colspan="10" class="loading">불러오는 중...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-    <div class="section" style="margin-top:18px">
-      <div class="section-header">
-        <div class="section-title">💎 추천 기회 (supplement_opportunities)</div>
-      </div>
-      <div id="opportunities-list"></div>
-    </div>
-  </main>
-
-  <!-- 사용자 탭 -->
-  <main id="content-users" style="display:none">
-    <h2 style="font-size:18px;margin-bottom:14px">사용자 목록</h2>
-    <div style="background:#0f172a;border-radius:12px;padding:14px;margin-bottom:14px">
-      <input id="users-search" placeholder="이름·휴대폰 검색..." oninput="filterUsers()" style="width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#1e293b;color:#fff;font-size:13px"/>
-    </div>
-    <div id="users-list"></div>
-  </main>
-
-  <!-- 식단 기록 탭 -->
-  <main id="content-foods" style="display:none">
-    <h2 style="font-size:18px;margin-bottom:14px">식단 분석 기록</h2>
-    <div id="foods-list"></div>
-  </main>
-
-  <!-- 물 섭취 탭 -->
-  <main id="content-waters" style="display:none">
-    <h2 style="font-size:18px;margin-bottom:14px">물 섭취 기록</h2>
-    <div id="waters-list"></div>
-  </main>
-
-  <!-- 대시보드 탭 -->
-  <main id="content-dashboard">
-    <div class="stats-grid">
-      <div class="stat-card accent clickable" onclick="switchTab('orders')">
-        <div class="stat-label">처리 대기 주문</div>
-        <div class="stat-value" id="stat-pending">-</div>
-        <div class="stat-sub">즉시 처리 필요</div>
-      </div>
-      <div class="stat-card clickable" onclick="switchTab('users')" style="background:linear-gradient(135deg,#10b981,#059669)">
-        <div class="stat-label">전체 사용자</div>
-        <div class="stat-value" id="stat-users">-</div>
-        <div class="stat-sub">통합 가입자 수</div>
-      </div>
-      <div class="stat-card clickable" onclick="switchTab('foods')" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">
-        <div class="stat-label">식단 분석</div>
-        <div class="stat-value" id="stat-foods">-</div>
-        <div class="stat-sub">누적 분석 수</div>
-      </div>
-      <div class="stat-card clickable" onclick="switchTab('waters')" style="background:linear-gradient(135deg,#06b6d4,#0891b2)">
-        <div class="stat-label">물 섭취 기록</div>
-        <div class="stat-value" id="stat-waters">-</div>
-        <div class="stat-sub">누적 일자 수</div>
-      </div>
-      <div class="stat-card clickable" onclick="switchTab('pets')">
-        <div class="stat-label">반려동물 기록</div>
-        <div class="stat-value" id="stat-pets">-</div>
-        <div class="stat-sub">누적 검사 수</div>
-      </div>
-      <div class="stat-card clickable" onclick="switchTab('humans')">
-        <div class="stat-label">사람 기록</div>
-        <div class="stat-value" id="stat-humans">-</div>
-        <div class="stat-sub">누적 검사 수</div>
-      </div>
-      <div class="stat-card warning">
-        <div class="stat-label">오늘 검사</div>
-        <div class="stat-value" id="stat-today">-</div>
-        <div class="stat-sub">24시간 이내</div>
-      </div>
-      <div class="stat-card success clickable" onclick="switchTab('orders')">
-        <div class="stat-label">완료된 주문</div>
-        <div class="stat-value" id="stat-fulfilled">-</div>
-        <div class="stat-sub">누적 발송</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🔥 최근 처리 대기 주문</div>
-        <button class="filter-btn active" onclick="switchTab('orders')">전체 보기 →</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>주문일시</th><th>보상</th><th>이름</th><th>연락처</th><th>상태</th></tr>
-          </thead>
-          <tbody id="dashRecentOrders"><tr><td colspan="5" class="loading">불러오는 중...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-
-  <!-- 보상 주문 탭 -->
-  <main id="content-orders" style="display:none">
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🎁 보상 주문 목록 <span class="count" id="ordersCount">-</span></div>
-        <div class="filter-bar">
-          <button class="filter-btn active" onclick="filterOrders('all')" id="ofall">전체</button>
-          <button class="filter-btn" onclick="filterOrders('pending')" id="ofpending">⏳ 대기</button>
-          <button class="filter-btn" onclick="filterOrders('processing')" id="ofproc">🚚 처리중</button>
-          <button class="filter-btn" onclick="filterOrders('fulfilled')" id="offul">✅ 완료</button>
-          <input type="text" class="search-input" id="orderSearch" placeholder="이름·전화 검색" oninput="renderOrders()"/>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>주문일시</th>
-              <th>주문번호</th>
-              <th>보상</th>
-              <th>받는 분</th>
-              <th>연락처</th>
-              <th>주소/메모</th>
-              <th>상태</th>
-              <th>처리</th>
-            </tr>
-          </thead>
-          <tbody id="ordersList"><tr><td colspan="8" class="loading">불러오는 중...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-
-  <!-- 반려동물 기록 탭 -->
-  <main id="content-pets" style="display:none">
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🐾 반려동물 검사 기록 <span class="count" id="petsCount">-</span></div>
-        <div class="filter-bar">
-          <button class="filter-btn active" onclick="filterPets('all')" id="pfall">전체</button>
-          <button class="filter-btn" onclick="filterPets('marketing')" id="pfmkt">📢 마케팅 동의</button>
-          <input type="text" class="search-input" id="petSearch" placeholder="이름·연락처 검색" oninput="renderPets()"/>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>일시</th>
-              <th>종류</th>
-              <th>이름</th>
-              <th>품종</th>
-              <th>성별</th>
-              <th>생년월</th>
-              <th>지역</th>
-              <th>연락처</th>
-              <th>마케팅</th>
-            </tr>
-          </thead>
-          <tbody id="petsList"><tr><td colspan="9" class="loading">불러오는 중...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-
-  <!-- 사람 기록 탭 -->
-  <main id="content-humans" style="display:none">
-    <div class="section">
-      <div class="section-header">
-        <div class="section-title">🧑 사람 검사 기록 <span class="count" id="humansCount">-</span></div>
-        <div class="filter-bar">
-          <button class="filter-btn active" onclick="filterHumans('all')" id="hfall">전체</button>
-          <button class="filter-btn" onclick="filterHumans('marketing')" id="hfmkt">📢 마케팅 동의</button>
-          <input type="text" class="search-input" id="humanSearch" placeholder="이름·연락처 검색" oninput="renderHumans()"/>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>일시</th>
-              <th>이름</th>
-              <th>성별</th>
-              <th>생년월</th>
-              <th>지역</th>
-              <th>생활패턴</th>
-              <th>연락처</th>
-              <th>마케팅</th>
-            </tr>
-          </thead>
-          <tbody id="humansList"><tr><td colspan="8" class="loading">불러오는 중...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
 </div>
-
-<div id="toast" class="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════════
-// ⚠️ 본인 정보로 채워주세요!
-// ════════════════════════════════════════════════════════════
+const SB_URL = 'https://guvzbtemficekutgxngb.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
 const ADMIN_PW = 'eggdot0220!';
-const SUPABASE_URL = 'https://guvzbtemficekutgxngb.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
-// ════════════════════════════════════════════════════════════
 
-// ─── 로그인 ───
-function login() {
-  const pw = document.getElementById('pw-input').value;
+let allUsers = [];
+const selected = new Set();
+
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  const err = document.getElementById('loginErr');
   if (pw === ADMIN_PW) {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('admin-page').style.display = 'block';
-    sessionStorage.setItem('admin_logged_in', '1');
-    loadAllData();
+    sessionStorage.setItem('adminAuth', '1');
+    showAdmin();
   } else {
-    document.getElementById('pw-error').textContent = '비밀번호가 틀렸습니다';
+    err.textContent = '비밀번호가 틀렸어요';
   }
 }
-function logout() {
-  sessionStorage.removeItem('admin_logged_in');
+function doLogout() {
+  sessionStorage.removeItem('adminAuth');
   location.reload();
 }
-// 세션 유지 (탭 새로고침해도 로그인 유지)
-if (sessionStorage.getItem('admin_logged_in') === '1') {
-  document.getElementById('login-page').style.display = 'none';
-  document.getElementById('admin-page').style.display = 'block';
-  window.addEventListener('load', () => loadAllData());
+function showAdmin() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminScreen').style.display = 'block';
+  loadUsers();
 }
 
-// ─── 탭 전환 ───
-function switchTab(tab) {
-  ['dashboard','users','foods','waters','orders','pets','humans','marketing'].forEach(t => {
-    const c = document.getElementById('content-'+t);
-    if (c) c.style.display = t === tab ? '' : 'none';
-    const b = document.getElementById('tab-'+t);
-    if (b) b.classList.toggle('active', t === tab);
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(SB_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      apikey: SB_KEY,
+      Authorization: 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      Prefer: opts.method === 'DELETE' ? 'return=minimal' : 'count=exact',
+      ...(opts.headers || {})
+    }
   });
-  window.scrollTo(0,0);
-  // 탭 진입 시 데이터 로드
-  if (tab === 'users') loadUsers();
-  else if (tab === 'foods') loadFoods();
-  else if (tab === 'waters') loadWaters();
-  else if (tab === 'marketing') loadMarketing();
+  return res;
 }
 
-// ─── 🎯 마케팅 탭 ───
-let marketingCandidates = [];
-async function loadMarketing() {
+async function loadUsers(force) {
+  const body = document.getElementById('usersBody');
+  body.innerHTML = '<tr><td colspan="10" class="loading">불러오는 중...</td></tr>';
   try {
-    // 1. 영양제별 추천 통계
-    const insights = await sbGet('nutrition_insights', 'select=*');
-    const stats = {
-      iron: insights.filter(i => i.needs_iron_supplement).length,
-      calcium: insights.filter(i => i.needs_calcium_supplement).length,
-      vd: insights.filter(i => i.needs_vitamin_d_supplement).length,
-      omega3: insights.filter(i => i.needs_omega3_supplement).length,
-      multi: insights.filter(i => i.needs_multivitamin).length
-    };
-    document.getElementById('mkt-iron').textContent = stats.iron;
-    document.getElementById('mkt-calcium').textContent = stats.calcium;
-    document.getElementById('mkt-vd').textContent = stats.vd;
-    document.getElementById('mkt-omega3').textContent = stats.omega3;
-    document.getElementById('mkt-multi').textContent = stats.multi;
-
-    // 2. 고전환 후보 (구매 가능성 70%+)
-    const hotUsers = await sbGet('users', 'select=*&supplement_propensity=gte.70&order=supplement_propensity.desc&limit=100');
-    document.getElementById('mkt-hot').textContent = hotUsers.length;
-    marketingCandidates = hotUsers;
-
-    // 3. 추천 후보군 리스트
-    const list = document.getElementById('marketing-list');
-    if (hotUsers.length === 0) {
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:#94A3B8">아직 추천 대상이 없어요. 식단 분석 데이터가 더 쌓이면 자동으로 나타납니다.</div>';
-    } else {
-      list.innerHTML = `
-        <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-          <thead><tr style="background:#1E293B">
-            <th style="padding:10px;text-align:left;font-size:11px;color:#94A3B8">이름</th>
-            <th style="padding:10px;text-align:left;font-size:11px;color:#94A3B8">연락처</th>
-            <th style="padding:10px;text-align:center;font-size:11px;color:#94A3B8">분석 수</th>
-            <th style="padding:10px;text-align:center;font-size:11px;color:#94A3B8">LTV</th>
-            <th style="padding:10px;text-align:center;font-size:11px;color:#94A3B8">구매 가능성</th>
-            <th style="padding:10px;text-align:left;font-size:11px;color:#94A3B8">추천 제품</th>
-            <th style="padding:10px;text-align:left;font-size:11px;color:#94A3B8">세그먼트</th>
-          </tr></thead>
-          <tbody>
-            ${hotUsers.map(u => {
-              const recs = (u.recommended_products || []).map(p => p.name).join(', ') || '-';
-              const segs = (u.marketing_segments || []).slice(0,3).join(', ') || '-';
-              const ltvColor = u.lifetime_value_score >= 70 ? '#10B981' : u.lifetime_value_score >= 40 ? '#F59E0B' : '#94A3B8';
-              const propColor = u.supplement_propensity >= 80 ? '#DC2626' : u.supplement_propensity >= 60 ? '#F59E0B' : '#94A3B8';
-              return `<tr style="border-bottom:1px solid #1E293B">
-                <td style="padding:10px">${u.name || '-'}</td>
-                <td style="padding:10px;color:#94A3B8;font-size:12px">${u.phone || '-'}</td>
-                <td style="padding:10px;text-align:center">${u.total_analyses || 0}</td>
-                <td style="padding:10px;text-align:center;color:${ltvColor};font-weight:800">${u.lifetime_value_score || 0}</td>
-                <td style="padding:10px;text-align:center;color:${propColor};font-weight:800">${u.supplement_propensity || 0}%</td>
-                <td style="padding:10px;font-size:12px;color:#10B981">${recs}</td>
-                <td style="padding:10px;font-size:11px;color:#94A3B8">${segs}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table></div>
-      `;
-    }
-
-    // 4. 추천 기회 (최근)
-    const opps = await sbGet('supplement_opportunities', 'select=*&order=confidence_score.desc&limit=50');
-    const oppList = document.getElementById('opportunities-list');
-    if (opps.length === 0) {
-      oppList.innerHTML = '<div style="padding:14px;color:#94A3B8;font-size:13px">추천 기회 데이터가 아직 없어요.</div>';
-    } else {
-      oppList.innerHTML = opps.map(o => `
-        <div style="background:#1E293B;border-radius:10px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:800;color:#F59E0B">${o.product_name || o.supplement_type}</div>
-            <div style="font-size:12px;color:#94A3B8;margin-top:4px">${o.reason || ''}</div>
-            <div style="font-size:11px;color:#64748B;margin-top:4px">UUID: ${(o.user_uuid || '').slice(0,8)}...</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:11px;color:#94A3B8">신뢰도</div>
-            <div style="font-size:18px;font-weight:800;color:${o.confidence_score >= 70 ? '#10B981' : '#F59E0B'}">${o.confidence_score || 0}%</div>
-            <div style="font-size:11px;color:#94A3B8;margin-top:2px">예상 ${(o.revenue_potential_krw || 0).toLocaleString()}원</div>
-          </div>
-        </div>
-      `).join('');
-    }
-  } catch(e) {
-    console.error('마케팅 로드 실패:', e);
-    document.getElementById('marketing-list').innerHTML = '<div style="color:#DC2626;padding:20px">데이터 로드 실패 — Supabase 테이블 확인 필요</div>';
+    const res = await sbFetch('users?select=*&order=created_at.desc&limit=1000');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    allUsers = await res.json();
+    document.getElementById('lastUpdate').textContent = '최종 업데이트: ' + new Date().toLocaleString('ko-KR');
+    updateStats();
+    renderTable();
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="10" class="empty">불러오기 실패: ' + e.message + '</td></tr>';
   }
 }
 
-// CSV 내보내기 (마케팅 캠페인 발송용)
-function exportMarketingCSV() {
-  if (!marketingCandidates.length) { alert('내보낼 데이터가 없어요'); return; }
-  const headers = ['이름','휴대폰','나이','성별','체질','분석수','LTV','구매가능성','추천제품','마케팅세그먼트'];
-  const rows = marketingCandidates.map(u => [
-    u.name || '',
-    u.phone || '',
-    u.birth_year ? new Date().getFullYear() - u.birth_year : '',
-    u.gender || '',
-    u.sasang_type || '',
-    u.total_analyses || 0,
-    u.lifetime_value_score || 0,
-    u.supplement_propensity || 0,
-    (u.recommended_products || []).map(p => p.name).join('|'),
-    (u.marketing_segments || []).join('|')
-  ]);
-  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `marketing-candidates-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
+function updateStats() {
+  const total = allUsers.length;
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const weekAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+  const dayAgo = now.getTime() - 24 * 60 * 60 * 1000;
+  let today = 0, week = 0, active = 0;
+  allUsers.forEach(u => {
+    const c = u.created_at ? new Date(u.created_at).getTime() : 0;
+    if (c >= todayStart) today++;
+    if (c >= weekAgo) week++;
+    const la = u.last_active ? new Date(u.last_active).getTime() : c;
+    if (la >= dayAgo) active++;
+  });
+  document.getElementById('statTotal').textContent = total.toLocaleString();
+  document.getElementById('statToday').textContent = today.toLocaleString();
+  document.getElementById('statWeek').textContent = week.toLocaleString();
+  document.getElementById('statActive').textContent = active.toLocaleString();
 }
 
-// ─── 사용자 목록 ───
-let allUsers = [];
-async function loadUsers() {
-  try {
-    const data = await sbGet('users', 'select=*&order=created_at.desc&limit=200');
-    allUsers = data;
-    renderUsers(data);
-  } catch(e) { document.getElementById('users-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
+function calcAge(y) {
+  if (!y) return '-';
+  return (new Date().getFullYear() - parseInt(y)) + '세';
 }
-function filterUsers() {
-  const q = document.getElementById('users-search').value.toLowerCase();
-  const filtered = allUsers.filter(u =>
-    (u.name||'').toLowerCase().includes(q) || (u.phone||'').includes(q)
-  );
-  renderUsers(filtered);
-}
-function renderUsers(data) {
-  const el = document.getElementById('users-list');
-  if (!data || data.length === 0) { el.innerHTML = '<div style="color:#64748b;padding:30px;text-align:center">사용자 없음</div>'; return; }
-  el.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
-    <thead><tr style="background:#1e293b;color:#94a3b8;font-size:11px;letter-spacing:.5px;text-transform:uppercase">
-      <th style="padding:11px;text-align:left">이름</th>
-      <th style="padding:11px;text-align:left">휴대폰</th>
-      <th style="padding:11px;text-align:left">성별</th>
-      <th style="padding:11px;text-align:left">나이</th>
-      <th style="padding:11px;text-align:left">키/몸무게</th>
-      <th style="padding:11px;text-align:left">체질</th>
-      <th style="padding:11px;text-align:left">가입일</th>
-      <th style="padding:11px;text-align:left">최근접속</th>
-    </tr></thead>
-    <tbody>${data.map(u => `
-      <tr style="border-top:1px solid #1e293b;font-size:13px">
-        <td style="padding:10px"><strong>${u.name||'-'}</strong></td>
-        <td style="padding:10px">${u.phone||'-'}</td>
-        <td style="padding:10px">${u.gender==='male'?'남':u.gender==='female'?'여':'-'}</td>
-        <td style="padding:10px">${u.birth_year ? (new Date().getFullYear()-u.birth_year)+'세' : '-'}</td>
-        <td style="padding:10px">${u.height||'?'}/${u.weight||'?'}</td>
-        <td style="padding:10px">${u.sasang_type||'-'}</td>
-        <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(u.created_at)}</td>
-        <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(u.last_active)}</td>
-      </tr>`).join('')}
-    </tbody></table>`;
-}
-
-// ─── 식단 기록 ───
-async function loadFoods() {
-  try {
-    const data = await sbGet('food_records', 'select=*&order=created_at.desc&limit=200');
-    const usersData = allUsers.length ? allUsers : await sbGet('users', 'select=user_uuid,name');
-    const userMap = {};
-    usersData.forEach(u => userMap[u.user_uuid] = u.name);
-    const el = document.getElementById('foods-list');
-    if (!data.length) { el.innerHTML = '<div style="color:#64748b;padding:30px;text-align:center">기록 없음</div>'; return; }
-    el.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
-      <thead><tr style="background:#1e293b;color:#94a3b8;font-size:11px;text-transform:uppercase">
-        <th style="padding:11px;text-align:left">날짜</th>
-        <th style="padding:11px;text-align:left">사용자</th>
-        <th style="padding:11px;text-align:left">식사</th>
-        <th style="padding:11px;text-align:left">음식</th>
-        <th style="padding:11px;text-align:left">칼로리</th>
-        <th style="padding:11px;text-align:left">점수</th>
-      </tr></thead>
-      <tbody>${data.map(r => {
-        const foods = (Array.isArray(r.foods) ? r.foods : []).map(f => f.name||f).filter(Boolean).slice(0,3).join(', ');
-        return `<tr style="border-top:1px solid #1e293b;font-size:13px">
-          <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(r.created_at)}</td>
-          <td style="padding:10px">${userMap[r.user_uuid] || '-'}</td>
-          <td style="padding:10px">${r.meal_time||'-'}</td>
-          <td style="padding:10px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foods||'-'}</td>
-          <td style="padding:10px">${r.total_calories||0} kcal</td>
-          <td style="padding:10px;font-weight:700;color:${r.balance_score>=80?'#10b981':r.balance_score>=60?'#f59e0b':'#ef4444'}">${r.balance_score||0}</td>
-        </tr>`;
-      }).join('')}
-      </tbody></table>`;
-  } catch(e) { document.getElementById('foods-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
-}
-
-// ─── 물 섭취 ───
-async function loadWaters() {
-  try {
-    const data = await sbGet('water_intake', 'select=*&order=date.desc&limit=300');
-    const usersData = allUsers.length ? allUsers : await sbGet('users', 'select=user_uuid,name');
-    const userMap = {};
-    usersData.forEach(u => userMap[u.user_uuid] = u.name);
-    const el = document.getElementById('waters-list');
-    if (!data.length) { el.innerHTML = '<div style="color:#64748b;padding:30px;text-align:center">기록 없음</div>'; return; }
-    el.innerHTML = `<table style="width:100%;border-collapse:collapse;background:#0f172a;border-radius:12px;overflow:hidden">
-      <thead><tr style="background:#1e293b;color:#94a3b8;font-size:11px;text-transform:uppercase">
-        <th style="padding:11px;text-align:left">날짜</th>
-        <th style="padding:11px;text-align:left">사용자</th>
-        <th style="padding:11px;text-align:left">섭취량</th>
-      </tr></thead>
-      <tbody>${data.map(r => `
-        <tr style="border-top:1px solid #1e293b;font-size:13px">
-          <td style="padding:10px">${r.date}</td>
-          <td style="padding:10px">${userMap[r.user_uuid] || '-'}</td>
-          <td style="padding:10px;font-weight:700;color:${r.amount_ml>=2000?'#10b981':r.amount_ml>=1000?'#f59e0b':'#ef4444'}">${r.amount_ml} ml</td>
-        </tr>`).join('')}
-      </tbody></table>`;
-  } catch(e) { document.getElementById('waters-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
-}
-
-function formatDate(ts) {
-  if (!ts) return '-';
-  const d = new Date(ts);
+function fmtDate(s) {
+  if (!s) return '-';
+  const d = new Date(s);
   return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
+function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c])); }
 
-// ─── Supabase fetch helper ───
-async function sbGet(table, query='') {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query || 'select=*'}`, {
-    headers: { apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer '+SUPABASE_ANON_KEY }
-  });
-  if (!res.ok) throw new Error(`Supabase 오류 (${res.status})`);
-  return res.json();
+function renderTable() {
+  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  const list = q ? allUsers.filter(u => {
+    return (u.name && u.name.toLowerCase().includes(q))
+      || (u.phone && u.phone.toLowerCase().includes(q))
+      || (u.contact && u.contact.toLowerCase().includes(q));
+  }) : allUsers;
+  const body = document.getElementById('usersBody');
+  if (!list.length) {
+    body.innerHTML = '<tr><td colspan="10" class="empty">등록된 사용자가 없어요</td></tr>';
+    return;
+  }
+  body.innerHTML = list.map(u => {
+    const id = u.user_uuid || u.id || u.uuid;
+    const isChecked = selected.has(id) ? 'checked' : '';
+    const gender = u.gender === 'female' ? '여' : u.gender === 'male' ? '남' : (u.gender || '-');
+    const hw = (u.height && u.weight) ? `${u.height}/${u.weight}` : '-';
+    return `<tr>
+      <td class="checkbox-col"><input type="checkbox" ${isChecked} onchange="toggleOne('${esc(id)}', this.checked)"></td>
+      <td>${esc(u.name) || '<span class="muted">-</span>'}</td>
+      <td>${esc(u.phone || u.contact) || '<span class="muted">-</span>'}</td>
+      <td>${gender}</td>
+      <td>${calcAge(u.birth_year)}</td>
+      <td>${hw}</td>
+      <td>${esc(u.body_type) || '<span class="muted">-</span>'}</td>
+      <td class="muted">${fmtDate(u.created_at)}</td>
+      <td class="muted">${fmtDate(u.last_active || u.last_seen)}</td>
+      <td class="action-col"><button class="btn-del" onclick="deleteOne('${esc(id)}', '${esc(u.name || '이 사용자')}')">삭제</button></td>
+    </tr>`;
+  }).join('');
 }
-async function sbPatch(table, idCol, idVal, body) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${idVal}`, {
-    method: 'PATCH',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: 'Bearer '+SUPABASE_ANON_KEY,
-      'Content-Type': 'application/json',
-      Prefer: 'return=minimal'
-    },
-    body: JSON.stringify(body)
+
+function toggleOne(id, checked) {
+  if (checked) selected.add(id); else selected.delete(id);
+  updateSelectionBar();
+}
+function toggleAll(checked) {
+  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+  const list = q ? allUsers.filter(u => (u.name && u.name.toLowerCase().includes(q)) || (u.phone && u.phone.toLowerCase().includes(q))) : allUsers;
+  list.forEach(u => {
+    const id = u.user_uuid || u.id || u.uuid;
+    if (checked) selected.add(id); else selected.delete(id);
   });
-  return res.ok;
+  renderTable();
+  updateSelectionBar();
+}
+function updateSelectionBar() {
+  const btn = document.getElementById('btnDeleteSelected');
+  const cnt = document.getElementById('selCount');
+  cnt.textContent = selected.size;
+  btn.style.display = selected.size > 0 ? '' : 'none';
 }
 
-// ─── 데이터 로드 ───
-let allOrders = [], allPets = [], allHumans = [];
-let orderFilter = 'all', petFilter = 'all', humanFilter = 'all';
-
-async function loadAllData() {
+async function deleteOne(id, name) {
+  if (!id) { alert('삭제 불가: ID 없음'); return; }
+  if (!confirm(`정말 [${name}]을(를) 삭제할까요? 되돌릴 수 없어요.`)) return;
   try {
-    const [orders, pets, humans, users, foods, waters] = await Promise.all([
-      sbGet('reward_orders', 'select=*&order=created_at.desc').catch(()=>[]),
-      sbGet('pet_records', 'select=*&order=created_at.desc').catch(()=>[]),
-      sbGet('human_records', 'select=*&order=created_at.desc').catch(()=>[]),
-      sbGet('users', 'select=id').catch(()=>[]),
-      sbGet('food_records', 'select=id').catch(()=>[]),
-      sbGet('water_intake', 'select=id').catch(()=>[])
-    ]);
-    allOrders = orders || [];
-    allPets = pets || [];
-    allHumans = humans || [];
-    // 새 통계
-    const usersCount = (users || []).length;
-    const foodsCount = (foods || []).length;
-    const watersCount = (waters || []).length;
-    const su = document.getElementById('stat-users'); if (su) su.textContent = usersCount.toLocaleString();
-    const sf = document.getElementById('stat-foods'); if (sf) sf.textContent = foodsCount.toLocaleString();
-    const sw = document.getElementById('stat-waters'); if (sw) sw.textContent = watersCount.toLocaleString();
-    renderDashboard();
-    renderOrders();
-    renderPets();
-    renderHumans();
-  } catch(e) {
-    showToast('데이터 로드 실패: '+e.message, 'error');
-  }
+    const res = await sbFetch(`users?user_uuid=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!res.ok) {
+      // 다른 컬럼 시도
+      const res2 = await sbFetch(`users?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res2.ok) throw new Error('HTTP ' + res.status);
+    }
+    selected.delete(id);
+    allUsers = allUsers.filter(u => (u.user_uuid || u.id || u.uuid) !== id);
+    updateStats();
+    renderTable();
+    updateSelectionBar();
+  } catch (e) { alert('삭제 실패: ' + e.message); }
 }
 
-// ─── 대시보드 ───
-function renderDashboard() {
-  const pending = allOrders.filter(o => o.status === 'pending').length;
-  const fulfilled = allOrders.filter(o => o.status === 'fulfilled').length;
-  const today = new Date().toISOString().split('T')[0];
-  const todayCount = [...allPets, ...allHumans].filter(r => r.created_at && r.created_at.startsWith(today)).length;
-  document.getElementById('stat-pending').textContent = pending;
-  document.getElementById('stat-pets').textContent = allPets.length.toLocaleString();
-  document.getElementById('stat-humans').textContent = allHumans.length.toLocaleString();
-  document.getElementById('stat-today').textContent = todayCount;
-  document.getElementById('stat-fulfilled').textContent = fulfilled.toLocaleString();
-  // 최근 처리 대기 5건
-  const recent = allOrders.filter(o => o.status === 'pending').slice(0, 5);
-  const tbody = document.getElementById('dashRecentOrders');
-  if (recent.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-row">처리 대기 주문이 없어요 ✨</td></tr>';
-  } else {
-    tbody.innerHTML = recent.map(o => `
-      <tr>
-        <td>${fmtDate(o.created_at)}</td>
-        <td>${rewardEmoji(o.reward_id)} ${o.reward_name || '-'}</td>
-        <td>${escape(o.ship_name)}</td>
-        <td class="phone-cell">${escape(o.ship_phone)}</td>
-        <td><span class="status-badge status-${o.status}">${statusLabel(o.status)}</span></td>
-      </tr>`).join('');
+async function deleteSelected() {
+  if (!selected.size) return;
+  if (!confirm(`선택한 ${selected.size}명을 모두 삭제할까요? 되돌릴 수 없어요.`)) return;
+  const ids = Array.from(selected);
+  let ok = 0, fail = 0;
+  for (const id of ids) {
+    try {
+      const res = await sbFetch(`users?user_uuid=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const res2 = await sbFetch(`users?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+        if (!res2.ok) throw new Error();
+      }
+      ok++;
+    } catch (e) { fail++; }
   }
+  selected.clear();
+  allUsers = allUsers.filter(u => !ids.includes(u.user_uuid || u.id || u.uuid));
+  updateStats();
+  renderTable();
+  updateSelectionBar();
+  alert(`✅ ${ok}명 삭제 완료${fail ? ` · ⚠️ ${fail}명 실패` : ''}`);
 }
 
-// ─── 주문 ───
-function filterOrders(f) {
-  orderFilter = f;
-  ['all','pending','proc','ful'].forEach(k => {
-    const map = { all:'all', pending:'pending', proc:'processing', ful:'fulfilled' };
-    document.getElementById('of'+k).classList.toggle('active', map[k] === f);
-  });
-  renderOrders();
+// 자동 로그인 (세션 유지)
+if (sessionStorage.getItem('adminAuth') === '1') {
+  showAdmin();
 }
-function renderOrders() {
-  const q = (document.getElementById('orderSearch')?.value || '').trim().toLowerCase();
-  let list = allOrders;
-  if (orderFilter !== 'all') list = list.filter(o => o.status === orderFilter);
-  if (q) list = list.filter(o =>
-    (o.ship_name||'').toLowerCase().includes(q) ||
-    (o.ship_phone||'').includes(q) ||
-    (o.reward_name||'').toLowerCase().includes(q)
-  );
-  document.getElementById('ordersCount').textContent = list.length;
-  const tbody = document.getElementById('ordersList');
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-row">해당 주문이 없어요</td></tr>';
-    return;
-  }
-  tbody.innerHTML = list.map(o => `
-    <tr>
-      <td>${fmtDate(o.created_at)}</td>
-      <td style="font-family:monospace;font-size:11px;color:#94A3B8">${escape(o.order_id)}</td>
-      <td><span class="reward-emoji">${rewardEmoji(o.reward_id)}</span>${escape(o.reward_name)}</td>
-      <td>${escape(o.ship_name)}</td>
-      <td>
-        <span class="phone-cell">${escape(o.ship_phone)}</span>
-        <button class="action-btn copy" onclick="copyText('${escape(o.ship_phone)}')">복사</button>
-      </td>
-      <td style="max-width:200px">
-        ${o.ship_address ? `<div style="font-size:11px">${escape(o.ship_address)}</div>` : ''}
-        ${o.ship_memo ? `<div style="font-size:10px;color:#94A3B8;margin-top:2px">📝 ${escape(o.ship_memo)}</div>` : ''}
-        ${o.ship_address ? `<button class="action-btn copy" onclick="copyText('${escape(o.ship_address)}')">주소복사</button>` : ''}
-      </td>
-      <td><span class="status-badge status-${o.status}">${statusLabel(o.status)}</span></td>
-      <td>
-        ${o.status === 'pending' ? `<button class="action-btn" onclick="updateOrder('${o.order_id}','processing')">처리중</button>` : ''}
-        ${o.status !== 'fulfilled' ? `<button class="action-btn" onclick="updateOrder('${o.order_id}','fulfilled')">완료</button>` : ''}
-      </td>
-    </tr>`).join('');
-}
-async function updateOrder(orderId, newStatus) {
-  if (!confirm(`주문 ${orderId} 상태를 "${statusLabel(newStatus)}"로 변경할까요?`)) return;
-  const ok = await sbPatch('reward_orders', 'order_id', orderId, { status: newStatus });
-  if (ok) {
-    const o = allOrders.find(x => x.order_id === orderId);
-    if (o) o.status = newStatus;
-    renderOrders();
-    renderDashboard();
-    showToast(`상태 변경: ${statusLabel(newStatus)}`);
-  } else {
-    showToast('변경 실패. 다시 시도해주세요', 'error');
-  }
-}
-
-// ─── 반려동물 기록 ───
-function filterPets(f) {
-  petFilter = f;
-  document.getElementById('pfall').classList.toggle('active', f === 'all');
-  document.getElementById('pfmkt').classList.toggle('active', f === 'marketing');
-  renderPets();
-}
-function renderPets() {
-  const q = (document.getElementById('petSearch')?.value || '').trim().toLowerCase();
-  let list = allPets;
-  if (petFilter === 'marketing') list = list.filter(p => p.marketing_consent === true);
-  if (q) list = list.filter(p =>
-    (p.pet_name||'').toLowerCase().includes(q) ||
-    (p.owner_contact||'').includes(q)
-  );
-  document.getElementById('petsCount').textContent = list.length;
-  const tbody = document.getElementById('petsList');
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty-row">기록 없음</td></tr>';
-    return;
-  }
-  tbody.innerHTML = list.map(p => `
-    <tr>
-      <td>${fmtDate(p.created_at)}</td>
-      <td>${petTypeEmoji(p.pet_type)} ${p.pet_type || '-'}</td>
-      <td>${escape(p.pet_name)}</td>
-      <td>${escape(p.pet_breed)}</td>
-      <td>${escape(p.pet_gender)}</td>
-      <td>${p.pet_birth_year ? `${p.pet_birth_year}.${p.pet_birth_month||'?'}` : '-'}</td>
-      <td>${escape(p.region)}</td>
-      <td class="phone-cell">${escape(p.owner_contact)}</td>
-      <td>${p.marketing_consent ? '✅' : '❌'}</td>
-    </tr>`).join('');
-}
-
-// ─── 사람 기록 ───
-function filterHumans(f) {
-  humanFilter = f;
-  document.getElementById('hfall').classList.toggle('active', f === 'all');
-  document.getElementById('hfmkt').classList.toggle('active', f === 'marketing');
-  renderHumans();
-}
-function renderHumans() {
-  const q = (document.getElementById('humanSearch')?.value || '').trim().toLowerCase();
-  let list = allHumans;
-  if (humanFilter === 'marketing') list = list.filter(h => h.marketing_consent === true);
-  if (q) list = list.filter(h =>
-    ((h.name||h.human_name)||'').toLowerCase().includes(q) ||
-    ((h.contact||h.owner_contact)||'').includes(q)
-  );
-  document.getElementById('humansCount').textContent = list.length;
-  const tbody = document.getElementById('humansList');
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-row">기록 없음</td></tr>';
-    return;
-  }
-  tbody.innerHTML = list.map(h => `
-    <tr>
-      <td>${fmtDate(h.created_at)}</td>
-      <td>${escape(h.name || h.human_name)}</td>
-      <td>${escape(h.gender)}</td>
-      <td>${h.birth_year ? `${h.birth_year}.${h.birth_month||'?'}` : '-'}</td>
-      <td>${escape(h.region)}</td>
-      <td>${escape(h.lifestyle)}</td>
-      <td class="phone-cell">${escape(h.contact || h.owner_contact)}</td>
-      <td>${h.marketing_consent ? '✅' : '❌'}</td>
-    </tr>`).join('');
-}
-
-// ─── 유틸 ───
-function fmtDate(iso) {
-  if (!iso) return '-';
-  const d = new Date(iso);
-  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-function pad(n) { return String(n).padStart(2,'0'); }
-function escape(s) {
-  if (s == null) return '-';
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function statusLabel(s) {
-  return { pending:'⏳ 대기', processing:'🚚 처리중', fulfilled:'✅ 완료' }[s] || s;
-}
-function rewardEmoji(id) {
-  return { mega:'☕', star:'⭐', c5k:'🎟️', c10k:'💸', freekit:'🎁', sample:'💊', snack:'🥨' }[id] || '🎁';
-}
-function petTypeEmoji(t) {
-  return { dog:'🐶', cat:'🐱' }[t] || '🐾';
-}
-function copyText(text) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => showToast(`복사됨: ${text}`));
-  }
-}
-function showToast(msg, type) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  if (type === 'error') toast.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
-  else toast.style.background = 'linear-gradient(135deg,#10B981,#059669)';
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
-}
-
-// 자동 데이터 갱신 (60초마다)
-setInterval(() => {
-  if (sessionStorage.getItem('admin_logged_in') === '1') loadAllData();
-}, 60000);
 </script>
 </body>
 </html>
