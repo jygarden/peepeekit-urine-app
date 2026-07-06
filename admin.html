@@ -78,6 +78,8 @@
     .action-btn:hover{transform:translateY(-1px)}
     .action-btn.secondary{background:#334155;box-shadow:none}
     .action-btn.copy{background:#475569;font-size:10px;padding:4px 9px}
+    .action-btn.delete{background:linear-gradient(135deg,#DC2626,#991B1B);font-size:10.5px;padding:5px 10px;box-shadow:0 2px 6px rgba(220,38,38,.3)}
+    .action-btn.delete:hover{background:linear-gradient(135deg,#B91C1C,#7F1D1D)}
     .empty-row{text-align:center;color:#64748B;padding:36px 20px;font-size:13px}
     .loading{text-align:center;color:#94A3B8;padding:36px;font-size:13px}
     .phone-cell{font-family:'SF Mono',Monaco,monospace;color:#A5B4FC;font-size:12px}
@@ -316,9 +318,10 @@
               <th>지역</th>
               <th>연락처</th>
               <th>마케팅</th>
+              <th>삭제</th>
             </tr>
           </thead>
-          <tbody id="petsList"><tr><td colspan="9" class="loading">불러오는 중...</td></tr></tbody>
+          <tbody id="petsList"><tr><td colspan="10" class="loading">불러오는 중...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -347,9 +350,10 @@
               <th>생활패턴</th>
               <th>연락처</th>
               <th>마케팅</th>
+              <th>삭제</th>
             </tr>
           </thead>
-          <tbody id="humansList"><tr><td colspan="8" class="loading">불러오는 중...</td></tr></tbody>
+          <tbody id="humansList"><tr><td colspan="9" class="loading">불러오는 중...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -548,6 +552,7 @@ function renderUsers(data) {
       <th style="padding:11px;text-align:left">체질</th>
       <th style="padding:11px;text-align:left">가입일</th>
       <th style="padding:11px;text-align:left">최근접속</th>
+      <th style="padding:11px;text-align:center">삭제</th>
     </tr></thead>
     <tbody>${data.map(u => `
       <tr style="border-top:1px solid #1e293b;font-size:13px">
@@ -559,8 +564,27 @@ function renderUsers(data) {
         <td style="padding:10px">${u.sasang_type||'-'}</td>
         <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(u.created_at)}</td>
         <td style="padding:10px;color:#64748b;font-size:11px">${formatDate(u.last_active)}</td>
+        <td style="padding:10px;text-align:center"><button class="action-btn delete" onclick="deleteUser('${escape(u.user_uuid || u.id)}','${escape(u.name || '이 사용자')}')">🗑 삭제</button></td>
       </tr>`).join('')}
     </tbody></table>`;
+}
+
+async function deleteUser(uuid, name) {
+  if (!uuid || uuid === '-') { showToast('삭제할 ID가 없어요', 'error'); return; }
+  if (!confirm(`⚠️ 정말 [${name}] 사용자를 삭제할까요?\n\n연관된 식단·물·검사 기록도 함께 삭제될 수 있어요.\n이 작업은 되돌릴 수 없어요!`)) return;
+  const ok = await sbDelete('users', 'user_uuid', uuid);
+  if (ok) {
+    allUsers = allUsers.filter(u => (u.user_uuid || u.id) !== uuid);
+    renderUsers(allUsers);
+    showToast('✅ 삭제 완료');
+  } else {
+    const ok2 = await sbDelete('users', 'id', uuid);
+    if (ok2) {
+      allUsers = allUsers.filter(u => (u.user_uuid || u.id) !== uuid);
+      renderUsers(allUsers);
+      showToast('✅ 삭제 완료');
+    } else showToast('삭제 실패', 'error');
+  }
 }
 
 // ─── 식단 기록 ───
@@ -580,6 +604,7 @@ async function loadFoods() {
         <th style="padding:11px;text-align:left">음식</th>
         <th style="padding:11px;text-align:left">칼로리</th>
         <th style="padding:11px;text-align:left">점수</th>
+        <th style="padding:11px;text-align:center">삭제</th>
       </tr></thead>
       <tbody>${data.map(r => {
         const foods = (Array.isArray(r.foods) ? r.foods : []).map(f => f.name||f).filter(Boolean).slice(0,3).join(', ');
@@ -590,10 +615,19 @@ async function loadFoods() {
           <td style="padding:10px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${foods||'-'}</td>
           <td style="padding:10px">${r.total_calories||0} kcal</td>
           <td style="padding:10px;font-weight:700;color:${r.balance_score>=80?'#10b981':r.balance_score>=60?'#f59e0b':'#ef4444'}">${r.balance_score||0}</td>
+          <td style="padding:10px;text-align:center"><button class="action-btn delete" onclick="deleteFood('${escape(r.id)}')">🗑</button></td>
         </tr>`;
       }).join('')}
       </tbody></table>`;
   } catch(e) { document.getElementById('foods-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
+}
+
+async function deleteFood(id) {
+  if (!id) return;
+  if (!confirm('이 식단 기록을 삭제할까요?')) return;
+  const ok = await sbDelete('food_records', 'id', id);
+  if (ok) { loadFoods(); showToast('✅ 삭제 완료'); }
+  else showToast('삭제 실패', 'error');
 }
 
 // ─── 물 섭취 ───
@@ -610,15 +644,25 @@ async function loadWaters() {
         <th style="padding:11px;text-align:left">날짜</th>
         <th style="padding:11px;text-align:left">사용자</th>
         <th style="padding:11px;text-align:left">섭취량</th>
+        <th style="padding:11px;text-align:center">삭제</th>
       </tr></thead>
       <tbody>${data.map(r => `
         <tr style="border-top:1px solid #1e293b;font-size:13px">
           <td style="padding:10px">${r.date}</td>
           <td style="padding:10px">${userMap[r.user_uuid] || '-'}</td>
           <td style="padding:10px;font-weight:700;color:${r.amount_ml>=2000?'#10b981':r.amount_ml>=1000?'#f59e0b':'#ef4444'}">${r.amount_ml} ml</td>
+          <td style="padding:10px;text-align:center"><button class="action-btn delete" onclick="deleteWater('${escape(r.id)}')">🗑</button></td>
         </tr>`).join('')}
       </tbody></table>`;
   } catch(e) { document.getElementById('waters-list').innerHTML = `<div style="color:#ef4444">로딩 실패: ${e.message}</div>`; }
+}
+
+async function deleteWater(id) {
+  if (!id) return;
+  if (!confirm('이 물 섭취 기록을 삭제할까요?')) return;
+  const ok = await sbDelete('water_intake', 'id', id);
+  if (ok) { loadWaters(); showToast('✅ 삭제 완료'); }
+  else showToast('삭제 실패', 'error');
 }
 
 function formatDate(ts) {
@@ -634,6 +678,17 @@ async function sbGet(table, query='') {
   });
   if (!res.ok) throw new Error(`Supabase 오류 (${res.status})`);
   return res.json();
+}
+async function sbDelete(table, idCol, idVal) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${encodeURIComponent(idVal)}`, {
+    method: 'DELETE',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer '+SUPABASE_ANON_KEY,
+      Prefer: 'return=minimal'
+    }
+  });
+  return res.ok;
 }
 async function sbPatch(table, idCol, idVal, body) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${idCol}=eq.${idVal}`, {
@@ -802,7 +857,19 @@ function renderPets() {
       <td>${escape(p.region)}</td>
       <td class="phone-cell">${escape(p.owner_contact)}</td>
       <td>${p.marketing_consent ? '✅' : '❌'}</td>
+      <td><button class="action-btn delete" onclick="deletePet('${escape(p.id)}','${escape(p.pet_name || '이 기록')}')">🗑</button></td>
     </tr>`).join('');
+}
+
+async function deletePet(id, name) {
+  if (!id) return;
+  if (!confirm(`[${name}] 반려동물 기록을 삭제할까요?`)) return;
+  const ok = await sbDelete('pet_records', 'id', id);
+  if (ok) {
+    allPets = allPets.filter(p => p.id !== id);
+    renderPets();
+    showToast('✅ 삭제 완료');
+  } else showToast('삭제 실패', 'error');
 }
 
 // ─── 사람 기록 ───
@@ -836,7 +903,19 @@ function renderHumans() {
       <td>${escape(h.lifestyle)}</td>
       <td class="phone-cell">${escape(h.contact || h.owner_contact)}</td>
       <td>${h.marketing_consent ? '✅' : '❌'}</td>
+      <td><button class="action-btn delete" onclick="deleteHuman('${escape(h.id)}','${escape(h.name || h.human_name || '이 기록')}')">🗑</button></td>
     </tr>`).join('');
+}
+
+async function deleteHuman(id, name) {
+  if (!id) return;
+  if (!confirm(`[${name}] 사람 검사 기록을 삭제할까요?`)) return;
+  const ok = await sbDelete('human_records', 'id', id);
+  if (ok) {
+    allHumans = allHumans.filter(h => h.id !== id);
+    renderHumans();
+    showToast('✅ 삭제 완료');
+  } else showToast('삭제 실패', 'error');
 }
 
 // ─── 유틸 ───
