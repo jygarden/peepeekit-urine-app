@@ -10121,30 +10121,48 @@ function renderHomeProfileSection() {
   const greeting = document.getElementById('homeGreeting');
   const greetingSub = document.getElementById('homeGreetingSub');
   if (greeting) {
-    // 🎨 랜덤 응원 문구 (반복 지루함 방지)
-    const _greetLines = [
+    // 🎨 랜덤 응원 문구 (한 줄로 끝나는 짧은 것만)
+    const _adultLines = [
       '오늘도 응원해요!',
-      '오늘 하루도 화이팅!',
-      '오늘도 반짝반짝한 하루!',
-      '오늘도 편안한 하루 되세요',
-      '오늘도 함께 건강 지켜요',
-      '좋은 하루 시작해봐요',
-      '오늘도 힘내봐요 ✨',
-      '오늘도 반가워요!'
+      '오늘도 화이팅 ✨',
+      '오늘도 반짝반짝!',
+      '좋은 하루 시작!',
+      '오늘도 반가워요',
+      '오늘도 파이팅!',
+      '오늘도 신나게!',
+      '오늘도 편안하게 🍀'
     ];
-    const _randomGreet = _greetLines[Math.floor(Math.random() * _greetLines.length)];
+    const _kidLines = [
+      '오늘도 반짝반짝!',
+      '신나는 하루 시작!',
+      '오늘도 최고예요',
+      '오늘도 밝게 자라요 🌸',
+      '오늘도 신나게!',
+      '함께 놀아요 🎈'
+    ];
+    const _petLines = [
+      '오늘도 사랑해요 💚',
+      '오늘도 반가워요 🐾',
+      '오늘도 뽀송뽀송!',
+      '오늘도 신나게!',
+      '함께 산책해요 🌿',
+      '오늘도 짱이야'
+    ];
+    const _adultGreet = _adultLines[Math.floor(Math.random() * _adultLines.length)];
+    const _kidGreet = _kidLines[Math.floor(Math.random() * _kidLines.length)];
+    const _petGreet = _petLines[Math.floor(Math.random() * _petLines.length)];
 
     if (active.id === 'main') {
       const userName = (typeof getPersonalProfile === 'function' && getPersonalProfile()?.name) || localStorage.getItem('userName') || '';
       greeting.innerHTML = userName
-        ? `${escapeHtml(userName)}님<br>${_randomGreet}`
-        : `건강한 하루,<br>${_randomGreet}`;
+        ? `${escapeHtml(userName)}님<br>${_adultGreet}`
+        : `건강한 하루,<br>${_adultGreet}`;
     } else if (active.type === 'kid') {
-      greeting.innerHTML = `${escapeHtml(active.name)} 🌸<br>오늘도 함께 자라요`;
+      greeting.innerHTML = `${escapeHtml(active.name)}<br>${_kidGreet}`;
     } else if (active.type === 'pet') {
-      greeting.innerHTML = `${escapeHtml(active.name)} 🐾<br>오늘도 건강하게`;
+      greeting.innerHTML = `${escapeHtml(active.name)}<br>${_petGreet}`;
     } else {
-      greeting.innerHTML = `${escapeHtml(active.name)}님<br>${_randomGreet}`;
+      greeting.innerHTML = `${escapeHtml(active.name)}님<br>${_adultGreet}`;
     }
   }
   if (greetingSub) {
@@ -10817,7 +10835,7 @@ const MONTHLY_CHALLENGES = [
   { month:4,  title:'벚꽃 산책 챌린지',  emoji:'🌸', stamp:'🌷', goal:'매일 컨디션 체크',             autoCheck:'checkin', color:'#EC4899' },
   { month:5,  title:'가족 건강 지키기',  emoji:'👨‍👩‍👧‍👦', stamp:'💗', goal:'매일 성분 검사 1회',        autoCheck:'ingredient', color:'#F97316' },
   { month:6,  title:'여름 수분 챌린지',  emoji:'💧', stamp:'💦', goal:'매일 2L 이상 물 마시기',      autoCheck:'water',   color:'#0EA5E9', threshold:2000 },
-  { month:7,  title:'여름 신선 채소',    emoji:'🥒', stamp:'🍅', goal:'매일 식단 기록',              autoCheck:'food',    color:'#10B981' },
+  { month:7,  title:'매일 컨디션 체크',  emoji:'✨', stamp:'💫', goal:'매일 아침 컨디션 기록',        autoCheck:'checkin', color:'#8B5CF6' },
   { month:8,  title:'과일 챙기기',      emoji:'🍎', stamp:'🍑', goal:'매일 식단 기록',              autoCheck:'food',    color:'#EF4444' },
   { month:9,  title:'퀴즈 마스터',      emoji:'🎯', stamp:'🌟', goal:'매일 퀴즈 완료',              autoCheck:'quiz',    color:'#F59E0B' },
   { month:10, title:'가을 나트륨 줄이기', emoji:'🍂', stamp:'🍁', goal:'매일 식단 분석',              autoCheck:'food',    color:'#EA580C' },
