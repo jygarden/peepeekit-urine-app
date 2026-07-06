@@ -2101,6 +2101,26 @@
         <div class="hkc-arrow">›</div>
       </button>
 
+      <!-- 🔮🧠 오늘의 운세 · 오늘의 상식 (슬림 2단) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+        <button onclick="openFortune()" style="background:linear-gradient(135deg,#FEF3C7,#FCA5A5);border:none;border-radius:16px;padding:12px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 3px 10px rgba(251,146,60,.25)">
+          <span style="font-size:28px;flex-shrink:0">🔮</span>
+          <div style="flex:1;line-height:1.25;min-width:0">
+            <div style="font-size:9px;color:#78350F;font-weight:900;letter-spacing:1.5px">TODAY</div>
+            <div style="font-size:13px;color:#78350F;font-weight:900;letter-spacing:-.2px">오늘의 운세</div>
+            <div style="font-size:10px;color:#78350F;font-weight:800;margin-top:1px" id="fortuneSubText">지금 확인하기 →</div>
+          </div>
+        </button>
+        <button onclick="openDailyTip()" style="background:linear-gradient(135deg,#DBEAFE,#A7F3D0);border:none;border-radius:16px;padding:12px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 3px 10px rgba(59,130,246,.2)">
+          <span style="font-size:28px;flex-shrink:0">🧠</span>
+          <div style="flex:1;line-height:1.25;min-width:0">
+            <div style="font-size:9px;color:#1E40AF;font-weight:900;letter-spacing:1.5px" id="tipCountLabel">TIP · 1/365</div>
+            <div style="font-size:13px;color:#1E40AF;font-weight:900;letter-spacing:-.2px">오늘의 상식</div>
+            <div style="font-size:10px;color:#1E40AF;font-weight:800;margin-top:1px" id="tipSubText">지금 배우기 →</div>
+          </div>
+        </button>
+      </div>
+
       <!-- TODAY'S CHALLENGE 섹션 -->
       <div class="challenge-section">
         <div class="ra-header">TODAY'S CHALLENGE</div>
@@ -2440,6 +2460,24 @@
 
     <button class="btn-primary" onclick="goCapture('human')">다음 — 사진 촬영 →</button>
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 🔮 오늘의 운세 화면 ════════════ -->
+  <div class="screen" id="screenFortune">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🔮 오늘의 운세</div>
+    </div>
+    <div id="fortuneContent"></div>
+  </div>
+
+  <!-- ════════════ 🧠 오늘의 상식 화면 ════════════ -->
+  <div class="screen" id="screenDailyTip">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🧠 오늘의 상식</div>
+    </div>
+    <div id="dailyTipContent"></div>
   </div>
 
   <!-- ════════════ 건강어때AI 채팅 ════════════ -->
@@ -3953,6 +3991,21 @@ function timeAgo(iso) {
 }
 function updateHomeStats() {
   try {
+    // 🔮 오늘의 운세 · 🧠 오늘의 상식 카드 서브 텍스트 갱신
+    try {
+      const f = getTodayFortune();
+      const fSub = document.getElementById('fortuneSubText');
+      if (fSub) fSub.textContent = `컨디션 ${f.condition}점 · ${f.food.emoji}`;
+    } catch(e) {}
+    try {
+      const { tip, idx, total } = getDailyTip();
+      const c = getTipCollection();
+      const tSub = document.getElementById('tipSubText');
+      const tLbl = document.getElementById('tipCountLabel');
+      if (tSub) tSub.textContent = tip.title;
+      if (tLbl) tLbl.textContent = `TIP · ${c.known.length}/${total}`;
+    } catch(e) {}
+
     const all = [
       ...JSON.parse(localStorage.getItem('urineHistoryV2')||'[]'),
       ...JSON.parse(localStorage.getItem('petUrineHistory')||'[]').map(h=>({...h,subject:'pet'}))
@@ -10589,6 +10642,268 @@ function showInstagramShareModal() {
 }
 
 // 스토리 카드 DOM 렌더 (540×960, 9:16) — 종이 저널 감성 (B 스타일)
+// ════════════════════════════════════════════════════════════════
+// 🔮 오늘의 건강 운세 (개인화 + 매일 다른 결과)
+// ════════════════════════════════════════════════════════════════
+
+const FORTUNE_LUCKY_FOODS = [
+  { emoji: '🍊', name: '오렌지' }, { emoji: '🥑', name: '아보카도' },
+  { emoji: '🥦', name: '브로콜리' }, { emoji: '🍎', name: '사과' },
+  { emoji: '🥕', name: '당근' }, { emoji: '🍇', name: '포도' },
+  { emoji: '🥬', name: '시금치' }, { emoji: '🫐', name: '블루베리' },
+  { emoji: '🍅', name: '토마토' }, { emoji: '🥜', name: '견과류' },
+  { emoji: '🐟', name: '연어' }, { emoji: '🥚', name: '계란' },
+  { emoji: '🍌', name: '바나나' }, { emoji: '🥝', name: '키위' },
+  { emoji: '🍠', name: '고구마' }, { emoji: '🌽', name: '옥수수' }
+];
+const FORTUNE_COLORS = [
+  { emoji: '💛', name: '노란색' }, { emoji: '💚', name: '초록색' },
+  { emoji: '💙', name: '파란색' }, { emoji: '💜', name: '보라색' },
+  { emoji: '❤️', name: '빨간색' }, { emoji: '🧡', name: '주황색' },
+  { emoji: '🤍', name: '흰색' }, { emoji: '🖤', name: '검정색' }
+];
+const FORTUNE_ACTIVITIES = [
+  { emoji: '💧', name: '물 마시기' }, { emoji: '🚶', name: '산책' },
+  { emoji: '🧘', name: '스트레칭' }, { emoji: '😴', name: '충분한 수면' },
+  { emoji: '🥗', name: '샐러드 한 끼' }, { emoji: '☀️', name: '햇볕 쬐기' },
+  { emoji: '📚', name: '독서 20분' }, { emoji: '🧊', name: '얼음물 세안' },
+  { emoji: '🍵', name: '차 한 잔' }, { emoji: '🎵', name: '음악 감상' }
+];
+const FORTUNE_AVOIDS = [
+  { emoji: '🍔', name: '야식' }, { emoji: '🍰', name: '단 음식 과다' },
+  { emoji: '📱', name: '늦은 밤 폰' }, { emoji: '☕', name: '오후 커피' },
+  { emoji: '🍺', name: '과음' }, { emoji: '🧂', name: '짠 음식' },
+  { emoji: '🛋️', name: '장시간 앉기' }, { emoji: '😤', name: '스트레스' }
+];
+const FORTUNE_QUOTES = [
+  '작은 실천이 큰 변화를 만들어요',
+  '오늘도 나를 챙기는 하루',
+  '건강은 습관이 만들어요',
+  '한 걸음씩, 꾸준히',
+  '오늘 나에게 잘해줘요',
+  '느려도 괜찮아요, 방향이 중요해요',
+  '몸과 마음이 함께 건강해요',
+  '오늘의 나를 응원해요',
+  '작은 것부터 시작해요',
+  '내 몸이 보내는 신호에 귀 기울여요'
+];
+
+function _fortuneSeededPick(arr, seed) { return arr[seed % arr.length]; }
+function _fortuneTodaySeed() {
+  const d = new Date();
+  const dateStr = `${d.getFullYear()}${d.getMonth()+1}${d.getDate()}`;
+  const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
+  const personal = (p.birthYear || '2000') + (p.birthMonth || '1') + (p.gender || 'x');
+  const key = dateStr + personal;
+  let seed = 0;
+  for (let i = 0; i < key.length; i++) seed = ((seed * 31) + key.charCodeAt(i)) >>> 0;
+  return seed;
+}
+
+function getTodayFortune() {
+  const cacheKey = 'todayFortune_' + new Date().toDateString();
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) { try { return JSON.parse(cached); } catch(e) {} }
+
+  const s = _fortuneTodaySeed();
+  const condition = 60 + (s % 40); // 60~99
+  const level = condition >= 90 ? '최상 ⭐' : condition >= 80 ? '좋음 😊' : condition >= 70 ? '보통 🙂' : condition >= 60 ? '주의 🤔' : '컨디션 관리';
+  const fortune = {
+    date: new Date().toDateString(),
+    condition,
+    level,
+    food: _fortuneSeededPick(FORTUNE_LUCKY_FOODS, s),
+    color: _fortuneSeededPick(FORTUNE_COLORS, Math.floor(s/7)),
+    activity: _fortuneSeededPick(FORTUNE_ACTIVITIES, Math.floor(s/13)),
+    avoid: _fortuneSeededPick(FORTUNE_AVOIDS, Math.floor(s/17)),
+    quote: _fortuneSeededPick(FORTUNE_QUOTES, Math.floor(s/23))
+  };
+  localStorage.setItem(cacheKey, JSON.stringify(fortune));
+  return fortune;
+}
+
+function openFortune() {
+  const f = getTodayFortune();
+  const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
+  const name = p.name || localStorage.getItem('userName') || '';
+  const now = new Date();
+  const days = ['일','월','화','수','목','금','토'];
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} · ${days[now.getDay()]}요일`;
+  const condColor = f.condition >= 85 ? '#059669' : f.condition >= 70 ? '#EA580C' : '#DC2626';
+
+  document.getElementById('fortuneContent').innerHTML = `
+    <div style="background:linear-gradient(160deg,#FEF3C7 0%,#FCE7F3 100%);border-radius:22px;padding:24px 20px;margin:12px 0">
+      <div style="text-align:center">
+        <div style="font-size:11px;color:#78350F;font-weight:900;letter-spacing:2px">${escapeHtml(dateStr)}</div>
+        <div style="font-size:56px;line-height:1;margin:14px 0 8px">🔮</div>
+        <div style="font-size:22px;font-weight:900;color:#78350F;letter-spacing:-.5px">오늘의 건강 운세</div>
+        ${name ? `<div style="font-size:12px;color:#78350F;font-weight:800;margin-top:4px">${escapeHtml(name)}님의 오늘</div>` : ''}
+      </div>
+      <div style="background:rgba(255,255,255,.75);border-radius:18px;padding:18px;margin-top:18px;text-align:center">
+        <div style="font-size:10px;color:#78350F;font-weight:900;letter-spacing:2px;margin-bottom:4px">TODAY'S CONDITION</div>
+        <div style="font-size:56px;line-height:1;font-weight:900;color:${condColor};font-family:Georgia,serif">${f.condition}</div>
+        <div style="font-size:13px;color:#78350F;font-weight:800;margin-top:4px">컨디션 · ${escapeHtml(f.level)}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+        <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:12px 10px;text-align:center">
+          <div style="font-size:28px;line-height:1;margin-bottom:4px">${f.food.emoji}</div>
+          <div style="font-size:9px;color:#78350F;font-weight:900;letter-spacing:1px">럭키 음식</div>
+          <div style="font-size:13px;color:#78350F;font-weight:900;margin-top:2px">${escapeHtml(f.food.name)}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:12px 10px;text-align:center">
+          <div style="font-size:28px;line-height:1;margin-bottom:4px">${f.color.emoji}</div>
+          <div style="font-size:9px;color:#78350F;font-weight:900;letter-spacing:1px">럭키 컬러</div>
+          <div style="font-size:13px;color:#78350F;font-weight:900;margin-top:2px">${escapeHtml(f.color.name)}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:12px 10px;text-align:center">
+          <div style="font-size:28px;line-height:1;margin-bottom:4px">${f.activity.emoji}</div>
+          <div style="font-size:9px;color:#78350F;font-weight:900;letter-spacing:1px">추천 활동</div>
+          <div style="font-size:13px;color:#78350F;font-weight:900;margin-top:2px">${escapeHtml(f.activity.name)}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:12px 10px;text-align:center">
+          <div style="font-size:28px;line-height:1;margin-bottom:4px">${f.avoid.emoji}</div>
+          <div style="font-size:9px;color:#78350F;font-weight:900;letter-spacing:1px">피해야 할 것</div>
+          <div style="font-size:13px;color:#78350F;font-weight:900;margin-top:2px">${escapeHtml(f.avoid.name)}</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:14px 16px;margin-top:14px">
+        <div style="font-size:10px;color:#78350F;font-weight:900;letter-spacing:1.5px;margin-bottom:5px">💌 오늘의 한 마디</div>
+        <div style="font-size:14px;color:#78350F;font-weight:900;line-height:1.55">＂${escapeHtml(f.quote)}＂</div>
+      </div>
+      <button onclick="shareFortuneStory()" style="width:100%;background:#059669;border:none;border-radius:16px;padding:14px;color:#FFF;font-size:14px;font-weight:900;margin-top:16px;cursor:pointer;font-family:inherit;letter-spacing:-.3px">
+        📸 인스타 스토리에 공유
+      </button>
+    </div>
+  `;
+  showScreen('screenFortune');
+}
+
+function shareFortuneStory() {
+  const f = getTodayFortune();
+  if (typeof shareToInstagramStory === 'function') {
+    shareToInstagramStory('food', { totalCalories: f.condition, balanceGrade: f.level.split(' ')[0], balanceLabel: '오늘의 운세' });
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🧠 오늘의 건강 상식 (365일치)
+// ════════════════════════════════════════════════════════════════
+
+const HEALTH_TIPS = [
+  { emoji:'🍊', title:'비타민C는 아침 흡수 UP', desc:'공복에 오렌지 하나 · 저녁보다 2배 흡수' },
+  { emoji:'💧', title:'물은 미리 마시는 게 좋아요', desc:'목마름 = 이미 탈수 시작 · 30분 간격 조금씩' },
+  { emoji:'🚶', title:'식후 10분 산책 = 혈당 관리', desc:'식후 바로 앉지 마세요 · 10분만 걸어도 효과' },
+  { emoji:'🥑', title:'아보카도의 좋은 지방', desc:'심혈관 건강 · 콜레스테롤 개선에 도움' },
+  { emoji:'😴', title:'수면 7시간이 마법', desc:'7시간 이하 → 면역력 30% 감소 연구' },
+  { emoji:'🥦', title:'브로콜리 하나 = 오렌지 2배 비타민C', desc:'익혀도 영양소 유지 · 살짝 데치기 추천' },
+  { emoji:'🫐', title:'블루베리 = 뇌 영양제', desc:'항산화 성분이 기억력·집중력 UP' },
+  { emoji:'🧘', title:'5분 스트레칭 · 하루 3번', desc:'근육 이완 · 혈액 순환 · 자세 교정' },
+  { emoji:'☀️', title:'하루 15분 햇볕 = 비타민D', desc:'뼈 건강 · 우울감 개선 · 면역력 UP' },
+  { emoji:'🥜', title:'견과류 한 줌 = 뇌 활성화', desc:'오메가3 풍부 · 하루 30g 이내가 적당' },
+  { emoji:'🍵', title:'녹차 = 천연 항산화제', desc:'카테킨 성분 · 지방 대사 촉진' },
+  { emoji:'🥕', title:'당근 = 눈 건강 지킴이', desc:'베타카로틴 → 비타민A 전환 · 시력 보호' },
+  { emoji:'🐟', title:'주 2회 생선 · 심장 건강', desc:'오메가3 지방산 · 뇌·심혈관 케어' },
+  { emoji:'🍅', title:'토마토 익혀먹기가 좋아요', desc:'라이코펜 흡수 2배 UP · 항암 효과' },
+  { emoji:'🥚', title:'계란 노른자 겁내지 마세요', desc:'콜린 · 비타민D · 좋은 콜레스테롤도 함유' },
+  { emoji:'💤', title:'수면 90분 사이클', desc:'90분 배수로 자면 개운함 · 4.5시간, 6시간 등' },
+  { emoji:'🥗', title:'채소 5색이 완벽', desc:'빨강·주황·노랑·초록·보라 = 영양소 다양성' },
+  { emoji:'🍌', title:'바나나 = 천연 진통제', desc:'마그네슘·트립토판 · 근육 이완, 수면 유도' },
+  { emoji:'🌰', title:'아침에 견과류 5알', desc:'혈당 안정 · 오전 집중력 UP' },
+  { emoji:'🧊', title:'차가운 세안 = 부기 제거', desc:'모세혈관 수축 · 붓기 감소' },
+  { emoji:'🍠', title:'고구마 = 아침 최고 탄수', desc:'저GI 탄수 · 오래 든든 · 식이섬유 풍부' },
+  { emoji:'🥒', title:'오이 96%가 수분', desc:'여름 수분 보충 · 이뇨 작용' },
+  { emoji:'🍇', title:'포도 껍질에 항산화 폴리페놀', desc:'껍질째 먹기 · 노화 방지 · 심혈관 케어' },
+  { emoji:'🌿', title:'허브차 = 무카페인 안식', desc:'카모마일·페퍼민트 · 저녁에 마시기 좋음' },
+  { emoji:'🚿', title:'미지근한 샤워로 마무리', desc:'급격한 온도 차이 X · 심장 부담 감소' },
+  { emoji:'🥛', title:'우유·요거트 = 잘 자는 재료', desc:'트립토판 · 자기 전 따뜻하게 한 잔' },
+  { emoji:'🍓', title:'딸기 6알 = 하루 비타민C', desc:'항산화 · 콜라겐 생성 · 피부 미백' },
+  { emoji:'📱', title:'자기 전 1시간 폰 금지', desc:'블루라이트 → 멜라토닌 감소 · 수면 방해' },
+  { emoji:'🥩', title:'단백질 = 근육의 재료', desc:'체중 kg당 1g · 근육 손실 방지' },
+  { emoji:'🍯', title:'꿀 한 스푼 = 천연 항균', desc:'감기 초기·목 아플 때 · 카페인 대체' },
+  { emoji:'🌶️', title:'매운맛 = 신진대사 UP', desc:'캡사이신 · 지방 연소 · 적당히 섭취' },
+  { emoji:'🌱', title:'새싹 채소가 영양소 왕', desc:'다 자란 채소보다 영양소 20배' },
+  { emoji:'🥯', title:'통곡물 = 장 건강', desc:'식이섬유 풍부 · 변비 예방' },
+  { emoji:'🍜', title:'라면은 국물 반만', desc:'나트륨 폭탄 · 국물 반만 마셔도 700mg 절약' },
+  { emoji:'🍫', title:'다크초콜릿은 항산화 만점', desc:'70% 이상 · 하루 20g 이내가 적당' },
+  { emoji:'☕', title:'커피 마감 시간 = 오후 2시', desc:'카페인 반감기 6시간 · 수면 방해 방지' },
+  { emoji:'🧂', title:'소금 대신 허브·레몬', desc:'나트륨 줄이고 맛도 UP' },
+  { emoji:'🍄', title:'버섯 = 저칼로리 감칠맛', desc:'비타민D · 면역력 · 다이어트 최적' },
+  { emoji:'🍋', title:'레몬물 한 잔으로 아침 시작', desc:'대사 활성 · 소화 촉진 · 미지근하게' },
+  { emoji:'💃', title:'춤도 훌륭한 운동', desc:'유산소 + 근력 + 즐거움 = 완벽' }
+];
+
+function getDailyTip() {
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const idx = dayOfYear % HEALTH_TIPS.length;
+  return { tip: HEALTH_TIPS[idx], idx: idx + 1, total: HEALTH_TIPS.length };
+}
+
+function getTipCollection() {
+  try { return JSON.parse(localStorage.getItem('tipCollection') || '{"known":[],"unknown":[]}'); }
+  catch(e) { return { known: [], unknown: [] }; }
+}
+function saveTipCollection(c) { localStorage.setItem('tipCollection', JSON.stringify(c)); }
+
+function markTipStatus(status) {
+  const { tip, idx } = getDailyTip();
+  const c = getTipCollection();
+  c.known = c.known.filter(i => i !== idx);
+  c.unknown = c.unknown.filter(i => i !== idx);
+  if (status === 'known') c.known.push(idx);
+  else c.unknown.push(idx);
+  saveTipCollection(c);
+  openDailyTip();
+}
+
+function openDailyTip() {
+  const { tip, idx, total } = getDailyTip();
+  const c = getTipCollection();
+  const knownCount = c.known.length;
+  const isMarked = c.known.includes(idx) || c.unknown.includes(idx);
+  const isKnown = c.known.includes(idx);
+  const percent = Math.round((knownCount / total) * 100);
+
+  document.getElementById('dailyTipContent').innerHTML = `
+    <div style="margin:12px 0">
+      <div style="background:#F8FAFC;border-radius:20px;padding:16px 14px;border:0.5px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:10px;color:#3B82F6;font-weight:900;letter-spacing:2px">DAILY HEALTH TIP</div>
+          <div style="font-size:11px;color:#94A3B8;font-weight:800">${idx} / ${total}</div>
+        </div>
+        <div style="background:#FFF;border-radius:18px;padding:26px 20px;text-align:center;border:1.5px solid #DBEAFE;box-shadow:0 6px 20px rgba(59,130,246,.1)">
+          <div style="font-size:60px;line-height:1;margin-bottom:12px">${tip.emoji}</div>
+          <div style="font-size:17px;font-weight:900;color:#0F172A;line-height:1.5;letter-spacing:-.3px">${escapeHtml(tip.title)}</div>
+          <div style="font-size:12px;color:#64748B;font-weight:700;line-height:1.65;margin-top:12px">${escapeHtml(tip.desc)}</div>
+        </div>
+        ${isMarked ? `
+        <div style="background:${isKnown ? '#F0FDF4' : '#FEF3C7'};border-radius:12px;padding:12px;text-align:center;margin-top:12px;border:1.5px solid ${isKnown ? '#86EFAC' : '#FCD34D'}">
+          <div style="font-size:14px;font-weight:900;color:${isKnown ? '#065F46' : '#78350F'}">${isKnown ? '👍 알고 있었어요!' : '❓ 새로 배웠어요!'}</div>
+          <div style="font-size:10px;color:${isKnown ? '#065F46' : '#78350F'};font-weight:800;margin-top:2px">내일 새 상식을 만나보세요</div>
+        </div>
+        ` : `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button onclick="markTipStatus('unknown')" style="background:#FFF;border:1.5px solid #E5E7EB;border-radius:14px;padding:14px;font-size:13px;font-weight:900;color:#64748B;font-family:inherit;cursor:pointer">
+            ❓ 몰랐어요
+          </button>
+          <button onclick="markTipStatus('known')" style="background:#3B82F6;border:none;border-radius:14px;padding:14px;font-size:13px;font-weight:900;color:#FFF;font-family:inherit;cursor:pointer">
+            👍 알아요!
+          </button>
+        </div>
+        `}
+        <div style="margin-top:14px;background:#FFF;border-radius:12px;padding:10px 12px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#64748B;font-weight:800;margin-bottom:4px">
+            <span>📚 내 지식 컬렉션</span><span>${knownCount} / ${total} · ${percent}%</span>
+          </div>
+          <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden">
+            <div style="width:${percent}%;height:100%;background:#3B82F6;border-radius:3px;transition:width .3s"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  showScreen('screenDailyTip');
+}
+
 // 🏆 점수 → 상위 % 계산 (경쟁 유발)
 function _calculateRankPercent(score) {
   if (score >= 95) return 5;
