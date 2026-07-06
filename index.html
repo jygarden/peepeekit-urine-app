@@ -2286,6 +2286,10 @@
 
   <!-- ════════════ 반려동물 폼 화면 ════════════ -->
   <div class="screen" id="screenPetForm">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🐾 반려동물 건강 체크</div>
+    </div>
 
     <div class="feature-section-label">✨ 반려동물 특별 기능</div>
     <div class="feature-grid">
@@ -2372,29 +2376,10 @@
       </div>
     </div>
 
-    <div class="section-title">👤 보호자 정보</div>
-    <div class="card">
-      <div class="field">
-        <label>연락처 <span style="color:#ef4444">*</span></label>
-        <input type="tel" id="petContact" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)"/>
-      </div>
-      <div class="consent-box">
-        <div class="consent-row">
-          <input type="checkbox" id="petConsentMarketing"/>
-          <label for="petConsentMarketing">
-            <strong>[선택] 마케팅 정보 수신 동의</strong><br>
-            신제품 출시, 프로모션, 건강 정보 등 유용한 소식을 받아보겠습니다.
-          </label>
-        </div>
-        <div class="consent-row">
-          <input type="checkbox" id="petConsentPrivacy" required/>
-          <label for="petConsentPrivacy">
-            <strong>[필수] 개인정보 수집 및 이용 동의</strong><br>
-            검사 결과 분석 및 서비스 제공 목적으로 입력하신 정보를 수집합니다.
-          </label>
-        </div>
-      </div>
-    </div>
+    <!-- 백업용 hidden 필드 (기존 로직 호환) -->
+    <input type="hidden" id="petContact"/>
+    <input type="checkbox" id="petConsentMarketing" style="display:none" checked/>
+    <input type="checkbox" id="petConsentPrivacy" style="display:none" checked/>
 
     <button class="btn-primary" onclick="goCapture('pet')">다음 — 사진 촬영 →</button>
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
@@ -2402,6 +2387,10 @@
 
   <!-- ════════════ 사람 폼 화면 ════════════ -->
   <div class="screen" id="screenHumanForm">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🧑 내 건강 체크</div>
+    </div>
 
     <div class="step-indicator">
       <div class="step-dot active"></div>
@@ -2444,29 +2433,10 @@
       </div>
     </div>
 
-    <div class="section-title">👤 연락처</div>
-    <div class="card">
-      <div class="field">
-        <label>연락처 <span style="color:#ef4444">*</span></label>
-        <input type="tel" id="humanContact" placeholder="010-0000-0000" maxlength="13" oninput="formatPhone(this)"/>
-      </div>
-      <div class="consent-box">
-        <div class="consent-row">
-          <input type="checkbox" id="humanConsentMarketing"/>
-          <label for="humanConsentMarketing">
-            <strong>[선택] 마케팅 정보 수신 동의</strong><br>
-            신제품 출시, 프로모션, 건강 정보 등 유용한 소식을 받아보겠습니다.
-          </label>
-        </div>
-        <div class="consent-row">
-          <input type="checkbox" id="humanConsentPrivacy" required/>
-          <label for="humanConsentPrivacy">
-            <strong>[필수] 개인정보 수집 및 이용 동의</strong><br>
-            검사 결과 분석 및 서비스 제공 목적으로 입력하신 정보를 수집합니다.
-          </label>
-        </div>
-      </div>
-    </div>
+    <!-- 백업용 hidden 필드 (기존 로직 호환) -->
+    <input type="hidden" id="humanContact"/>
+    <input type="checkbox" id="humanConsentMarketing" style="display:none" checked/>
+    <input type="checkbox" id="humanConsentPrivacy" style="display:none" checked/>
 
     <button class="btn-primary" onclick="goCapture('human')">다음 — 사진 촬영 →</button>
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
