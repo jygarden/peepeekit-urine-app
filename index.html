@@ -970,7 +970,7 @@
     .compare-card.declined .compare-message{color:#9A3412}
     .compare-card.same .compare-message{color:#374151}
     .compare-period{font-size:10.5px;color:#6B7280;margin-top:8px;text-align:center;letter-spacing:-.1px}
-    /* ── 🤖 AI 영양사 채팅 ── */
+    /* ── 🤖 건강어때AI 채팅 ── */
     .chat-btn-row{background:linear-gradient(135deg,#FEF3C7,#FCD34D);border:none;border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;width:100%;cursor:pointer;font-family:inherit;text-align:left;margin-bottom:14px;box-shadow:0 3px 10px rgba(251,191,36,.25);transition:transform .15s,box-shadow .2s}
     .chat-btn-row:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(251,191,36,.35)}
     .chat-btn-row:active{transform:scale(.985)}
@@ -2037,7 +2037,7 @@
       <!-- 인사 + 새 슬로건 -->
       <div class="home-hello">
         <h1 id="homeGreeting">건강한 하루,<br>오늘도 응원해요</h1>
-        <div class="sub" id="homeGreetingSub">AI 영양사가 하루를 똑똑하게 챙겨드려요</div>
+        <div class="sub" id="homeGreetingSub">검사·식단·성분까지, 건강어때AI가 챙겨드려요</div>
       </div>
 
       <!-- 👨‍👩‍👧‍👦 다중 프로필 스위처 -->
@@ -2054,20 +2054,20 @@
 
       <div class="home-cards">
 
-        <!-- 내 건강 체크 -->
+        <!-- 내 소변검사 -->
         <button class="home-card human" onclick="enterHuman()">
           <div class="card-orb">🧑</div>
-          <div class="card-label">URINE</div>
+          <div class="card-label">🧪 소변검사</div>
           <div class="card-title">내 건강 체크</div>
-          <div class="card-meta" id="humanLastInfo">약 1분</div>
+          <div class="card-meta" id="humanLastInfo">1분 자가진단</div>
         </button>
 
-        <!-- 반려동물 -->
+        <!-- 반려동물 소변검사 -->
         <button class="home-card pet" onclick="enterPet()">
           <div class="card-pet-orb">🐶🐱</div>
-          <div class="card-label">PET</div>
+          <div class="card-label">🧪 소변검사</div>
           <div class="card-title">반려동물</div>
-          <div class="card-meta" id="petLastInfo">약 1분</div>
+          <div class="card-meta" id="petLastInfo">1분 자가진단</div>
         </button>
 
         <!-- 식단 분석 -->
@@ -2442,11 +2442,11 @@
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
-  <!-- ════════════ AI 영양사 채팅 ════════════ -->
+  <!-- ════════════ 건강어때AI 채팅 ════════════ -->
   <div class="screen" id="screenChat">
     <div class="chat-header">
       <button class="chat-back" onclick="exitChat()">← 결과로</button>
-      <h2>🤖 AI 영양사<span class="sub">검사 결과 기반 맞춤 답변</span></h2>
+      <h2>🤖 건강어때AI<span class="sub">검사 결과 기반 맞춤 답변</span></h2>
       <button class="chat-back" onclick="goHome()" style="font-size:11px">🏠 홈</button>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
@@ -2519,7 +2519,7 @@
     <button class="btn-primary" id="btnFoodAnalyze" onclick="analyzeFood()" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 4px 14px rgba(245,158,11,.40)">🤖 AI 식단 분석 시작</button>
     <div class="loading-box" id="foodLoadingBox">
       <div class="emoji">🍴</div>
-      <p>AI 영양사가 분석 중이에요...</p>
+      <p>건강어때AI가 분석 중이에요...</p>
       <small>음식 종류, 칼로리, 영양소를 계산하고 있어요</small>
     </div>
   </div>
@@ -2780,7 +2780,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -2836,11 +2836,11 @@
 
       <div class="rec-box" id="recBox"></div>
 
-      <!-- 🤖 AI 영양사·약사 채팅 진입 -->
+      <!-- 🤖 건강어때AI·약사 채팅 진입 -->
       <button class="chat-btn-row" onclick="enterChat()">
         <span class="chat-btn-ic">🤖</span>
         <div class="chat-btn-text">
-          <div class="chat-btn-title">AI 영양사한테 물어보기</div>
+          <div class="chat-btn-title">건강어때AI한테 물어보기</div>
           <div class="chat-btn-sub">이번 결과 기반으로 답변해드려요</div>
         </div>
         <span class="chat-btn-arrow">›</span>
@@ -4979,7 +4979,7 @@ function renderActionPlan(r, info) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// 🤖 AI 영양사·약사 채팅
+// 🤖 건강어때AI·약사 채팅
 // ════════════════════════════════════════════════════════════════
 let chatMessages = [];
 function exitChat() {
@@ -5563,7 +5563,7 @@ let foodLoadingInterval = null;
 let foodLoadingProgress = 0;
 const FOOD_LOADING_STAGES = [
   { emoji: '📸', msg: '사진을 분석하고 있어요...', sub: 'AI가 음식을 인식 중', threshold: 0 },
-  { emoji: '🤖', msg: 'AI 영양사가 보는 중이에요', sub: '재료와 양을 추정 중', threshold: 25 },
+  { emoji: '🤖', msg: '건강어때AI가 보는 중이에요', sub: '재료와 양을 추정 중', threshold: 25 },
   { emoji: '🔬', msg: '영양소 계산 중이에요', sub: '칼로리·단백질·비타민 분석 중', threshold: 50 },
   { emoji: '🍱', msg: '음식 궁합 분석 중이에요', sub: '재료별 시너지 체크 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
@@ -5661,8 +5661,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -5955,7 +5955,7 @@ async function confirmAndAnalyze() {
   const btn = event.target;
   const originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = '🤖 AI 영양사 분석 중...';
+  btn.textContent = '🤖 건강어때AI 분석 중...';
   // 🎬 분석 화면으로 이동 + 진행률 로딩 표시
   showScreen('screenFoodPreview');
   startFoodLoading();
@@ -6589,7 +6589,7 @@ function renderFoodResult(r) {
     <div class="nutritionist-talk">
       <div class="nutri-char">👩‍⚕️</div>
       <div class="speech-bubble">
-        <div class="speech-name">AI 영양사</div>
+        <div class="speech-name">건강어때AI</div>
         <div class="speech-text">${r.summary || '맛있는 한 끼였네요! 분석 결과를 확인해보세요 😊'}</div>
       </div>
     </div>`;
@@ -7811,22 +7811,49 @@ function renderReport() {
       return opts[0] ? `✓ ${opts[0]} <span style="color:#94A3B8">(${it.pct}%)</span>` : null;
     }).filter(Boolean);
 
-    // 칭찬·따끔 멘트
+    // 🎨 칭찬·따끔 멘트 (친근하고 위트있게)
     let coachMsg = '', coachClass = 'neutral';
+    const periodTxt = reportTab === 'today' ? '오늘' : '이번 주';
     if (avgScore >= 85 && lackedKeys.length === 0) {
-      coachMsg = `🌟 <strong>정말 훌륭해요!</strong> ${avgScore}점, 부족·과다 없음. 이대로 계속!`;
+      const praises = [
+        `🌟 <strong>완벽 그 자체!</strong> ${avgScore}점 · 왕관 씌워드립니다 👑 이대로 쭉 가요!`,
+        `🥇 <strong>영양사 저리가라~</strong> ${avgScore}점, 부족한 게 하나도 없어요! 대박`,
+        `✨ <strong>${periodTxt} 진짜 훌륭했어요!</strong> ${avgScore}점, 흠잡을 데 없음`
+      ];
+      coachMsg = praises[Math.floor(Math.random() * praises.length)];
       coachClass = 'praise';
     } else if (avgScore >= 75 && lackedKeys.length <= 2) {
-      coachMsg = `👍 <strong>잘 드시고 계세요!</strong> ${avgScore}점 균형 좋아요. ${lackedKeys.length > 0 ? `${lackedKeys.length}가지만 살짝 채워주세요.` : '유지 부탁!'}`;
+      const goods = [
+        `👍 <strong>오~ 잘하고 계신데요?</strong> ${avgScore}점, ${lackedKeys.length > 0 ? `딱 ${lackedKeys.length}가지만 채우면 만점` : '이 리듬 그대로!'}`,
+        `😊 <strong>훌륭!</strong> ${avgScore}점 균형 좋아요${lackedKeys.length > 0 ? ` · ${lackedKeys.length}가지만 더!` : ' 유지 부탁드려요~'}`,
+        `🎯 <strong>${periodTxt} 잘 챙기셨네요!</strong> ${avgScore}점${lackedKeys.length > 0 ? `, ${lackedKeys.length}가지만 살짝 더` : ' · 완벽 코앞이에요'}`
+      ];
+      coachMsg = goods[Math.floor(Math.random() * goods.length)];
       coachClass = 'praise';
     } else if (lackedKeys.length >= 5) {
-      coachMsg = `<strong>${reportTab === 'today' ? '오늘은' : '이번 주는'} 신경 더 써야겠어요.</strong> 부족 ${lackedKeys.length}가지가 보여요. 추천 음식을 챙기세요.`;
+      const warns = [
+        `🥲 <strong>${periodTxt} 좀 아쉬웠어요~</strong> 부족 ${lackedKeys.length}가지 발견! 다음번엔 함께 채워봐요`,
+        `😅 <strong>어라, ${periodTxt} 살짝 삐끗!</strong> 부족 ${lackedKeys.length}가지, 다음번 화이팅 🍀`,
+        `🍰 <strong>${periodTxt} 케이크가 좀 많았나요?</strong> 부족 ${lackedKeys.length}가지, 리셋 어때요?`,
+        `🙈 <strong>이럴수가 · 부족 ${lackedKeys.length}가지 발견!</strong> ${periodTxt}은 좀 놓쳤지만 다음번엔 만회해봐요`
+      ];
+      coachMsg = warns[Math.floor(Math.random() * warns.length)];
       coachClass = 'warn';
     } else if (lackedKeys.length >= 3) {
-      coachMsg = `💪 <strong>괜찮지만 더 좋아질 수 있어요.</strong> 부족 ${lackedKeys.length}가지가 있어요.`;
+      const midMsgs = [
+        `💪 <strong>나쁘진 않은데...</strong> 부족 ${lackedKeys.length}가지만 채우면 확 좋아져요!`,
+        `👌 <strong>이 정도면 무난~</strong> 근데 ${lackedKeys.length}가지만 더 챙기면 A+ 각!`,
+        `🌱 <strong>괜찮아요!</strong> ${lackedKeys.length}가지만 살짝 신경쓰면 등급 UP`
+      ];
+      coachMsg = midMsgs[Math.floor(Math.random() * midMsgs.length)];
       coachClass = 'neutral';
     } else {
-      coachMsg = `🍽 ${avgScore}점, 평균적인 식단이에요.`;
+      const neutrals = [
+        `🍽 <strong>${avgScore}점 · 딱 평균이네요</strong> · 조금만 더 노력하면 상위권!`,
+        `😌 <strong>평범한 식단이에요</strong> · ${avgScore}점, 한 끗 차이로 훌륭해질 수 있어요`,
+        `🤔 <strong>애매한 ${avgScore}점</strong> · 다음 식사에 뭘 더할지 고민 좀 해봐요~`
+      ];
+      coachMsg = neutrals[Math.floor(Math.random() * neutrals.length)];
       coachClass = 'neutral';
     }
 
@@ -10095,7 +10122,10 @@ function renderHomeProfileSection() {
   const greetingSub = document.getElementById('homeGreetingSub');
   if (greeting) {
     if (active.id === 'main') {
-      greeting.innerHTML = '건강한 하루,<br>오늘도 응원해요';
+      const userName = (typeof getPersonalProfile === 'function' && getPersonalProfile()?.name) || localStorage.getItem('userName') || '';
+      greeting.innerHTML = userName
+        ? `${escapeHtml(userName)}<br>오늘도 응원해요`
+        : '건강한 하루,<br>오늘도 응원해요';
     } else if (active.type === 'kid') {
       greeting.innerHTML = `${escapeHtml(active.name)} 🌸<br>오늘도 함께 자라요`;
     } else if (active.type === 'pet') {
@@ -10110,7 +10140,7 @@ function renderHomeProfileSection() {
     } else if (active.type === 'pet') {
       greetingSub.innerHTML = `${escapeHtml(active.name)}의 건강·사료·성분 케어`;
     } else {
-      greetingSub.innerHTML = 'AI 영양사가 하루를 똑똑하게 챙겨드려요';
+      greetingSub.innerHTML = '검사·식단·성분까지, 건강어때AI가 챙겨드려요';
     }
   }
 
@@ -10774,7 +10804,7 @@ const MONTHLY_CHALLENGES = [
   { month:4,  title:'벚꽃 산책 챌린지',  emoji:'🌸', stamp:'🌷', goal:'매일 컨디션 체크',             autoCheck:'checkin', color:'#EC4899' },
   { month:5,  title:'가족 건강 지키기',  emoji:'👨‍👩‍👧‍👦', stamp:'💗', goal:'매일 성분 검사 1회',        autoCheck:'ingredient', color:'#F97316' },
   { month:6,  title:'여름 수분 챌린지',  emoji:'💧', stamp:'💦', goal:'매일 2L 이상 물 마시기',      autoCheck:'water',   color:'#0EA5E9', threshold:2000 },
-  { month:7,  title:'물 마시기 챌린지',  emoji:'💧', stamp:'💧', goal:'매일 2L 이상 물 마시기',      autoCheck:'water',   color:'#3B82F6', threshold:2000 },
+  { month:7,  title:'여름 신선 채소',    emoji:'🥒', stamp:'🍅', goal:'매일 식단 기록',              autoCheck:'food',    color:'#10B981' },
   { month:8,  title:'과일 챙기기',      emoji:'🍎', stamp:'🍑', goal:'매일 식단 기록',              autoCheck:'food',    color:'#EF4444' },
   { month:9,  title:'퀴즈 마스터',      emoji:'🎯', stamp:'🌟', goal:'매일 퀴즈 완료',              autoCheck:'quiz',    color:'#F59E0B' },
   { month:10, title:'가을 나트륨 줄이기', emoji:'🍂', stamp:'🍁', goal:'매일 식단 분석',              autoCheck:'food',    color:'#EA580C' },
@@ -12131,26 +12161,54 @@ function _showFoodReportImpl(period) {
   lackedItems.sort((a, b) => a.pct - b.pct);
   excessItems.sort((a, b) => b.pct - a.pct);
 
-  // 🌟 칭찬·따끔 멘트
+  // 🌟 칭찬·따끔 멘트 (친근하고 위트있게)
   const lackedCnt = lackedItems.length;
   const excessCnt = excessItems.length;
+  const periodTxt2 = period === 'month' ? '이번 달' : '이번 주';
   let coachMsg = '', coachClass = '';
   if (avgScore >= 85 && lackedCnt === 0 && excessCnt === 0) {
-    coachMsg = `🌟 <strong>정말 훌륭해요!</strong> ${avgScore}점에 부족·과다 영양소도 없어요. 이 페이스 그대로 유지해주세요!`;
+    const praises = [
+      `🌟 <strong>완벽 그 자체!</strong> ${avgScore}점 · 왕관 씌워드립니다 👑 이대로 쭉 가요!`,
+      `🥇 <strong>${periodTxt2} 영양사 저리가라~</strong> ${avgScore}점, 흠 하나도 없음! 대박`,
+      `✨ <strong>${periodTxt2} 진짜 훌륭했어요!</strong> ${avgScore}점, 이 페이스 그대로 부탁드려요`
+    ];
+    coachMsg = praises[Math.floor(Math.random() * praises.length)];
     coachClass = 'praise';
   } else if (avgScore >= 75 && lackedCnt <= 2) {
-    coachMsg = `👍 <strong>잘 드시고 계세요!</strong> 점수 ${avgScore}점, 균형도 괜찮아요. ${lackedCnt > 0 ? `다만 ${lackedCnt}가지 영양소가 살짝 부족하니 채워보세요.` : '지금처럼 유지하세요.'}`;
+    const goods = [
+      `👍 <strong>오~ ${periodTxt2} 잘하셨네요!</strong> ${avgScore}점${lackedCnt > 0 ? `, 딱 ${lackedCnt}가지만 채우면 만점` : ' 이대로 유지 부탁'}`,
+      `😊 <strong>훌륭!</strong> ${avgScore}점 균형 좋아요${lackedCnt > 0 ? ` · ${lackedCnt}가지만 더 챙기면 A+` : ' · 지금처럼만 가주세요~'}`,
+      `🎯 <strong>${periodTxt2} 잘 챙기셨어요!</strong> ${avgScore}점${lackedCnt > 0 ? `, ${lackedCnt}가지만 살짝 더` : ' · 완벽 코앞이에요'}`
+    ];
+    coachMsg = goods[Math.floor(Math.random() * goods.length)];
     coachClass = 'praise';
   } else if (lackedCnt >= 5 || excessCnt >= 2) {
-    coachMsg = period === 'month'
-      ? `<strong>한 달간 식단 관리가 부족하셨어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지. 이대로 가면 건강에 문제가 생길 수 있어요. 식습관 개선이 시급합니다.`
-      : `<strong>이번 주는 신경 더 써야겠어요.</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지가 보여요. 추천 음식을 챙겨보세요.`;
+    const warns = period === 'month' ? [
+      `🥲 <strong>한 달 동안 살짝 아쉬웠네요~</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 달엔 리셋 어때요?`,
+      `😅 <strong>이번 달은 좀 놓쳤어요!</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 새 달, 새 마음으로 화이팅 🍀`,
+      `🍰 <strong>한 달 내내 케이크가 많았나요?</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 달은 함께 채워봐요`
+    ] : [
+      `🥲 <strong>${periodTxt2} 좀 아쉬웠어요~</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 주엔 함께 채워봐요!`,
+      `😅 <strong>어라, ${periodTxt2} 살짝 삐끗!</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 주 화이팅 🍀`,
+      `🙈 <strong>이럴수가 · 부족 ${lackedCnt}가지 발견!</strong> ${periodTxt2}은 놓쳤지만 다음 주엔 만회해봐요`
+    ];
+    coachMsg = warns[Math.floor(Math.random() * warns.length)];
     coachClass = 'warn';
   } else if (lackedCnt >= 3 || excessCnt >= 1) {
-    coachMsg = `💪 <strong>괜찮지만 더 좋아질 수 있어요.</strong> 부족·과다 영양소가 ${lackedCnt+excessCnt}가지 보여요. 신경 쓰면 점수도 올라갈 거예요!`;
+    const midMsgs = [
+      `💪 <strong>나쁘진 않은데...</strong> 부족·과다 ${lackedCnt+excessCnt}가지만 정리하면 확 좋아져요!`,
+      `👌 <strong>이 정도면 무난~</strong> ${lackedCnt+excessCnt}가지만 챙기면 A+ 각!`,
+      `🌱 <strong>괜찮아요!</strong> ${lackedCnt+excessCnt}가지만 살짝 신경쓰면 등급 UP`
+    ];
+    coachMsg = midMsgs[Math.floor(Math.random() * midMsgs.length)];
     coachClass = 'neutral';
   } else {
-    coachMsg = `🍽 ${avgScore}점, 평균적인 식단이에요. 조금만 더 챙기면 좋아질 거예요.`;
+    const neutrals = [
+      `🍽 <strong>${avgScore}점 · 딱 평균이네요</strong> · 조금만 더 노력하면 상위권!`,
+      `😌 <strong>평범한 식단이에요</strong> · ${avgScore}점, 한 끗 차이로 훌륭해질 수 있어요`,
+      `🤔 <strong>애매한 ${avgScore}점</strong> · 다음 식사에 뭘 더할지 고민 좀 해봐요~`
+    ];
+    coachMsg = neutrals[Math.floor(Math.random() * neutrals.length)];
     coachClass = 'neutral';
   }
   const coachHtml = `<div class="coach-msg ${coachClass}">${coachMsg}</div>`;
@@ -12283,8 +12341,8 @@ function _showFoodReportImpl(period) {
     }
   }
 
-  // 평가 멘트
-  const scoreMsg = avgScore >= 85 ? '🌟 영양 균형이 정말 훌륭해요!' : avgScore >= 70 ? '👍 균형있게 잘 드시고 있어요' : avgScore >= 55 ? '💪 조금만 더 신경 쓰면 좋아질 거예요' : '🙌 다양한 음식을 더 챙겨보세요';
+  // 평가 멘트 (친근하게)
+  const scoreMsg = avgScore >= 85 ? '🌟 완벽해요! 이 리듬 그대로 부탁드려요' : avgScore >= 70 ? '👍 오~ 잘 드시고 계세요!' : avgScore >= 55 ? '💪 한 끗만 더 신경쓰면 대박!' : '🙌 다양한 음식으로 리셋 어때요?';
 
   content.innerHTML = `
     <h2 style="font-size:18px;margin:0 0 4px;color:#1F2937">📊 ${periodLabel} 리포트</h2>
