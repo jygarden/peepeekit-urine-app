@@ -2054,20 +2054,20 @@
 
       <div class="home-cards">
 
-        <!-- 내 소변검사 -->
+        <!-- 인체용 소변검사 -->
         <button class="home-card human" onclick="enterHuman()">
           <div class="card-orb">🧑</div>
-          <div class="card-label">🧪 소변검사</div>
-          <div class="card-title">내 건강 체크</div>
-          <div class="card-meta" id="humanLastInfo">1분 자가진단</div>
+          <div class="card-label">인체용</div>
+          <div class="card-title">소변검사</div>
+          <div class="card-meta" id="humanLastInfo">1분 · 홈 자가진단</div>
         </button>
 
-        <!-- 반려동물 소변검사 -->
+        <!-- 반려동물용 소변검사 -->
         <button class="home-card pet" onclick="enterPet()">
           <div class="card-pet-orb">🐶🐱</div>
-          <div class="card-label">🧪 소변검사</div>
-          <div class="card-title">반려동물</div>
-          <div class="card-meta" id="petLastInfo">1분 자가진단</div>
+          <div class="card-label">반려동물용</div>
+          <div class="card-title">소변검사</div>
+          <div class="card-meta" id="petLastInfo">1분 · 홈 자가진단</div>
         </button>
 
         <!-- 식단 분석 -->
@@ -2780,7 +2780,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -5661,8 +5661,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
