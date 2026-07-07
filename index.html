@@ -3989,6 +3989,89 @@ function timeAgo(iso) {
   if (sec < 86400*30)  return Math.floor(sec/(86400*7)) + '주 전';
   return Math.floor(sec/(86400*30)) + '개월 전';
 }
+// ════════════════════════════════════════════════════════════════
+// 🎪 음식별 위트 코멘트 사전 (좋은 점 인정 + 재밌는 팁)
+// ════════════════════════════════════════════════════════════════
+const FOOD_WITTY_DICT = {
+  '튀김':     '역시 튀김은 무엇을 튀겨도 맛있죠! 근데 너무 많이 드시면 안 좋은 거 아시죠?? 특히 맥주랑 세트로...🍺',
+  '치킨':     '치킨은 진리죠 🍗 근데 튀김옷은 좀... 다음엔 오븐 버전 도전!',
+  '피자':     '피자 잘 드셨네요! 치즈 사랑 알아요~ 근데 나트륨은 좀 줄여봐요',
+  '삼겹살':   '삼겹살 = 인생 아이템 🥓 근데 야채도 좀 챙겨봐요~ 특히 상추 크게 한 장!',
+  '떡볶이':   '떡볶이 최고죠! 근데 단맛+매운맛 콤보 위장이 좀 힘들어해요 🌶',
+  '라면':     '라면 한 그릇의 로망~ 근데 국물은 반만! 나트륨 폭탄이에요',
+  '족발':     '족발 = 콜라겐 만점! 근데 저녁 늦게 드시면 다음 날 부어요...🥲',
+  '보쌈':     '보쌈은 삼삼하죠~ 김치랑 먹으면 궁합 대박!',
+  '샐러드':   '샐러드 챙기신 거 대박! 이 정도면 인플루언서 급이에요 ✨',
+  '연어':     '연어 = 오메가3 만점! 뇌·심장·피부 다 챙기셨어요 🌟',
+  '브로콜리': '브로콜리 챙기신 거 훌륭! 항산화 성분 폭발이에요',
+  '김치':     '김치 = 유산균 대장! 근데 나트륨도 은근 많죠 살짝만~',
+  '고구마':   '고구마 최고 탄수화물! 식이섬유 풍부 · 든든하죠',
+  '계란':     '계란 잘 드셨네요! 완전 단백질 · 콜린도 풍부 🥚',
+  '견과류':   '견과류 챙기신 거 굿! 한 줌만! 하루 30g 이내가 딱',
+  '아보카도': '아보카도 = 좋은 지방! 심혈관 케어 최고 🥑',
+  '치즈':     '치즈 사랑 알아요~ 근데 나트륨·포화지방 은근 많죠',
+  '커피':     '커피 없인 살 수 없죠 ☕ 근데 오후 2시 이후는 자제!',
+  '맥주':     '맥주 한 잔의 여유~ 근데 살은 어쩌실 거예요...? 🍺',
+  '아이스크림': '아이스크림 = 행복 🍦 근데 설탕 폭탄인 거 아시죠?',
+  '초콜릿':   '초콜릿 최고죠~ 다크초콜릿이면 완벽 (70% 이상!)',
+  '토마토':   '토마토 챙기신 거 굿! 라이코펜 · 익혀 먹으면 흡수 2배',
+  '오이':     '오이 = 여름의 여왕 🥒 수분 96%로 시원함 폭발',
+  '두부':     '두부는 진리 · 식물성 단백질 최강',
+  '나물':     '나물 반찬 챙기신 거 진짜 대박! 어머니 같은 식단이에요 🌿',
+  '국':       '국물 요리 좋아요~ 근데 국물은 반만 드시면 나트륨 안전!',
+  '찌개':     '찌개 = 밥도둑! 근데 국물 다 마시면 나트륨 초과예요~',
+  '볶음밥':   '볶음밥 최고! 근데 기름 많으면 칼로리 폭탄 조심',
+  '샌드위치': '샌드위치 좋아요~ 야채 많이 · 소스는 적게가 정답!',
+  '햄버거':   '햄버거 잘 드셨네요! 근데 감튀·콜라 세트는 좀... 위험',
+  '족발':     '족발 콜라겐 폭발! 근데 저녁 늦게 드시면 부어요',
+  '순대':     '순대 좋아요~ 소금 살짝만 찍어드세요!',
+  '김밥':     '김밥은 완벽 식단! 야채 · 단백질 · 탄수 균형 굿',
+  '비빔밥':   '비빔밥 = 종합 영양제 🌈 완벽한 한 그릇',
+  '냉면':     '냉면 시원~ 근데 국물 나트륨은 조심!',
+  '수박':     '수박 = 여름 필수 🍉 수분 · 라이코펜 좋아요',
+  '떡':       '떡 잘 드셨네요~ 근데 소화가 좀 무거워요 🍡',
+  '빵':       '빵 사랑! 근데 흰빵보단 통곡물빵이 훨씬 좋아요',
+  '우유':     '우유 = 칼슘 만점! 뼈 건강 챙기셨네요 🥛',
+  '요거트':   '요거트 챙기신 거 굿~ 유산균 · 프로바이오틱 폭발!',
+  '녹차':     '녹차 = 항산화 최고 🍵 카테킨 성분 대박',
+  '고기':     '고기 잘 드셨네요! 단백질 든든 · 근데 야채도 챙겨요~',
+  '생선':     '생선 = 오메가3 · DHA 만점! 뇌·심장 케어 굿',
+  '과일':     '과일 챙기신 거 대박! 비타민 · 항산화 · 최고',
+  '채소':     '채소 사랑 알아요~ 이 정도면 5색 다 채우실 듯!',
+  '탕수육':   '탕수육 최고죠~ 근데 소스는 살짝만 찍어드세요!',
+  '짜장면':   '짜장면 = 소울푸드 🍜 근데 야채 많이 · 국물 적게!',
+  '짬뽕':     '짬뽕 시원~ 근데 국물 다 마시면 나트륨 초과!',
+  '초밥':     '초밥 = 프리미엄 식단 🍣 오메가3 · 단백질 굿'
+};
+
+// 🎯 최근 먹은 음식에서 위트 코멘트 생성
+function _getWittyFromRecentFoods(records) {
+  if (!records || !records.length) return null;
+  const collected = [];
+  records.slice(0, 20).forEach(rec => {
+    let foods = rec.foods;
+    if (typeof foods === 'string') foods = foods.split(/[,、+·]/);
+    if (!Array.isArray(foods)) return;
+    foods.forEach(f => {
+      const name = typeof f === 'string' ? f : (f.name || '');
+      if (!name) return;
+      // 사전에서 일치하는 키워드 찾기
+      for (const key in FOOD_WITTY_DICT) {
+        if (name.includes(key)) { collected.push(key); break; }
+      }
+    });
+  });
+  if (!collected.length) return null;
+  // 빈도 카운트해서 가장 많이 먹은 것 위주
+  const cnt = {};
+  collected.forEach(k => cnt[k] = (cnt[k] || 0) + 1);
+  const sorted = Object.entries(cnt).sort((a,b) => b[1]-a[1]);
+  const [topFood, topCnt] = sorted[0];
+  const wittyLine = FOOD_WITTY_DICT[topFood];
+  const prefix = topCnt >= 3 ? `🔥 이번에 ${topFood}만 ${topCnt}번!` : `👀 ${topFood} 드셨네요~`;
+  return `${prefix} ${wittyLine}`;
+}
+
 function updateHomeStats() {
   try {
     // 🔮 오늘의 운세 · 🧠 오늘의 상식 카드 서브 텍스트 갱신
@@ -7888,50 +7971,47 @@ function renderReport() {
       return opts[0] ? `✓ ${opts[0]} <span style="color:#94A3B8">(${it.pct}%)</span>` : null;
     }).filter(Boolean);
 
-    // 🎨 칭찬·따끔 멘트 (친근하고 위트있게)
+    // 🎪 좋은 점 위주 + 위트 있는 코멘트 (실제 먹은 음식 언급)
     let coachMsg = '', coachClass = 'neutral';
     const periodTxt = reportTab === 'today' ? '오늘' : '이번 주';
-    if (avgScore >= 85 && lackedKeys.length === 0) {
+    const wittyLine = _getWittyFromRecentFoods(list);
+
+    if (avgScore >= 85) {
       const praises = [
-        `🌟 <strong>완벽 그 자체!</strong> ${avgScore}점 · 왕관 씌워드립니다 👑 이대로 쭉 가요!`,
-        `🥇 <strong>영양사 저리가라~</strong> ${avgScore}점, 부족한 게 하나도 없어요! 대박`,
-        `✨ <strong>${periodTxt} 진짜 훌륭했어요!</strong> ${avgScore}점, 흠잡을 데 없음`
+        `🌟 <strong>완벽 그 자체!</strong> ${avgScore}점 · 왕관 씌워드립니다 👑`,
+        `🥇 <strong>영양사 저리가라~</strong> ${avgScore}점! 흠잡을 데가 없어요`,
+        `✨ <strong>${periodTxt} 진짜 훌륭!</strong> ${avgScore}점, 이 페이스 유지 부탁드려요!`
       ];
       coachMsg = praises[Math.floor(Math.random() * praises.length)];
+      if (wittyLine) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#065F46">${wittyLine}</div>`;
       coachClass = 'praise';
-    } else if (avgScore >= 75 && lackedKeys.length <= 2) {
+    } else if (avgScore >= 70) {
       const goods = [
-        `👍 <strong>오~ 잘하고 계신데요?</strong> ${avgScore}점, ${lackedKeys.length > 0 ? `딱 ${lackedKeys.length}가지만 채우면 만점` : '이 리듬 그대로!'}`,
-        `😊 <strong>훌륭!</strong> ${avgScore}점 균형 좋아요${lackedKeys.length > 0 ? ` · ${lackedKeys.length}가지만 더!` : ' 유지 부탁드려요~'}`,
-        `🎯 <strong>${periodTxt} 잘 챙기셨네요!</strong> ${avgScore}점${lackedKeys.length > 0 ? `, ${lackedKeys.length}가지만 살짝 더` : ' · 완벽 코앞이에요'}`
+        `👍 <strong>오~ 잘하고 계신데요?</strong> ${avgScore}점, ${periodTxt} 잘 챙기셨어요`,
+        `😊 <strong>훌륭!</strong> ${avgScore}점, 이대로 유지만 해도 대박~`,
+        `🎯 <strong>${periodTxt} 좋았어요!</strong> ${avgScore}점 · 다음번도 이 리듬으로!`
       ];
       coachMsg = goods[Math.floor(Math.random() * goods.length)];
+      if (wittyLine) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#065F46">${wittyLine}</div>`;
       coachClass = 'praise';
-    } else if (lackedKeys.length >= 5) {
-      const warns = [
-        `🥲 <strong>${periodTxt} 좀 아쉬웠어요~</strong> 부족 ${lackedKeys.length}가지 발견! 다음번엔 함께 채워봐요`,
-        `😅 <strong>어라, ${periodTxt} 살짝 삐끗!</strong> 부족 ${lackedKeys.length}가지, 다음번 화이팅 🍀`,
-        `🍰 <strong>${periodTxt} 케이크가 좀 많았나요?</strong> 부족 ${lackedKeys.length}가지, 리셋 어때요?`,
-        `🙈 <strong>이럴수가 · 부족 ${lackedKeys.length}가지 발견!</strong> ${periodTxt}은 좀 놓쳤지만 다음번엔 만회해봐요`
+    } else if (avgScore >= 55) {
+      const mids = [
+        `💪 <strong>${avgScore}점 · 나쁘지 않아요!</strong>`,
+        `👌 <strong>${avgScore}점 · 무난한 ${periodTxt}!</strong>`,
+        `🌱 <strong>${avgScore}점 · 아직 성장 중!</strong>`
       ];
-      coachMsg = warns[Math.floor(Math.random() * warns.length)];
-      coachClass = 'warn';
-    } else if (lackedKeys.length >= 3) {
-      const midMsgs = [
-        `💪 <strong>나쁘진 않은데...</strong> 부족 ${lackedKeys.length}가지만 채우면 확 좋아져요!`,
-        `👌 <strong>이 정도면 무난~</strong> 근데 ${lackedKeys.length}가지만 더 챙기면 A+ 각!`,
-        `🌱 <strong>괜찮아요!</strong> ${lackedKeys.length}가지만 살짝 신경쓰면 등급 UP`
-      ];
-      coachMsg = midMsgs[Math.floor(Math.random() * midMsgs.length)];
+      coachMsg = mids[Math.floor(Math.random() * mids.length)];
+      if (wittyLine) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#78350F">${wittyLine}</div>`;
       coachClass = 'neutral';
     } else {
-      const neutrals = [
-        `🍽 <strong>${avgScore}점 · 딱 평균이네요</strong> · 조금만 더 노력하면 상위권!`,
-        `😌 <strong>평범한 식단이에요</strong> · ${avgScore}점, 한 끗 차이로 훌륭해질 수 있어요`,
-        `🤔 <strong>애매한 ${avgScore}점</strong> · 다음 식사에 뭘 더할지 고민 좀 해봐요~`
+      const encourages = [
+        `🙌 <strong>${avgScore}점 · 다음번엔 더 잘하실 거예요!</strong>`,
+        `🍀 <strong>${avgScore}점 · 오늘부터 리셋 어때요?</strong>`,
+        `😅 <strong>${avgScore}점 · 다양한 음식 도전!</strong>`
       ];
-      coachMsg = neutrals[Math.floor(Math.random() * neutrals.length)];
-      coachClass = 'neutral';
+      coachMsg = encourages[Math.floor(Math.random() * encourages.length)];
+      if (wittyLine) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#7F1D1D">${wittyLine}</div>`;
+      coachClass = 'warn';
     }
 
     // 📝 식단 기록 관리 섹션 (잘못 입력한 거 삭제)
@@ -12533,55 +12613,52 @@ function _showFoodReportImpl(period) {
   lackedItems.sort((a, b) => a.pct - b.pct);
   excessItems.sort((a, b) => b.pct - a.pct);
 
-  // 🌟 칭찬·따끔 멘트 (친근하고 위트있게)
-  const lackedCnt = lackedItems.length;
-  const excessCnt = excessItems.length;
+  // 🎪 좋은 점 위주 + 위트 있는 코멘트 (실제 먹은 음식 언급)
   const periodTxt2 = period === 'month' ? '이번 달' : '이번 주';
   let coachMsg = '', coachClass = '';
-  if (avgScore >= 85 && lackedCnt === 0 && excessCnt === 0) {
+  // records가 아니라 rawRecords에서 최근 먹은 것 뽑기
+  let recentRecords = [];
+  try {
+    recentRecords = (JSON.parse(localStorage.getItem('foodHistoryV1') || '[]') || []).slice(-30);
+  } catch(e) {}
+  const wittyLine2 = _getWittyFromRecentFoods(recentRecords);
+
+  if (avgScore >= 85) {
     const praises = [
-      `🌟 <strong>완벽 그 자체!</strong> ${avgScore}점 · 왕관 씌워드립니다 👑 이대로 쭉 가요!`,
-      `🥇 <strong>${periodTxt2} 영양사 저리가라~</strong> ${avgScore}점, 흠 하나도 없음! 대박`,
-      `✨ <strong>${periodTxt2} 진짜 훌륭했어요!</strong> ${avgScore}점, 이 페이스 그대로 부탁드려요`
+      `🌟 <strong>완벽 그 자체!</strong> ${avgScore}점 · 왕관 씌워드립니다 👑`,
+      `🥇 <strong>${periodTxt2} 영양사 저리가라~</strong> ${avgScore}점, 흠잡을 데 없어요`,
+      `✨ <strong>${periodTxt2} 진짜 훌륭!</strong> ${avgScore}점, 이대로 부탁드려요`
     ];
     coachMsg = praises[Math.floor(Math.random() * praises.length)];
+    if (wittyLine2) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#065F46">${wittyLine2}</div>`;
     coachClass = 'praise';
-  } else if (avgScore >= 75 && lackedCnt <= 2) {
+  } else if (avgScore >= 70) {
     const goods = [
-      `👍 <strong>오~ ${periodTxt2} 잘하셨네요!</strong> ${avgScore}점${lackedCnt > 0 ? `, 딱 ${lackedCnt}가지만 채우면 만점` : ' 이대로 유지 부탁'}`,
-      `😊 <strong>훌륭!</strong> ${avgScore}점 균형 좋아요${lackedCnt > 0 ? ` · ${lackedCnt}가지만 더 챙기면 A+` : ' · 지금처럼만 가주세요~'}`,
-      `🎯 <strong>${periodTxt2} 잘 챙기셨어요!</strong> ${avgScore}점${lackedCnt > 0 ? `, ${lackedCnt}가지만 살짝 더` : ' · 완벽 코앞이에요'}`
+      `👍 <strong>오~ ${periodTxt2} 잘하셨네요!</strong> ${avgScore}점`,
+      `😊 <strong>훌륭!</strong> ${avgScore}점, 균형 좋아요`,
+      `🎯 <strong>${periodTxt2} 잘 챙기셨어요!</strong> ${avgScore}점 · 이 리듬 유지!`
     ];
     coachMsg = goods[Math.floor(Math.random() * goods.length)];
+    if (wittyLine2) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#065F46">${wittyLine2}</div>`;
     coachClass = 'praise';
-  } else if (lackedCnt >= 5 || excessCnt >= 2) {
-    const warns = period === 'month' ? [
-      `🥲 <strong>한 달 동안 살짝 아쉬웠네요~</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 달엔 리셋 어때요?`,
-      `😅 <strong>이번 달은 좀 놓쳤어요!</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 새 달, 새 마음으로 화이팅 🍀`,
-      `🍰 <strong>한 달 내내 케이크가 많았나요?</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 달은 함께 채워봐요`
-    ] : [
-      `🥲 <strong>${periodTxt2} 좀 아쉬웠어요~</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 주엔 함께 채워봐요!`,
-      `😅 <strong>어라, ${periodTxt2} 살짝 삐끗!</strong> 부족 ${lackedCnt}가지, 과다 ${excessCnt}가지 · 다음 주 화이팅 🍀`,
-      `🙈 <strong>이럴수가 · 부족 ${lackedCnt}가지 발견!</strong> ${periodTxt2}은 놓쳤지만 다음 주엔 만회해봐요`
+  } else if (avgScore >= 55) {
+    const mids = [
+      `💪 <strong>${avgScore}점 · 나쁘지 않아요!</strong>`,
+      `👌 <strong>${avgScore}점 · 무난한 ${periodTxt2}!</strong>`,
+      `🌱 <strong>${avgScore}점 · 아직 성장 중!</strong>`
     ];
-    coachMsg = warns[Math.floor(Math.random() * warns.length)];
-    coachClass = 'warn';
-  } else if (lackedCnt >= 3 || excessCnt >= 1) {
-    const midMsgs = [
-      `💪 <strong>나쁘진 않은데...</strong> 부족·과다 ${lackedCnt+excessCnt}가지만 정리하면 확 좋아져요!`,
-      `👌 <strong>이 정도면 무난~</strong> ${lackedCnt+excessCnt}가지만 챙기면 A+ 각!`,
-      `🌱 <strong>괜찮아요!</strong> ${lackedCnt+excessCnt}가지만 살짝 신경쓰면 등급 UP`
-    ];
-    coachMsg = midMsgs[Math.floor(Math.random() * midMsgs.length)];
+    coachMsg = mids[Math.floor(Math.random() * mids.length)];
+    if (wittyLine2) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#78350F">${wittyLine2}</div>`;
     coachClass = 'neutral';
   } else {
-    const neutrals = [
-      `🍽 <strong>${avgScore}점 · 딱 평균이네요</strong> · 조금만 더 노력하면 상위권!`,
-      `😌 <strong>평범한 식단이에요</strong> · ${avgScore}점, 한 끗 차이로 훌륭해질 수 있어요`,
-      `🤔 <strong>애매한 ${avgScore}점</strong> · 다음 식사에 뭘 더할지 고민 좀 해봐요~`
+    const encourages = [
+      `🙌 <strong>${avgScore}점 · ${periodTxt2}엔 더 잘하실 거예요!</strong>`,
+      `🍀 <strong>${avgScore}점 · 오늘부터 리셋 어때요?</strong>`,
+      `😅 <strong>${avgScore}점 · 다양한 음식 도전!</strong>`
     ];
-    coachMsg = neutrals[Math.floor(Math.random() * neutrals.length)];
-    coachClass = 'neutral';
+    coachMsg = encourages[Math.floor(Math.random() * encourages.length)];
+    if (wittyLine2) coachMsg += `<div style="margin-top:8px;font-weight:700;font-size:13px;color:#7F1D1D">${wittyLine2}</div>`;
+    coachClass = 'warn';
   }
   const coachHtml = `<div class="coach-msg ${coachClass}">${coachMsg}</div>`;
 
