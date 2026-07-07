@@ -79,10 +79,16 @@ async function build() {
             'saveNickname', 'closeReminder'
           ]
         },
-        format: { comments: false }
+        format: {
+          comments: false,
+          inline_script: true // 🛡️ 문자열 안 &lt;/script&gt; 등 자동 escape (스크립트 조기 종료 방지)
+        }
       });
 
-      const minified = result.code || code;
+      // 🛡️ script 안의 raw &lt;/script&gt; 자동 escape (문자열 안 이면 브라우저가 조기 종료)
+      const minified = (result.code || code)
+        .replace(/<\/script/gi, '<\\/script')
+        .replace(/<!--/g, '<\\!--');
       totalMinified += minified.length;
       const newScript = `<script${attrs}>${minified}</script>`;
       replacements.push({ from: fullMatch, to: newScript });
@@ -91,9 +97,9 @@ async function build() {
     }
   }
 
-  // 교체 적용
+  // 교체 적용 (함수 콜백으로 $& 등 특수문자 오해석 방지)
   for (const rep of replacements) {
-    html = html.replace(rep.from, rep.to);
+    html = html.replace(rep.from, () => rep.to);
   }
 
   // HTML 자체도 간단히 압축 (여러 줄 공백 → 한 줄)
