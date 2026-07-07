@@ -1,6 +1,6 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v6 — Rate Limit 추가 (남용 방지)
+// v7 — 속도 최적화 (2차 호출 조건 완화 + maxDuration 25초)
 
 const { rateLimitMiddleware } = require('./_rateLimit');
 
@@ -24,13 +24,14 @@ module.exports = async function handler(req, res) {
     const model = 'gemini-2.5-flash';
     const allRawTexts = [];
 
-    // ── 1차 호출 ──
+    // ── 1차 호출 (속도 최우선) ──
     const r1 = await tryAnalyze(apiKey, model, buildIngredientsFirstPrompt(), imageB64);
     if (r1.rawText) allRawTexts.push('### 1차 응답\n' + r1.rawText);
     let result = r1.result;
 
-    // ── 빈 ingredients면 2차 호출 ──
-    if (!result || !Array.isArray(result.ingredients) || result.ingredients.length === 0) {
+    // ── 완전히 실패했을 때만 2차 호출 (속도 UP: 1개라도 뽑히면 넘어감) ──
+    const has1st = result && Array.isArray(result.ingredients) && result.ingredients.length > 0;
+    if (!has1st) {
       const r2 = await tryAnalyze(apiKey, model, buildForcePrompt(), imageB64);
       if (r2.rawText) allRawTexts.push('### 2차 응답\n' + r2.rawText);
       if (r2.result && Array.isArray(r2.result.ingredients) && r2.result.ingredients.length > 0) {
@@ -450,3 +451,7 @@ function fillMissingFields(r) {
   }
   return r;
 }
+
+// ⏱ Vercel 함수 실행 시간 (기본 10초 → 25초)
+module.exports.config = { maxDuration: 25 };
+
