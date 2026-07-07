@@ -2818,7 +2818,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>건강어떄 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -11182,6 +11182,17 @@ function renderStoryCardDOM(type, data) {
     subLabel = `${correct}/${total} 정답 · 지식 +1`;
   }
 
+  // 🎨 타입별 테마 (색상·이모지·배경) — 시각적으로 확실히 구분
+  const themes = {
+    urine:      { emoji: '🧪', hero: '🩺', bg: '#F0FDFA', accent: '#0891B2', accentDark: '#155E75', badge: '#CFFAFE', textDark: '#164E63' },
+    food:       { emoji: '🍱', hero: '🥗', bg: '#FFF7ED', accent: '#EA580C', accentDark: '#9A3412', badge: '#FFEDD5', textDark: '#7C2D12' },
+    ingredient: { emoji: '🏷️', hero: '🧬', bg: '#FAF5FF', accent: '#7C3AED', accentDark: '#5B21B6', badge: '#EDE9FE', textDark: '#4C1D95' },
+    weekly:     { emoji: '📊', hero: '🌿', bg: '#F0FDF4', accent: '#059669', accentDark: '#065F46', badge: '#D1FAE5', textDark: '#064E3B' },
+    challenge:  { emoji: '🏆', hero: '⭐', bg: '#FEFCE8', accent: '#EAB308', accentDark: '#A16207', badge: '#FEF3C7', textDark: '#713F12' },
+    quiz:       { emoji: '🎯', hero: '🧠', bg: '#EFF6FF', accent: '#3B82F6', accentDark: '#1D4ED8', badge: '#DBEAFE', textDark: '#1E3A8A' }
+  };
+  const theme = themes[type] || themes.food;
+
   // 순위·트렌드·평균·목표 계산
   const rankPct = _calculateRankPercent(score);
   const rankPos = rankPct; // 100명 중 X등
@@ -11199,36 +11210,36 @@ function renderStoryCardDOM(type, data) {
   }).join('');
 
   div.innerHTML = `
-    <div style="width:100%;height:100%;background:#FFF;padding:26px 24px;display:flex;flex-direction:column;box-sizing:border-box;position:relative;color:#0F172A">
+    <div style="width:100%;height:100%;background:${theme.bg};padding:26px 24px;display:flex;flex-direction:column;box-sizing:border-box;position:relative;color:#0F172A">
 
-      <!-- 헤더 -->
-      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid #F0F0F0">
-        <div style="font-size:13px;font-weight:800;color:#059669;letter-spacing:3px">${escapeHtml(title)}</div>
-        <div style="font-size:13px;font-weight:700;color:#94A3B8;letter-spacing:1px">${escapeHtml(dateStr)}</div>
+      <!-- 헤더 (타입별 이모지·색상) -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1.5px dashed ${theme.accent}33">
+        <div style="font-size:14px;font-weight:900;color:${theme.accent};letter-spacing:3px">${theme.emoji} ${escapeHtml(title)}</div>
+        <div style="font-size:12px;font-weight:800;color:#94A3B8;letter-spacing:1px">${escapeHtml(dateStr)}</div>
       </div>
 
-      <!-- Hero: 👑 상위 X% -->
+      <!-- Hero: 타입별 이모지 + 상위 X% -->
       <div style="text-align:center;margin-top:12px">
-        <div style="font-size:40px;line-height:1;margin-bottom:2px">👑</div>
-        <div style="font-size:13px;color:#059669;font-weight:900;letter-spacing:3px">상위</div>
+        <div style="font-size:48px;line-height:1;margin-bottom:4px">${theme.hero}</div>
+        <div style="font-size:13px;color:${theme.accent};font-weight:900;letter-spacing:3px">상위</div>
         <div style="display:flex;justify-content:center;align-items:baseline">
-          <span style="font-size:90px;line-height:1;font-weight:900;color:#059669;letter-spacing:-5px;font-family:Georgia,serif">${rankPct}</span>
-          <span style="font-size:40px;color:#059669;font-weight:900">%</span>
+          <span style="font-size:90px;line-height:1;font-weight:900;color:${theme.accent};letter-spacing:-5px;font-family:Georgia,serif">${rankPct}</span>
+          <span style="font-size:40px;color:${theme.accent};font-weight:900">%</span>
         </div>
-        <div style="font-size:15px;color:#065F46;font-weight:800;margin-top:2px">100명 중 ${rankPos}등</div>
+        <div style="font-size:15px;color:${theme.accentDark};font-weight:800;margin-top:2px">100명 중 ${rankPos}등</div>
       </div>
 
       <!-- 점수·랭킹 이중 카드 -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-        <div style="background:#F0FDF4;border-radius:14px;padding:11px;text-align:center;border:1.5px solid #A7F3D0">
-          <div style="font-size:10px;color:#065F46;font-weight:900;letter-spacing:2px;margin-bottom:2px">SCORE</div>
-          <div style="font-size:34px;line-height:1;font-weight:900;color:#059669;font-family:Georgia,serif">${score}</div>
-          <div style="font-size:11px;color:#065F46;font-weight:800;margin-top:2px">${escapeHtml(grade)} 등급</div>
+        <div style="background:${theme.badge};border-radius:14px;padding:11px;text-align:center;border:1.5px solid ${theme.accent}55">
+          <div style="font-size:10px;color:${theme.accentDark};font-weight:900;letter-spacing:2px;margin-bottom:2px">SCORE</div>
+          <div style="font-size:34px;line-height:1;font-weight:900;color:${theme.accent};font-family:Georgia,serif">${score}</div>
+          <div style="font-size:11px;color:${theme.accentDark};font-weight:800;margin-top:2px">${escapeHtml(grade)} 등급</div>
         </div>
-        <div style="background:#F0FDF4;border-radius:14px;padding:11px;text-align:center;border:1.5px solid #A7F3D0">
-          <div style="font-size:10px;color:#065F46;font-weight:900;letter-spacing:2px;margin-bottom:2px">GRADE</div>
-          <div style="font-size:34px;line-height:1;font-weight:900;color:#059669;font-family:Georgia,serif">TOP</div>
-          <div style="font-size:11px;color:#065F46;font-weight:800;margin-top:2px">상위 ${rankPct}%</div>
+        <div style="background:${theme.badge};border-radius:14px;padding:11px;text-align:center;border:1.5px solid ${theme.accent}55">
+          <div style="font-size:10px;color:${theme.accentDark};font-weight:900;letter-spacing:2px;margin-bottom:2px">GRADE</div>
+          <div style="font-size:34px;line-height:1;font-weight:900;color:${theme.accent};font-family:Georgia,serif">TOP</div>
+          <div style="font-size:11px;color:${theme.accentDark};font-weight:800;margin-top:2px">상위 ${rankPct}%</div>
         </div>
       </div>
 
@@ -11248,31 +11259,31 @@ function renderStoryCardDOM(type, data) {
 
       <!-- 📈 미니 트렌드 그래프 -->
       <div style="margin-top:10px">
-        <div style="font-size:10px;color:#065F46;letter-spacing:1.5px;font-weight:900;margin-bottom:5px">📈 지난 7일 · 상승 곡선</div>
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:1.5px;font-weight:900;margin-bottom:5px">📈 지난 7일 · 상승 곡선</div>
         <div style="display:flex;align-items:flex-end;justify-content:space-between;height:36px;gap:4px">
           ${trendHtml}
         </div>
         <div style="display:flex;justify-content:space-between;font-size:9px;color:#94A3B8;margin-top:3px;font-weight:700">
-          <span>-6d</span><span>-5d</span><span>-4d</span><span>-3d</span><span>-2d</span><span>-1d</span><span style="color:#059669;font-weight:900">오늘</span>
+          <span>-6d</span><span>-5d</span><span>-4d</span><span>-3d</span><span>-2d</span><span>-1d</span><span style="color:${theme.accent};font-weight:900">오늘</span>
         </div>
       </div>
 
       <!-- 🆚 사용자 평균 vs 나 -->
-      <div style="background:#F0FDF4;border-radius:12px;padding:9px 12px;margin-top:10px">
-        <div style="font-size:10px;color:#065F46;letter-spacing:1.5px;font-weight:900;margin-bottom:5px">VS 사용자 평균</div>
+      <div style="background:${theme.badge};border-radius:12px;padding:9px 12px;margin-top:10px">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:1.5px;font-weight:900;margin-bottom:5px">VS 사용자 평균</div>
         <div style="display:flex;justify-content:space-between;font-size:11px;color:#78716C;font-weight:800;margin-bottom:2px">
           <span>평균</span><span>${avgScore}점</span>
         </div>
-        <div style="height:6px;background:#DCFCE7;border-radius:3px;overflow:hidden;margin-bottom:6px">
-          <div style="width:${avgScore}%;height:100%;background:#86EFAC"></div>
+        <div style="height:6px;background:${theme.accent}22;border-radius:3px;overflow:hidden;margin-bottom:6px">
+          <div style="width:${avgScore}%;height:100%;background:${theme.accent}88"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:#059669;font-weight:900;margin-bottom:2px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:${theme.accent};font-weight:900;margin-bottom:2px">
           <span>나</span><span>${score}점</span>
         </div>
-        <div style="height:6px;background:#DCFCE7;border-radius:3px;overflow:hidden">
-          <div style="width:${score}%;height:100%;background:#059669"></div>
+        <div style="height:6px;background:${theme.accent}22;border-radius:3px;overflow:hidden">
+          <div style="width:${score}%;height:100%;background:${theme.accent}"></div>
         </div>
-        <div style="font-size:11px;color:#065F46;font-weight:900;text-align:center;margin-top:5px">
+        <div style="font-size:11px;color:${theme.accentDark};font-weight:900;text-align:center;margin-top:5px">
           ${diff > 0 ? `평균보다 +${diff}점 우수 ✨` : diff === 0 ? '평균과 동일' : `평균보다 ${diff}점 · 성장 중`}
         </div>
       </div>
@@ -11286,15 +11297,15 @@ function renderStoryCardDOM(type, data) {
         </div>
       </div>
 
-      <!-- CTA -->
-      <div style="background:#059669;border-radius:16px;padding:11px;text-align:center;margin-top:10px">
+      <!-- CTA (타입별 컬러) -->
+      <div style="background:${theme.accent};border-radius:16px;padding:11px;text-align:center;margin-top:10px">
         <div style="font-size:14px;font-weight:900;color:#FFF;letter-spacing:-.3px">당신의 점수는? 확인하기 →</div>
       </div>
 
       <!-- 스토어 다운로드 안내 (크게!) -->
-      <div style="margin-top:12px;padding-top:10px;border-top:1.5px solid #F0F0F0">
+      <div style="margin-top:12px;padding-top:10px;border-top:1.5px dashed ${theme.accent}33">
         <div style="text-align:center;margin-bottom:10px">
-          <div style="font-size:13px;color:#059669;letter-spacing:3px;font-weight:900">DOWNLOAD NOW</div>
+          <div style="font-size:13px;color:${theme.accent};letter-spacing:3px;font-weight:900">DOWNLOAD NOW</div>
           <div style="font-size:19px;color:#0F172A;font-weight:900;margin-top:4px;letter-spacing:-.4px">'건강어때' 검색 &amp; 다운로드</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
