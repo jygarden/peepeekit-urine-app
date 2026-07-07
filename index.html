@@ -2818,7 +2818,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어떄 AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -11193,6 +11193,91 @@ function renderStoryCardDOM(type, data) {
   };
   const theme = themes[type] || themes.food;
 
+  // 🎯 타입별 특화 데이터 섹션 (Hero 아래에 삽입 — 진짜 다른 콘텐츠)
+  let specialSection = '';
+  if (type === 'weekly') {
+    const w = data;
+    specialSection = `
+      <div style="background:#FFF;border-radius:14px;padding:12px;margin-top:12px;border:1.5px solid ${theme.accent}33">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:2px;font-weight:900;margin-bottom:8px;text-align:center">📊 이번 주 활동</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+          <div style="text-align:center">
+            <div style="font-size:20px;line-height:1">🍱</div>
+            <div style="font-size:18px;font-weight:900;color:${theme.accent};font-family:Georgia,serif;margin-top:2px">${w.foodCount || 0}</div>
+            <div style="font-size:8.5px;color:${theme.accentDark};font-weight:800">식단</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:20px;line-height:1">🧪</div>
+            <div style="font-size:18px;font-weight:900;color:${theme.accent};font-family:Georgia,serif;margin-top:2px">${w.urineCount || 0}</div>
+            <div style="font-size:8.5px;color:${theme.accentDark};font-weight:800">소변검사</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:20px;line-height:1">🏷️</div>
+            <div style="font-size:18px;font-weight:900;color:${theme.accent};font-family:Georgia,serif;margin-top:2px">${w.ingredientCount || 0}</div>
+            <div style="font-size:8.5px;color:${theme.accentDark};font-weight:800">성분</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:20px;line-height:1">💧</div>
+            <div style="font-size:18px;font-weight:900;color:${theme.accent};font-family:Georgia,serif;margin-top:2px">${((w.waterTotal||0)/1000).toFixed(1)}</div>
+            <div style="font-size:8.5px;color:${theme.accentDark};font-weight:800">물 (L)</div>
+          </div>
+        </div>
+      </div>`;
+  } else if (type === 'food') {
+    const foods = (data.foods || []).slice(0, 3).map(f => typeof f === 'string' ? f : (f.name || '')).filter(Boolean);
+    const cal = data.totalCalories || 0;
+    specialSection = `
+      <div style="background:#FFF;border-radius:14px;padding:12px;margin-top:12px;border:1.5px solid ${theme.accent}33">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:2px;font-weight:900;margin-bottom:6px;text-align:center">🍽 오늘의 식단</div>
+        ${foods.length > 0 ? `<div style="text-align:center;font-size:13px;color:${theme.accentDark};font-weight:900;line-height:1.4">${foods.map(f => escapeHtml(f)).join(' · ')}</div>` : ''}
+        <div style="display:flex;justify-content:space-around;margin-top:8px;padding-top:8px;border-top:1px dashed ${theme.accent}55">
+          <div style="text-align:center">
+            <div style="font-size:16px;font-weight:900;color:${theme.accent};font-family:Georgia,serif">${cal}</div>
+            <div style="font-size:9px;color:${theme.accentDark};font-weight:800">kcal</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:16px;font-weight:900;color:${theme.accent};font-family:Georgia,serif">${escapeHtml(data.balanceGrade || 'B')}</div>
+            <div style="font-size:9px;color:${theme.accentDark};font-weight:800">균형</div>
+          </div>
+        </div>
+      </div>`;
+  } else if (type === 'urine') {
+    const status = data.status || '분석 완료';
+    specialSection = `
+      <div style="background:#FFF;border-radius:14px;padding:14px 12px;margin-top:12px;border:1.5px solid ${theme.accent}33;text-align:center">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:2px;font-weight:900;margin-bottom:4px">🩺 오늘의 검사</div>
+        <div style="font-size:14px;color:${theme.accentDark};font-weight:900">${escapeHtml(status)}</div>
+      </div>`;
+  } else if (type === 'ingredient') {
+    const grade = data.overallGrade || '-';
+    specialSection = `
+      <div style="background:#FFF;border-radius:14px;padding:14px 12px;margin-top:12px;border:1.5px solid ${theme.accent}33;text-align:center">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:2px;font-weight:900;margin-bottom:4px">🧬 종합 안전 등급</div>
+        <div style="font-size:22px;color:${theme.accent};font-weight:900;font-family:Georgia,serif">${escapeHtml(grade)}</div>
+        <div style="font-size:11px;color:${theme.accentDark};font-weight:800;margin-top:2px">성분 안전도 ${data.overallScore || 0}점</div>
+      </div>`;
+  } else if (type === 'challenge') {
+    const c = data;
+    const stampCells = Array.from({length: c.total || 30}, (_, i) => {
+      const filled = i < (c.count || 0);
+      return `<div style="aspect-ratio:1;background:${filled ? theme.accent : '#FFF'};border:1px solid ${theme.accent}66;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#FFF;font-weight:900">${filled ? '✓' : ''}</div>`;
+    }).slice(0, 30).join('');
+    specialSection = `
+      <div style="background:#FFF;border-radius:14px;padding:12px;margin-top:12px;border:1.5px solid ${theme.accent}33">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:2px;font-weight:900;margin-bottom:6px;text-align:center">🏆 스탬프북 · ${c.count||0}/${c.total||30}</div>
+        <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:3px">${stampCells}</div>
+      </div>`;
+  } else if (type === 'quiz') {
+    const correct = data.correct || 0;
+    const total = data.total || 3;
+    const dots = Array.from({length: total}, (_, i) => `<div style="width:22px;height:22px;border-radius:50%;background:${i < correct ? theme.accent : '#FFF'};border:2px solid ${theme.accent};display:flex;align-items:center;justify-content:center;font-size:12px;color:#FFF;font-weight:900">${i < correct ? '✓' : ''}</div>`).join('');
+    specialSection = `
+      <div style="background:#FFF;border-radius:14px;padding:14px 12px;margin-top:12px;border:1.5px solid ${theme.accent}33;text-align:center">
+        <div style="font-size:10px;color:${theme.accentDark};letter-spacing:2px;font-weight:900;margin-bottom:8px">🎯 오늘의 정답 · ${correct}/${total}</div>
+        <div style="display:flex;justify-content:center;gap:8px">${dots}</div>
+      </div>`;
+  }
+
   // 순위·트렌드·평균·목표 계산
   const rankPct = _calculateRankPercent(score);
   const rankPos = rankPct; // 100명 중 X등
@@ -11242,6 +11327,9 @@ function renderStoryCardDOM(type, data) {
           <div style="font-size:11px;color:${theme.accentDark};font-weight:800;margin-top:2px">상위 ${rankPct}%</div>
         </div>
       </div>
+
+      <!-- 🎯 타입별 특화 데이터 (진짜 다른 콘텐츠!) -->
+      ${specialSection}
 
       <!-- 🔥 스트릭 뱃지 -->
       ${streakDays > 0 ? `
