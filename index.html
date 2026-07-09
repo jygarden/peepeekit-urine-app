@@ -497,6 +497,10 @@
     .family-avatar.add-avatar .fa-circle{
       background:#F1F5F9;border:2px dashed #CBD5E1;color:#94A3B8
     }
+    .family-avatar.manage-avatar .fa-circle{
+      background:#F0FDF4;border:2px dashed #86EFAC;color:#059669;font-size:20px
+    }
+    .family-avatar.manage-avatar .fa-name{color:#059669}
     .fa-circle{
       width:52px;height:52px;border-radius:50%;
       display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;
@@ -10382,6 +10386,11 @@ function renderHomeProfileSection() {
       <button class="family-avatar add-avatar" onclick="openAddProfileForm()">
         <div class="fa-circle">+</div>
         <div class="fa-name">추가</div>
+        <div class="fa-age" style="opacity:0">·</div>
+      </button>
+      <button class="family-avatar manage-avatar" onclick="manageProfilesFromSettings()">
+        <div class="fa-circle">✎</div>
+        <div class="fa-name">관리</div>
         <div class="fa-age" style="opacity:0">·</div>
       </button>
     `;
