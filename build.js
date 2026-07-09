@@ -57,6 +57,7 @@ async function build() {
             'openSettings', 'closeSettings', 'saveNewName', 'manageProfilesFromSettings', 'resetAllData',
             'openStreakInfo', 'openProfileSwitcher', 'closeProfileSwitcher', 'openCheckinModal', 'closeCheckin',
             'switchProfile', 'openAddProfileForm', 'saveNewProfile', 'saveCheckin',
+            'openProfileManager', 'closeProfileManager', 'editFamilyProfileFromManager', 'confirmDeleteFamilyProfile',
             'apSelectType', 'apSelectEmoji', 'apSelectGender',
             'saveAllergyProfile', 'toggleAllergy', 'openPersonalProfile', 'closePersonalProfile', 'savePersonalProfile', 'updateAgePreview',
             'enterHuman', 'enterPet', 'enterFood', 'enterIngredient', 'enterKidsSection',
