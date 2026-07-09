@@ -2725,6 +2725,19 @@
     </div>
   </div>
 
+  <!-- ✎ 프로필 관리 모달 (편집·삭제) -->
+  <div id="profileManagerModal" class="profile-switcher-modal" onclick="if(event.target===this)closeProfileManager()">
+    <div class="psm-body">
+      <div class="psm-title">✎ 프로필 관리</div>
+      <div class="psm-sub">이름을 눌러 편집하거나, ✕로 삭제하세요</div>
+      <div id="pmProfileList"></div>
+      <button class="psm-add-btn" onclick="closeProfileManager();openAddProfileForm()">
+        <span style="font-size:16px">+</span> 새 프로필 추가하기
+      </button>
+      <button onclick="closeProfileManager()" style="width:100%;margin-top:10px;padding:10px;background:transparent;border:none;color:#94A3B8;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>
+    </div>
+  </div>
+
   <!-- 🔥 아침 체크인 모달 -->
   <div id="checkinModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);overflow-y:auto;padding:16px;font-family:inherit" onclick="if(event.target===this)closeCheckin()">
     <div style="background:linear-gradient(135deg,#FEF3C7 0%,#FCE7F3 100%);border-radius:24px;max-width:400px;margin:60px auto;padding:26px 24px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25)">
@@ -3578,7 +3591,7 @@
     <button class="settings-btn settings-btn-primary" onclick="saveNewName()">이름 변경</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings()">취소</button>
     <div class="settings-divider"></div>
-    <button class="settings-btn settings-btn-secondary" onclick="manageProfilesFromSettings()">프로필 관리 (가족·반려동물)</button>
+    <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openProfileManager()">프로필 관리 (가족·반려동물)</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();goAllergyProfile()" style="background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border-color:#FCA5A5;color:#991B1B;font-weight:900">🚨 내 알레르기 관리</button>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
@@ -10388,7 +10401,7 @@ function renderHomeProfileSection() {
         <div class="fa-name">추가</div>
         <div class="fa-age" style="opacity:0">·</div>
       </button>
-      <button class="family-avatar manage-avatar" onclick="manageProfilesFromSettings()">
+      <button class="family-avatar manage-avatar" onclick="openProfileManager()">
         <div class="fa-circle">✎</div>
         <div class="fa-name">관리</div>
         <div class="fa-age" style="opacity:0">·</div>
@@ -12152,6 +12165,108 @@ function openProfileSwitcher() {
 function closeProfileSwitcher() {
   const modal = document.getElementById('profileSwitcherModal');
   if (modal) modal.classList.remove('show');
+}
+
+// ✎ 프로필 관리 모달 (편집·삭제)
+function openProfileManager() {
+  const modal = document.getElementById('profileManagerModal');
+  const list = document.getElementById('pmProfileList');
+  if (!modal || !list) return;
+  const profiles = getFamilyProfiles();
+  if (profiles.length === 0) {
+    alert('아직 저장된 프로필이 없어요.\n\'+ 새 프로필 추가\'로 먼저 만들어주세요.');
+    return;
+  }
+  list.innerHTML = profiles.map(p => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 6px;border-bottom:0.5px solid #F1F5F9">
+      <button onclick="editFamilyProfileFromManager('${p.id}')" style="flex:1;display:flex;align-items:center;gap:10px;background:transparent;border:none;padding:4px;cursor:pointer;font-family:inherit;text-align:left">
+        <div style="width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;${p.photo ? `background:url('${p.photo}') center/cover;` : `background:${profileAvatarBg(p.type)};`}">${p.photo ? '' : (p.emoji || '🧑')}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px">${escapeHtml(p.name)}</div>
+          <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:1px">${escapeHtml(profileAgeMeta(p))}</div>
+        </div>
+        <div style="font-size:11px;color:#059669;font-weight:800">편집 ›</div>
+      </button>
+      <button onclick="confirmDeleteFamilyProfile('${p.id}','${escapeHtml(p.name).replace(/'/g,'&#39;')}')" style="width:32px;height:32px;border-radius:50%;background:#FEE2E2;border:none;color:#DC2626;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;flex-shrink:0" aria-label="삭제">✕</button>
+    </div>
+  `).join('');
+  modal.classList.add('show');
+}
+function closeProfileManager() {
+  const modal = document.getElementById('profileManagerModal');
+  if (modal) modal.classList.remove('show');
+}
+function editFamilyProfileFromManager(id) {
+  closeProfileManager();
+  const p = getFamilyProfiles().find(x => x.id === id);
+  if (!p) return;
+  _apType = p.type || 'adult';
+  _apEmoji = p.emoji || '🧑';
+  _apGender = p.gender || null;
+  _apEditingId = id;
+  _apPhotoDataUrl = p.photo || null;
+  document.getElementById('addProfileTitle').textContent = '✎ 프로필 편집';
+  document.getElementById('apName').value = p.name || '';
+  document.getElementById('apAgeYears').value = p.ageYears != null ? p.ageYears : '';
+  const monthsInput = document.getElementById('apAgeMonths');
+  if (monthsInput) monthsInput.value = p.ageMonths != null ? p.ageMonths : '';
+  document.getElementById('apAllergies').value = (p.allergies || []).join(', ');
+  apSelectType(_apType);
+  // 저장된 이모지 다시 선택 표시
+  const grid = document.getElementById('apEmojiGrid');
+  if (grid && _apEmoji) {
+    const emojis = PROFILE_EMOJI_MAP[_apType] || [];
+    grid.innerHTML = emojis.map(e => `
+      <button onclick="apSelectEmoji('${e}',this)" style="width:44px;height:44px;font-size:24px;border-radius:12px;border:2px solid ${e === _apEmoji ? '#EC4899' : '#E5E7EB'};background:${e === _apEmoji ? '#FCE7F3' : '#fff'};cursor:pointer;line-height:1;font-family:inherit;padding:0">${e}</button>
+    `).join('');
+  }
+  // 성별 표시 복원
+  if (_apGender) {
+    ['male','female'].forEach(g => {
+      const btn = document.getElementById('apGender' + g.charAt(0).toUpperCase() + g.slice(1));
+      if (btn) btn.classList.toggle('active', g === _apGender);
+    });
+  }
+  // 사진 미리보기 복원
+  const preview = document.getElementById('apPhotoPreview');
+  if (preview) {
+    if (_apPhotoDataUrl) {
+      preview.style.background = `url('${_apPhotoDataUrl}') center/cover`;
+      preview.textContent = '';
+      const clearBtn = document.getElementById('apPhotoClearBtn');
+      if (clearBtn) clearBtn.style.display = 'block';
+    } else {
+      preview.style.background = '#F1F5F9';
+      preview.textContent = '📷';
+    }
+  }
+  showScreen('screenAddProfile');
+}
+function confirmDeleteFamilyProfile(id, name) {
+  const profiles = getFamilyProfiles();
+  if (profiles.length <= 1) {
+    alert('마지막 프로필은 삭제할 수 없어요.\n먼저 새 프로필을 추가해주세요.');
+    return;
+  }
+  if (!confirm(`'${name}' 프로필을 삭제할까요?\n\n이 프로필의 데이터는 사라지지 않지만,\n프로필 목록에서만 제거돼요.`)) return;
+  deleteFamilyProfile(id);
+  // 활성 프로필이 삭제됐으면 첫 번째로 전환
+  const active = getActiveProfileId();
+  const remaining = getFamilyProfiles();
+  if (!remaining.find(p => p.id === active) && remaining.length > 0) {
+    setActiveProfileId(remaining[0].id);
+  }
+  if (typeof showPointToast === 'function') showPointToast(`🗑 ${name} 프로필이 삭제됐어요`);
+  // 홈 리렌더
+  try { renderHomeProfileSection(); } catch(e) {}
+  try { renderHomeAllergyBanner(); } catch(e) {}
+  try { renderHomeKidsInsight(); } catch(e) {}
+  try { renderKidsCard(); } catch(e) {}
+  try { updateHomeStats(); } catch(e) {}
+  // 관리 모달 다시 열기 (남은 프로필 보여주기)
+  if (remaining.length > 0) {
+    openProfileManager();
+  }
 }
 function switchProfile(id) {
   setActiveProfileId(id);
