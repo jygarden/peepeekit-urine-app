@@ -10246,6 +10246,7 @@ function addFamilyProfile(data) {
     ageMonths: data.ageMonths || null,
     gender: data.gender || null,
     emoji: data.emoji || (data.type === 'kid' ? '👶' : data.type === 'pet' ? '🐶' : '🧑'),
+    photo: data.photo || null,
     allergies: data.allergies || [],
     createdAt: new Date().toISOString()
   });
