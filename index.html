@@ -6840,9 +6840,22 @@ function renderFoodResult(r) {
         <div class="speech-text">${getWittyMealSummary(r)}</div>
       </div>
     </div>`;
+  // 👤 개인 프로필 유무 확인 (안내 문구용)
+  let _scoreBasisText = '💡 일반 성인 기준 · 프로필 입력 시 개인화';
+  try {
+    const _p = (typeof getPersonalProfile === 'function') ? getPersonalProfile() : null;
+    if (_p && (_p.height || _p.weight || _p.birthYear || _p.gender)) {
+      const bits = [];
+      if (_p.birthYear) bits.push('나이');
+      if (_p.gender)    bits.push('성별');
+      if (_p.height && _p.weight) bits.push('BMI');
+      _scoreBasisText = `👤 ${bits.join('·')} 반영 · 개인 맞춤 점수`;
+    }
+  } catch(e) {}
   const scoreCard = `
     <div class="game-score-card">
       <div class="game-rank-badge">${selectedMealTime} · ${label}</div>
+      <div style="font-size:10.5px;color:#94A3B8;font-weight:700;margin:6px 0 2px;letter-spacing:.2px;text-align:center">${_scoreBasisText}</div>
       <div class="game-score-ring">
         <svg width="120" height="120" viewBox="0 0 120 120">
           <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
