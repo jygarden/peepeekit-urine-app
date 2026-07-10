@@ -1,6 +1,6 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v10 — AI는 이름만, 세부는 로컬 사전 매칭 (5-10초 목표) · safety 정렬 · 로컬 총평·점수 계산
+// v11 — AI는 이름 + rawText 요청 · rawText로 사전 매칭 병합 · 40개+ 성분 복원
 
 const { rateLimitMiddleware } = require('./_rateLimit');
 
@@ -24,19 +24,23 @@ module.exports = async function handler(req, res) {
     const model = 'gemini-2.5-flash';
     const allRawTexts = [];
 
-    // ── 1차 호출 (이름만 짧게 요청 · 속도 최우선) ──
+    // ── 1차 호출 (names + rawText 함께 요청) ──
     const r1 = await tryAnalyze(apiKey, model, buildIngredientsFirstPrompt(), imageB64);
     if (r1.rawText) allRawTexts.push('### 1차 응답\n' + r1.rawText);
     let result = r1.result || {};
 
-    // AI 응답이 names 형식이면 사전 매칭으로 ingredients 채움
+    // AI 응답의 names → 사전 매칭 ingredients
     result.ingredients = normalizeAiResponse(result);
 
-    // ── 완전 실패 시 2차 호출 ──
-    if (!Array.isArray(result.ingredients) || result.ingredients.length < 3) {
+    // rawText가 있으면 그것도 combined에 추가 (사전 매칭 소스로 활용)
+    if (result.rawText) allRawTexts.push('### 원재료명 원문\n' + result.rawText);
+
+    // ── 성분이 너무 적으면 2차 호출 ──
+    if (!Array.isArray(result.ingredients) || result.ingredients.length < 8) {
       const r2 = await tryAnalyze(apiKey, model, buildForcePrompt(), imageB64);
       if (r2.rawText) allRawTexts.push('### 2차 응답\n' + r2.rawText);
       if (r2.result) {
+        if (r2.result.rawText) allRawTexts.push('### 2차 원문\n' + r2.result.rawText);
         const r2ing = normalizeAiResponse(r2.result);
         if (r2ing.length > (result.ingredients?.length || 0)) {
           result = { ...r2.result, ingredients: r2ing, allergens: r2.result.allergens || result.allergens };
@@ -56,7 +60,7 @@ module.exports = async function handler(req, res) {
         result._debug = { reason: 'all_methods_failed', rawText: combinedRaw.slice(0, 800) || '(빈 응답)' };
       }
     } else {
-      // ✨ AI 응답 + raw text 사전 매칭 병합 (놓친 합성 첨가물 자동 보완)
+      // ✨ 핵심! rawText 포함한 combined에서 사전 매칭 → 놓친 성분 대량 보완
       const fromDict = extractIngredientsFromText(combinedRaw);
       if (fromDict.length > 0) {
         const existingNames = new Set(result.ingredients.map(i => normalizeName(i?.name)));
@@ -69,7 +73,7 @@ module.exports = async function handler(req, res) {
             added++;
           }
         }
-        if (added > 0) console.log(`[성분 병합] 사전 매칭으로 ${added}개 추가`);
+        if (added > 0) console.log(`[성분 병합] rawText 사전 매칭으로 ${added}개 추가`);
       }
     }
 
@@ -176,38 +180,45 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
   }
 }
 
-// ── 프롬프트 1: 성분 이름만 짧게 요청 (속도 최우선) ──
+// ── 프롬프트 1: 성분 이름 + 원재료명 원문 요청 (속도 + 정확성) ──
 function buildIngredientsFirstPrompt() {
   return `한국어 JSON만. 마크다운 X.
 
-사진 "원재료명"의 모든 성분 이름만 배열로 추출. 세부 설명 X, 이름만!
+사진 "원재료명"에서:
+1. 모든 성분 이름을 names 배열에
+2. "원재료명" 필드의 원문 텍스트를 rawText에 그대로 (성분 추출용 백업 소스)
 
 ★ 규칙 ★
-- 괄호·중괄호 안 성분도 모두 별도로 분리 (예: "빵가루{소맥분, 효모, 정제소금}" → 빵가루, 소맥분, 효모, 정제소금)
-- "혼합제제", "다크컴파운드", "코코아시즈닝", "향료제제" 등 그룹명 자체도 별도 항목
-- 원산지 표시(미국산·호주산·국산) 제외
+- 괄호·중괄호 안 성분도 모두 별도로 분리 (예: "빵가루{소맥분, 효모, 정제소금}" → 빵가루, 소맥분, 효모, 정제소금 4개)
+- "혼합제제1", "혼합제제2", "다크컴파운드", "코코아시즈닝", "향료제제" 등 그룹명 자체도 별도 항목
+- 원산지 표시(미국산·호주산·국산) 제외, 성분명만
 - 중복 없이
-- 최소 15개
-- 합성 첨가물·유화제·색소·산도조절제 반드시 포함: 아라비아검, 말토덱스트린, 프로필렌글리콜, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 결정셀룰로스, 카카오색소, 안나토색소, 베타카로틴, 초산, 이산화규소, 탄산나트륨 등
+- **names 최소 20개 이상** — 부족하면 다시 훑어봐 (특히 괄호 안·중괄호 안 놓치지 마)
+- 합성 첨가물·유화제·색소·산도조절제 반드시 포함: 아라비아검, 말토덱스트린, 프로필렌글리콜, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 결정셀룰로스, 카카오색소, 안나토색소, 베타카로틴, 초산, 이산화규소, 탄산나트륨, 미강유 등
+
+★ rawText는 사진에서 원재료명 시작부터 끝까지 그대로 (성분들 사이의 콤마·괄호 다 포함, 원문 그대로)
 
 allergens는 22종 중 해당만: 우유, 대두, 밀, 땅콩, 견과류, 달걀, 메밀, 복숭아, 토마토, 돼지고기, 쇠고기, 닭고기, 고등어, 게, 새우, 오징어, 조개류, 잣, 아황산류
 
-응답 (JSON만, 짧게):
+응답 (JSON):
 {
   "names": ["설탕", "코코아분말", "폴리글리세린축합리시놀레인산에스테르", ...],
+  "rawText": "다크컴파운드{싱가포르산: 설탕, 식물성유지1(팜핵경화유), 코코아분말, 식물성유지2(코코넛오일), 레시틴}, 콘밀(옥수수), 설탕, 빵가루{소맥분(밀), 효모, 정제소금, 대두분, 유화제}, ...",
   "allergens": ["우유", "대두"],
   "productName": ""
 }`;
 }
 
-// ── 프롬프트 2: 백업 (이름만 · 더 짧게) ──
+// ── 프롬프트 2: 백업 (rawText만 우선) ──
 function buildForcePrompt() {
-  return `한국어 JSON. 사진 원재료명 모든 성분 이름만 배열로.
-- 괄호 안·그룹명 다 별도로
-- 최소 15개, 중복 없이
-- 합성 유화제(폴리글리세린…, 소르비탄…), 색소(카카오·안나토·베타카로틴), 증점제(아라비아검, 결정셀룰로스), 산도조절제(초산) 필수
+  return `한국어 JSON. 사진 "원재료명"의 원문 텍스트를 rawText에 그대로 반환.
+성분 이름 배열도 names에.
 
-응답: {"names":[15+개 이름],"allergens":["해당 22종"],"productName":""}`;
+- 원재료명 시작부터 "밀·우유·대두 함유" 같은 알레르기 표시 직전까지 모두
+- 괄호·중괄호·특수문자 그대로 유지
+- names는 괄호 안까지 다 분리해서 최소 20개
+
+응답: {"rawText":"원문 그대로","names":[20+개 이름],"allergens":["해당 22종"],"productName":""}`;
 }
 
 // ── 텍스트에서 알려진 성분 추출 (확장 사전) ──
@@ -414,7 +425,7 @@ async function callGemini(apiKey, model, prompt, imageB64) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 4096,
       responseMimeType: 'application/json'
     }
   };
