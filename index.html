@@ -11253,6 +11253,7 @@ function renderStoryCardDOM(type, data) {
         <div style="text-align:center;padding-bottom:14px;border-bottom:1.5px dashed rgba(124,58,237,.3)">
           <div style="font-size:14px;font-weight:900;letter-spacing:3px">🏷️ INGREDIENT REPORT</div>
           <div style="font-size:12px;font-weight:800;margin-top:4px;opacity:.8">${escapeHtml(dateFullStr)}</div>
+          <div style="display:inline-block;background:rgba(255,255,255,.85);border-radius:99px;padding:4px 12px;margin-top:8px;font-size:11px;font-weight:900;color:#7C3AED;letter-spacing:.5px">@건강어때 · 알레르기 자동 체크</div>
         </div>
 
         <div style="text-align:center;margin-top:18px">
@@ -11290,16 +11291,17 @@ function renderStoryCardDOM(type, data) {
         </div>
 
         ${allergens.length > 0 ? `
-        <div style="background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:14px;padding:12px 14px;margin-top:12px">
-          <div style="font-size:11px;color:#991B1B;font-weight:900;letter-spacing:1.5px;margin-bottom:4px">🚨 알레르기 유발 가능</div>
-          <div style="font-size:13px;color:#7F1D1D;font-weight:900;line-height:1.5">${allergens.slice(0,5).map(a => escapeHtml(a)).join(' · ')}</div>
+        <div style="background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border:2px solid #F87171;border-radius:14px;padding:14px 16px;margin-top:12px;box-shadow:0 4px 12px rgba(220,38,38,.15)">
+          <div style="font-size:12px;color:#991B1B;font-weight:900;letter-spacing:1.5px;margin-bottom:5px">🚨 알레르기 자동 발견!</div>
+          <div style="font-size:14px;color:#7F1D1D;font-weight:900;line-height:1.5;letter-spacing:-.3px">${allergens.slice(0,5).map(a => escapeHtml(a)).join(' · ')}</div>
+          <div style="font-size:10.5px;color:#B91C1C;font-weight:800;margin-top:6px;letter-spacing:.2px">등록해둔 알레르기와 자동으로 교차 체크됐어요</div>
         </div>
         ` : ''}
 
         <div style="margin-top:auto;padding-top:14px;border-top:1.5px dashed rgba(124,58,237,.3)">
-          <div style="text-align:center;margin-bottom:10px">
-            <div style="font-size:12px;font-weight:900;letter-spacing:2.5px">DOWNLOAD NOW</div>
-            <div style="font-size:16px;font-weight:900;margin-top:2px">'건강어때' 검색 &amp; 다운로드</div>
+          <div style="background:linear-gradient(135deg,#7C3AED,#EC4899);border-radius:16px;padding:14px 16px;margin-bottom:10px;text-align:center;box-shadow:0 4px 14px rgba(124,58,237,.35)">
+            <div style="font-size:18px;font-weight:900;color:#FFF;letter-spacing:-.4px">🏷 이 앱으로 성분 스캔하기</div>
+            <div style="font-size:11.5px;font-weight:800;color:#F5F3FF;margin-top:2px">우리 아이 알레르기 자동 크로스체크</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div style="background:#000;border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:8px">
@@ -11335,6 +11337,7 @@ function renderStoryCardDOM(type, data) {
         <div style="text-align:center;padding-bottom:14px;border-bottom:1.5px dashed rgba(120,53,15,.3)">
           <div style="font-size:14px;font-weight:900;letter-spacing:3px">🔮 TODAY'S FORTUNE</div>
           <div style="font-size:12px;font-weight:800;margin-top:4px;opacity:.8">${escapeHtml(dateFullStr)}</div>
+          <div style="display:inline-block;background:rgba(255,255,255,.85);border-radius:99px;padding:4px 12px;margin-top:8px;font-size:11px;font-weight:900;color:#B45309;letter-spacing:.5px">@건강어때 · 매일 무료</div>
         </div>
         <div style="text-align:center;margin-top:18px">
           <div style="font-size:80px;line-height:1;margin-bottom:6px">🔮</div>
@@ -11373,9 +11376,9 @@ function renderStoryCardDOM(type, data) {
           <div style="font-size:16px;font-weight:900;line-height:1.55;letter-spacing:-.3px">＂${escapeHtml(f.quote || '오늘도 응원해요')}＂</div>
         </div>
         <div style="margin-top:auto;padding-top:14px;border-top:1.5px dashed rgba(120,53,15,.3)">
-          <div style="text-align:center;margin-bottom:10px">
-            <div style="font-size:12px;font-weight:900;letter-spacing:2.5px">DOWNLOAD NOW</div>
-            <div style="font-size:16px;font-weight:900;margin-top:2px">'건강어때' 검색 &amp; 다운로드</div>
+          <div style="background:linear-gradient(135deg,#F59E0B,#EC4899);border-radius:16px;padding:14px 16px;margin-bottom:10px;text-align:center;box-shadow:0 4px 14px rgba(236,72,153,.35)">
+            <div style="font-size:18px;font-weight:900;color:#FFF;letter-spacing:-.4px">🔮 나도 오늘 운세 뽑기</div>
+            <div style="font-size:11.5px;font-weight:800;color:#FEF3C7;margin-top:2px">앱스토어 · 플레이스토어 '건강어때' 검색</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div style="background:#000;border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:8px">
@@ -11564,10 +11567,18 @@ function renderStoryCardDOM(type, data) {
     <div style="width:100%;height:100%;background:${theme.bg};padding:26px 24px;display:flex;flex-direction:column;box-sizing:border-box;position:relative;color:#0F172A">
 
       <!-- 헤더 (타입별 이모지·색상) -->
-      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1.5px dashed ${theme.accent}33">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1.5px dashed ${theme.accent}33">
         <div style="font-size:14px;font-weight:900;color:${theme.accent};letter-spacing:3px">${theme.emoji} ${escapeHtml(title)}</div>
         <div style="font-size:12px;font-weight:800;color:#94A3B8;letter-spacing:1px">${escapeHtml(dateStr)}</div>
       </div>
+      <div style="text-align:center;margin-top:6px"><span style="display:inline-block;background:${theme.badge};color:${theme.accentDark};border-radius:99px;padding:3px 10px;font-size:10.5px;font-weight:900;letter-spacing:.5px">@건강어때 · ${
+        type === 'urine' ? '자가 소변검사'
+        : type === 'food' ? 'AI 식단 분석'
+        : type === 'weekly' ? '주간 리포트'
+        : type === 'challenge' ? '월간 스탬프'
+        : type === 'quiz' ? '건강 퀴즈'
+        : '건강 리포트'
+      }</span></div>
 
       <!-- Hero: 타입별 이모지 + 상위 X% -->
       <div style="text-align:center;margin-top:12px">
@@ -11651,9 +11662,17 @@ function renderStoryCardDOM(type, data) {
         </div>
       </div>
 
-      <!-- CTA (타입별 컬러) -->
-      <div style="background:${theme.accent};border-radius:16px;padding:11px;text-align:center;margin-top:10px">
-        <div style="font-size:14px;font-weight:900;color:#FFF;letter-spacing:-.3px">당신의 점수는? 확인하기 →</div>
+      <!-- CTA (타입별 컬러 · 훅 강화) -->
+      <div style="background:${theme.accent};border-radius:16px;padding:13px 14px;text-align:center;margin-top:10px;box-shadow:0 4px 14px ${theme.accent}55">
+        <div style="font-size:16px;font-weight:900;color:#FFF;letter-spacing:-.4px">${
+          type === 'urine' ? '🩺 나도 소변 자가검사 하기'
+          : type === 'food' ? '🥗 오늘 뭐 먹었는지 분석하기'
+          : type === 'weekly' ? '📊 나도 이번 주 리포트 받기'
+          : type === 'challenge' ? '🏆 나도 스탬프 모으기 도전'
+          : type === 'quiz' ? '🎯 오늘의 건강 퀴즈 풀기'
+          : '당신의 점수는? 확인하기 →'
+        }</div>
+        <div style="font-size:11px;font-weight:800;color:#FFFFFFCC;margin-top:3px;letter-spacing:.2px">'건강어때' 검색 · 앱스토어 · 플레이스토어</div>
       </div>
 
       <!-- 스토어 다운로드 안내 (크게!) -->
