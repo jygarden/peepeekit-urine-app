@@ -5564,9 +5564,13 @@ function renderIngredientResult(data) {
   if (!el) return;
   const ingredients = Array.isArray(data.ingredients) ? data.ingredients : [];
 
-  // 🐛 디버그 정보 (관리자/개발자용 — _debug 있을 때만 표시)
+  // 🐛 디버그 정보 (관리자만! URL에 ?debug=1 또는 localStorage adminMode=1일 때만)
   let debugHtml = '';
-  if (data._debug) {
+  const _isAdmin = (typeof window !== 'undefined') && (
+    window.location.search.includes('debug=1') ||
+    localStorage.getItem('adminMode') === '1'
+  );
+  if (data._debug && _isAdmin) {
     debugHtml = `
       <div style="background:#FEE2E2;border:2px solid #DC2626;border-radius:14px;padding:14px;margin-bottom:14px">
         <div style="font-size:13px;font-weight:800;color:#991B1B;margin-bottom:6px">🐛 디버그 정보 (관리자용)</div>
@@ -11257,9 +11261,31 @@ function renderStoryCardDOM(type, data) {
         </div>
 
         <div style="text-align:center;margin-top:18px">
-          <div style="font-size:70px;line-height:1;margin-bottom:6px">🧬</div>
-          <div style="font-size:22px;font-weight:900;letter-spacing:-.5px">오늘의 성분 분석</div>
-          ${userName ? `<div style="font-size:14px;font-weight:800;margin-top:4px;opacity:.85">${escapeHtml(userName)}님의 안전 리포트</div>` : ''}
+          <div style="font-size:60px;line-height:1;margin-bottom:6px">${
+            (grade === 'A' || grade === 'A+') ? '✨'
+            : (grade === 'B' || grade === 'B+') ? '👀'
+            : grade === 'C' ? '⚠️'
+            : '🚨'
+          }</div>
+          <div style="font-size:26px;font-weight:900;letter-spacing:-.6px;line-height:1.2;color:${
+            (grade === 'A' || grade === 'A+') ? '#047857'
+            : (grade === 'B' || grade === 'B+') ? '#5B21B6'
+            : grade === 'C' ? '#C2410C'
+            : '#991B1B'
+          }">${
+            (grade === 'A' || grade === 'A+') ? '안심하고 드세요!'
+            : (grade === 'B' || grade === 'B+') ? '이거 알고 드셨나요?'
+            : grade === 'C' ? '잠깐, 확인하고 드세요'
+            : '이거 조심하세요!'
+          }</div>
+          <div style="font-size:14px;font-weight:800;margin-top:6px;opacity:.9">${
+            warningCnt > 0 ? `합성 첨가물 <b>${warningCnt}개</b> 발견`
+            : allergens.length > 0 ? `알레르기 유발 성분 <b>${allergens.length}개</b> 발견`
+            : cautionCnt >= 3 ? `주의 성분 <b>${cautionCnt}개</b> 포함`
+            : total > 0 ? `총 <b>${total}개</b> 성분 분석 완료`
+            : '성분 분석 완료'
+          }</div>
+          ${userName ? `<div style="font-size:12.5px;font-weight:700;margin-top:6px;opacity:.75">${escapeHtml(userName)}님이 오늘 확인한 성분</div>` : ''}
         </div>
 
         <div style="background:rgba(255,255,255,.85);border-radius:24px;padding:20px;margin-top:18px;text-align:center;box-shadow:0 6px 20px rgba(124,58,237,.12)">
