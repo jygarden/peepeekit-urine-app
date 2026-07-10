@@ -1,6 +1,6 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v8 — Vercel Pro 60초 · 프롬프트 강화 (15개+ 성분 강제) · maxOutputTokens 8192
+// v9 — 사전 확장(합성 유화제·색소·증점제 30+개 추가) · AI 응답+사전 병합 · 중복 제거 · 프롬프트 강조
 
 const { rateLimitMiddleware } = require('./_rateLimit');
 
@@ -61,6 +61,22 @@ module.exports = async function handler(req, res) {
           rawText: combinedRaw.slice(0, 800) || '(빈 응답)'
         };
       }
+    } else {
+      // ✨ AI가 성분을 뽑았어도 raw text에서 사전 매칭되는 걸 병합 (놓친 합성 첨가물 보완)
+      const fromDict = extractIngredientsFromText(combinedRaw);
+      if (fromDict.length > 0) {
+        const existingNames = new Set(result.ingredients.map(i => normalizeName(i?.name)));
+        let added = 0;
+        for (const item of fromDict) {
+          const n = normalizeName(item.name);
+          if (!existingNames.has(n)) {
+            result.ingredients.push(item);
+            existingNames.add(n);
+            added++;
+          }
+        }
+        if (added > 0) console.log(`[성분 병합] 사전 매칭으로 ${added}개 추가`);
+      }
     }
 
     if (result.error) return res.status(400).json(result);
@@ -101,7 +117,7 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
   }
 }
 
-// ── 프롬프트 1: 완전 추출 우선 ──
+// ── 프롬프트 1: 완전 추출 우선 (합성 첨가물 강조) ──
 function buildIngredientsFirstPrompt() {
   return `한국어 JSON만. 마크다운 X.
 
@@ -111,17 +127,28 @@ function buildIngredientsFirstPrompt() {
 1. 괄호·중괄호 안 성분은 모두 별도로 분리
    예: "빵가루{소맥분(밀:미국산,호주산), 효모, 정제소금, 대두분, 유화제}"
    → 빵가루, 소맥분, 효모, 정제소금, 대두분, 유화제 (6개로 분리)
-2. "혼합제제1", "혼합제제2", "다크컴파운드" 같은 그룹명 자체도 별도 성분으로
+2. "혼합제제1", "혼합제제2", "다크컴파운드", "코코아시즈닝", "향료제제" 같은 그룹명 자체도 별도 성분으로
    그 안에 든 성분들도 각각 별도로
 3. 원산지 표시(미국산·호주산·국산 등)는 제외, 성분명만 추출
 4. **ingredients 배열 최소 15개 이상** — 부족하면 다시 훑어봐라
-5. productName은 반드시 "" 빈 문자열
-6. summary/recommendation은 객관적·중립적 톤 (제품 비판 금지)
+5. **중복 절대 금지** — 같은 이름 두 번 나오면 하나만
+6. productName은 반드시 "" 빈 문자열
+7. summary/recommendation은 객관적·중립적 톤 (제품 비판 금지)
+
+★★★ 특별히 놓치지 말 것 (합성 첨가물·유화제·색소·산도조절제) ★★★
+- 유화제류: 폴리글리세린지방산에스테르, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 글리세린에스테르, 프로필렌글리콜에스테르
+- 증점제·안정제: 아라비아검, 잔탄검, 결정셀룰로스, 카복시메틸셀룰로스, 젤라틴
+- 산도조절제: 초산, 구연산, 인산, 제이인산칼륨
+- 착색료: 카라멜색소, 카카오색소, 안나토색소, 파프리카추출색소, 베타카로틴(β-카로틴), 홍화황색소, 치자색소
+- 팽창제: 탄산나트륨, 탄산수소나트륨, 이산화규소
+- 당류 유도체: 말토덱스트린, 덱스트린, 포도당
+- 유지류: 미강유, 코코넛오일, 팜핵경화유, 가공유지, 식물성유지, 가공버터
+- 유제품: 유청단백, 유청분말, 전지분유, 탈지분유
 
 safety 분류:
-- safe: 정제수, 비타민(E/C 등), 천연 색소(파프리카·베타카로틴·안나토), 천연 유화제(레시틴), 밀가루/소맥분, 옥수수, 효모, 정제소금, 코코아분말, 코코아버터
-- caution: 설탕, 원당, 팜유, 팜핵경화유, 가공유지, 식물성유지, 정제소금(과다), 카페인, 유당, 분유, 유청단백, MSG, 향료, 물엿
-- warning: 프로필렌글리콜, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 아스파탐, 적색40호, 카라멜색소, 안식향산나트륨, 합성향료
+- safe: 정제수, 비타민(E/C 등), 천연 색소(파프리카·베타카로틴·안나토·카카오색소), 레시틴(천연 유화제), 밀가루/소맥분, 옥수수, 효모, 정제소금, 코코아분말·매스·버터, 아라비아검, 결정셀룰로스, 탄산나트륨, 이산화규소
+- caution: 설탕, 원당, 팜유, 팜핵경화유, 가공유지, 식물성유지, 미강유, 카페인, 유당, 분유, 유청단백, MSG, 향료, 물엿, 말토덱스트린, 덱스트린, 유지, 향료제제, 초산
+- warning: 프로필렌글리콜, 폴리글리세린지방산에스테르, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 아스파탐, 수크랄로스, 적색40호, 카라멜색소, 안식향산나트륨, 합성향료
 - danger: 트랜스지방, 아질산나트륨, 부틸히드록시아니솔(BHA)
 
 allergens: 사진 성분 중 아래 22종 해당만 한국어로
@@ -282,7 +309,68 @@ function getIngredientDict() {
     '글루탐산나트륨': { type:'조미료', safety:'caution', impact:'민감 시 두통·홍조', desc:'MSG' },
     '인산': { type:'산도조절제', safety:'caution', impact:'과다 시 칼슘 흡수 방해', desc:'산미료' },
     '카페인': { type:'각성제', safety:'caution', impact:'과다 시 불면·심박↑', desc:'카페인' },
-    '탄산': { type:'기체', safety:'safe', impact:'안전합니다', desc:'이산화탄소' }
+    '탄산': { type:'기체', safety:'safe', impact:'안전합니다', desc:'이산화탄소' },
+
+    // 증점제·안정제 (추가)
+    '아라비아검': { type:'증점제', safety:'safe', impact:'대체로 안전, 대량 섭취 시 복부 불편', desc:'아카시아 나무 수액에서 추출한 천연 증점제' },
+    '잔탄검': { type:'증점제', safety:'safe', impact:'대체로 안전', desc:'미생물 발효 증점제' },
+    '결정셀룰로스': { type:'증점제', safety:'safe', impact:'안전, 소화되지 않음', desc:'식이섬유 유래 증점제' },
+    '카복시메틸셀룰로스': { type:'증점제', safety:'safe', impact:'대체로 안전', desc:'셀룰로스 유도체' },
+    '펙틴': { type:'증점제', safety:'safe', impact:'식이섬유 역할', desc:'과일에서 추출' },
+
+    // 당류·전분 유도체 (추가)
+    '말토덱스트린': { type:'당류', safety:'caution', impact:'혈당 급상승 유발 가능', desc:'전분을 부분 가수분해한 당' },
+    '포도당': { type:'당류', safety:'caution', impact:'혈당 직접 상승', desc:'단당류' },
+    '과당': { type:'당류', safety:'caution', impact:'과다 시 지방간 위험', desc:'단당류' },
+
+    // 유지류 (추가)
+    '팜핵경화유': { type:'유지', safety:'warning', impact:'포화지방·트랜스지방 함유 가능', desc:'경화 처리된 팜핵유' },
+    '경화유': { type:'유지', safety:'warning', impact:'트랜스지방 함유 가능', desc:'수소 첨가한 유지' },
+    '코코넛오일': { type:'유지', safety:'caution', impact:'포화지방 다량, 소량은 무방', desc:'코코넛 열매 기름' },
+    '미강유': { type:'유지', safety:'caution', impact:'대체로 안전, 오메가6 다량', desc:'쌀겨에서 추출한 기름' },
+    '가공버터': { type:'유지', safety:'caution', impact:'포화지방 함유', desc:'가공된 버터' },
+
+    // 유제품 (추가)
+    '유청단백': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'유청 단백질' },
+    '유청단백분말': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'유청 단백질 분말' },
+
+    // 색소 (추가)
+    '카카오색소': { type:'착색료', safety:'safe', impact:'천연 색소', desc:'카카오 추출 갈색 색소' },
+    '안나토색소': { type:'착색료', safety:'safe', impact:'천연 색소', desc:'아치오테 씨앗에서 추출' },
+    '베타카로틴': { type:'착색료', safety:'safe', impact:'비타민A 전구체', desc:'당근 등에서 추출한 천연 오렌지색' },
+    'β-카로틴': { type:'착색료', safety:'safe', impact:'비타민A 전구체', desc:'베타카로틴' },
+    '비타민E': { type:'비타민', safety:'safe', impact:'항산화 효과', desc:'토코페롤' },
+
+    // 팽창제·산도조절제 (추가)
+    '탄산나트륨': { type:'팽창제', safety:'safe', impact:'대체로 안전', desc:'베이킹 소다 계열' },
+    '이산화규소': { type:'고결방지제', safety:'safe', impact:'대체로 안전', desc:'분말이 뭉치는 것을 방지' },
+    '초산': { type:'산도조절제', safety:'caution', impact:'과다 시 위점막 자극 가능', desc:'식초의 주성분' },
+
+    // 유화제 (합성 유화제 추가)
+    '폴리글리세린축합리시놀레인산에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제, EFSA는 일일 허용량 설정', desc:'초콜릿·마가린 흐름성 개선용' },
+    '폴리글리세린': { type:'유화제', safety:'caution', impact:'대체로 안전', desc:'글리세린 중합체' },
+    '리시놀레인산에스테르': { type:'유화제', safety:'warning', impact:'합성 유화제', desc:'피마자유 유래' },
+    '카복시메틸': { type:'증점제', safety:'safe', impact:'대체로 안전', desc:'셀룰로스 유도체 계열' },
+
+    // 그룹·복합 성분 (추가)
+    '다크컴파운드': { type:'가공식품', safety:'caution', impact:'당분·지방 다량', desc:'초콜릿 대체 가공물' },
+    '컴파운드': { type:'가공식품', safety:'caution', impact:'조합 가공품', desc:'복합 가공물' },
+    '혼합제제': { type:'가공물', safety:'caution', impact:'여러 첨가물 혼합', desc:'복합 첨가물' },
+    '향료제제': { type:'향료', safety:'caution', impact:'합성향료 포함 가능', desc:'혼합 향료' },
+    '코코아시즈닝': { type:'가공물', safety:'caution', impact:'조합 가공품', desc:'코코아 시즈닝 혼합물' },
+    '시즈닝': { type:'조미료', safety:'caution', impact:'조미료 혼합', desc:'시즈닝 혼합물' },
+
+    // 기타
+    '빵가루': { type:'천연성분', safety:'safe', impact:'밀 알레르기 주의', desc:'분쇄한 빵' },
+    '콘밀': { type:'천연성분', safety:'safe', impact:'옥수수 분쇄물', desc:'옥수수 가루' },
+    '대두분': { type:'천연성분', safety:'safe', impact:'대두 알레르기 주의', desc:'대두 분말' },
+    '전지분유': { type:'유제품', safety:'safe', impact:'우유 알레르기 주의', desc:'전지 우유 분말' },
+    '천일염': { type:'무기물', safety:'safe', impact:'미네랄 풍부, 과다 시 혈압↑', desc:'천연 소금' },
+    '볶음천일염': { type:'무기물', safety:'safe', impact:'볶은 천연 소금', desc:'구운 천일염' },
+    '해조칼슘': { type:'영양강화제', safety:'safe', impact:'칼슘 보충', desc:'해조류에서 추출한 칼슘' },
+    '채종유': { type:'유지', safety:'safe', impact:'대체로 안전', desc:'유채씨 기름 (카놀라유 계열)' },
+    '옥수수': { type:'천연성분', safety:'safe', impact:'안전합니다', desc:'옥수수' },
+    '군옥수수맛시즈닝': { type:'조미료', safety:'caution', impact:'복합 조미료', desc:'구운 옥수수 맛 조미료' }
   };
 }
 
@@ -369,6 +457,15 @@ function tryRecoverTruncatedJSON(text) {
   return cut + '}'.repeat(Math.max(0, d2));
 }
 
+// 성분명 정규화 (공백·괄호·특수문자 제거)
+function normalizeName(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[()（）\[\]{}·・,、.]/g, '')
+    .trim();
+}
+
 function fillMissingFields(r) {
   if (!r || typeof r !== 'object') r = {};
 
@@ -381,7 +478,17 @@ function fillMissingFields(r) {
   // 🔒 법적 안전장치: productName 절대 노출 X (AI가 채워도 강제로 빈 값)
   r.productName = '';
   if (!Array.isArray(r.ingredients)) r.ingredients = [];
-  r.ingredients = r.ingredients.map(ing => ({
+
+  // 🔁 name 기준 중복 제거
+  const seen = new Set();
+  const dedup = [];
+  for (const ing of r.ingredients) {
+    const key = normalizeName(ing?.name);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    dedup.push(ing);
+  }
+  r.ingredients = dedup.map(ing => ({
     name: ing?.name || '알 수 없음',
     type: ing?.type || '성분',
     safety: ['safe','caution','warning','danger'].includes((ing?.safety || '').toLowerCase())
