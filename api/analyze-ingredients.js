@@ -101,31 +101,56 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
   }
 }
 
-// ── 프롬프트 1: 축약 · 속도 최우선 ──
+// ── 프롬프트 1: 완전 추출 우선 ──
 function buildIngredientsFirstPrompt() {
-  return `한국어 JSON만. 사진의 식품 원재료명 모든 성분 추출. 괄호 안 성분도 분리.
+  return `한국어 JSON만. 마크다운 X.
+
+사진의 "원재료명"에 있는 모든 성분을 하나도 빠짐없이 추출.
+
+★★★ 절대 규칙 ★★★
+1. 괄호·중괄호 안 성분은 모두 별도로 분리
+   예: "빵가루{소맥분(밀:미국산,호주산), 효모, 정제소금, 대두분, 유화제}"
+   → 빵가루, 소맥분, 효모, 정제소금, 대두분, 유화제 (6개로 분리)
+2. "혼합제제1", "혼합제제2", "다크컴파운드" 같은 그룹명 자체도 별도 성분으로
+   그 안에 든 성분들도 각각 별도로
+3. 원산지 표시(미국산·호주산·국산 등)는 제외, 성분명만 추출
+4. **ingredients 배열 최소 15개 이상** — 부족하면 다시 훑어봐라
+5. productName은 반드시 "" 빈 문자열
+6. summary/recommendation은 객관적·중립적 톤 (제품 비판 금지)
 
 safety 분류:
-- safe: 정제수, 비타민, 천연재료
-- caution: 설탕, 가공유지, 카페인, 카라멜색소, MSG
-- warning: 아스파탐, 적색40호, 폴리글리세린지방산에스테르, 프로필렌글리콜
-- danger: 트랜스지방, 아질산나트륨
+- safe: 정제수, 비타민(E/C 등), 천연 색소(파프리카·베타카로틴·안나토), 천연 유화제(레시틴), 밀가루/소맥분, 옥수수, 효모, 정제소금, 코코아분말, 코코아버터
+- caution: 설탕, 원당, 팜유, 팜핵경화유, 가공유지, 식물성유지, 정제소금(과다), 카페인, 유당, 분유, 유청단백, MSG, 향료, 물엿
+- warning: 프로필렌글리콜, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 아스파탐, 적색40호, 카라멜색소, 안식향산나트륨, 합성향료
+- danger: 트랜스지방, 아질산나트륨, 부틸히드록시아니솔(BHA)
 
-allergens는 사진 성분 중 22종(우유/대두/밀/땅콩/견과/달걀/조개/새우/게 등)에 해당하는 것만 한국어로.
-productName은 반드시 "" 빈 문자열.
-summary/recommendation은 객관적·중립적 톤 (제품 비판 금지, "보고된 바 있음" 같은 표현).
+allergens: 사진 성분 중 아래 22종 해당만 한국어로
+[우유, 대두, 밀, 땅콩, 견과류, 달걀, 메밀, 복숭아, 토마토, 돼지고기, 쇠고기, 닭고기, 고등어, 게, 새우, 오징어, 조개류(굴/전복/홍합), 잣, 아황산류]
 
-응답:
-{"ingredients":[{"name":"","type":"","safety":"safe|caution|warning|danger","impact":"1문장","description":"1문장","dailyLimit":""}],"allergens":[],"productName":"","overallScore":0~100,"overallGrade":"A|B|C|D|F","summary":"3문장 객관적","recommendation":"2문장 적정량 권장 톤"}`;
+응답 형식 (JSON만):
+{
+  "ingredients": [
+    {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"1문장 객관적","description":"1문장","dailyLimit":""}
+  ],
+  "allergens": ["해당 알레르기명들"],
+  "productName": "",
+  "overallScore": 0~100,
+  "overallGrade": "A|B|C|D|F",
+  "summary": "객관적 3문장",
+  "recommendation": "적정량 권장 톤 2문장"
+}`;
 }
 
-// ── 프롬프트 2: 백업 (더 짧게) ──
+// ── 프롬프트 2: 백업 (더 강력) ──
 function buildForcePrompt() {
-  return `한국어 JSON. 사진 원재료명 성분 최소 10개 추출 (괄호 안도 분리).
-productName은 "" 빈 문자열. summary 객관적 톤.
+  return `한국어 JSON. 사진 원재료명 모든 성분 추출. 괄호 안도 각각 별도로.
+★ ingredients 최소 15개 필수 — 다크컴파운드, 혼합제제, 향료제제 등 그룹명도 별도 항목
+★ productName은 "" 빈 문자열
+★ summary 객관적 톤
+
 각 성분: {name,type,safety(safe|caution|warning|danger),impact,description,dailyLimit}
-allergens: 우유/대두/밀/땅콩/견과/달걀/조개/새우/게 등 해당만.
-응답: {ingredients:[10+개],allergens:[],productName:"",overallScore:0~100,overallGrade:"A|B|C|D|F",summary:"객관 3문장",recommendation:"객관 2문장"}`;
+allergens: 우유/대두/밀/땅콩/견과/달걀/조개/새우/게 해당만.
+응답: {ingredients:[15+개],allergens:[],productName:"",overallScore:0~100,overallGrade:"A|B|C|D|F",summary:"객관 3문장",recommendation:"객관 2문장"}`;
 }
 
 // ── 텍스트에서 알려진 성분 추출 (확장 사전) ──
@@ -271,7 +296,7 @@ async function callGemini(apiKey, model, prompt, imageB64) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 8192,
       responseMimeType: 'application/json'
     }
   };
