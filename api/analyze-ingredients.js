@@ -101,82 +101,31 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
   }
 }
 
-// ── 프롬프트 1: ingredients first (안전·객관적 톤) ──
+// ── 프롬프트 1: 축약 · 속도 최우선 ──
 function buildIngredientsFirstPrompt() {
-  return `🇰🇷 한국어 JSON. 마크다운 X.
+  return `한국어 JSON만. 사진의 식품 원재료명 모든 성분 추출. 괄호 안 성분도 분리.
 
-당신은 식품 성분 전문가. 사진의 식품 성분표를 읽고 모든 성분을 추출.
-
-★ 절대 규칙 ★
-1. "원재료명"의 성분을 모두 추출
-2. 괄호 안 성분도 별도로 분리 — 예: "준초콜릿(설탕, 가공유지, 혼합분유, 코코아분말, 유당)" → 6개로 분리
-3. ingredients 배열 최소 5개, 빈 배열 금지
-4. **productName 필드는 빈 문자열("")로** — 제품명 절대 표시 X
-5. summary는 **객관적·중립적 톤**, 제품 비판 X
-
-=== 안전 분류 ===
+safety 분류:
 - safe: 정제수, 비타민, 천연재료
-- caution: 설탕, 가공유지, 카페인, 카라멜색소 등 일반 첨가물
-- warning: 합성첨가물 (아스파탐, 적색40호, 폴리글리세린지방산에스테르, 프로필렌글리콜, MSG 등)
-- danger: 트랜스지방, 아질산나트륨 등 (식약처 사용 기준 초과 시 우려)
+- caution: 설탕, 가공유지, 카페인, 카라멜색소, MSG
+- warning: 아스파탐, 적색40호, 폴리글리세린지방산에스테르, 프로필렌글리콜
+- danger: 트랜스지방, 아질산나트륨
 
-=== summary 작성 규칙 ★ ===
-- 절대 금지: "이 제품은 나쁘다", "위험해요", 제품명·브랜드 언급
-- 안전한 패턴 사용:
-  · "총 N개 성분 중 주의 X개, 경고 Y개가 포함되어 있습니다."
-  · "그중 ○○ 성분은 다량·장기 섭취 시 ○○○ 영향이 보고된 바 있습니다."
-  · "적정량 섭취를 권장하며, 균형 잡힌 식단과 함께 드시는 것이 좋습니다."
-- 출처 기반 단어 사용: "보고된 바 있습니다", "가능성이 있습니다"
-
-=== recommendation 작성 규칙 ===
-- "이 제품은~" 시작 X
-- "본 성분 구성을 기준으로, 일일 권장 섭취 한도 내에서 적당량 드시는 것이 좋습니다." 같은 톤
-- 단정 표현 X ("암 걸려요" 절대 X)
-
-=== 알레르기 유발 가능 성분 추출 ===
-한국 식약처 알레르기 표시 권고 22종 기준:
-알류(가금류), 우유, 메밀, 땅콩, 대두, 밀, 고등어, 게, 새우, 돼지고기, 복숭아,
-토마토, 아황산류, 호두, 닭고기, 쇠고기, 오징어, 조개류(굴/홍합/전복/조개 포함),
-잣, 견과류가공품, 콩기름(대두유), 레시틴(대두/계란 유래)
-→ 사진의 성분 중 위에 해당하는 항목을 allergens 배열에 한국어로
-
-=== 응답 형식 ===
-{
-  "ingredients": [
-    {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"인체 영향 (1~2문장, 객관적 표현)","description":"이 성분 설명 (1~2문장)","dailyLimit":"식약처/WHO 기준 (있으면)"}
-  ],
-  "allergens": ["땅콩", "대두유", "레시틴", "혼합분유" /* 해당되는 것만 */],
-  "productName": "",
-  "overallScore": 0~100,
-  "overallGrade": "A|B|C|D|F",
-  "summary": "객관적 3문장 (위 규칙대로)",
-  "recommendation": "객관적 2~3문장 (위 규칙대로)"
-}`;
-}
-
-// ── 프롬프트 2: 더 강력하게 (객관적 톤 유지) ──
-function buildForcePrompt() {
-  return `🇰🇷 한국어 JSON. 사진의 식품 성분을 분석.
-
-★★★ ingredients 배열 최소 10개 필수. 빈 배열 금지 ★★★
-★★★ productName은 빈 문자열("")로. 제품명 절대 노출 X ★★★
-★★★ summary는 객관적 톤 — 제품 비판·단정 표현 금지 ★★★
-
-각 성분: {"name":"...","type":"...","safety":"safe|caution|warning|danger","impact":"...","description":"...","dailyLimit":"..."}
-
-summary 패턴 (이대로):
-"분석된 N개 성분 중 안전 X개, 주의 Y개, 경고 Z개가 확인되었습니다. ○○ 등의 성분은 다량·장기 섭취 시 ○○○ 영향이 보고된 바 있어, 적정량 섭취가 권장됩니다."
+allergens는 사진 성분 중 22종(우유/대두/밀/땅콩/견과/달걀/조개/새우/게 등)에 해당하는 것만 한국어로.
+productName은 반드시 "" 빈 문자열.
+summary/recommendation은 객관적·중립적 톤 (제품 비판 금지, "보고된 바 있음" 같은 표현).
 
 응답:
-{
-  "ingredients": [최소 10개],
-  "allergens": ["알레르기 유발 가능 성분명들 — 우유/땅콩/대두/밀/달걀/견과류/조개류 등 해당되는 것만"],
-  "productName": "",
-  "overallScore": 정수,
-  "overallGrade": "A|B|C|D|F",
-  "summary": "객관적 3문장 (위 패턴)",
-  "recommendation": "적정량 섭취 권장 톤 2~3문장"
-}`;
+{"ingredients":[{"name":"","type":"","safety":"safe|caution|warning|danger","impact":"1문장","description":"1문장","dailyLimit":""}],"allergens":[],"productName":"","overallScore":0~100,"overallGrade":"A|B|C|D|F","summary":"3문장 객관적","recommendation":"2문장 적정량 권장 톤"}`;
+}
+
+// ── 프롬프트 2: 백업 (더 짧게) ──
+function buildForcePrompt() {
+  return `한국어 JSON. 사진 원재료명 성분 최소 10개 추출 (괄호 안도 분리).
+productName은 "" 빈 문자열. summary 객관적 톤.
+각 성분: {name,type,safety(safe|caution|warning|danger),impact,description,dailyLimit}
+allergens: 우유/대두/밀/땅콩/견과/달걀/조개/새우/게 등 해당만.
+응답: {ingredients:[10+개],allergens:[],productName:"",overallScore:0~100,overallGrade:"A|B|C|D|F",summary:"객관 3문장",recommendation:"객관 2문장"}`;
 }
 
 // ── 텍스트에서 알려진 성분 추출 (확장 사전) ──
@@ -322,7 +271,7 @@ async function callGemini(apiKey, model, prompt, imageB64) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 4096,
       responseMimeType: 'application/json'
     }
   };
@@ -452,6 +401,6 @@ function fillMissingFields(r) {
   return r;
 }
 
-// ⏱ Vercel 함수 실행 시간 (기본 10초 → 25초)
-module.exports.config = { maxDuration: 25 };
+// ⏱ Vercel 함수 실행 시간 (Pro plan: 60초 지원, Hobby: 최대 10초에 잘림)
+module.exports.config = { maxDuration: 60 };
 
