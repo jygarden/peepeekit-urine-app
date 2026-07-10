@@ -1,6 +1,6 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v7 — 속도 최적화 (2차 호출 조건 완화 + maxDuration 25초)
+// v8 — Vercel Pro 60초 · 프롬프트 강화 (15개+ 성분 강제) · maxOutputTokens 8192
 
 const { rateLimitMiddleware } = require('./_rateLimit');
 
