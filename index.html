@@ -11433,6 +11433,14 @@ function renderStoryCardDOM(type, data) {
           <div style="font-size:11px;color:#7C3AED;font-weight:900;letter-spacing:1.5px">📊 총 ${total}개 성분 분석</div>
         </div>
 
+        <div style="background:rgba(255,255,255,.95);border-radius:16px;padding:14px 16px;margin-top:12px;border:1.5px solid rgba(124,58,237,.2);box-shadow:0 4px 12px rgba(124,58,237,.1)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:16px">🤖</span>
+            <span style="font-size:11px;color:#5B21B6;font-weight:900;letter-spacing:1.5px">건강어때AI 종합 평가</span>
+          </div>
+          <div style="font-size:14px;color:#4C1D95;font-weight:900;line-height:1.5;letter-spacing:-.3px">${escapeHtml(getWittyIngredientSummary(d).opener)}</div>
+        </div>
+
         ${allergens.length > 0 ? `
         <div style="background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border:2px solid #F87171;border-radius:14px;padding:14px 16px;margin-top:12px;box-shadow:0 4px 12px rgba(220,38,38,.15)">
           <div style="font-size:12px;color:#991B1B;font-weight:900;letter-spacing:1.5px;margin-bottom:5px">🚨 알레르기 자동 발견!</div>
