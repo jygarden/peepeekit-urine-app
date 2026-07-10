@@ -1,6 +1,6 @@
 // Vercel Serverless Function — 식품 성분표 AI 분석
 // 위치: /api/analyze-ingredients.js
-// v9 — 사전 확장(합성 유화제·색소·증점제 30+개 추가) · AI 응답+사전 병합 · 중복 제거 · 프롬프트 강조
+// v10 — AI는 이름만, 세부는 로컬 사전 매칭 (5-10초 목표) · safety 정렬 · 로컬 총평·점수 계산
 
 const { rateLimitMiddleware } = require('./_rateLimit');
 
@@ -24,45 +24,39 @@ module.exports = async function handler(req, res) {
     const model = 'gemini-2.5-flash';
     const allRawTexts = [];
 
-    // ── 1차 호출 (속도 최우선) ──
+    // ── 1차 호출 (이름만 짧게 요청 · 속도 최우선) ──
     const r1 = await tryAnalyze(apiKey, model, buildIngredientsFirstPrompt(), imageB64);
     if (r1.rawText) allRawTexts.push('### 1차 응답\n' + r1.rawText);
-    let result = r1.result;
+    let result = r1.result || {};
 
-    // ── 완전히 실패했을 때만 2차 호출 (속도 UP: 1개라도 뽑히면 넘어감) ──
-    const has1st = result && Array.isArray(result.ingredients) && result.ingredients.length > 0;
-    if (!has1st) {
+    // AI 응답이 names 형식이면 사전 매칭으로 ingredients 채움
+    result.ingredients = normalizeAiResponse(result);
+
+    // ── 완전 실패 시 2차 호출 ──
+    if (!Array.isArray(result.ingredients) || result.ingredients.length < 3) {
       const r2 = await tryAnalyze(apiKey, model, buildForcePrompt(), imageB64);
       if (r2.rawText) allRawTexts.push('### 2차 응답\n' + r2.rawText);
-      if (r2.result && Array.isArray(r2.result.ingredients) && r2.result.ingredients.length > 0) {
-        result = r2.result;
-      } else {
-        result = result || r2.result || {};
+      if (r2.result) {
+        const r2ing = normalizeAiResponse(r2.result);
+        if (r2ing.length > (result.ingredients?.length || 0)) {
+          result = { ...r2.result, ingredients: r2ing, allergens: r2.result.allergens || result.allergens };
+        }
       }
     }
 
     const combinedRaw = allRawTexts.join('\n\n');
 
-    // ── 그래도 빈 ingredients면 전체 raw text에서 추출 ──
-    if (!result || !Array.isArray(result.ingredients) || result.ingredients.length === 0) {
-      if (!result) result = {};
+    // 여전히 empty → raw text에서 사전 매칭
+    if (!Array.isArray(result.ingredients) || result.ingredients.length === 0) {
       const extracted = extractIngredientsFromText(combinedRaw);
       if (extracted.length > 0) {
         result.ingredients = extracted;
-        result._debug = {
-          reason: 'extracted_from_raw_text',
-          count: extracted.length,
-          rawSample: combinedRaw.slice(0, 400)
-        };
+        result._debug = { reason: 'extracted_from_raw_text', count: extracted.length, rawSample: combinedRaw.slice(0, 400) };
       } else {
-        // 정말 0개면 raw text 전체를 디버그에 노출
-        result._debug = {
-          reason: 'all_methods_failed',
-          rawText: combinedRaw.slice(0, 800) || '(빈 응답)'
-        };
+        result._debug = { reason: 'all_methods_failed', rawText: combinedRaw.slice(0, 800) || '(빈 응답)' };
       }
     } else {
-      // ✨ AI가 성분을 뽑았어도 raw text에서 사전 매칭되는 걸 병합 (놓친 합성 첨가물 보완)
+      // ✨ AI 응답 + raw text 사전 매칭 병합 (놓친 합성 첨가물 자동 보완)
       const fromDict = extractIngredientsFromText(combinedRaw);
       if (fromDict.length > 0) {
         const existingNames = new Set(result.ingredients.map(i => normalizeName(i?.name)));
@@ -91,6 +85,71 @@ module.exports = async function handler(req, res) {
   }
 };
 
+// ── AI 응답의 names 배열 → 사전 매칭으로 ingredients 변환 ──
+// (호환성: 옛 형식 ingredients 배열도 그대로 통과)
+function normalizeAiResponse(result) {
+  if (!result || typeof result !== 'object') return [];
+
+  // 1) names 배열 있으면 사전 매칭
+  if (Array.isArray(result.names) && result.names.length > 0) {
+    return namesToIngredients(result.names);
+  }
+
+  // 2) ingredients 배열 있으면 그대로 사용 (구버전 호환)
+  if (Array.isArray(result.ingredients) && result.ingredients.length > 0) {
+    return result.ingredients;
+  }
+
+  return [];
+}
+
+// ── 성분 이름 배열 → 사전 매칭으로 세부정보 채움 ──
+function namesToIngredients(names) {
+  const dict = getIngredientDict();
+  const sortedKeys = Object.keys(dict).sort((a, b) => b.length - a.length);
+
+  return names.map(rawName => {
+    const name = String(rawName || '').trim();
+    if (!name) return null;
+
+    // 사전 정확 매칭
+    let info = dict[name];
+    let matchedKey = name;
+
+    // 사전 부분 매칭 (긴 이름 우선)
+    if (!info) {
+      for (const key of sortedKeys) {
+        if (name.includes(key) || key.includes(name)) {
+          info = dict[key];
+          matchedKey = key;
+          break;
+        }
+      }
+    }
+
+    if (info) {
+      return {
+        name,
+        type: info.type,
+        safety: info.safety,
+        impact: info.impact,
+        description: info.desc,
+        dailyLimit: info.limit || '정해진 한도 없음'
+      };
+    }
+
+    // 사전에 없음 → 기본값 (사용자에게 "정보 준비 중" 표시)
+    return {
+      name,
+      type: '성분',
+      safety: 'caution',
+      impact: '정보 준비 중',
+      description: '',
+      dailyLimit: '정해진 한도 없음'
+    };
+  }).filter(Boolean);
+}
+
 // ── tryAnalyze: result + rawText 같이 반환 ──
 async function tryAnalyze(apiKey, model, prompt, imageB64) {
   let geminiRes = await callGemini(apiKey, model, prompt, imageB64);
@@ -117,67 +176,38 @@ async function tryAnalyze(apiKey, model, prompt, imageB64) {
   }
 }
 
-// ── 프롬프트 1: 완전 추출 우선 (합성 첨가물 강조) ──
+// ── 프롬프트 1: 성분 이름만 짧게 요청 (속도 최우선) ──
 function buildIngredientsFirstPrompt() {
   return `한국어 JSON만. 마크다운 X.
 
-사진의 "원재료명"에 있는 모든 성분을 하나도 빠짐없이 추출.
+사진 "원재료명"의 모든 성분 이름만 배열로 추출. 세부 설명 X, 이름만!
 
-★★★ 절대 규칙 ★★★
-1. 괄호·중괄호 안 성분은 모두 별도로 분리
-   예: "빵가루{소맥분(밀:미국산,호주산), 효모, 정제소금, 대두분, 유화제}"
-   → 빵가루, 소맥분, 효모, 정제소금, 대두분, 유화제 (6개로 분리)
-2. "혼합제제1", "혼합제제2", "다크컴파운드", "코코아시즈닝", "향료제제" 같은 그룹명 자체도 별도 성분으로
-   그 안에 든 성분들도 각각 별도로
-3. 원산지 표시(미국산·호주산·국산 등)는 제외, 성분명만 추출
-4. **ingredients 배열 최소 15개 이상** — 부족하면 다시 훑어봐라
-5. **중복 절대 금지** — 같은 이름 두 번 나오면 하나만
-6. productName은 반드시 "" 빈 문자열
-7. summary/recommendation은 객관적·중립적 톤 (제품 비판 금지)
+★ 규칙 ★
+- 괄호·중괄호 안 성분도 모두 별도로 분리 (예: "빵가루{소맥분, 효모, 정제소금}" → 빵가루, 소맥분, 효모, 정제소금)
+- "혼합제제", "다크컴파운드", "코코아시즈닝", "향료제제" 등 그룹명 자체도 별도 항목
+- 원산지 표시(미국산·호주산·국산) 제외
+- 중복 없이
+- 최소 15개
+- 합성 첨가물·유화제·색소·산도조절제 반드시 포함: 아라비아검, 말토덱스트린, 프로필렌글리콜, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 결정셀룰로스, 카카오색소, 안나토색소, 베타카로틴, 초산, 이산화규소, 탄산나트륨 등
 
-★★★ 특별히 놓치지 말 것 (합성 첨가물·유화제·색소·산도조절제) ★★★
-- 유화제류: 폴리글리세린지방산에스테르, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 글리세린에스테르, 프로필렌글리콜에스테르
-- 증점제·안정제: 아라비아검, 잔탄검, 결정셀룰로스, 카복시메틸셀룰로스, 젤라틴
-- 산도조절제: 초산, 구연산, 인산, 제이인산칼륨
-- 착색료: 카라멜색소, 카카오색소, 안나토색소, 파프리카추출색소, 베타카로틴(β-카로틴), 홍화황색소, 치자색소
-- 팽창제: 탄산나트륨, 탄산수소나트륨, 이산화규소
-- 당류 유도체: 말토덱스트린, 덱스트린, 포도당
-- 유지류: 미강유, 코코넛오일, 팜핵경화유, 가공유지, 식물성유지, 가공버터
-- 유제품: 유청단백, 유청분말, 전지분유, 탈지분유
+allergens는 22종 중 해당만: 우유, 대두, 밀, 땅콩, 견과류, 달걀, 메밀, 복숭아, 토마토, 돼지고기, 쇠고기, 닭고기, 고등어, 게, 새우, 오징어, 조개류, 잣, 아황산류
 
-safety 분류:
-- safe: 정제수, 비타민(E/C 등), 천연 색소(파프리카·베타카로틴·안나토·카카오색소), 레시틴(천연 유화제), 밀가루/소맥분, 옥수수, 효모, 정제소금, 코코아분말·매스·버터, 아라비아검, 결정셀룰로스, 탄산나트륨, 이산화규소
-- caution: 설탕, 원당, 팜유, 팜핵경화유, 가공유지, 식물성유지, 미강유, 카페인, 유당, 분유, 유청단백, MSG, 향료, 물엿, 말토덱스트린, 덱스트린, 유지, 향료제제, 초산
-- warning: 프로필렌글리콜, 폴리글리세린지방산에스테르, 폴리글리세린축합리시놀레인산에스테르, 소르비탄지방산에스테르, 아스파탐, 수크랄로스, 적색40호, 카라멜색소, 안식향산나트륨, 합성향료
-- danger: 트랜스지방, 아질산나트륨, 부틸히드록시아니솔(BHA)
-
-allergens: 사진 성분 중 아래 22종 해당만 한국어로
-[우유, 대두, 밀, 땅콩, 견과류, 달걀, 메밀, 복숭아, 토마토, 돼지고기, 쇠고기, 닭고기, 고등어, 게, 새우, 오징어, 조개류(굴/전복/홍합), 잣, 아황산류]
-
-응답 형식 (JSON만):
+응답 (JSON만, 짧게):
 {
-  "ingredients": [
-    {"name":"성분명","type":"분류","safety":"safe|caution|warning|danger","impact":"1문장 객관적","description":"1문장","dailyLimit":""}
-  ],
-  "allergens": ["해당 알레르기명들"],
-  "productName": "",
-  "overallScore": 0~100,
-  "overallGrade": "A|B|C|D|F",
-  "summary": "객관적 3문장",
-  "recommendation": "적정량 권장 톤 2문장"
+  "names": ["설탕", "코코아분말", "폴리글리세린축합리시놀레인산에스테르", ...],
+  "allergens": ["우유", "대두"],
+  "productName": ""
 }`;
 }
 
-// ── 프롬프트 2: 백업 (더 강력) ──
+// ── 프롬프트 2: 백업 (이름만 · 더 짧게) ──
 function buildForcePrompt() {
-  return `한국어 JSON. 사진 원재료명 모든 성분 추출. 괄호 안도 각각 별도로.
-★ ingredients 최소 15개 필수 — 다크컴파운드, 혼합제제, 향료제제 등 그룹명도 별도 항목
-★ productName은 "" 빈 문자열
-★ summary 객관적 톤
+  return `한국어 JSON. 사진 원재료명 모든 성분 이름만 배열로.
+- 괄호 안·그룹명 다 별도로
+- 최소 15개, 중복 없이
+- 합성 유화제(폴리글리세린…, 소르비탄…), 색소(카카오·안나토·베타카로틴), 증점제(아라비아검, 결정셀룰로스), 산도조절제(초산) 필수
 
-각 성분: {name,type,safety(safe|caution|warning|danger),impact,description,dailyLimit}
-allergens: 우유/대두/밀/땅콩/견과/달걀/조개/새우/게 해당만.
-응답: {ingredients:[15+개],allergens:[],productName:"",overallScore:0~100,overallGrade:"A|B|C|D|F",summary:"객관 3문장",recommendation:"객관 2문장"}`;
+응답: {"names":[15+개 이름],"allergens":["해당 22종"],"productName":""}`;
 }
 
 // ── 텍스트에서 알려진 성분 추출 (확장 사전) ──
@@ -384,7 +414,7 @@ async function callGemini(apiKey, model, prompt, imageB64) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 2048,
       responseMimeType: 'application/json'
     }
   };
@@ -457,6 +487,58 @@ function tryRecoverTruncatedJSON(text) {
   return cut + '}'.repeat(Math.max(0, d2));
 }
 
+// ── 로컬 점수 계산 (safety 카운트 기반) ──
+function calculateScoreLocal(ingredients) {
+  const counts = { safe: 0, caution: 0, warning: 0, danger: 0 };
+  (ingredients || []).forEach(ing => {
+    const s = (ing?.safety || 'caution').toLowerCase();
+    if (counts[s] !== undefined) counts[s]++;
+  });
+  const total = counts.safe + counts.caution + counts.warning + counts.danger;
+  if (total === 0) return 65;
+  // 시작 82점에서 감가
+  let score = 82;
+  score += counts.safe * 1.5;
+  score -= counts.caution * 2;
+  score -= counts.warning * 7;
+  score -= counts.danger * 14;
+  return Math.max(20, Math.min(100, Math.round(score)));
+}
+
+// ── 로컬 총평 생성 ──
+function generateSummaryLocal(ingredients) {
+  const counts = { safe: 0, caution: 0, warning: 0, danger: 0 };
+  (ingredients || []).forEach(ing => {
+    const s = (ing?.safety || 'caution').toLowerCase();
+    if (counts[s] !== undefined) counts[s]++;
+  });
+  const total = counts.safe + counts.caution + counts.warning + counts.danger;
+  const parts = [`총 ${total}개 성분 중 안전 ${counts.safe}개, 유의 ${counts.caution}개`];
+  if (counts.warning > 0) parts.push(`주의 ${counts.warning}개`);
+  if (counts.danger > 0) parts.push(`절제 ${counts.danger}개`);
+  const first = `분석된 ${parts.join(', ')}가 확인되었습니다.`;
+  const second = counts.warning > 0 || counts.danger > 0
+    ? '일부 성분은 다량·장기 섭취 시 인체 영향이 보고된 바 있으니 적정량 섭취가 권장됩니다.'
+    : '전반적으로 안전한 성분 조합이며, 균형 잡힌 식단과 함께 드시길 권합니다.';
+  return `${first} ${second}`;
+}
+
+// ── 로컬 권장사항 생성 ──
+function generateRecommendationLocal(ingredients) {
+  const counts = { safe: 0, caution: 0, warning: 0, danger: 0 };
+  (ingredients || []).forEach(ing => {
+    const s = (ing?.safety || 'caution').toLowerCase();
+    if (counts[s] !== undefined) counts[s]++;
+  });
+  if (counts.danger > 0) {
+    return '경고 등급 성분이 포함되어 있어 자주 섭취하는 것은 권장되지 않습니다. 일일 권장 섭취 한도를 반드시 준수해주세요.';
+  }
+  if (counts.warning >= 3) {
+    return '합성 첨가물이 다수 포함되어 있어 매일 섭취보다는 가끔 즐기시는 것이 좋습니다. 균형 잡힌 식단과 함께 드세요.';
+  }
+  return '본 성분 구성을 기준으로 일일 권장 섭취 한도 내에서 적당량 드시는 것이 좋습니다. 균형 잡힌 식단과 함께 드시길 권합니다.';
+}
+
 // 성분명 정규화 (공백·괄호·특수문자 제거)
 function normalizeName(name) {
   return String(name || '')
@@ -469,12 +551,6 @@ function normalizeName(name) {
 function fillMissingFields(r) {
   if (!r || typeof r !== 'object') r = {};
 
-  if (typeof r.overallScore !== 'number') r.overallScore = 65;
-  r.overallScore = Math.max(0, Math.min(100, Math.round(r.overallScore)));
-  if (!r.overallGrade) {
-    const s = r.overallScore;
-    r.overallGrade = s >= 90 ? 'A' : s >= 75 ? 'B' : s >= 60 ? 'C' : s >= 40 ? 'D' : 'F';
-  }
   // 🔒 법적 안전장치: productName 절대 노출 X (AI가 채워도 강제로 빈 값)
   r.productName = '';
   if (!Array.isArray(r.ingredients)) r.ingredients = [];
@@ -493,12 +569,26 @@ function fillMissingFields(r) {
     type: ing?.type || '성분',
     safety: ['safe','caution','warning','danger'].includes((ing?.safety || '').toLowerCase())
       ? ing.safety.toLowerCase() : 'caution',
-    impact: ing?.impact || '정보가 부족해요',
+    impact: ing?.impact || '정보 준비 중',
     description: ing?.description || '',
     dailyLimit: ing?.dailyLimit || '정해진 한도 없음'
   }));
-  if (!r.summary) r.summary = '분석을 완료했어요!';
-  if (!r.recommendation) r.recommendation = '제품을 적당히 섭취하시고, 다른 식품과 균형 있게 드세요.';
+
+  // 🔽 safety 순 정렬: safe → caution → warning → danger
+  const safetyOrder = { safe: 0, caution: 1, warning: 2, danger: 3 };
+  r.ingredients.sort((a, b) => {
+    const oa = safetyOrder[(a.safety || 'caution').toLowerCase()] ?? 1;
+    const ob = safetyOrder[(b.safety || 'caution').toLowerCase()] ?? 1;
+    return oa - ob;
+  });
+
+  // 📊 점수·등급 로컬 계산 (AI 값 무시 → 성분 조합 기반으로 항상 재계산)
+  r.overallScore = calculateScoreLocal(r.ingredients);
+  r.overallGrade = r.overallScore >= 90 ? 'A' : r.overallScore >= 75 ? 'B' : r.overallScore >= 60 ? 'C' : r.overallScore >= 40 ? 'D' : 'F';
+
+  // 📝 총평·권장 문구 로컬 생성 (AI 값 없으면)
+  if (!r.summary || r.summary.length < 20) r.summary = generateSummaryLocal(r.ingredients);
+  if (!r.recommendation || r.recommendation.length < 20) r.recommendation = generateRecommendationLocal(r.ingredients);
 
   // 알레르기 표기 자동 추출 (AI가 누락한 경우 백업)
   if (!Array.isArray(r.allergens)) r.allergens = [];
