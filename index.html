@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8"/>
@@ -4074,6 +4074,44 @@ const FOOD_WITTY_DICT = {
   '초밥':     '초밥 = 프리미엄 식단 🍣 오메가3 · 단백질 굿'
 };
 
+// 🎯 한 끼 식단 결과 → 위트 있는 오프너 (딱딱한 summary 대체용)
+function getWittyMealSummary(r) {
+  const foods = r.foods || r.dishes || [];
+  const grade = r.balanceGrade || 'B';
+
+  // 위트 사전 매칭 (첫 음식 우선)
+  let witty = '';
+  let matchedFood = '';
+  for (const f of foods) {
+    const name = typeof f === 'string' ? f : (f.name || '');
+    if (!name) continue;
+    for (const key in FOOD_WITTY_DICT) {
+      if (name.includes(key)) { witty = FOOD_WITTY_DICT[key]; matchedFood = key; break; }
+    }
+    if (witty) break;
+  }
+
+  // 위트 매칭 없으면 grade별 감성 오프너
+  if (!witty) {
+    const openers = {
+      'A+': ['완벽 그 자체! ✨ 이 정도면 인플루언서급 식단이에요', '와, 오늘 밥상 대박 👏 이대로만 계속 가요!'],
+      'A':  ['이 정도면 훌륭 👍 균형 잘 잡으셨어요', '든든하게 잘 드셨네요 🌸 이 페이스 좋아요'],
+      'B+': ['나쁘지 않은 한 끼예요 😊 소소하게 잘 챙기셨어요', '이 정도면 통과 🙆 다음엔 채소 하나만 더!'],
+      'B':  ['오늘은 소소하게 🌱 채소 한 접시만 있었어도 만점!', '한 번쯤은 이래도 괜찮아요 🍀 내일은 균형 잡아봐요'],
+      'C':  ['오늘은 조금 아쉬웠지만 괜찮아요 🙌 내일이 있잖아요', '괜찮아요 🌿 다음 끼니에 채소 하나면 바로 회복 각']
+    };
+    const arr = openers[grade] || openers['B'];
+    witty = arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // summary가 있으면 위트 아래에 작게 병기 (딱딱한 톤 완충)
+  const summary = (r.summary || '').trim();
+  if (summary && summary.length > 15) {
+    return `${witty}<br><br><span style="font-size:12.5px;color:#64748B;font-weight:600;line-height:1.55">${escapeHtml(summary)}</span>`;
+  }
+  return witty;
+}
+
 // 🎯 최근 먹은 음식에서 위트 코멘트 생성
 function _getWittyFromRecentFoods(records) {
   if (!records || !records.length) return null;
@@ -6799,7 +6837,7 @@ function renderFoodResult(r) {
       <div class="nutri-char">👩‍⚕️</div>
       <div class="speech-bubble">
         <div class="speech-name">건강어때AI</div>
-        <div class="speech-text">${r.summary || '맛있는 한 끼였네요! 분석 결과를 확인해보세요 😊'}</div>
+        <div class="speech-text">${getWittyMealSummary(r)}</div>
       </div>
     </div>`;
   const scoreCard = `
