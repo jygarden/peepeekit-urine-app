@@ -5559,6 +5559,56 @@ function ingredientSafetyStyle(safety) {
   }
 }
 
+// 🎯 성분 분석 결과 → 위트 있는 종합 평가
+function getWittyIngredientSummary(data) {
+  const counts = { safe:0, caution:0, warning:0, danger:0 };
+  (data.ingredients || []).forEach(ing => {
+    const s = (ing.safety || '').toLowerCase();
+    if (counts[s] !== undefined) counts[s]++;
+  });
+  const allergens = data.allergens || [];
+  const grade = data.overallGrade || 'C';
+  const total = counts.safe + counts.caution + counts.warning + counts.danger;
+
+  // 위트 오프너 (심각도·상황별)
+  let opener = '';
+  if (counts.danger > 0) {
+    opener = `🚨 위험 첨가물이 ${counts.danger}개나! 오늘은 물 한 잔으로 씻어내고 내일부터 살살요 💧`;
+  } else if (counts.warning >= 4) {
+    opener = `🍽 합성 첨가물 뷔페! 이 정도면 진짜 정성이야... 근데 매일은 노노 😅`;
+  } else if (counts.warning >= 2) {
+    opener = `⚠️ 합성 첨가물이 ${counts.warning}개 슬쩍 숨어있네요. 가끔이면 눈감아드릴게요 🙈`;
+  } else if (counts.warning === 1) {
+    opener = `👀 합성 첨가물 1개 발견! 크게 걱정할 수준은 아니지만 알고 드시는 게 좋아요`;
+  } else if (allergens.length >= 3) {
+    opener = `🚨 알레르기 유발 성분 ${allergens.length}개! ${allergens.slice(0,3).join('·')} — 있는 사람은 진짜 조심!`;
+  } else if (allergens.length > 0) {
+    opener = `👀 알레르기 성분 발견: ${allergens.join('·')} — 등록해둔 알레르기와 자동 크로스체크 완료 ✅`;
+  } else if (grade === 'A' || grade === 'A+') {
+    opener = `✨ 이건 진짜 착한 성분들만! 안심하고 드셔도 돼요 🌱`;
+  } else if (grade === 'B' || grade === 'B+') {
+    opener = `🙆 이 정도면 무난한 편! 가끔 즐기기 딱 좋아요`;
+  } else if (grade === 'C') {
+    opener = `🍪 가끔은 괜찮아요, 근데 매일 드시면 우리 몸이 좀 힘들어해요 😅`;
+  } else {
+    opener = `⚠️ 이건 진짜 특별한 날에만! 자주 드시기엔 몸이 부담스러워요`;
+  }
+
+  // 성분 개수 총평
+  const parts = [`총 ${total}개 성분`, `안전 ${counts.safe}`, `유의 ${counts.caution}`];
+  if (counts.warning > 0) parts.push(`주의 ${counts.warning}`);
+  if (counts.danger > 0) parts.push(`절제 ${counts.danger}`);
+  const stats = parts.join(' · ');
+
+  // 기존 summary가 의미있으면(폴백 아니면) 병기
+  const summary = (data.summary || '').trim();
+  const isMeaningful = summary && summary.length > 15
+    && !summary.startsWith('분석을 완료')
+    && !summary.includes('완료했어요');
+
+  return { opener, stats, summary: isMeaningful ? summary : '' };
+}
+
 function renderIngredientResult(data) {
   const el = document.getElementById('ingredientResultContent');
   if (!el) return;
@@ -5647,15 +5697,16 @@ function renderIngredientResult(data) {
     </div>
   `;
 
-  // AI 종합 평가
-  if (data.summary) {
-    html += `
-      <div style="background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow-xs)">
-        <div style="font-size:13px;font-weight:800;color:#5B21B6;margin-bottom:8px">🤖 AI 종합 평가</div>
-        <div style="font-size:13px;color:var(--gray-700);line-height:1.65">${escapeHtml(data.summary).replace(/\n/g,'<br>')}</div>
-      </div>
-    `;
-  }
+  // 🤖 AI 종합 평가 (위트있게)
+  const _wit = getWittyIngredientSummary(data);
+  html += `
+    <div style="background:#fff;border:1px solid var(--gray-200);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow-xs)">
+      <div style="font-size:13px;font-weight:800;color:#5B21B6;margin-bottom:8px">🤖 AI 종합 평가</div>
+      <div style="font-size:14px;color:var(--gray-800);line-height:1.6;font-weight:700;letter-spacing:-.2px;margin-bottom:6px">${_wit.opener}</div>
+      <div style="font-size:11.5px;color:#94A3B8;font-weight:700;${_wit.summary ? 'margin-bottom:8px' : ''}">${escapeHtml(_wit.stats)}</div>
+      ${_wit.summary ? `<div style="font-size:12.5px;color:var(--gray-600);line-height:1.55">${escapeHtml(_wit.summary)}</div>` : ''}
+    </div>
+  `;
 
   // 성분별 상세
   html += `
