@@ -5459,9 +5459,9 @@ async function analyzeIngredient() {
   document.getElementById('btnIngredientAnalyze').disabled = true;
   startIngredientLoading();
   try {
-    // ⏱ 28초 timeout (Vercel 10초 + 여유)
+    // ⏱ 55초 timeout (Vercel Pro maxDuration 60초 대비 여유)
     const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 28000);
+    const timeoutId = setTimeout(() => ctrl.abort(), 55000);
     let res;
     try {
       res = await fetch('/api/analyze-ingredients', {
@@ -5476,7 +5476,7 @@ async function analyzeIngredient() {
       stopIngredientLoading();
       document.getElementById('btnIngredientAnalyze').disabled = false;
       if (netErr.name === 'AbortError') {
-        showIngredientError('⏱ 응답이 너무 느려요 (28초 초과). 사진이 복잡할 수 있어요. 조금 더 가까이서 다시 찍어보세요.');
+        showIngredientError('⏱ 응답이 너무 느려요. 성분표 사진을 더 가까이·크게 다시 찍어주세요.');
       } else {
         showIngredientError('🌐 네트워크 오류: ' + (netErr.message || '연결 확인 후 다시 시도해주세요.'));
       }
