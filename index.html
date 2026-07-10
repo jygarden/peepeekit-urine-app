@@ -5393,8 +5393,8 @@ function handleIngredientFile(event) {
   const file = event.target.files[0];
   if (!file) return;
   fileToDataUrlSafe(file).then(dataUrl => {
-    // 성분표 글자 유지하면서 크기 최적화 (2000→1600, 92→85 → 속도 2-3배 UP)
-    return compressImageForUpload(dataUrl, 1600, 0.85);
+    // 성분표 글자 유지하면서 크기 최적화 (1600→1400, 85→80 → 업로드·분석 속도 UP)
+    return compressImageForUpload(dataUrl, 1400, 0.80);
   }).then(compressed => {
     ingredientImageSrc = compressed;
     ingredientImageB64 = compressed.split(',')[1];
@@ -5459,9 +5459,10 @@ async function analyzeIngredient() {
   document.getElementById('btnIngredientAnalyze').disabled = true;
   startIngredientLoading();
   try {
-    // ⏱ 55초 timeout (Vercel Pro maxDuration 60초 대비 여유)
+    // ⏱ 90초 timeout (진단용 · Vercel Pro 60초 초과 여부 확인)
+    const _startTime = Date.now();
     const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 55000);
+    const timeoutId = setTimeout(() => ctrl.abort(), 90000);
     let res;
     try {
       res = await fetch('/api/analyze-ingredients', {
@@ -5473,21 +5474,38 @@ async function analyzeIngredient() {
       });
     } catch(netErr) {
       clearTimeout(timeoutId);
+      const _elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);
+      console.log('[성분분석] fetch 실패까지 걸린 시간:', _elapsed + '초');
       stopIngredientLoading();
       document.getElementById('btnIngredientAnalyze').disabled = false;
       if (netErr.name === 'AbortError') {
-        showIngredientError('⏱ 응답이 너무 느려요. 성분표 사진을 더 가까이·크게 다시 찍어주세요.');
+        showIngredientError(`⏱ 응답이 너무 느려요 (${_elapsed}초 대기 후 중단).\n\n` +
+          `이 시간이 60초 이상이면 Vercel Pro가 이미 적용된 상태예요. Gemini API가 진짜 오래 걸리는 케이스입니다. 성분표만 더 크게 다시 찍어주세요.\n\n` +
+          `60초 미만이면 최신 파일이 아직 배포되지 않았을 수 있어요.`);
       } else {
         showIngredientError('🌐 네트워크 오류: ' + (netErr.message || '연결 확인 후 다시 시도해주세요.'));
       }
       return;
     }
     clearTimeout(timeoutId);
+    const _elapsed = ((Date.now() - _startTime) / 1000).toFixed(1);
+    console.log('[성분분석] 서버 응답까지 걸린 시간:', _elapsed + '초');
 
     // ── 디버깅: 응답 상태 + raw 텍스트 콘솔 출력 ──
     console.log('[성분분석] HTTP status:', res.status);
     const rawText = await res.text();
     console.log('[성분분석] raw response (첫 500자):', rawText.slice(0, 500));
+
+    // 🕐 Vercel 서버 함수 timeout (504 Gateway Timeout)
+    if (res.status === 504) {
+      stopIngredientLoading();
+      showIngredientError(
+        '⏱ 서버가 시간 초과됐어요 (Vercel 함수 timeout).\n\n' +
+        '무료 Vercel Hobby plan은 최대 10초까지만 실행돼요. 성분표가 많은 사진은 20~30초 걸릴 수 있으니 Pro plan으로 업그레이드하거나, 더 작은 성분표 사진으로 다시 시도해주세요.'
+      );
+      document.getElementById('btnIngredientAnalyze').disabled = false;
+      return;
+    }
 
     let data;
     try {
