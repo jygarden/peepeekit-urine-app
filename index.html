@@ -5416,37 +5416,85 @@ const INGREDIENT_LOADING_STAGES = [
   { p: 38, msg: '🧪 인공감미료·착색료·보존료 분류' },
   { p: 55, msg: '💊 각 성분의 인체 영향 조사' },
   { p: 72, msg: '⚖️ 안전 등급·일일 섭취 한도 확인' },
-  { p: 88, msg: '📝 알기 쉽게 정리 중...' },
-  { p: 96, msg: '✨ 마무리하고 있어요!' }
+  { p: 85, msg: '📝 알기 쉽게 정리 중...' },
+  { p: 92, msg: '✨ 마무리하고 있어요!' }
+];
+// 초기 스테이지 다 지난 후 순환하는 위트 메시지 (긴 대기용)
+const INGREDIENT_EXTRA_MESSAGES = [
+  '🤔 성분이 진짜 많네요... 조금만 더!',
+  '📚 성분 사전이랑 대조 중이에요',
+  '🧑‍⚕️ 안전 등급 최종 확인 중',
+  '💭 알레르기 유발 성분 크로스체크 중',
+  '🔬 각 첨가물 다량 섭취 영향 조사 중',
+  '☕ 커피 한 잔 하고 오셔도 돼요~',
+  '🌱 오늘도 건강 챙기시는 모습이 멋져요',
+  '⏰ 거의 다 됐어요, 조금만 더!',
+  '📊 위험도 점수 계산 중이에요',
+  '🎯 마지막 요약 정리하는 중'
 ];
 let _ingredientLoadingTimer = null;
+let _ingredientElapsedTimer = null;
+let _ingredientLoadingStartTime = 0;
 function startIngredientLoading() {
   const box = document.getElementById('ingredientLoadingBox');
   if (!box) return;
   box.classList.add('show');
-  // 진행 바 + 메시지 HTML 주입
+  _ingredientLoadingStartTime = Date.now();
+
   box.innerHTML = `
     <div style="font-size:32px;text-align:center;margin-bottom:8px">🧪</div>
-    <p style="margin:0 0 6px;font-weight:700;color:#5B21B6" id="ingrLoadMsg">🔍 성분표를 읽고 있어요...</p>
+    <p style="margin:0 0 6px;font-weight:700;color:#5B21B6;text-align:center" id="ingrLoadMsg">🔍 성분표를 읽고 있어요...</p>
     <div style="height:6px;background:#EDE9FE;border-radius:99px;overflow:hidden;margin:10px 4px">
-      <div id="ingrLoadBar" style="height:100%;width:0%;background:linear-gradient(90deg,#8B5CF6,#EC4899);transition:width .6s ease-out"></div>
+      <div id="ingrLoadBar" style="height:100%;width:0%;background:linear-gradient(90deg,#8B5CF6,#EC4899);transition:width .8s ease-out"></div>
     </div>
-    <small style="display:block;text-align:center;color:#7C3AED">평균 15-20초 정도 걸려요</small>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#7C3AED;margin:0 4px">
+      <span>평균 15-40초 소요</span>
+      <span id="ingrLoadElapsed" style="font-weight:900;letter-spacing:.3px">0초 경과</span>
+    </div>
   `;
-  let idx = 0;
+
+  let stageIdx = 0;
+  let extraIdx = 0;
   const bar = box.querySelector('#ingrLoadBar');
   const lbl = box.querySelector('#ingrLoadMsg');
+  const elap = box.querySelector('#ingrLoadElapsed');
+
+  // 🕐 매 500ms마다 경과 시간 업데이트 (계속 살아있음을 명확히 표시)
+  _ingredientElapsedTimer = setInterval(() => {
+    const seconds = Math.floor((Date.now() - _ingredientLoadingStartTime) / 1000);
+    if (elap) {
+      elap.textContent = seconds + '초 경과';
+      // 시간이 길어질수록 색상 변화 → 살아있음을 명확히
+      if (seconds > 40) elap.style.color = '#DC2626';
+      else if (seconds > 25) elap.style.color = '#EA580C';
+      else elap.style.color = '#7C3AED';
+    }
+  }, 500);
+
   function tick() {
-    if (idx >= INGREDIENT_LOADING_STAGES.length) return;
-    const s = INGREDIENT_LOADING_STAGES[idx++];
-    if (bar) bar.style.width = s.p + '%';
-    if (lbl) lbl.textContent = s.msg;
-    _ingredientLoadingTimer = setTimeout(tick, 2200 + Math.random()*800);
+    // 1) 초기 스테이지 순차 진행
+    if (stageIdx < INGREDIENT_LOADING_STAGES.length) {
+      const s = INGREDIENT_LOADING_STAGES[stageIdx++];
+      if (bar) bar.style.width = s.p + '%';
+      if (lbl) lbl.textContent = s.msg;
+      _ingredientLoadingTimer = setTimeout(tick, 2400 + Math.random() * 800);
+    } else {
+      // 2) 스테이지 소진 → 무한 위트 메시지 + 진행바 asymptotic 증가
+      //    (진행바는 99%까지만, 100%는 실제 완료 시)
+      const currentWidth = parseFloat((bar?.style.width || '92').replace('%','')) || 92;
+      const nextWidth = Math.min(99, currentWidth + 0.4);
+      if (bar) bar.style.width = nextWidth + '%';
+      const msg = INGREDIENT_EXTRA_MESSAGES[extraIdx % INGREDIENT_EXTRA_MESSAGES.length];
+      if (lbl) lbl.textContent = msg;
+      extraIdx++;
+      _ingredientLoadingTimer = setTimeout(tick, 3200 + Math.random() * 1500);
+    }
   }
   tick();
 }
 function stopIngredientLoading() {
   if (_ingredientLoadingTimer) { clearTimeout(_ingredientLoadingTimer); _ingredientLoadingTimer = null; }
+  if (_ingredientElapsedTimer) { clearInterval(_ingredientElapsedTimer); _ingredientElapsedTimer = null; }
   const box = document.getElementById('ingredientLoadingBox');
   if (box) box.classList.remove('show');
 }
