@@ -11235,6 +11235,66 @@ function openDailyTip() {
   showScreen('screenDailyTip');
 }
 
+// 🍽 식단 카드용 위트 오프너 (인스타 카드 · getWittyMealSummary와 로직 공유)
+function _getMealWittyOpener(data) {
+  const foods = data.foods || data.dishes || [];
+  const grade = data.balanceGrade || 'B';
+
+  // 위트 사전 매칭
+  for (const f of foods) {
+    const name = typeof f === 'string' ? f : (f.name || '');
+    if (!name) continue;
+    for (const key in FOOD_WITTY_DICT) {
+      if (name.includes(key)) return FOOD_WITTY_DICT[key];
+    }
+  }
+
+  const openers = {
+    'A+': ['완벽 그 자체! ✨ 이 정도면 인플루언서급 식단', '와, 오늘 밥상 대박 👏 이대로 계속 가요'],
+    'A':  ['이 정도면 훌륭! 👍 균형 잘 잡으셨어요', '든든하게 잘 드셨네요 🌸 이 페이스 좋아요'],
+    'B+': ['나쁘지 않은 한 끼 😊 소소하게 잘 챙기셨어요', '이 정도면 통과 🙆 다음엔 채소 하나만 더!'],
+    'B':  ['오늘은 소소하게 🌱 채소 한 접시면 만점이었어요!', '한 번쯤은 이래도 괜찮아요 🍀 내일은 균형 잡아봐요'],
+    'C':  ['오늘은 조금 아쉬웠지만 괜찮아요 🙌 내일이 있잖아요', '괜찮아요 🌿 다음 끼니에 채소 하나면 바로 회복']
+  };
+  const arr = openers[grade] || openers['B'];
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// 🧪 소변검사 카드용 위트 오프너 (인스타 카드)
+function _getUrineWittyOpener(data) {
+  const score = data.score || 0;
+
+  if (score >= 90) {
+    const arr = [
+      '✨ 몸이 진짜 컨디션 좋네요! 이대로 유지해요',
+      '🌟 완벽에 가까운 결과! 이 관리력 대박이에요',
+      '👏 진짜 관리 잘 하고 계세요, 이 상태 유지!'
+    ];
+    return arr[Math.floor(Math.random() * arr.length)];
+  } else if (score >= 75) {
+    const arr = [
+      '👍 대체로 좋아요! 물 한 컵만 더 챙기면 완벽',
+      '🌸 무난한 결과! 오늘도 잘 챙기고 계세요',
+      '🙆 나쁘지 않아요, 이 페이스 유지해봐요'
+    ];
+    return arr[Math.floor(Math.random() * arr.length)];
+  } else if (score >= 60) {
+    const arr = [
+      '⚠️ 살짝 신호가 왔네요, 오늘 물 많이 드셔봐요 💧',
+      '🌱 조금 아쉬운 결과! 내일은 채소·물 신경 써봐요',
+      '📉 컨디션 살짝 다운, 푹 자고 회복해봐요'
+    ];
+    return arr[Math.floor(Math.random() * arr.length)];
+  } else {
+    const arr = [
+      '🚨 몸이 힘들다는 신호! 오늘은 푹 쉬어주세요',
+      '💧 심각한 건 아니지만 물·수면·식단 다 챙겨야 해요',
+      '⚠️ 3일 안에 재검 해보고, 지속되면 병원 상담도 고려하세요'
+    ];
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+}
+
 // 🏆 점수 → 상위 % 계산 (경쟁 유발) — 더 세분화
 function _calculateRankPercent(score) {
   if (score >= 95) return 3;
@@ -11370,21 +11430,21 @@ function renderStoryCardDOM(type, data) {
     const warningCnt = d.warningCount || 0;
     const allergens = d.allergens || [];
     div.innerHTML = `
-      <div style="width:100%;height:100%;background:linear-gradient(160deg,#F5F3FF 0%,#FCE7F3 100%);padding:34px 28px;display:flex;flex-direction:column;box-sizing:border-box;color:#4C1D95;position:relative">
-        <div style="text-align:center;padding-bottom:14px;border-bottom:1.5px dashed rgba(124,58,237,.3)">
-          <div style="font-size:14px;font-weight:900;letter-spacing:3px">🏷️ INGREDIENT REPORT</div>
-          <div style="font-size:12px;font-weight:800;margin-top:4px;opacity:.8">${escapeHtml(dateFullStr)}</div>
-          <div style="display:inline-block;background:rgba(255,255,255,.85);border-radius:99px;padding:4px 12px;margin-top:8px;font-size:11px;font-weight:900;color:#7C3AED;letter-spacing:.5px">@건강어때 · 알레르기 자동 체크</div>
+      <div style="width:100%;height:100%;background:linear-gradient(160deg,#F5F3FF 0%,#FCE7F3 100%);padding:24px 22px;display:flex;flex-direction:column;box-sizing:border-box;color:#4C1D95;position:relative">
+        <div style="text-align:center;padding-bottom:10px;border-bottom:1.5px dashed rgba(124,58,237,.3)">
+          <div style="font-size:13px;font-weight:900;letter-spacing:2.5px">🏷️ INGREDIENT REPORT</div>
+          <div style="font-size:11px;font-weight:800;margin-top:2px;opacity:.8">${escapeHtml(dateFullStr)}</div>
+          <div style="display:inline-block;background:rgba(255,255,255,.85);border-radius:99px;padding:3px 10px;margin-top:6px;font-size:10px;font-weight:900;color:#7C3AED;letter-spacing:.5px">@건강어때 · 알레르기 자동 체크</div>
         </div>
 
-        <div style="text-align:center;margin-top:18px">
-          <div style="font-size:60px;line-height:1;margin-bottom:6px">${
+        <div style="text-align:center;margin-top:12px">
+          <div style="font-size:44px;line-height:1;margin-bottom:4px">${
             (grade === 'A' || grade === 'A+') ? '✨'
             : (grade === 'B' || grade === 'B+') ? '👀'
             : grade === 'C' ? '⚠️'
             : '🚨'
           }</div>
-          <div style="font-size:26px;font-weight:900;letter-spacing:-.6px;line-height:1.2;color:${
+          <div style="font-size:22px;font-weight:900;letter-spacing:-.5px;line-height:1.15;color:${
             (grade === 'A' || grade === 'A+') ? '#047857'
             : (grade === 'B' || grade === 'B+') ? '#5B21B6'
             : grade === 'C' ? '#C2410C'
@@ -11395,78 +11455,72 @@ function renderStoryCardDOM(type, data) {
             : grade === 'C' ? '잠깐, 확인하고 드세요'
             : '이거 조심하세요!'
           }</div>
-          <div style="font-size:14px;font-weight:800;margin-top:6px;opacity:.9">${
+          <div style="font-size:12.5px;font-weight:800;margin-top:4px;opacity:.9">${
             warningCnt > 0 ? `합성 첨가물 <b>${warningCnt}개</b> 발견`
             : allergens.length > 0 ? `알레르기 유발 성분 <b>${allergens.length}개</b> 발견`
             : cautionCnt >= 3 ? `주의 성분 <b>${cautionCnt}개</b> 포함`
             : total > 0 ? `총 <b>${total}개</b> 성분 분석 완료`
             : '성분 분석 완료'
           }</div>
-          ${userName ? `<div style="font-size:12.5px;font-weight:700;margin-top:6px;opacity:.75">${escapeHtml(userName)}님이 오늘 확인한 성분</div>` : ''}
         </div>
 
-        <div style="background:rgba(255,255,255,.85);border-radius:24px;padding:20px;margin-top:18px;text-align:center;box-shadow:0 6px 20px rgba(124,58,237,.12)">
-          <div style="font-size:12px;font-weight:900;letter-spacing:2.5px;margin-bottom:4px">SAFETY GRADE</div>
-          <div style="font-size:110px;line-height:1;font-weight:900;color:${gradeColor};font-family:Georgia,serif;letter-spacing:-5px">${escapeHtml(grade)}</div>
-          <div style="font-size:16px;font-weight:900;margin-top:6px">안전도 · ${score}점</div>
+        <div style="background:rgba(255,255,255,.85);border-radius:20px;padding:14px;margin-top:12px;text-align:center;box-shadow:0 4px 14px rgba(124,58,237,.1)">
+          <div style="font-size:11px;font-weight:900;letter-spacing:2.5px;margin-bottom:2px">SAFETY GRADE</div>
+          <div style="font-size:82px;line-height:1;font-weight:900;color:${gradeColor};font-family:Georgia,serif;letter-spacing:-4px">${escapeHtml(grade)}</div>
+          <div style="font-size:14px;font-weight:900;margin-top:3px">안전도 · ${score}점 · 총 ${total}개 성분</div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px">
-          <div style="background:rgba(255,255,255,.9);border-radius:16px;padding:14px 8px;text-align:center">
-            <div style="font-size:26px;line-height:1;margin-bottom:2px">✅</div>
-            <div style="font-size:24px;font-weight:900;color:#059669;font-family:Georgia,serif;line-height:1">${safeCnt}</div>
-            <div style="font-size:10px;font-weight:900;margin-top:3px;color:#065F46">안전</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px">
+          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:10px 6px;text-align:center">
+            <div style="font-size:20px;line-height:1">✅</div>
+            <div style="font-size:20px;font-weight:900;color:#059669;font-family:Georgia,serif;line-height:1;margin-top:2px">${safeCnt}</div>
+            <div style="font-size:9.5px;font-weight:900;margin-top:2px;color:#065F46">안전</div>
           </div>
-          <div style="background:rgba(255,255,255,.9);border-radius:16px;padding:14px 8px;text-align:center">
-            <div style="font-size:26px;line-height:1;margin-bottom:2px">⚠️</div>
-            <div style="font-size:24px;font-weight:900;color:#EA580C;font-family:Georgia,serif;line-height:1">${cautionCnt}</div>
-            <div style="font-size:10px;font-weight:900;margin-top:3px;color:#9A3412">유의</div>
+          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:10px 6px;text-align:center">
+            <div style="font-size:20px;line-height:1">⚠️</div>
+            <div style="font-size:20px;font-weight:900;color:#EA580C;font-family:Georgia,serif;line-height:1;margin-top:2px">${cautionCnt}</div>
+            <div style="font-size:9.5px;font-weight:900;margin-top:2px;color:#9A3412">유의</div>
           </div>
-          <div style="background:rgba(255,255,255,.9);border-radius:16px;padding:14px 8px;text-align:center">
-            <div style="font-size:26px;line-height:1;margin-bottom:2px">🚨</div>
-            <div style="font-size:24px;font-weight:900;color:#DC2626;font-family:Georgia,serif;line-height:1">${warningCnt}</div>
-            <div style="font-size:10px;font-weight:900;margin-top:3px;color:#991B1B">경고</div>
+          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:10px 6px;text-align:center">
+            <div style="font-size:20px;line-height:1">🚨</div>
+            <div style="font-size:20px;font-weight:900;color:#DC2626;font-family:Georgia,serif;line-height:1;margin-top:2px">${warningCnt}</div>
+            <div style="font-size:9.5px;font-weight:900;margin-top:2px;color:#991B1B">경고</div>
           </div>
         </div>
 
-        <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:10px 14px;margin-top:12px;text-align:center">
-          <div style="font-size:11px;color:#7C3AED;font-weight:900;letter-spacing:1.5px">📊 총 ${total}개 성분 분석</div>
-        </div>
-
-        <div style="background:rgba(255,255,255,.95);border-radius:16px;padding:14px 16px;margin-top:12px;border:1.5px solid rgba(124,58,237,.2);box-shadow:0 4px 12px rgba(124,58,237,.1)">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-            <span style="font-size:16px">🤖</span>
-            <span style="font-size:11px;color:#5B21B6;font-weight:900;letter-spacing:1.5px">건강어때AI 종합 평가</span>
+        <div style="background:rgba(255,255,255,.95);border-radius:14px;padding:11px 13px;margin-top:10px;border:1.5px solid rgba(124,58,237,.2)">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+            <span style="font-size:14px">🤖</span>
+            <span style="font-size:10px;color:#5B21B6;font-weight:900;letter-spacing:1.2px">건강어때AI 종합 평가</span>
           </div>
-          <div style="font-size:14px;color:#4C1D95;font-weight:900;line-height:1.5;letter-spacing:-.3px">${escapeHtml(getWittyIngredientSummary(d).opener)}</div>
+          <div style="font-size:13px;color:#4C1D95;font-weight:900;line-height:1.45;letter-spacing:-.3px">${escapeHtml(getWittyIngredientSummary(d).opener)}</div>
         </div>
 
         ${allergens.length > 0 ? `
-        <div style="background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border:2px solid #F87171;border-radius:14px;padding:14px 16px;margin-top:12px;box-shadow:0 4px 12px rgba(220,38,38,.15)">
-          <div style="font-size:12px;color:#991B1B;font-weight:900;letter-spacing:1.5px;margin-bottom:5px">🚨 알레르기 자동 발견!</div>
-          <div style="font-size:14px;color:#7F1D1D;font-weight:900;line-height:1.5;letter-spacing:-.3px">${allergens.slice(0,5).map(a => escapeHtml(a)).join(' · ')}</div>
-          <div style="font-size:10.5px;color:#B91C1C;font-weight:800;margin-top:6px;letter-spacing:.2px">등록해둔 알레르기와 자동으로 교차 체크됐어요</div>
+        <div style="background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border:2px solid #F87171;border-radius:12px;padding:10px 13px;margin-top:10px">
+          <div style="font-size:11px;color:#991B1B;font-weight:900;letter-spacing:1.2px;margin-bottom:3px">🚨 알레르기 자동 발견!</div>
+          <div style="font-size:13px;color:#7F1D1D;font-weight:900;line-height:1.4;letter-spacing:-.3px">${allergens.slice(0,5).map(a => escapeHtml(a)).join(' · ')}</div>
         </div>
         ` : ''}
 
-        <div style="margin-top:auto;padding-top:14px;border-top:1.5px dashed rgba(124,58,237,.3)">
-          <div style="background:linear-gradient(135deg,#7C3AED,#EC4899);border-radius:16px;padding:14px 16px;margin-bottom:10px;text-align:center;box-shadow:0 4px 14px rgba(124,58,237,.35)">
-            <div style="font-size:18px;font-weight:900;color:#FFF;letter-spacing:-.4px">🏷 이 앱으로 성분 스캔하기</div>
-            <div style="font-size:11.5px;font-weight:800;color:#F5F3FF;margin-top:2px">우리 아이 알레르기 자동 크로스체크</div>
+        <div style="margin-top:auto;padding-top:10px;border-top:1.5px dashed rgba(124,58,237,.3)">
+          <div style="background:linear-gradient(135deg,#7C3AED,#EC4899);border-radius:14px;padding:10px 14px;margin-bottom:8px;text-align:center;box-shadow:0 4px 12px rgba(124,58,237,.3)">
+            <div style="font-size:16px;font-weight:900;color:#FFF;letter-spacing:-.4px">🏷 이 앱으로 성분 스캔하기</div>
+            <div style="font-size:10.5px;font-weight:800;color:#F5F3FF;margin-top:1px">우리 아이 알레르기 자동 크로스체크</div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div style="background:#000;border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:8px">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="#FFF"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
-              <div style="flex:1;line-height:1.15">
-                <div style="font-size:10px;color:#DDD">Download on the</div>
-                <div style="font-size:15px;color:#FFF;font-weight:900">App Store</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:#000;border-radius:12px;padding:9px 10px;display:flex;align-items:center;gap:7px">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFF"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+              <div style="flex:1;line-height:1.1;min-width:0">
+                <div style="font-size:9px;color:#DDD;white-space:nowrap;overflow:hidden">Download on the</div>
+                <div style="font-size:13.5px;color:#FFF;font-weight:900">App Store</div>
               </div>
             </div>
-            <div style="background:#000;border-radius:14px;padding:11px 12px;display:flex;align-items:center;gap:8px">
-              <svg width="26" height="26" viewBox="0 0 24 24"><path fill="#FFF" d="M3.1 2.4C2.4 2.9 2 3.7 2 4.7v14.6c0 1 .4 1.8 1.1 2.3l.2.2 8.2-8.2v-.2L3.1 2.4M15.5 8.5L4.9 2.5c-.5-.3-1.1-.4-1.5-.1L12 11l3.5-2.5m4.7 2.7l-3.2-1.8L13.1 12l3.9 3.6 3.3-1.9c1-.6 1-2.1-.1-2.5M4.9 21.5c.4.2 1 .2 1.5-.1L15.5 15.5 12 12l-8.7 8.7c0 .3.6.6 1.6.8"/></svg>
-              <div style="flex:1;line-height:1.15">
-                <div style="font-size:10px;color:#DDD">Download on</div>
-                <div style="font-size:15px;color:#FFF;font-weight:900">Google Play</div>
+            <div style="background:#000;border-radius:12px;padding:9px 10px;display:flex;align-items:center;gap:7px">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#FFF" d="M3.1 2.4C2.4 2.9 2 3.7 2 4.7v14.6c0 1 .4 1.8 1.1 2.3l.2.2 8.2-8.2v-.2L3.1 2.4M15.5 8.5L4.9 2.5c-.5-.3-1.1-.4-1.5-.1L12 11l3.5-2.5m4.7 2.7l-3.2-1.8L13.1 12l3.9 3.6 3.3-1.9c1-.6 1-2.1-.1-2.5M4.9 21.5c.4.2 1 .2 1.5-.1L15.5 15.5 12 12l-8.7 8.7c0 .3.6.6 1.6.8"/></svg>
+              <div style="flex:1;line-height:1.1;min-width:0">
+                <div style="font-size:9px;color:#DDD;white-space:nowrap;overflow:hidden">Download on</div>
+                <div style="font-size:13.5px;color:#FFF;font-weight:900">Google Play</div>
               </div>
             </div>
           </div>
@@ -11758,6 +11812,17 @@ function renderStoryCardDOM(type, data) {
 
       <!-- 🎯 타입별 특화 데이터 (진짜 다른 콘텐츠!) -->
       ${specialSection}
+
+      <!-- 🤖 건강어때AI 종합 평가 (식단·소변검사 카드에만) -->
+      ${(type === 'food' || type === 'urine') ? `
+      <div style="background:#FFF;border-radius:14px;padding:12px 14px;margin-top:12px;border:1.5px solid ${theme.accent}33;box-shadow:0 3px 10px ${theme.accent}22">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+          <span style="font-size:15px">🤖</span>
+          <span style="font-size:10px;color:${theme.accentDark};font-weight:900;letter-spacing:1.5px">건강어때AI 종합 평가</span>
+        </div>
+        <div style="font-size:13.5px;color:#0F172A;font-weight:900;line-height:1.5;letter-spacing:-.3px">${escapeHtml(type === 'food' ? _getMealWittyOpener(data) : _getUrineWittyOpener(data))}</div>
+      </div>
+      ` : ''}
 
       <!-- 🔥 스트릭 뱃지 -->
       ${streakDays > 0 ? `
