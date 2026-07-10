@@ -11533,19 +11533,19 @@ function renderStoryCardDOM(type, data) {
 
         ${(() => {
           // 💡 한 줄 인사이트 (등급·성분별 맞춤)
-          let tipEmoji = '💡', tipTitle = 'TODAY\\'S TIP', tipMsg = '';
+          let tipEmoji = '💡', tipTitle = 'TODAY TIP', tipMsg = '';
           if (warningCnt >= 3) {
             tipEmoji = '⚠️'; tipTitle = '이런 분 조심'; tipMsg = '아이·임산부·민감 체질은 자주 피하시면 좋아요';
           } else if (warningCnt > 0) {
-            tipEmoji = '🍀'; tipTitle = 'TODAY\\'S TIP'; tipMsg = '가끔의 즐거움! 매일 드시기보단 주 1~2회가 좋아요';
+            tipEmoji = '🍀'; tipTitle = 'TODAY TIP'; tipMsg = '가끔의 즐거움! 매일 드시기보단 주 1~2회가 좋아요';
           } else if (allergens.length > 0) {
             tipEmoji = '👨‍👩‍👧'; tipTitle = '가족과 나눠 드실 때'; tipMsg = '등록된 알레르기와 자동 대조 · 안심하고 즐기세요';
           } else if (cautionCnt >= 3) {
-            tipEmoji = '⚖️'; tipTitle = 'TODAY\\'S TIP'; tipMsg = '당분·나트륨은 다른 식사에서 조절해봐요';
+            tipEmoji = '⚖️'; tipTitle = 'TODAY TIP'; tipMsg = '당분·나트륨은 다른 식사에서 조절해봐요';
           } else if (grade === 'A' || grade === 'A+') {
             tipEmoji = '✨'; tipTitle = 'GOOD PICK'; tipMsg = '오늘의 착한 선택! 이런 성분들 편히 즐기세요';
           } else {
-            tipEmoji = '🌿'; tipTitle = 'TODAY\\'S TIP'; tipMsg = '균형 잡힌 식단과 함께 드시면 더 좋아요';
+            tipEmoji = '🌿'; tipTitle = 'TODAY TIP'; tipMsg = '균형 잡힌 식단과 함께 드시면 더 좋아요';
           }
           return `
         <div style="background:linear-gradient(135deg,#FEFCE8,#F5F3FF);border-radius:12px;padding:10px 13px;margin-top:10px;border:1px dashed rgba(180,83,9,.3)">
