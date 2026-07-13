@@ -11019,6 +11019,63 @@ const FORTUNE_QUOTES = [
   '내 몸이 보내는 신호에 귀 기울여요'
 ];
 
+// 🐉 12지 (쥐→돼지 순서, (year-4)%12로 인덱스 계산)
+const FORTUNE_ZODIACS = [
+  { name: '쥐',    emoji: '🐁', trait: '영리·기민' },
+  { name: '소',    emoji: '🐄', trait: '성실·인내' },
+  { name: '호랑이', emoji: '🐅', trait: '용기·리더십' },
+  { name: '토끼',  emoji: '🐇', trait: '온화·부드러움' },
+  { name: '용',    emoji: '🐉', trait: '카리스마·도약' },
+  { name: '뱀',    emoji: '🐍', trait: '지혜·통찰' },
+  { name: '말',    emoji: '🐎', trait: '활력·자유' },
+  { name: '양',    emoji: '🐑', trait: '조화·예술' },
+  { name: '원숭이', emoji: '🐒', trait: '재치·유쾌' },
+  { name: '닭',    emoji: '🐔', trait: '부지런·꼼꼼' },
+  { name: '개',    emoji: '🐕', trait: '충직·신뢰' },
+  { name: '돼지',  emoji: '🐖', trait: '풍요·복' }
+];
+function _getKoreanZodiac(birthYear) {
+  const y = parseInt(birthYear) || 2000;
+  return FORTUNE_ZODIACS[((y - 4) % 12 + 12) % 12];
+}
+
+// 🎯 띠별 오늘의 조언 (각 3개 랜덤)
+const FORTUNE_ZODIAC_TIPS = {
+  '쥐':    ['새로운 정보에 귀 기울여봐요','작은 변화가 큰 결과로 이어져요','기민한 판단이 오늘 유리해요'],
+  '소':    ['묵묵히 하는 일이 인정받는 하루','서두르지 말고 차근차근','체력 관리에 신경 써봐요'],
+  '호랑이': ['용기 있게 도전해봐요','리더십이 빛나는 날','적극적으로 표현해봐요'],
+  '토끼':  ['부드러운 소통이 답이에요','작은 배려가 큰 감동을 만들어요','안전한 선택이 좋은 결과로'],
+  '용':    ['큰 그림을 그려봐요','자신감 있게 나아가요','변화를 받아들여봐요'],
+  '뱀':    ['깊이 있게 생각해봐요','숨겨진 의미를 찾는 하루','지혜로운 결정의 날'],
+  '말':    ['자유롭게 움직여봐요','새로운 곳으로 떠나봐요','활동적인 하루가 좋아요'],
+  '양':    ['조화로운 마음가짐 필요','예술적 감성이 살아나요','주변과 함께 나눠봐요'],
+  '원숭이': ['재치 있게 풀어봐요','유쾌한 대화를 즐겨봐요','창의적인 아이디어가 떠올라요'],
+  '닭':    ['꼼꼼함이 인정받는 하루','아침 시간을 잘 활용해요','체계적으로 정리해봐요'],
+  '개':    ['진심이 통하는 하루','가족·친구와 함께 시간을','신뢰를 쌓아가는 날'],
+  '돼지':  ['풍요로운 마음가짐','나를 위한 작은 선물을','즐거움을 만끽해봐요']
+};
+function _getZodiacDailyTip(zodiacName, seed) {
+  const arr = FORTUNE_ZODIAC_TIPS[zodiacName] || FORTUNE_ZODIAC_TIPS['쥐'];
+  return arr[seed % arr.length];
+}
+
+// 📊 6가지 운세 지표 (건강·활력·집중·재물·관계·행운)
+const FORTUNE_METRICS_DEFS = [
+  { key: 'health', label: '건강', emoji: '💪' },
+  { key: 'energy', label: '활력', emoji: '⚡' },
+  { key: 'focus',  label: '집중', emoji: '🎯' },
+  { key: 'wealth', label: '재물', emoji: '💰' },
+  { key: 'love',   label: '관계', emoji: '💕' },
+  { key: 'luck',   label: '행운', emoji: '🍀' }
+];
+function _getFortuneMetrics(seed) {
+  return FORTUNE_METRICS_DEFS.map((m, i) => {
+    // 각 지표마다 다른 시드 조각 사용해서 다양성 확보
+    const s = (seed * (i + 3) + i * 17) >>> 0;
+    return { ...m, score: 45 + (s % 55) }; // 45~99
+  });
+}
+
 function _fortuneSeededPick(arr, seed) { return arr[seed % arr.length]; }
 function _fortuneTodaySeed() {
   const d = new Date();
@@ -11039,10 +11096,20 @@ function getTodayFortune() {
   const s = _fortuneTodaySeed();
   const condition = 60 + (s % 40); // 60~99
   const level = condition >= 90 ? '최상 ⭐' : condition >= 80 ? '좋음 😊' : condition >= 70 ? '보통 🙂' : condition >= 60 ? '주의 🤔' : '컨디션 관리';
+
+  // 🐉 띠 (생년월일 기반)
+  const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
+  const z = _getKoreanZodiac(p.birthYear);
+  const zodiacTodayTip = _getZodiacDailyTip(z.name, Math.floor(s / 29));
+
+  // 📊 6가지 지표 (건강·활력·집중·재물·관계·행운)
+  const metrics = _getFortuneMetrics(s);
+
   const fortune = {
     date: new Date().toDateString(),
-    condition,
-    level,
+    condition, level,
+    zodiac: { name: z.name, emoji: z.emoji, trait: z.trait, todayTip: zodiacTodayTip },
+    metrics,
     food: _fortuneSeededPick(FORTUNE_LUCKY_FOODS, s),
     color: _fortuneSeededPick(FORTUNE_COLORS, Math.floor(s/7)),
     activity: _fortuneSeededPick(FORTUNE_ACTIVITIES, Math.floor(s/13)),
@@ -11062,6 +11129,13 @@ function openFortune() {
   const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} · ${days[now.getDay()]}요일`;
   const condColor = f.condition >= 85 ? '#059669' : f.condition >= 70 ? '#EA580C' : '#DC2626';
 
+  // 별점 (컨디션 100점 만점을 5점으로 환산)
+  const starCount = Math.max(1, Math.min(5, Math.round(f.condition / 20)));
+  const starsHtml = '⭐'.repeat(starCount) + '<span style="opacity:.25">' + '⭐'.repeat(5 - starCount) + '</span>';
+
+  // 6지표 컬러
+  const metricColor = (score) => score >= 85 ? '#059669' : score >= 70 ? '#EA580C' : score >= 55 ? '#B45309' : '#DC2626';
+
   document.getElementById('fortuneContent').innerHTML = `
     <div style="background:linear-gradient(160deg,#FEF3C7 0%,#FCE7F3 100%);border-radius:22px;padding:24px 20px;margin:12px 0">
       <div style="text-align:center">
@@ -11070,11 +11144,39 @@ function openFortune() {
         <div style="font-size:22px;font-weight:900;color:#78350F;letter-spacing:-.5px">오늘의 건강 운세</div>
         ${name ? `<div style="font-size:12px;color:#78350F;font-weight:800;margin-top:4px">${escapeHtml(name)}님의 오늘</div>` : ''}
       </div>
-      <div style="background:rgba(255,255,255,.75);border-radius:18px;padding:18px;margin-top:18px;text-align:center">
+
+      ${f.zodiac ? `
+      <div style="background:linear-gradient(135deg,#FEF3C7,#FCE7F3);border:1.5px solid rgba(180,83,9,.3);border-radius:16px;padding:12px 16px;margin-top:14px;display:flex;align-items:center;gap:12px">
+        <div style="font-size:34px;line-height:1">${f.zodiac.emoji}</div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:#78350F;font-weight:900;letter-spacing:1px">${escapeHtml(f.zodiac.name)}띠의 오늘 · ${escapeHtml(f.zodiac.trait)}</div>
+          <div style="font-size:13.5px;color:#78350F;font-weight:900;margin-top:3px;letter-spacing:-.3px">${escapeHtml(f.zodiac.todayTip)}</div>
+        </div>
+      </div>
+      ` : ''}
+
+      <div style="background:rgba(255,255,255,.75);border-radius:18px;padding:18px;margin-top:14px;text-align:center">
         <div style="font-size:10px;color:#78350F;font-weight:900;letter-spacing:2px;margin-bottom:4px">TODAY'S CONDITION</div>
         <div style="font-size:56px;line-height:1;font-weight:900;color:${condColor};font-family:Georgia,serif">${f.condition}</div>
         <div style="font-size:13px;color:#78350F;font-weight:800;margin-top:4px">컨디션 · ${escapeHtml(f.level)}</div>
+        <div style="font-size:20px;line-height:1;letter-spacing:2px;margin-top:8px">${starsHtml}</div>
       </div>
+
+      ${f.metrics ? `
+      <div style="background:rgba(255,255,255,.75);border-radius:16px;padding:14px 12px;margin-top:14px">
+        <div style="font-size:10px;color:#78350F;font-weight:900;letter-spacing:1.5px;text-align:center;margin-bottom:10px">📊 오늘의 6가지 운세</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          ${f.metrics.map(m => `
+            <div style="background:rgba(255,255,255,.85);border-radius:12px;padding:10px 4px;text-align:center">
+              <div style="font-size:22px;line-height:1">${m.emoji}</div>
+              <div style="font-size:9.5px;color:#78350F;font-weight:900;margin-top:3px;letter-spacing:.3px">${escapeHtml(m.label)}</div>
+              <div style="font-size:15px;font-weight:900;color:${metricColor(m.score)};font-family:Georgia,serif;margin-top:2px">${m.score}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      ` : ''}
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
         <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:12px 10px;text-align:center">
           <div style="font-size:28px;line-height:1;margin-bottom:4px">${f.food.emoji}</div>
@@ -11598,71 +11700,76 @@ function renderStoryCardDOM(type, data) {
           <div style="font-size:11px;font-weight:800;margin-top:2px;opacity:.8">${escapeHtml(dateFullStr)}</div>
           <div style="display:inline-block;background:rgba(255,255,255,.85);border-radius:99px;padding:3px 10px;margin-top:6px;font-size:10px;font-weight:900;color:#B45309;letter-spacing:.5px">@건강어때 · 매일 무료</div>
         </div>
-        <div style="text-align:center;margin-top:10px">
-          <div style="font-size:58px;line-height:1;margin-bottom:3px">🔮</div>
-          <div style="font-size:20px;font-weight:900;letter-spacing:-.4px">오늘의 건강 운세</div>
-          ${userName ? `<div style="font-size:12.5px;font-weight:800;margin-top:2px;opacity:.85">${escapeHtml(userName)}님의 오늘</div>` : ''}
+        <div style="text-align:center;margin-top:8px">
+          <div style="font-size:48px;line-height:1;margin-bottom:2px">🔮</div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:-.4px">오늘의 건강 운세</div>
+          ${userName ? `<div style="font-size:11.5px;font-weight:800;margin-top:1px;opacity:.85">${escapeHtml(userName)}님의 오늘</div>` : ''}
         </div>
-        <div style="background:rgba(255,255,255,.9);border-radius:20px;padding:14px 16px;margin-top:10px;text-align:center;box-shadow:0 4px 14px rgba(120,53,15,.12)">
-          <div style="font-size:11px;font-weight:900;letter-spacing:2.5px;margin-bottom:2px">TODAY'S CONDITION</div>
-          <div style="font-size:78px;line-height:1;font-weight:900;color:${condColor};font-family:Georgia,serif;letter-spacing:-3px">${f.condition || 0}</div>
-          <div style="font-size:13.5px;font-weight:900;margin-top:1px">컨디션 · ${escapeHtml(f.level || '')}</div>
-          <div style="font-size:20px;line-height:1;letter-spacing:2px;margin-top:6px">${(() => {
+
+        ${f.zodiac ? `
+        <div style="background:rgba(255,255,255,.9);border:1.5px solid rgba(180,83,9,.3);border-radius:14px;padding:8px 12px;margin-top:8px;display:flex;align-items:center;gap:10px">
+          <div style="font-size:28px;line-height:1">${escapeHtml(f.zodiac.emoji)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:9.5px;font-weight:900;letter-spacing:.8px;opacity:.75">${escapeHtml(f.zodiac.name)}띠 · ${escapeHtml(f.zodiac.trait || '')}</div>
+            <div style="font-size:12.5px;font-weight:900;letter-spacing:-.3px;margin-top:1px">${escapeHtml(f.zodiac.todayTip || '')}</div>
+          </div>
+        </div>
+        ` : ''}
+
+        <div style="background:rgba(255,255,255,.9);border-radius:18px;padding:10px 14px;margin-top:8px;text-align:center;box-shadow:0 4px 14px rgba(120,53,15,.12)">
+          <div style="font-size:10px;font-weight:900;letter-spacing:2.5px;margin-bottom:1px">TODAY'S CONDITION</div>
+          <div style="font-size:62px;line-height:1;font-weight:900;color:${condColor};font-family:Georgia,serif;letter-spacing:-3px">${f.condition || 0}</div>
+          <div style="font-size:12.5px;font-weight:900;margin-top:1px">컨디션 · ${escapeHtml(f.level || '')}</div>
+          <div style="font-size:16px;line-height:1;letter-spacing:2px;margin-top:4px">${(() => {
             const cond = f.condition || 0;
             const stars = Math.round(cond / 20);
             return '⭐'.repeat(Math.max(1, Math.min(5, stars))) + '<span style="opacity:.25">' + '⭐'.repeat(Math.max(0, 5 - stars)) + '</span>';
           })()}</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px">
-          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:12px 8px;text-align:center">
-            <div style="font-size:32px;line-height:1;margin-bottom:4px">${f.food?.emoji || '🍽'}</div>
-            <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.8">럭키 음식</div>
-            <div style="font-size:14.5px;font-weight:900;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.food?.name || '-')}</div>
-          </div>
-          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:12px 8px;text-align:center">
-            <div style="font-size:32px;line-height:1;margin-bottom:4px">${f.color?.emoji || '🌈'}</div>
-            <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.8">럭키 컬러</div>
-            <div style="font-size:14.5px;font-weight:900;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.color?.name || '-')}</div>
-          </div>
-          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:12px 8px;text-align:center">
-            <div style="font-size:32px;line-height:1;margin-bottom:4px">${f.activity?.emoji || '💫'}</div>
-            <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.8">추천 활동</div>
-            <div style="font-size:14.5px;font-weight:900;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.activity?.name || '-')}</div>
-          </div>
-          <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:12px 8px;text-align:center">
-            <div style="font-size:32px;line-height:1;margin-bottom:4px">${f.avoid?.emoji || '⚠️'}</div>
-            <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.8">피해야 할 것</div>
-            <div style="font-size:14.5px;font-weight:900;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.avoid?.name || '-')}</div>
+
+        ${f.metrics && f.metrics.length ? `
+        <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:10px 10px;margin-top:8px">
+          <div style="font-size:9.5px;font-weight:900;letter-spacing:1.2px;text-align:center;margin-bottom:6px;opacity:.75">📊 오늘의 6가지 운세</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            ${f.metrics.map(m => {
+              const c = m.score >= 85 ? '#059669' : m.score >= 70 ? '#EA580C' : m.score >= 55 ? '#B45309' : '#DC2626';
+              return `
+              <div style="background:rgba(255,255,255,.9);border-radius:10px;padding:6px 3px;text-align:center">
+                <div style="font-size:18px;line-height:1">${m.emoji}</div>
+                <div style="font-size:8.5px;font-weight:900;margin-top:2px;letter-spacing:.3px">${escapeHtml(m.label)}</div>
+                <div style="font-size:13px;font-weight:900;color:${c};font-family:Georgia,serif;line-height:1;margin-top:1px">${m.score}</div>
+              </div>`;
+            }).join('')}
           </div>
         </div>
-        ${(() => {
-          // ⏰ 럭키 시간대 & 방향 (컨디션 기반 랜덤이지만 매일 같은 값)
-          const seed = (f.condition || 50) + (new Date().getDate());
-          const timeSlots = ['오전 9시-11시','오전 10시-정오','오후 1시-3시','오후 2시-4시','오후 4시-6시','오후 7시-9시','저녁 8시-10시'];
-          const directions = ['동쪽 🧭','서쪽 🧭','남쪽 🧭','북쪽 🧭','동남쪽 🧭','남서쪽 🧭'];
-          const luckyTime = timeSlots[seed % timeSlots.length];
-          const luckyDir = directions[seed % directions.length];
-          return `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px">
-          <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:9px 12px;display:flex;align-items:center;gap:8px">
-            <span style="font-size:20px">⏰</span>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:9px;font-weight:900;letter-spacing:1px;opacity:.7">럭키 시간</div>
-              <div style="font-size:11.5px;font-weight:900;letter-spacing:-.3px;margin-top:1px">${escapeHtml(luckyTime)}</div>
-            </div>
+        ` : ''}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px;margin-top:8px">
+          <div style="background:rgba(255,255,255,.9);border-radius:11px;padding:8px 4px;text-align:center">
+            <div style="font-size:22px;line-height:1">${f.food?.emoji || '🍽'}</div>
+            <div style="font-size:8px;font-weight:900;letter-spacing:.6px;opacity:.7;margin-top:2px">럭키 음식</div>
+            <div style="font-size:11px;font-weight:900;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.food?.name || '-')}</div>
           </div>
-          <div style="background:rgba(255,255,255,.85);border-radius:14px;padding:9px 12px;display:flex;align-items:center;gap:8px">
-            <span style="font-size:20px">🧭</span>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:9px;font-weight:900;letter-spacing:1px;opacity:.7">럭키 방향</div>
-              <div style="font-size:11.5px;font-weight:900;letter-spacing:-.3px;margin-top:1px">${escapeHtml(luckyDir.replace(' 🧭',''))}</div>
-            </div>
+          <div style="background:rgba(255,255,255,.9);border-radius:11px;padding:8px 4px;text-align:center">
+            <div style="font-size:22px;line-height:1">${f.color?.emoji || '🌈'}</div>
+            <div style="font-size:8px;font-weight:900;letter-spacing:.6px;opacity:.7;margin-top:2px">럭키 컬러</div>
+            <div style="font-size:11px;font-weight:900;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.color?.name || '-')}</div>
           </div>
-        </div>`;
-        })()}
-        <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:12px 15px;margin-top:10px">
-          <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.8;margin-bottom:4px">💌 오늘의 한 마디</div>
-          <div style="font-size:14px;font-weight:900;line-height:1.45;letter-spacing:-.3px">＂${escapeHtml(f.quote || '오늘도 응원해요')}＂</div>
+          <div style="background:rgba(255,255,255,.9);border-radius:11px;padding:8px 4px;text-align:center">
+            <div style="font-size:22px;line-height:1">${f.activity?.emoji || '💫'}</div>
+            <div style="font-size:8px;font-weight:900;letter-spacing:.6px;opacity:.7;margin-top:2px">추천 활동</div>
+            <div style="font-size:11px;font-weight:900;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.activity?.name || '-')}</div>
+          </div>
+          <div style="background:rgba(255,255,255,.9);border-radius:11px;padding:8px 4px;text-align:center">
+            <div style="font-size:22px;line-height:1">${f.avoid?.emoji || '⚠️'}</div>
+            <div style="font-size:8px;font-weight:900;letter-spacing:.6px;opacity:.7;margin-top:2px">피해야 할 것</div>
+            <div style="font-size:11px;font-weight:900;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.avoid?.name || '-')}</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(255,255,255,.9);border-radius:14px;padding:9px 13px;margin-top:8px">
+          <div style="font-size:10px;font-weight:900;letter-spacing:1.2px;opacity:.8;margin-bottom:2px">💌 오늘의 한 마디</div>
+          <div style="font-size:13px;font-weight:900;line-height:1.4;letter-spacing:-.3px">＂${escapeHtml(f.quote || '오늘도 응원해요')}＂</div>
         </div>
         <div style="margin-top:auto;padding-top:10px;border-top:1.5px dashed rgba(120,53,15,.3)">
           <div style="background:linear-gradient(135deg,#F59E0B,#EC4899);border-radius:14px;padding:10px 14px;margin-bottom:8px;text-align:center;box-shadow:0 4px 12px rgba(236,72,153,.3)">
