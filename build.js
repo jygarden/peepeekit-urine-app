@@ -77,7 +77,8 @@ async function build() {
             'sendChatMessage', 'sendSuggest', 'enterChat',
             'selectPet', 'selectGender', 'selectEnv', 'selectHumanGender', 'selectLifestyle',
             'formatPhone', 'goCapture', 'showAgePicker',
-            'saveNickname', 'closeReminder'
+            'saveNickname', 'closeReminder',
+            'openFortune', 'openFortuneResult', 'startFortuneDraw', 'shareFortuneStory'
           ]
         },
         format: {
