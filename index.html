@@ -11915,119 +11915,115 @@ function renderStoryCardDOM(type, data) {
     const dateFullStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} · ${daysKr[now.getDay()]}요일`;
     // 컨디션 원형 링 계산
     const condPct = (f.condition || 0);
-    const ringCirc = 2 * Math.PI * 50; // r=50
+    const ringCirc = 2 * Math.PI * 50;
     const ringOffset = ringCirc - (condPct / 100) * ringCirc;
     const starCount = Math.max(1, Math.min(5, Math.round(condPct / 20)));
 
     div.innerHTML = `
-      <div style="width:100%;height:100%;background:#FEFCF5;padding:36px 32px;display:flex;flex-direction:column;box-sizing:border-box;color:#3F2E1E;position:relative;overflow:hidden;font-family:-apple-system,'Apple SD Gothic Neo',sans-serif">
+      <div style="width:100%;height:100%;background:#FEFCF5;padding:26px 24px;display:flex;flex-direction:column;box-sizing:border-box;color:#3F2E1E;position:relative;overflow:hidden;font-family:-apple-system,'Apple SD Gothic Neo',sans-serif">
 
-        <!-- 매우 서브틀한 데코 (2개만) -->
-        <div style="position:absolute;top:70px;right:36px;font-size:11px;opacity:.28">✦</div>
-        <div style="position:absolute;bottom:280px;left:34px;font-size:11px;opacity:.28">✦</div>
+        <!-- 큰 데코 원 (앱 홈처럼 부드러운 배경) -->
+        <div style="position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(5,150,105,.08) 0%,transparent 70%)"></div>
+        <div style="position:absolute;bottom:-100px;left:-100px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(180,83,9,.05) 0%,transparent 70%)"></div>
 
-        <!-- 헤더 (미니멀) -->
-        <div style="text-align:center">
-          <div style="font-size:10px;font-weight:800;letter-spacing:3.5px;color:#8B6F47">TODAY'S FORTUNE</div>
-          <div style="width:24px;height:1px;background:#059669;margin:8px auto"></div>
-          <div style="font-size:11px;font-weight:700;color:#8B6F47;letter-spacing:.3px">${escapeHtml(dateFullStr)}</div>
+        <!-- 헤더 -->
+        <div style="text-align:center;position:relative;z-index:1">
+          <div style="font-size:11px;font-weight:900;letter-spacing:3px;color:#059669">TODAY'S FORTUNE</div>
+          <div style="width:28px;height:2px;background:#059669;margin:6px auto"></div>
+          <div style="font-size:12px;font-weight:700;color:#8B6F47">${escapeHtml(dateFullStr)}</div>
         </div>
 
-        <!-- 브랜드 명 -->
-        <div style="text-align:center;margin-top:20px">
-          <div style="font-size:22px;font-weight:900;letter-spacing:-.6px;color:#0F1F1A">오늘의 건강 운세</div>
-          ${userName ? `<div style="font-size:12.5px;font-weight:700;color:#8B6F47;margin-top:3px">${escapeHtml(userName)}님의 오늘</div>` : ''}
+        <!-- 브랜드 명 (제목) -->
+        <div style="text-align:center;margin-top:10px;position:relative;z-index:1">
+          <div style="font-size:26px;font-weight:900;letter-spacing:-.7px;color:#0F1F1A;line-height:1.15">오늘의 건강 운세</div>
+          ${userName ? `<div style="font-size:13.5px;font-weight:700;color:#8B6F47;margin-top:2px">${escapeHtml(userName)}님의 오늘</div>` : ''}
         </div>
 
-        <!-- 🔮 히어로: 원형 링 + 크리스탈 (Sage Green) -->
-        <div style="position:relative;text-align:center;margin-top:22px">
-          <svg width="200" height="200" viewBox="0 0 120 120" style="margin:0 auto;display:block">
-            <circle cx="60" cy="60" r="50" fill="none" stroke="#EDE4CB" stroke-width="3"/>
-            <circle cx="60" cy="60" r="50" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round"
+        <!-- 🔮 히어로: 큰 원형 링 + 크리스탈 (Sage Green) -->
+        <div style="position:relative;text-align:center;margin-top:14px;z-index:1">
+          <svg width="260" height="260" viewBox="0 0 120 120" style="margin:0 auto;display:block">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#EDE4CB" stroke-width="4"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#059669" stroke-width="4" stroke-linecap="round"
               stroke-dasharray="${ringCirc}" stroke-dashoffset="${ringOffset}"
               transform="rotate(-90 60 60)"/>
           </svg>
           <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center">
-            <div style="font-size:36px;line-height:1;margin-bottom:2px">🔮</div>
-            <div style="font-family:Georgia,serif;font-size:44px;line-height:1;font-weight:900;color:#0F1F1A;letter-spacing:-2px">${f.condition || 0}</div>
-            <div style="font-size:10px;font-weight:900;letter-spacing:1.5px;color:#8B6F47;margin-top:4px">${escapeHtml((f.level || '').replace(/[⭐😊🙂🤔]/g,'').trim())}</div>
+            <div style="font-size:54px;line-height:1;margin-bottom:2px">🔮</div>
+            <div style="font-family:Georgia,serif;font-size:64px;line-height:.95;font-weight:900;color:#0F1F1A;letter-spacing:-3px">${f.condition || 0}</div>
+            <div style="font-size:12px;font-weight:900;letter-spacing:1.5px;color:#8B6F47;margin-top:4px">${escapeHtml((f.level || '').replace(/[⭐😊🙂🤔]/g,'').trim())}</div>
           </div>
         </div>
 
         <!-- 별점 -->
-        <div style="text-align:center;margin-top:2px;font-size:14px;letter-spacing:3px">${
+        <div style="text-align:center;margin-top:-4px;font-size:22px;letter-spacing:4px;position:relative;z-index:1">${
           '⭐'.repeat(starCount) + '<span style="opacity:.22">' + '⭐'.repeat(5 - starCount) + '</span>'
         }</div>
 
         ${f.metrics && f.metrics.length ? `
-        <!-- 6가지 운세: 심플 라인 리스트 -->
-        <div style="margin-top:22px;padding:0 4px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <div style="flex:1;height:1px;background:#EDE4CB"></div>
-            <div style="font-size:9.5px;font-weight:900;letter-spacing:2.5px;color:#8B6F47">FORTUNE STATS</div>
-            <div style="flex:1;height:1px;background:#EDE4CB"></div>
+        <!-- 6가지 운세: 3x2 카드 그리드 (모두 정사각형에 가깝게) -->
+        <div style="margin-top:16px;position:relative;z-index:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="flex:1;height:1px;background:#E5D9BA"></div>
+            <div style="font-size:10.5px;font-weight:900;letter-spacing:2.5px;color:#059669">FORTUNE STATS</div>
+            <div style="flex:1;height:1px;background:#E5D9BA"></div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 18px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             ${f.metrics.map(m => {
-              const c = m.score >= 85 ? '#059669' : m.score >= 70 ? '#8B6F47' : m.score >= 55 ? '#B45309' : '#B45309';
+              const c = m.score >= 85 ? '#059669' : m.score >= 70 ? '#B45309' : m.score >= 55 ? '#B45309' : '#DC2626';
               return `
-              <div>
-                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
-                  <span style="font-size:12px;font-weight:800;letter-spacing:-.2px;color:#3F2E1E">${m.emoji} ${escapeHtml(m.label)}</span>
-                  <span style="font-family:Georgia,serif;font-size:15px;font-weight:900;color:${c};letter-spacing:-.5px">${m.score}</span>
-                </div>
-                <div style="height:2px;background:#EDE4CB;border-radius:2px;overflow:hidden">
-                  <div style="width:${m.score}%;height:100%;background:${c}"></div>
-                </div>
+              <div style="background:#FFFBEF;border:1px solid #F0E6C8;border-radius:14px;padding:10px 6px;text-align:center">
+                <div style="font-size:22px;line-height:1">${m.emoji}</div>
+                <div style="font-size:10.5px;font-weight:800;color:#8B6F47;letter-spacing:.3px;margin-top:3px">${escapeHtml(m.label)}</div>
+                <div style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:${c};letter-spacing:-.8px;line-height:1;margin-top:3px">${m.score}</div>
               </div>`;
             }).join('')}
           </div>
         </div>
         ` : ''}
 
-        <!-- 럭키 4개: 미니멀 라인 리스트 -->
-        <div style="margin-top:22px;padding:0 4px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <div style="flex:1;height:1px;background:#EDE4CB"></div>
-            <div style="font-size:9.5px;font-weight:900;letter-spacing:2.5px;color:#8B6F47">TODAY'S LUCKY</div>
-            <div style="flex:1;height:1px;background:#EDE4CB"></div>
+        <!-- 럭키 4개: 2x2 카드 그리드 (정사각형에 가깝게) -->
+        <div style="margin-top:16px;position:relative;z-index:1">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <div style="flex:1;height:1px;background:#E5D9BA"></div>
+            <div style="font-size:10.5px;font-weight:900;letter-spacing:2.5px;color:#059669">TODAY'S LUCKY</div>
+            <div style="flex:1;height:1px;background:#E5D9BA"></div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="font-size:26px;line-height:1;flex-shrink:0">${f.food?.emoji || '🍽'}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:#FFFBEF;border:1px solid #F0E6C8;border-radius:14px;padding:12px 10px;display:flex;align-items:center;gap:11px">
+              <div style="font-size:34px;line-height:1;flex-shrink:0">${f.food?.emoji || '🍽'}</div>
               <div style="flex:1;min-width:0">
-                <div style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#8B6F47">FOOD</div>
-                <div style="font-size:13px;font-weight:900;color:#0F1F1A;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.food?.name || '-')}</div>
+                <div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:#8B6F47">FOOD</div>
+                <div style="font-size:15px;font-weight:900;color:#0F1F1A;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.food?.name || '-')}</div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="font-size:26px;line-height:1;flex-shrink:0">${f.color?.emoji || '🌈'}</div>
+            <div style="background:#FFFBEF;border:1px solid #F0E6C8;border-radius:14px;padding:12px 10px;display:flex;align-items:center;gap:11px">
+              <div style="font-size:34px;line-height:1;flex-shrink:0">${f.color?.emoji || '🌈'}</div>
               <div style="flex:1;min-width:0">
-                <div style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#8B6F47">COLOR</div>
-                <div style="font-size:13px;font-weight:900;color:#0F1F1A;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.color?.name || '-')}</div>
+                <div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:#8B6F47">COLOR</div>
+                <div style="font-size:15px;font-weight:900;color:#0F1F1A;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.color?.name || '-')}</div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="font-size:26px;line-height:1;flex-shrink:0">${f.activity?.emoji || '💫'}</div>
+            <div style="background:#FFFBEF;border:1px solid #F0E6C8;border-radius:14px;padding:12px 10px;display:flex;align-items:center;gap:11px">
+              <div style="font-size:34px;line-height:1;flex-shrink:0">${f.activity?.emoji || '💫'}</div>
               <div style="flex:1;min-width:0">
-                <div style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#8B6F47">ACTIVITY</div>
-                <div style="font-size:13px;font-weight:900;color:#0F1F1A;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.activity?.name || '-')}</div>
+                <div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:#8B6F47">ACTIVITY</div>
+                <div style="font-size:15px;font-weight:900;color:#0F1F1A;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.activity?.name || '-')}</div>
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="font-size:26px;line-height:1;flex-shrink:0">${f.avoid?.emoji || '⚠️'}</div>
+            <div style="background:#FFFBEF;border:1px solid #F0E6C8;border-radius:14px;padding:12px 10px;display:flex;align-items:center;gap:11px">
+              <div style="font-size:34px;line-height:1;flex-shrink:0">${f.avoid?.emoji || '⚠️'}</div>
               <div style="flex:1;min-width:0">
-                <div style="font-size:9.5px;font-weight:800;letter-spacing:.5px;color:#8B6F47">AVOID</div>
-                <div style="font-size:13px;font-weight:900;color:#0F1F1A;margin-top:1px;letter-spacing:-.3px">${escapeHtml(f.avoid?.name || '-')}</div>
+                <div style="font-size:10px;font-weight:800;letter-spacing:.5px;color:#8B6F47">AVOID</div>
+                <div style="font-size:15px;font-weight:900;color:#0F1F1A;margin-top:2px;letter-spacing:-.3px">${escapeHtml(f.avoid?.name || '-')}</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- 오늘의 한 마디: 세리프 인용 -->
-        <div style="margin-top:22px;text-align:center;padding:0 12px">
-          <div style="font-family:Georgia,serif;font-size:44px;line-height:.5;color:#059669;opacity:.55;height:14px">"</div>
-          <div style="font-family:Georgia,serif;font-size:15px;font-style:italic;font-weight:500;line-height:1.5;color:#3F2E1E;margin-top:6px">${escapeHtml(f.quote || '오늘도 응원해요')}</div>
+        <div style="margin-top:16px;text-align:center;padding:14px 20px;background:linear-gradient(180deg,transparent,rgba(5,150,105,.05));border-top:1px solid #E5D9BA;position:relative;z-index:1">
+          <div style="font-family:Georgia,serif;font-size:56px;line-height:.4;color:#059669;opacity:.5;height:20px">"</div>
+          <div style="font-family:Georgia,serif;font-size:17px;font-style:italic;font-weight:500;line-height:1.5;color:#3F2E1E;margin-top:2px">${escapeHtml(f.quote || '오늘도 응원해요')}</div>
         </div>
         <div style="margin-top:auto;padding-top:10px;border-top:1.5px dashed rgba(120,53,15,.3)">
           <div style="background:linear-gradient(135deg,#F59E0B,#EC4899);border-radius:14px;padding:10px 14px;margin-bottom:8px;text-align:center;box-shadow:0 4px 12px rgba(236,72,153,.3)">
