@@ -10980,33 +10980,38 @@ function showKidsGrowthResult(height, weight, p) {
 // ════════════════════════════════════════════════════════════════
 
 // 스토리 카드 데이터 (타입별 다른 디자인)
-async function shareToInstagramStory(type, data) {
+async function shareToInstagramStory(type, data, customEl) {
   // 진행 표시
   const progress = document.createElement('div');
   progress.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:24px 32px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:100000;font-family:inherit;font-size:14px;font-weight:800';
   progress.textContent = '📸 스토리 카드 만드는 중...';
   document.body.appendChild(progress);
 
-  // 스토리 카드 DOM 생성 (화면 밖에)
-  const cardEl = renderStoryCardDOM(type, data);
-  document.body.appendChild(cardEl);
+  // 🆕 customEl 있으면 그 요소 직접 캡쳐 (앱 화면 그대로), 없으면 renderStoryCardDOM 사용
+  let cardEl;
+  const isCustom = !!customEl;
+  if (isCustom) {
+    cardEl = customEl;
+  } else {
+    cardEl = renderStoryCardDOM(type, data);
+    document.body.appendChild(cardEl);
+  }
 
   await new Promise(r => setTimeout(r, 100)); // 렌더링 대기
 
   let canvas;
   try {
-    canvas = await html2canvas(cardEl, {
-      scale: 2, useCORS: true,
-      backgroundColor: null, logging: false,
-      width: 540, height: 960
-    });
+    const opts = isCustom
+      ? { scale: 2, useCORS: true, backgroundColor: '#FEFCE8', logging: false }
+      : { scale: 2, useCORS: true, backgroundColor: null, logging: false, width: 540, height: 960 };
+    canvas = await html2canvas(cardEl, opts);
   } catch(e) {
     progress.remove();
-    cardEl.remove();
+    if (!isCustom) cardEl.remove();
     alert('스토리 카드 생성 실패: ' + e.message);
     return;
   }
-  cardEl.remove();
+  if (!isCustom) cardEl.remove();
 
   const dataUrl = canvas.toDataURL('image/png');
   const fileName = `건강어때_스토리_${_todayLocalKey()}.png`;
@@ -11431,10 +11436,32 @@ function openFortuneResult() {
   showScreen('screenFortune');
 }
 
-function shareFortuneStory() {
-  const f = getTodayFortune();
-  if (typeof shareToInstagramStory === 'function') {
-    shareToInstagramStory('fortune', f);
+// 🔮 오늘의 운세 · 앱 화면 그대로 인스타 공유 (renderStoryCardDOM 안 씀)
+async function shareFortuneStory() {
+  const el = document.getElementById('fortuneContent');
+  if (!el) return;
+
+  // 공유 버튼 임시 숨김 (캡쳐에 안 찍히게)
+  const shareBtn = el.querySelector('button[onclick*="shareFortuneStory"]');
+  const originalDisplay = shareBtn ? shareBtn.style.display : '';
+  if (shareBtn) shareBtn.style.display = 'none';
+
+  // 하단에 브랜드 배너 임시 추가 (앱스토어·플레이스토어 안내)
+  const banner = document.createElement('div');
+  banner.id = '_shareBottomBanner';
+  banner.style.cssText = 'margin:14px 0 4px;background:linear-gradient(135deg,#059669,#065F46);border-radius:16px;padding:14px 18px;text-align:center;color:#FFF;box-shadow:0 4px 14px rgba(5,150,105,.35)';
+  banner.innerHTML =
+    '<div style="font-size:15px;font-weight:900;letter-spacing:-.3px">🔮 나도 오늘 운세 뽑기</div>' +
+    '<div style="font-size:11px;font-weight:700;color:#D1FAE5;margin-top:3px">앱스토어 · 플레이스토어 \'건강어때\' 검색</div>';
+  // fortuneContent 내부 첫 자식(운세 카드 컨테이너) 안에 추가
+  const inner = el.firstElementChild || el;
+  inner.appendChild(banner);
+
+  try {
+    await shareToInstagramStory('fortune', getTodayFortune(), el);
+  } finally {
+    if (shareBtn) shareBtn.style.display = originalDisplay;
+    banner.remove();
   }
 }
 
