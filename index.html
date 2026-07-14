@@ -11146,16 +11146,55 @@ const FORTUNE_AVOIDS = [
   { emoji: '🛋️', name: '장시간 앉기' }, { emoji: '😤', name: '스트레스' }
 ];
 const FORTUNE_QUOTES = [
-  '작은 실천이 큰 변화를 만들어요',
-  '오늘도 나를 챙기는 하루',
-  '건강은 습관이 만들어요',
-  '한 걸음씩, 꾸준히',
-  '오늘 나에게 잘해줘요',
-  '느려도 괜찮아요, 방향이 중요해요',
-  '몸과 마음이 함께 건강해요',
-  '오늘의 나를 응원해요',
-  '작은 것부터 시작해요',
-  '내 몸이 보내는 신호에 귀 기울여요'
+  // 공감·현실 (짠한 위로)
+  '오늘 하루 살아낸 것만으로도 최고예요',
+  '완벽한 하루보다 나에게 다정한 하루',
+  '가끔은 아무것도 안 하는 게 최고의 관리',
+  '피곤한 나 자신도 좀 사랑해줘요',
+  '오늘 잠깐이라도 웃었으면 그거면 성공',
+  '뭐라도 해낸 나에게 박수 한 번',
+  '내 몸이 뭐라고 하는지 좀 들어봐요',
+  '완벽하지 않아도 오늘의 나로 충분해요',
+
+  // 유쾌·위트
+  '나는 나를 응원하는 유일한 팬이에요',
+  '오늘 내 몸: 잘 부탁드립니다 🙇',
+  '숨 쉬는 것도 사실 노동이에요',
+  '어제보다 1% 나으면 그거 대박이에요',
+  '커피 한 잔이 곧 건강 관리 아닐까요',
+  '갓생 살려 애쓰지 말고 그냥 살아요',
+  '오늘도 무사히 → 이게 진짜 승리',
+  '이불 밖은 위험하지만 나가야 살아요',
+
+  // 짧고 강렬 (인스타 감성)
+  '나답게, 오늘도',
+  '조급함 대신 여유',
+  '내 속도로 가면 돼',
+  '가끔 멈춰가는 것도 용기예요',
+  '오늘의 나에게 다정하게',
+  '있는 그대로의 나를',
+  '완벽하지 않아도 괜찮아',
+  '나를 아끼는 하루',
+
+  // 진지·감성 (스토리 감성)
+  '나를 돌보는 게 가장 큰 사랑',
+  '오늘의 컨디션이 내일의 나를 만들어요',
+  '조급함 없이, 지금 이 순간에',
+  '한 번 사는 인생, 나부터 아껴줘요',
+  '건강한 하루의 시작은 나에게 다정한 인사',
+  '내일의 나는 오늘의 내가 만들어요',
+  '스스로를 안아주는 하루',
+  '나에게 다정한 사람이 되어봐요',
+
+  // 계절·시간·상황
+  '오늘 이 순간, 온전히 나로',
+  '아침 햇살처럼 시작해봐요',
+  '저녁엔 나에게 편안함을 선물해요',
+  '숨 한 번 크게 쉬고 시작해요',
+  '작은 실천이 큰 변화의 시작',
+  '내 몸이 보내는 신호에 귀 기울여요',
+  '지금 이 자리에서 나를 응원해요',
+  '나를 위한 시간, 지금부터'
 ];
 
 // 🐉 12지 (쥐→돼지 순서, (year-4)%12로 인덱스 계산)
@@ -11227,9 +11266,57 @@ function _fortuneTodaySeed() {
   return seed;
 }
 
+// 🎯 오늘 운세 상황별 맞춤 한마디 (컨디션 점수 + 6지표 조합 기반)
+function _generateFortuneQuote(f) {
+  const cond = f.condition || 70;
+  const metrics = Array.isArray(f.metrics) ? f.metrics : [];
+  const best = metrics.length ? [...metrics].sort((a,b) => b.score - a.score)[0] : null;
+  const worst = metrics.length ? [...metrics].sort((a,b) => a.score - b.score)[0] : null;
+  const activityName = f.activity?.name || '';
+  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  // ═══ 컨디션 최상 (90+) ═══
+  if (cond >= 90) {
+    if (best?.key === 'energy')  return rand(['에너지 만렙! 오늘 뭐든 시작해봐요 🚀','활력 넘치는 하루, 이 기세로 쭉 달려요','오늘 뭐든 두 배 효과 각!']);
+    if (best?.key === 'wealth')  return rand(['재물운 대박, 지갑이 든든해질 하루 💰','오늘 뜻밖의 소식이 들려올 수도!','작은 지출도 큰 이득으로 돌아와요']);
+    if (best?.key === 'love')    return rand(['관계운 활짝, 오늘 안부 인사 어때요 💕','좋은 사람과의 인연이 이어지는 날','따뜻한 한 마디가 큰 힘이 되는 하루']);
+    if (best?.key === 'luck')    return rand(['행운이 나를 따라오는 하루 🍀','오늘 하는 일마다 술술 풀려요','평소보다 좋은 일이 많이 생길 예감']);
+    if (best?.key === 'health')  return rand(['몸 컨디션 최상, 운동 두 배 효과!','오늘 내 몸이 나한테 감사하는 날 💪','활력 폭발, 뭐든 도전해볼 각']);
+    if (best?.key === 'focus')   return rand(['집중력 만점, 미뤄둔 일 끝낼 찬스 🎯','오늘 한 번에 큰 일 해낼 수 있어요','머리가 맑아지는 최고의 컨디션']);
+    return rand(['컨디션 최상, 오늘 뭐 하든 잘 될 거예요 ✨','오늘 하늘이 나를 응원하는 날 🌟','완벽에 가까운 하루, 마음껏 즐겨요']);
+  }
+
+  // ═══ 좋음 (75-89) ═══
+  if (cond >= 75) {
+    if (worst?.key === 'love'   && worst.score < 60) return rand(['관계는 살짝 삐그덕, 오늘은 나에게 집중해요','인간관계 스트레스는 잠시 내려놔요','오늘은 혼자만의 시간도 나쁘지 않아요']);
+    if (worst?.key === 'wealth' && worst.score < 60) return rand(['지출 조심하는 하루, 커피는 참아봐요 ☕','오늘은 지갑 열지 않는 게 이득','가벼운 소비만 딱, 나머지는 내일로']);
+    if (worst?.key === 'focus'  && worst.score < 60) return rand(['집중이 잘 안되면 짧게 끊어서 해봐요','오늘은 완벽보다 완료가 답','머리가 좀 무거워도 괜찮아요']);
+    if (best?.key === 'energy')  return rand(['활력 넘치는 하루, 이 기세로 쭉!','에너지 좋을 때 몰아서 해봐요','오늘 나 진짜 잘 굴러가는 중']);
+    if (activityName)             return `${activityName} 어때요? 오늘 딱 맞는 활동이에요`;
+    return rand(['오늘도 나쁘지 않은 하루, 이 페이스 좋아요','평온한 하루가 최고의 하루','흐름 타는 중, 이대로 유지 각']);
+  }
+
+  // ═══ 보통 (60-74) ═══
+  if (cond >= 60) {
+    if (worst?.key === 'health' && worst.score < 55) return rand(['몸이 무거우면 오늘은 좀 쉬어가요 😴','오늘 무리하면 내일 더 힘들어요','물 한 잔이라도 챙기고 시작해요']);
+    if (worst?.key === 'focus'  && worst.score < 55) return rand(['집중이 어려운 날, 짧게 나눠서 해봐요','오늘은 큰 일보다 정리 정돈하는 날','머리 안 돌아가면 잠깐 산책 어때요']);
+    if (worst?.key === 'love'   && worst.score < 55) return rand(['관계 스트레스는 잠시 내려놓고 나만 챙겨요','오늘은 소통보다 나만의 시간','SNS 좀 덜 보는 하루도 나쁘지 않아요']);
+    if (best?.key === 'luck')    return rand(['컨디션은 보통이지만 행운이 따라와요 🍀','오늘 뜻밖의 좋은 일이 생길 수 있어요','평범한 하루에 소소한 반짝임이 있어요']);
+    if (activityName)             return rand([`오늘은 ${activityName}으로 리셋해봐요`,`${activityName}이 딱 필요한 하루예요`]);
+    return rand(['보통의 하루도 나쁘지 않아요, 소소하게 지나가요','완벽하지 않아도 오늘의 나로 충분해요','평온함이 최고의 축복이에요']);
+  }
+
+  // ═══ 낮음 (60 미만) ═══
+  if (worst?.key === 'health') return rand(['몸이 힘든 신호, 오늘은 무리하지 말아요 🙏','오늘은 나에게 관대해지는 날','따뜻한 물 한 잔부터 시작해요']);
+  if (worst?.key === 'love')   return rand(['관계 스트레스는 잠시 내려놓고 나만 챙겨요','오늘은 혼자만의 시간이 약이에요','내가 나를 안아주는 하루']);
+  if (worst?.key === 'wealth') return rand(['오늘은 지갑 꼭 닫고, 마음은 활짝','작은 지출도 오늘은 참는 게 답','오늘 안 쓴 만큼 내일이 든든해져요']);
+  if (cond < 50)               return rand(['오늘은 나에게 관대해지는 날, 푹 쉬어요','완벽한 하루가 아니어도 괜찮아요','오늘 살아낸 것만으로도 대단해요']);
+  return rand(['조금 아쉬운 하루지만 내일이 있잖아요 🌿','피곤한 나 자신도 좀 사랑해줘요','오늘 하루 무사히, 그거면 충분']);
+}
+
 function getTodayFortune() {
-  // 🔄 캐시 키 v2 (zodiac·metrics 필드 포함) — 옛날 캐시 자동 무효화
-  const cacheKey = 'todayFortune_v2_' + new Date().toDateString();
+  // 🔄 캐시 키 v4 (quote 상황별 맞춤 생성) — 옛날 캐시 자동 무효화
+  const cacheKey = 'todayFortune_v4_' + new Date().toDateString();
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     try {
@@ -11240,10 +11327,10 @@ function getTodayFortune() {
       }
     } catch(e) {}
   }
-  // 옛 v1 캐시도 정리 (localStorage 절약)
+  // 옛 캐시(v1~v3) 정리 (localStorage 절약)
   try {
     Object.keys(localStorage).forEach(k => {
-      if (k.startsWith('todayFortune_') && !k.startsWith('todayFortune_v2_')) localStorage.removeItem(k);
+      if (k.startsWith('todayFortune_') && !k.startsWith('todayFortune_v4_')) localStorage.removeItem(k);
     });
   } catch(e) {}
 
@@ -11267,9 +11354,11 @@ function getTodayFortune() {
     food: _fortuneSeededPick(FORTUNE_LUCKY_FOODS, s),
     color: _fortuneSeededPick(FORTUNE_COLORS, Math.floor(s/7)),
     activity: _fortuneSeededPick(FORTUNE_ACTIVITIES, Math.floor(s/13)),
-    avoid: _fortuneSeededPick(FORTUNE_AVOIDS, Math.floor(s/17)),
-    quote: _fortuneSeededPick(FORTUNE_QUOTES, Math.floor(s/23))
+    avoid: _fortuneSeededPick(FORTUNE_AVOIDS, Math.floor(s/17))
   };
+  // 🎯 상황별 맞춤 한마디 (컨디션·6지표·활동 조합 기반)
+  fortune.quote = _generateFortuneQuote(fortune);
+
   localStorage.setItem(cacheKey, JSON.stringify(fortune));
   return fortune;
 }
