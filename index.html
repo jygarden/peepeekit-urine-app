@@ -2405,37 +2405,18 @@
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
-  <!-- ════════════ 사람 폼 화면 ════════════ -->
-  <div class="screen" id="screenHumanForm">
-    <div class="page-header">
-      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
-      <div class="page-title">🧑 내 건강 체크</div>
-    </div>
-
-    <div class="step-indicator">
-      <div class="step-dot active"></div>
-      <div class="step-dot"></div>
-      <div class="step-dot"></div>
-    </div>
-
-    <div class="section-title">🧑 본인 정보</div>
-    <!-- 저장된 프로필 배너 (식단 분석과 동일 스타일) -->
+  <!-- ════════════ 사람 폼 화면 (제거됨 · hidden 필드만 유지) ════════════ -->
+  <div class="screen" id="screenHumanForm" style="display:none !important">
     <div id="humanProfileBanner"></div>
-    <!-- 백업용 hidden 필드 (저장된 프로필에서 자동 채움) -->
     <input type="hidden" id="humanName"/>
     <input type="hidden" id="humanBirthYear"/>
     <input type="hidden" id="humanBirthMonth"/>
     <input type="hidden" id="hGenderMale" value=""/>
     <input type="hidden" id="hGenderFemale" value=""/>
-
-    <!-- 백업용 hidden 필드 (프로필에서 자동 조회 · 사용자에게 안 보임) -->
     <input type="hidden" id="humanRegion" value=""/>
     <input type="hidden" id="humanContact"/>
     <input type="checkbox" id="humanConsentMarketing" style="display:none" checked/>
     <input type="checkbox" id="humanConsentPrivacy" style="display:none" checked/>
-
-    <button class="btn-primary" onclick="goCapture('human')">다음 — 사진 촬영 →</button>
-    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
   <!-- ════════════ 🔮 오늘의 운세 화면 ════════════ -->
@@ -3483,6 +3464,22 @@
           <button id="apGenderM" class="meal-time-btn" onclick="apSelectGender('male')">🧑 남</button>
           <button id="apGenderF" class="meal-time-btn" onclick="apSelectGender('female')">👩 여</button>
         </div>
+      </div>
+
+      <!-- 키·몸무게 (본인·성인만 노출) -->
+      <div class="field" id="apBodyField" style="display:none">
+        <label>키 · 몸무게 (선택)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <input type="number" id="apHeight" placeholder="키" min="30" max="230" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">cm</div>
+          </div>
+          <div>
+            <input type="number" id="apWeight" placeholder="몸무게" min="1" max="300" step="0.1" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">kg</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#94A3B8;margin-top:4px">식단 분석 시 BMI·권장 칼로리 계산에 사용됩니다</div>
       </div>
 
       <div class="field">
@@ -4932,14 +4929,9 @@ function addNewProfileFlow() {
     document.querySelectorAll('#screenPetForm .active').forEach(el => el.classList.remove('active'));
     showScreen('screenPetForm');
   } else {
-    document.getElementById('humanName').value = '';
-    document.getElementById('humanBirthYear').value = '';
-    document.getElementById('humanBirthMonth').value = '';
-    document.getElementById('humanRegion').value = '';
-    document.getElementById('humanContact').value = '';
-    humanGender = null; humanLifestyle = null;
-    document.querySelectorAll('#screenHumanForm .active').forEach(el => el.classList.remove('active'));
-    showScreen('screenHumanForm');
+    // 🚀 인체용은 폼 화면 삭제됨 → 바로 촬영 화면
+    // (개인 프로필 v2에 정보 이미 있음 · enterHuman에서 hidden 필드 채움)
+    goCapture('human');
   }
 }
 
@@ -8520,9 +8512,13 @@ async function downloadFoodResult() {
   } catch(e) { alert('저장 중 오류: ' + e.message); }
 }
 
-// 촬영 화면에서 뒤로
+// 촬영 화면에서 뒤로 (인체는 홈으로, 반려동물은 프로필 폼으로)
 function backToForm() {
-  showScreen(subjectMode === 'human' ? 'screenHumanForm' : 'screenPetForm');
+  if (subjectMode === 'human') {
+    goHome();
+  } else {
+    showScreen('screenPetForm');
+  }
 }
 
 // ══════════════════════════════════════
@@ -13645,6 +13641,19 @@ function editFamilyProfileFromManager(id) {
   const monthsInput = document.getElementById('apAgeMonths');
   if (monthsInput) monthsInput.value = p.ageMonths != null ? p.ageMonths : '';
   document.getElementById('apAllergies').value = (p.allergies || []).join(', ');
+  // 🆕 키·몸무게 로드 (adult 타입, v2 프로필 fallback)
+  try {
+    const heightInput = document.getElementById('apHeight');
+    const weightInput = document.getElementById('apWeight');
+    let h = p.height, w = p.weight;
+    if (_apType === 'adult' && (!h || !w)) {
+      const v2 = JSON.parse(localStorage.getItem('userProfileV2') || '{}');
+      if (!h && v2.height) h = v2.height;
+      if (!w && v2.weight) w = v2.weight;
+    }
+    if (heightInput) heightInput.value = h != null ? h : '';
+    if (weightInput) weightInput.value = w != null ? w : '';
+  } catch(e) {}
   apSelectType(_apType);
   // 저장된 이모지 다시 선택 표시
   const grid = document.getElementById('apEmojiGrid');
@@ -13742,6 +13751,10 @@ function goAddProfile() {
   const monthsInput = document.getElementById('apAgeMonths');
   if (monthsInput) monthsInput.value = '';
   document.getElementById('apAllergies').value = '';
+  const heightInput = document.getElementById('apHeight');
+  const weightInput = document.getElementById('apWeight');
+  if (heightInput) heightInput.value = '';
+  if (weightInput) weightInput.value = '';
   apSelectType('adult');
   showScreen('screenAddProfile');
 }
@@ -13763,6 +13776,9 @@ function apSelectType(type) {
   }
   // 아이 유형이면 개월 필드 표시
   document.getElementById('apAgeMonthsWrap').style.display = type === 'kid' ? 'block' : 'none';
+  // 본인·성인이면 키·몸무게 표시
+  const bodyField = document.getElementById('apBodyField');
+  if (bodyField) bodyField.style.display = type === 'adult' ? 'block' : 'none';
   // 반려동물이면 성별 숨김·유지
 }
 
@@ -13870,14 +13886,30 @@ function saveNewProfile() {
   const allergiesRaw = document.getElementById('apAllergies').value.trim();
   const allergies = allergiesRaw ? allergiesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
 
+  // 🆕 키·몸무게 (adult 타입만)
+  const heightVal = document.getElementById('apHeight')?.value.trim();
+  const weightVal = document.getElementById('apWeight')?.value.trim();
+  const height = _apType === 'adult' && heightVal ? parseFloat(heightVal) : null;
+  const weight = _apType === 'adult' && weightVal ? parseFloat(weightVal) : null;
+
   const data = {
     name, type: _apType, ageYears, ageMonths, gender: _apGender,
     emoji: _apEmoji, allergies,
-    photo: _apPhotoDataUrl || null
+    photo: _apPhotoDataUrl || null,
+    height, weight
   };
 
   if (_apEditingId) {
     updateFamilyProfile(_apEditingId, data);
+    // 🆕 본인(main·adult) 프로필 수정 시 개인 프로필(v2)에도 동기화
+    if (_apType === 'adult' && (height || weight)) {
+      try {
+        const v2 = JSON.parse(localStorage.getItem('userProfileV2') || '{}');
+        if (height) v2.height = height;
+        if (weight) v2.weight = weight;
+        localStorage.setItem('userProfileV2', JSON.stringify(v2));
+      } catch(e) {}
+    }
     if (typeof showPointToast === 'function') showPointToast(`✏️ ${name} 프로필 수정됨`);
   } else {
     const newId = addFamilyProfile(data);
