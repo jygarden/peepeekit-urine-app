@@ -2395,31 +2395,8 @@
       </div>
     </div>
 
-    <div class="section-title">🏠 생활 환경</div>
-    <div class="card">
-      <div class="field">
-        <label>사는 지역</label>
-        <select id="region">
-          <option value="">지역 선택</option>
-          <option>서울</option><option>경기</option><option>인천</option>
-          <option>부산</option><option>대구</option><option>광주</option>
-          <option>대전</option><option>울산</option><option>세종</option>
-          <option>강원</option><option>충북</option><option>충남</option>
-          <option>전북</option><option>전남</option><option>경북</option>
-          <option>경남</option><option>제주</option><option>기타</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>생활 환경</label>
-        <div class="env-row" style="margin-bottom:0">
-          <button class="env-btn" id="envIndoor" onclick="selectEnv('실내')">🏠<span>실내</span></button>
-          <button class="env-btn" id="envOutdoor" onclick="selectEnv('실외')">🌳<span>실외</span></button>
-          <button class="env-btn" id="envMixed" onclick="selectEnv('실내+실외')">🔄<span>실내+실외</span></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 백업용 hidden 필드 (기존 로직 호환) -->
+    <!-- 백업용 hidden 필드 (프로필에서 자동 조회) -->
+    <input type="hidden" id="region" value=""/>
     <input type="hidden" id="petContact"/>
     <input type="checkbox" id="petConsentMarketing" style="display:none" checked/>
     <input type="checkbox" id="petConsentPrivacy" style="display:none" checked/>
@@ -2451,32 +2428,8 @@
     <input type="hidden" id="hGenderMale" value=""/>
     <input type="hidden" id="hGenderFemale" value=""/>
 
-    <div class="section-title">🏠 생활 패턴</div>
-    <div class="card">
-      <div class="field">
-        <label>사는 지역</label>
-        <select id="humanRegion">
-          <option value="">지역 선택</option>
-          <option>서울</option><option>경기</option><option>인천</option>
-          <option>부산</option><option>대구</option><option>광주</option>
-          <option>대전</option><option>울산</option><option>세종</option>
-          <option>강원</option><option>충북</option><option>충남</option>
-          <option>전북</option><option>전남</option><option>경북</option>
-          <option>경남</option><option>제주</option><option>기타</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>평소 활동량</label>
-        <div class="env-row" style="margin-bottom:0;flex-wrap:wrap">
-          <button class="env-btn" id="lsSedentary" onclick="selectLifestyle('sedentary')">💺<span>좌식·사무</span></button>
-          <button class="env-btn" id="lsMixed" onclick="selectLifestyle('mixed')">🚶<span>보통</span></button>
-          <button class="env-btn" id="lsActive" onclick="selectLifestyle('active')">🏃<span>활동적</span></button>
-          <button class="env-btn" id="lsShift" onclick="selectLifestyle('shift')">🌙<span>교대·불규칙</span></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 백업용 hidden 필드 (기존 로직 호환) -->
+    <!-- 백업용 hidden 필드 (프로필에서 자동 조회 · 사용자에게 안 보임) -->
+    <input type="hidden" id="humanRegion" value=""/>
     <input type="hidden" id="humanContact"/>
     <input type="checkbox" id="humanConsentMarketing" style="display:none" checked/>
     <input type="checkbox" id="humanConsentPrivacy" style="display:none" checked/>
@@ -2938,7 +2891,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>제미나이 AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -5036,12 +4989,17 @@ function enterPet() {
   }
 }
 function enterHuman() {
-  // 🔀 활성 프로필이 아이면 아이 건강 체크 화면으로
+  // 🔀 활성 프로필이 아이면 아이 건강 체크 화면으로 (kid 기능 제거로 실행 안 됨)
   try {
     const active = getActiveProfile();
     if (active && active.type === 'kid') { enterKidsCheck(); return; }
   } catch(e) {}
   subjectMode = 'human';
+  // 🆕 개인 프로필의 lifestyle 자동 로드 (사용자에게 안 보이지만 결과 해석에 사용)
+  try {
+    const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
+    if (p.lifestyle) humanLifestyle = p.lifestyle;
+  } catch(e) {}
   const profiles = getProfiles().filter(p => p.type === 'human');
   if (profiles.length === 0) {
     addNewProfileFlow();
