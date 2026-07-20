@@ -2112,8 +2112,8 @@
 
       </div>
 
-      <!-- 👶 우리 아이 전용 카드 -->
-      <button class="home-card-kids" onclick="enterKidsSection()">
+      <!-- 👶 우리 아이 전용 카드 (아이 프로필 제거로 인해 hidden) -->
+      <button class="home-card-kids" onclick="enterKidsSection()" style="display:none">
         <span class="card-new-badge">NEW</span>
         <div class="card-orb-kids">👶</div>
         <div class="hkc-info">
@@ -3415,9 +3415,8 @@
     <div class="card">
       <div class="field">
         <label>어떤 유형인가요?</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <button id="apTypeAdult" class="meal-time-btn active" onclick="apSelectType('adult')">🧑<br>본인·가족</button>
-          <button id="apTypeKid" class="meal-time-btn" onclick="apSelectType('kid')">👶<br>아이</button>
           <button id="apTypePet" class="meal-time-btn" onclick="apSelectType('pet')">🐶<br>반려동물</button>
         </div>
       </div>
@@ -3511,6 +3510,17 @@
     <div class="card" style="padding:14px 16px;margin-top:12px">
       <label style="font-size:12px;font-weight:700;color:#374151">기타 (직접 입력, 쉼표로 구분)</label>
       <input type="text" id="allergyCustomInput" placeholder="예: 코코넛, 참깨, 셀러리" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:13px;margin-top:6px;font-family:inherit"/>
+    </div>
+
+    <!-- 👨‍👩‍👧 가족 알레르기 (아이·배우자 등 함께 관리) -->
+    <div class="card" style="padding:16px;margin-top:16px;background:#FEFCF5;border:1px solid #F0E6C8">
+      <div style="font-size:12.5px;font-weight:800;color:#065F46;margin-bottom:6px;letter-spacing:-.2px">👨‍👩‍👧 가족 알레르기 (선택)</div>
+      <div style="font-size:10.5px;color:#65756B;line-height:1.5;margin-bottom:10px">
+        아이·배우자 등 가족의 알레르기를 함께 등록하면 성분 분석 시 자동 크로스체크됩니다.
+      </div>
+      <div id="familyAllergyChipGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+      <label style="font-size:11px;font-weight:700;color:#374151">기타 가족 알레르기</label>
+      <input type="text" id="familyAllergyCustomInput" placeholder="예: 우유(아이), 견과류(남편)" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #E5D9BA;font-size:12.5px;margin-top:5px;font-family:inherit;box-sizing:border-box"/>
     </div>
 
     <button onclick="saveAllergyProfile()" style="width:100%;margin-top:16px;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(239,68,68,.4);letter-spacing:-.3px">
@@ -10347,17 +10357,29 @@ function hasAllergyProfile() {
 }
 
 function openAllergyProfile() {
-  const profile = getAllergyProfile() || { selected:[], custom:'' };
+  const profile = getAllergyProfile() || { selected:[], custom:'', familySelected:[], familyCustom:'' };
   const grid = document.getElementById('allergyChipGrid');
+  const familyGrid = document.getElementById('familyAllergyChipGrid');
   if (!grid) return;
 
+  // 본인 알레르기 (data-scope="me")
   grid.innerHTML = ALLERGY_LIST.map(a => {
     const selected = profile.selected?.includes(a.name);
-    return `<button class="allergy-chip ${selected ? 'selected' : ''}" onclick="toggleAllergy('${escapeHtml(a.name)}', this)">${escapeHtml(a.name)}</button>`;
+    return `<button class="allergy-chip ${selected ? 'selected' : ''}" data-scope="me" onclick="toggleAllergy('${escapeHtml(a.name)}', this)">${escapeHtml(a.name)}</button>`;
   }).join('');
+
+  // 가족 알레르기 (data-scope="family")
+  if (familyGrid) {
+    familyGrid.innerHTML = ALLERGY_LIST.map(a => {
+      const selected = profile.familySelected?.includes(a.name);
+      return `<button class="allergy-chip ${selected ? 'selected' : ''}" data-scope="family" onclick="toggleAllergy('${escapeHtml(a.name)}', this)">${escapeHtml(a.name)}</button>`;
+    }).join('');
+  }
 
   const customInput = document.getElementById('allergyCustomInput');
   if (customInput) customInput.value = profile.custom || '';
+  const familyCustomInput = document.getElementById('familyAllergyCustomInput');
+  if (familyCustomInput) familyCustomInput.value = profile.familyCustom || '';
 
   showScreen('screenAllergyProfile');
 }
@@ -10367,18 +10389,33 @@ function toggleAllergy(name, btn) {
 }
 
 function saveAllergyProfile() {
+  // 본인 알레르기
   const selected = [];
-  document.querySelectorAll('.allergy-chip.selected').forEach(el => {
+  document.querySelectorAll('.allergy-chip.selected[data-scope="me"]').forEach(el => {
     const text = el.textContent.trim().replace(/^✓\s*/, '');
     if (text) selected.push(text);
   });
   const custom = document.getElementById('allergyCustomInput').value.trim();
-  const profile = { selected, custom, updated: new Date().toISOString() };
+
+  // 가족 알레르기 (아이·배우자)
+  const familySelected = [];
+  document.querySelectorAll('.allergy-chip.selected[data-scope="family"]').forEach(el => {
+    const text = el.textContent.trim().replace(/^✓\s*/, '');
+    if (text) familySelected.push(text);
+  });
+  const familyCustomInput = document.getElementById('familyAllergyCustomInput');
+  const familyCustom = familyCustomInput ? familyCustomInput.value.trim() : '';
+
+  const profile = { selected, custom, familySelected, familyCustom, updated: new Date().toISOString() };
   saveAllergyProfileToStorage(profile);
 
-  const total = selected.length + (custom ? custom.split(',').filter(s => s.trim()).length : 0);
-  if (typeof showPointToast === 'function') showPointToast(`✅ 알레르기 ${total}개 저장됨`);
-  else alert(`알레르기 ${total}개가 저장됐어요!`);
+  const meTotal = selected.length + (custom ? custom.split(',').filter(s => s.trim()).length : 0);
+  const famTotal = familySelected.length + (familyCustom ? familyCustom.split(',').filter(s => s.trim()).length : 0);
+  const msg = famTotal > 0
+    ? `✅ 본인 ${meTotal}개 · 가족 ${famTotal}개 저장됨`
+    : `✅ 알레르기 ${meTotal}개 저장됨`;
+  if (typeof showPointToast === 'function') showPointToast(msg);
+  else alert(msg);
   goHome();
 }
 
@@ -10450,6 +10487,10 @@ function getFamilyProfiles() {
     if (Array.isArray(list)) return list;
   } catch(e) {}
   return [];
+}
+// 🆕 UI 표시용 (kid 프로필 제외 · Me + Pet만)
+function getVisibleProfiles() {
+  return getFamilyProfiles().filter(p => p && p.type !== 'kid');
 }
 function saveFamilyProfiles(list) {
   localStorage.setItem(FAMILY_KEY, JSON.stringify(list));
@@ -10718,10 +10759,10 @@ function renderHomeProfileSection() {
   // 3) 홈 카드 4개 제목·설명 개인화
   updateHomeCardsByProfile(active);
 
-  // 4) 가족 아바타 그리드 (홈 프로필 섹션)
+  // 4) 가족 아바타 그리드 (홈 프로필 섹션) — kid 프로필 제외
   const el = document.getElementById('homeProfileSection');
   if (el) {
-    const profiles = getFamilyProfiles();
+    const profiles = getVisibleProfiles();
     const avatarsHtml = profiles.map(p => `
       <button class="family-avatar ${p.id === active.id ? 'active' : ''}" onclick="switchProfile('${p.id}')">
         <div class="fa-circle" style="${p.photo ? `background:url('${p.photo}') center/cover;` : `background:${profileAvatarBg(p.type)};`}">${p.photo ? '' : (p.emoji || '🧑')}</div>
@@ -13438,22 +13479,10 @@ function enterKidsSection() {
   }
 }
 
-// KIDS 카드 → 아이 프로필 없을 때만 등록 유도용으로 표시
+// KIDS 카드 → 아이 프로필 기능 제거로 인해 항상 hidden
 function renderKidsCard() {
   const cardEl = document.querySelector('.home-card-kids');
-  const titleEl = document.getElementById('kidsCardTitle');
-  const subEl = document.getElementById('kidsCardSub');
-  if (!titleEl || !subEl || !cardEl) return;
-
-  const kids = getFamilyProfiles().filter(p => p.type === 'kid');
-  // 이미 아이가 있으면 카드 숨김 (가족 아바타에서 선택 가능하므로 중복)
-  if (kids.length > 0) {
-    cardEl.style.display = 'none';
-    return;
-  }
-  cardEl.style.display = '';
-  titleEl.textContent = '우리 아이 등록하기';
-  subEl.textContent = '연령별 식단·성분·알레르기 관리';
+  if (cardEl) cardEl.style.display = 'none';
 }
 
 // 활성 프로필 기반 홈 카드 개인화 (제목·라벨·이모지·표시 여부)
@@ -13522,7 +13551,7 @@ function openProfileSwitcher() {
   const modal = document.getElementById('profileSwitcherModal');
   const list = document.getElementById('psmProfileList');
   if (!modal || !list) return;
-  const profiles = getFamilyProfiles();
+  const profiles = getVisibleProfiles();
   const activeId = getActiveProfileId();
   list.innerHTML = profiles.map(p => `
     <button class="psm-item ${p.id === activeId ? 'active' : ''}" onclick="switchProfile('${p.id}');closeProfileSwitcher()">
@@ -13541,12 +13570,12 @@ function closeProfileSwitcher() {
   if (modal) modal.classList.remove('show');
 }
 
-// ✎ 프로필 관리 모달 (편집·삭제)
+// ✎ 프로필 관리 모달 (편집·삭제) — kid 프로필 제외
 function openProfileManager() {
   const modal = document.getElementById('profileManagerModal');
   const list = document.getElementById('pmProfileList');
   if (!modal || !list) return;
-  const profiles = getFamilyProfiles();
+  const profiles = getVisibleProfiles();
   if (profiles.length === 0) {
     alert('아직 저장된 프로필이 없어요.\n\'+ 새 프로필 추가\'로 먼저 만들어주세요.');
     return;
@@ -13617,7 +13646,7 @@ function editFamilyProfileFromManager(id) {
   showScreen('screenAddProfile');
 }
 function confirmDeleteFamilyProfile(id, name) {
-  const profiles = getFamilyProfiles();
+  const profiles = getVisibleProfiles();
   if (profiles.length <= 1) {
     alert('마지막 프로필은 삭제할 수 없어요.\n먼저 새 프로필을 추가해주세요.');
     return;
