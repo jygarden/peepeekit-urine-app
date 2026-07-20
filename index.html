@@ -2101,6 +2101,15 @@
           <div class="card-meta" id="ingredientLastInfo">약 20초</div>
         </button>
 
+        <!-- 💊 영양제 관리 (NEW) -->
+        <button class="home-card supplement" onclick="enterSupplement()">
+          <span class="card-new-badge">NEW</span>
+          <div class="card-orb">💊</div>
+          <div class="card-label">SUPPLEMENT</div>
+          <div class="card-title">영양제 관리</div>
+          <div class="card-meta" id="supplementLastInfo">자연 우선 · 시간 알림</div>
+        </button>
+
       </div>
 
       <!-- 👶 우리 아이 전용 카드 -->
@@ -2492,6 +2501,24 @@
       <div class="page-title">🧠 오늘의 상식</div>
     </div>
     <div id="dailyTipContent"></div>
+  </div>
+
+  <!-- ════════════ 💊 영양제 관리 화면 ════════════ -->
+  <div class="screen" id="screenSupplement">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">💊 영양제 관리</div>
+    </div>
+    <div id="supplementContent"></div>
+  </div>
+
+  <!-- ════════════ 💊 영양제 추가 화면 ════════════ -->
+  <div class="screen" id="screenAddSupplement">
+    <div class="page-header">
+      <button class="back-btn" onclick="enterSupplement()" aria-label="뒤로">←</button>
+      <div class="page-title">➕ 영양제 추가</div>
+    </div>
+    <div id="addSupplementContent"></div>
   </div>
 
   <!-- ════════════ 건강어때AI 채팅 ════════════ -->
@@ -11198,6 +11225,181 @@ const FORTUNE_QUOTES = [
 ];
 
 // 🐉 12지 (쥐→돼지 순서, (year-4)%12로 인덱스 계산)
+// ════════════════════════════════════════════════════════════════
+// 💊 영양제 룰 DB · 성분별 최적 복용 시간 (50개+)
+// 원칙: 지용성=식후 / 수용성=아침 / 미네랄=자기전 / 철분·프로바이오틱=아침공복
+// ════════════════════════════════════════════════════════════════
+const SUPPLEMENT_TIME_SLOTS = [
+  { key:'morning_empty', label:'아침 공복',   hour:7,  emoji:'🌅', desc:'기상 직후 · 빈속' },
+  { key:'morning_after', label:'아침 식후',   hour:8,  emoji:'☀️', desc:'아침 식사 30분 후' },
+  { key:'lunch_after',   label:'점심 식후',   hour:13, emoji:'🍽',  desc:'점심 식사 30분 후' },
+  { key:'dinner_after',  label:'저녁 식후',   hour:19, emoji:'🌆', desc:'저녁 식사 30분 후' },
+  { key:'workout',       label:'운동 전후',   hour:18, emoji:'💪', desc:'운동 30분 전 or 후' },
+  { key:'bedtime_empty', label:'자기전 공복', hour:21, emoji:'🌙', desc:'취침 1시간 전 · 빈속' },
+  { key:'bedtime',       label:'자기전',      hour:22, emoji:'😴', desc:'취침 30분 전' },
+  { key:'anytime',       label:'아무 때나',   hour:9,  emoji:'⏰', desc:'하루 중 편한 시간' }
+];
+
+const SUPPLEMENT_TIMING_RULES = {
+  // ── 지용성 비타민 (식후) ──
+  '비타민a':        { slot:'lunch_after',   reason:'지방과 함께 흡수 UP', natural:'당근·시금치·달걀노른자' },
+  '비타민d':        { slot:'morning_empty', reason:'햇빛 리듬에 맞춰 아침', natural:'연어·달걀노른자·표고버섯' },
+  '비타민d3':       { slot:'morning_empty', reason:'햇빛 리듬에 맞춰 아침', natural:'연어·달걀노른자·표고버섯' },
+  '비타민e':        { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'아몬드·해바라기씨·아보카도' },
+  '비타민k':        { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'낫토·시금치·케일' },
+  '비타민k2':       { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'낫토·치즈·계란' },
+
+  // ── 수용성 비타민 (아침) ──
+  '비타민c':        { slot:'morning_empty', reason:'흡수 잘 됨, 밤엔 각성 유발', natural:'딸기·오렌지·브로콜리·파프리카' },
+  '비타민b1':       { slot:'morning_after', reason:'에너지 대사 활성', natural:'현미·돼지고기·콩류' },
+  '비타민b2':       { slot:'morning_after', reason:'에너지 대사 활성', natural:'우유·계란·시금치' },
+  '비타민b6':       { slot:'morning_after', reason:'아침에 활발', natural:'닭가슴살·바나나·감자' },
+  '비타민b12':      { slot:'morning_after', reason:'에너지·집중력', natural:'조개·소고기·연어' },
+  '비타민b군':      { slot:'morning_after', reason:'하루 에너지 시작', natural:'통곡물·달걀·생선' },
+  '엽산':           { slot:'morning_after', reason:'흡수 잘 됨', natural:'시금치·아스파라거스·렌틸콩' },
+  '나이아신':       { slot:'lunch_after',   reason:'위장 자극 방지', natural:'닭고기·참치·땅콩' },
+  '비오틴':         { slot:'anytime',       reason:'아무 때나 무방', natural:'달걀노른자·아몬드·연어' },
+  '판토텐산':       { slot:'morning_after', reason:'에너지 대사', natural:'닭간·아보카도·현미' },
+
+  // ── 미네랄 ──
+  '칼슘':           { slot:'bedtime',       reason:'흡수·수면 개선', natural:'우유·요거트·멸치·케일' },
+  '마그네슘':       { slot:'bedtime',       reason:'근육이완·수면 유도', natural:'다크초콜릿·시금치·아몬드' },
+  '아연':           { slot:'bedtime_empty', reason:'음식 성분과 경쟁 방지', natural:'굴·소고기·호박씨' },
+  '철분':           { slot:'morning_empty', reason:'흡수 최대화 · 커피·차 금물', natural:'붉은고기·시금치·조개' },
+  '요오드':         { slot:'morning_after', reason:'갑상선 활성', natural:'미역·다시마·계란' },
+  '셀레늄':         { slot:'lunch_after',   reason:'위 자극 방지', natural:'브라질너트·참치·달걀' },
+  '크롬':           { slot:'lunch_after',   reason:'혈당 조절', natural:'브로콜리·통곡물·감자' },
+  '구리':           { slot:'lunch_after',   reason:'흡수 안정', natural:'간·굴·견과류' },
+  '망간':           { slot:'lunch_after',   reason:'흡수 안정', natural:'파인애플·시금치·귀리' },
+  '몰리브덴':       { slot:'anytime',       reason:'미량 필요', natural:'콩류·곡물' },
+
+  // ── 오메가·지방 ──
+  '오메가3':        { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'연어·고등어·아마씨·호두' },
+  '오메가6':        { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'해바라기유·호두·달걀' },
+  'epa':            { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'등푸른 생선·고등어·정어리' },
+  'dha':            { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'연어·참치·해조류' },
+  '알티지오메가':   { slot:'lunch_after',   reason:'지방과 함께 흡수', natural:'연어·고등어·호두' },
+
+  // ── 장 건강·소화 ──
+  '프로바이오틱스': { slot:'morning_empty', reason:'위산 통과 후 장 도달', natural:'김치·요거트·낫토·된장' },
+  '유산균':         { slot:'morning_empty', reason:'위산 통과 후 장 도달', natural:'김치·요거트·발효식품' },
+  '식이섬유':       { slot:'lunch_after',   reason:'포만감·혈당 안정', natural:'귀리·현미·채소·과일' },
+  '이눌린':         { slot:'morning_empty', reason:'유산균 먹이', natural:'마늘·양파·바나나·아스파라거스' },
+  '소화효소':       { slot:'lunch_after',   reason:'식사와 함께 작용', natural:'파인애플·파파야·생강' },
+
+  // ── 항산화·특수 ──
+  '코엔자임q10':    { slot:'lunch_after',   reason:'지용성, 지방과 흡수', natural:'소고기·정어리·시금치' },
+  '루테인':         { slot:'lunch_after',   reason:'지용성, 지방과 흡수', natural:'케일·시금치·달걀노른자' },
+  '지아잔틴':       { slot:'lunch_after',   reason:'지용성, 지방과 흡수', natural:'옥수수·오렌지·파프리카' },
+  '아스타잔틴':     { slot:'lunch_after',   reason:'지용성, 지방과 흡수', natural:'연어·새우·게' },
+  '레스베라트롤':   { slot:'morning_empty', reason:'흡수 최대화', natural:'포도·블루베리·적포도주' },
+  '커큐민':         { slot:'lunch_after',   reason:'지방·후추와 흡수 UP', natural:'강황·카레·후추' },
+  '글루타치온':     { slot:'morning_empty', reason:'흡수 최대화', natural:'아스파라거스·아보카도·시금치' },
+
+  // ── 단백질·아미노산 ──
+  '단백질':         { slot:'workout',       reason:'근육 회복', natural:'닭가슴살·두부·계란·콩' },
+  '유청단백':       { slot:'workout',       reason:'빠른 흡수', natural:'우유·요거트' },
+  '카제인':         { slot:'bedtime',       reason:'천천히 흡수 · 밤 회복', natural:'우유·치즈·요거트' },
+  'bcaa':           { slot:'workout',       reason:'근육 회복·유지', natural:'닭고기·계란·유청' },
+  '글루타민':       { slot:'bedtime',       reason:'회복·수면', natural:'소고기·계란·요거트' },
+  '아르기닌':       { slot:'bedtime_empty', reason:'성장호르몬 분비', natural:'견과류·닭고기·수박' },
+  '크레아틴':       { slot:'anytime',       reason:'꾸준함이 중요, 시간 무관', natural:'소고기·연어·돼지고기' },
+  '콜라겐':         { slot:'bedtime',       reason:'수면 중 재생', natural:'뼈국물·닭껍질·생선' },
+
+  // ── 허브·특수 ──
+  '홍삼':           { slot:'morning_after', reason:'기력·집중력', natural:'인삼차·수삼' },
+  '녹차추출물':     { slot:'morning_after', reason:'카페인 함유, 밤엔 X', natural:'녹차·말차' },
+  '카페인':         { slot:'morning_after', reason:'각성, 밤엔 절대 X', natural:'커피·녹차' },
+  '가르시니아':     { slot:'lunch_after',   reason:'식욕 억제 · 식전', natural:'-' },
+  '밀크씨슬':       { slot:'bedtime',       reason:'간 회복', natural:'-' },
+  '실리마린':       { slot:'bedtime',       reason:'간 회복', natural:'-' },
+  '멜라토닌':       { slot:'bedtime_empty', reason:'수면 유도', natural:'체리·바나나·귀리' },
+  '테아닌':         { slot:'bedtime',       reason:'이완·수면', natural:'녹차' },
+  '가바':           { slot:'bedtime',       reason:'이완·수면', natural:'김치·된장·발효식품' },
+  '아쉬와간다':     { slot:'bedtime',       reason:'스트레스 완화', natural:'-' },
+  '루이보스':       { slot:'bedtime',       reason:'카페인 X, 이완', natural:'루이보스티' },
+
+  // ── 조합·복합 ──
+  '종합비타민':     { slot:'morning_after', reason:'안정 흡수', natural:'다양한 채소·과일 5색' },
+  '멀티비타민':     { slot:'morning_after', reason:'안정 흡수', natural:'다양한 채소·과일 5색' },
+  '멀티미네랄':     { slot:'bedtime',       reason:'미네랄 흡수', natural:'견과·해조류·통곡물' }
+};
+
+// 성분 이름 정규화 (공백·특수문자 제거, 소문자)
+function _normalizeSupplementName(name) {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[()（）\[\]{}·・,、.\-]/g, '')
+    .trim();
+}
+
+// 성분 이름 → 최적 시간 정보 매칭 (긴 이름 우선)
+function getSupplementTiming(name) {
+  const norm = _normalizeSupplementName(name);
+  if (!norm) return null;
+
+  // 정확 매칭
+  if (SUPPLEMENT_TIMING_RULES[norm]) {
+    return { ...SUPPLEMENT_TIMING_RULES[norm], matchedKey: norm };
+  }
+
+  // 부분 매칭 (긴 키 우선)
+  const keys = Object.keys(SUPPLEMENT_TIMING_RULES).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    if (norm.includes(key) || key.includes(norm)) {
+      return { ...SUPPLEMENT_TIMING_RULES[key], matchedKey: key };
+    }
+  }
+  return null;
+}
+
+// slot key → SUPPLEMENT_TIME_SLOTS 객체 반환
+function getSupplementSlot(slotKey) {
+  return SUPPLEMENT_TIME_SLOTS.find(s => s.key === slotKey) || SUPPLEMENT_TIME_SLOTS[7]; // fallback: anytime
+}
+
+// 유저 영양제 리스트 관리 (localStorage)
+function getSupplementList() {
+  try { return JSON.parse(localStorage.getItem('supplementListV1') || '[]'); } catch(e) { return []; }
+}
+function saveSupplementList(list) {
+  localStorage.setItem('supplementListV1', JSON.stringify(list));
+}
+function addSupplement(item) {
+  const list = getSupplementList();
+  const newItem = {
+    id: 'sup_' + Date.now(),
+    name: item.name || '',
+    dose: item.dose || '',
+    slot: item.slot || 'anytime',
+    hour: item.hour || 9,
+    minute: item.minute || 0,
+    natural: item.natural || '',
+    reason: item.reason || '',
+    enabled: true,
+    createdAt: new Date().toISOString(),
+    lastTaken: null
+  };
+  list.push(newItem);
+  saveSupplementList(list);
+  return newItem;
+}
+function updateSupplement(id, updates) {
+  const list = getSupplementList();
+  const idx = list.findIndex(x => x.id === id);
+  if (idx >= 0) {
+    list[idx] = { ...list[idx], ...updates };
+    saveSupplementList(list);
+  }
+}
+function deleteSupplement(id) {
+  saveSupplementList(getSupplementList().filter(x => x.id !== id));
+}
+function markSupplementTaken(id) {
+  updateSupplement(id, { lastTaken: new Date().toISOString() });
+}
+
 const FORTUNE_ZODIACS = [
   { name: '쥐',    emoji: '🐁', trait: '영리·기민' },
   { name: '소',    emoji: '🐄', trait: '성실·인내' },
@@ -11552,6 +11754,260 @@ async function shareFortuneStory() {
     if (shareBtn) shareBtn.style.display = originalDisplay;
     banner.remove();
   }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 💊 영양제 관리 · 화면 로직
+// ════════════════════════════════════════════════════════════════
+
+function enterSupplement() {
+  renderSupplementList();
+  showScreen('screenSupplement');
+}
+
+function renderSupplementList() {
+  const el = document.getElementById('supplementContent');
+  if (!el) return;
+  const list = getSupplementList();
+
+  // 시간대별 그룹화
+  const grouped = {};
+  SUPPLEMENT_TIME_SLOTS.forEach(s => { grouped[s.key] = []; });
+  list.filter(x => x.enabled !== false).forEach(item => {
+    if (!grouped[item.slot]) grouped[item.slot] = [];
+    grouped[item.slot].push(item);
+  });
+
+  // 시간순 정렬
+  const sortedSlots = SUPPLEMENT_TIME_SLOTS.filter(s => grouped[s.key].length > 0);
+
+  const todayKey = new Date().toDateString();
+
+  el.innerHTML = `
+    <!-- 자연 우선 슬로건 배너 -->
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:14px;padding:12px 14px;margin:14px 0;display:flex;align-items:center;gap:11px">
+      <span style="font-size:26px">🌱</span>
+      <div>
+        <div style="font-size:12px;font-weight:900;color:#065F46;letter-spacing:-.3px">영양제는 부족을 채우는 도구</div>
+        <div style="font-size:11px;font-weight:700;color:#059669;margin-top:2px">첫 선택은 <b>자연</b>이에요</div>
+      </div>
+    </div>
+
+    ${list.length === 0 ? `
+    <!-- 빈 상태 -->
+    <div style="background:#FEFCF5;border:1px dashed #F0E6C8;border-radius:16px;padding:28px 20px;text-align:center;margin-bottom:14px">
+      <div style="font-size:52px;line-height:1;margin-bottom:10px">💊</div>
+      <div style="font-size:14px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px">아직 등록된 영양제가 없어요</div>
+      <div style="font-size:12px;color:#65756B;font-weight:700;line-height:1.55;margin-top:6px">사진 촬영 or 이름 입력으로 추가해보세요<br>성분에 맞는 복용 시간을 자동 추천해드려요</div>
+    </div>
+    ` : sortedSlots.map(slot => `
+      <div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:900;color:#65756B;letter-spacing:1px;margin-bottom:8px;padding:0 4px">
+          <span style="font-size:14px">${slot.emoji}</span>
+          <span>${escapeHtml(slot.label)} · ${String(slot.hour).padStart(2,'0')}:00</span>
+        </div>
+        ${grouped[slot.key].map(item => {
+          const takenToday = item.lastTaken && new Date(item.lastTaken).toDateString() === todayKey;
+          return `
+          <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:12px;padding:11px 13px;margin-bottom:6px;box-shadow:0 2px 6px rgba(0,0,0,.03)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:34px;height:34px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">💊</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px">${escapeHtml(item.name)}${item.dose ? ' · ' + escapeHtml(item.dose) : ''}</div>
+                <div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:2px">${escapeHtml(item.reason || '')}</div>
+              </div>
+              ${takenToday
+                ? `<div style="background:#F0FDF4;color:#059669;font-size:10px;font-weight:900;padding:4px 8px;border-radius:6px">✓ 완료</div>`
+                : `<div style="display:flex;gap:4px">
+                     <button onclick="onSupplementTaken('${item.id}')" style="background:#059669;color:#FFF;font-size:10px;font-weight:900;padding:5px 8px;border-radius:6px;border:none;cursor:pointer;font-family:inherit">먹었어요</button>
+                     <button onclick="editSupplement('${item.id}')" style="background:#FFF;color:#65756B;font-size:10px;font-weight:900;padding:5px 8px;border-radius:6px;border:1px solid #E5D9BA;cursor:pointer;font-family:inherit">편집</button>
+                   </div>`}
+            </div>
+            ${item.natural ? `
+            <div style="background:#FEFCF5;border-left:2px solid #059669;padding:7px 10px;border-radius:0 8px 8px 0;margin-top:8px">
+              <div style="font-size:9.5px;font-weight:900;color:#065F46;letter-spacing:.5px;margin-bottom:1px">🌱 자연 대체 아이디어</div>
+              <div style="font-size:11px;color:#3F2E1E;font-weight:700">${escapeHtml(item.natural)}</div>
+            </div>
+            ` : ''}
+          </div>
+          `;
+        }).join('')}
+      </div>
+    `).join('')}
+
+    <!-- 영양제 추가 버튼 -->
+    <button onclick="goAddSupplement()" style="width:100%;background:transparent;border:1.5px dashed #86EFAC;color:#059669;font-size:13px;font-weight:900;padding:14px;border-radius:14px;font-family:inherit;cursor:pointer;margin-top:8px">
+      + 영양제 추가하기
+    </button>
+
+    <!-- 안내 -->
+    <div style="background:#F7FDF9;border-radius:12px;padding:11px 13px;margin-top:14px;font-size:10.5px;color:#65756B;font-weight:700;line-height:1.6">
+      💡 <b>Tip</b>. 사진 촬영하면 AI가 성분을 인식하고 최적 복용 시간을 자동으로 추천해드려요. 언제든 편집 가능합니다.
+    </div>
+  `;
+}
+
+// 영양제 복용 체크
+function onSupplementTaken(id) {
+  markSupplementTaken(id);
+  const list = getSupplementList();
+  const item = list.find(x => x.id === id);
+  if (item && typeof showPointToast === 'function') {
+    showPointToast(`✓ ${item.name} 완료!${item.natural ? ' 자연 대체: ' + item.natural : ''}`);
+  }
+  renderSupplementList();
+}
+
+// 영양제 편집 (수정·삭제 시트)
+function editSupplement(id) {
+  const list = getSupplementList();
+  const item = list.find(x => x.id === id);
+  if (!item) return;
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;padding:0;font-family:inherit';
+  const slotOptions = SUPPLEMENT_TIME_SLOTS.map(s =>
+    `<option value="${s.key}"${s.key === item.slot ? ' selected' : ''}>${s.emoji} ${s.label} (${String(s.hour).padStart(2,'0')}:00)</option>`
+  ).join('');
+  modal.innerHTML = `
+    <div style="background:#FEFCF5;border-radius:20px 20px 0 0;max-width:480px;width:100%;padding:22px 20px 30px;box-shadow:0 -8px 30px rgba(0,0,0,.2)">
+      <div style="font-size:15px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px;margin-bottom:14px">✎ ${escapeHtml(item.name)} 편집</div>
+
+      <label style="display:block;font-size:11px;font-weight:800;color:#65756B;margin-bottom:5px">복용 시간대</label>
+      <select id="_editSup_slot" style="width:100%;padding:11px 12px;border:1px solid #E5D9BA;border-radius:10px;background:#FFF;font-size:13px;font-weight:700;color:#0F1F1A;margin-bottom:12px;font-family:inherit">
+        ${slotOptions}
+      </select>
+
+      <label style="display:block;font-size:11px;font-weight:800;color:#65756B;margin-bottom:5px">이름 · 용량</label>
+      <input id="_editSup_name" value="${escapeHtml(item.name)}" style="width:100%;padding:11px 12px;border:1px solid #E5D9BA;border-radius:10px;background:#FFF;font-size:13px;font-weight:700;margin-bottom:8px;font-family:inherit;box-sizing:border-box">
+      <input id="_editSup_dose" value="${escapeHtml(item.dose || '')}" placeholder="예: 1000IU, 500mg" style="width:100%;padding:11px 12px;border:1px solid #E5D9BA;border-radius:10px;background:#FFF;font-size:13px;font-weight:700;margin-bottom:16px;font-family:inherit;box-sizing:border-box">
+
+      <div style="display:flex;gap:8px">
+        <button onclick="_saveEditSupplement('${id}')" style="flex:1;background:#059669;color:#FFF;font-size:13px;font-weight:900;padding:12px;border-radius:12px;border:none;font-family:inherit;cursor:pointer">저장</button>
+        <button onclick="_confirmDeleteSupplement('${id}')" style="background:#FEE2E2;color:#DC2626;font-size:13px;font-weight:900;padding:12px 16px;border-radius:12px;border:none;font-family:inherit;cursor:pointer">삭제</button>
+      </div>
+      <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;background:transparent;color:#65756B;font-size:12px;font-weight:700;padding:10px;border-radius:12px;border:none;margin-top:6px;font-family:inherit;cursor:pointer">닫기</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function _saveEditSupplement(id) {
+  const slot = document.getElementById('_editSup_slot').value;
+  const name = document.getElementById('_editSup_name').value.trim();
+  const dose = document.getElementById('_editSup_dose').value.trim();
+  if (!name) { alert('이름을 입력해주세요'); return; }
+  const slotInfo = getSupplementSlot(slot);
+  updateSupplement(id, { slot, name, dose, hour: slotInfo.hour });
+  document.querySelectorAll('div[style*=fixed]').forEach(m => { if (m.querySelector('#_editSup_slot')) m.remove(); });
+  renderSupplementList();
+  if (typeof showPointToast === 'function') showPointToast(`✎ ${name} 수정됨`);
+}
+
+function _confirmDeleteSupplement(id) {
+  if (!confirm('이 영양제를 삭제할까요?')) return;
+  deleteSupplement(id);
+  document.querySelectorAll('div[style*=fixed]').forEach(m => { if (m.querySelector('#_editSup_slot')) m.remove(); });
+  renderSupplementList();
+}
+
+// 영양제 추가 화면
+function goAddSupplement() {
+  const el = document.getElementById('addSupplementContent');
+  if (!el) return;
+
+  const slotOptions = SUPPLEMENT_TIME_SLOTS.map(s =>
+    `<option value="${s.key}">${s.emoji} ${s.label} (${String(s.hour).padStart(2,'0')}:00) · ${s.desc}</option>`
+  ).join('');
+
+  el.innerHTML = `
+    <div style="padding:14px 4px">
+      <!-- 슬로건 -->
+      <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:14px;padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:900;color:#065F46">🌱 성분에 맞는 시간을 자동으로 추천해드려요</div>
+      </div>
+
+      <!-- 이름 입력 -->
+      <label style="display:block;font-size:12px;font-weight:900;color:#0F1F1A;margin-bottom:6px">영양제 이름</label>
+      <input id="_newSup_name" placeholder="예: 비타민D, 오메가3, 마그네슘…" style="width:100%;padding:13px 14px;border:1px solid #E5D9BA;border-radius:12px;background:#FFF;font-size:14px;font-weight:700;margin-bottom:6px;font-family:inherit;box-sizing:border-box" oninput="_previewSupplementTiming()">
+      <div id="_supNameHint" style="font-size:10.5px;color:#65756B;font-weight:700;padding:0 4px 12px">이름을 입력하면 자동으로 최적 시간을 추천해드려요</div>
+
+      <!-- 용량 -->
+      <label style="display:block;font-size:12px;font-weight:900;color:#0F1F1A;margin-bottom:6px">용량 (선택)</label>
+      <input id="_newSup_dose" placeholder="예: 1000IU, 500mg (선택 사항)" style="width:100%;padding:13px 14px;border:1px solid #E5D9BA;border-radius:12px;background:#FFF;font-size:14px;font-weight:700;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+
+      <!-- 시간대 -->
+      <label style="display:block;font-size:12px;font-weight:900;color:#0F1F1A;margin-bottom:6px">복용 시간대</label>
+      <select id="_newSup_slot" style="width:100%;padding:13px 14px;border:1px solid #E5D9BA;border-radius:12px;background:#FFF;font-size:13px;font-weight:700;color:#0F1F1A;margin-bottom:14px;font-family:inherit">
+        ${slotOptions}
+      </select>
+
+      <!-- 자연 대체 미리보기 -->
+      <div id="_supNaturalPreview" style="display:none;background:#F0FDF4;border-left:3px solid #059669;padding:10px 13px;border-radius:0 10px 10px 0;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:900;color:#065F46;letter-spacing:.8px;margin-bottom:3px">🌱 자연 대체 아이디어</div>
+        <div id="_supNaturalText" style="font-size:12px;color:#065F46;font-weight:800"></div>
+      </div>
+
+      <!-- 저장 -->
+      <button onclick="saveNewSupplement()" style="width:100%;background:#059669;color:#FFF;font-size:14px;font-weight:900;padding:14px;border-radius:14px;border:none;font-family:inherit;cursor:pointer">등록하기</button>
+
+      <div style="text-align:center;margin-top:14px;font-size:10.5px;color:#65756B;font-weight:700;line-height:1.6">
+        💡 등록 후 편집·삭제·복용 시간 변경 언제든 가능해요<br>영양제 사진 촬영 기능은 곧 추가됩니다
+      </div>
+    </div>
+  `;
+
+  showScreen('screenAddSupplement');
+}
+
+// 이름 입력 시 자동 미리보기
+function _previewSupplementTiming() {
+  const name = document.getElementById('_newSup_name').value.trim();
+  const hint = document.getElementById('_supNameHint');
+  const slotSel = document.getElementById('_newSup_slot');
+  const naturalWrap = document.getElementById('_supNaturalPreview');
+  const naturalText = document.getElementById('_supNaturalText');
+
+  const timing = getSupplementTiming(name);
+  if (timing) {
+    const slot = getSupplementSlot(timing.slot);
+    hint.innerHTML = `✅ <b style="color:#059669">${slot.emoji} ${slot.label}</b> 추천 · ${escapeHtml(timing.reason)}`;
+    hint.style.color = '#059669';
+    if (slotSel) slotSel.value = timing.slot;
+    if (timing.natural && timing.natural !== '-') {
+      naturalWrap.style.display = 'block';
+      naturalText.textContent = timing.natural;
+    } else {
+      naturalWrap.style.display = 'none';
+    }
+  } else if (name) {
+    hint.textContent = '💡 사전에 없는 성분이에요. 시간대를 직접 선택해주세요.';
+    hint.style.color = '#65756B';
+    naturalWrap.style.display = 'none';
+  } else {
+    hint.textContent = '이름을 입력하면 자동으로 최적 시간을 추천해드려요';
+    hint.style.color = '#65756B';
+    naturalWrap.style.display = 'none';
+  }
+}
+
+function saveNewSupplement() {
+  const name = document.getElementById('_newSup_name').value.trim();
+  const dose = document.getElementById('_newSup_dose').value.trim();
+  const slot = document.getElementById('_newSup_slot').value;
+  if (!name) { alert('영양제 이름을 입력해주세요'); return; }
+
+  const timing = getSupplementTiming(name);
+  const slotInfo = getSupplementSlot(slot);
+  addSupplement({
+    name, dose, slot,
+    hour: slotInfo.hour,
+    natural: timing?.natural && timing.natural !== '-' ? timing.natural : '',
+    reason: timing?.reason || ''
+  });
+
+  if (typeof showPointToast === 'function') showPointToast(`💊 ${name} 등록 완료!`);
+  enterSupplement();
 }
 
 // ════════════════════════════════════════════════════════════════
