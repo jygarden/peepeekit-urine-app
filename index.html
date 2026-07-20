@@ -2084,12 +2084,21 @@
           <div class="card-meta" id="petLastInfo">1분 · 홈 자가진단</div>
         </button>
 
-        <!-- 식단 분석 -->
+        <!-- 식단 분석 (인체용) -->
         <button class="home-card food" onclick="enterFood()">
           <div class="card-orb">🍱</div>
           <div class="card-label">MEAL</div>
           <div class="card-title">식단 분석</div>
           <div class="card-meta" id="foodLastInfo">약 30초</div>
+        </button>
+
+        <!-- 반려동물 사료·간식 분석 (NEW) -->
+        <button class="home-card petfood" onclick="enterPetFood()">
+          <span class="card-new-badge">NEW</span>
+          <div class="card-orb">🐾</div>
+          <div class="card-label">PET FOOD</div>
+          <div class="card-title">반려동물 사료</div>
+          <div class="card-meta" id="petFoodLastInfo">사료·간식 성분 분석</div>
         </button>
 
         <!-- 식품 성분 분석 (NEW) -->
@@ -3213,6 +3222,97 @@
     </button>
     <div class="action-row" style="margin-top:10px">
       <button class="btn-retake" style="border-color:#8B5CF6;color:#8B5CF6" onclick="showScreen('screenIngredient')">📷 다시 찍기</button>
+      <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
+    </div>
+  </div>
+
+  <!-- ════════════ 🐾 반려동물 사료·간식 분석 — 촬영 진입 ════════════ -->
+  <div class="screen" id="screenPetFood">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🐾 반려동물 사료·간식 분석</div>
+    </div>
+
+    <!-- 반려동물 타입 선택 -->
+    <div class="card" style="padding:16px;margin-bottom:12px">
+      <div style="font-size:12.5px;font-weight:900;color:#374151;margin-bottom:10px">🐾 누구를 위한 분석인가요?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="meal-time-btn active" id="pfTypeDog" onclick="selectPetFoodType('dog')">🐶<br>강아지</button>
+        <button class="meal-time-btn" id="pfTypeCat" onclick="selectPetFoodType('cat')">🐱<br>고양이</button>
+      </div>
+    </div>
+
+    <!-- 촬영 가이드 -->
+    <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="background:#F0FDF4;color:#059669;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">GOOD</span>
+        <span style="font-size:13px;font-weight:900;color:#0F1F1A">✅ 이렇게 촬영하세요</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">1</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">사료·간식 <b style="color:#059669">성분표</b>를 촬영</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">봉투 뒷면·옆면 원재료명 부분</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">2</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">글자가 <b style="color:#059669">화면에 꽉 차게</b></div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">가까이·정면으로</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">3</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#059669">밝은 조명</b> · 반사 X</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">약 20~40초 안에 결과 확인</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 독성 성분 경고 배너 -->
+    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:11px 14px;margin-bottom:14px">
+      <div style="font-size:11.5px;font-weight:900;color:#991B1B;margin-bottom:3px">🚨 이런 성분이 있으면 즉시 알려드려요</div>
+      <div style="font-size:10.5px;color:#7F1D1D;font-weight:700;line-height:1.55">초콜릿·자일리톨·포도·양파·마늘 등 반려동물 독성 성분 자동 검출</div>
+    </div>
+
+    <button class="upload-btn accent" style="border-color:#059669" onclick="safeCameraClick('petFoodCameraInput')">
+      <div class="icon">📷</div>
+      <div class="lbl" style="color:#059669">카메라로 촬영</div>
+      <div class="sub">사료·간식 성분표를 찍어주세요</div>
+    </button>
+    <button class="upload-btn" onclick="openFileInput('petFoodGalleryInput')">
+      <div class="icon">🖼️</div>
+      <div class="lbl">갤러리에서 선택</div>
+      <div class="sub">저장된 사진을 불러오세요</div>
+    </button>
+    <input type="file" id="petFoodCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePetFoodFile(event)">
+    <input type="file" id="petFoodGalleryInput" accept="image/*" style="display:none" onchange="handlePetFoodFile(event)">
+    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 🐾 반려동물 사료 · 미리보기 ════════════ -->
+  <div class="screen" id="screenPetFoodPreview">
+    <div class="preview-wrap">
+      <img id="petFoodPreviewImg" src="" alt="사료 성분표 이미지"/>
+      <button class="btn-close-img" onclick="showScreen('screenPetFood')">×</button>
+    </div>
+    <div class="error-box" id="petFoodErrorBox"></div>
+    <button class="btn-primary" id="btnPetFoodAnalyze" onclick="analyzePetFood()" style="background:linear-gradient(135deg,#059669,#065F46);box-shadow:0 4px 14px rgba(5,150,105,.40)">🔍 AI 사료 성분 분석</button>
+    <div class="loading-box" id="petFoodLoadingBox">
+      <div class="emoji">🐾</div>
+      <p>사료·간식 성분을 분석 중이에요...</p>
+      <small id="petFoodLoadingSub">반려동물 관점에서 안전성 평가 중</small>
+    </div>
+  </div>
+
+  <!-- ════════════ 🐾 반려동물 사료 · 결과 화면 ════════════ -->
+  <div class="screen" id="screenPetFoodResult">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:4px 2px">
+      <button onclick="goHome()" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;box-shadow:var(--shadow-xs)">
+        🏠 <span>홈으로</span>
+      </button>
+      <button onclick="showScreen('screenPetFood')" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;box-shadow:var(--shadow-xs)">
+        📷 <span>다시 찍기</span>
+      </button>
+    </div>
+    <div id="petFoodResultContent"></div>
+    <div class="action-row" style="margin-top:10px">
+      <button class="btn-retake" style="border-color:#059669;color:#059669" onclick="showScreen('screenPetFood')">📷 다시 찍기</button>
       <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
     </div>
   </div>
@@ -5440,6 +5540,259 @@ function handleFoodFile(input) {
     alert('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
   });
   input.value = '';
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🐾 반려동물 사료·간식 분석 · 진입 / 파일 처리 / 분석 / 결과 렌더
+// ════════════════════════════════════════════════════════════════
+let _petFoodType = 'dog'; // 'dog' | 'cat'
+let petFoodImageB64 = null;
+let petFoodImageSrc = null;
+let currentPetFoodResult = null;
+
+function enterPetFood() {
+  _petFoodType = 'dog';
+  petFoodImageB64 = null;
+  petFoodImageSrc = null;
+  currentPetFoodResult = null;
+  // 타입 선택 UI 초기화
+  document.getElementById('pfTypeDog')?.classList.add('active');
+  document.getElementById('pfTypeCat')?.classList.remove('active');
+  showScreen('screenPetFood');
+}
+
+function selectPetFoodType(type) {
+  _petFoodType = type;
+  ['dog','cat'].forEach(t => {
+    const btn = document.getElementById('pfType' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) btn.classList.toggle('active', t === type);
+  });
+}
+
+function handlePetFoodFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  fileToDataUrlSafe(file).then(dataUrl => {
+    return compressImageForUpload(dataUrl, 1400, 0.80);
+  }).then(compressed => {
+    petFoodImageSrc = compressed;
+    petFoodImageB64 = compressed.split(',')[1];
+    document.getElementById('petFoodPreviewImg').src = compressed;
+    const eb = document.getElementById('petFoodErrorBox');
+    if (eb) eb.classList.remove('show');
+    showScreen('screenPetFoodPreview');
+  }).catch(e => {
+    console.error('[handlePetFoodFile]', e);
+    alert('사진 로드 실패: ' + (e.message || '알 수 없는 오류'));
+  });
+  event.target.value = '';
+}
+
+function showPetFoodError(msg) {
+  const eb = document.getElementById('petFoodErrorBox');
+  if (eb) { eb.textContent = msg; eb.classList.add('show'); }
+  else alert(msg);
+}
+
+async function analyzePetFood() {
+  if (!petFoodImageB64) { showPetFoodError('사진을 먼저 선택해주세요'); return; }
+  document.getElementById('btnPetFoodAnalyze').disabled = true;
+  const loadingBox = document.getElementById('petFoodLoadingBox');
+  const errorBox = document.getElementById('petFoodErrorBox');
+  if (loadingBox) loadingBox.classList.add('show');
+  if (errorBox) errorBox.classList.remove('show');
+
+  const startTime = Date.now();
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 55000);
+  let res;
+  try {
+    res = await fetch('/api/analyze-pet-food', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageB64: petFoodImageB64, petType: _petFoodType }),
+      signal: ctrl.signal,
+      cache: 'no-store'
+    });
+  } catch(netErr) {
+    clearTimeout(timeoutId);
+    if (loadingBox) loadingBox.classList.remove('show');
+    document.getElementById('btnPetFoodAnalyze').disabled = false;
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    if (netErr.name === 'AbortError') {
+      showPetFoodError(`⏱ 응답이 너무 느려요 (${elapsed}초). 성분표를 더 가까이 다시 찍어주세요.`);
+    } else {
+      showPetFoodError('🌐 네트워크 오류: ' + (netErr.message || '연결 확인'));
+    }
+    return;
+  }
+  clearTimeout(timeoutId);
+
+  if (res.status === 504) {
+    if (loadingBox) loadingBox.classList.remove('show');
+    document.getElementById('btnPetFoodAnalyze').disabled = false;
+    showPetFoodError('⏱ 서버 시간 초과. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+
+  const txt = await res.text();
+  let data;
+  try { data = JSON.parse(txt); }
+  catch(e) {
+    if (loadingBox) loadingBox.classList.remove('show');
+    document.getElementById('btnPetFoodAnalyze').disabled = false;
+    showPetFoodError('응답 파싱 오류. 다시 시도해주세요.');
+    return;
+  }
+
+  if (data.error) {
+    if (loadingBox) loadingBox.classList.remove('show');
+    document.getElementById('btnPetFoodAnalyze').disabled = false;
+    showPetFoodError(data.error);
+    return;
+  }
+
+  currentPetFoodResult = data;
+  if (loadingBox) loadingBox.classList.remove('show');
+  document.getElementById('btnPetFoodAnalyze').disabled = false;
+  renderPetFoodResult(data);
+  showScreen('screenPetFoodResult');
+
+  // 기록 저장 (반려동물 사료 이력)
+  try {
+    const records = JSON.parse(localStorage.getItem('petFoodRecords') || '[]');
+    records.unshift({ date: new Date().toISOString(), petType: _petFoodType, ...data });
+    localStorage.setItem('petFoodRecords', JSON.stringify(records.slice(0, 100)));
+  } catch(e) {}
+}
+
+function renderPetFoodResult(data) {
+  const el = document.getElementById('petFoodResultContent');
+  if (!el) return;
+  const ingredients = Array.isArray(data.ingredients) ? data.ingredients : [];
+  const petLabel = data.petType === 'cat' ? '🐱 고양이' : '🐶 강아지';
+
+  // 안전 등급별 카운트
+  const counts = { safe:0, caution:0, warning:0, danger:0 };
+  ingredients.forEach(ing => {
+    const s = (ing.safety || '').toLowerCase();
+    if (counts[s] !== undefined) counts[s]++;
+  });
+
+  // 위트 오프너 (반려동물 관점)
+  let opener = '';
+  if (counts.danger > 0) {
+    opener = `🚨 반려동물 독성 성분 ${counts.danger}개 발견! 절대 급여하지 마세요`;
+  } else if (counts.warning >= 3) {
+    opener = `⚠️ 인공첨가물이 ${counts.warning}개나 있어요. 가끔 간식으로만 활용`;
+  } else if (counts.warning > 0) {
+    opener = `👀 합성 성분 ${counts.warning}개 있음. 주식보다는 간식으로`;
+  } else if (data.overallGrade === 'A' || data.overallGrade === 'A+') {
+    opener = `✨ 이건 진짜 프리미엄! 안심하고 급여하세요`;
+  } else if (data.overallGrade === 'B' || data.overallGrade === 'B+') {
+    opener = `🙆 무난한 사료·간식이에요`;
+  } else {
+    opener = `🌿 급여 시 양·빈도 조절이 필요해요`;
+  }
+
+  const gradeColor = data.overallGrade === 'A' || data.overallGrade === 'A+' ? '#059669'
+    : data.overallGrade === 'B' || data.overallGrade === 'B+' ? '#7C3AED'
+    : data.overallGrade === 'C' ? '#EA580C' : '#DC2626';
+
+  let html = '';
+
+  // 안전도 히어로
+  html += `
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border-radius:16px;padding:18px 16px;margin-bottom:12px;text-align:center;border:1.5px solid #86EFAC">
+      <div style="font-size:11px;font-weight:900;color:#065F46;letter-spacing:1.5px;margin-bottom:4px">${petLabel} 사료·간식 안전도</div>
+      <div style="display:flex;justify-content:center;align-items:baseline;gap:4px">
+        <span style="font-family:Georgia,serif;font-size:52px;font-weight:900;color:${gradeColor};letter-spacing:-1.5px;line-height:1">${data.overallScore || 0}</span>
+        <span style="font-size:16px;color:#065F46;font-weight:800">점</span>
+      </div>
+      <div style="font-size:13px;font-weight:900;color:${gradeColor};margin-top:4px">등급 ${escapeHtml(data.overallGrade || '-')}</div>
+    </div>`;
+
+  // 카운트 그리드 (4개 · 반려동물은 danger 강조)
+  html += `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">
+      <div style="background:#F0FDF4;border-radius:10px;padding:8px 4px;text-align:center">
+        <div style="font-size:9px;color:#065F46;font-weight:900">🟢 안전</div>
+        <div style="font-size:18px;font-weight:900;color:#059669;margin-top:2px">${counts.safe}</div>
+      </div>
+      <div style="background:#FEF3C7;border-radius:10px;padding:8px 4px;text-align:center">
+        <div style="font-size:9px;color:#92400E;font-weight:900">🟡 유의</div>
+        <div style="font-size:18px;font-weight:900;color:#B45309;margin-top:2px">${counts.caution}</div>
+      </div>
+      <div style="background:#FED7AA;border-radius:10px;padding:8px 4px;text-align:center">
+        <div style="font-size:9px;color:#9A3412;font-weight:900">🟠 주의</div>
+        <div style="font-size:18px;font-weight:900;color:#EA580C;margin-top:2px">${counts.warning}</div>
+      </div>
+      <div style="background:${counts.danger > 0 ? '#FEE2E2' : '#F1F5F9'};border-radius:10px;padding:8px 4px;text-align:center;${counts.danger > 0 ? 'box-shadow:0 0 0 2px #DC2626' : ''}">
+        <div style="font-size:9px;color:#991B1B;font-weight:900">🔴 절제</div>
+        <div style="font-size:18px;font-weight:900;color:#DC2626;margin-top:2px">${counts.danger}</div>
+      </div>
+    </div>`;
+
+  // danger 성분 경고 배너 (있으면)
+  const dangerItems = ingredients.filter(i => i.safety === 'danger');
+  if (dangerItems.length > 0) {
+    html += `
+      <div style="background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border:2px solid #DC2626;border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(220,38,38,.2)">
+        <div style="font-size:12px;color:#991B1B;font-weight:900;letter-spacing:1.2px;margin-bottom:6px">🚨 반려동물 독성 성분 발견!</div>
+        <div style="font-size:13px;color:#7F1D1D;font-weight:900;line-height:1.5">${dangerItems.slice(0, 5).map(i => escapeHtml(i.name)).join(' · ')}</div>
+        <div style="font-size:10.5px;color:#B91C1C;font-weight:800;margin-top:6px">이 성분은 ${petLabel}에게 위험할 수 있어요. 급여 전 수의사 상담 권장</div>
+      </div>`;
+  }
+
+  // AI 종합 평가
+  html += `
+    <div style="background:#FFF;border-radius:12px;padding:12px 14px;margin-bottom:12px;border:0.5px solid #EFEFEF">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span style="font-size:15px">🐾</span>
+        <span style="font-size:10.5px;font-weight:900;color:#059669;letter-spacing:1.2px">AI 종합 평가 (${petLabel})</span>
+      </div>
+      <div style="font-size:13.5px;color:#0F1F1A;font-weight:900;line-height:1.5">${escapeHtml(opener)}</div>
+      ${data.nutritionBalance ? `<div style="font-size:11px;color:#65756B;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px solid #F0F5F2">${escapeHtml(data.nutritionBalance)}</div>` : ''}
+    </div>`;
+
+  // 알레르기 발견
+  if (Array.isArray(data.allergens) && data.allergens.length > 0) {
+    html += `
+      <div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:11px 14px;margin-bottom:12px">
+        <div style="font-size:11px;color:#92400E;font-weight:900;letter-spacing:1px;margin-bottom:3px">⚠️ 알레르기 유발 가능 성분</div>
+        <div style="font-size:12.5px;color:#78350F;font-weight:800">${data.allergens.map(a => escapeHtml(a)).join(' · ')}</div>
+      </div>`;
+  }
+
+  // 성분별 상세 (safety 순 정렬됨)
+  html += `<div style="background:#FFF;border-radius:12px;padding:12px 14px;margin-bottom:12px;border:0.5px solid #EFEFEF">
+    <div style="font-size:11px;font-weight:900;color:#0F1F1A;margin-bottom:8px">📋 성분별 분석 (${ingredients.length}개)</div>`;
+  ingredients.forEach(ing => {
+    const s = ing.safety;
+    const color = s === 'safe' ? '#059669' : s === 'caution' ? '#B45309' : s === 'warning' ? '#EA580C' : '#DC2626';
+    const bg = s === 'safe' ? '#F0FDF4' : s === 'caution' ? '#FEF3C7' : s === 'warning' ? '#FED7AA' : '#FEE2E2';
+    const emoji = s === 'safe' ? '🟢' : s === 'caution' ? '🟡' : s === 'warning' ? '🟠' : '🔴';
+    const safetyLabel = s === 'safe' ? '안전' : s === 'caution' ? '유의' : s === 'warning' ? '주의' : '절제';
+    html += `
+      <div style="background:${bg};border-left:3px solid ${color};border-radius:8px;padding:9px 11px;margin-bottom:5px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:900;color:${color}">
+          ${emoji} ${escapeHtml(ing.name)} <span style="font-size:10px;color:${color};opacity:.7;font-weight:700">· ${escapeHtml(ing.type || '')} · ${safetyLabel}</span>
+        </div>
+        ${ing.impact ? `<div style="font-size:10.5px;color:#3F2E1E;font-weight:700;line-height:1.5;margin-top:3px">🐾 ${escapeHtml(ing.impact)}</div>` : ''}
+      </div>`;
+  });
+  html += `</div>`;
+
+  // 급여 권장
+  if (data.recommendation) {
+    html += `
+      <div style="background:#F0FDF4;border-radius:12px;padding:11px 14px;margin-bottom:12px;border:0.5px solid #BBF7D0">
+        <div style="font-size:11px;color:#059669;font-weight:900;letter-spacing:1px;margin-bottom:4px">💡 급여 권장</div>
+        <div style="font-size:12px;color:#065F46;font-weight:700;line-height:1.55">${escapeHtml(data.recommendation)}</div>
+      </div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════════════
