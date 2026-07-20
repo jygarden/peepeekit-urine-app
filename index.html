@@ -4056,8 +4056,8 @@ function showScreen(id) {
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
   // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯 + 스트릭·체크인
   if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} }
-  // 촬영 화면 첫 진입 시 팁 표시
-  if (id === 'screenCapture') maybeShowCaptureTip();
+  // 촬영 화면 첫 진입 시 팁 표시 + 프로필 배너 렌더링
+  if (id === 'screenCapture') { maybeShowCaptureTip(); try { renderCaptureProfileBanner(); } catch(e){} }
   // 식단 사진 화면 진입 시 프로필 배너 렌더링
   if (id === 'screenFoodCapture') { try { renderCaptureProfileBanner(); } catch(e){} }
   // 성분 분석 화면: 촬영 가이드는 HTML에 정적으로 표시 (JS 로직 제거)
@@ -4989,28 +4989,31 @@ function enterPet() {
   }
 }
 function enterHuman() {
-  // 🔀 활성 프로필이 아이면 아이 건강 체크 화면으로 (kid 기능 제거로 실행 안 됨)
-  try {
-    const active = getActiveProfile();
-    if (active && active.type === 'kid') { enterKidsCheck(); return; }
-  } catch(e) {}
   subjectMode = 'human';
-  // 🆕 개인 프로필의 lifestyle 자동 로드 (사용자에게 안 보이지만 결과 해석에 사용)
+  // 🆕 개인 프로필의 lifestyle · gender 자동 로드
   try {
     const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
     if (p.lifestyle) humanLifestyle = p.lifestyle;
+    if (p.gender) humanGender = p.gender;
   } catch(e) {}
+
+  // 🚀 프로필 있으면 본인 정보 확인 화면 스킵 → 바로 촬영 화면으로
   const profiles = getProfiles().filter(p => p.type === 'human');
   if (profiles.length === 0) {
+    // 프로필 없음 → 신규 등록 폼
     addNewProfileFlow();
-  } else {
-    document.getElementById('profilePickerTitle').innerHTML = '누구의<br>건강을 확인할까요?';
-    document.getElementById('profilePickerSub').textContent = '프로필을 선택하거나 새로 추가하세요';
-    document.getElementById('profileAddLabel').textContent = '새 가족 추가';
-    profileEditMode = false;
-    renderProfileList();
-    showScreen('screenProfilePicker');
+    return;
   }
+  // 활성 프로필 우선, 없으면 첫 번째
+  const active = getActiveProfile();
+  const target = (active && (active.type === 'main' || active.type === 'adult')) ? active : profiles[0];
+  if (target) {
+    activeProfile = target;
+    if (target.lifestyle) humanLifestyle = target.lifestyle;
+    if (target.gender) humanGender = target.gender;
+  }
+  // 촬영 화면 바로 진입
+  goCapture('human');
 }
 
 // ════════════════════════════════════════════════════════════════
