@@ -54,13 +54,20 @@ function buildPetFoodPrompt(petType) {
 
   return `한국어 JSON만. 마크다운 X.
 
-사진의 반려동물 사료·간식 성분표를 분석. 대상: ${petName}.
+사진의 반려동물 사료·간식을 분석. 대상: ${petName}.
+
+★★★ 판단 순서 (하이브리드 인식) ★★★
+1. 사진에 **원재료명·성분표가 명확히 보이면** → 그 텍스트를 OCR로 정확히 읽어 성분 추출 (source: "ocr")
+2. 원재료명이 안 보이고 **제품 앞면·상표만 보이면** → 제품·브랜드를 식별하고 알려진 대표 성분을 추정 (source: "product_recognition")
+3. 둘 다 애매하면 → 보이는 정보로 최대한 (source: "partial")
+4. 완전히 모르면 → ingredients 빈 배열 + summary에 "제품을 인식하지 못했어요. 원재료명이 있는 뒷면을 다시 찍어주세요" (source: "unknown")
 
 ★★★ 절대 규칙 ★★★
-1. 원재료명의 모든 성분을 추출 (괄호 안 성분도 별도로 분리)
-2. ingredients 배열 최소 8개 이상
+1. 성분 추출 최소 8개 이상 목표 (원재료명 사진일 때 특히)
+2. ingredients 배열 원소마다 성분 정보
 3. productName은 반드시 "" 빈 문자열 (제품명 노출 금지)
 4. ${petName} 관점에서 안전성 평가 (사람 기준 X)
+5. source 필드 필수 · confidence(0~100) 필수
 
 ★★★ ${petName} 독성 성분 (danger 필수 표시) ★★★
 ${toxicList}
@@ -71,10 +78,12 @@ ${toxicList}
 - warning: 옥수수시럽, BHA/BHT/에톡시퀸(합성 산화방지제), 인공색소(적색40호·황색5호 등), 프로필렌글리콜, MSG, 아질산나트륨, 카라멜색소
 - danger: (위 독성 성분 리스트) + 자일리톨, 초콜릿, 포도, 양파, 마늘, 카페인
 
-allergens: ${petName} 흔한 알레르기 유발 성분 중 사진에 있는 것만 (닭·소·양·유제품·계란·밀·옥수수·콩·생선 등)
+allergens: ${petName} 흔한 알레르기 유발 성분 중 실제 확인된 것만
 
 응답 (JSON):
 {
+  "source": "ocr|product_recognition|partial|unknown",
+  "confidence": 0~100,
   "ingredients": [
     {"name":"성분명","type":"단백질|탄수화물|지방|비타민|미네랄|합성첨가물|보존료|기타","safety":"safe|caution|warning|danger","impact":"${petName} 관점 1문장","description":"1문장","dailyLimit":""}
   ],
@@ -157,6 +166,18 @@ function fillMissingFields(r, petType) {
   if (!r.summary) r.summary = '분석을 완료했어요.';
   if (!r.recommendation) r.recommendation = '적정량 급여를 권장합니다. 새 사료로 전환 시 7~10일에 걸쳐 서서히 바꿔주세요.';
   if (!r.nutritionBalance) r.nutritionBalance = '';
+
+  // 하이브리드 인식: source / confidence 정규화
+  const validSources = ['ocr', 'product_recognition', 'partial', 'unknown'];
+  r.source = validSources.includes(r.source) ? r.source : (r.ingredients.length > 5 ? 'ocr' : 'partial');
+  r.confidence = Math.max(0, Math.min(100, Number(r.confidence) || (r.source === 'ocr' ? 90 : r.source === 'product_recognition' ? 60 : 40)));
+
+  // 인식 실패 시 안내 메시지 보정
+  if (r.source === 'unknown' || r.ingredients.length === 0) {
+    r.summary = '제품을 정확히 인식하지 못했어요. 봉투 뒷면의 원재료명이 잘 보이도록 다시 촬영하면 정확한 분석이 가능해요.';
+    r.recommendation = '봉투 뒷면 · 원재료명 부분을 크게 찍어주세요.';
+  }
+
   r.petType = petType;
   return r;
 }
