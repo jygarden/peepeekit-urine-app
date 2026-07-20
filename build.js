@@ -58,6 +58,7 @@ async function build() {
             'openStreakInfo', 'openProfileSwitcher', 'closeProfileSwitcher', 'openCheckinModal', 'closeCheckin',
             'switchProfile', 'openAddProfileForm', 'saveNewProfile', 'saveCheckin',
             'openProfileManager', 'closeProfileManager', 'editFamilyProfileFromManager', 'confirmDeleteFamilyProfile',
+            'enterPetFood', 'selectPetFoodType', 'handlePetFoodFile', 'analyzePetFood', 'renderPetFoodResult',
             'apSelectType', 'apSelectEmoji', 'apSelectGender',
             'saveAllergyProfile', 'toggleAllergy', 'openPersonalProfile', 'closePersonalProfile', 'savePersonalProfile', 'updateAgePreview',
             'enterHuman', 'enterPet', 'enterFood', 'enterIngredient', 'enterKidsSection',
