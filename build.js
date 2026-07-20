@@ -142,6 +142,28 @@ async function build() {
     }
   }
 
+  // 🖼 assets 폴더 재귀 복사 (촬영 가이드 사진 등)
+  function copyDirRecursive(src, dest) {
+    if (!fs.existsSync(src)) return 0;
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+    let count = 0;
+    for (const f of fs.readdirSync(src)) {
+      if (f.startsWith('.')) continue; // .DS_Store 등 스킵
+      const srcPath = path.join(src, f);
+      const destPath = path.join(dest, f);
+      const st = fs.statSync(srcPath);
+      if (st.isDirectory()) {
+        count += copyDirRecursive(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+        count++;
+      }
+    }
+    return count;
+  }
+  const assetsCount = copyDirRecursive(path.join(rootDir, 'assets'), path.join(distDir, 'assets'));
+  if (assetsCount > 0) console.log(`   assets 파일 ${assetsCount}개 복사`);
+
   // API 파일들 dist/api로 복사
   const apiSrcDir = path.join(rootDir, 'api');
   const apiDestDir = path.join(distDir, 'api');
