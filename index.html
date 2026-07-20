@@ -4990,30 +4990,34 @@ function enterPet() {
 }
 function enterHuman() {
   subjectMode = 'human';
-  // 🆕 개인 프로필의 lifestyle · gender 자동 로드
+
+  // 🆕 개인 프로필에서 정보 자동 로드 (v2 회원가입 데이터)
+  const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
+  const name = p.name || localStorage.getItem('userName') || '';
+
+  // hidden 필드에 프로필 데이터 자동 채움 (저장 로직 호환)
   try {
-    const p = (typeof getPersonalProfile === 'function' && getPersonalProfile()) || {};
-    if (p.lifestyle) humanLifestyle = p.lifestyle;
-    if (p.gender) humanGender = p.gender;
+    const nameInput = document.getElementById('humanName');
+    const yearInput = document.getElementById('humanBirthYear');
+    const monthInput = document.getElementById('humanBirthMonth');
+    const contactInput = document.getElementById('humanContact');
+    if (nameInput) nameInput.value = name;
+    if (yearInput) yearInput.value = p.birthYear || '';
+    if (monthInput) monthInput.value = p.birthMonth || '';
+    if (contactInput) contactInput.value = p.phone || p.contact || '';
   } catch(e) {}
 
-  // 🚀 프로필 있으면 본인 정보 확인 화면 스킵 → 바로 촬영 화면으로
-  const profiles = getProfiles().filter(p => p.type === 'human');
-  if (profiles.length === 0) {
-    // 프로필 없음 → 신규 등록 폼
-    addNewProfileFlow();
+  if (p.lifestyle) humanLifestyle = p.lifestyle;
+  if (p.gender) humanGender = p.gender;
+
+  // 🚀 개인 프로필 있으면 (거의 모든 유저) → 바로 촬영 화면
+  if (name || p.gender || p.birthYear) {
+    goCapture('human');
     return;
   }
-  // 활성 프로필 우선, 없으면 첫 번째
-  const active = getActiveProfile();
-  const target = (active && (active.type === 'main' || active.type === 'adult')) ? active : profiles[0];
-  if (target) {
-    activeProfile = target;
-    if (target.lifestyle) humanLifestyle = target.lifestyle;
-    if (target.gender) humanGender = target.gender;
-  }
-  // 촬영 화면 바로 진입
-  goCapture('human');
+
+  // 완전 신규 (개인 프로필도 없음) → 폼 화면
+  addNewProfileFlow();
 }
 
 // ════════════════════════════════════════════════════════════════
