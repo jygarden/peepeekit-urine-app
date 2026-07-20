@@ -2566,15 +2566,49 @@
         </div>
       </div>
     </div>
-    <div class="warning-banner" style="background:#FFF7ED;border-color:#FDBA74">
-      <div class="wtitle" style="color:#9A3412">📸 사진 촬영 팁</div>
-      <ul style="color:#7C2D12">
-        <li>음식 전체가 잘 보이게 위에서 촬영</li>
-        <li>식기·그릇 함께 찍으면 양 추정에 도움됨</li>
-        <li>밝은 조명 아래에서</li>
-        <li>한 식사의 음식 전부 다 한 사진에</li>
-      </ul>
+    <!-- ✅ 이렇게 촬영하세요 (예시 사진 + 3-Step) -->
+    <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(234,88,12,.06)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="background:#FFEDD5;color:#EA580C;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">GOOD</span>
+        <span style="font-size:13px;font-weight:900;color:#0F1F1A">✅ 이렇게 촬영하세요</span>
+      </div>
+
+      <!-- 예시 사진 -->
+      <div style="background:#FEFCF5;border-radius:12px;padding:8px;margin-bottom:12px;text-align:center">
+        <img src="assets/guide/food-tray.jpg" alt="식단 촬영 예시" style="max-width:100%;max-height:240px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+        <div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:6px">위에서 내려다본 각도 · 모든 반찬이 다 보이게</div>
+      </div>
+
+      <!-- 3-Step 가이드 -->
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#EA580C;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">1</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">모든 반찬이 <b style="color:#EA580C">다 보이게</b></div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">가려진 음식 없이 · 한 식사를 한 사진에</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#EA580C;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">2</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#EA580C">위에서 내려다보는</b> 각도</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">식판·쟁반이 다 보이게 정면 촬영</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#EA580C;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">3</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#EA580C">밝은 조명</b> (창가·형광등)</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">식기·그릇 함께 찍으면 양 추정 정확</div></div>
+        </div>
+      </div>
     </div>
+
+    <!-- ❌ 이런 건 피하세요 -->
+    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="background:#FEE2E2;color:#DC2626;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">DON'T</span>
+        <span style="font-size:12.5px;font-weight:900;color:#7F1D1D">❌ 이런 건 피하세요</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:#7F1D1D;font-weight:800;text-align:center">
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🍽</div><div style="margin-top:3px">가려진 반찬</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🌑</div><div style="margin-top:3px">어두운 조명</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">📱</div><div style="margin-top:3px">흐린 사진</div></div>
+      </div>
+    </div>
+
     <button class="upload-btn accent" style="border-color:#F59E0B" onclick="safeCameraClick('foodCameraInput')">
       <div class="icon">📷</div>
       <div class="lbl" style="color:#F59E0B">카메라로 촬영</div>
@@ -2820,15 +2854,47 @@
       <div class="step-dot"></div>
     </div>
 
-    <div class="warning-banner">
-      <div class="wtitle">📸 촬영 전 꼭 확인하세요!</div>
-      <ul>
-        <li>검사 후 <strong>60~120초 후</strong>에 촬영하세요</li>
-        <li><strong>빛의 밝기와 주변 환경</strong>에 따라 색상이 다르게 찍혀 결과가 달라질 수 있습니다</li>
-        <li>직사광선을 피하고 <strong>형광등 아래 평평한 곳</strong>에서 촬영하세요</li>
-        <li>키트 전체가 <strong>화면에 꽉 차게</strong> 찍어야 정확합니다</li>
-        <li>그림자와 반사광이 없도록 해주세요</li>
-      </ul>
+    <!-- ✅ 이렇게 촬영하세요 (예시 사진 + 3-Step) -->
+    <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="background:#F0FDF4;color:#059669;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">GOOD</span>
+        <span style="font-size:13px;font-weight:900;color:#0F1F1A">✅ 이렇게 촬영하세요</span>
+      </div>
+
+      <!-- 예시 사진 -->
+      <div style="background:#FEFCF5;border-radius:12px;padding:8px;margin-bottom:12px;text-align:center">
+        <img src="assets/guide/urine-strip.jpg" alt="소변검사 스틱 촬영 예시" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+        <div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:6px">스틱 전체가 화면에 꽉 차게 · 밝은 배경</div>
+      </div>
+
+      <!-- 3-Step 가이드 -->
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">1</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">검사 <b style="color:#059669">60~120초 후</b> 촬영</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">색이 안정된 상태에서 정확한 결과</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">2</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#059669">형광등 아래</b> 평평한 곳</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">일정한 조명이 정확한 색상 판독의 핵심</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">3</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">스틱 전체가 <b style="color:#059669">화면에 꽉 차게</b></div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">여백 최소화 · 모든 색상 패드 다 보이게</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ❌ 이런 건 피하세요 -->
+    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="background:#FEE2E2;color:#DC2626;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">DON'T</span>
+        <span style="font-size:12.5px;font-weight:900;color:#7F1D1D">❌ 이런 건 피하세요</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:#7F1D1D;font-weight:800;text-align:center">
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">☀️</div><div style="margin-top:3px">직사광선</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🌑</div><div style="margin-top:3px">그림자·반사</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">📱</div><div style="margin-top:3px">흔들린 사진</div></div>
+      </div>
     </div>
 
     <button class="upload-btn accent" onclick="safeCameraClick('cameraInput')">
@@ -2872,7 +2938,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>제미나이 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
