@@ -78,7 +78,9 @@ async function build() {
             'selectPet', 'selectGender', 'selectEnv', 'selectHumanGender', 'selectLifestyle',
             'formatPhone', 'goCapture', 'showAgePicker',
             'saveNickname', 'closeReminder',
-            'openFortune', 'openFortuneResult', 'startFortuneDraw', 'shareFortuneStory'
+            'openFortune', 'openFortuneResult', 'startFortuneDraw', 'shareFortuneStory',
+            'enterSupplement', 'goAddSupplement', 'saveNewSupplement', 'onSupplementTaken',
+            'editSupplement', '_saveEditSupplement', '_confirmDeleteSupplement', '_previewSupplementTiming'
           ]
         },
         format: {
