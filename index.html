@@ -2493,6 +2493,23 @@
     </div>
     <!-- 🧬 맞춤 분석 프로필 (사진 찍기 전 입력) -->
     <div id="captureProfileBanner" style="margin-bottom:12px"></div>
+
+    <!-- 👋 도입 카드 (필라이즈 스타일) -->
+    <div style="background:linear-gradient(135deg,#FFF7ED,#FED7AA);border:1px solid #FDBA74;border-radius:16px;padding:16px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:38px;height:38px;background:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(234,88,12,.15)">🍽</div>
+        <div>
+          <div style="font-size:14px;font-weight:900;color:#7C2D12;letter-spacing:-.3px">한 끼로 알아보는 영양 밸런스</div>
+          <div style="font-size:10.5px;color:#EA580C;font-weight:800;margin-top:1px">약 20초 · 음식 자동 인식 · AI가 코칭</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <div style="flex:1;background:rgba(255,255,255,.75);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🥗</div><div style="font-size:9.5px;font-weight:900;color:#7C2D12;margin-top:1px">칼로리·영양소</div></div>
+        <div style="flex:1;background:rgba(255,255,255,.75);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">⚖️</div><div style="font-size:9.5px;font-weight:900;color:#7C2D12;margin-top:1px">균형 점수</div></div>
+        <div style="flex:1;background:rgba(255,255,255,.75);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💡</div><div style="font-size:9.5px;font-weight:900;color:#7C2D12;margin-top:1px">개선 팁</div></div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="field">
         <label>어떤 식사·사료인가요?</label>
@@ -2562,6 +2579,16 @@
       <div class="lbl">갤러리에서 선택</div>
       <div class="sub">저장된 사진을 불러오세요</div>
     </button>
+
+    <!-- 🔒 개인정보 안내 -->
+    <div style="display:flex;align-items:flex-start;gap:8px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 12px;margin:10px 0 8px">
+      <div style="font-size:15px;line-height:1.2">🔒</div>
+      <div style="flex:1">
+        <div style="font-size:11.5px;font-weight:900;color:#7C2D12">사진은 안전하게 처리돼요</div>
+        <div style="font-size:10px;color:#9A3412;font-weight:600;margin-top:1px;line-height:1.4">AI 분석 후 서버에 저장되지 않아요 · 결과만 내 기기에 남아요</div>
+      </div>
+    </div>
+
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
@@ -2797,6 +2824,22 @@
       <div class="step-dot"></div>
     </div>
 
+    <!-- 👋 도입 카드 (필라이즈 스타일) -->
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:16px;padding:16px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:38px;height:38px;background:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(5,150,105,.15)">🧪</div>
+        <div>
+          <div id="captureIntroTitle" style="font-size:14px;font-weight:900;color:#065F46;letter-spacing:-.3px">소변으로 몸 상태 체크</div>
+          <div id="captureIntroSub" style="font-size:10.5px;color:#059669;font-weight:800;margin-top:1px">약 30초 · 10가지 항목 자동 판독</div>
+        </div>
+      </div>
+      <div id="captureIntroChips" style="display:flex;gap:6px">
+        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💧</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">수분·pH</div></div>
+        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🩸</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">단백뇨·잠혈</div></div>
+        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🍬</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">당·케톤</div></div>
+      </div>
+    </div>
+
     <!-- ✅ 이렇게 촬영하세요 (예시 사진 + 3-Step) -->
     <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
@@ -2850,6 +2893,15 @@
       <div class="lbl">갤러리에서 선택</div>
       <div class="sub">저장된 사진을 불러오세요</div>
     </button>
+
+    <!-- 🔒 개인정보 안내 -->
+    <div style="display:flex;align-items:flex-start;gap:8px;background:#F8FAF9;border:1px solid #E5EBE7;border-radius:12px;padding:10px 12px;margin:10px 0 8px">
+      <div style="font-size:15px;line-height:1.2">🔒</div>
+      <div style="flex:1">
+        <div style="font-size:11.5px;font-weight:900;color:#0F1F1A">사진은 안전하게 처리돼요</div>
+        <div style="font-size:10px;color:#65756B;font-weight:600;margin-top:1px;line-height:1.4">AI 분석 후 서버에 저장되지 않아요 · 결과만 내 기기에 남아요</div>
+      </div>
+    </div>
 
     <button class="btn-outline" onclick="backToForm()">← 이전으로</button>
   </div>
@@ -3233,41 +3285,119 @@
       <div class="page-title">🐾 반려동물 사료·간식 분석</div>
     </div>
 
+    <!-- 👋 히어로 카드 (필라이즈 벤치마킹 · 반려동물 특화) -->
+    <div style="position:relative;background:linear-gradient(135deg,#065F46,#059669);border-radius:20px;padding:18px 18px 16px;margin-bottom:14px;overflow:hidden;box-shadow:0 8px 22px rgba(5,150,105,.28)">
+      <!-- 배경 데코 -->
+      <div style="position:absolute;top:-30px;right:-30px;font-size:120px;opacity:.10;transform:rotate(15deg);pointer-events:none">🦴</div>
+      <div style="position:absolute;bottom:-16px;left:-14px;font-size:70px;opacity:.10;transform:rotate(-10deg);pointer-events:none">🐾</div>
+      <div style="position:relative;z-index:1">
+        <div style="display:inline-block;background:rgba(255,255,255,.22);color:#FFF;font-size:9.5px;font-weight:900;padding:3px 8px;border-radius:20px;letter-spacing:1px;margin-bottom:8px">PET FOOD SCAN · AI 분석</div>
+        <div style="font-size:19px;font-weight:900;color:#FFF;letter-spacing:-.5px;line-height:1.25;margin-bottom:6px">우리 아이 사료,<br>정말 <span style="background:linear-gradient(90deg,#FDE68A,#FBBF24);-webkit-background-clip:text;background-clip:text;color:transparent">안전할까요?</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.88);font-weight:700;line-height:1.5;margin-bottom:12px">
+          성분표 사진 한 장으로 <b style="color:#FDE68A">독성 성분·유해 첨가물</b>을<br>수의영양학 기반으로 자동 검사해요.
+        </div>
+        <div style="display:flex;gap:6px">
+          <div style="flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.20);border-radius:10px;padding:9px 6px;text-align:center;backdrop-filter:blur(6px)">
+            <div style="font-size:15px;line-height:1">⏱</div>
+            <div style="font-size:9.5px;font-weight:900;color:#FFF;margin-top:2px">약 30초</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.20);border-radius:10px;padding:9px 6px;text-align:center;backdrop-filter:blur(6px)">
+            <div style="font-size:15px;line-height:1">🧠</div>
+            <div style="font-size:9.5px;font-weight:900;color:#FFF;margin-top:2px">Gemini AI</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.20);border-radius:10px;padding:9px 6px;text-align:center;backdrop-filter:blur(6px)">
+            <div style="font-size:15px;line-height:1">📋</div>
+            <div style="font-size:9.5px;font-weight:900;color:#FFF;margin-top:2px">등급 리포트</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.20);border-radius:10px;padding:9px 6px;text-align:center;backdrop-filter:blur(6px)">
+            <div style="font-size:15px;line-height:1">🆓</div>
+            <div style="font-size:9.5px;font-weight:900;color:#FFF;margin-top:2px">무료</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 반려동물 타입 선택 -->
     <div class="card" style="padding:16px;margin-bottom:12px">
-      <div style="font-size:12.5px;font-weight:900;color:#374151;margin-bottom:10px">🐾 누구를 위한 분석인가요?</div>
+      <div style="font-size:12.5px;font-weight:900;color:#374151;margin-bottom:4px">🐾 누구를 위한 분석인가요?</div>
+      <div style="font-size:10.5px;color:#6B7280;font-weight:700;margin-bottom:10px">종별로 독성 성분·알레르기 기준이 달라요</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <button class="meal-time-btn active" id="pfTypeDog" onclick="selectPetFoodType('dog')">🐶<br>강아지</button>
         <button class="meal-time-btn" id="pfTypeCat" onclick="selectPetFoodType('cat')">🐱<br>고양이</button>
       </div>
     </div>
 
-    <!-- 촬영 가이드 -->
+    <!-- ✅ 이렇게 촬영하세요 (필라이즈 스타일 3-Step + 시각 예시) -->
     <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <span style="background:#F0FDF4;color:#059669;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">GOOD</span>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+        <span style="background:#F0FDF4;color:#059669;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">HOW TO</span>
         <span style="font-size:13px;font-weight:900;color:#0F1F1A">✅ 이렇게 촬영하세요</span>
       </div>
+
+      <!-- 시각 예시 (라벨 일러스트) -->
+      <div style="background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border:1px dashed #86EFAC;border-radius:12px;padding:14px 10px;margin-bottom:12px;text-align:center">
+        <div style="display:inline-block;background:#FFF;border:2px solid #059669;border-radius:10px;padding:10px 14px;box-shadow:0 3px 10px rgba(5,150,105,.15)">
+          <div style="font-size:9px;font-weight:900;color:#059669;letter-spacing:1px;margin-bottom:5px">원재료명 · INGREDIENTS</div>
+          <div style="font-size:8.5px;color:#374151;font-weight:600;line-height:1.55;text-align:left;max-width:200px">닭고기, 현미, 옥수수, 닭 부산물, 동물성 지방, 비트 펄프, 계란, 어유, BHA, 카라멜색소, 아연 프로테네이트...</div>
+        </div>
+        <div style="font-size:10px;color:#065F46;font-weight:800;margin-top:8px">👆 봉투 뒷면 이 부분을 크게 찍어주세요</div>
+      </div>
+
+      <!-- 3-Step -->
       <div style="display:flex;flex-direction:column;gap:9px">
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">1</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">사료·간식 <b style="color:#059669">성분표</b>를 촬영</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">봉투 뒷면·옆면 원재료명 부분</div></div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#059669">원재료명</b> 부분을 화면 가득</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">봉투 뒷면·옆면의 성분 리스트를 정면으로</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">2</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">글자가 <b style="color:#059669">화면에 꽉 차게</b></div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">가까이·정면으로</div></div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">글자가 <b style="color:#059669">또렷하게</b> 읽히도록</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">가까이 · 흔들림 없이 · 접힌 부분 펴서</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">3</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#059669">밝은 조명</b> · 반사 X</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">약 20~40초 안에 결과 확인</div></div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#059669">밝은 조명</b> · 반사·그림자 X</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">비닐 표면 반사 주의 · 각도 살짝 기울여도 OK</div></div>
         </div>
       </div>
     </div>
 
-    <!-- 독성 성분 경고 배너 -->
-    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:11px 14px;margin-bottom:14px">
-      <div style="font-size:11.5px;font-weight:900;color:#991B1B;margin-bottom:3px">🚨 이런 성분이 있으면 즉시 알려드려요</div>
-      <div style="font-size:10.5px;color:#7F1D1D;font-weight:700;line-height:1.55">초콜릿·자일리톨·포도·양파·마늘 등 반려동물 독성 성분 자동 검출</div>
+    <!-- ❌ 이런 건 피하세요 -->
+    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="background:#FEE2E2;color:#DC2626;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">DON'T</span>
+        <span style="font-size:12.5px;font-weight:900;color:#7F1D1D">❌ 이런 건 피하세요</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:#7F1D1D;font-weight:800;text-align:center">
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">📦</div><div style="margin-top:3px">앞면·제품명</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">✨</div><div style="margin-top:3px">비닐 반사</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🌫</div><div style="margin-top:3px">흐린·기울어짐</div></div>
+      </div>
+    </div>
+
+    <!-- 🚨 독성 성분 경고 (강조) -->
+    <div style="background:linear-gradient(135deg,#FEF2F2,#FEE2E2);border:1px solid #F87171;border-radius:14px;padding:13px 14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:15px">🚨</span>
+        <span style="font-size:12.5px;font-weight:900;color:#7F1D1D">이런 성분이 나오면 즉시 경고해요</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:6px">
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:6px 3px;text-align:center"><div style="font-size:16px;line-height:1">🍫</div><div style="font-size:9px;color:#991B1B;font-weight:900;margin-top:2px">초콜릿</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:6px 3px;text-align:center"><div style="font-size:16px;line-height:1">🍇</div><div style="font-size:9px;color:#991B1B;font-weight:900;margin-top:2px">포도</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:6px 3px;text-align:center"><div style="font-size:16px;line-height:1">🧅</div><div style="font-size:9px;color:#991B1B;font-weight:900;margin-top:2px">양파·마늘</div></div>
+        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:6px 3px;text-align:center"><div style="font-size:16px;line-height:1">🍬</div><div style="font-size:9px;color:#991B1B;font-weight:900;margin-top:2px">자일리톨</div></div>
+      </div>
+      <div style="font-size:10px;color:#7F1D1D;font-weight:700;line-height:1.5">+ BHA·BHT·에톡시퀸(합성 산화방지제), 인공색소, 프로필렌글리콜 등 유해 첨가물도 검출</div>
+    </div>
+
+    <!-- 🎁 결과로 무엇을 알 수 있나요? -->
+    <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:14px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:11.5px;font-weight:900;color:#111827;margin-bottom:8px">🎁 결과 리포트로 알 수 있어요</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#374151;font-weight:700"><span style="width:18px;height:18px;background:#DCFCE7;color:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0">✓</span><span>사료 종합 <b style="color:#059669">A~F 등급</b></span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#374151;font-weight:700"><span style="width:18px;height:18px;background:#DCFCE7;color:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0">✓</span><span>성분별 <b style="color:#059669">안전·주의·경고·위험</b> 4단계</span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#374151;font-weight:700"><span style="width:18px;height:18px;background:#DCFCE7;color:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0">✓</span><span>알레르기 유발 성분 <b style="color:#059669">자동 표시</b></span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#374151;font-weight:700"><span style="width:18px;height:18px;background:#DCFCE7;color:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0">✓</span><span>단백·탄수·지방 <b style="color:#059669">영양 균형</b> 평가</span></div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#374151;font-weight:700"><span style="width:18px;height:18px;background:#DCFCE7;color:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0">✓</span><span>적정 급여량·빈도 <b style="color:#059669">가이드</b></span></div>
+      </div>
     </div>
 
     <button class="upload-btn accent" style="border-color:#059669" onclick="safeCameraClick('petFoodCameraInput')">
@@ -3282,6 +3412,16 @@
     </button>
     <input type="file" id="petFoodCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePetFoodFile(event)">
     <input type="file" id="petFoodGalleryInput" accept="image/*" style="display:none" onchange="handlePetFoodFile(event)">
+
+    <!-- 🔒 안심 안내 -->
+    <div style="display:flex;align-items:flex-start;gap:8px;background:#F8FAF9;border:1px solid #E5EBE7;border-radius:12px;padding:10px 12px;margin:10px 0 8px">
+      <div style="font-size:15px;line-height:1.2">🔒</div>
+      <div style="flex:1">
+        <div style="font-size:11.5px;font-weight:900;color:#0F1F1A">사진은 안전하게 처리돼요</div>
+        <div style="font-size:10px;color:#65756B;font-weight:600;margin-top:1px;line-height:1.4">AI 분석 후 서버에 저장되지 않아요 · 결과만 내 기기에 남아요<br>본 서비스는 참고용이며, 이상 증상이 있으면 <b>동물병원 상담</b>을 권장합니다</div>
+      </div>
+    </div>
+
     <button class="btn-outline" onclick="goHome()">← 홈으로</button>
   </div>
 
@@ -8953,7 +9093,34 @@ function goCapture(mode) {
     }
   }
   subjectMode = mode;
+  // 🎨 촬영 인트로 카드 mode별 콘텐츠 스왑
+  updateCaptureIntro(mode);
   showScreen('screenCapture');
+}
+
+// 촬영 화면 상단 인트로 카드 텍스트/칩 mode에 따라 갱신
+function updateCaptureIntro(mode) {
+  const titleEl = document.getElementById('captureIntroTitle');
+  const subEl = document.getElementById('captureIntroSub');
+  const chipsEl = document.getElementById('captureIntroChips');
+  if (!titleEl || !subEl || !chipsEl) return;
+  if (mode === 'pet') {
+    titleEl.textContent = '반려동물 소변 상태 체크';
+    subEl.textContent = '약 30초 · 신장·비뇨기 이상 신호 자동 감지';
+    chipsEl.innerHTML = `
+      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🐾</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">신장·방광</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💧</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">수분·pH</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">⚠️</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">잠혈·당</div></div>
+    `;
+  } else {
+    titleEl.textContent = '소변으로 몸 상태 체크';
+    subEl.textContent = '약 30초 · 10가지 항목 자동 판독';
+    chipsEl.innerHTML = `
+      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💧</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">수분·pH</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🩸</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">단백뇨·잠혈</div></div>
+      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🍬</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">당·케톤</div></div>
+    `;
+  }
 }
 
 // ══════════════════════════════════════
