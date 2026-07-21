@@ -4168,8 +4168,10 @@ async function openCustomCamera(callback) {
 
 // safeCameraClick — 커스텀 카메라 사용 (input file 우회)
 function safeCameraClick(inputId) {
-  const isFood = inputId.indexOf('food') !== -1;
-  const isIngredient = inputId.indexOf('ingredient') !== -1;
+  // 🐾 반려동물 사료 (petFood) 먼저 체크 — food 검사보다 앞
+  const isPetFood = /petfood/i.test(inputId);
+  const isFood = !isPetFood && /food/i.test(inputId);
+  const isIngredient = /ingredient/i.test(inputId);
 
   // 첫 사용자 안내 (1회만)
   if (!localStorage.getItem('cameraGuideShown')) {
@@ -4182,11 +4184,19 @@ function safeCameraClick(inputId) {
       // 압축 — 성분표는 글자가 생명! 거의 안 줄이기
       const compressed = await compressImageForUpload(
         dataUrl,
-        isIngredient ? 2000 : (isFood ? 1000 : 1500),
-        isIngredient ? 0.92 : (isFood ? 0.7 : 0.85)
+        isIngredient || isPetFood ? 2000 : (isFood ? 1000 : 1500),
+        isIngredient || isPetFood ? 0.92 : (isFood ? 0.7 : 0.85)
       );
 
-      if (isFood) {
+      if (isPetFood) {
+        petFoodImageSrc = compressed;
+        petFoodImageB64 = compressed.split(',')[1];
+        const img = document.getElementById('petFoodPreviewImg');
+        if (img) img.src = compressed;
+        const eb = document.getElementById('petFoodErrorBox');
+        if (eb) eb.classList.remove('show');
+        showScreen('screenPetFoodPreview');
+      } else if (isFood) {
         foodImageSrc = compressed;
         foodImageB64 = compressed.split(',')[1];
         document.getElementById('foodPreviewImg').src = compressed;
