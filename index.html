@@ -5769,7 +5769,7 @@ async function analyzePetFood() {
 
   const startTime = Date.now();
   const ctrl = new AbortController();
-  const timeoutId = setTimeout(() => ctrl.abort(), 55000);
+  const timeoutId = setTimeout(() => ctrl.abort(), 85000);
   let res;
   try {
     res = await fetch('/api/analyze-pet-food', {
@@ -5866,16 +5866,19 @@ function renderPetFoodResult(data) {
 
   let html = '';
 
-  // 🎯 인식 방식 배지 (하이브리드)
+  // 🎯 인식 방식 배지 (하이브리드 + Grounding)
+  const isGrounded = data.grounded === true;
   const srcMap = {
     ocr: { icon:'🔤', label:'원재료명 판독', color:'#059669', bg:'#F0FDF4', desc:'뒷면 성분표를 정확히 읽었어요' },
-    product_recognition: { icon:'📦', label:'제품 추정', color:'#B45309', bg:'#FEFCF5', desc:'앞면 사진 기반 추정이라 부정확할 수 있어요. 뒷면 원재료명을 찍으면 정확해요' },
+    product_recognition: isGrounded
+      ? { icon:'🌐', label:'웹 검색으로 확인', color:'#059669', bg:'#F0FDF4', desc:'제품 페이지에서 실제 성분 리스트를 조회했어요' }
+      : { icon:'📦', label:'제품 추정', color:'#B45309', bg:'#FEFCF5', desc:'앞면 사진 기반 추정이라 부정확할 수 있어요. 뒷면 원재료명을 찍으면 정확해요' },
     partial: { icon:'🔍', label:'부분 판독', color:'#6B7280', bg:'#F9FAFB', desc:'일부 정보만 읽었어요. 더 선명하게 다시 찍으면 정확해요' },
     unknown: { icon:'❓', label:'판독 실패', color:'#DC2626', bg:'#FEF2F2', desc:'원재료명이 있는 뒷면을 다시 촬영해주세요' }
   };
   const src = srcMap[data.source] || srcMap.partial;
   const conf = Number(data.confidence) || 0;
-  const showWarnCTA = data.source === 'product_recognition' || data.source === 'partial';
+  const showWarnCTA = (data.source === 'product_recognition' && !isGrounded) || data.source === 'partial';
   html += `
     <div style="background:${src.bg};border:1px solid ${src.color}44;border-radius:12px;padding:11px 12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;gap:10px">
