@@ -3327,6 +3327,24 @@
       </div>
     </div>
 
+    <!-- 📷 어떤 면을 찍을 건가요? (분석 시간 최적화) -->
+    <div class="card" style="padding:16px;margin-bottom:12px">
+      <div style="font-size:12.5px;font-weight:900;color:#374151;margin-bottom:4px">📷 어떤 면을 찍을 건가요?</div>
+      <div style="font-size:10.5px;color:#6B7280;font-weight:700;margin-bottom:10px">선택에 따라 분석 방식이 달라져요</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="meal-time-btn active" id="pfSideBack" onclick="selectPetFoodSide('back')" style="padding:10px 6px">
+          <div style="font-size:20px;line-height:1;margin-bottom:3px">🔤</div>
+          <div style="font-size:11px;font-weight:900">뒷면 원재료명</div>
+          <div style="font-size:9px;color:#059669;font-weight:800;margin-top:2px">약 10초 · 정확도 95%+ 👑</div>
+        </button>
+        <button class="meal-time-btn" id="pfSideFront" onclick="selectPetFoodSide('front')" style="padding:10px 6px">
+          <div style="font-size:20px;line-height:1;margin-bottom:3px">📦</div>
+          <div style="font-size:11px;font-weight:900">제품 앞면</div>
+          <div style="font-size:9px;color:#B45309;font-weight:800;margin-top:2px">약 25초 · 웹 검색</div>
+        </button>
+      </div>
+    </div>
+
     <!-- ✅ 두 가지 방법 (하이브리드) -->
     <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
@@ -5749,6 +5767,14 @@ function handleFoodFile(input) {
 // 🐾 반려동물 사료·간식 분석 · 진입 / 파일 처리 / 분석 / 결과 렌더
 // ════════════════════════════════════════════════════════════════
 let _petFoodType = 'dog'; // 'dog' | 'cat'
+let _petFoodSide = 'back'; // 'back' | 'front' — 촬영 방향
+function selectPetFoodSide(side) {
+  _petFoodSide = side;
+  const b = document.getElementById('pfSideBack');
+  const f = document.getElementById('pfSideFront');
+  if (b) b.classList.toggle('active', side === 'back');
+  if (f) f.classList.toggle('active', side === 'front');
+}
 let petFoodImageB64 = null;
 let petFoodImageSrc = null;
 let currentPetFoodResult = null;
@@ -5804,13 +5830,19 @@ function _startPetFoodLoading() {
   if (!box) return;
   box.style.display = 'block';
   const started = Date.now();
-  // 단계별 콘텐츠 (경과 시간별 자동 전환)
-  const stages = [
-    { t: 0,  step: 1, emoji: '📷', title: '사진 확인 중...',      sub: '이미지 품질 체크하고 있어요',       bar: 12 },
-    { t: 2,  step: 2, emoji: '🔤', title: '성분 판독 중...',      sub: '봉투에 적힌 성분명을 읽어내는 중',   bar: 38 },
-    { t: 8,  step: 3, emoji: '🔍', title: '제품 정보 교차 검증',   sub: '더 정확한 성분을 조회하고 있어요',   bar: 62 },
-    { t: 20, step: 4, emoji: '🐾', title: '안전성 평가 중',       sub: '성분별 안전 등급을 매기고 있어요',   bar: 82 },
-    { t: 35, step: 4, emoji: '⏳', title: '거의 다 됐어요...',    sub: '결과 정리 중이에요',                bar: 93 }
+  const isFront = _petFoodSide === 'front';
+  // 단계별 콘텐츠 (앞/뒷면 별로 문구·타이밍 다름)
+  const stages = isFront ? [
+    { t: 0,  step: 1, emoji: '📷', title: '사진 확인 중...',       sub: '제품 정보를 파악하고 있어요',      bar: 15 },
+    { t: 2,  step: 2, emoji: '📦', title: '제품 식별 중...',       sub: '브랜드와 제품명을 인식하는 중',    bar: 35 },
+    { t: 6,  step: 3, emoji: '🌐', title: '웹에서 성분 조회 중',   sub: '실제 제품 페이지를 찾고 있어요',   bar: 65 },
+    { t: 18, step: 4, emoji: '🐾', title: '안전성 평가 중',        sub: '성분별 안전 등급을 매기고 있어요', bar: 85 },
+    { t: 30, step: 4, emoji: '⏳', title: '거의 다 됐어요...',     sub: '결과 정리 중이에요',              bar: 93 }
+  ] : [
+    { t: 0,  step: 1, emoji: '📷', title: '사진 확인 중...',       sub: '이미지 품질 체크하고 있어요',      bar: 20 },
+    { t: 1.5,step: 2, emoji: '🔤', title: '원재료명 판독 중...',    sub: '성분표에 적힌 성분을 읽어내는 중', bar: 55 },
+    { t: 5,  step: 4, emoji: '🐾', title: '안전성 평가 중',        sub: '성분별 안전 등급을 매기고 있어요', bar: 82 },
+    { t: 10, step: 4, emoji: '⏳', title: '거의 다 됐어요...',     sub: '결과 정리 중이에요',              bar: 93 }
   ];
   const tickFns = () => {
     const elapsed = (Date.now() - started) / 1000;
@@ -5861,7 +5893,7 @@ async function analyzePetFood() {
     res = await fetch('/api/analyze-pet-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageB64: petFoodImageB64, petType: _petFoodType }),
+      body: JSON.stringify({ imageB64: petFoodImageB64, petType: _petFoodType, side: _petFoodSide }),
       signal: ctrl.signal,
       cache: 'no-store'
     });
