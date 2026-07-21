@@ -24,18 +24,33 @@ module.exports = async function handler(req, res) {
     const prompt = buildPetFoodPrompt(petType);
 
     // 🚀 1차: 빠른 분석 (검색 X · JSON 모드)
-    let result = await tryAnalyze(apiKey, model, prompt, imageB64, false);
-    if (!result) return res.status(500).json({ error: 'AI 응답 없음' });
+    let attempt = await tryAnalyze(apiKey, model, prompt, imageB64, false);
+    let result = attempt.ok ? attempt.data : null;
+    let firstFailReason = attempt.ok ? null : attempt.reason;
+    let firstFailMsg = attempt.ok ? null : attempt.message;
 
-    // 🔍 앞면 사진이거나 신뢰도 낮으면 → 2차: Google 검색 활성화 재시도
-    const needsGrounding = (result.source === 'product_recognition' || result.source === 'partial') && (Number(result.confidence) || 0) < 75;
+    // 1차 실패 or 신뢰도 낮으면 → 2차: Google 검색 활성화
+    const needsGrounding = !result
+      || ((result.source === 'product_recognition' || result.source === 'partial') && (Number(result.confidence) || 0) < 75);
     if (needsGrounding) {
-      const groundedPrompt = prompt + `\n\n★★★ 이번엔 Google 검색 도구를 활용해 실제 제품 페이지에서 원재료 리스트를 찾아 확인하세요. 검색으로 확인된 성분만 나열하세요. 검색해서 확인되면 source: "product_recognition"이지만 confidence는 최대 85까지 가능. ★★★`;
-      const grounded = await tryAnalyze(apiKey, model, groundedPrompt, imageB64, true);
-      if (grounded && (Number(grounded.confidence) || 0) > (Number(result.confidence) || 0)) {
-        result = grounded;
-        result.grounded = true;
+      const groundedPrompt = prompt + `\n\n★★★ Google 검색 도구를 활용해 실제 제품 페이지에서 원재료 리스트를 찾아 확인하세요. 검색으로 확인된 성분만 나열하세요. 검색해서 확인되면 source: "product_recognition"이지만 confidence는 최대 85까지 가능. ★★★`;
+      const g = await tryAnalyze(apiKey, model, groundedPrompt, imageB64, true);
+      if (g.ok && g.data) {
+        const conf = Number(g.data.confidence) || 0;
+        const oldConf = Number(result?.confidence) || 0;
+        if (!result || conf > oldConf) {
+          result = g.data;
+          result.grounded = true;
+        }
       }
+    }
+
+    // 두 번 다 실패 → 진짜 판독 불가
+    if (!result) {
+      return res.status(500).json({
+        error: '사진에서 정보를 읽어내지 못했어요. 봉투 뒷면의 원재료명 부분을 다시 촬영해주세요.',
+        debug: { reason: firstFailReason, message: firstFailMsg }
+      });
     }
 
     result = fillMissingFields(result, petType);
@@ -126,28 +141,48 @@ async function callGemini(apiKey, model, prompt, imageB64, useGrounding = false)
 }
 
 async function extractText(response) {
-  if (!response || !response.ok) return null;
-  try {
-    const data = await response.json();
-    // 여러 parts 대응 (grounding 모드에서 텍스트가 분리될 수 있음)
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    return parts.map(p => p.text).filter(Boolean).join('\n') || null;
-  } catch(e) { return null; }
+  if (!response) return { text: null, reason: 'no_response' };
+  let data;
+  try { data = await response.json(); }
+  catch(e) { return { text: null, reason: 'invalid_json_response', status: response.status }; }
+
+  if (!response.ok) {
+    const errMsg = data?.error?.message || `HTTP ${response.status}`;
+    return { text: null, reason: 'gemini_error', status: response.status, message: errMsg, data };
+  }
+  // Safety block 등 finishReason 체크
+  const cand = data?.candidates?.[0];
+  const finish = cand?.finishReason;
+  const promptBlock = data?.promptFeedback?.blockReason;
+  if (promptBlock) return { text: null, reason: 'prompt_blocked', message: promptBlock };
+  if (finish && finish !== 'STOP' && finish !== 'MAX_TOKENS') {
+    return { text: null, reason: 'finish_' + finish.toLowerCase(), data };
+  }
+  const parts = cand?.content?.parts || [];
+  const text = parts.map(p => p.text).filter(Boolean).join('\n');
+  if (!text) return { text: null, reason: 'empty_text', data };
+  return { text, reason: 'ok' };
 }
 
-// 한 번 시도 → JSON 파싱까지 완료
+// 한 번 시도 → JSON 파싱까지 완료 · 실패 이유 정보 포함
 async function tryAnalyze(apiKey, model, prompt, imageB64, useGrounding) {
-  const geminiRes = await callGemini(apiKey, model, prompt, imageB64, useGrounding);
-  const rawText = await extractText(geminiRes);
-  if (!rawText) return null;
+  let geminiRes;
   try {
-    let cleaned = rawText.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+    geminiRes = await callGemini(apiKey, model, prompt, imageB64, useGrounding);
+  } catch(e) {
+    return { ok: false, reason: 'network', message: e.message };
+  }
+  const ex = await extractText(geminiRes);
+  if (!ex.text) return { ok: false, reason: ex.reason, message: ex.message || '', status: ex.status };
+  try {
+    let cleaned = ex.text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
     if (firstBrace !== -1 && lastBrace > firstBrace) cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-    return JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    return { ok: true, data: parsed };
   } catch(e) {
-    return null;
+    return { ok: false, reason: 'parse_error', message: e.message, rawText: ex.text.slice(0, 400) };
   }
 }
 
