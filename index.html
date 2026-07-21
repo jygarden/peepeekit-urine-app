@@ -3563,12 +3563,12 @@
     <!-- 요약 대시보드 -->
     <div id="pantrySummary" style="margin-bottom:12px"></div>
 
-    <!-- 유형 필터 -->
-    <div id="pantryFilter" style="display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px">
-      <button class="pantry-filter active" data-kind="all" onclick="filterPantry('all')" style="background:#059669;color:#FFF;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">전체</button>
-      <button class="pantry-filter" data-kind="main" onclick="filterPantry('main')" style="background:#F1F5F9;color:#64748B;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">🥣 사료</button>
-      <button class="pantry-filter" data-kind="treat" onclick="filterPantry('treat')" style="background:#F1F5F9;color:#64748B;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">🍪 간식</button>
-      <button class="pantry-filter" data-kind="supplement" onclick="filterPantry('supplement')" style="background:#F1F5F9;color:#64748B;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">💊 영양제</button>
+    <!-- 유형 필터 (크기 UP) -->
+    <div id="pantryFilter" style="display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px">
+      <button class="pantry-filter active" data-kind="all" onclick="filterPantry('all')" style="background:#059669;color:#FFF;border:none;border-radius:99px;padding:11px 20px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap;letter-spacing:-.2px">전체</button>
+      <button class="pantry-filter" data-kind="main" onclick="filterPantry('main')" style="background:#F1F5F9;color:#475569;border:none;border-radius:99px;padding:11px 20px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap;letter-spacing:-.2px">🥣 사료</button>
+      <button class="pantry-filter" data-kind="treat" onclick="filterPantry('treat')" style="background:#F1F5F9;color:#475569;border:none;border-radius:99px;padding:11px 20px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap;letter-spacing:-.2px">🍪 간식</button>
+      <button class="pantry-filter" data-kind="supplement" onclick="filterPantry('supplement')" style="background:#F1F5F9;color:#475569;border:none;border-radius:99px;padding:11px 20px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap;letter-spacing:-.2px">💊 영양제</button>
     </div>
 
     <!-- 리스트 -->
@@ -3819,6 +3819,15 @@
             <input type="number" id="apAgeMonths" placeholder="개월" min="0" max="240" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
             <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">개월 (2세 미만)</div>
           </div>
+        </div>
+      </div>
+
+      <!-- 🐾 품종 (선택 · 반려동물만) -->
+      <div class="field" id="apBreedField" style="display:none">
+        <label>품종 <span style="font-size:10.5px;color:#94A3B8;font-weight:700;margin-left:4px">(선택)</span></label>
+        <div style="position:relative">
+          <input type="text" id="apBreedInput" placeholder="예: 포메, 페르시안" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit;box-sizing:border-box" oninput="_apBreedSuggest()" onfocus="_apBreedSuggest()">
+          <div id="apBreedSuggestions" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>
         </div>
       </div>
 
@@ -6121,6 +6130,35 @@ function deletePetFoodRecord(dateId) {
   localStorage.setItem('petFoodRecords', JSON.stringify(list));
   renderPantryList();
 }
+// 🐾 견종·묘종 기반 사료 성분 크로스체크
+function _crosscheckBreedNutrients(ingredients) {
+  const pet = _getActivePetProfile();
+  const breedInfo = getBreedInfo(pet?.breed);
+  if (!breedInfo || !Array.isArray(ingredients)) return null;
+  const normalize = s => String(s || '').toLowerCase().replace(/\s+/g, '');
+  const foundGood = [];
+  const missingGood = [];
+  (breedInfo.recommend || []).forEach(rec => {
+    const nRec = normalize(rec).replace(/[-·]/g, '');
+    const hit = ingredients.find(ing => {
+      const n = normalize(ing.name).replace(/[-·]/g, '');
+      return n.includes(nRec) || nRec.includes(n);
+    });
+    if (hit) foundGood.push({ recommend: rec, ingredient: hit.name });
+    else missingGood.push(rec);
+  });
+  const foundAvoid = [];
+  (breedInfo.avoid || []).forEach(av => {
+    const nAv = normalize(av).replace(/[()]/g, '');
+    const hit = ingredients.find(ing => {
+      const n = normalize(ing.name);
+      return n.includes(nAv) || nAv.includes(n);
+    });
+    if (hit) foundAvoid.push({ avoid: av, ingredient: hit.name });
+  });
+  return { pet, breedInfo, foundGood, missingGood, foundAvoid };
+}
+
 // 사료 표시 이름 (제품명 없으니 대표 성분으로)
 function _getFoodDisplayName(record) {
   const ings = Array.isArray(record.ingredients) ? record.ingredients : [];
@@ -6157,7 +6195,7 @@ function filterPantry(kind) {
   document.querySelectorAll('.pantry-filter').forEach(btn => {
     const isActive = btn.getAttribute('data-kind') === kind;
     btn.style.background = isActive ? '#059669' : '#F1F5F9';
-    btn.style.color = isActive ? '#FFF' : '#64748B';
+    btn.style.color = isActive ? '#FFF' : '#475569';
     btn.classList.toggle('active', isActive);
   });
   renderPantryList();
@@ -6314,6 +6352,36 @@ function renderPetFoodResult(data) {
       <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
         <span style="font-size:18px">✅</span>
         <div style="flex:1"><div style="font-size:11.5px;font-weight:900;color:#065F46">${escapeHtml(petName)} 알레르기 성분 없음</div><div style="font-size:10px;color:#059669;font-weight:700;margin-top:1px">등록된 알레르기 ${allergyCheck.pet.allergies.length}개 다 크로스체크 완료</div></div>
+      </div>`;
+  }
+
+  // 🐾 견종·묘종 맞춤 크로스체크 (은근하게 · 배너 위에 위치)
+  const breedCheck = _crosscheckBreedNutrients(ingredients);
+  if (breedCheck && (breedCheck.foundGood.length > 0 || breedCheck.foundAvoid.length > 0)) {
+    const petName = breedCheck.pet?.name || '우리 아이';
+    const breedName = breedCheck.breedInfo.name;
+    const hasGood = breedCheck.foundGood.length > 0;
+    const hasBad = breedCheck.foundAvoid.length > 0;
+    html += `
+      <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:14px;padding:12px 14px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <span style="background:#F0FDF4;color:#059669;font-size:9.5px;font-weight:900;padding:2px 8px;border-radius:6px;letter-spacing:.5px">${escapeHtml(breedName)} 맞춤</span>
+          <span style="font-size:11px;color:#64748B;font-weight:700">${escapeHtml(petName)} 관점</span>
+        </div>
+        ${hasGood ? `
+          <div style="background:#F0FDF4;border-left:3px solid #059669;border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:${hasBad ? '6px' : '0'}">
+            <div style="font-size:11.5px;color:#065F46;font-weight:800;line-height:1.5">
+              ✨ ${breedCheck.foundGood.slice(0, 2).map(g => `<b>${escapeHtml(g.ingredient)}</b>이(가) 함유돼 있어 도움돼요`).join(', ')}
+            </div>
+          </div>
+        ` : ''}
+        ${hasBad ? `
+          <div style="background:#FEF3C7;border-left:3px solid #F59E0B;border-radius:0 8px 8px 0;padding:8px 10px">
+            <div style="font-size:11.5px;color:#78350F;font-weight:800;line-height:1.5">
+              ⚠️ ${breedCheck.foundAvoid.slice(0, 2).map(a => `<b>${escapeHtml(a.ingredient)}</b>은(는) 조금 신경써주세요`).join(', ')}
+            </div>
+          </div>
+        ` : ''}
       </div>`;
   }
 
@@ -12351,6 +12419,62 @@ const FORTUNE_QUOTES = [
 // 💊 영양제 룰 DB · 성분별 최적 복용 시간 (50개+)
 // 원칙: 지용성=식후 / 수용성=아침 / 미네랄=자기전 / 철분·프로바이오틱=아침공복
 // ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+// 🐾 견종/묘종 건강 DB (온보딩·프로필 저장 → 사료 분석 결과에서 은근하게 활용)
+// ═══════════════════════════════════════════
+const BREED_HEALTH_RULES = {
+  // 강아지 (인기 견종 위주)
+  '포메라니안':      { species:'dog', concerns:['슬개골 탈구','기관지 협착','치아 유전질환'], recommend:['콘드로이틴','글루코사민','오메가-3','칼슘'], avoid:['고나트륨'] },
+  '말티즈':         { species:'dog', concerns:['눈물자국','안구건조','슬개골'], recommend:['루테인','저알러지 단백질','유산균','항산화'], avoid:['색소','인공첨가물'] },
+  '푸들':          { species:'dog', concerns:['슬개골','눈물자국','애디슨병'], recommend:['콘드로이틴','항산화','오메가-3'], avoid:['고당분','인공색소'] },
+  '시츄':          { species:'dog', concerns:['안구 돌출','호흡기','피부'], recommend:['오메가-3','아연','비오틴'], avoid:['고나트륨'] },
+  '요크셔테리어':    { species:'dog', concerns:['슬개골','기관지','저혈당'], recommend:['콘드로이틴','고품질 단백질'], avoid:['저품질 부산물'] },
+  '치와와':         { species:'dog', concerns:['슬개골','저혈당','심장'], recommend:['타우린','L-카르니틴','콘드로이틴'], avoid:['옥수수시럽'] },
+  '비숑프리제':     { species:'dog', concerns:['방광결석','알레르기','슬개골'], recommend:['크랜베리','저마그네슘','저알러지 단백질'], avoid:['옥살산염 고함량'] },
+  '닥스훈트':       { species:'dog', concerns:['척추(IVDD)','비만'], recommend:['MSM','오메가-3','L-카르니틴'], avoid:['고칼로리'] },
+  '웰시코기':       { species:'dog', concerns:['척추','비만','DM(퇴행성 척수증)'], recommend:['오메가-3','저칼로리','항산화'], avoid:['과다 지방'] },
+  '프렌치불독':     { species:'dog', concerns:['호흡기','피부','척추'], recommend:['오메가-3','저나트륨','항산화'], avoid:['고나트륨','알레르기 유발'] },
+  '시바':          { species:'dog', concerns:['알레르기','관절','눈'], recommend:['저알러지 단백질(연어)','유산균','오메가-3'], avoid:['닭(개체차)'] },
+  '진돗개':         { species:'dog', concerns:['관절','갑상선'], recommend:['글루코사민','오메가-3','요오드'], avoid:['글루텐'] },
+  '골든리트리버':   { species:'dog', concerns:['고관절 이형성','심장','암'], recommend:['오메가-3','항산화(비타민E)','글루코사민'], avoid:['과다 곡물'] },
+  '라브라도':       { species:'dog', concerns:['고관절','비만','백내장'], recommend:['오메가-3','저칼로리','루테인'], avoid:['고칼로리'] },
+  '저먼셰퍼드':     { species:'dog', concerns:['고관절','척추','소화기'], recommend:['글루코사민','유산균','오메가-3'], avoid:['자극성 성분'] },
+  '보더콜리':       { species:'dog', concerns:['백내장','간질','고관절'], recommend:['타우린','루테인','고품질 단백질'], avoid:['인공첨가물'] },
+  '코카스파니엘':   { species:'dog', concerns:['귀염증','백내장','피부'], recommend:['오메가-3','아연','루테인'], avoid:['유제품(개체차)'] },
+  '샤페이':         { species:'dog', concerns:['안구(입선증)','피부','알레르기'], recommend:['저알러지 단백질','오메가-3','유산균'], avoid:['닭','밀'] },
+  '도베르만':       { species:'dog', concerns:['심장(DCM)','목뼈'], recommend:['타우린','L-카르니틴','CoQ10'], avoid:['저타우린 사료'] },
+  '로트와일러':     { species:'dog', concerns:['심장','관절','암'], recommend:['타우린','글루코사민','항산화'], avoid:['과다 지방'] },
+  '허스키':         { species:'dog', concerns:['눈(백내장)','고관절'], recommend:['루테인','아연','오메가-3'], avoid:['닭(개체차)'] },
+  '사모예드':       { species:'dog', concerns:['고관절','심장','당뇨'], recommend:['글루코사민','타우린','저혈당지수'], avoid:['고당분'] },
+  '비글':          { species:'dog', concerns:['비만','귀염증','간질'], recommend:['저칼로리','오메가-3','타우린'], avoid:['고칼로리 간식'] },
+  '믹스견':         { species:'dog', concerns:['개체차'], recommend:['균형 잡힌 영양','오메가-3','유산균'], avoid:[] },
+
+  // 고양이
+  '페르시안':       { species:'cat', concerns:['다낭성신장병(PKD)','호흡기','안구'], recommend:['저인','저나트륨','습식','수분'], avoid:['건조 단독'] },
+  '스코티시폴드':   { species:'cat', concerns:['골연화증','관절'], recommend:['콘드로이틴','MSM','오메가-3','칼슘'], avoid:['부족한 관절 영양'] },
+  '브리티시숏헤어': { species:'cat', concerns:['심장병(HCM)','비만'], recommend:['타우린','L-카르니틴','저칼로리'], avoid:['고칼로리'] },
+  '러시안블루':     { species:'cat', concerns:['비만','유선 종양'], recommend:['저칼로리','고단백','항산화'], avoid:['고탄수'] },
+  '벵골':          { species:'cat', concerns:['HCM','위장'], recommend:['타우린','유산균','고품질 단백질'], avoid:['저품질 부산물'] },
+  '랙돌':          { species:'cat', concerns:['HCM','방광결석'], recommend:['타우린','크랜베리','수분'], avoid:['저마그네슘 부족'] },
+  '노르웨이숲':     { species:'cat', concerns:['심장병','GSD-IV'], recommend:['타우린','L-카르니틴'], avoid:['저타우린'] },
+  '메인쿤':         { species:'cat', concerns:['HCM','고관절'], recommend:['타우린','글루코사민','오메가-3'], avoid:['저타우린'] },
+  '샴':            { species:'cat', concerns:['사시','아밀로이드증','호흡기'], recommend:['고품질 단백질','오메가-3'], avoid:['저품질 단백질'] },
+  '아메리칸숏헤어': { species:'cat', concerns:['HCM','다낭성신장'], recommend:['타우린','저인','저나트륨'], avoid:['고나트륨'] },
+  '스핑크스':      { species:'cat', concerns:['HCM','피부'], recommend:['오메가-3','비타민E','타우린'], avoid:['자극성 성분'] },
+  '먼치킨':         { species:'cat', concerns:['척추','관절'], recommend:['글루코사민','콘드로이틴','MSM'], avoid:[] },
+  '코리안숏헤어':   { species:'cat', concerns:['건강 편차 적음'], recommend:['균형 잡힌 영양','타우린'], avoid:[] },
+  '터키시앙고라':   { species:'cat', concerns:['난청','HCM'], recommend:['타우린','오메가-3'], avoid:[] }
+};
+function getBreedInfo(breedName) {
+  if (!breedName) return null;
+  const key = String(breedName).trim().replace(/\s+/g, '');
+  const found = Object.keys(BREED_HEALTH_RULES).find(k => k.replace(/\s+/g,'') === key || k.includes(key) || key.includes(k));
+  return found ? { name: found, ...BREED_HEALTH_RULES[found] } : null;
+}
+function getBreedListBySpecies(species) {
+  return Object.keys(BREED_HEALTH_RULES).filter(k => BREED_HEALTH_RULES[k].species === species);
+}
+
 const SUPPLEMENT_TIME_SLOTS = [
   { key:'morning_empty', label:'아침 공복',   hour:7,  emoji:'🌅', desc:'기상 직후 · 빈속' },
   { key:'morning_after', label:'아침 식후',   hour:8,  emoji:'☀️', desc:'아침 식사 30분 후' },
@@ -14936,6 +15060,9 @@ function editFamilyProfileFromManager(id) {
     if (bmEl) bmEl.value = bm != null ? bm : '';
     if (bdEl) bdEl.value = bd != null ? bd : '';
   } catch(e) {}
+  // 🐾 품종 (반려동물)
+  const breedInput = document.getElementById('apBreedInput');
+  if (breedInput) breedInput.value = p.breed || '';
   apSelectType(_apType);
   // 저장된 이모지 다시 선택 표시
   const grid = document.getElementById('apEmojiGrid');
@@ -15037,7 +15164,7 @@ function goAddProfile() {
   const weightInput = document.getElementById('apWeight');
   if (heightInput) heightInput.value = '';
   if (weightInput) weightInput.value = '';
-  ['apBirthYear','apBirthMonth','apBirthDay'].forEach(id => {
+  ['apBirthYear','apBirthMonth','apBirthDay','apBreedInput'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -15067,7 +15194,35 @@ function apSelectType(type) {
   if (bodyField) bodyField.style.display = type === 'adult' ? 'block' : 'none';
   const birthField = document.getElementById('apBirthField');
   if (birthField) birthField.style.display = type === 'adult' ? 'block' : 'none';
+  // 🐾 반려동물이면 품종 표시
+  const breedField = document.getElementById('apBreedField');
+  if (breedField) breedField.style.display = type === 'pet' ? 'block' : 'none';
+  if (type === 'pet') _apBreedSuggest();
   // 반려동물이면 성별 숨김·유지
+}
+
+// 🐾 품종 검색 · 칩 자동 필터 (반려동물 프로필용)
+function _apBreedSuggest() {
+  const input = document.getElementById('apBreedInput');
+  const box = document.getElementById('apBreedSuggestions');
+  if (!input || !box) return;
+  const query = String(input.value || '').trim();
+  const speciesFilter = _apEmoji && ['🐱','😺','😸'].includes(_apEmoji) ? 'cat' : (_apEmoji && ['🐶','🐕','🐩'].includes(_apEmoji) ? 'dog' : null);
+  const all = Object.keys(BREED_HEALTH_RULES);
+  const filtered = all.filter(name => {
+    if (query && !name.includes(query) && !query.includes(name)) return false;
+    if (speciesFilter && BREED_HEALTH_RULES[name].species !== speciesFilter) return false;
+    return true;
+  }).slice(0, 12);
+  box.innerHTML = filtered.map(b => {
+    const isSelected = query === b;
+    return `<button type="button" onclick="_apSelectBreed('${b}')" style="background:${isSelected ? '#059669' : '#F1F5F9'};color:${isSelected ? '#FFF' : '#475569'};border:none;border-radius:99px;padding:6px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">${b}</button>`;
+  }).join('');
+}
+function _apSelectBreed(name) {
+  const input = document.getElementById('apBreedInput');
+  if (input) input.value = name;
+  _apBreedSuggest();
 }
 
 function apSelectEmoji(e, btn) {
@@ -15188,12 +15343,17 @@ function saveNewProfile() {
   const birthMonth = _apType === 'adult' && bMonthRaw ? parseInt(bMonthRaw) : null;
   const birthDay   = _apType === 'adult' && bDayRaw   ? parseInt(bDayRaw)   : null;
 
+  // 🐾 품종 (반려동물만)
+  const breedVal = document.getElementById('apBreedInput')?.value.trim() || '';
+  const breed = _apType === 'pet' && breedVal ? breedVal : null;
+
   const data = {
     name, type: _apType, ageYears, ageMonths, gender: _apGender,
     emoji: _apEmoji, allergies,
     photo: _apPhotoDataUrl || null,
     height, weight,
-    birthYear, birthMonth, birthDay
+    birthYear, birthMonth, birthDay,
+    breed
   };
 
   if (_apEditingId) {
