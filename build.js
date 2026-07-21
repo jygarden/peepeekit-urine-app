@@ -59,7 +59,7 @@ async function build() {
             'switchProfile', 'openAddProfileForm', 'saveNewProfile', 'saveCheckin',
             'openProfileManager', 'closeProfileManager', 'editFamilyProfileFromManager', 'confirmDeleteFamilyProfile',
             'enterPetFood', 'selectPetFoodType', 'selectPetFoodSide', 'handlePetFoodFile', 'analyzePetFood', 'renderPetFoodResult',
-            'enterPetPantry', 'renderPantryList', 'setCurrentFeedingFood', 'deletePetFoodRecord', 'markCurrentFeedingFromResult', '_confirmDeletePantryItem',
+            'enterPetPantry', 'enterPetPantryOrCapture', 'renderPantryList', 'setCurrentFeedingFood', 'deletePetFoodRecord', 'markCurrentFeedingFromResult', '_confirmDeletePantryItem', 'filterPantry', 'selectPetFoodKind',
             'apSelectType', 'apSelectEmoji', 'apSelectGender',
             'saveAllergyProfile', 'toggleAllergy', 'openPersonalProfile', 'closePersonalProfile', 'savePersonalProfile', 'updateAgePreview',
             'enterHuman', 'enterPet', 'enterFood', 'enterIngredient', 'enterKidsSection',
