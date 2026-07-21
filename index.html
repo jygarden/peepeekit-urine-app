@@ -3334,25 +3334,25 @@
         <span style="font-size:13px;font-weight:900;color:#0F1F1A">📸 이렇게 찍어도 돼요</span>
       </div>
 
-      <!-- 방법 A: 원재료명 (권장) -->
-      <div style="background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border:1.5px solid #059669;border-radius:12px;padding:12px 12px;margin-bottom:10px;position:relative">
-        <div style="position:absolute;top:-8px;left:10px;background:#059669;color:#FFF;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;letter-spacing:.5px">✨ 정확 · 추천</div>
+      <!-- 방법 A: 원재료명 (강력 권장) -->
+      <div style="background:linear-gradient(135deg,#F0FDF4,#ECFDF5);border:2px solid #059669;border-radius:12px;padding:12px 12px;margin-bottom:10px;position:relative">
+        <div style="position:absolute;top:-8px;left:10px;background:#059669;color:#FFF;font-size:9px;font-weight:900;padding:2px 8px;border-radius:10px;letter-spacing:.5px">👑 정확 · 강력 권장</div>
         <div style="display:flex;align-items:center;gap:9px;margin-top:4px">
           <div style="width:38px;height:38px;background:#FFF;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid #86EFAC">🔤</div>
           <div style="flex:1">
-            <div style="font-size:12px;font-weight:900;color:#065F46">A. 뒷면 <b>원재료명</b> 촬영</div>
-            <div style="font-size:10px;color:#059669;font-weight:700;margin-top:2px;line-height:1.4">봉투 뒷면·옆면 성분 리스트 → OCR로 <b>실제 성분</b> 분석</div>
+            <div style="font-size:12px;font-weight:900;color:#065F46">뒷면 <b>원재료명</b> 촬영</div>
+            <div style="font-size:10px;color:#059669;font-weight:700;margin-top:2px;line-height:1.4">봉투 뒷면·옆면 성분 리스트 → <b>정확도 90%+</b></div>
           </div>
         </div>
       </div>
 
-      <!-- 방법 B: 앞면 -->
+      <!-- 방법 B: 앞면 (참고용 · 부정확할 수 있음) -->
       <div style="background:#FEFCF5;border:1px dashed #F59E0B;border-radius:12px;padding:12px 12px;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:9px">
           <div style="width:38px;height:38px;background:#FFF;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid #FCD34D">📦</div>
           <div style="flex:1">
-            <div style="font-size:12px;font-weight:900;color:#78350F">B. 제품 <b>앞면</b> 촬영</div>
-            <div style="font-size:10px;color:#B45309;font-weight:700;margin-top:2px;line-height:1.4">유명 브랜드면 AI가 제품 인식해서 알려진 성분 조회 · 신뢰도 표시</div>
+            <div style="font-size:12px;font-weight:900;color:#78350F">앞면 촬영 <span style="font-size:9px;color:#B45309;background:#FEF3C7;padding:1px 6px;border-radius:6px;margin-left:3px">참고용</span></div>
+            <div style="font-size:10px;color:#B45309;font-weight:700;margin-top:2px;line-height:1.4">유명 브랜드가 아니면 부정확할 수 있어요. 뒷면을 우선 시도하세요</div>
           </div>
         </div>
       </div>
@@ -5868,23 +5868,29 @@ function renderPetFoodResult(data) {
 
   // 🎯 인식 방식 배지 (하이브리드)
   const srcMap = {
-    ocr: { icon:'🔤', label:'원재료명 OCR', color:'#059669', bg:'#F0FDF4', desc:'사진에서 실제 성분 추출' },
-    product_recognition: { icon:'📦', label:'제품 인식', color:'#B45309', bg:'#FEFCF5', desc:'AI가 브랜드·제품 식별해 성분 조회' },
-    partial: { icon:'🔍', label:'부분 인식', color:'#6B7280', bg:'#F9FAFB', desc:'보이는 정보 기반' },
-    unknown: { icon:'❓', label:'인식 실패', color:'#DC2626', bg:'#FEF2F2', desc:'원재료명이 있는 뒷면을 다시 촬영해주세요' }
+    ocr: { icon:'🔤', label:'원재료명 판독', color:'#059669', bg:'#F0FDF4', desc:'뒷면 성분표를 정확히 읽었어요' },
+    product_recognition: { icon:'📦', label:'제품 추정', color:'#B45309', bg:'#FEFCF5', desc:'앞면 사진 기반 추정이라 부정확할 수 있어요. 뒷면 원재료명을 찍으면 정확해요' },
+    partial: { icon:'🔍', label:'부분 판독', color:'#6B7280', bg:'#F9FAFB', desc:'일부 정보만 읽었어요. 더 선명하게 다시 찍으면 정확해요' },
+    unknown: { icon:'❓', label:'판독 실패', color:'#DC2626', bg:'#FEF2F2', desc:'원재료명이 있는 뒷면을 다시 촬영해주세요' }
   };
   const src = srcMap[data.source] || srcMap.partial;
   const conf = Number(data.confidence) || 0;
+  const showWarnCTA = data.source === 'product_recognition' || data.source === 'partial';
   html += `
-    <div style="background:${src.bg};border:1px solid ${src.color}22;border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      <div style="font-size:20px;flex-shrink:0">${src.icon}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
-          <span style="font-size:11.5px;font-weight:900;color:${src.color}">${src.label}</span>
-          <span style="font-size:9.5px;font-weight:800;color:${src.color};background:${src.color}18;padding:1px 6px;border-radius:8px">신뢰도 ${conf}%</span>
+    <div style="background:${src.bg};border:1px solid ${src.color}44;border-radius:12px;padding:11px 12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:20px;flex-shrink:0">${src.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <span style="font-size:11.5px;font-weight:900;color:${src.color}">${src.label}</span>
+            <span style="font-size:9.5px;font-weight:800;color:${src.color};background:${src.color}22;padding:1px 6px;border-radius:8px">정확도 ${conf}%</span>
+          </div>
+          <div style="font-size:10px;color:#4B5563;font-weight:600;line-height:1.4">${escapeHtml(src.desc)}</div>
         </div>
-        <div style="font-size:10px;color:#4B5563;font-weight:600;line-height:1.4">${escapeHtml(src.desc)}</div>
       </div>
+      ${showWarnCTA ? `
+      <button onclick="showScreen('screenPetFood')" style="width:100%;margin-top:9px;background:${src.color};border:none;border-radius:8px;padding:8px;color:#FFF;font-size:11px;font-weight:900;cursor:pointer;font-family:inherit">📷 뒷면 원재료명 다시 찍기</button>
+      ` : ''}
     </div>`;
 
   // 안전도 히어로
@@ -5930,12 +5936,12 @@ function renderPetFoodResult(data) {
       </div>`;
   }
 
-  // AI 종합 평가
+  // 종합 평가
   html += `
     <div style="background:#FFF;border-radius:12px;padding:12px 14px;margin-bottom:12px;border:0.5px solid #EFEFEF">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
         <span style="font-size:15px">🐾</span>
-        <span style="font-size:10.5px;font-weight:900;color:#059669;letter-spacing:1.2px">AI 종합 평가 (${petLabel})</span>
+        <span style="font-size:10.5px;font-weight:900;color:#059669;letter-spacing:1.2px">종합 평가 (${petLabel})</span>
       </div>
       <div style="font-size:13.5px;color:#0F1F1A;font-weight:900;line-height:1.5">${escapeHtml(opener)}</div>
       ${data.nutritionBalance ? `<div style="font-size:11px;color:#65756B;font-weight:700;margin-top:6px;padding-top:6px;border-top:1px solid #F0F5F2">${escapeHtml(data.nutritionBalance)}</div>` : ''}
