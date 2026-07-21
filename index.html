@@ -4292,6 +4292,14 @@ function safeCameraClick(inputId) {
   const isPetFood = /petfood/i.test(inputId);
   const isFood = !isPetFood && /food/i.test(inputId);
   const isIngredient = /ingredient/i.test(inputId);
+  const isSupplement = /supplement/i.test(inputId);
+
+  // 💊 영양제 라벨 → 직접 파일 인풋 클릭 (미리보기 없이 바로 분석)
+  if (isSupplement) {
+    const inp = document.getElementById(inputId);
+    if (inp) inp.click();
+    return;
+  }
 
   // 첫 사용자 안내 (1회만)
   if (!localStorage.getItem('cameraGuideShown')) {
@@ -13147,9 +13155,31 @@ function goAddSupplement() {
 
   el.innerHTML = `
     <div style="padding:14px 4px">
-      <!-- 슬로건 -->
-      <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:14px;padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:12px;font-weight:900;color:#065F46">🌱 성분에 맞는 시간을 자동으로 추천해드려요</div>
+      <!-- 📷 사진으로 등록 (스마트) -->
+      <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1.5px solid #86EFAC;border-radius:14px;padding:14px 14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="font-size:20px">📷</div>
+          <div style="flex:1">
+            <div style="font-size:12.5px;font-weight:900;color:#065F46">라벨 사진으로 자동 등록</div>
+            <div style="font-size:10.5px;color:#059669;font-weight:700;margin-top:1px">성분·용량 자동 인식 · 최적 시간 추천</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button onclick="safeCameraClick('supplementCameraInput')" style="background:#FFF;border:1.5px solid #059669;color:#059669;font-size:11.5px;font-weight:900;padding:11px;border-radius:10px;cursor:pointer;font-family:inherit">📷 카메라 촬영</button>
+          <button onclick="openFileInput('supplementGalleryInput')" style="background:#FFF;border:1.5px solid #86EFAC;color:#059669;font-size:11.5px;font-weight:900;padding:11px;border-radius:10px;cursor:pointer;font-family:inherit">🖼 갤러리에서</button>
+        </div>
+        <input type="file" id="supplementCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleSupplementLabelFile(event)">
+        <input type="file" id="supplementGalleryInput" accept="image/*" style="display:none" onchange="handleSupplementLabelFile(event)">
+        <div id="supplementLabelLoading" style="display:none;background:rgba(255,255,255,.85);border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:10px">
+          <div style="width:22px;height:22px;border:3px solid #DCFCE7;border-top-color:#059669;border-radius:50%;animation:spin 1s linear infinite"></div>
+          <div style="flex:1;font-size:11.5px;color:#065F46;font-weight:900">라벨에서 성분 판독 중...</div>
+        </div>
+      </div>
+
+      <!-- 구분선 -->
+      <div style="text-align:center;font-size:10px;color:#94A3B8;font-weight:800;letter-spacing:1.5px;margin:10px 0 14px;position:relative">
+        <span style="background:#FEFCF5;padding:0 12px;position:relative;z-index:1">또는 직접 입력</span>
+        <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#E5D9BA"></div>
       </div>
 
       <!-- 이름 입력 -->
@@ -13177,7 +13207,7 @@ function goAddSupplement() {
       <button onclick="saveNewSupplement()" style="width:100%;background:#059669;color:#FFF;font-size:14px;font-weight:900;padding:14px;border-radius:14px;border:none;font-family:inherit;cursor:pointer">등록하기</button>
 
       <div style="text-align:center;margin-top:14px;font-size:10.5px;color:#65756B;font-weight:700;line-height:1.6">
-        💡 등록 후 편집·삭제·복용 시간 변경 언제든 가능해요<br>영양제 사진 촬영 기능은 곧 추가됩니다
+        💡 등록 후 편집·삭제·복용 시간 변경 언제든 가능해요
       </div>
     </div>
   `;
@@ -13213,6 +13243,71 @@ function _previewSupplementTiming() {
     hint.textContent = '이름을 입력하면 자동으로 최적 시간을 추천해드려요';
     hint.style.color = '#65756B';
     naturalWrap.style.display = 'none';
+  }
+}
+
+// 📷 영양제 라벨 사진 → OCR → 성분 매칭 → 폼 자동 채움
+async function handleSupplementLabelFile(event) {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const loadingEl = document.getElementById('supplementLabelLoading');
+  if (loadingEl) loadingEl.style.display = 'flex';
+  try {
+    const dataUrl = await fileToDataUrlSafe(file);
+    // 이미지 압축 (라벨은 글자가 생명이라 크게 유지)
+    const compressed = await compressImageForUpload(dataUrl, 2000, 0.92);
+    const imageB64 = compressed.split(',')[1];
+
+    // 성분 분석 API 호출
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 55000);
+    const res = await fetch('/api/analyze-ingredients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageB64 }),
+      signal: ctrl.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error('분석 서버 오류');
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // 분석된 성분에서 영양제 매칭
+    const ingredients = Array.isArray(data.ingredients) ? data.ingredients : [];
+    let bestMatch = null;
+    let matchedName = null;
+    for (const ing of ingredients) {
+      const nm = ing.name || '';
+      const timing = getSupplementTiming(nm);
+      if (timing) { bestMatch = { name: nm, timing }; break; }
+    }
+    // 매칭 못 찾으면 첫 번째 성분 사용
+    if (!bestMatch && ingredients.length > 0) {
+      matchedName = ingredients[0].name || '';
+    }
+    const finalName = bestMatch ? bestMatch.name : matchedName;
+    if (!finalName) {
+      alert('라벨에서 성분을 인식하지 못했어요. 다시 촬영하거나 직접 입력해주세요.');
+      return;
+    }
+    const nameInput = document.getElementById('_newSup_name');
+    if (nameInput) nameInput.value = finalName;
+    _previewSupplementTiming();
+    // 사용자에게 안내
+    const hintEl = document.getElementById('_supNameHint');
+    if (hintEl) {
+      hintEl.innerHTML = bestMatch
+        ? `✨ <b style="color:#059669">${escapeHtml(finalName)}</b> 자동 인식 완료! 필요하면 수정하세요`
+        : `📸 <b style="color:#065F46">${escapeHtml(finalName)}</b> 인식됨 · 시간대는 직접 선택해주세요`;
+    }
+    if (typeof showPointToast === 'function') showPointToast('📷 라벨 인식 완료!');
+  } catch (err) {
+    console.error('[handleSupplementLabelFile]', err);
+    alert('라벨 인식 실패: ' + (err.message || '다시 시도해주세요'));
+  } finally {
+    if (loadingEl) loadingEl.style.display = 'none';
+    // input 초기화 (같은 사진 재선택 가능)
+    if (event.target) event.target.value = '';
   }
 }
 
