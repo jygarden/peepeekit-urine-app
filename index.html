@@ -3511,10 +3511,46 @@
       </button>
     </div>
     <div id="petFoodResultContent"></div>
+
+    <!-- 🥫 Pantry CTA (분석 후 자동 노출) -->
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:14px;padding:14px 14px;margin-top:12px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="font-size:22px;line-height:1">🥫</div>
+        <div style="flex:1">
+          <div style="font-size:12.5px;font-weight:900;color:#065F46">Pantry에 자동 저장됐어요</div>
+          <div style="font-size:10.5px;color:#059669;font-weight:700;margin-top:1px">다음번 사료 살 때 나란히 비교할 수 있어요</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <button onclick="markCurrentFeedingFromResult()" style="background:#FFF;border:1.5px solid #059669;border-radius:10px;padding:9px;font-size:11px;font-weight:900;color:#059669;cursor:pointer;font-family:inherit">👑 지금 급여 중으로 설정</button>
+        <button onclick="enterPetPantry()" style="background:#059669;border:none;border-radius:10px;padding:9px;font-size:11px;font-weight:900;color:#FFF;cursor:pointer;font-family:inherit">📚 사료 히스토리 보기</button>
+      </div>
+    </div>
+
     <div class="action-row" style="margin-top:10px">
       <button class="btn-retake" style="border-color:#059669;color:#059669" onclick="showScreen('screenPetFood')">📷 다시 찍기</button>
       <button class="btn-new" onclick="goHome()">🏠 홈으로</button>
     </div>
+  </div>
+
+  <!-- ════════════ 🥫 Pantry (사료 라이브러리) ════════════ -->
+  <div class="screen" id="screenPetPantry">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">🥫 우리 아이 사료 히스토리</div>
+    </div>
+
+    <!-- 요약 대시보드 -->
+    <div id="pantrySummary" style="margin-bottom:12px"></div>
+
+    <!-- 사료 리스트 -->
+    <div id="pantryList"></div>
+
+    <!-- 새 사료 찍기 CTA -->
+    <button onclick="enterPetFood()" style="width:100%;margin-top:12px;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#059669,#065F46);color:#FFF;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(5,150,105,.35)">
+      📷 새로운 사료 분석하기
+    </button>
+    <button onclick="goHome()" class="btn-outline" style="margin-top:10px">← 홈으로</button>
   </div>
 
   <!-- ════════════ 🏆 월간 챌린지 스티커북 ════════════ -->
@@ -5949,6 +5985,204 @@ async function analyzePetFood() {
   } catch(e) {}
 }
 
+// ═══════════════════════════════════════════
+// 🐾 반려동물 사료 지속성 유틸 (Pantry · 알레르기 · 소변 연동)
+// ═══════════════════════════════════════════
+// 현재 활성 반려동물 프로필 (있으면 그 프로필의 알레르기 사용)
+function _getActivePetProfile() {
+  try {
+    const profiles = typeof getFamilyProfiles === 'function' ? getFamilyProfiles() : [];
+    const active = typeof getActiveProfile === 'function' ? getActiveProfile() : null;
+    if (active && active.type === 'pet') return active;
+    // 활성 프로필이 pet 아니면 첫 번째 pet
+    return profiles.find(p => p.type === 'pet') || null;
+  } catch(e) { return null; }
+}
+// 반려동물 알레르기 성분과 사료 성분 교차 검증
+function _crosscheckAllergens(ingredients) {
+  const pet = _getActivePetProfile();
+  const petAllergies = Array.isArray(pet?.allergies) ? pet.allergies : [];
+  if (!petAllergies.length || !Array.isArray(ingredients)) return { pet, matches: [] };
+  const normalize = s => String(s || '').toLowerCase().replace(/\s+/g, '');
+  const matches = [];
+  petAllergies.forEach(al => {
+    const nAl = normalize(al);
+    if (!nAl) return;
+    const hit = ingredients.find(ing => normalize(ing.name).includes(nAl) || nAl.includes(normalize(ing.name)));
+    if (hit) matches.push({ allergen: al, ingredient: hit.name });
+  });
+  return { pet, matches };
+}
+// 최근 소변검사 이력 기반 사료 이슈 감지 (반려동물)
+function _getUrineLinkage(ingredients) {
+  try {
+    const history = JSON.parse(localStorage.getItem('urineHistoryV2') || '[]');
+    const petHistory = history.filter(h => h.subject === 'pet');
+    if (!petHistory.length) return null;
+    const latest = petHistory[0];
+    const items = Array.isArray(latest.testItems) ? latest.testItems : [];
+    const issues = [];
+    const findItem = key => items.find(i => (i.item || '').includes(key));
+    const isBad = it => it && (it.status === 'warning' || it.status === 'danger');
+    // 신장 관련: 단백뇨·잠혈·pH
+    if (isBad(findItem('단백질')) || isBad(findItem('잠혈')) || isBad(findItem('pH'))) {
+      issues.push({
+        organ: '신장·비뇨기',
+        warn: '최근 소변검사에서 신장 관련 이상 신호가 있었어요',
+        avoid: ['인', '나트륨', '단백질(고함량)', '옥살산염'],
+        recommend: '저인·저나트륨·중단백 사료'
+      });
+    }
+    if (isBad(findItem('당'))) {
+      issues.push({
+        organ: '혈당',
+        warn: '최근 소변검사에서 당뇨 의심 신호',
+        avoid: ['옥수수시럽', '설탕', '단순당', '탄수화물(과다)'],
+        recommend: '저탄수·고섬유 사료'
+      });
+    }
+    if (isBad(findItem('케톤')) || isBad(findItem('비중'))) {
+      issues.push({
+        organ: '수분·대사',
+        warn: '탈수·대사 이상 신호',
+        avoid: ['건조 사료(단독)'],
+        recommend: '습식 사료·수분 보충 병행'
+      });
+    }
+    if (!issues.length) return null;
+    // 이슈 성분이 실제로 이 사료에 있는지 확인
+    const relevant = issues.map(iss => {
+      const hits = (ingredients || []).filter(ing =>
+        iss.avoid.some(a => String(ing.name || '').includes(a.replace(/\(.*/, '')))
+      );
+      return { ...iss, hitIngredients: hits.map(h => h.name) };
+    });
+    return { latest, issues: relevant };
+  } catch(e) { return null; }
+}
+// Pantry: 사료 히스토리 저장/조회/현재 급여 중 지정
+function getPetFoodPantry() {
+  try { return JSON.parse(localStorage.getItem('petFoodRecords') || '[]'); }
+  catch(e) { return []; }
+}
+function setCurrentFeedingFood(dateId) {
+  const list = getPetFoodPantry();
+  list.forEach(item => { item.currentlyFeeding = (item.date === dateId); });
+  localStorage.setItem('petFoodRecords', JSON.stringify(list));
+  renderPantryList();
+}
+function deletePetFoodRecord(dateId) {
+  const list = getPetFoodPantry().filter(item => item.date !== dateId);
+  localStorage.setItem('petFoodRecords', JSON.stringify(list));
+  renderPantryList();
+}
+// 사료 표시 이름 (제품명 없으니 대표 성분으로)
+function _getFoodDisplayName(record) {
+  const ings = Array.isArray(record.ingredients) ? record.ingredients : [];
+  const proteins = ings.filter(i => i.type === '단백질').slice(0, 2).map(i => i.name);
+  const base = proteins.length ? proteins.join('·') : (ings.slice(0, 2).map(i => i.name).join('·') || '사료');
+  return base + ' 사료';
+}
+
+// 방금 본 결과를 "현재 급여 중"으로 마크
+function markCurrentFeedingFromResult() {
+  const list = getPetFoodPantry();
+  if (list.length === 0) { alert('저장된 사료가 없어요'); return; }
+  const latest = list[0];
+  list.forEach(item => { item.currentlyFeeding = (item.date === latest.date); });
+  localStorage.setItem('petFoodRecords', JSON.stringify(list));
+  if (typeof showPointToast === 'function') showPointToast('👑 지금 급여 중으로 설정됨!');
+}
+
+// Pantry 진입
+function enterPetPantry() {
+  showScreen('screenPetPantry');
+  renderPantryList();
+}
+// Pantry 리스트 렌더
+function renderPantryList() {
+  const listEl = document.getElementById('pantryList');
+  const summaryEl = document.getElementById('pantrySummary');
+  if (!listEl || !summaryEl) return;
+  const list = getPetFoodPantry();
+
+  if (list.length === 0) {
+    summaryEl.innerHTML = '';
+    listEl.innerHTML = `
+      <div style="background:#F9FAFB;border:1px dashed #E5E7EB;border-radius:16px;padding:32px 20px;text-align:center">
+        <div style="font-size:44px;line-height:1;margin-bottom:8px">🥫</div>
+        <div style="font-size:13.5px;font-weight:900;color:#374151;margin-bottom:4px">아직 분석한 사료가 없어요</div>
+        <div style="font-size:11px;color:#6B7280;font-weight:700;line-height:1.5">사료·간식 성분표를 찍으면<br>여기에 자동으로 쌓여요</div>
+      </div>`;
+    return;
+  }
+
+  // 요약: 총 개수 · 평균 점수 · 현재 급여 중 개수
+  const totalScore = list.reduce((sum, r) => sum + (r.overallScore || 0), 0);
+  const avgScore = Math.round(totalScore / list.length);
+  const avgGrade = avgScore >= 90 ? 'A' : avgScore >= 75 ? 'B' : avgScore >= 60 ? 'C' : avgScore >= 40 ? 'D' : 'F';
+  const gradeColor = avgScore >= 90 ? '#059669' : avgScore >= 75 ? '#7C3AED' : avgScore >= 60 ? '#EA580C' : '#DC2626';
+  const currentFeeding = list.filter(r => r.currentlyFeeding).length;
+
+  summaryEl.innerHTML = `
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1.5px solid #86EFAC;border-radius:14px;padding:14px 14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:56px;height:56px;background:#FFF;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(5,150,105,.15)">
+          <div style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:${gradeColor};line-height:1">${avgGrade}</div>
+          <div style="font-size:8.5px;font-weight:800;color:#65756B;margin-top:1px">평균</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:#065F46;font-weight:900;letter-spacing:1px;margin-bottom:2px">우리 아이 사료 등급</div>
+          <div style="font-size:13.5px;color:#0F1F1A;font-weight:900">${list.length}개 분석 · 평균 ${avgScore}점</div>
+          <div style="font-size:10.5px;color:#065F46;font-weight:700;margin-top:2px">${currentFeeding > 0 ? `👑 현재 급여 중 ${currentFeeding}개` : '💡 현재 급여 중인 사료를 지정해보세요'}</div>
+        </div>
+      </div>
+    </div>`;
+
+  // 리스트
+  listEl.innerHTML = list.map((r, idx) => {
+    const grade = r.overallGrade || '-';
+    const score = r.overallScore || 0;
+    const gColor = score >= 90 ? '#059669' : score >= 75 ? '#7C3AED' : score >= 60 ? '#EA580C' : '#DC2626';
+    const name = _getFoodDisplayName(r);
+    const dateStr = r.date ? new Date(r.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '-';
+    const isCurrent = r.currentlyFeeding === true;
+    const petIcon = r.petType === 'cat' ? '🐱' : '🐶';
+    // 알레르기 매칭 여부
+    const allergyCheck = _crosscheckAllergens(r.ingredients);
+    const hasAllergy = allergyCheck.matches.length > 0;
+    const dangerCount = (r.ingredients || []).filter(i => i.safety === 'danger').length;
+
+    return `
+      <div style="background:#FFF;border:${isCurrent ? '2px solid #059669' : '1px solid #E5E7EB'};border-radius:14px;padding:12px 14px;margin-top:10px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.04)">
+        ${isCurrent ? `<div style="position:absolute;top:-8px;left:12px;background:#059669;color:#FFF;font-size:9px;font-weight:900;padding:3px 8px;border-radius:10px;letter-spacing:.5px">👑 지금 급여 중</div>` : ''}
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:46px;height:46px;background:${gColor}15;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+            <div style="font-family:Georgia,serif;font-size:20px;font-weight:900;color:${gColor};line-height:1">${escapeHtml(grade)}</div>
+            <div style="font-size:8px;color:${gColor};font-weight:800;margin-top:1px">${score}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
+              <span style="font-size:13px">${petIcon}</span>
+              <span style="font-size:12.5px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(name)}</span>
+            </div>
+            <div style="font-size:10px;color:#6B7280;font-weight:700">${escapeHtml(dateStr)} · 성분 ${(r.ingredients || []).length}개</div>
+            ${hasAllergy ? `<div style="font-size:9.5px;color:#DC2626;font-weight:900;margin-top:3px">🚨 알레르기 ${allergyCheck.matches.length}건</div>` : ''}
+            ${dangerCount > 0 ? `<div style="font-size:9.5px;color:#DC2626;font-weight:900;margin-top:3px">⚠️ 위험 성분 ${dangerCount}개</div>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:5px;margin-top:10px">
+          ${!isCurrent ? `<button onclick="setCurrentFeedingFood('${r.date}')" style="flex:1;background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:7px;font-size:10.5px;font-weight:900;color:#059669;cursor:pointer;font-family:inherit">👑 지금 급여 중</button>` : `<button onclick="setCurrentFeedingFood('')" style="flex:1;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:8px;padding:7px;font-size:10.5px;font-weight:900;color:#64748B;cursor:pointer;font-family:inherit">✕ 해제</button>`}
+          <button onclick="_confirmDeletePantryItem('${r.date}')" style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:8px;padding:7px 10px;font-size:10.5px;font-weight:900;color:#DC2626;cursor:pointer;font-family:inherit">🗑</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function _confirmDeletePantryItem(dateId) {
+  if (confirm('이 사료 기록을 삭제할까요?')) deletePetFoodRecord(dateId);
+}
+
 function renderPetFoodResult(data) {
   const el = document.getElementById('petFoodResultContent');
   if (!el) return;
@@ -5983,6 +6217,63 @@ function renderPetFoodResult(data) {
     : data.overallGrade === 'C' ? '#EA580C' : '#DC2626';
 
   let html = '';
+
+  // 🚨 알레르기 자동 크로스체크 (우선순위 최상단)
+  const allergyCheck = _crosscheckAllergens(ingredients);
+  if (allergyCheck.matches.length > 0) {
+    const petName = allergyCheck.pet?.name || '우리 아이';
+    html += `
+      <div style="background:linear-gradient(135deg,#FEF2F2,#FEE2E2);border:2px solid #DC2626;border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(220,38,38,.15)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:20px">🚨</span>
+          <span style="font-size:13.5px;font-weight:900;color:#7F1D1D">${escapeHtml(petName)} 알레르기 성분 발견!</span>
+        </div>
+        <div style="font-size:11.5px;color:#991B1B;font-weight:800;line-height:1.55;margin-bottom:8px">
+          이 사료에는 등록된 알레르기 성분이 포함돼 있어요. <b>급여 전 수의사 상담을 강력히 권장합니다.</b>
+        </div>
+        <div style="background:#FFF;border-radius:10px;padding:8px 10px">
+          ${allergyCheck.matches.map(m =>
+            `<div style="font-size:10.5px;color:#7F1D1D;font-weight:800;padding:3px 0"><span style="color:#DC2626">●</span> 등록 알레르기: <b>${escapeHtml(m.allergen)}</b> → 사료 성분: <b>${escapeHtml(m.ingredient)}</b></div>`
+          ).join('')}
+        </div>
+      </div>`;
+  } else if (allergyCheck.pet && Array.isArray(allergyCheck.pet.allergies) && allergyCheck.pet.allergies.length > 0) {
+    // 등록된 알레르기 있는데 매칭 안 됨 → 안심 배너
+    const petName = allergyCheck.pet.name || '우리 아이';
+    html += `
+      <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">✅</span>
+        <div style="flex:1"><div style="font-size:11.5px;font-weight:900;color:#065F46">${escapeHtml(petName)} 알레르기 성분 없음</div><div style="font-size:10px;color:#059669;font-weight:700;margin-top:1px">등록된 알레르기 ${allergyCheck.pet.allergies.length}개 다 크로스체크 완료</div></div>
+      </div>`;
+  }
+
+  // 🎯 소변검사 ↔ 사료 연동 (반려동물)
+  const urineLink = _getUrineLinkage(ingredients);
+  if (urineLink && urineLink.issues.length > 0) {
+    urineLink.issues.forEach(iss => {
+      const hasProblem = iss.hitIngredients.length > 0;
+      html += `
+        <div style="background:${hasProblem ? 'linear-gradient(135deg,#FEF3C7,#FEE2E2)' : 'linear-gradient(135deg,#EFF6FF,#DBEAFE)'};border:1.5px solid ${hasProblem ? '#F59E0B' : '#3B82F6'};border-radius:14px;padding:13px 14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:16px">${hasProblem ? '⚠️' : '💡'}</span>
+            <span style="font-size:11.5px;font-weight:900;color:${hasProblem ? '#B45309' : '#1E40AF'};letter-spacing:.5px">최근 소변검사 연동 · ${escapeHtml(iss.organ)}</span>
+          </div>
+          <div style="font-size:11.5px;color:${hasProblem ? '#78350F' : '#1E3A8A'};font-weight:800;line-height:1.5;margin-bottom:6px">
+            ${escapeHtml(iss.warn)}${hasProblem ? '.<br><b>이 사료에 걱정되는 성분이 있어요.</b>' : ''}
+          </div>
+          ${hasProblem ? `
+            <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:6px 8px;margin-bottom:5px">
+              <div style="font-size:9.5px;color:#7C2D12;font-weight:900;letter-spacing:.5px;margin-bottom:2px">주의 성분</div>
+              <div style="font-size:10.5px;color:#78350F;font-weight:700">${iss.hitIngredients.map(escapeHtml).join(' · ')}</div>
+            </div>
+          ` : ''}
+          <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:6px 8px">
+            <div style="font-size:9.5px;color:${hasProblem ? '#7C2D12' : '#1E40AF'};font-weight:900;letter-spacing:.5px;margin-bottom:2px">추천 사료 유형</div>
+            <div style="font-size:10.5px;color:${hasProblem ? '#78350F' : '#1E3A8A'};font-weight:800">${escapeHtml(iss.recommend)}</div>
+          </div>
+        </div>`;
+    });
+  }
 
   // 🎯 인식 방식 배지 (하이브리드 + Grounding)
   const isGrounded = data.grounded === true;
