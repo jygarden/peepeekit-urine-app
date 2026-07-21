@@ -82,7 +82,8 @@ async function build() {
             'saveNickname', 'closeReminder',
             'openFortune', 'openFortuneResult', 'startFortuneDraw', 'shareFortuneStory',
             'enterSupplement', 'goAddSupplement', 'saveNewSupplement', 'onSupplementTaken',
-            'editSupplement', '_saveEditSupplement', '_confirmDeleteSupplement', '_previewSupplementTiming'
+            'editSupplement', '_saveEditSupplement', '_confirmDeleteSupplement', '_previewSupplementTiming',
+            'handleSupplementLabelFile'
           ]
         },
         format: {
