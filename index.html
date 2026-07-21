@@ -3303,7 +3303,7 @@
           </div>
           <div style="flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.20);border-radius:10px;padding:9px 6px;text-align:center;backdrop-filter:blur(6px)">
             <div style="font-size:15px;line-height:1">🧠</div>
-            <div style="font-size:9.5px;font-weight:900;color:#FFF;margin-top:2px">건강어때 AI</div>
+            <div style="font-size:9.5px;font-weight:900;color:#FFF;margin-top:2px">수의영양학</div>
           </div>
           <div style="flex:1;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.20);border-radius:10px;padding:9px 6px;text-align:center;backdrop-filter:blur(6px)">
             <div style="font-size:15px;line-height:1">📋</div>
@@ -3436,13 +3436,51 @@
       <button class="btn-close-img" onclick="showScreen('screenPetFood')">×</button>
     </div>
     <div class="error-box" id="petFoodErrorBox"></div>
-    <button class="btn-primary" id="btnPetFoodAnalyze" onclick="analyzePetFood()" style="background:linear-gradient(135deg,#059669,#065F46);box-shadow:0 4px 14px rgba(5,150,105,.40)">🔍 AI 사료 성분 분석</button>
-    <div class="loading-box" id="petFoodLoadingBox">
-      <div class="emoji">🐾</div>
-      <p>사료·간식 성분을 분석 중이에요...</p>
-      <small id="petFoodLoadingSub">반려동물 관점에서 안전성 평가 중</small>
+    <button class="btn-primary" id="btnPetFoodAnalyze" onclick="analyzePetFood()" style="background:linear-gradient(135deg,#059669,#065F46);box-shadow:0 4px 14px rgba(5,150,105,.40)">🔍 사료 성분 분석 시작</button>
+
+    <!-- 🚀 진행 중 UI (필라이즈 스타일 · 단계별 표시) -->
+    <div id="petFoodLoadingBox" style="display:none;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1.5px solid #86EFAC;border-radius:16px;padding:18px 16px;margin-top:12px">
+      <!-- 헤더: 이모지 + 타이틀 + 경과 시간 -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:44px;height:44px;background:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 3px 10px rgba(5,150,105,.15);position:relative">
+          <span id="petFoodLoadingEmoji" style="line-height:1;animation:petFoodPulse 1.2s ease-in-out infinite">🐾</span>
+        </div>
+        <div style="flex:1">
+          <div id="petFoodLoadingTitle" style="font-size:13.5px;font-weight:900;color:#065F46;letter-spacing:-.3px">사진 확인 중...</div>
+          <div id="petFoodLoadingSub" style="font-size:10.5px;color:#059669;font-weight:700;margin-top:2px">곧 성분을 읽어낼게요</div>
+        </div>
+        <div id="petFoodLoadingElapsed" style="font-family:Georgia,serif;font-size:16px;font-weight:900;color:#059669;background:#FFF;padding:5px 10px;border-radius:10px;box-shadow:0 2px 6px rgba(5,150,105,.12);min-width:52px;text-align:center">0.0s</div>
+      </div>
+
+      <!-- 프로그레스 바 -->
+      <div style="background:rgba(255,255,255,.6);border-radius:99px;height:8px;overflow:hidden;margin-bottom:10px">
+        <div id="petFoodLoadingBar" style="height:100%;background:linear-gradient(90deg,#059669,#10B981);border-radius:99px;width:8%;transition:width .8s ease"></div>
+      </div>
+
+      <!-- 4단계 스텝퍼 -->
+      <div style="display:flex;gap:5px" id="petFoodLoadingSteps">
+        <div class="pfstep" data-step="1" style="flex:1;text-align:center;padding:6px 4px;background:rgba(255,255,255,.85);border-radius:9px;border:1px solid #86EFAC">
+          <div style="font-size:13px;line-height:1">📷</div>
+          <div style="font-size:8.5px;color:#065F46;font-weight:900;margin-top:2px">사진 확인</div>
+        </div>
+        <div class="pfstep" data-step="2" style="flex:1;text-align:center;padding:6px 4px;background:rgba(255,255,255,.4);border-radius:9px;border:1px solid transparent">
+          <div style="font-size:13px;line-height:1;opacity:.5">🔤</div>
+          <div style="font-size:8.5px;color:#059669;font-weight:800;margin-top:2px;opacity:.6">성분 판독</div>
+        </div>
+        <div class="pfstep" data-step="3" style="flex:1;text-align:center;padding:6px 4px;background:rgba(255,255,255,.4);border-radius:9px;border:1px solid transparent">
+          <div style="font-size:13px;line-height:1;opacity:.5">🔍</div>
+          <div style="font-size:8.5px;color:#059669;font-weight:800;margin-top:2px;opacity:.6">교차 검증</div>
+        </div>
+        <div class="pfstep" data-step="4" style="flex:1;text-align:center;padding:6px 4px;background:rgba(255,255,255,.4);border-radius:9px;border:1px solid transparent">
+          <div style="font-size:13px;line-height:1;opacity:.5">🐾</div>
+          <div style="font-size:8.5px;color:#059669;font-weight:800;margin-top:2px;opacity:.6">안전성 평가</div>
+        </div>
+      </div>
     </div>
   </div>
+  <style>
+    @keyframes petFoodPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+  </style>
 
   <!-- ════════════ 🐾 반려동물 사료 · 결과 화면 ════════════ -->
   <div class="screen" id="screenPetFoodResult">
@@ -5759,13 +5797,61 @@ function showPetFoodError(msg) {
   else alert(msg);
 }
 
+// 🚀 사료 로딩 UX (단계별 표시 · 경과 시간 · 문구 회전)
+let _petFoodLoadingTimer = null;
+function _startPetFoodLoading() {
+  const box = document.getElementById('petFoodLoadingBox');
+  if (!box) return;
+  box.style.display = 'block';
+  const started = Date.now();
+  // 단계별 콘텐츠 (경과 시간별 자동 전환)
+  const stages = [
+    { t: 0,  step: 1, emoji: '📷', title: '사진 확인 중...',      sub: '이미지 품질 체크하고 있어요',       bar: 12 },
+    { t: 2,  step: 2, emoji: '🔤', title: '성분 판독 중...',      sub: '봉투에 적힌 성분명을 읽어내는 중',   bar: 38 },
+    { t: 8,  step: 3, emoji: '🔍', title: '제품 정보 교차 검증',   sub: '더 정확한 성분을 조회하고 있어요',   bar: 62 },
+    { t: 20, step: 4, emoji: '🐾', title: '안전성 평가 중',       sub: '성분별 안전 등급을 매기고 있어요',   bar: 82 },
+    { t: 35, step: 4, emoji: '⏳', title: '거의 다 됐어요...',    sub: '결과 정리 중이에요',                bar: 93 }
+  ];
+  const tickFns = () => {
+    const elapsed = (Date.now() - started) / 1000;
+    const elapsedEl = document.getElementById('petFoodLoadingElapsed');
+    if (elapsedEl) elapsedEl.textContent = elapsed.toFixed(1) + 's';
+    // 최신 단계 결정
+    const cur = stages.filter(s => elapsed >= s.t).pop() || stages[0];
+    const titleEl = document.getElementById('petFoodLoadingTitle');
+    const subEl = document.getElementById('petFoodLoadingSub');
+    const emojiEl = document.getElementById('petFoodLoadingEmoji');
+    const barEl = document.getElementById('petFoodLoadingBar');
+    if (titleEl && titleEl.textContent !== cur.title) titleEl.textContent = cur.title;
+    if (subEl && subEl.textContent !== cur.sub) subEl.textContent = cur.sub;
+    if (emojiEl) emojiEl.textContent = cur.emoji;
+    if (barEl) barEl.style.width = cur.bar + '%';
+    // 단계별 활성화
+    document.querySelectorAll('#petFoodLoadingSteps .pfstep').forEach(el => {
+      const s = parseInt(el.getAttribute('data-step'));
+      const on = s <= cur.step;
+      el.style.background = on ? 'rgba(255,255,255,.85)' : 'rgba(255,255,255,.4)';
+      el.style.border = on ? '1px solid #86EFAC' : '1px solid transparent';
+      el.querySelectorAll('div').forEach(d => { d.style.opacity = on ? '1' : '.5'; });
+    });
+  };
+  tickFns();
+  _petFoodLoadingTimer = setInterval(tickFns, 200);
+}
+function _stopPetFoodLoading() {
+  if (_petFoodLoadingTimer) { clearInterval(_petFoodLoadingTimer); _petFoodLoadingTimer = null; }
+  const box = document.getElementById('petFoodLoadingBox');
+  if (box) box.style.display = 'none';
+  const barEl = document.getElementById('petFoodLoadingBar');
+  if (barEl) barEl.style.width = '8%';
+}
+
 async function analyzePetFood() {
   if (!petFoodImageB64) { showPetFoodError('사진을 먼저 선택해주세요'); return; }
   document.getElementById('btnPetFoodAnalyze').disabled = true;
-  const loadingBox = document.getElementById('petFoodLoadingBox');
   const errorBox = document.getElementById('petFoodErrorBox');
-  if (loadingBox) loadingBox.classList.add('show');
   if (errorBox) errorBox.classList.remove('show');
+  _startPetFoodLoading();
 
   const startTime = Date.now();
   const ctrl = new AbortController();
@@ -5781,7 +5867,7 @@ async function analyzePetFood() {
     });
   } catch(netErr) {
     clearTimeout(timeoutId);
-    if (loadingBox) loadingBox.classList.remove('show');
+    _stopPetFoodLoading();
     document.getElementById('btnPetFoodAnalyze').disabled = false;
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     if (netErr.name === 'AbortError') {
@@ -5794,7 +5880,7 @@ async function analyzePetFood() {
   clearTimeout(timeoutId);
 
   if (res.status === 504) {
-    if (loadingBox) loadingBox.classList.remove('show');
+    _stopPetFoodLoading();
     document.getElementById('btnPetFoodAnalyze').disabled = false;
     showPetFoodError('⏱ 서버 시간 초과. 잠시 후 다시 시도해주세요.');
     return;
@@ -5804,21 +5890,21 @@ async function analyzePetFood() {
   let data;
   try { data = JSON.parse(txt); }
   catch(e) {
-    if (loadingBox) loadingBox.classList.remove('show');
+    _stopPetFoodLoading();
     document.getElementById('btnPetFoodAnalyze').disabled = false;
     showPetFoodError('응답 파싱 오류. 다시 시도해주세요.');
     return;
   }
 
   if (data.error) {
-    if (loadingBox) loadingBox.classList.remove('show');
+    _stopPetFoodLoading();
     document.getElementById('btnPetFoodAnalyze').disabled = false;
     showPetFoodError(data.error);
     return;
   }
 
   currentPetFoodResult = data;
-  if (loadingBox) loadingBox.classList.remove('show');
+  _stopPetFoodLoading();
   document.getElementById('btnPetFoodAnalyze').disabled = false;
   renderPetFoodResult(data);
   showScreen('screenPetFoodResult');
