@@ -21,19 +21,21 @@ module.exports = async function handler(req, res) {
     if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
     const model = 'gemini-2.5-flash';
-    const geminiRes = await callGemini(apiKey, model, buildPetFoodPrompt(petType), imageB64);
-    const rawText = await extractText(geminiRes);
-    if (!rawText) return res.status(500).json({ error: 'AI 응답 없음', debug: { rawText: '' } });
+    const prompt = buildPetFoodPrompt(petType);
 
-    let result;
-    try {
-      let cleaned = rawText.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace > firstBrace) cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-      result = JSON.parse(cleaned);
-    } catch(e) {
-      return res.status(500).json({ error: 'JSON 파싱 실패', debug: { rawText: rawText.slice(0, 400) } });
+    // 🚀 1차: 빠른 분석 (검색 X · JSON 모드)
+    let result = await tryAnalyze(apiKey, model, prompt, imageB64, false);
+    if (!result) return res.status(500).json({ error: 'AI 응답 없음' });
+
+    // 🔍 앞면 사진이거나 신뢰도 낮으면 → 2차: Google 검색 활성화 재시도
+    const needsGrounding = (result.source === 'product_recognition' || result.source === 'partial') && (Number(result.confidence) || 0) < 75;
+    if (needsGrounding) {
+      const groundedPrompt = prompt + `\n\n★★★ 이번엔 Google 검색 도구를 활용해 실제 제품 페이지에서 원재료 리스트를 찾아 확인하세요. 검색으로 확인된 성분만 나열하세요. 검색해서 확인되면 source: "product_recognition"이지만 confidence는 최대 85까지 가능. ★★★`;
+      const grounded = await tryAnalyze(apiKey, model, groundedPrompt, imageB64, true);
+      if (grounded && (Number(grounded.confidence) || 0) > (Number(result.confidence) || 0)) {
+        result = grounded;
+        result.grounded = true;
+      }
     }
 
     result = fillMissingFields(result, petType);
@@ -98,7 +100,7 @@ allergens: ${petName} 흔한 알레르기 유발 성분 중 실제 확인된 것
 }`;
 }
 
-async function callGemini(apiKey, model, prompt, imageB64) {
+async function callGemini(apiKey, model, prompt, imageB64, useGrounding = false) {
   const body = {
     contents: [{
       parts: [
@@ -108,10 +110,15 @@ async function callGemini(apiKey, model, prompt, imageB64) {
     }],
     generationConfig: {
       temperature: 0.1,
-      maxOutputTokens: 4096,
-      responseMimeType: 'application/json'
+      maxOutputTokens: 4096
     }
   };
+  // Grounding 모드: Google Search 툴 활성화 (JSON responseMimeType 못 씀)
+  if (useGrounding) {
+    body.tools = [{ google_search: {} }];
+  } else {
+    body.generationConfig.responseMimeType = 'application/json';
+  }
   return fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
@@ -122,8 +129,26 @@ async function extractText(response) {
   if (!response || !response.ok) return null;
   try {
     const data = await response.json();
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    // 여러 parts 대응 (grounding 모드에서 텍스트가 분리될 수 있음)
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    return parts.map(p => p.text).filter(Boolean).join('\n') || null;
   } catch(e) { return null; }
+}
+
+// 한 번 시도 → JSON 파싱까지 완료
+async function tryAnalyze(apiKey, model, prompt, imageB64, useGrounding) {
+  const geminiRes = await callGemini(apiKey, model, prompt, imageB64, useGrounding);
+  const rawText = await extractText(geminiRes);
+  if (!rawText) return null;
+  try {
+    let cleaned = rawText.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    return JSON.parse(cleaned);
+  } catch(e) {
+    return null;
+  }
 }
 
 function fillMissingFields(r, petType) {
@@ -173,9 +198,10 @@ function fillMissingFields(r, petType) {
   r.source = validSources.includes(r.source) ? r.source : (r.ingredients.length > 5 ? 'ocr' : 'partial');
   let conf = Number(r.confidence);
   if (!Number.isFinite(conf)) conf = r.source === 'ocr' ? 90 : r.source === 'product_recognition' ? 50 : 35;
-  // source별 confidence 상한 강제 (환각 방지)
-  if (r.source === 'product_recognition') conf = Math.min(conf, 60);
-  if (r.source === 'partial') conf = Math.min(conf, 50);
+  // source별 confidence 상한 강제 (환각 방지) — grounded면 상한 완화
+  const isGrounded = r.grounded === true;
+  if (r.source === 'product_recognition') conf = Math.min(conf, isGrounded ? 85 : 60);
+  if (r.source === 'partial') conf = Math.min(conf, isGrounded ? 70 : 50);
   if (r.source === 'ocr') conf = Math.max(conf, 75);
   r.confidence = Math.max(0, Math.min(100, Math.round(conf)));
 
@@ -183,13 +209,16 @@ function fillMissingFields(r, petType) {
   if (r.source === 'unknown' || r.ingredients.length === 0) {
     r.summary = '제품을 정확히 인식하지 못했어요. 봉투 뒷면의 원재료명이 잘 보이도록 다시 촬영하면 정확한 분석이 가능해요.';
     r.recommendation = '봉투 뒷면 · 원재료명 부분을 크게 찍어주세요.';
-  } else if (r.source === 'product_recognition') {
-    // 앞면 인식은 참고용임을 명시
+  } else if (r.source === 'product_recognition' && !isGrounded) {
+    // 앞면 인식 · 검색 미사용 → 신뢰도 낮음 명시
     r.summary = '앞면 사진 기반 추정 분석입니다. 결과가 실제와 다를 수 있으니, 정확한 분석을 원하시면 뒷면의 원재료명을 촬영해주세요. ' + (r.summary || '');
+  } else if (r.source === 'product_recognition' && isGrounded) {
+    // 앞면 인식 · 웹 검색으로 확인됨
+    r.summary = '제품 페이지에서 실제 성분 정보를 확인했습니다. ' + (r.summary || '');
   }
 
   r.petType = petType;
   return r;
 }
 
-module.exports.config = { maxDuration: 60 };
+module.exports.config = { maxDuration: 90 };
