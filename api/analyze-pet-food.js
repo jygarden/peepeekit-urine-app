@@ -17,30 +17,50 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 GEMINI_API_KEY가 설정되지 않았어요.' });
 
   try {
-    const { imageB64, petType = 'dog' } = req.body || {};
+    const { imageB64, petType = 'dog', side = 'back' } = req.body || {};
     if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
     const model = 'gemini-2.5-flash';
     const prompt = buildPetFoodPrompt(petType);
+    const isFront = side === 'front';
 
-    // 🚀 1차: 빠른 분석 (검색 X · JSON 모드)
-    let attempt = await tryAnalyze(apiKey, model, prompt, imageB64, false);
-    let result = attempt.ok ? attempt.data : null;
-    let firstFailReason = attempt.ok ? null : attempt.reason;
-    let firstFailMsg = attempt.ok ? null : attempt.message;
+    let result = null;
+    let firstFailReason = null;
+    let firstFailMsg = null;
 
-    // 1차 실패 or 신뢰도 낮으면 → 2차: Google 검색 활성화
-    const needsGrounding = !result
-      || ((result.source === 'product_recognition' || result.source === 'partial') && (Number(result.confidence) || 0) < 75);
-    if (needsGrounding) {
-      const groundedPrompt = prompt + `\n\n★★★ Google 검색 도구를 활용해 실제 제품 페이지에서 원재료 리스트를 찾아 확인하세요. 검색으로 확인된 성분만 나열하세요. 검색해서 확인되면 source: "product_recognition"이지만 confidence는 최대 85까지 가능. ★★★`;
+    if (isFront) {
+      // 📦 앞면 촬영 → 1차 스킵, 바로 Google 검색 (15초 단축)
+      const groundedPrompt = prompt + `\n\n★★★ 사진은 제품 봉투의 앞면(브랜드/제품명 노출)입니다. Google 검색으로 제품을 식별하고 실제 제품 페이지에서 원재료 리스트를 찾아 확인하세요. 검색으로 확인된 성분만 나열하세요. source: "product_recognition", confidence 최대 85. 검색해도 못 찾으면 source: "unknown". ★★★`;
       const g = await tryAnalyze(apiKey, model, groundedPrompt, imageB64, true);
       if (g.ok && g.data) {
-        const conf = Number(g.data.confidence) || 0;
-        const oldConf = Number(result?.confidence) || 0;
-        if (!result || conf > oldConf) {
-          result = g.data;
-          result.grounded = true;
+        result = g.data;
+        result.grounded = true;
+      } else {
+        firstFailReason = g.reason;
+        firstFailMsg = g.message;
+      }
+    } else {
+      // 🔤 뒷면 촬영 → 1차 OCR만 (빠르고 정확)
+      const attempt = await tryAnalyze(apiKey, model, prompt, imageB64, false);
+      if (attempt.ok) {
+        result = attempt.data;
+      } else {
+        firstFailReason = attempt.reason;
+        firstFailMsg = attempt.message;
+      }
+      // OCR 확신 낮으면(사용자가 잘못 골랐거나 사진 문제) grounding 백업
+      const needsFallback = !result
+        || ((result.source === 'product_recognition' || result.source === 'partial') && (Number(result.confidence) || 0) < 60);
+      if (needsFallback) {
+        const groundedPrompt = prompt + `\n\n★★★ Google 검색 도구를 활용해 실제 제품 페이지에서 원재료 리스트를 찾아 확인하세요. ★★★`;
+        const g = await tryAnalyze(apiKey, model, groundedPrompt, imageB64, true);
+        if (g.ok && g.data) {
+          const conf = Number(g.data.confidence) || 0;
+          const oldConf = Number(result?.confidence) || 0;
+          if (!result || conf > oldConf) {
+            result = g.data;
+            result.grounded = true;
+          }
         }
       }
     }
