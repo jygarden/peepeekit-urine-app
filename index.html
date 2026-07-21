@@ -11908,29 +11908,72 @@ function renderHomeProfileSection() {
   // 3) 홈 카드 4개 제목·설명 개인화
   updateHomeCardsByProfile(active);
 
-  // 4) 가족 아바타 그리드 (홈 프로필 섹션) — kid 프로필 제외
+  // 4) 홈 프로필 섹션 (본인 · 반려동물 분리)
   const el = document.getElementById('homeProfileSection');
   if (el) {
     const profiles = getVisibleProfiles();
-    const avatarsHtml = profiles.map(p => `
-      <button class="family-avatar ${p.id === active.id ? 'active' : ''}" onclick="switchProfile('${p.id}')">
-        <div class="fa-circle" style="${p.photo ? `background:url('${p.photo}') center/cover;` : `background:${profileAvatarBg(p.type)};`}">${p.photo ? '' : (p.emoji || '🧑')}</div>
-        <div class="fa-name">${escapeHtml(p.name)}</div>
-        <div class="fa-age">${escapeHtml(getAgeLabel(p) || (p.type === 'pet' ? '반려' : ''))}</div>
-      </button>
-    `).join('') + `
-      <button class="family-avatar add-avatar" onclick="openAddProfileForm()">
-        <div class="fa-circle">+</div>
-        <div class="fa-name">추가</div>
-        <div class="fa-age" style="opacity:0">·</div>
-      </button>
-      <button class="family-avatar manage-avatar" onclick="openProfileManager()">
-        <div class="fa-circle">✎</div>
-        <div class="fa-name">관리</div>
-        <div class="fa-age" style="opacity:0">·</div>
-      </button>
+    const selfProfile = profiles.find(p => p.id === 'main') || profiles.find(p => p.type === 'adult');
+    const petProfiles = profiles.filter(p => p.type === 'pet');
+    const selfActive = selfProfile && selfProfile.id === active.id;
+
+    // 👤 본인 섹션 (하나만 · 편집만)
+    const selfHtml = selfProfile ? `
+      <div style="background:#FFF;border-radius:14px;padding:12px 14px;margin-bottom:10px;border:0.5px solid #E5E7EB">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:5px">
+            <span style="font-size:13px">👤</span>
+            <span style="font-size:11px;font-weight:900;color:#0F1F1A;letter-spacing:.5px">본인</span>
+          </div>
+          <button onclick="editFamilyProfileFromManager('${selfProfile.id}')" style="background:transparent;border:1px solid #E5E7EB;border-radius:8px;padding:4px 11px;font-size:10.5px;font-weight:800;color:#64748B;cursor:pointer;font-family:inherit">✎ 편집</button>
+        </div>
+        <button onclick="switchProfile('${selfProfile.id}')" style="width:100%;display:flex;align-items:center;gap:10px;background:transparent;border:none;padding:0;cursor:pointer;font-family:inherit;text-align:left">
+          <div style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:${selfActive ? '2.5px solid #059669' : '1px solid #E5E7EB'};${selfProfile.photo ? `background:url('${selfProfile.photo}') center/cover;` : `background:${profileAvatarBg(selfProfile.type)};`}">${selfProfile.photo ? '' : (selfProfile.emoji || '🧑')}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px">${escapeHtml(selfProfile.name)}</div>
+            <div style="font-size:11px;color:#65756B;font-weight:700;margin-top:2px">${escapeHtml(getAgeLabel(selfProfile) || '나')}</div>
+          </div>
+          ${selfActive ? `<div style="width:24px;height:24px;border-radius:50%;background:#059669;color:#FFF;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900">✓</div>` : ''}
+        </button>
+      </div>
+    ` : '';
+
+    // 🐾 반려동물 섹션 (여러 마리 · 추가·편집)
+    const petsHtml = `
+      <div style="background:#FFF;border-radius:14px;padding:12px 14px;border:0.5px solid #E5E7EB">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:13px">🐾</span>
+            <span style="font-size:11px;font-weight:900;color:#0F1F1A;letter-spacing:.5px">반려동물</span>
+            ${petProfiles.length > 0 ? `<span style="background:#F0FDF4;color:#059669;font-size:10px;font-weight:900;padding:1px 7px;border-radius:99px">${petProfiles.length}마리</span>` : ''}
+          </div>
+          <button onclick="openAddProfileForm()" style="background:#059669;border:none;border-radius:8px;padding:4px 11px;font-size:10.5px;font-weight:800;color:#FFF;cursor:pointer;font-family:inherit">+ 추가</button>
+        </div>
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px">
+          ${petProfiles.length === 0 ? `
+            <div style="width:100%;text-align:center;padding:14px 8px;background:#F9FAFB;border-radius:10px">
+              <div style="font-size:26px;line-height:1;margin-bottom:4px">🐾</div>
+              <div style="font-size:11.5px;color:#65756B;font-weight:800">아직 등록된 반려동물이 없어요</div>
+              <div style="font-size:10px;color:#94A3B8;font-weight:700;margin-top:2px">"+ 추가"로 등록해보세요</div>
+            </div>
+          ` : petProfiles.map(p => {
+            const isActive = p.id === active.id;
+            return `
+              <div style="min-width:88px;position:relative">
+                <button onclick="switchProfile('${p.id}')" style="width:100%;background:transparent;border:${isActive ? '2.5px solid #059669' : '1px solid #E5E7EB'};border-radius:12px;padding:10px 6px 8px;cursor:pointer;font-family:inherit">
+                  <div style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 5px;${p.photo ? `background:url('${p.photo}') center/cover;` : `background:${profileAvatarBg(p.type)};`}">${p.photo ? '' : (p.emoji || '🐶')}</div>
+                  <div style="font-size:11.5px;font-weight:900;color:#0F1F1A;letter-spacing:-.2px">${escapeHtml(p.name)}</div>
+                  <div style="font-size:9.5px;color:#65756B;font-weight:700;margin-top:1px">${escapeHtml(getAgeLabel(p) || '반려')}</div>
+                </button>
+                <button onclick="editFamilyProfileFromManager('${p.id}')" style="position:absolute;top:-6px;right:-4px;width:22px;height:22px;background:#FFF;border:1px solid #E5E7EB;border-radius:50%;color:#64748B;font-size:10px;cursor:pointer;font-family:inherit;line-height:1" aria-label="편집">✎</button>
+                ${isActive ? `<div style="position:absolute;top:-6px;left:-4px;width:22px;height:22px;background:#059669;color:#FFF;border-radius:50%;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center">✓</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
     `;
-    el.innerHTML = `<div class="home-profile-section"><div class="family-avatars">${avatarsHtml}</div></div>`;
+
+    el.innerHTML = selfHtml + petsHtml;
   }
 }
 
