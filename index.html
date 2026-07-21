@@ -2092,8 +2092,8 @@
           <div class="card-meta" id="foodLastInfo">약 30초</div>
         </button>
 
-        <!-- 반려동물 사료·간식 분석 (NEW) -->
-        <button class="home-card petfood" onclick="enterPetFood()">
+        <!-- 반려동물 사료·간식·영양제 (Pantry) -->
+        <button class="home-card petfood" onclick="enterPetPantryOrCapture()">
           <span class="card-new-badge">NEW</span>
           <div class="card-orb">🐾</div>
           <div class="card-label">PET FOOD</div>
@@ -3327,6 +3327,26 @@
       </div>
     </div>
 
+    <!-- 🥫 유형 선택 (사료·간식·영양제 통합) -->
+    <div class="card" style="padding:16px;margin-bottom:12px">
+      <div style="font-size:12.5px;font-weight:900;color:#374151;margin-bottom:4px">🥫 어떤 제품인가요?</div>
+      <div style="font-size:10.5px;color:#6B7280;font-weight:700;margin-bottom:10px">유형별로 Pantry에 분류돼 저장돼요</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <button class="meal-time-btn active" id="pfKindMain" onclick="selectPetFoodKind('main')" style="padding:10px 4px">
+          <div style="font-size:18px;line-height:1;margin-bottom:2px">🥣</div>
+          <div style="font-size:10.5px;font-weight:900">사료</div>
+        </button>
+        <button class="meal-time-btn" id="pfKindTreat" onclick="selectPetFoodKind('treat')" style="padding:10px 4px">
+          <div style="font-size:18px;line-height:1;margin-bottom:2px">🍪</div>
+          <div style="font-size:10.5px;font-weight:900">간식</div>
+        </button>
+        <button class="meal-time-btn" id="pfKindSupp" onclick="selectPetFoodKind('supplement')" style="padding:10px 4px">
+          <div style="font-size:18px;line-height:1;margin-bottom:2px">💊</div>
+          <div style="font-size:10.5px;font-weight:900">영양제</div>
+        </button>
+      </div>
+    </div>
+
     <!-- 📷 어떤 면을 찍을 건가요? (분석 시간 최적화) -->
     <div class="card" style="padding:16px;margin-bottom:12px">
       <div style="font-size:12.5px;font-weight:900;color:#374151;margin-bottom:4px">📷 어떤 면을 찍을 건가요?</div>
@@ -3533,17 +3553,25 @@
     </div>
   </div>
 
-  <!-- ════════════ 🥫 Pantry (사료 라이브러리) ════════════ -->
+  <!-- ════════════ 🥫 Pantry (사료·간식·영양제 히스토리) ════════════ -->
   <div class="screen" id="screenPetPantry">
     <div class="page-header">
       <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
-      <div class="page-title">🥫 우리 아이 사료 히스토리</div>
+      <div class="page-title">🥫 우리 아이 Pantry</div>
     </div>
 
     <!-- 요약 대시보드 -->
     <div id="pantrySummary" style="margin-bottom:12px"></div>
 
-    <!-- 사료 리스트 -->
+    <!-- 유형 필터 -->
+    <div id="pantryFilter" style="display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px">
+      <button class="pantry-filter active" data-kind="all" onclick="filterPantry('all')" style="background:#059669;color:#FFF;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">전체</button>
+      <button class="pantry-filter" data-kind="main" onclick="filterPantry('main')" style="background:#F1F5F9;color:#64748B;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">🥣 사료</button>
+      <button class="pantry-filter" data-kind="treat" onclick="filterPantry('treat')" style="background:#F1F5F9;color:#64748B;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">🍪 간식</button>
+      <button class="pantry-filter" data-kind="supplement" onclick="filterPantry('supplement')" style="background:#F1F5F9;color:#64748B;border:none;border-radius:99px;padding:7px 14px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:inherit;white-space:nowrap">💊 영양제</button>
+    </div>
+
+    <!-- 리스트 -->
     <div id="pantryList"></div>
 
     <!-- 새 사료 찍기 CTA -->
@@ -5804,12 +5832,21 @@ function handleFoodFile(input) {
 // ════════════════════════════════════════════════════════════════
 let _petFoodType = 'dog'; // 'dog' | 'cat'
 let _petFoodSide = 'back'; // 'back' | 'front' — 촬영 방향
+let _petFoodKind = 'main'; // 'main' | 'treat' | 'supplement' — 제품 유형
 function selectPetFoodSide(side) {
   _petFoodSide = side;
   const b = document.getElementById('pfSideBack');
   const f = document.getElementById('pfSideFront');
   if (b) b.classList.toggle('active', side === 'back');
   if (f) f.classList.toggle('active', side === 'front');
+}
+function selectPetFoodKind(kind) {
+  _petFoodKind = kind;
+  ['main','treat','supplement'].forEach(k => {
+    const btnId = k === 'main' ? 'pfKindMain' : k === 'treat' ? 'pfKindTreat' : 'pfKindSupp';
+    const el = document.getElementById(btnId);
+    if (el) el.classList.toggle('active', k === kind);
+  });
 }
 let petFoodImageB64 = null;
 let petFoodImageSrc = null;
@@ -5977,10 +6014,10 @@ async function analyzePetFood() {
   renderPetFoodResult(data);
   showScreen('screenPetFoodResult');
 
-  // 기록 저장 (반려동물 사료 이력)
+  // 기록 저장 (반려동물 사료·간식·영양제 통합 이력)
   try {
     const records = JSON.parse(localStorage.getItem('petFoodRecords') || '[]');
-    records.unshift({ date: new Date().toISOString(), petType: _petFoodType, ...data });
+    records.unshift({ date: new Date().toISOString(), petType: _petFoodType, kind: _petFoodKind, ...data });
     localStorage.setItem('petFoodRecords', JSON.stringify(records.slice(0, 100)));
   } catch(e) {}
 }
@@ -6095,8 +6132,26 @@ function markCurrentFeedingFromResult() {
 }
 
 // Pantry 진입
+let _pantryFilter = 'all';
 function enterPetPantry() {
+  _pantryFilter = 'all';
   showScreen('screenPetPantry');
+  renderPantryList();
+}
+// 홈에서 진입 — 이력 있으면 Pantry, 없으면 바로 촬영
+function enterPetPantryOrCapture() {
+  const list = getPetFoodPantry();
+  if (list.length > 0) enterPetPantry();
+  else enterPetFood();
+}
+function filterPantry(kind) {
+  _pantryFilter = kind;
+  document.querySelectorAll('.pantry-filter').forEach(btn => {
+    const isActive = btn.getAttribute('data-kind') === kind;
+    btn.style.background = isActive ? '#059669' : '#F1F5F9';
+    btn.style.color = isActive ? '#FFF' : '#64748B';
+    btn.classList.toggle('active', isActive);
+  });
   renderPantryList();
 }
 // Pantry 리스트 렌더
@@ -6104,7 +6159,10 @@ function renderPantryList() {
   const listEl = document.getElementById('pantryList');
   const summaryEl = document.getElementById('pantrySummary');
   if (!listEl || !summaryEl) return;
-  const list = getPetFoodPantry();
+  let list = getPetFoodPantry();
+  if (_pantryFilter !== 'all') {
+    list = list.filter(r => (r.kind || 'main') === _pantryFilter);
+  }
 
   if (list.length === 0) {
     summaryEl.innerHTML = '';
@@ -6148,6 +6206,9 @@ function renderPantryList() {
     const dateStr = r.date ? new Date(r.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' }) : '-';
     const isCurrent = r.currentlyFeeding === true;
     const petIcon = r.petType === 'cat' ? '🐱' : '🐶';
+    const kind = r.kind || 'main';
+    const kindMap = { main: { icon:'🥣', label:'사료' }, treat: { icon:'🍪', label:'간식' }, supplement: { icon:'💊', label:'영양제' } };
+    const kindInfo = kindMap[kind] || kindMap.main;
     // 알레르기 매칭 여부
     const allergyCheck = _crosscheckAllergens(r.ingredients);
     const hasAllergy = allergyCheck.matches.length > 0;
@@ -6164,6 +6225,7 @@ function renderPantryList() {
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
               <span style="font-size:13px">${petIcon}</span>
+              <span style="background:#F0FDF4;color:#059669;font-size:9px;font-weight:900;padding:1px 6px;border-radius:6px">${kindInfo.icon} ${kindInfo.label}</span>
               <span style="font-size:12.5px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(name)}</span>
             </div>
             <div style="font-size:10px;color:#6B7280;font-weight:700">${escapeHtml(dateStr)} · 성분 ${(r.ingredients || []).length}개</div>
@@ -14627,7 +14689,7 @@ function updateHomeCardsByProfile(active) {
       label: isKid ? 'GROWTH' : '인체용',
       emoji: isKid ? '📈' : '🧑',
       meta: isKid ? '키·몸무게' : '1분 · 홈 자가진단',
-      hide: isPet
+      hide: isPet // 반려동물 모드에선 인체 소변검사 숨김
     },
     pet: {
       title: '소변검사',
@@ -14641,20 +14703,34 @@ function updateHomeCardsByProfile(active) {
       label: isBaby ? 'BABY' : (isKid ? 'KIDS' : 'MEAL'),
       emoji: isBaby ? '🥣' : '🍱',
       meta: '약 30초',
-      hide: isKid && months < 6 // 이유식 시작 전(6개월 미만)은 숨김
+      hide: isPet || (isKid && months < 6) // 반려동물 모드에선 인체 식단 숨김
+    },
+    petfood: {
+      title: isPet ? '사료·간식·영양제' : '반려동물 사료',
+      label: isPet ? 'PET PANTRY' : 'PET FOOD',
+      emoji: '🐾',
+      meta: isPet ? '성분 분석 · 자동 저장' : '사료·간식 성분 분석',
+      hide: isKid
     },
     ingredient: {
       title: isKid ? '아이 안전 성분' : '식품 성분',
       label: isKid ? 'SAFE' : 'LABEL',
       emoji: isKid ? '🛡️' : '🏷️',
       meta: '약 20초',
-      hide: false
+      hide: isPet // 반려동물 모드에선 인체 성분 숨김
+    },
+    supplement: {
+      title: '영양제 관리',
+      label: 'SUPPLEMENT',
+      emoji: '💊',
+      meta: '시간대별 알림',
+      hide: isPet // 반려동물 모드에선 Pantry에 통합돼서 숨김
     }
   };
 
   cards.forEach(card => {
     const cardClasses = card.className.split(' ');
-    const type = ['human','pet','food','ingredient'].find(t => cardClasses.includes(t));
+    const type = ['human','pet','food','petfood','ingredient','supplement'].find(t => cardClasses.includes(t));
     if (!type || !cardData[type]) return;
     const d = cardData[type];
     const titleEl = card.querySelector('.card-title');
