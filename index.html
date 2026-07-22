@@ -4785,22 +4785,19 @@ async function initWelcome() {
     } catch(e) { console.warn('[onboarding]', e); }
     return;
   } else if (!v2 && name) {
-    // 옛 사용자(이름만 있음) → 온보딩 스킵 처리 · 홈으로
+    // 옛 사용자(이름만 있음) → 온보딩 스킵 처리 · 바로 홈
     try { localStorage.setItem(ONBOARDING_DONE_KEY, '1'); } catch(e) {}
     document.getElementById('welcomeFirst').style.display = 'none';
-    document.getElementById('welcomeReturn').style.display = 'block';
-    document.getElementById('welcomeGreet').textContent = timeGreeting();
-    document.getElementById('welcomeName').textContent = name;
-    setTimeout(() => goHome(), 1500);
+    document.getElementById('welcomeReturn').style.display = 'none';
+    goHome();
+    return;
   } else {
-    // 가입 완료된 사용자 → 인사 후 홈
-    document.getElementById('welcomeReturn').style.display = 'block';
+    // 가입 완료된 사용자 → 스플래시 없이 바로 홈
+    document.getElementById('welcomeReturn').style.display = 'none';
     document.getElementById('welcomeFirst').style.display = 'none';
-    document.getElementById('welcomeGreet').textContent = timeGreeting();
-    document.getElementById('welcomeName').textContent = name;
-    // Supabase에 last_active 갱신
+    // Supabase에 last_active 갱신 (백그라운드)
     try { syncUserToSupabase(v2); } catch(e){}
-    setTimeout(() => goHome(), 2000);
+    goHome();
   }
 }
 
