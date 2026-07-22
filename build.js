@@ -60,6 +60,7 @@ async function build() {
             'openProfileManager', 'closeProfileManager', 'editFamilyProfileFromManager', 'confirmDeleteFamilyProfile',
             'enterPetFood', 'selectPetFoodType', 'selectPetFoodSide', 'handlePetFoodFile', 'analyzePetFood', 'renderPetFoodResult',
             'enterPetPantry', 'enterPetPantryOrCapture', 'renderPantryList', 'setCurrentFeedingFood', 'deletePetFoodRecord', 'markCurrentFeedingFromResult', '_confirmDeletePantryItem', 'filterPantry', 'selectPetFoodKind', '_apBreedSuggest', '_apSelectBreed', 'sharePetFoodStory', 'apSelectSpecies', '_renderPantryNutrition',
+            'enterVetChat', '_renderVetChat', '_vetChatQuickAsk', '_resetVetChat', 'sendVetMessage',
             'apSelectType', 'apSelectEmoji', 'apSelectGender',
             'saveAllergyProfile', 'toggleAllergy', 'openPersonalProfile', 'closePersonalProfile', 'savePersonalProfile', 'updateAgePreview',
             'enterHuman', 'enterPet', 'enterFood', 'enterIngredient', 'enterKidsSection',
