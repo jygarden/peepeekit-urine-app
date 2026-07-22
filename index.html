@@ -4775,15 +4775,23 @@ async function initWelcome() {
   const v2 = getUserProfile();
   const name = v2?.name || localStorage.getItem('userName');
 
-  if (!name || !v2) {
-    // 신규 또는 옛 사용자(이름만 있는) → 통합 가입 폼
-    document.getElementById('welcomeFirst').style.display = 'block';
+  if (!name && !v2) {
+    // 🎋 완전 신규 사용자 → 새 온보딩 화면 (사람/반려동물 선택)
+    document.getElementById('welcomeFirst').style.display = 'none';
     document.getElementById('welcomeReturn').style.display = 'none';
-    // 옛 사용자면 이름 미리 채워줌
-    if (name && !v2) {
-      const nameInput = document.getElementById('su_name');
-      if (nameInput) nameInput.value = name;
-    }
+    try {
+      if (typeof renderOnboarding === 'function') renderOnboarding();
+      showScreen('screenOnboarding');
+    } catch(e) { console.warn('[onboarding]', e); }
+    return;
+  } else if (!v2 && name) {
+    // 옛 사용자(이름만 있음) → 온보딩 스킵 처리 · 홈으로
+    try { localStorage.setItem(ONBOARDING_DONE_KEY, '1'); } catch(e) {}
+    document.getElementById('welcomeFirst').style.display = 'none';
+    document.getElementById('welcomeReturn').style.display = 'block';
+    document.getElementById('welcomeGreet').textContent = timeGreeting();
+    document.getElementById('welcomeName').textContent = name;
+    setTimeout(() => goHome(), 1500);
   } else {
     // 가입 완료된 사용자 → 인사 후 홈
     document.getElementById('welcomeReturn').style.display = 'block';
