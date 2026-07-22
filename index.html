@@ -6443,16 +6443,65 @@ function renderPetFoodResult(data) {
       ` : ''}
     </div>`;
 
-  // 안전도 히어로
+  // 🎋 안전도 히어로 카드 (드라마틱 리뉴얼 · 대형 등급 + 애니메이션 카운트업 + 수의영양학 뱃지)
+  const petName = allergyCheck.pet?.name || (data.petType === 'cat' ? '우리 고양이' : '우리 강아지');
+  const scoreVal = data.overallScore || 0;
+  const gradeVal = data.overallGrade || '-';
+  const heroSubtitle =
+    scoreVal >= 90 ? '이 사료, 진짜 프리미엄!'
+    : scoreVal >= 75 ? '전반적으로 안심할 수 있어요'
+    : scoreVal >= 60 ? '괜찮지만 조금 신경써주세요'
+    : scoreVal >= 40 ? '주의가 필요한 성분이 있어요'
+    : '급여를 재고해보세요';
+  const heroBg =
+    scoreVal >= 90 ? 'linear-gradient(135deg,#065F46,#059669)'
+    : scoreVal >= 75 ? 'linear-gradient(135deg,#7C3AED,#5B21B6)'
+    : scoreVal >= 60 ? 'linear-gradient(135deg,#EA580C,#C2410C)'
+    : 'linear-gradient(135deg,#DC2626,#991B1B)';
   html += `
-    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border-radius:16px;padding:18px 16px;margin-bottom:12px;text-align:center;border:1.5px solid #86EFAC">
-      <div style="font-size:11px;font-weight:900;color:#065F46;letter-spacing:1.5px;margin-bottom:4px">${petLabel} 사료·간식 안전도</div>
-      <div style="display:flex;justify-content:center;align-items:baseline;gap:4px">
-        <span style="font-family:Georgia,serif;font-size:52px;font-weight:900;color:${gradeColor};letter-spacing:-1.5px;line-height:1">${data.overallScore || 0}</span>
-        <span style="font-size:16px;color:#065F46;font-weight:800">점</span>
+    <div style="position:relative;background:${heroBg};border-radius:22px;padding:22px 20px 20px;margin-bottom:14px;text-align:center;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.18)">
+      <!-- 배경 데코 -->
+      <div style="position:absolute;top:-25px;right:-25px;font-size:120px;opacity:.10;line-height:1;transform:rotate(15deg);pointer-events:none">🐾</div>
+      <div style="position:absolute;bottom:-30px;left:-20px;font-size:80px;opacity:.10;line-height:1;transform:rotate(-10deg);pointer-events:none">🥫</div>
+
+      <div style="position:relative;z-index:1">
+        <!-- 상단 태그 -->
+        <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.22);padding:4px 11px;border-radius:99px;margin-bottom:10px;backdrop-filter:blur(6px)">
+          <span style="font-size:10px">🧑‍⚕️</span>
+          <span style="font-size:9.5px;font-weight:900;color:#FFF;letter-spacing:.8px">수의영양학 · AAFCO 기준</span>
+        </div>
+
+        <div style="font-size:12.5px;color:rgba(255,255,255,.9);font-weight:800;margin-bottom:6px">${escapeHtml(petName)}에게 이 사료는?</div>
+
+        <!-- 대형 등급 -->
+        <div style="font-family:Georgia,serif;font-size:96px;line-height:.85;font-weight:900;color:#FFF;letter-spacing:-4px;margin:8px 0 4px;text-shadow:0 4px 20px rgba(0,0,0,.2)" id="_petFoodBigGrade">${escapeHtml(gradeVal)}</div>
+
+        <!-- 점수 + 별점 -->
+        <div style="display:flex;justify-content:center;align-items:baseline;gap:4px;margin-bottom:6px">
+          <span style="font-family:Georgia,serif;font-size:22px;font-weight:900;color:#FFF;letter-spacing:-.5px" id="_petFoodScore">${scoreVal}</span>
+          <span style="font-size:12px;color:rgba(255,255,255,.85);font-weight:800">/ 100점</span>
+        </div>
+
+        <!-- 서브 카피 -->
+        <div style="font-size:14px;color:#FFF;font-weight:900;letter-spacing:-.3px;line-height:1.35;margin-top:2px">${escapeHtml(heroSubtitle)}</div>
       </div>
-      <div style="font-size:13px;font-weight:900;color:${gradeColor};margin-top:4px">등급 ${escapeHtml(data.overallGrade || '-')}</div>
     </div>`;
+
+  // 애니메이션은 innerHTML 삽입 후 별도로 실행 (renderPetFoodResult 마지막에 트리거)
+  setTimeout(() => {
+    try {
+      const el = document.getElementById('_petFoodScore');
+      if (!el) return;
+      const target = scoreVal;
+      let cur = 0;
+      const step = Math.max(1, Math.floor(target / 24));
+      const timer = setInterval(() => {
+        cur = Math.min(target, cur + step);
+        el.textContent = cur;
+        if (cur >= target) clearInterval(timer);
+      }, 30);
+    } catch(e) {}
+  }, 50);
 
   // 카운트 그리드 (4개 · 반려동물은 danger 강조)
   html += `
@@ -6534,7 +6583,60 @@ function renderPetFoodResult(data) {
       </div>`;
   }
 
+  // 📸 인스타 공유 CTA (바이럴 훅)
+  html += `
+    <button onclick="sharePetFoodStory()" style="width:100%;background:linear-gradient(135deg,#EC4899,#8B5CF6);border:none;border-radius:16px;padding:16px;color:#FFF;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 6px 18px rgba(236,72,153,.45);margin-bottom:14px">
+      📸 우리 아이 결과 인스타 스토리로 자랑하기
+    </button>`;
+
+  // 🧑‍⚕️ 수의영양학 기준 & 면책 (신뢰도 강화)
+  html += `
+    <div style="background:#F9FAFB;border:0.5px solid #E5E7EB;border-radius:14px;padding:13px 14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:14px">🧑‍⚕️</span>
+        <span style="font-size:11.5px;font-weight:900;color:#111827;letter-spacing:.3px">수의영양학 · 판정 기준</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:8px;padding:7px 9px">
+          <div style="font-size:9.5px;color:#059669;font-weight:900;letter-spacing:.5px;margin-bottom:2px">🇺🇸 AAFCO</div>
+          <div style="font-size:10px;color:#374151;font-weight:700;line-height:1.4">미국 사료 협회 · 반려동물 영양 기준</div>
+        </div>
+        <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:8px;padding:7px 9px">
+          <div style="font-size:9.5px;color:#059669;font-weight:900;letter-spacing:.5px;margin-bottom:2px">🇪🇺 FEDIAF</div>
+          <div style="font-size:10px;color:#374151;font-weight:700;line-height:1.4">유럽 반려동물 사료 협회 표준</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#6B7280;font-weight:600;line-height:1.5;padding-top:8px;border-top:0.5px solid #F3F4F6">
+        본 분석은 <b>국제 수의영양학 가이드라인</b>과 <b>독성 성분 데이터베이스</b>를 기반으로 자동 판정됩니다. 개별 반려동물의 건강 상태에 따라 차이가 있을 수 있으니, 이상 증상 시 <b>동물병원 상담</b>을 권장합니다.
+      </div>
+    </div>`;
+
   el.innerHTML = html;
+}
+
+// 📸 반려동물 사료 결과 → 인스타 스토리 카드 공유 (기존 성분 카드 인프라 재사용)
+function sharePetFoodStory() {
+  const data = currentPetFoodResult;
+  if (!data) { alert('공유할 결과가 없어요'); return; }
+  if (typeof shareToInstagramStory !== 'function') { alert('공유 기능 준비 중이에요'); return; }
+  const ings = data.ingredients || [];
+  const safeCnt = ings.filter(i => i.safety === 'safe').length;
+  const cautionCnt = ings.filter(i => i.safety === 'caution').length;
+  const warningCnt = ings.filter(i => i.safety === 'warning' || i.safety === 'danger').length;
+  const pet = _getActivePetProfile();
+  const petName = pet?.name || (data.petType === 'cat' ? '우리 고양이' : '우리 강아지');
+  shareToInstagramStory('petfood', {
+    overallScore: data.overallScore || 0,
+    overallGrade: data.overallGrade || '-',
+    totalCount: ings.length,
+    safeCount: safeCnt,
+    cautionCount: cautionCnt,
+    warningCount: warningCnt,
+    allergens: data.allergens || [],
+    summary: data.summary || '',
+    petName,
+    petType: data.petType || 'dog'
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -13795,6 +13897,74 @@ function renderStoryCardDOM(type, data) {
   const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
   const daysKr = ['일','월','화','수','목','금','토'];
   const dateStr = `${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${days[now.getDay()]}`;
+
+  // 🐾 반려동물 사료 카드 (딥그린 · AAFCO)
+  if (type === 'petfood') {
+    const d = data || {};
+    const dateFullStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} · ${daysKr[now.getDay()]}요일`;
+    const grade = d.overallGrade || '-';
+    const score = d.overallScore || 0;
+    const safeCnt = d.safeCount || 0;
+    const cautionCnt = d.cautionCount || 0;
+    const warningCnt = d.warningCount || 0;
+    const petName = d.petName || '우리 아이';
+    const petEmoji = d.petType === 'cat' ? '🐱' : '🐶';
+    const opener =
+      score >= 90 ? '✨ 진짜 프리미엄!'
+      : score >= 75 ? '🙆 안심할 수 있어요'
+      : score >= 60 ? '👀 조금 신경써주세요'
+      : '⚠️ 다시 생각해봐요';
+    div.innerHTML = `
+      <div style="width:100%;height:100%;background:linear-gradient(160deg,#065F46 0%,#059669 55%,#10B981 100%);padding:24px 22px;display:flex;flex-direction:column;box-sizing:border-box;color:#FFF;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-30px;right:-30px;font-size:140px;opacity:.08;line-height:1;transform:rotate(15deg);pointer-events:none">🐾</div>
+        <div style="position:absolute;bottom:-40px;left:-30px;font-size:100px;opacity:.08;line-height:1;transform:rotate(-10deg);pointer-events:none">🥫</div>
+
+        <div style="text-align:center;padding-bottom:10px;border-bottom:1.5px dashed rgba(255,255,255,.3);position:relative;z-index:1">
+          <div style="font-size:13px;font-weight:900;letter-spacing:2.5px">🐾 PET FOOD SCAN</div>
+          <div style="font-size:11px;font-weight:800;margin-top:2px;opacity:.85">${escapeHtml(dateFullStr)}</div>
+          <div style="display:inline-block;background:rgba(255,255,255,.22);border-radius:99px;padding:3px 10px;margin-top:6px;font-size:10px;font-weight:900;letter-spacing:.5px;backdrop-filter:blur(6px)">🧑‍⚕️ AAFCO · FEDIAF 기준</div>
+        </div>
+
+        <div style="text-align:center;margin-top:14px;position:relative;z-index:1">
+          <div style="font-size:32px;line-height:1;margin-bottom:4px">${petEmoji}</div>
+          <div style="font-size:16px;font-weight:800;opacity:.9;margin-bottom:2px">${escapeHtml(petName)}에게 이 사료는</div>
+          <div style="font-family:Georgia,serif;font-size:140px;line-height:.85;font-weight:900;color:#FFF;letter-spacing:-6px;margin:8px 0 4px;text-shadow:0 8px 30px rgba(0,0,0,.25)">${escapeHtml(grade)}</div>
+          <div style="font-size:18px;font-weight:900;letter-spacing:-.3px">${score}점 / 100</div>
+          <div style="font-size:22px;font-weight:900;margin-top:8px;letter-spacing:-.5px">${escapeHtml(opener)}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;position:relative;z-index:1">
+          <div style="background:rgba(255,255,255,.18);border-radius:14px;padding:12px 4px;text-align:center;backdrop-filter:blur(10px)">
+            <div style="font-size:18px;line-height:1;margin-bottom:4px">🟢</div>
+            <div style="font-size:22px;font-weight:900">${safeCnt}</div>
+            <div style="font-size:10.5px;font-weight:800;opacity:.85;margin-top:2px">안전</div>
+          </div>
+          <div style="background:rgba(255,255,255,.18);border-radius:14px;padding:12px 4px;text-align:center;backdrop-filter:blur(10px)">
+            <div style="font-size:18px;line-height:1;margin-bottom:4px">🟡</div>
+            <div style="font-size:22px;font-weight:900">${cautionCnt}</div>
+            <div style="font-size:10.5px;font-weight:800;opacity:.85;margin-top:2px">유의</div>
+          </div>
+          <div style="background:rgba(255,255,255,.18);border-radius:14px;padding:12px 4px;text-align:center;backdrop-filter:blur(10px)">
+            <div style="font-size:18px;line-height:1;margin-bottom:4px">🔴</div>
+            <div style="font-size:22px;font-weight:900">${warningCnt}</div>
+            <div style="font-size:10.5px;font-weight:800;opacity:.85;margin-top:2px">경고</div>
+          </div>
+        </div>
+
+        ${d.summary ? `
+        <div style="background:rgba(255,255,255,.18);border-radius:16px;padding:14px 16px;margin-top:14px;backdrop-filter:blur(10px);position:relative;z-index:1">
+          <div style="font-size:10px;font-weight:900;letter-spacing:1.5px;opacity:.85;margin-bottom:4px">🧑‍⚕️ 종합 평가</div>
+          <div style="font-size:13px;font-weight:900;line-height:1.5;letter-spacing:-.3px">${escapeHtml((d.summary || '').slice(0, 90))}${(d.summary || '').length > 90 ? '…' : ''}</div>
+        </div>
+        ` : ''}
+
+        <div style="margin-top:auto;padding-top:14px;text-align:center;position:relative;z-index:1">
+          <div style="font-size:11px;font-weight:900;letter-spacing:2px;opacity:.75">건강어때 · AAFCO 기준 · 무료</div>
+        </div>
+      </div>`;
+    document.body.appendChild(div);
+    return div;
+  }
 
   // 🏷️ 성분 분석 카드는 완전 별도 디자인 (라벤더 · 안전도)
   if (type === 'ingredient') {
