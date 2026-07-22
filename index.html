@@ -3921,20 +3921,29 @@
         </div>
       </div>
 
-      <!-- 키·몸무게 (본인·성인만 노출) -->
+      <!-- 키·몸무게 (본인·반려동물 노출) -->
       <div class="field" id="apBodyField" style="display:none">
-        <label>키 · 몸무게 (선택)</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div>
+        <label id="apBodyLabel">키 · 몸무게 (선택)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="apBodyGrid">
+          <div id="apHeightWrap">
             <input type="number" id="apHeight" placeholder="키" min="30" max="230" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
             <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">cm</div>
           </div>
           <div>
-            <input type="number" id="apWeight" placeholder="몸무게" min="1" max="300" step="0.1" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
+            <input type="number" id="apWeight" placeholder="몸무게" min="0.5" max="300" step="0.1" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
             <div style="font-size:10.5px;color:#94A3B8;margin-top:4px">kg</div>
           </div>
         </div>
-        <div style="font-size:11px;color:#94A3B8;margin-top:4px">식단 분석 시 BMI·권장 칼로리 계산에 사용됩니다</div>
+        <div id="apBodyHint" style="font-size:11px;color:#94A3B8;margin-top:4px">식단 분석 시 BMI·권장 칼로리 계산에 사용됩니다</div>
+      </div>
+
+      <!-- 중성화 여부 (반려동물만) -->
+      <div class="field" id="apNeuterField" style="display:none">
+        <label>중성화 여부 <span style="font-size:10.5px;color:#6366F1;font-weight:800;margin-left:4px">📋 처방 정확도 UP</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button type="button" id="apNeuterY" class="meal-time-btn" onclick="apSelectNeuter(true)">✅ 완료</button>
+          <button type="button" id="apNeuterN" class="meal-time-btn" onclick="apSelectNeuter(false)">❌ 안 함</button>
+        </div>
       </div>
 
       <div class="field">
@@ -6326,60 +6335,143 @@ function _calculatePetCalories(species, weightKg, ageYears) {
   const mer = Math.round(rer * factor);
   return { rer: Math.round(rer), mer, weight: w };
 }
-// 처방전 자동 생성
+// 처방전 자동 생성 (4개 축: 종·나이·성별·체중 + 견종·중성화 고려)
 function generateMonthlyPrescription(pet) {
   if (!pet) return null;
   const species = pet.species || (['🐱','😺','😸','😻','🐈'].includes(pet.emoji) ? 'cat' : 'dog');
   const speciesLabel = species === 'cat' ? '고양이' : '강아지';
   const weight = pet.weight || (species === 'cat' ? 4 : 5);
   const age = pet.ageYears || 3;
-  const ageMode = age >= 8 ? 'senior' : age <= 1 ? 'puppy' : 'adult';
+  const gender = pet.gender || null; // 'male' | 'female'
+  const neutered = pet.neutered === true;
+  const genderLabel = gender === 'female' ? '암' : gender === 'male' ? '수' : '';
+  const neuterLabel = neutered ? ' (중성화)' : (gender ? ' (중성화 X)' : '');
+
+  // 라이프 스테이지 정확히 (종별 기준 다름)
+  const ageMode = species === 'cat'
+    ? (age >= 10 ? 'senior' : age <= 1 ? 'kitten' : 'adult')
+    : (age >= 8 ? 'senior' : age <= 1 ? 'puppy' : 'adult');
+  const stageLabel = {
+    puppy: '성장기 (~1세)', adult: '성체 유지기 (1~7세)', senior: '시니어 (8세+)',
+    kitten: '성장기 (~1세)', 'adult-cat': '성묘 유지기'
+  }[ageMode] || '유지기';
+
   const cal = _calculatePetCalories(species, weight, age);
-  // 사료 대략 계산 (건사료 평균 380kcal/100g 기준)
+  // 중성화된 경우 대사 낮음 → 칼로리 -15% 조정
+  const adjustedCalories = neutered ? Math.round(cal.mer * 0.85) : cal.mer;
+
   const kcalPer100g = 380;
-  const foodGrams = Math.round((cal.mer / kcalPer100g) * 100);
-  const treatGrams = Math.round(foodGrams * 0.10); // 하루 총칼로리의 10% 이내
-  const waterMl = Math.round(weight * 50); // 체중 kg × 50ml
-  // 견종 취약점 기반 집중 케어
+  const foodGrams = Math.round((adjustedCalories / kcalPer100g) * 100);
+  const treatGrams = Math.round(foodGrams * 0.10);
+  const waterMl = Math.round(weight * 50);
+
+  // 견종 취약점 (기존)
   const breedInfo = typeof getBreedInfo === 'function' ? getBreedInfo(pet.breed) : null;
-  const focusCare = breedInfo
-    ? { title: breedInfo.name + ' 맞춤 케어', concerns: breedInfo.concerns.slice(0, 3), recommend: breedInfo.recommend.slice(0, 4) }
-    : { title: (age >= 8 ? '시니어 케어' : age <= 1 ? '성장기 케어' : '건강 유지'), concerns: [], recommend: ['균형 잡힌 영양','오메가-3','유산균'] };
-  // 필수 영양제 리스트 (견종 + 나이 기반)
+
+  // ═══ 4개 축 통합 영양제 처방 ═══
   const supplements = [];
-  if (breedInfo && breedInfo.concerns.some(c => c.includes('슬개골') || c.includes('관절') || c.includes('고관절'))) {
-    supplements.push({ name:'콘드로이틴·글루코사민', why:'관절 예방', freq:'매일 1알', emoji:'🦴' });
+  const addSup = (name, why, freq, emoji) => {
+    if (!supplements.find(s => s.name === name)) supplements.push({ name, why, freq, emoji });
+  };
+
+  // 🐾 견종·묘종 취약점 기반 (최우선)
+  if (breedInfo?.concerns.some(c => c.includes('슬개골') || c.includes('관절') || c.includes('고관절') || c.includes('척추'))) {
+    addSup('콘드로이틴·글루코사민', `${breedInfo.name} 관절 예방`, '매일 1알', '🦴');
   }
-  if (breedInfo && breedInfo.concerns.some(c => c.includes('심장') || c.includes('HCM'))) {
-    supplements.push({ name:'타우린', why:'심장 건강', freq:'매일 1알', emoji:'❤️' });
+  if (breedInfo?.concerns.some(c => c.includes('심장') || c.includes('HCM') || c.includes('DCM'))) {
+    addSup('타우린 + CoQ10', `${breedInfo.name} 심장 건강`, '매일 1알', '❤️');
   }
-  if (breedInfo && breedInfo.concerns.some(c => c.includes('눈물') || c.includes('안구'))) {
-    supplements.push({ name:'루테인 + 항산화', why:'눈 건강·눈물자국', freq:'매일 1알', emoji:'👁' });
+  if (breedInfo?.concerns.some(c => c.includes('눈물') || c.includes('안구') || c.includes('백내장'))) {
+    addSup('루테인 + 항산화', `${breedInfo.name} 눈 건강`, '매일 1알', '👁');
   }
-  if (breedInfo && breedInfo.concerns.some(c => c.includes('피부') || c.includes('알레르기'))) {
-    supplements.push({ name:'오메가-3 (어유)', why:'피부·모질 개선', freq:'주 5회', emoji:'🐟' });
+  if (breedInfo?.concerns.some(c => c.includes('피부') || c.includes('알레르기') || c.includes('모질'))) {
+    addSup('오메가-3 (어유)', '피부·모질 개선', '주 5회', '🐟');
   }
-  if (breedInfo && breedInfo.concerns.some(c => c.includes('신장') || c.includes('방광') || c.includes('결석'))) {
-    supplements.push({ name:'크랜베리 + 저인', why:'비뇨기 건강', freq:'매일 1알', emoji:'💧' });
+  if (breedInfo?.concerns.some(c => c.includes('신장') || c.includes('방광') || c.includes('결석') || c.includes('PKD'))) {
+    addSup('크랜베리 + 저인', '비뇨기 건강', '매일 1알', '💧');
   }
-  // 최소 기본 3개는 보장
-  if (supplements.length === 0) supplements.push({ name:'멀티비타민', why:'전반적 영양 균형', freq:'매일 1알', emoji:'💊' });
-  if (supplements.length < 2) supplements.push({ name:'프로바이오틱스', why:'장 건강·면역', freq:'주 5회', emoji:'🦠' });
-  if (supplements.length < 3 && ageMode !== 'puppy') supplements.push({ name:'오메가-3 (어유)', why:'피부·심혈관', freq:'주 5회', emoji:'🐟' });
+  if (breedInfo?.concerns.some(c => c.includes('호흡') || c.includes('기관지'))) {
+    addSup('항산화 (비타민E)', '호흡기 보호', '주 5회', '🌬');
+  }
+
+  // 🎂 나이 기반
+  if (ageMode === 'puppy' || ageMode === 'kitten') {
+    addSup('DHA·EPA (성장기)', '뇌·시각 발달', '매일', '🧠');
+    addSup('칼슘 + 인 (성장 균형)', '뼈·치아 성장', '매일', '🦴');
+  } else if (ageMode === 'senior') {
+    addSup('SAMe / 밀크씨슬', '간 기능 유지', '매일 1알', '🌿');
+    addSup('CoQ10', '심혈관·에너지', '매일 1알', '💚');
+    if (!supplements.find(s => s.name.includes('콘드로이틴'))) {
+      addSup('MSM + 콘드로이틴', '시니어 관절 케어', '매일 1알', '🦴');
+    }
+  }
+
+  // ⚧ 성별·중성화 기반
+  if (gender === 'male' && !neutered) {
+    addSup('사포닌·아연', '전립선·비뇨기 예방', '주 3회', '⚡');
+  } else if (gender === 'male' && neutered) {
+    addSup('L-카르니틴', '중성화 후 비만 예방', '매일 1알', '⚖️');
+  } else if (gender === 'female' && !neutered) {
+    addSup('엽산 + 비타민B', '임신·수유 대비', '주 3회', '🌸');
+  } else if (gender === 'female' && neutered) {
+    addSup('L-카르니틴', '중성화 후 대사 관리', '매일 1알', '⚖️');
+    if (species === 'dog') addSup('실리마린', '유선·간 건강', '주 3회', '🌿');
+  }
+
+  // 💪 체중 기반 (비만 or 저체중 감지)
+  const isSmallDog = species === 'dog' && weight < 5;
+  const isLargeDog = species === 'dog' && weight > 25;
+  const isOverweightCat = species === 'cat' && weight > 6;
+  if (isLargeDog) addSup('대형견 관절 서포트', '체중 부하 완화', '매일 1알', '🦴');
+  if (isSmallDog) addSup('저혈당 예방 (프로폴리스)', '소형견 급성 저혈당 예방', '주 3회', '🍯');
+  if (isOverweightCat) addSup('식이섬유 (헤어볼·체중)', '헤어볼·포만감', '매일', '🌾');
+
+  // 🥇 기본 (모든 개체 최소 보장)
+  addSup('프로바이오틱스', '장 건강·면역', '주 5회', '🦠');
+  if (species === 'cat' && !supplements.find(s => s.name.includes('타우린'))) {
+    addSup('타우린 (고양이 필수)', '심장·시각 필수 영양소', '매일', '❤️');
+  }
+  if (species === 'cat') addSup('수분 부스터 (습식 병행)', '신장 건강 · 수분 부족 예방', '매일', '💧');
+
+  // 🎯 집중 케어 (프로필 축 조합)
+  let focusCareTitle = '';
+  let focusCareDesc = '';
+  if (breedInfo) {
+    focusCareTitle = `${breedInfo.name} + ${stageLabel}`;
+    focusCareDesc = `${breedInfo.concerns.slice(0, 2).join(' · ')} 예방에 집중`;
+  } else {
+    focusCareTitle = stageLabel;
+    focusCareDesc = ageMode === 'senior' ? '노화 관리 · 관절 · 심장' : ageMode === 'puppy' || ageMode === 'kitten' ? '성장기 영양 · 뇌 발달' : '균형 잡힌 유지';
+  }
+  const focusCare = {
+    title: focusCareTitle,
+    desc: focusCareDesc,
+    concerns: breedInfo?.concerns.slice(0, 3) || [],
+    recommend: (breedInfo?.recommend || ['균형 잡힌 영양','오메가-3','프로바이오틱스']).slice(0, 5)
+  };
+
+  // 프로필 완성도 (4개 축 얼마나 채웠나)
+  const completeness = [
+    !!species, !!weight, !!age, !!gender
+  ].filter(Boolean).length;
 
   return {
     petName: pet.name || '우리 아이',
     petEmoji: pet.emoji || (species === 'cat' ? '🐱' : '🐶'),
-    species, speciesLabel, weight, age, ageMode,
+    species, speciesLabel, weight, age, ageMode, stageLabel,
+    gender, genderLabel, neutered, neuterLabel,
     breedName: breedInfo?.name || '',
-    calories: cal.mer,
+    calories: adjustedCalories,
+    caloriesBase: cal.mer,
+    calorieAdjustNote: neutered ? '중성화 반영 -15%' : '',
     foodGrams,
     foodMorning: Math.round(foodGrams / 2),
     foodEvening: Math.round(foodGrams / 2),
     treatGrams,
     waterMl,
-    supplements,
+    supplements: supplements.slice(0, 8), // 최대 8개
     focusCare,
+    completeness,
     generatedAt: new Date().toISOString(),
     monthLabel: `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`
   };
@@ -6406,8 +6498,14 @@ function renderPrescription() {
       <div style="position:relative;z-index:1">
         <div style="display:inline-block;background:#7F77DD;color:#FFF;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:1px;margin-bottom:8px">${escapeHtml(rx.monthLabel)} 처방전</div>
         <div style="font-size:20px;font-weight:900;color:#3C3489;letter-spacing:-.5px;line-height:1.25">${rx.petEmoji} ${escapeHtml(rx.petName)}<br>맞춤 케어 플랜</div>
-        <div style="font-size:11.5px;color:#5B21B6;font-weight:800;margin-top:6px">${escapeHtml(rx.speciesLabel)} · ${escapeHtml(rx.breedName || (rx.age + '세'))} · ${rx.weight}kg</div>
-        <div style="font-size:10px;color:#7F77DD;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid rgba(124,58,237,.2)">🧑‍⚕️ AAFCO · 수의영양학 기반 자동 처방</div>
+        <div style="font-size:11.5px;color:#5B21B6;font-weight:800;margin-top:6px">${escapeHtml(rx.speciesLabel)}${rx.breedName ? ' · ' + escapeHtml(rx.breedName) : ''}</div>
+        <!-- 4개 축 뱃지 -->
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">
+          <span style="background:rgba(255,255,255,.7);color:#3C3489;font-size:10px;font-weight:900;padding:3px 8px;border-radius:99px">🎂 ${rx.age}세 · ${escapeHtml(rx.stageLabel)}</span>
+          ${rx.genderLabel ? `<span style="background:rgba(255,255,255,.7);color:#3C3489;font-size:10px;font-weight:900;padding:3px 8px;border-radius:99px">⚧ ${escapeHtml(rx.genderLabel)}${escapeHtml(rx.neuterLabel)}</span>` : ''}
+          <span style="background:rgba(255,255,255,.7);color:#3C3489;font-size:10px;font-weight:900;padding:3px 8px;border-radius:99px">⚖️ ${rx.weight}kg</span>
+        </div>
+        <div style="font-size:10px;color:#7F77DD;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid rgba(124,58,237,.2)">🧑‍⚕️ AAFCO · 4개 축 (종·나이·성별·체중) 정밀 처방</div>
       </div>
     </div>
 
@@ -15880,10 +15978,20 @@ function editFamilyProfileFromManager(id) {
     if (bmEl) bmEl.value = bm != null ? bm : '';
     if (bdEl) bdEl.value = bd != null ? bd : '';
   } catch(e) {}
-  // 🐾 종·품종 (반려동물)
+  // 🐾 종·품종·중성화 (반려동물)
   _apSpecies = p.species || (['🐱','😺','😸','😻','🐈'].includes(p.emoji) ? 'cat' : (['🐶','🐕','🐩','🦮'].includes(p.emoji) ? 'dog' : null));
+  _apNeutered = (typeof p.neutered === 'boolean') ? p.neutered : null;
   const breedInput = document.getElementById('apBreedInput');
   if (breedInput) breedInput.value = p.breed || '';
+  // 중성화 버튼 반영
+  if (_apType === 'pet' && _apNeutered !== null) {
+    setTimeout(() => {
+      const y = document.getElementById('apNeuterY');
+      const n = document.getElementById('apNeuterN');
+      if (y) y.classList.toggle('active', _apNeutered === true);
+      if (n) n.classList.toggle('active', _apNeutered === false);
+    }, 0);
+  }
   apSelectType(_apType);
   // 종 버튼 활성화 반영
   if (_apType === 'pet' && _apSpecies) {
@@ -15999,7 +16107,8 @@ function goAddProfile() {
     if (el) el.value = '';
   });
   _apSpecies = null;
-  ['apSpeciesDog','apSpeciesCat'].forEach(id => {
+  _apNeutered = null;
+  ['apSpeciesDog','apSpeciesCat','apNeuterY','apNeuterN'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('active');
   });
@@ -16024,9 +16133,27 @@ function apSelectType(type) {
   }
   // 아이 유형이면 개월 필드 표시
   document.getElementById('apAgeMonthsWrap').style.display = type === 'kid' ? 'block' : 'none';
-  // 본인·성인이면 키·몸무게 + 생년월일 표시
+  // 본인·성인이면 키·몸무게 + 생년월일 · 반려동물이면 몸무게만
   const bodyField = document.getElementById('apBodyField');
-  if (bodyField) bodyField.style.display = type === 'adult' ? 'block' : 'none';
+  if (bodyField) bodyField.style.display = (type === 'adult' || type === 'pet') ? 'block' : 'none';
+  const bodyLabel = document.getElementById('apBodyLabel');
+  const heightWrap = document.getElementById('apHeightWrap');
+  const bodyGrid = document.getElementById('apBodyGrid');
+  const bodyHint = document.getElementById('apBodyHint');
+  if (type === 'pet') {
+    if (bodyLabel) bodyLabel.innerHTML = '몸무게 <span style="font-size:10.5px;color:#DC2626;font-weight:800;margin-left:4px">필수</span>';
+    if (heightWrap) heightWrap.style.display = 'none';
+    if (bodyGrid) bodyGrid.style.gridTemplateColumns = '1fr';
+    if (bodyHint) bodyHint.innerHTML = '💊 <b>사료 하루 급여량·영양제 처방</b>을 정확히 계산해드려요';
+  } else {
+    if (bodyLabel) bodyLabel.innerHTML = '키 · 몸무게 (선택)';
+    if (heightWrap) heightWrap.style.display = '';
+    if (bodyGrid) bodyGrid.style.gridTemplateColumns = '1fr 1fr';
+    if (bodyHint) bodyHint.innerHTML = '식단 분석 시 BMI·권장 칼로리 계산에 사용됩니다';
+  }
+  // 중성화 필드 (반려동물만)
+  const neuterField = document.getElementById('apNeuterField');
+  if (neuterField) neuterField.style.display = type === 'pet' ? 'block' : 'none';
   const birthField = document.getElementById('apBirthField');
   if (birthField) birthField.style.display = type === 'adult' ? 'block' : 'none';
   // 🐾 반려동물이면 종 + 품종 표시
@@ -16040,6 +16167,14 @@ function apSelectType(type) {
 
 // 🐾 반려동물 종 선택 (강아지/고양이 · 이모지 자동 변경)
 let _apSpecies = null;
+let _apNeutered = null; // 중성화 여부
+function apSelectNeuter(yes) {
+  _apNeutered = yes;
+  const y = document.getElementById('apNeuterY');
+  const n = document.getElementById('apNeuterN');
+  if (y) y.classList.toggle('active', yes === true);
+  if (n) n.classList.toggle('active', yes === false);
+}
 function apSelectSpecies(species) {
   _apSpecies = species;
   const dog = document.getElementById('apSpeciesDog');
@@ -16189,11 +16324,11 @@ function saveNewProfile() {
   const allergiesRaw = document.getElementById('apAllergies').value.trim();
   const allergies = allergiesRaw ? allergiesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-  // 🆕 키·몸무게 (adult 타입만)
+  // 🆕 키·몸무게 (adult · pet 모두)
   const heightVal = document.getElementById('apHeight')?.value.trim();
   const weightVal = document.getElementById('apWeight')?.value.trim();
   const height = _apType === 'adult' && heightVal ? parseFloat(heightVal) : null;
-  const weight = _apType === 'adult' && weightVal ? parseFloat(weightVal) : null;
+  const weight = (_apType === 'adult' || _apType === 'pet') && weightVal ? parseFloat(weightVal) : null;
 
   // 🎋 생년월일 (adult 타입만 · 사주 건강 추천용)
   const bYearRaw  = document.getElementById('apBirthYear')?.value.trim();
@@ -16209,6 +16344,11 @@ function saveNewProfile() {
   const species = _apType === 'pet' ? (_apSpecies || null) : null;
 
   if (_apType === 'pet' && !species) { alert('강아지·고양이 중 종류를 선택해주세요'); return; }
+  if (_apType === 'pet' && !weight) { alert('반려동물 몸무게는 필수예요.\n사료 급여량·처방 정확도에 필요합니다.'); return; }
+  if (_apType === 'pet' && ageYears == null) { alert('반려동물 나이는 필수예요.'); return; }
+  if (_apType === 'pet' && !_apGender) { alert('반려동물 성별을 선택해주세요.'); return; }
+
+  const neutered = _apType === 'pet' ? _apNeutered : null;
 
   const data = {
     name, type: _apType, ageYears, ageMonths, gender: _apGender,
@@ -16216,7 +16356,7 @@ function saveNewProfile() {
     photo: _apPhotoDataUrl || null,
     height, weight,
     birthYear, birthMonth, birthDay,
-    species, breed
+    species, breed, neutered
   };
 
   if (_apEditingId) {
