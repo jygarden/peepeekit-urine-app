@@ -2019,7 +2019,7 @@
 
   <!-- ════════════ 홈 화면 (Minimal Apple Style) ════════════ -->
   <!-- ════════════ 🎋 온보딩 (첫 방문) ════════════ -->
-  <div class="screen" id="screenOnboarding" style="display:none;padding:0">
+  <div class="screen" id="screenOnboarding" style="padding:0">
     <div style="min-height:100vh;padding:52px 22px 36px;background:#FEFCF5;display:flex;flex-direction:column">
       <!-- 브랜드 마크 -->
       <div style="font-size:11.5px;color:#8B9490;font-weight:600;letter-spacing:1.2px;margin-bottom:30px">건강어때</div>
@@ -2970,7 +2970,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -3623,7 +3623,7 @@
   </div>
 
   <!-- ════════════ 📋 월간 처방전 화면 ════════════ -->
-  <div class="screen" id="screenPrescription" style="display:none">
+  <div class="screen" id="screenPrescription">
     <div class="page-header">
       <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
       <div class="page-title">📋 이번 달 처방전</div>
@@ -3633,7 +3633,7 @@
   </div>
 
   <!-- ════════════ 👩‍⚕️ 닥터 냐옹 · AI 수의영양사 채팅 ════════════ -->
-  <div class="screen" id="screenVetChat" style="display:none">
+  <div class="screen" id="screenVetChat">
     <div class="page-header" style="display:flex;align-items:center;gap:10px;padding-right:6px">
       <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
       <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#CECBF6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👩‍⚕️</div>
@@ -8092,8 +8092,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
