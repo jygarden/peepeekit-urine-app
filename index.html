@@ -2092,6 +2092,15 @@
           <div class="card-meta" id="foodLastInfo">약 30초</div>
         </button>
 
+        <!-- 📋 월간 처방전 (반려동물 모드에서만) -->
+        <button class="home-card prescription" onclick="enterPrescription()">
+          <span class="card-new-badge">NEW</span>
+          <div class="card-orb" style="background:linear-gradient(135deg,#EEEDFE,#DDD6FE)">📋</div>
+          <div class="card-label" style="color:#7F77DD">RX</div>
+          <div class="card-title">이번 달 처방전</div>
+          <div class="card-meta">맞춤 급여·영양제 자동</div>
+        </button>
+
         <!-- 반려동물 사료·간식·영양제 (Pantry) -->
         <button class="home-card petfood" onclick="enterPetPantryOrCapture()">
           <span class="card-new-badge">NEW</span>
@@ -3592,6 +3601,16 @@
       📷 새로운 사료 분석하기
     </button>
     <button onclick="goHome()" class="btn-outline" style="margin-top:10px">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 📋 월간 처방전 화면 ════════════ -->
+  <div class="screen" id="screenPrescription" style="display:none">
+    <div class="page-header">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div class="page-title">📋 이번 달 처방전</div>
+    </div>
+    <div id="prescriptionContent"></div>
+    <button onclick="goHome()" class="btn-outline" style="margin-top:12px">← 홈으로</button>
   </div>
 
   <!-- ════════════ 👩‍⚕️ 닥터 냐옹 · AI 수의영양사 채팅 ════════════ -->
@@ -6286,6 +6305,208 @@ function markCurrentFeedingFromResult() {
   latest.currentlyFeeding = true; // 최신 것만 켜기 (중복 유지)
   localStorage.setItem('petFoodRecords', JSON.stringify(list));
   if (typeof showPointToast === 'function') showPointToast('👑 지금 급여 중으로 설정됨!');
+}
+
+// ═══════════════════════════════════════════
+// 📋 월간 처방전 시스템 (자동 생성 · 견종·나이·체중 기반)
+// ═══════════════════════════════════════════
+// RER (Resting Energy Requirement) · MER (Maintenance)
+// 강아지: RER=70×kg^0.75 · MER 성견=RER×1.6 · 시니어=RER×1.4 · 어린강아지=RER×2.0
+// 고양이: RER=70×kg^0.75 · MER 성묘=RER×1.2 · 활동적=RER×1.4
+function _calculatePetCalories(species, weightKg, ageYears) {
+  const w = Math.max(0.5, Math.min(80, Number(weightKg) || 3));
+  const age = Number(ageYears) || 3;
+  const rer = 70 * Math.pow(w, 0.75);
+  let factor;
+  if (species === 'cat') {
+    factor = age >= 10 ? 1.1 : age <= 1 ? 2.0 : 1.2;
+  } else {
+    factor = age >= 8 ? 1.4 : age <= 1 ? 2.0 : 1.6;
+  }
+  const mer = Math.round(rer * factor);
+  return { rer: Math.round(rer), mer, weight: w };
+}
+// 처방전 자동 생성
+function generateMonthlyPrescription(pet) {
+  if (!pet) return null;
+  const species = pet.species || (['🐱','😺','😸','😻','🐈'].includes(pet.emoji) ? 'cat' : 'dog');
+  const speciesLabel = species === 'cat' ? '고양이' : '강아지';
+  const weight = pet.weight || (species === 'cat' ? 4 : 5);
+  const age = pet.ageYears || 3;
+  const ageMode = age >= 8 ? 'senior' : age <= 1 ? 'puppy' : 'adult';
+  const cal = _calculatePetCalories(species, weight, age);
+  // 사료 대략 계산 (건사료 평균 380kcal/100g 기준)
+  const kcalPer100g = 380;
+  const foodGrams = Math.round((cal.mer / kcalPer100g) * 100);
+  const treatGrams = Math.round(foodGrams * 0.10); // 하루 총칼로리의 10% 이내
+  const waterMl = Math.round(weight * 50); // 체중 kg × 50ml
+  // 견종 취약점 기반 집중 케어
+  const breedInfo = typeof getBreedInfo === 'function' ? getBreedInfo(pet.breed) : null;
+  const focusCare = breedInfo
+    ? { title: breedInfo.name + ' 맞춤 케어', concerns: breedInfo.concerns.slice(0, 3), recommend: breedInfo.recommend.slice(0, 4) }
+    : { title: (age >= 8 ? '시니어 케어' : age <= 1 ? '성장기 케어' : '건강 유지'), concerns: [], recommend: ['균형 잡힌 영양','오메가-3','유산균'] };
+  // 필수 영양제 리스트 (견종 + 나이 기반)
+  const supplements = [];
+  if (breedInfo && breedInfo.concerns.some(c => c.includes('슬개골') || c.includes('관절') || c.includes('고관절'))) {
+    supplements.push({ name:'콘드로이틴·글루코사민', why:'관절 예방', freq:'매일 1알', emoji:'🦴' });
+  }
+  if (breedInfo && breedInfo.concerns.some(c => c.includes('심장') || c.includes('HCM'))) {
+    supplements.push({ name:'타우린', why:'심장 건강', freq:'매일 1알', emoji:'❤️' });
+  }
+  if (breedInfo && breedInfo.concerns.some(c => c.includes('눈물') || c.includes('안구'))) {
+    supplements.push({ name:'루테인 + 항산화', why:'눈 건강·눈물자국', freq:'매일 1알', emoji:'👁' });
+  }
+  if (breedInfo && breedInfo.concerns.some(c => c.includes('피부') || c.includes('알레르기'))) {
+    supplements.push({ name:'오메가-3 (어유)', why:'피부·모질 개선', freq:'주 5회', emoji:'🐟' });
+  }
+  if (breedInfo && breedInfo.concerns.some(c => c.includes('신장') || c.includes('방광') || c.includes('결석'))) {
+    supplements.push({ name:'크랜베리 + 저인', why:'비뇨기 건강', freq:'매일 1알', emoji:'💧' });
+  }
+  // 최소 기본 3개는 보장
+  if (supplements.length === 0) supplements.push({ name:'멀티비타민', why:'전반적 영양 균형', freq:'매일 1알', emoji:'💊' });
+  if (supplements.length < 2) supplements.push({ name:'프로바이오틱스', why:'장 건강·면역', freq:'주 5회', emoji:'🦠' });
+  if (supplements.length < 3 && ageMode !== 'puppy') supplements.push({ name:'오메가-3 (어유)', why:'피부·심혈관', freq:'주 5회', emoji:'🐟' });
+
+  return {
+    petName: pet.name || '우리 아이',
+    petEmoji: pet.emoji || (species === 'cat' ? '🐱' : '🐶'),
+    species, speciesLabel, weight, age, ageMode,
+    breedName: breedInfo?.name || '',
+    calories: cal.mer,
+    foodGrams,
+    foodMorning: Math.round(foodGrams / 2),
+    foodEvening: Math.round(foodGrams / 2),
+    treatGrams,
+    waterMl,
+    supplements,
+    focusCare,
+    generatedAt: new Date().toISOString(),
+    monthLabel: `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월`
+  };
+}
+
+function enterPrescription() {
+  const pet = _getActivePetProfile();
+  if (!pet) { alert('반려동물 프로필을 먼저 등록해주세요'); return; }
+  showScreen('screenPrescription');
+  renderPrescription();
+}
+function renderPrescription() {
+  const el = document.getElementById('prescriptionContent');
+  if (!el) return;
+  const pet = _getActivePetProfile();
+  if (!pet) { el.innerHTML = '<div style="text-align:center;padding:32px 20px;color:#6B7280">반려동물 프로필을 등록해주세요</div>'; return; }
+  const rx = generateMonthlyPrescription(pet);
+  if (!rx) { el.innerHTML = '<div>처방전 생성에 실패했어요</div>'; return; }
+  const missingWeight = !pet.weight;
+  el.innerHTML = `
+    <!-- 표지 -->
+    <div style="background:linear-gradient(135deg,#EEEDFE,#DDD6FE);border-radius:20px;padding:22px 18px 20px;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-25px;right:-25px;font-size:120px;opacity:.10;line-height:1;transform:rotate(15deg);pointer-events:none">📋</div>
+      <div style="position:relative;z-index:1">
+        <div style="display:inline-block;background:#7F77DD;color:#FFF;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:99px;letter-spacing:1px;margin-bottom:8px">${escapeHtml(rx.monthLabel)} 처방전</div>
+        <div style="font-size:20px;font-weight:900;color:#3C3489;letter-spacing:-.5px;line-height:1.25">${rx.petEmoji} ${escapeHtml(rx.petName)}<br>맞춤 케어 플랜</div>
+        <div style="font-size:11.5px;color:#5B21B6;font-weight:800;margin-top:6px">${escapeHtml(rx.speciesLabel)} · ${escapeHtml(rx.breedName || (rx.age + '세'))} · ${rx.weight}kg</div>
+        <div style="font-size:10px;color:#7F77DD;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid rgba(124,58,237,.2)">🧑‍⚕️ AAFCO · 수의영양학 기반 자동 처방</div>
+      </div>
+    </div>
+
+    ${missingWeight ? `
+    <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:12px;padding:11px 13px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <span style="font-size:16px">💡</span>
+      <div style="flex:1;font-size:11.5px;color:#78350F;font-weight:800">체중 정보가 없어 5kg으로 가정했어요. <b>프로필에 체중 입력</b>하면 더 정확해져요</div>
+    </div>` : ''}
+
+    <!-- 하루 급여량 (핵심) -->
+    <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:16px;padding:14px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:12.5px;font-weight:900;color:#111827">🍽 하루 급여 계획</div>
+        <div style="background:#F0FDF4;color:#059669;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px">${rx.calories} kcal / 일</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:linear-gradient(135deg,#FFF7ED,#FED7AA);border-radius:12px;padding:12px 10px;text-align:center">
+          <div style="font-size:22px;line-height:1">🌅</div>
+          <div style="font-size:10.5px;color:#7C2D12;font-weight:900;margin-top:4px">아침 사료</div>
+          <div style="font-size:20px;font-weight:900;color:#7C2D12;font-family:Georgia,serif">${rx.foodMorning}<span style="font-size:10px">g</span></div>
+        </div>
+        <div style="background:linear-gradient(135deg,#EEF2FF,#C7D2FE);border-radius:12px;padding:12px 10px;text-align:center">
+          <div style="font-size:22px;line-height:1">🌙</div>
+          <div style="font-size:10.5px;color:#3730A3;font-weight:900;margin-top:4px">저녁 사료</div>
+          <div style="font-size:20px;font-weight:900;color:#3730A3;font-family:Georgia,serif">${rx.foodEvening}<span style="font-size:10px">g</span></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:#FEF3C7;border-radius:10px;padding:9px 10px;display:flex;align-items:center;gap:6px">
+          <span style="font-size:16px">🍪</span>
+          <div><div style="font-size:9.5px;color:#78350F;font-weight:900">간식 최대</div><div style="font-size:13px;font-weight:900;color:#78350F">${rx.treatGrams}g / 일</div></div>
+        </div>
+        <div style="background:#EFF6FF;border-radius:10px;padding:9px 10px;display:flex;align-items:center;gap:6px">
+          <span style="font-size:16px">💧</span>
+          <div><div style="font-size:9.5px;color:#1E40AF;font-weight:900">수분 목표</div><div style="font-size:13px;font-weight:900;color:#1E40AF">${rx.waterMl}ml</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 필수 영양제 처방 -->
+    <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:16px;padding:14px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="font-size:15px">💊</span>
+        <span style="font-size:12.5px;font-weight:900;color:#111827">필수 영양제 처방</span>
+        <span style="background:#F1F5F9;color:#64748B;font-size:9.5px;font-weight:900;padding:1px 7px;border-radius:99px">${rx.supplements.length}가지</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${rx.supplements.map(s => `
+          <div style="background:#F9FAFB;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;background:#FFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${s.emoji}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12.5px;font-weight:900;color:#111827">${escapeHtml(s.name)}</div>
+              <div style="font-size:10.5px;color:#6B7280;font-weight:700;margin-top:1px">${escapeHtml(s.why)}</div>
+            </div>
+            <div style="background:#EEEDFE;color:#3C3489;font-size:10px;font-weight:900;padding:4px 8px;border-radius:8px;white-space:nowrap">${escapeHtml(s.freq)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- 이번 달 집중 케어 -->
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:16px;padding:14px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:15px">🎯</span>
+        <span style="font-size:12.5px;font-weight:900;color:#065F46">이번 달 집중 케어</span>
+      </div>
+      <div style="font-size:13px;font-weight:900;color:#065F46;margin-bottom:6px">${escapeHtml(rx.focusCare.title)}</div>
+      ${rx.focusCare.concerns.length > 0 ? `
+      <div style="font-size:10.5px;color:#065F46;font-weight:700;margin-bottom:8px;line-height:1.5">유전적 취약점: ${rx.focusCare.concerns.map(escapeHtml).join(' · ')}</div>
+      ` : ''}
+      <div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px 10px">
+        <div style="font-size:9.5px;color:#065F46;font-weight:900;margin-bottom:3px;letter-spacing:.5px">📌 이 성분을 우선 챙기세요</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${rx.focusCare.recommend.map(r => `<span style="background:#FFF;color:#065F46;font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;border:0.5px solid #86EFAC">${escapeHtml(r)}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- 다음 스텝 CTA -->
+    <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:16px;padding:14px 16px;margin-bottom:12px">
+      <div style="font-size:11.5px;font-weight:900;color:#111827;margin-bottom:8px">✨ 처방을 따르는 방법</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="enterPetPantryOrCapture()" style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:11px 13px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">📷</span>
+          <div style="flex:1"><div style="font-size:12px;font-weight:900;color:#065F46">현재 사료 스캔하기</div><div style="font-size:10px;color:#059669;font-weight:700;margin-top:1px">처방과 맞는지 자동 검증</div></div>
+          <span style="color:#059669;font-size:14px">›</span>
+        </button>
+        <button onclick="enterVetChat()" style="background:#EEEDFE;border:1px solid #CECBF6;border-radius:10px;padding:11px 13px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">👩‍⚕️</span>
+          <div style="flex:1"><div style="font-size:12px;font-weight:900;color:#3C3489">닥터 냐옹에게 물어보기</div><div style="font-size:10px;color:#5B21B6;font-weight:700;margin-top:1px">처방 관련 궁금한 점</div></div>
+          <span style="color:#5B21B6;font-size:14px">›</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 면책 -->
+    <div style="background:#F9FAFB;border-radius:12px;padding:11px 13px;font-size:10px;color:#6B7280;font-weight:600;line-height:1.55">
+      💡 본 처방은 AAFCO·FEDIAF 기준 성체 유지 요구량 기반 자동 계산입니다. 임신·수유·질병·수술 회복 중이거나 특별 관리가 필요한 경우 <b>동물병원 상담</b>을 권장합니다.
+    </div>`;
 }
 
 // ═══════════════════════════════════════════
@@ -15536,12 +15757,19 @@ function updateHomeCardsByProfile(active) {
       emoji: '👩‍⚕️',
       meta: 'AI 수의영양사 · 24시간',
       hide: !isPet // 반려동물 모드에서만
+    },
+    prescription: {
+      title: '이번 달 처방전',
+      label: 'RX',
+      emoji: '📋',
+      meta: '맞춤 급여·영양제 자동',
+      hide: !isPet // 반려동물 모드에서만
     }
   };
 
   cards.forEach(card => {
     const cardClasses = card.className.split(' ');
-    const type = ['human','pet','food','petfood','ingredient','supplement','vetchat'].find(t => cardClasses.includes(t));
+    const type = ['human','pet','food','petfood','ingredient','supplement','vetchat','prescription'].find(t => cardClasses.includes(t));
     if (!type || !cardData[type]) return;
     const d = cardData[type];
     const titleEl = card.querySelector('.card-title');
