@@ -2933,7 +2933,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어때 AI가 종합 분석 중입니다</p>
+      <p>Gemini AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -7170,8 +7170,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -14958,7 +14958,7 @@ function updateHomeCardsByProfile(active) {
       label: '반려동물용',
       emoji: '🐶🐱',
       meta: '1분 · 홈 자가진단',
-      hide: isKid
+      hide: !isPet // 반려동물 모드에서만 표시
     },
     food: {
       title: isBaby ? '이유식' : (isKid ? '아이 식단' : '식단 분석'),
@@ -14968,11 +14968,11 @@ function updateHomeCardsByProfile(active) {
       hide: isPet || (isKid && months < 6) // 반려동물 모드에선 인체 식단 숨김
     },
     petfood: {
-      title: isPet ? '사료·간식·영양제' : '반려동물 사료',
-      label: isPet ? 'PET PANTRY' : 'PET FOOD',
+      title: '사료·간식·영양제',
+      label: 'PET PANTRY',
       emoji: '🐾',
-      meta: isPet ? '성분 분석 · 자동 저장' : '사료·간식 성분 분석',
-      hide: isKid
+      meta: '성분 분석 · 자동 저장',
+      hide: !isPet // 반려동물 모드에서만 표시
     },
     ingredient: {
       title: isKid ? '아이 안전 성분' : '식품 성분',
