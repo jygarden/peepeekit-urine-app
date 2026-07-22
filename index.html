@@ -2101,6 +2101,15 @@
           <div class="card-meta" id="petFoodLastInfo">사료·간식 성분 분석</div>
         </button>
 
+        <!-- 👩‍⚕️ 닥터 냐옹 챗봇 (반려동물 모드에서만) -->
+        <button class="home-card vetchat" onclick="enterVetChat()">
+          <span class="card-new-badge">NEW</span>
+          <div class="card-orb" style="background:linear-gradient(135deg,#EEEDFE,#CECBF6)">👩‍⚕️</div>
+          <div class="card-label" style="color:#7F77DD">VET CHAT</div>
+          <div class="card-title">닥터 냐옹</div>
+          <div class="card-meta">AI 수의영양사 · 24시간 상담</div>
+        </button>
+
         <!-- 식품 성분 분석 (NEW) -->
         <button class="home-card ingredient" onclick="enterIngredient()">
           <span class="card-new-badge">NEW</span>
@@ -2933,7 +2942,7 @@
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>Gemini AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -3518,6 +3527,7 @@
   </div>
   <style>
     @keyframes petFoodPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    @keyframes vetdot { 0%,60%,100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
   </style>
 
   <!-- ════════════ 🐾 반려동물 사료 · 결과 화면 ════════════ -->
@@ -3582,6 +3592,36 @@
       📷 새로운 사료 분석하기
     </button>
     <button onclick="goHome()" class="btn-outline" style="margin-top:10px">← 홈으로</button>
+  </div>
+
+  <!-- ════════════ 👩‍⚕️ 닥터 냐옹 · AI 수의영양사 채팅 ════════════ -->
+  <div class="screen" id="screenVetChat" style="display:none">
+    <div class="page-header" style="display:flex;align-items:center;gap:10px;padding-right:6px">
+      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#CECBF6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👩‍⚕️</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14.5px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px">닥터 냐옹</div>
+        <div style="font-size:10.5px;color:#059669;font-weight:800;display:flex;align-items:center;gap:4px;margin-top:1px">
+          <span style="width:6px;height:6px;background:#059669;border-radius:50%"></span>
+          수의영양사 · 지금 답장 가능
+        </div>
+      </div>
+      <button onclick="_resetVetChat()" style="background:transparent;border:1px solid #E5E7EB;border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:800;color:#64748B;cursor:pointer;font-family:inherit">🗑 초기화</button>
+    </div>
+
+    <!-- 메시지 리스트 -->
+    <div id="vetChatMessages" style="min-height:60vh;padding:8px 4px 20px;display:flex;flex-direction:column;gap:10px"></div>
+
+    <!-- 빠른 질문 칩 (첫 진입 시만) -->
+    <div id="vetChatSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+
+    <!-- 입력창 (고정) -->
+    <div style="position:sticky;bottom:0;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,#FEFCF5 30%);padding:10px 4px 14px;margin:0 -4px">
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="text" id="vetChatInput" placeholder="예: 우리 아이 이 사료 괜찮아요?" style="flex:1;padding:12px 14px;border:1.5px solid #E5D9BA;border-radius:99px;background:#FFF;font-size:13.5px;font-family:inherit;box-sizing:border-box" onkeypress="if(event.key==='Enter')sendVetMessage()">
+        <button id="vetChatSendBtn" onclick="sendVetMessage()" style="background:linear-gradient(135deg,#059669,#065F46);border:none;border-radius:50%;width:44px;height:44px;color:#FFF;font-size:18px;cursor:pointer;font-family:inherit;flex-shrink:0;box-shadow:0 3px 10px rgba(5,150,105,.35)">➤</button>
+      </div>
+    </div>
   </div>
 
   <!-- ════════════ 🏆 월간 챌린지 스티커북 ════════════ -->
@@ -6248,6 +6288,185 @@ function markCurrentFeedingFromResult() {
   if (typeof showPointToast === 'function') showPointToast('👑 지금 급여 중으로 설정됨!');
 }
 
+// ═══════════════════════════════════════════
+// 👩‍⚕️ 닥터 냐옹 · AI 수의영양사 챗봇
+// ═══════════════════════════════════════════
+const VET_CHAT_STORAGE = 'vetChatHistory_v1';
+function _getVetChatHistory() {
+  try { return JSON.parse(localStorage.getItem(VET_CHAT_STORAGE) || '[]'); }
+  catch(e) { return []; }
+}
+function _saveVetChatHistory(history) {
+  localStorage.setItem(VET_CHAT_STORAGE, JSON.stringify(history.slice(-40)));
+}
+// 반려동물 컨텍스트를 요약 (프롬프트용)
+function _getPetContextForChat() {
+  const pet = _getActivePetProfile();
+  if (!pet) return null;
+  const feeding = getPetFoodPantry().filter(r => r.currentlyFeeding);
+  const feedingSummary = feeding.length
+    ? feeding.slice(0, 3).map(f => {
+        const kind = f.kind === 'treat' ? '간식' : f.kind === 'supplement' ? '영양제' : '사료';
+        const topIng = (f.ingredients || []).slice(0, 3).map(i => i.name).join(', ');
+        return `${kind}(${f.overallGrade || '-'}등급 · ${topIng})`;
+      }).join(' / ')
+    : '없음';
+  // 최근 소변검사
+  let urineSummary = '없음';
+  try {
+    const uh = JSON.parse(localStorage.getItem('urineHistoryV2') || '[]').filter(h => h.subject === 'pet');
+    if (uh.length > 0) {
+      const latest = uh[0];
+      const abnormal = (latest.testItems || []).filter(i => i.status !== 'normal').map(i => i.item);
+      urineSummary = abnormal.length ? `이상 항목: ${abnormal.join(', ')}` : '전반적 정상';
+    }
+  } catch(e) {}
+  return {
+    name: pet.name || '우리 아이',
+    species: pet.species === 'cat' ? '고양이' : '강아지',
+    breed: pet.breed || '',
+    age: pet.ageYears ? `${pet.ageYears}세` : '',
+    gender: pet.gender === 'female' ? '여아' : pet.gender === 'male' ? '남아' : '',
+    allergies: (pet.allergies || []).join(', ') || '없음',
+    feeding: feedingSummary,
+    latestUrine: urineSummary
+  };
+}
+// 첫 진입 시 인사말 · 빠른 질문 칩 렌더
+function enterVetChat() {
+  showScreen('screenVetChat');
+  _renderVetChat();
+  setTimeout(() => document.getElementById('vetChatInput')?.focus(), 100);
+}
+function _renderVetChat() {
+  const msgsEl = document.getElementById('vetChatMessages');
+  const sugEl = document.getElementById('vetChatSuggestions');
+  if (!msgsEl) return;
+  const history = _getVetChatHistory();
+  const pet = _getActivePetProfile();
+  const petName = pet?.name || '우리 아이';
+  // 첫 방문 시 인사말 자동 추가
+  if (history.length === 0) {
+    const now = new Date();
+    const hour = now.getHours();
+    const greet = hour < 6 ? '늦은 시간까지 걱정이 많으시죠?'
+      : hour < 12 ? '좋은 아침이에요'
+      : hour < 18 ? '오늘도 반갑습니다'
+      : '하루 마무리 잘 하고 계신가요?';
+    history.push({
+      role: 'assistant',
+      text: `${greet} 저는 <b>닥터 냐옹</b>이에요 👩‍⚕️<br>${escapeHtml(petName)}의 사료·건강 · 뭐든 편하게 물어보세요.<br><br>참고로 저는 앱에 기록된 ${escapeHtml(petName)}의 <b>프로필 · 사료 · 검사 결과</b>를 다 알고 답변해드려요.`,
+      time: Date.now()
+    });
+    _saveVetChatHistory(history);
+  }
+  msgsEl.innerHTML = history.map(m => _renderVetMessage(m)).join('');
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  // 빠른 질문 칩 (첫 진입 시만 노출)
+  if (sugEl) {
+    if (history.length <= 1) {
+      const suggestions = [
+        `${petName} 이 사료 계속 먹여도 돼요?`,
+        `요즘 물을 잘 안 마셔요`,
+        `사료 바꿀 때 주의사항은?`,
+        `영양제는 언제 먹여야 좋아요?`,
+        `건강 검진 얼마나 자주?`,
+      ];
+      sugEl.innerHTML = suggestions.map(q =>
+        `<button onclick="_vetChatQuickAsk('${escapeHtml(q).replace(/'/g,'&#39;')}')" style="background:#EEEDFE;color:#3C3489;border:none;border-radius:99px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">${escapeHtml(q)}</button>`
+      ).join('');
+    } else {
+      sugEl.innerHTML = '';
+    }
+  }
+}
+function _renderVetMessage(m) {
+  if (m.role === 'assistant') {
+    return `
+      <div style="display:flex;align-items:flex-start;gap:8px;max-width:88%">
+        <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#CECBF6);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👩‍⚕️</div>
+        <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:14px;border-top-left-radius:4px;padding:11px 13px">
+          <div style="font-size:12.5px;color:#0F1F1A;font-weight:600;line-height:1.6">${m.text}</div>
+        </div>
+      </div>`;
+  }
+  return `
+    <div style="display:flex;justify-content:flex-end;max-width:88%;align-self:flex-end;margin-left:auto">
+      <div style="background:linear-gradient(135deg,#059669,#065F46);color:#FFF;border-radius:14px;border-top-right-radius:4px;padding:10px 13px">
+        <div style="font-size:12.5px;font-weight:600;line-height:1.55">${escapeHtml(m.text)}</div>
+      </div>
+    </div>`;
+}
+function _vetChatQuickAsk(q) {
+  const input = document.getElementById('vetChatInput');
+  if (input) input.value = q;
+  sendVetMessage();
+}
+function _resetVetChat() {
+  if (!confirm('대화 기록을 모두 지울까요?')) return;
+  localStorage.removeItem(VET_CHAT_STORAGE);
+  _renderVetChat();
+}
+async function sendVetMessage() {
+  const input = document.getElementById('vetChatInput');
+  const btn = document.getElementById('vetChatSendBtn');
+  const msgsEl = document.getElementById('vetChatMessages');
+  const sugEl = document.getElementById('vetChatSuggestions');
+  if (!input || !btn || !msgsEl) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  if (sugEl) sugEl.innerHTML = '';
+
+  const history = _getVetChatHistory();
+  history.push({ role: 'user', text, time: Date.now() });
+  _saveVetChatHistory(history);
+  msgsEl.innerHTML = history.map(m => _renderVetMessage(m)).join('');
+
+  // 타이핑 인디케이터
+  const typingId = 'typing_' + Date.now();
+  msgsEl.insertAdjacentHTML('beforeend', `
+    <div id="${typingId}" style="display:flex;align-items:flex-start;gap:8px;max-width:88%">
+      <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#CECBF6);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👩‍⚕️</div>
+      <div style="background:#FFF;border:0.5px solid #E5E7EB;border-radius:14px;border-top-left-radius:4px;padding:12px 14px">
+        <div style="display:flex;gap:4px">
+          <span style="width:6px;height:6px;background:#94A3B8;border-radius:50%;animation:vetdot 1.4s infinite"></span>
+          <span style="width:6px;height:6px;background:#94A3B8;border-radius:50%;animation:vetdot 1.4s .2s infinite"></span>
+          <span style="width:6px;height:6px;background:#94A3B8;border-radius:50%;animation:vetdot 1.4s .4s infinite"></span>
+        </div>
+      </div>
+    </div>`);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  btn.disabled = true;
+
+  const ctx = _getPetContextForChat();
+  const shortHistory = history.slice(-8).map(m => ({ role: m.role, text: m.text.replace(/<[^>]+>/g, '') }));
+  try {
+    const res = await fetch('/api/vet-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history: shortHistory, petContext: ctx })
+    });
+    const data = await res.json();
+    document.getElementById(typingId)?.remove();
+    if (data.error) throw new Error(data.error);
+    const reply = data.reply || '죄송해요, 답변을 준비하지 못했어요. 다시 물어봐주세요.';
+    history.push({ role: 'assistant', text: escapeHtml(reply).replace(/\n/g, '<br>'), time: Date.now() });
+    _saveVetChatHistory(history);
+    msgsEl.innerHTML = history.map(m => _renderVetMessage(m)).join('');
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  } catch(e) {
+    document.getElementById(typingId)?.remove();
+    history.push({ role: 'assistant', text: `죄송해요, 잠시 문제가 있었어요. 다시 시도해주세요. <span style="color:#94A3B8;font-size:10px">(${escapeHtml(e.message || '오류')})</span>`, time: Date.now() });
+    _saveVetChatHistory(history);
+    msgsEl.innerHTML = history.map(m => _renderVetMessage(m)).join('');
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+  } finally {
+    btn.disabled = false;
+    input.focus();
+  }
+}
+
 // Pantry 진입
 let _pantryFilter = 'all';
 function enterPetPantry() {
@@ -7425,8 +7644,8 @@ let urineLoadingProgress = 0;
 const URINE_LOADING_STAGES = [
   { emoji: '📸', msg: '검사 키트 이미지 분석 중...', sub: 'AI가 색상 패드를 인식 중', threshold: 0 },
   { emoji: '🔬', msg: '11가지 항목 측정 중이에요', sub: 'pH·단백질·당·요잠혈 ...', threshold: 25 },
-  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '사주·BMI 기반 맞춤 분석', threshold: 50 },
-  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '약사 조합 계산 중', threshold: 75 },
+  { emoji: '🧬', msg: '체질·체격 패턴 분석 중', sub: '체질 기반 맞춤 분석', threshold: 50 },
+  { emoji: '💊', msg: '맞춤 영양제 처방 중이에요', sub: '영양사 조합 계산 중', threshold: 75 },
   { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
 ];
 
@@ -15310,12 +15529,19 @@ function updateHomeCardsByProfile(active) {
       emoji: '💊',
       meta: '시간대별 알림',
       hide: isPet // 반려동물 모드에선 Pantry에 통합돼서 숨김
+    },
+    vetchat: {
+      title: '닥터 냐옹',
+      label: 'VET CHAT',
+      emoji: '👩‍⚕️',
+      meta: 'AI 수의영양사 · 24시간',
+      hide: !isPet // 반려동물 모드에서만
     }
   };
 
   cards.forEach(card => {
     const cardClasses = card.className.split(' ');
-    const type = ['human','pet','food','petfood','ingredient','supplement'].find(t => cardClasses.includes(t));
+    const type = ['human','pet','food','petfood','ingredient','supplement','vetchat'].find(t => cardClasses.includes(t));
     if (!type || !cardData[type]) return;
     const d = cardData[type];
     const titleEl = card.querySelector('.card-title');
