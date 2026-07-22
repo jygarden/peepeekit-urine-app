@@ -3560,7 +3560,7 @@
     @keyframes vetdot { 0%,60%,100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
     @keyframes apFadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes apSlideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes obSlideEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes obSlideEnter { from { opacity: 0; } to { opacity: 1; } }
     @keyframes obEyebrow { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes obTitleReveal { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
     @keyframes obSubReveal { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -3568,7 +3568,15 @@
     @keyframes obDotPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
     @keyframes obDeco1 { 0%,100% { transform: translate(0,0) rotate(0); } 50% { transform: translate(10px,-8px) rotate(3deg); } }
     @keyframes obDeco2 { 0%,100% { transform: translate(0,0) rotate(0); } 50% { transform: translate(-8px,6px) rotate(-3deg); } }
-    #obSlides { animation: obSlideEnter .55s cubic-bezier(.2,.8,.2,1) both; }
+    /* 새 애니메이션 */
+    @keyframes obFromLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes obFromRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes obScaleIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+    @keyframes obBigNumIn { from { opacity: 0; transform: scale(.5) rotate(-8deg); } to { opacity: .07; transform: scale(1) rotate(0); } }
+    @keyframes obNumPop { 0% { opacity: 0; transform: scale(.3); } 60% { opacity: 1; transform: scale(1.15); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes obLineExpand { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes obCardStagger { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
+    #obSlides { animation: obSlideEnter .4s ease-out both; }
   </style>
 
   <!-- ════════════ 🐾 반려동물 사료 · 결과 화면 ════════════ -->
@@ -6399,7 +6407,7 @@ function _buildObSlides() {
       petFirst = false;
     }
     const selfCard = `
-      <button onclick="startOnboardingSelf()" style="background:#FFFFFF;border:1px solid #E5DFCB;border-radius:14px;padding:22px 20px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:space-between;width:100%">
+      <button onclick="startOnboardingSelf()" style="background:#FFFFFF;border:1px solid #E5DFCB;border-radius:14px;padding:22px 20px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:space-between;width:100%;animation:obCardStagger .5s cubic-bezier(.2,.8,.2,1) .95s both">
         <div>
           <div style="font-size:17px;font-weight:700;color:#0F1F1A;letter-spacing:-.3px">나</div>
           <div style="font-size:13px;color:#8B9490;font-weight:500;margin-top:3px;letter-spacing:-.2px">건강 · 식단 · 영양제</div>
@@ -6407,27 +6415,32 @@ function _buildObSlides() {
         <div style="color:#C4BDA8;font-size:18px">›</div>
       </button>`;
     const petCard = `
-      <button onclick="startOnboardingPet()" style="background:#FFFFFF;border:1px solid #E5DFCB;border-radius:14px;padding:22px 20px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:space-between;width:100%">
+      <button onclick="startOnboardingPet()" style="background:#FFFFFF;border:1px solid #E5DFCB;border-radius:14px;padding:22px 20px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:space-between;width:100%;animation:obCardStagger .5s cubic-bezier(.2,.8,.2,1) 1.1s both">
         <div>
           <div style="font-size:17px;font-weight:700;color:#0F1F1A;letter-spacing:-.3px">반려동물</div>
           <div style="font-size:13px;color:#8B9490;font-weight:500;margin-top:3px;letter-spacing:-.2px">사료 · 처방전 · 상담</div>
         </div>
         <div style="color:#C4BDA8;font-size:18px">›</div>
       </button>`;
+    // 🎬 마지막 슬라이드 (선택) — 상단 정렬 · 카드 왼쪽 stagger
     return {
       isSelection: true,
       html: `
-        <div style="position:relative;min-height:60vh;padding-top:20px">
-          <div aria-hidden="true" style="position:absolute;top:-30px;right:-50px;width:180px;height:180px;border-radius:50%;background:#EEEDFE;filter:blur(50px);opacity:.5;animation:obDeco1 8s ease-in-out infinite;pointer-events:none"></div>
-          <div aria-hidden="true" style="position:absolute;bottom:40px;left:-70px;width:160px;height:160px;border-radius:50%;background:#DCFCE7;filter:blur(60px);opacity:.5;animation:obDeco2 9s ease-in-out infinite;pointer-events:none"></div>
+        <div style="position:relative;min-height:64vh;padding:20px 0;display:flex;flex-direction:column">
+          <div aria-hidden="true" style="position:absolute;bottom:-40px;right:-70px;width:260px;height:260px;border-radius:50%;background:#EEEDFE;filter:blur(60px);opacity:.55;animation:obDeco1 10s ease-in-out infinite;pointer-events:none"></div>
+          <div aria-hidden="true" style="position:absolute;top:40%;left:-90px;width:180px;height:180px;border-radius:50%;background:#DCFCE7;filter:blur(60px);opacity:.5;animation:obDeco2 9s ease-in-out infinite;pointer-events:none"></div>
           <div style="position:relative;z-index:1">
-            <div style="font-size:11px;color:#8B9490;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:20px;animation:obEyebrow .5s cubic-bezier(.2,.8,.2,1) .1s both">READY TO START</div>
-            <div style="font-size:30px;font-weight:700;color:#0F1F1A;letter-spacing:-1px;line-height:1.15;margin-bottom:16px;animation:obTitleReveal .8s cubic-bezier(.2,.8,.2,1) .2s both">${mainTitle}</div>
-            <div style="font-size:13.5px;color:#65756B;font-weight:500;letter-spacing:-.2px;line-height:1.65;margin-bottom:34px;animation:obSubReveal .6s cubic-bezier(.2,.8,.2,1) .55s both">${subTitle}</div>
+            <!-- 우상단 인디케이터 -->
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:20px;animation:obFromRight .5s cubic-bezier(.2,.8,.2,1) .1s both">
+              <div style="font-size:10.5px;color:#0F1F1A;font-weight:700;letter-spacing:2.5px">READY</div>
+              <div style="width:22px;height:2px;background:#0F1F1A;transform-origin:right;animation:obLineExpand .6s cubic-bezier(.2,.8,.2,1) .2s both"></div>
+            </div>
+            <div style="font-size:32px;font-weight:700;color:#0F1F1A;letter-spacing:-1.1px;line-height:1.15;margin-bottom:18px;animation:obTitleReveal .8s cubic-bezier(.2,.8,.2,1) .3s both">${mainTitle}</div>
+            <div style="font-size:13.5px;color:#65756B;font-weight:500;letter-spacing:-.2px;line-height:1.7;margin-bottom:36px;animation:obSubReveal .6s cubic-bezier(.2,.8,.2,1) .65s both">${subTitle}</div>
             <div style="display:flex;flex-direction:column;gap:10px">
               ${petFirst ? (petCard + selfCard) : (selfCard + petCard)}
             </div>
-            <div style="text-align:center;margin-top:20px">
+            <div style="text-align:center;margin-top:22px;animation:obSubReveal .5s ease-out 1.25s both">
               <div style="font-size:11.5px;color:#8B9490;font-weight:500;line-height:1.6">나중에 다른 프로필도 언제든 추가 가능해요</div>
             </div>
           </div>
@@ -6435,33 +6448,48 @@ function _buildObSlides() {
     };
   })();
 
-  // 스토리 슬라이드 (감성 데코 + 순차 애니메이션 · 광고 소스별 톤 조정)
-  const _storyLayout = (eyebrow, title, sub, decoColor1, decoColor2) => `
-    <div style="position:relative;min-height:60vh;padding-top:20px">
-      <!-- 배경 데코 원 -->
-      <div aria-hidden="true" style="position:absolute;top:-40px;right:-60px;width:200px;height:200px;border-radius:50%;background:${decoColor1};filter:blur(50px);opacity:.55;animation:obDeco1 8s ease-in-out infinite;pointer-events:none"></div>
-      <div aria-hidden="true" style="position:absolute;bottom:20px;left:-80px;width:180px;height:180px;border-radius:50%;background:${decoColor2};filter:blur(60px);opacity:.55;animation:obDeco2 9s ease-in-out infinite;pointer-events:none"></div>
+  // 🎬 슬라이드 1 레이아웃 — 초대형 배경 넘버 · 하단 정렬 · 왼쪽에서 등장
+  const _layoutChapter = (chapterNum, eyebrow, title, sub, decoColor) => `
+    <div style="position:relative;min-height:64vh;padding:20px 0;display:flex;flex-direction:column;justify-content:flex-end">
+      <div aria-hidden="true" style="position:absolute;top:-20px;right:-30px;width:240px;height:240px;border-radius:50%;background:${decoColor};filter:blur(60px);opacity:.5;animation:obDeco1 8s ease-in-out infinite;pointer-events:none"></div>
+      <!-- 초대형 배경 넘버 -->
+      <div aria-hidden="true" style="position:absolute;top:-10px;right:-24px;font-family:Georgia,serif;font-size:280px;font-weight:700;color:#0F1F1A;letter-spacing:-14px;line-height:.85;opacity:0;animation:obBigNumIn 1.2s cubic-bezier(.2,.8,.2,1) .1s forwards;pointer-events:none">${chapterNum}</div>
       <div style="position:relative;z-index:1">
-        <div style="font-size:11px;color:#8B9490;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:20px;animation:obEyebrow .5s cubic-bezier(.2,.8,.2,1) .1s both">${eyebrow}</div>
-        <div style="font-size:34px;font-weight:700;color:#0F1F1A;letter-spacing:-1.2px;line-height:1.15;margin-bottom:22px;animation:obTitleReveal .8s cubic-bezier(.2,.8,.2,1) .2s both">${title}</div>
-        <div style="font-size:14.5px;color:#65756B;font-weight:500;letter-spacing:-.2px;line-height:1.75;animation:obSubReveal .6s cubic-bezier(.2,.8,.2,1) .55s both">${sub}</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:22px;animation:obFromLeft .55s cubic-bezier(.2,.8,.2,1) .2s both">
+          <div style="width:36px;height:2px;background:#0F1F1A;transform-origin:left;animation:obLineExpand .6s cubic-bezier(.2,.8,.2,1) .3s both"></div>
+          <div style="font-size:10.5px;color:#0F1F1A;font-weight:700;letter-spacing:2.5px;text-transform:uppercase">${eyebrow}</div>
+        </div>
+        <div style="font-size:36px;font-weight:700;color:#0F1F1A;letter-spacing:-1.3px;line-height:1.12;margin-bottom:20px;animation:obTitleReveal .8s cubic-bezier(.2,.8,.2,1) .35s both">${title}</div>
+        <div style="font-size:14.5px;color:#65756B;font-weight:500;letter-spacing:-.2px;line-height:1.75;animation:obFromLeft .65s cubic-bezier(.2,.8,.2,1) .75s both">${sub}</div>
+      </div>
+    </div>`;
+
+  // 🎬 슬라이드 2 레이아웃 — 중앙 정렬 · 큰 강조 숫자 · 스케일 등장
+  const _layoutMoment = (bigNumber, bigUnit, title, sub, decoColor) => `
+    <div style="position:relative;min-height:64vh;padding:20px 0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+      <div aria-hidden="true" style="position:absolute;top:20%;left:50%;transform:translateX(-50%);width:340px;height:340px;border-radius:50%;background:${decoColor};filter:blur(70px);opacity:.5;animation:obDeco2 9s ease-in-out infinite;pointer-events:none"></div>
+      <div style="position:relative;z-index:1;max-width:320px">
+        <!-- 초대형 숫자 -->
+        <div style="display:flex;align-items:baseline;justify-content:center;gap:6px;margin-bottom:24px;animation:obNumPop .8s cubic-bezier(.2,1.4,.4,1) .15s both">
+          <div style="font-family:Georgia,serif;font-size:120px;font-weight:700;color:#0F1F1A;letter-spacing:-6px;line-height:.85">${bigNumber}</div>
+          <div style="font-size:32px;font-weight:600;color:#0F1F1A;letter-spacing:-1px">${bigUnit}</div>
+        </div>
+        <div style="width:60px;height:2px;background:#0F1F1A;margin:0 auto 24px;transform-origin:center;animation:obLineExpand .6s cubic-bezier(.2,.8,.2,1) .55s both"></div>
+        <div style="font-size:26px;font-weight:700;color:#0F1F1A;letter-spacing:-.8px;line-height:1.25;margin-bottom:16px;animation:obTitleReveal .7s cubic-bezier(.2,.8,.2,1) .65s both">${title}</div>
+        <div style="font-size:13.5px;color:#65756B;font-weight:500;letter-spacing:-.2px;line-height:1.75;animation:obSubReveal .6s cubic-bezier(.2,.8,.2,1) .95s both">${sub}</div>
       </div>
     </div>`;
 
   const storySlides = adSource === 'self' ? [
-    { html: _storyLayout('CHAPTER 01 · 당신의 몸', '어제의 나와<br>오늘의 나는<br>다릅니다.', '컨디션, 수면, 식단.<br>매일 미묘하게 달라지는 나의 몸.<br>매일 확인이 필요합니다.', '#DBEAFE', '#FEF3C7') },
-    { html: _storyLayout('CHAPTER 02 · 해결책', '사진 한 장,<br>1분이면<br>충분합니다.', '소변, 식단, 영양제 라벨.<br>찍기만 하면 알아서 분석해<br>맞춤 건강 코칭을 시작합니다.', '#DCFCE7', '#FCE7F3') }
+    { html: _layoutChapter('01', 'YOUR BODY', '어제의 나와<br>오늘의 나는<br>다릅니다.', '컨디션, 수면, 식단.<br>매일 미묘하게 달라지는 나의 몸.<br>매일 확인이 필요합니다.', '#DBEAFE') },
+    { html: _layoutMoment('1', '분', '사진 한 장이면 충분합니다.', '소변, 식단, 영양제 라벨.<br>찍기만 하면 알아서 분석해<br>맞춤 건강 코칭을 시작합니다.', '#DCFCE7') }
   ] : adSource === 'pet' ? [
-    { html: _storyLayout('CHAPTER 01 · 우리 아이', '우리 아이,<br>말은 못하지만<br>매일 신호를 보냅니다.', '사료·간식·컨디션.<br>매일 조금씩 달라지는 우리 아이.<br>그 신호를 놓치지 마세요.', '#FEF3C7', '#DCFCE7') },
-    { html: _storyLayout('CHAPTER 02 · 해결책', '사료 사진 한 장이면<br>충분합니다.', '사료·간식·영양제 라벨을 찍으면<br>수의영양학 기반으로 분석해<br>우리 아이 맞춤 처방전을 만들어 드립니다.', '#DCFCE7', '#FCE7F3') }
+    { html: _layoutChapter('01', 'OUR PET', '우리 아이,<br>말은 못하지만<br>매일 신호를 보냅니다.', '사료·간식·컨디션.<br>매일 조금씩 달라지는 우리 아이.<br>그 신호를 놓치지 마세요.', '#FEF3C7') },
+    { html: _layoutMoment('1', '분', '사료 사진 한 장이면 충분합니다.', '사료·간식·영양제 라벨을 찍으면<br>수의영양학 기반으로 분석해<br>맞춤 처방전을 만들어 드립니다.', '#DCFCE7') }
   ] : [
-    { html: _storyLayout('CHAPTER 01 · 매일의 변화', '당신도, 우리 아이도<br>매일 조금씩<br>다릅니다.', '어제와 오늘, 컨디션이 다릅니다.<br>변화하는 몸에는 매일의 관심이 필요합니다.', '#DBEAFE', '#FEF3C7') },
-    { html: _storyLayout('CHAPTER 02 · 해결책', '사진 한 장,<br>1분이면<br>충분합니다.', '소변, 사료, 라벨을 찍으면<br>알아서 분석해<br>맞춤 조언을 만들어 드립니다.', '#DCFCE7', '#FCE7F3') }
+    { html: _layoutChapter('01', 'EVERY DAY', '당신도, 우리 아이도<br>매일 조금씩<br>다릅니다.', '어제와 오늘, 컨디션이 다릅니다.<br>변화하는 몸에는<br>매일의 관심이 필요합니다.', '#DBEAFE') },
+    { html: _layoutMoment('1', '분', '사진 한 장이면 충분합니다.', '소변, 사료, 음식을 찍으면<br>알아서 분석해<br>맞춤 조언을 만들어 드립니다.', '#DCFCE7') }
   ];
-
-  // 카드 등장 애니메이션 추가 (선택 슬라이드 카드에 stagger)
-  finalSlide.html = finalSlide.html.replace(/<div style="display:flex;flex-direction:column;gap:10px">/,
-    '<div style="display:flex;flex-direction:column;gap:10px;animation:obCardReveal .6s cubic-bezier(.2,.8,.2,1) .8s both">');
 
   _obSlides = [...storySlides, finalSlide];
 }
