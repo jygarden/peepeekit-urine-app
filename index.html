@@ -91,8 +91,20 @@
   .gg-tabbar svg{width:22px;height:22px}
   .gg-tab-icon{width:22px;height:22px;object-fit:contain;display:block}
   body.gg-tab-shown .screen{padding-bottom:70px}
-  /* v12 · My 화면 · 심플 block · 상단부터 자연 정렬 */
-  #screenMy{ padding: 16px 16px calc(90px + env(safe-area-inset-bottom, 0px)) !important; }
+  /* v12 · My 화면 · animation·transform 완전 제거 (Fold WebView translateY 잔존 방지) */
+  #screenMy{
+    padding: 16px 16px 90px !important;
+    margin: 0 !important;
+    transform: none !important;
+    top: 0 !important;
+    position: relative !important;
+    animation: none !important;
+    min-height: 0 !important;
+  }
+  #screenMy.active{
+    animation: none !important;
+    transform: none !important;
+  }
   #screenMy > div{ padding-top: 0 !important; margin-top: 0 !important; }
   /* v12 · 홈은 오늘 상태만 · 나머지는 다른 탭으로 이관 */
   #screenHome .home-top-bar,
@@ -3103,7 +3115,7 @@
         </div>
         <button onclick="enterIngredient()" style="width:100%;background:#FFF;border:1px solid var(--gg-line);border-radius:14px;padding:14px 16px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:14px">
           <div style="width:56px;height:56px;display:grid;place-items:center;flex-shrink:0">
-            <img class="app-icon-lg" data-icon="ingredient-scan" alt="" style="width:52px;height:52px;object-fit:contain">
+            <img class="app-icon-lg" data-icon="ingredient-scan" alt="" style="width:38px;height:38px;object-fit:contain">
           </div>
           <div style="flex:1">
             <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">원재료·첨가물 분석</div>
@@ -3122,14 +3134,14 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <button onclick="enterSupplement('human')" style="background:#FFF;border:1px solid var(--gg-line);border-radius:14px;padding:16px 14px;text-align:left;cursor:pointer;font-family:inherit">
             <div style="width:56px;height:56px;display:grid;place-items:center;margin-bottom:8px">
-              <img class="app-icon-lg" data-icon="pill-clock" alt="" style="width:44px;height:44px;object-fit:contain">
+              <img class="app-icon-lg" data-icon="pill-clock" alt="" style="width:38px;height:38px;object-fit:contain">
             </div>
             <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">사람 영양제</div>
             <div style="font-size:11px;color:var(--gg-muted);margin-top:3px">KRDA 대비 %DV</div>
           </button>
           <button onclick="enterSupplement('pet')" style="background:#FFF;border:1px solid var(--gg-line);border-radius:14px;padding:16px 14px;text-align:left;cursor:pointer;font-family:inherit">
             <div style="width:56px;height:56px;display:grid;place-items:center;margin-bottom:8px">
-              <img class="app-icon-lg" data-icon="pet-supplement" alt="" style="width:44px;height:44px;object-fit:contain">
+              <img class="app-icon-lg" data-icon="pet-supplement" alt="" style="width:38px;height:38px;object-fit:contain">
             </div>
             <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">반려동물 영양제</div>
             <div style="font-size:11px;color:var(--gg-muted);margin-top:3px">체중 기준 급여량</div>
