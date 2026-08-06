@@ -83,13 +83,13 @@
   /* CTA */
   .gg-cta{background:var(--gg-blue);color:#fff;border:0;border-radius:12px;padding:15px;font-family:inherit;font-weight:600;font-size:14.5px;letter-spacing:-.02em;width:100%;cursor:pointer}
   /* 하단 탭바 */
-  .gg-tabbar{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--gg-line);padding:4px 4px calc(env(safe-area-inset-bottom, 4px) + 2px);background:#fff;z-index:50;font-family:'Pretendard Variable',Pretendard,sans-serif;max-width:520px;margin:0 auto}
-  .gg-tabbar button{position:relative;border:0;background:transparent;color:var(--gg-muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 4px 3px;font-family:inherit;font-size:10.5px;font-weight:500;cursor:pointer;transition:color .15s;min-height:36px}
+  .gg-tabbar{position:fixed;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--gg-line);padding:2px 4px calc(env(safe-area-inset-bottom, 0px) + 2px);background:#fff;z-index:50;font-family:'Pretendard Variable',Pretendard,sans-serif;max-width:520px;margin:0 auto}
+  .gg-tabbar button{position:relative;border:0;background:transparent;color:var(--gg-muted);display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 4px 2px;font-family:inherit;font-size:11px;font-weight:500;cursor:pointer;transition:color .15s;min-height:38px;line-height:1.1}
   .gg-tabbar button.on{color:var(--gg-blue);font-weight:700}
-  .gg-tabbar button.on::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:14px;height:3px;border-radius:3px;background:var(--gg-yellow)}
+  .gg-tabbar button.on::after{content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:14px;height:3px;border-radius:3px;background:var(--gg-yellow)}
   .gg-tabbar svg{width:20px;height:20px}
-  .gg-tab-icon{width:22px;height:22px;object-fit:contain;display:block}
-  body.gg-tab-shown .screen{padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px))}
+  .gg-tab-icon{width:20px;height:20px;object-fit:contain;display:block}
+  body.gg-tab-shown .screen{padding-bottom:calc(60px + env(safe-area-inset-bottom, 0px))}
   /* v12 · My 화면 · 심플 block · 상단부터 자연 정렬 */
   #screenMy{ padding: 16px 16px calc(90px + env(safe-area-inset-bottom, 0px)) !important; }
   #screenMy > div{ padding-top: 0 !important; margin-top: 0 !important; }
