@@ -3415,87 +3415,80 @@ window.appIcon = function(name, size){
   </div>
 
   <div class="screen" id="screenCapture">
-    <div class="step-indicator">
-      <div class="step-dot done"></div>
-      <div class="step-dot active"></div>
-      <div class="step-dot"></div>
+    <!-- v14 새 헤더 · 심플 -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <button onclick="backToForm()" aria-label="뒤로" style="width:40px;height:40px;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div style="flex:1;display:flex;align-items:center;gap:10px">
+        <div id="captureHeaderIcon" style="width:40px;height:40px;background:#FFFFFF;border:0.5px solid #D9DEDC;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:6px">
+          <svg width="24" height="24" viewBox="0 0 128 128"><g transform="rotate(-8 55 62)"><rect x="34" y="18" width="42" height="88" rx="8" fill="#FFFFFF" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/><rect x="42" y="28" width="26" height="18" rx="3" fill="#FBBF24" stroke="#17243A" stroke-width="4"/><rect x="42" y="52" width="26" height="18" rx="3" fill="#22C55E" stroke="#17243A" stroke-width="4"/><rect x="42" y="76" width="26" height="18" rx="3" fill="#3B82F6" stroke="#17243A" stroke-width="4"/></g><path d="M99 54c-8 11-12 17-12 26a12 12 0 0 0 24 0c0-9-4-15-12-26Z" fill="#FBBF24" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div id="capturePageTitle" style="font-size:16px;font-weight:700;color:#17243A;letter-spacing:-.3px">인체용 소변검사</div>
+          <div id="capturePageSub" style="font-size:11px;color:#8B95A1;margin-top:1px">테스트 스트립의 10가지 항목을 자동 판독해요</div>
+        </div>
+      </div>
     </div>
 
-    <!-- v14 · 진입점에서 이미 인체/반려동물 나뉨 · 세그먼트 숨김 -->
+    <!-- 프로필 chip (편집 가능) -->
+    <div id="captureProfileChip" style="display:flex;align-items:center;justify-content:space-between;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M5 21c1-5 5-8 7-8s6 3 7 8"/></svg>
+        <div id="captureProfileText" style="font-size:12.5px;color:#17243A;font-weight:600">프로필 정보</div>
+      </div>
+      <button onclick="if(typeof openPersonalProfile==='function')openPersonalProfile();else if(typeof openProfileSwitcher==='function')openProfileSwitcher();" style="background:transparent;border:none;color:#8B95A1;font-size:12px;font-weight:500;cursor:pointer;text-decoration:underline;text-underline-offset:2px">수정</button>
+    </div>
+
+    <!-- 3 항목 태그 -->
+    <div id="captureTagRow" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:10px;margin-bottom:12px">
+      <span style="font-size:11px;color:#17243A;font-weight:600">비중·pH</span>
+      <span style="color:#C8C6BC">·</span>
+      <span style="font-size:11px;color:#17243A;font-weight:600">단백질·잠혈</span>
+      <span style="color:#C8C6BC">·</span>
+      <span style="font-size:11px;color:#17243A;font-weight:600">포도당·케톤</span>
+    </div>
+
+    <!-- 예시 사진 -->
+    <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:16px;padding:10px;margin-bottom:12px">
+      <img id="captureGuideImg" src="assets/guide/urine-strip-human.jpg" alt="소변검사 스틱 촬영 예시" style="width:100%;display:block;border-radius:10px">
+    </div>
+
+    <!-- 3 팁 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+      <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+        <div style="font-size:10.5px;font-weight:600;color:#17243A">판독 시간</div>
+      </div>
+      <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="10" x2="20" y2="10"/><line x1="4" y1="14" x2="20" y2="14"/></svg>
+        <div id="captureTip2" style="font-size:10.5px;font-weight:600;color:#17243A">평평하게</div>
+      </div>
+      <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg>
+        <div style="font-size:10.5px;font-weight:600;color:#17243A">화면에 크게</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:#8B95A1;margin-bottom:16px">키트 안내에 적힌 판독 시간에 맞춰 촬영해주세요.</div>
+
+    <!-- 다크 CTA -->
+    <button onclick="safeCameraClick('cameraInput')" style="width:100%;background:#17243A;color:#FFF;border:none;border-radius:12px;padding:14px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      검사키트 촬영
+    </button>
+    <button onclick="openFileInput('galleryInput')" style="width:100%;background:transparent;color:#17243A;border:none;padding:12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px">앨범에서 선택</button>
+
+    <div style="text-align:center;font-size:10.5px;color:#8B95A1;padding-bottom:20px">사진 처리 기준은 <a href="privacy.html" style="color:#8B95A1;text-decoration:underline;text-underline-offset:2px">개인정보처리방침</a>을 확인해주세요</div>
+
+    <!-- 레거시 히든 요소 (기존 JS 호환) -->
     <div id="captureSubjectSeg" style="display:none">
       <button type="button" id="capSegHuman" onclick="switchCaptureSubject('human')" class="meal-time-btn">인체용</button>
       <button type="button" id="capSegPet" onclick="switchCaptureSubject('pet')" class="meal-time-btn">반려동물용</button>
     </div>
-
-    <!-- 도입 카드 제거 · 심플화 (v14) -->
     <div id="captureIntroTitle" style="display:none"></div>
     <div id="captureIntroSub" style="display:none"></div>
     <div id="captureIntroChips" style="display:none"></div>
-
-    <!-- ✅ 이렇게 촬영하세요 (예시 사진 + 3-Step) -->
-    <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <span style="background:#F0FDF4;color:#059669;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">GOOD</span>
-        <span style="font-size:13px;font-weight:900;color:#0F1F1A">✅ 이렇게 촬영하세요</span>
-      </div>
-
-      <!-- 예시 사진 -->
-      <div style="background:#FEFCF5;border-radius:12px;padding:8px;margin-bottom:12px;text-align:center">
-        <img src="assets/guide/urine-strip.jpg" alt="소변검사 스틱 촬영 예시" style="max-width:100%;max-height:280px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
-        <div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:6px">스틱 전체가 화면에 꽉 차게 · 밝은 배경</div>
-      </div>
-
-      <!-- 3-Step 가이드 -->
-      <div style="display:flex;flex-direction:column;gap:9px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">1</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">검사 <b style="color:#059669">60~120초 후</b> 촬영</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">색이 안정된 상태에서 정확한 결과</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">2</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#059669">형광등 아래</b> 평평한 곳</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">일정한 조명이 정확한 색상 판독의 핵심</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:26px;height:26px;background:#059669;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">3</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">스틱 전체가 <b style="color:#059669">화면에 꽉 차게</b></div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">여백 최소화 · 모든 색상 패드 다 보이게</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ❌ 이런 건 피하세요 -->
-    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:12px 14px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <span style="background:#FEE2E2;color:#DC2626;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">DON'T</span>
-        <span style="font-size:12.5px;font-weight:900;color:#7F1D1D">❌ 이런 건 피하세요</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:#7F1D1D;font-weight:800;text-align:center">
-        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">☀️</div><div style="margin-top:3px">직사광선</div></div>
-        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🌑</div><div style="margin-top:3px">그림자·반사</div></div>
-        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">📱</div><div style="margin-top:3px">흔들린 사진</div></div>
-      </div>
-    </div>
-
-    <button class="upload-btn accent" onclick="safeCameraClick('cameraInput')">
-      <div class="icon">📷</div>
-      <div class="lbl">카메라로 촬영</div>
-      <div class="sub">지금 바로 검사 키트를 찍어주세요</div>
-    </button>
-    <button class="upload-btn" onclick="openFileInput('galleryInput')">
-      <div class="icon">🖼️</div>
-      <div class="lbl">갤러리에서 선택</div>
-      <div class="sub">저장된 사진을 불러오세요</div>
-    </button>
-
-    <!-- 🔒 개인정보 안내 -->
-    <div style="display:flex;align-items:flex-start;gap:8px;background:#F8FAF9;border:1px solid #E5EBE7;border-radius:12px;padding:10px 12px;margin:10px 0 8px">
-      <div style="font-size:15px;line-height:1.2">🔒</div>
-      <div style="flex:1">
-        <div style="font-size:11.5px;font-weight:900;color:#0F1F1A">사진은 안전하게 처리돼요</div>
-        <div style="font-size:10px;color:#65756B;font-weight:600;margin-top:1px;line-height:1.4">AI 분석 후 서버에 저장되지 않아요 · 결과만 내 기기에 남아요</div>
-      </div>
-    </div>
-
-    <button class="btn-outline" onclick="backToForm()">← 이전으로</button>
   </div>
 
   <!-- ════════════ 미리보기 화면 ════════════ -->
@@ -12791,33 +12784,53 @@ function goCapture(mode) {
 
 // 촬영 화면 상단 인트로 카드 텍스트/칩 mode에 따라 갱신
 function updateCaptureIntro(mode) {
-  const titleEl = document.getElementById('captureIntroTitle');
-  const subEl = document.getElementById('captureIntroSub');
-  const chipsEl = document.getElementById('captureIntroChips');
-  if (!titleEl || !subEl || !chipsEl) return;
-  if (mode === 'pet') {
-    titleEl.textContent = '반려동물 소변 상태 체크';
-    subEl.textContent = '약 30초 · 신장·비뇨기 이상 신호 자동 감지';
-    chipsEl.innerHTML = `
-      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🐾</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">신장·방광</div></div>
-      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💧</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">수분·pH</div></div>
-      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">⚠️</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">잠혈·당</div></div>
-    `;
-  } else {
-    titleEl.textContent = '소변으로 몸 상태 체크';
-    subEl.textContent = '약 30초 · 10가지 항목 자동 판독';
-    chipsEl.innerHTML = `
-      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💧</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">수분·pH</div></div>
-      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🩸</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">단백뇨·잠혈</div></div>
-      <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🍬</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">당·케톤</div></div>
-    `;
+  const isPet = mode === 'pet';
+  const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+  // v14 새 헤더 스왑
+  set('capturePageTitle', isPet ? '반려동물용 소변검사' : '인체용 소변검사');
+  set('capturePageSub',   isPet ? '반려동물용 테스트 스트립의 색상 변화를 자동 판독해요' : '테스트 스트립의 10가지 항목을 자동 판독해요');
+  set('captureTip2',      isPet ? '그림자 없이' : '평평하게');
+
+  // 헤더 아이콘 · 반려면 인체 스틱 SVG를 반려용(2패드+발자국)으로 스왑
+  const iconWrap = document.getElementById('captureHeaderIcon');
+  if (iconWrap) {
+    iconWrap.innerHTML = isPet
+      ? '<svg width="24" height="24" viewBox="0 0 128 128"><g transform="rotate(-8 55 62)"><rect x="34" y="18" width="42" height="88" rx="8" fill="#FFFFFF" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/><rect x="42" y="28" width="26" height="18" rx="3" fill="#3B82F6" stroke="#17243A" stroke-width="4"/><rect x="42" y="52" width="26" height="18" rx="3" fill="#22C55E" stroke="#17243A" stroke-width="4"/><g fill="#EF4444"><circle cx="48" cy="82" r="2.5"/><circle cx="55" cy="80" r="2.5"/><circle cx="62" cy="82" r="2.5"/><ellipse cx="55" cy="90" rx="7" ry="5"/></g></g><path d="M99 54c-8 11-12 17-12 26a12 12 0 0 0 24 0c0-9-4-15-12-26Z" fill="#FBBF24" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/></svg>'
+      : '<svg width="24" height="24" viewBox="0 0 128 128"><g transform="rotate(-8 55 62)"><rect x="34" y="18" width="42" height="88" rx="8" fill="#FFFFFF" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/><rect x="42" y="28" width="26" height="18" rx="3" fill="#FBBF24" stroke="#17243A" stroke-width="4"/><rect x="42" y="52" width="26" height="18" rx="3" fill="#22C55E" stroke="#17243A" stroke-width="4"/><rect x="42" y="76" width="26" height="18" rx="3" fill="#3B82F6" stroke="#17243A" stroke-width="4"/></g><path d="M99 54c-8 11-12 17-12 26a12 12 0 0 0 24 0c0-9-4-15-12-26Z" fill="#FBBF24" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/></svg>';
   }
-  // 세그먼트 active 상태 동기화
+
+  // 예시 사진 스왑
+  const guideImg = document.getElementById('captureGuideImg');
+  if (guideImg) {
+    guideImg.src = isPet ? 'assets/guide/urine-strip-pet.jpg' : 'assets/guide/urine-strip-human.jpg';
+    guideImg.alt = isPet ? '반려동물용 소변검사 스틱 촬영 예시' : '인체용 소변검사 스틱 촬영 예시';
+  }
+
+  // 프로필 chip 텍스트 (있으면)
+  try {
+    const chipText = document.getElementById('captureProfileText');
+    if (chipText) {
+      if (isPet) {
+        const active = (typeof getActiveProfile === 'function') ? getActiveProfile() : null;
+        chipText.textContent = active ? `${active.name || '반려동물'} · ${active.breed || ''} · ${active.weight || ''}${active.weight ? 'kg' : ''}`.replace(/\s·\s$/,'') : '반려동물 프로필';
+      } else {
+        const p = (typeof getPersonalProfile === 'function') ? getPersonalProfile() : {};
+        const name = (p && p.name) || localStorage.getItem('userName') || '';
+        const now = new Date();
+        const age = (p && p.birthYear) ? (now.getFullYear() - parseInt(p.birthYear) + 1) : '';
+        const gender = p && p.gender === 'female' ? '여성' : p && p.gender === 'male' ? '남성' : '';
+        chipText.textContent = [name, age ? `${age}세` : '', gender].filter(Boolean).join(' · ') || '내 프로필';
+      }
+    }
+  } catch(e){}
+
+  // 레거시 세그먼트 active 동기화 (숨겨져 있지만 상태 유지)
   const segHuman = document.getElementById('capSegHuman');
   const segPet = document.getElementById('capSegPet');
   if (segHuman && segPet) {
-    segHuman.classList.toggle('active', mode !== 'pet');
-    segPet.classList.toggle('active', mode === 'pet');
+    segHuman.classList.toggle('active', !isPet);
+    segPet.classList.toggle('active', isPet);
   }
 }
 
