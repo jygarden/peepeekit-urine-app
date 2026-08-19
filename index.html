@@ -3019,14 +3019,14 @@ window.appIcon = function(name, size){
 
     <!-- MEAL SCAN 히어로 카드 -->
     <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:16px;padding:18px 20px;margin-bottom:12px">
-      <div style="font-size:10.5px;font-weight:700;color:#3454C4;letter-spacing:1.2px;margin-bottom:6px">MEAL SCAN</div>
-      <div style="font-size:19px;font-weight:700;color:#17243A;letter-spacing:-.4px;line-height:1.35;margin-bottom:8px">한 끼 사진 한 장이면 충분해요</div>
-      <div style="font-size:12px;color:#5A5A55;line-height:1.55">음식과 양을 AI가 인식하고<br>칼로리·영양 균형을 분석해드려요.</div>
+      <div id="foodHeroLabel" style="font-size:10.5px;font-weight:700;color:#3454C4;letter-spacing:1.2px;margin-bottom:6px">MEAL SCAN</div>
+      <div id="foodHeroTitle" style="font-size:19px;font-weight:700;color:#17243A;letter-spacing:-.4px;line-height:1.35;margin-bottom:8px">한 끼 사진 한 장이면 충분해요</div>
+      <div id="foodHeroSub" style="font-size:12px;color:#5A5A55;line-height:1.55">음식과 양을 AI가 인식하고<br>칼로리·영양 균형을 분석해드려요.</div>
     </div>
 
     <!-- 예시 사진 · 코너 마커 -->
     <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:16px;padding:12px;margin-bottom:12px;position:relative">
-      <div style="position:absolute;top:22px;left:22px;background:#17243A;color:#FFF;font-size:10px;font-weight:600;padding:5px 10px;border-radius:99px;z-index:2">접시 전체가 보이게</div>
+      <div id="foodPhotoChip" style="position:absolute;top:22px;left:22px;background:#17243A;color:#FFF;font-size:10px;font-weight:600;padding:5px 10px;border-radius:99px;z-index:2">접시 전체가 보이게</div>
       <div style="position:relative;border-radius:12px;overflow:hidden">
         <img id="foodGuideImg" src="assets/guide/food-tray.jpg" alt="식단 촬영 예시" style="width:100%;display:block">
         <!-- 코너 마커 -->
@@ -3044,27 +3044,27 @@ window.appIcon = function(name, size){
         <div style="width:32px;height:32px;background:#FFF6C5;border-radius:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7B5F00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="12" cy="12" r="4"/></svg>
         </div>
-        <div style="font-size:11.5px;font-weight:700;color:#17243A">음식 구성</div>
-        <div style="font-size:10px;color:#8B95A1;margin-top:2px">메뉴 자동 인식</div>
+        <div id="foodSub1Title" style="font-size:11.5px;font-weight:700;color:#17243A">음식 구성</div>
+        <div id="foodSub1Sub" style="font-size:10px;color:#8B95A1;margin-top:2px">메뉴 자동 인식</div>
       </div>
       <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 8px;text-align:center">
         <div style="width:32px;height:32px;background:#FFE8D6;border-radius:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B85818" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l-2 18H8Z"/><path d="M8 8h8"/></svg>
         </div>
-        <div style="font-size:11.5px;font-weight:700;color:#17243A">섭취량 추정</div>
-        <div style="font-size:10px;color:#8B95A1;margin-top:2px">공기·조각 기준</div>
+        <div id="foodSub2Title" style="font-size:11.5px;font-weight:700;color:#17243A">섭취량 추정</div>
+        <div id="foodSub2Sub" style="font-size:10px;color:#8B95A1;margin-top:2px">공기·조각 기준</div>
       </div>
       <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 8px;text-align:center">
         <div style="width:32px;height:32px;background:#DCFCE7;border-radius:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 5"/></svg>
         </div>
-        <div style="font-size:11.5px;font-weight:700;color:#17243A">영양 균형</div>
-        <div style="font-size:10px;color:#8B95A1;margin-top:2px">칼로리·영양소</div>
+        <div id="foodSub3Title" style="font-size:11.5px;font-weight:700;color:#17243A">영양 균형</div>
+        <div id="foodSub3Sub" style="font-size:10px;color:#8B95A1;margin-top:2px">칼로리·영양소</div>
       </div>
     </div>
 
     <!-- 힌트 -->
-    <div style="text-align:center;font-size:11px;color:#8B95A1;margin-bottom:14px">빠진 음식이 있을 때만 직접 추가하면 돼요.</div>
+    <div id="foodHintText" style="text-align:center;font-size:11px;color:#8B95A1;margin-bottom:14px">빠진 음식이 있을 때만 직접 추가하면 돼요.</div>
 
     <!-- 촬영 / 갤러리 -->
     <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -3088,8 +3088,8 @@ window.appIcon = function(name, size){
     <div style="background:#F0FAF3;border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:20px">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>
       <div style="flex:1;font-size:11.5px;color:#166534;line-height:1.5">
-        <b style="font-weight:700">음식 종류는 자동으로, 먹은 양만 간단히 확인</b><br>
-        <span style="color:#4B8858">사진만으로 확정하기 어려운 양은 분석 전에 물어봐요.</span>
+        <b id="foodAlertTitle" style="font-weight:700">음식 종류는 자동으로, 먹은 양만 간단히 확인</b><br>
+        <span id="foodAlertSub" style="color:#4B8858">사진만으로 확정하기 어려운 양은 분석 전에 물어봐요.</span>
       </div>
     </div>
   </div>
@@ -7543,27 +7543,56 @@ function selectFoodTarget(target) {
   foodTarget = target;
   document.getElementById('ftHuman').classList.toggle('active', target === 'human');
   document.getElementById('ftPet').classList.toggle('active', target === 'pet');
-  // v14: 페이지 제목도 target 에 맞게 스왑
-  const pageTitle = document.getElementById('foodPageTitle');
-  if (pageTitle) pageTitle.textContent = target === 'pet' ? '반려동물 사료 분석' : '사람 식단 분석';
-  // 촬영 버튼 라벨 스왑
-  const camLbl = document.getElementById('foodCameraBtnLabel');
-  if (camLbl) camLbl.textContent = target === 'pet' ? '사료 촬영하기' : '식사 촬영하기';
-  // 사료면 시간 라벨 변경
-  document.getElementById('mealTimeLabel').textContent =
-    target === 'pet' ? '언제 주는 사료예요?' : '언제 드신 식사예요?';
-  // v12: 예시 사진 · 캡션도 target 에 맞게 스왑
+  const isPet = target === 'pet';
+
+  // v14: 콘텐츠 완전 스왑 (사람 식단 vs 반려동물 사료 라벨 스캔)
+  const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+  setText('foodPageTitle',      isPet ? '반려동물 사료 분석' : '사람 식단 분석');
+  setText('foodCameraBtnLabel', isPet ? '사료 촬영하기' : '식사 촬영하기');
+  setText('mealTimeLabel',      isPet ? '언제 주는 사료예요?' : '언제 드신 식사예요?');
+
+  // 히어로 카드
+  setText('foodHeroLabel', isPet ? 'PET FOOD SCAN' : 'MEAL SCAN');
+  setText('foodHeroTitle', isPet ? '사료 뒷면 한 장이면 충분해요' : '한 끼 사진 한 장이면 충분해요');
+  const heroSub = document.getElementById('foodHeroSub');
+  if (heroSub) {
+    heroSub.innerHTML = isPet
+      ? '제품명·원재료·등록성분량·열량이<br>모두 보이게 뒷면 전체를 담아주세요.'
+      : '음식과 양을 AI가 인식하고<br>칼로리·영양 균형을 분석해드려요.';
+  }
+
+  // 사진 위 chip · 하단 캡션
+  setText('foodPhotoChip',    isPet ? '뒷면 전체가 보이게' : '접시 전체가 보이게');
+  setText('foodGuideCaption', isPet ? '뒷면 전체가 보이게 · 정면에서 반사 없이' : '접시 전체가 보이게 · 위에서 촬영');
+
+  // 3 서브 카드
+  setText('foodSub1Title', isPet ? '제품·원재료'  : '음식 구성');
+  setText('foodSub1Sub',   isPet ? '브랜드·성분표'  : '메뉴 자동 인식');
+  setText('foodSub2Title', isPet ? '등록성분량'     : '섭취량 추정');
+  setText('foodSub2Sub',   isPet ? '단백·지방·수분'  : '공기·조각 기준');
+  setText('foodSub3Title', isPet ? '열량 · 급여량'   : '영양 균형');
+  setText('foodSub3Sub',   isPet ? 'kcal/kg · 급여표' : '칼로리·영양소');
+
+  // 힌트 텍스트
+  setText('foodHintText', isPet
+    ? '글자가 작으면 확대해서 한 번 더 찍어도 돼요.'
+    : '빠진 음식이 있을 때만 직접 추가하면 돼요.');
+
+  // 하단 초록 카드
+  setText('foodAlertTitle', isPet ? '뒷면 한 장으로 성분·급여량을 자동 인식' : '음식 종류는 자동으로, 먹은 양만 간단히 확인');
+  setText('foodAlertSub', isPet
+    ? '급여표는 있으면 함께 · 없으면 체중 기준으로 추정해요.'
+    : '사진만으로 확정하기 어려운 양은 분석 전에 물어봐요.');
+
+  // 예시 사진 스왑
   const guideImg = document.getElementById('foodGuideImg');
-  const guideCap = document.getElementById('foodGuideCaption');
-  if (guideImg && guideCap) {
-    if (target === 'pet') {
-      guideImg.src = 'assets/guide/pet-food-bowl.jpg';
-      guideImg.alt = '반려동물 사료 촬영 예시';
-      guideCap.textContent = '사료 그릇 · 하루 급여량이 다 보이게';
+  if (guideImg) {
+    if (isPet) {
+      guideImg.src = 'assets/guide/pet-food-package.jpg';
+      guideImg.alt = '반려동물 사료 뒷면 촬영 예시';
     } else {
       guideImg.src = 'assets/guide/food-tray.jpg';
       guideImg.alt = '식단 촬영 예시';
-      guideCap.textContent = '위에서 내려다본 각도 · 모든 반찬이 다 보이게';
     }
   }
 }
