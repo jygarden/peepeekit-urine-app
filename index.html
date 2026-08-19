@@ -2992,108 +2992,106 @@ window.appIcon = function(name, size){
 
   <!-- ════════════ 식단 사진 업로드 화면 ════════════ -->
   <div class="screen" id="screenFoodCapture">
-    <div class="page-header">
-      <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
-      <div class="page-title">🍽 식단 분석</div>
-    </div>
-    <!-- 🧬 맞춤 분석 프로필 (사진 찍기 전 입력) -->
-    <div id="captureProfileBanner" style="margin-bottom:12px"></div>
-
-    <!-- 👋 도입 카드 (필라이즈 스타일) -->
-    <div style="background:linear-gradient(135deg,#FFF7ED,#FED7AA);border:1px solid #FDBA74;border-radius:16px;padding:16px 16px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div style="width:38px;height:38px;background:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(234,88,12,.15)">🍽</div>
-        <div>
-          <div style="font-size:14px;font-weight:900;color:#7C2D12;letter-spacing:-.3px">한 끼로 알아보는 영양 밸런스</div>
-          <div style="font-size:10.5px;color:#EA580C;font-weight:800;margin-top:1px">약 20초 · 음식 자동 인식 · AI가 코칭</div>
-        </div>
+    <!-- v14 새 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button onclick="goHome()" aria-label="홈으로" style="width:40px;height:40px;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div id="foodPageTitle" style="font-size:19px;font-weight:700;letter-spacing:-.4px;color:#17243A">사람 식단 분석</div>
       </div>
-      <div style="display:flex;gap:6px">
-        <div style="flex:1;background:rgba(255,255,255,.75);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🥗</div><div style="font-size:9.5px;font-weight:900;color:#7C2D12;margin-top:1px">칼로리·영양소</div></div>
-        <div style="flex:1;background:rgba(255,255,255,.75);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">⚖️</div><div style="font-size:9.5px;font-weight:900;color:#7C2D12;margin-top:1px">균형 점수</div></div>
-        <div style="flex:1;background:rgba(255,255,255,.75);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💡</div><div style="font-size:9.5px;font-weight:900;color:#7C2D12;margin-top:1px">개선 팁</div></div>
-      </div>
+      <div id="foodProfileBadge" style="font-size:11px;color:#3454C4;background:#EDF1FB;padding:5px 10px;border-radius:99px;font-weight:600">맞춤 분석</div>
     </div>
 
-    <div class="card">
-      <div class="field">
-        <div class="meal-time-row" style="margin-bottom:10px;display:none">
-          <button class="meal-time-btn active" id="ftHuman" onclick="selectFoodTarget('human')">🧑<br>사람 식사</button>
-          <button class="meal-time-btn" id="ftPet" onclick="selectFoodTarget('pet')">🐾<br>반려동물 사료</button>
-        </div>
-        <label id="mealTimeLabel">언제 드신 식사예요?</label>
-        <div class="meal-time-row">
-          <button class="meal-time-btn" id="mtBreakfast" onclick="selectMealTime('아침')">🌅<br>아침</button>
-          <button class="meal-time-btn" id="mtLunch" onclick="selectMealTime('점심')">☀️<br>점심</button>
-          <button class="meal-time-btn" id="mtDinner" onclick="selectMealTime('저녁')">🌙<br>저녁</button>
-          <button class="meal-time-btn" id="mtSnack" onclick="selectMealTime('간식')">🍪<br>간식</button>
-        </div>
-      </div>
+    <div id="captureProfileBanner" style="display:none"></div>
+    <!-- 시간대 세그먼트 (숨김 · 자동 세팅되나 값 유지) -->
+    <div class="meal-time-row" style="display:none">
+      <button class="meal-time-btn active" id="ftHuman" onclick="selectFoodTarget('human')">사람</button>
+      <button class="meal-time-btn" id="ftPet" onclick="selectFoodTarget('pet')">반려동물</button>
     </div>
-    <!-- ✅ 이렇게 촬영하세요 (예시 사진 + 3-Step) -->
-    <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(234,88,12,.06)">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <span style="background:#FFEDD5;color:#EA580C;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">GOOD</span>
-        <span style="font-size:13px;font-weight:900;color:#0F1F1A">✅ 이렇게 촬영하세요</span>
-      </div>
-
-      <!-- 예시 사진 (사람 식사 / 반려동물 사료 자동 스왑) -->
-      <div style="background:#FEFCF5;border-radius:12px;padding:8px;margin-bottom:12px;text-align:center">
-        <img id="foodGuideImg" src="assets/guide/food-tray.jpg" alt="식단 촬영 예시" style="max-width:100%;max-height:240px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
-        <div id="foodGuideCaption" style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:6px">위에서 내려다본 각도 · 모든 반찬이 다 보이게</div>
-      </div>
-
-      <!-- 3-Step 가이드 -->
-      <div style="display:flex;flex-direction:column;gap:9px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:26px;height:26px;background:#EA580C;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">1</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A">모든 반찬이 <b style="color:#EA580C">다 보이게</b></div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">가려진 음식 없이 · 한 식사를 한 사진에</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:26px;height:26px;background:#EA580C;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">2</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#EA580C">위에서 내려다보는</b> 각도</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">식판·쟁반이 다 보이게 정면 촬영</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:26px;height:26px;background:#EA580C;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0">3</div>
-          <div style="flex:1"><div style="font-size:12.5px;font-weight:900;color:#0F1F1A"><b style="color:#EA580C">밝은 조명</b> (창가·형광등)</div><div style="font-size:10.5px;color:#65756B;font-weight:700;margin-top:1px">식기·그릇 함께 찍으면 양 추정 정확</div></div>
-        </div>
-      </div>
+    <label id="mealTimeLabel" style="display:none"></label>
+    <div class="meal-time-row" style="display:none">
+      <button class="meal-time-btn" id="mtBreakfast" onclick="selectMealTime('아침')">아침</button>
+      <button class="meal-time-btn" id="mtLunch" onclick="selectMealTime('점심')">점심</button>
+      <button class="meal-time-btn" id="mtDinner" onclick="selectMealTime('저녁')">저녁</button>
+      <button class="meal-time-btn" id="mtSnack" onclick="selectMealTime('간식')">간식</button>
     </div>
 
-    <!-- ❌ 이런 건 피하세요 -->
-    <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px;padding:12px 14px;margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <span style="background:#FEE2E2;color:#DC2626;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.5px">DON'T</span>
-        <span style="font-size:12.5px;font-weight:900;color:#7F1D1D">❌ 이런 건 피하세요</span>
+    <!-- MEAL SCAN 히어로 카드 -->
+    <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:16px;padding:18px 20px;margin-bottom:12px">
+      <div style="font-size:10.5px;font-weight:700;color:#3454C4;letter-spacing:1.2px;margin-bottom:6px">MEAL SCAN</div>
+      <div style="font-size:19px;font-weight:700;color:#17243A;letter-spacing:-.4px;line-height:1.35;margin-bottom:8px">한 끼 사진 한 장이면 충분해요</div>
+      <div style="font-size:12px;color:#5A5A55;line-height:1.55">음식과 양을 AI가 인식하고<br>칼로리·영양 균형을 분석해드려요.</div>
+    </div>
+
+    <!-- 예시 사진 · 코너 마커 -->
+    <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:16px;padding:12px;margin-bottom:12px;position:relative">
+      <div style="position:absolute;top:22px;left:22px;background:#17243A;color:#FFF;font-size:10px;font-weight:600;padding:5px 10px;border-radius:99px;z-index:2">접시 전체가 보이게</div>
+      <div style="position:relative;border-radius:12px;overflow:hidden">
+        <img id="foodGuideImg" src="assets/guide/food-tray.jpg" alt="식단 촬영 예시" style="width:100%;display:block">
+        <!-- 코너 마커 -->
+        <svg style="position:absolute;top:8px;left:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 8V2h6" stroke="#3454C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg style="position:absolute;top:8px;right:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16 2h6v6" stroke="#3454C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg style="position:absolute;bottom:8px;left:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 16v6h6" stroke="#3454C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg style="position:absolute;bottom:8px;right:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 16v6h-6" stroke="#3454C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:10.5px;color:#7F1D1D;font-weight:800;text-align:center">
-        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🍽</div><div style="margin-top:3px">가려진 반찬</div></div>
-        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">🌑</div><div style="margin-top:3px">어두운 조명</div></div>
-        <div style="background:#FFF;border:1px solid #FCA5A5;border-radius:8px;padding:8px 4px"><div style="font-size:20px">📱</div><div style="margin-top:3px">흐린 사진</div></div>
+      <div id="foodGuideCaption" style="text-align:center;font-size:12px;color:#5A5A55;font-weight:600;padding:10px 14px;background:#F5F5F0;border-radius:99px;margin-top:12px">접시 전체가 보이게 · 위에서 촬영</div>
+    </div>
+
+    <!-- 3 서브 카드 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 8px;text-align:center">
+        <div style="width:32px;height:32px;background:#FFF6C5;border-radius:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7B5F00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="12" cy="12" r="4"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:#17243A">음식 구성</div>
+        <div style="font-size:10px;color:#8B95A1;margin-top:2px">메뉴 자동 인식</div>
+      </div>
+      <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 8px;text-align:center">
+        <div style="width:32px;height:32px;background:#FFE8D6;border-radius:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B85818" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l-2 18H8Z"/><path d="M8 8h8"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:#17243A">섭취량 추정</div>
+        <div style="font-size:10px;color:#8B95A1;margin-top:2px">공기·조각 기준</div>
+      </div>
+      <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 8px;text-align:center">
+        <div style="width:32px;height:32px;background:#DCFCE7;border-radius:8px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 5"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:#17243A">영양 균형</div>
+        <div style="font-size:10px;color:#8B95A1;margin-top:2px">칼로리·영양소</div>
       </div>
     </div>
 
-    <button class="upload-btn accent" style="border-color:#F59E0B" onclick="safeCameraClick('foodCameraInput')">
-      <div class="icon">📷</div>
-      <div class="lbl" style="color:#F59E0B">카메라로 촬영</div>
-      <div class="sub">지금 바로 식사 사진을 찍어주세요</div>
-    </button>
-    <button class="upload-btn" onclick="openFileInput('foodGalleryInput')">
-      <div class="icon">🖼️</div>
-      <div class="lbl">갤러리에서 선택</div>
-      <div class="sub">저장된 사진을 불러오세요</div>
-    </button>
+    <!-- 힌트 -->
+    <div style="text-align:center;font-size:11px;color:#8B95A1;margin-bottom:14px">빠진 음식이 있을 때만 직접 추가하면 돼요.</div>
 
-    <!-- 🔒 개인정보 안내 -->
-    <div style="display:flex;align-items:flex-start;gap:8px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 12px;margin:10px 0 8px">
-      <div style="font-size:15px;line-height:1.2">🔒</div>
-      <div style="flex:1">
-        <div style="font-size:11.5px;font-weight:900;color:#7C2D12">사진은 안전하게 처리돼요</div>
-        <div style="font-size:10px;color:#9A3412;font-weight:600;margin-top:1px;line-height:1.4">AI 분석 후 서버에 저장되지 않아요 · 결과만 내 기기에 남아요</div>
-      </div>
+    <!-- 촬영 / 갤러리 -->
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="safeCameraClick('foodCameraInput')" style="flex:2;background:#17243A;color:#FFF;border:none;border-radius:12px;padding:14px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="foodCameraBtnLabel">식사 촬영하기</span>
+      </button>
+      <button onclick="openFileInput('foodGalleryInput')" style="flex:1;background:#FFF;color:#17243A;border:0.5px solid #D9DEDC;border-radius:12px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        갤러리
+      </button>
     </div>
 
-    <button class="btn-outline" onclick="goHome()">← 홈으로</button>
+    <!-- 안전 안내 · 아이콘 + 짧은 문장 -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:10.5px;color:#8B95A1;margin-bottom:14px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>
+      촬영 이미지는 분석 목적으로만 처리됩니다.
+    </div>
+
+    <!-- 초록 안내 카드 -->
+    <div style="background:#F0FAF3;border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;margin-bottom:20px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>
+      <div style="flex:1;font-size:11.5px;color:#166534;line-height:1.5">
+        <b style="font-weight:700">음식 종류는 자동으로, 먹은 양만 간단히 확인</b><br>
+        <span style="color:#4B8858">사진만으로 확정하기 어려운 양은 분석 전에 물어봐요.</span>
+      </div>
+    </div>
   </div>
 
   <!-- ════════════ 식단 미리보기 ════════════ -->
@@ -3429,21 +3427,10 @@ window.appIcon = function(name, size){
       <button type="button" id="capSegPet" onclick="switchCaptureSubject('pet')" class="meal-time-btn">반려동물용</button>
     </div>
 
-    <!-- 👋 도입 카드 (필라이즈 스타일) -->
-    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC;border-radius:16px;padding:16px 16px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-        <div style="width:38px;height:38px;background:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 2px 6px rgba(5,150,105,.15)">🧪</div>
-        <div>
-          <div id="captureIntroTitle" style="font-size:14px;font-weight:900;color:#065F46;letter-spacing:-.3px">소변으로 몸 상태 체크</div>
-          <div id="captureIntroSub" style="font-size:10.5px;color:#059669;font-weight:800;margin-top:1px">약 30초 · 10가지 항목 자동 판독</div>
-        </div>
-      </div>
-      <div id="captureIntroChips" style="display:flex;gap:6px">
-        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">💧</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">수분·pH</div></div>
-        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🩸</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">단백뇨·잠혈</div></div>
-        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:8px;padding:7px 8px;text-align:center"><div style="font-size:14px;line-height:1">🍬</div><div style="font-size:9.5px;font-weight:900;color:#065F46;margin-top:1px">당·케톤</div></div>
-      </div>
-    </div>
+    <!-- 도입 카드 제거 · 심플화 (v14) -->
+    <div id="captureIntroTitle" style="display:none"></div>
+    <div id="captureIntroSub" style="display:none"></div>
+    <div id="captureIntroChips" style="display:none"></div>
 
     <!-- ✅ 이렇게 촬영하세요 (예시 사진 + 3-Step) -->
     <div style="background:#FFF;border:0.5px solid #EFEFEF;border-radius:16px;padding:16px 14px;margin-bottom:12px;box-shadow:0 3px 12px rgba(5,150,105,.06)">
@@ -7556,6 +7543,12 @@ function selectFoodTarget(target) {
   foodTarget = target;
   document.getElementById('ftHuman').classList.toggle('active', target === 'human');
   document.getElementById('ftPet').classList.toggle('active', target === 'pet');
+  // v14: 페이지 제목도 target 에 맞게 스왑
+  const pageTitle = document.getElementById('foodPageTitle');
+  if (pageTitle) pageTitle.textContent = target === 'pet' ? '반려동물 사료 분석' : '사람 식단 분석';
+  // 촬영 버튼 라벨 스왑
+  const camLbl = document.getElementById('foodCameraBtnLabel');
+  if (camLbl) camLbl.textContent = target === 'pet' ? '사료 촬영하기' : '식사 촬영하기';
   // 사료면 시간 라벨 변경
   document.getElementById('mealTimeLabel').textContent =
     target === 'pet' ? '언제 주는 사료예요?' : '언제 드신 식사예요?';
@@ -7564,7 +7557,7 @@ function selectFoodTarget(target) {
   const guideCap = document.getElementById('foodGuideCaption');
   if (guideImg && guideCap) {
     if (target === 'pet') {
-      guideImg.src = 'assets/onboarding/kibble-bowl.png';
+      guideImg.src = 'assets/guide/pet-food-bowl.jpg';
       guideImg.alt = '반려동물 사료 촬영 예시';
       guideCap.textContent = '사료 그릇 · 하루 급여량이 다 보이게';
     } else {
