@@ -2995,7 +2995,7 @@ window.appIcon = function(name, size){
     <!-- v14 새 헤더 -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:12px">
-        <button onclick="goHome()" aria-label="홈으로" style="width:40px;height:40px;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">
+        <button onclick="if(typeof ggGoTab==='function')ggGoTab('analyze');else goHome();" aria-label="뒤로" style="width:40px;height:40px;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div id="foodPageTitle" style="font-size:19px;font-weight:700;letter-spacing:-.4px;color:#17243A">사람 식단 분석</div>
@@ -7546,35 +7546,35 @@ function selectFoodTarget(target) {
 
   // 히어로 카드
   setText('foodHeroLabel', isPet ? 'PET FOOD SCAN' : 'MEAL SCAN');
-  setText('foodHeroTitle', isPet ? '사료 뒷면 한 장이면 충분해요' : '한 끼 사진 한 장이면 충분해요');
+  setText('foodHeroTitle', isPet ? '라벨 필요 부분만 가까이 찍어주세요' : '한 끼 사진 한 장이면 충분해요');
   const heroSub = document.getElementById('foodHeroSub');
   if (heroSub) {
     heroSub.innerHTML = isPet
-      ? '제품명·원재료·등록성분량·열량이<br>모두 보이게 뒷면 전체를 담아주세요.'
+      ? '등록성분량 · 열량·급여 안내 · 원재료명<br>각 영역이 선명하게 · 2~3장으로 나눠도 돼요.'
       : '음식과 양을 AI가 인식하고<br>칼로리·영양 균형을 분석해드려요.';
   }
 
   // 사진 위 chip · 하단 캡션
-  setText('foodPhotoChip',    isPet ? '뒷면 전체가 보이게' : '접시 전체가 보이게');
-  setText('foodGuideCaption', isPet ? '뒷면 전체가 보이게 · 정면에서 반사 없이' : '접시 전체가 보이게 · 위에서 촬영');
+  setText('foodPhotoChip',    isPet ? '필요한 부분만 가까이' : '접시 전체가 보이게');
+  setText('foodGuideCaption', isPet ? '글자가 선명하게 · 반사·비스듬함 없이' : '접시 전체가 보이게 · 위에서 촬영');
 
   // 3 서브 카드
-  setText('foodSub1Title', isPet ? '제품·원재료'  : '음식 구성');
-  setText('foodSub1Sub',   isPet ? '브랜드·성분표'  : '메뉴 자동 인식');
-  setText('foodSub2Title', isPet ? '등록성분량'     : '섭취량 추정');
-  setText('foodSub2Sub',   isPet ? '단백·지방·수분'  : '공기·조각 기준');
-  setText('foodSub3Title', isPet ? '열량 · 급여량'   : '영양 균형');
-  setText('foodSub3Sub',   isPet ? 'kcal/kg · 급여표' : '칼로리·영양소');
+  setText('foodSub1Title', isPet ? '등록성분량'  : '음식 구성');
+  setText('foodSub1Sub',   isPet ? '단백·지방·수분·미네랄'  : '메뉴 자동 인식');
+  setText('foodSub2Title', isPet ? '열량 · 급여량'     : '섭취량 추정');
+  setText('foodSub2Sub',   isPet ? 'kcal/kg · 체중별 급여표'  : '공기·조각 기준');
+  setText('foodSub3Title', isPet ? '원재료 · 성분'   : '영양 균형');
+  setText('foodSub3Sub',   isPet ? '알레르기 크로스체크' : '칼로리·영양소');
 
   // 힌트 텍스트
   setText('foodHintText', isPet
-    ? '글자가 작으면 확대해서 한 번 더 찍어도 돼요.'
+    ? '2~3장 나눠 찍어도 자동으로 합쳐서 인식해요.'
     : '빠진 음식이 있을 때만 직접 추가하면 돼요.');
 
   // 하단 초록 카드
-  setText('foodAlertTitle', isPet ? '뒷면 한 장으로 성분·급여량을 자동 인식' : '음식 종류는 자동으로, 먹은 양만 간단히 확인');
+  setText('foodAlertTitle', isPet ? '한 번에 한 영역 · 필요하면 여러 장 촬영' : '음식 종류는 자동으로, 먹은 양만 간단히 확인');
   setText('foodAlertSub', isPet
-    ? '급여표는 있으면 함께 · 없으면 체중 기준으로 추정해요.'
+    ? '뒷면 전체 한 장은 글씨가 작아 인식이 어려워요. 등록성분량·열량·원재료명 각 1장이 정확해요.'
     : '사진만으로 확정하기 어려운 양은 분석 전에 물어봐요.');
 
   // 예시 사진 스왑
@@ -12691,6 +12691,11 @@ async function downloadFoodResult() {
 
 // 촬영 화면에서 뒤로 (인체는 홈으로, 반려동물은 프로필 폼으로)
 function backToForm() {
+  // v14: 분석 탭에서 진입한 경우 분석 허브로 · 그 외는 기존 로직
+  if (typeof ggGoTab === 'function') {
+    ggGoTab('analyze');
+    return;
+  }
   if (subjectMode === 'human') {
     goHome();
   } else {
