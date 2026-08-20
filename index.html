@@ -3089,7 +3089,7 @@ window.appIcon = function(name, size){
         </div>
         <button onclick="document.getElementById('petShot1Input').click()" style="width:100%;margin-top:10px;background:#F5F5F0;color:#17243A;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px" id="petShot1Btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          촬영하기
+          이 영역만 촬영
         </button>
       </div>
 
@@ -3104,7 +3104,7 @@ window.appIcon = function(name, size){
         <img id="petShot2Img" src="assets/guide/pet-food-kcal.jpg" alt="열량 예시" style="width:100%;display:block;border-radius:8px;border:0.5px dashed #C8B994">
         <button onclick="document.getElementById('petShot2Input').click()" style="width:100%;margin-top:10px;background:#F5F5F0;color:#17243A;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px" id="petShot2Btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          촬영하기
+          이 영역만 촬영
         </button>
       </div>
 
@@ -3119,7 +3119,7 @@ window.appIcon = function(name, size){
         <img id="petShot3Img" src="assets/guide/pet-food-ingredients.jpg" alt="원재료 예시" style="width:100%;display:block;border-radius:8px;border:0.5px dashed #C8B994">
         <button onclick="document.getElementById('petShot3Input').click()" style="width:100%;margin-top:10px;background:#F5F5F0;color:#17243A;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px" id="petShot3Btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          촬영하기
+          이 영역만 촬영
         </button>
       </div>
 
@@ -3134,11 +3134,18 @@ window.appIcon = function(name, size){
         <img id="petShot4Img" src="assets/guide/pet-food-feeding.jpg" alt="급여 안내표 예시" style="width:100%;display:block;border-radius:8px;border:0.5px dashed #C8B994">
         <button onclick="document.getElementById('petShot4Input').click()" style="width:100%;margin-top:10px;background:#F5F5F0;color:#17243A;border:0.5px solid #D9DEDC;border-radius:10px;padding:10px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px" id="petShot4Btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          촬영하기
+          이 영역만 촬영
         </button>
       </div>
 
-      <div id="petShotProgress" style="text-align:center;font-size:11px;color:#8B95A1;margin-bottom:10px">0 / 4 · 최소 1장 이상 필요해요</div>
+      <div id="petShotProgress" style="text-align:center;font-size:11px;color:#8B95A1;margin-bottom:10px">각 카드마다 촬영하기 · 최소 1장만 있어도 분석돼요</div>
+
+      <!-- 갤러리 다중 선택 (한 번에 여러 장 선택) -->
+      <input type="file" id="petMultiInput" accept="image/*" multiple style="display:none" onchange="_petMultiSelected(this)">
+      <button onclick="document.getElementById('petMultiInput').click()" style="width:100%;background:#FFF;color:#17243A;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        갤러리에서 여러 장 한 번에 선택
+      </button>
     </div>
 
     <!-- 사람 · 촬영 / 갤러리 (기존) -->
@@ -7637,6 +7644,28 @@ function _petShotCaptured(slot, input) {
   input.value = '';
 }
 
+function _petMultiSelected(input) {
+  const files = input && input.files ? Array.from(input.files) : [];
+  if (!files.length) return;
+  files.slice(0, 4).forEach((file, idx) => {
+    const slot = idx + 1;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      window.petFoodShots[slot] = { dataUrl, b64: dataUrl.split(',')[1], label: _PET_SHOT_LABELS[slot] };
+      const img = document.getElementById('petShot' + slot + 'Img');
+      const chk = document.getElementById('petShot' + slot + 'Check');
+      const btn = document.getElementById('petShot' + slot + 'Btn');
+      if (img) { img.src = dataUrl; img.style.border = '2px solid #22C55E'; }
+      if (chk) chk.style.display = 'flex';
+      if (btn) btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="2" stroke-linecap="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg> 다시 촬영';
+      _petUpdateCta();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
 function _petUpdateCta() {
   const shots = Object.values(window.petFoodShots).filter(Boolean);
   const count = shots.length;
@@ -7700,11 +7729,11 @@ function selectFoodTarget(target) {
 
   // 히어로 카드
   setText('foodHeroLabel', isPet ? 'PET FOOD SCAN' : 'MEAL SCAN');
-  setText('foodHeroTitle', isPet ? '라벨 필요 부분만 가까이 찍어주세요' : '한 끼 사진 한 장이면 충분해요');
+  setText('foodHeroTitle', isPet ? '1장만 찍어도 돼요' : '한 끼 사진 한 장이면 충분해요');
   const heroSub = document.getElementById('foodHeroSub');
   if (heroSub) {
     heroSub.innerHTML = isPet
-      ? '등록성분량 · 열량·급여 안내 · 원재료명<br>각 영역이 선명하게 · 2~3장으로 나눠도 돼요.'
+      ? '아래 4가지 중 <b>하나만 촬영해도 분석돼요</b>.<br>여러 장 찍을수록 <b>더 정확하고 세심한 분석</b>이 가능해요.'
       : '음식과 양을 AI가 인식하고<br>칼로리·영양 균형을 분석해드려요.';
   }
 
