@@ -3953,14 +3953,14 @@ window.appIcon = function(name, size){
       <!-- ③ 탭 컨텐츠 컨테이너 -->
       <div id="v20RecContent"></div>
 
-      <!-- ④ 하단 · 영양제 전에 음식 -->
-      <div onclick="alert('음식이 최고의 영양제예요. 먼저 오늘의 식단을 기록하고, 부족한 영양소부터 채워보세요.')" style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer">
+      <!-- ④ 하단 · 영양제 전에 음식 (클릭 시 식사 촬영으로 이동) -->
+      <button onclick="if(typeof enterFood==='function')enterFood('human')" style="width:100%;background:#FEF9C3;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;font-family:inherit;text-align:left">
         <div style="flex:1">
           <div style="font-size:12px;font-weight:800;color:#854D0E;margin-bottom:3px">⭐ 영양제를 추천하기 전에 음식을 추천해요</div>
-          <div style="font-size:10.5px;color:#92400E;font-weight:600;line-height:1.5">음식이 최고의 영양제에요. 먼저 음식으로 채워보세요.</div>
+          <div style="font-size:10.5px;color:#92400E;font-weight:600;line-height:1.5">지금 식단을 찍으면 진짜 부족한 게 보여요.</div>
         </div>
         <span style="color:#A16207;font-size:16px;font-weight:700">›</span>
-      </div>
+      </button>
 
     </div>
   </div>
@@ -5703,7 +5703,20 @@ function _getFoodHistory() {
   try { return JSON.parse(localStorage.getItem('foodHistoryV1') || '[]'); } catch(e){ return []; }
 }
 function _foodsFromEntry(f) {
-  return f.items || (f.foodName ? [{name: f.foodName, portion: 1}] : []);
+  // v2.0: 여러 저장 포맷 호환
+  // ① items 배열 (v2.0 이후 신규)
+  if (Array.isArray(f.items) && f.items.length) return f.items;
+  // ② foods 배열 오브젝트 [{name, ...}]
+  if (Array.isArray(f.foods)) {
+    return f.foods.map(x => (typeof x === 'string') ? {name: x, portion: 1} : {name: x.name || '', portion: x.portion || 1});
+  }
+  // ③ foods 문자열 (콤마 구분 · saveFoodHistory 현재 포맷)
+  if (typeof f.foods === 'string' && f.foods.trim()) {
+    return f.foods.split(',').map(s => s.trim()).filter(Boolean).map(name => ({name, portion: 1}));
+  }
+  // ④ foodName (레거시)
+  if (f.foodName) return [{name: f.foodName, portion: 1}];
+  return [];
 }
 // 최근 N일간 각 날짜의 밸런스 점수 배열
 function get7DayScores() {
@@ -11914,6 +11927,44 @@ async function confirmAndAnalyze() {
         });
       }
     } catch(e) { result.__excludeIngs = []; }
+    // ═══ v2.0 · 로컬 영양 계산 enrichment (AI가 없거나 불완전한 필드 보완) ═══
+    try {
+      if (!Array.isArray(result.foods) || result.foods.length === 0) {
+        result.foods = (detectedFoodsData || []).map(f => ({
+          name: f.name,
+          portion: f.portion || 1,
+          ingredients: (f.ingredients || []).map(x => (typeof x === 'string' ? {name: x} : x))
+        }));
+      }
+      if (typeof sumNutrition === 'function' && typeof KOREAN_FOOD_DB !== 'undefined' && typeof RDA_ADULT !== 'undefined') {
+        const items = result.foods.map(f => ({name: f.name, portion: f.portion || 1}));
+        const totals = sumNutrition(items);
+        // 항상 로컬 계산으로 덮어쓰기 (AI 숫자 무시 · 정확성 우선)
+        result.nutrition = {
+          protein: Math.round(totals.protein || 0),
+          carbs: Math.round(totals.carbs || 0),
+          fat: Math.round(totals.fat || 0),
+          fiber: Math.round(totals.fiber || 0),
+          sodium: Math.round(totals.sodium || 0),
+          calcium: Math.round(totals.calcium || 0),
+          iron: Math.round((totals.iron || 0) * 10) / 10,
+          magnesium: Math.round(totals.magnesium || 0),
+          vitC: Math.round(totals.vitC || 0),
+          vitD: Math.round((totals.vitD || 0) * 10) / 10,
+          omega3: Math.round(totals.omega3 || 0)
+        };
+        result.totalCalories = Math.round(totals.kcal || 0);
+        // 균형 점수
+        const keys = ['protein','fiber','calcium','iron','magnesium','vitC'];
+        const scores = keys.map(k => Math.min(100, RDA_ADULT[k] > 0 ? (totals[k] / RDA_ADULT[k]) * 100 : 0));
+        result.balanceScore = Math.round(scores.reduce((s,v) => s+v, 0) / keys.length);
+        const s = result.balanceScore;
+        result.balanceGrade = s >= 85 ? 'A' : s >= 70 ? 'B' : s >= 50 ? 'C' : s >= 30 ? 'D' : 'F';
+      }
+      // items 배열 항상 저장 · v2.0 엔진 호환
+      result.items = (result.foods || []).map(f => ({name: f.name, portion: f.portion || 1}));
+    } catch(enrichErr) { console.warn('[v2.0 enrichment]', enrichErr); }
+
     currentFoodResult = result;
     renderFoodResult(result);
     saveFoodHistory(result);
@@ -13301,6 +13352,8 @@ function saveFoodHistory(result) {
       balanceScore: result.balanceScore,
       balanceGrade: result.balanceGrade,
       foods: (result.foods || []).map(f => f.name).join(', '),
+      // v2.0 · items 배열 저장 (nutrition engine이 이걸 파싱)
+      items: result.items || (result.foods || []).map(f => ({ name: f.name, portion: f.portion || 1 })),
       nutrition: result.nutrition,
       missing: result.missing,
       excessive: result.excessive,
