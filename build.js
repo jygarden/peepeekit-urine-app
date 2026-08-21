@@ -110,7 +110,9 @@ async function build() {
             '_v20RenderMissions', '_v20RenderCoach', '_v20OpenChip', '_v20RenderChipAnswer',
             '_v20Esc', '_v20CurrentSituation',
             'renderV20Curation', '_v20RecSwitch', '_v20RecRenderNutrients',
-            '_v20RecAppendMenus', '_v20RecRenderFoods', '_v20RecRenderLifestyle', '_v20RecCurrentTab'
+            '_v20RecAppendMenus', '_v20RecRenderFoods', '_v20RecRenderLifestyle', '_v20RecCurrentTab',
+            // v2.0 · 식단 스토리 카드
+            'renderV20FoodStoryDOM', 'FOOD_ALIAS'
           ]
         },
         format: {
