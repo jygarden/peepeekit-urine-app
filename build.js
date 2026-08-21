@@ -104,7 +104,7 @@ async function build() {
             'MISSION_POOL', 'getTodayMissions',
             'getCoachInsights', 'COACH_SUGGESTED_QUESTIONS',
             // v2.0 신규 · 홈/추천 재작성
-            'NUTRIENT_KNOWLEDGE', '_getFoodHistory', '_foodsFromEntry',
+            'NUTRIENT_KNOWLEDGE', 'FOOD_ALIAS', '_getFoodHistory', '_foodsFromEntry',
             'get7DayScores', 'get7DayScoreAvg', 'getShortageDayCount', 'getHeroSummary',
             'renderV20Home', '_v20RenderMealSuggestion', '_v20SelectSituation',
             '_v20RenderMissions', '_v20RenderCoach', '_v20OpenChip', '_v20RenderChipAnswer',
