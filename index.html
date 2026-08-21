@@ -2329,7 +2329,7 @@ window.appIcon = function(name, size){
             </div>
             <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between">
               <div>
-                <div id="v14FoodName" style="font-size:15px;font-weight:700;color:var(--gg-ink);letter-spacing:-.3px;margin-bottom:6px">고등어구이 한상</div>
+                <div id="v14FoodName" style="font-size:15px;font-weight:700;color:var(--gg-ink);letter-spacing:-.3px;margin-bottom:6px">순대국 한 그릇</div>
                 <div id="v14FoodReason" style="font-size:11.5px;color:#5A5A55;line-height:1.5">단백질과 오메가3를 보완하기 좋아요.</div>
               </div>
               <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
@@ -2597,13 +2597,13 @@ window.appIcon = function(name, size){
           <div class="card-meta" id="petFoodLastInfo">사료·간식 성분 분석</div>
         </button>
 
-        <!-- 닥터 냐옹 챗봇 (반려동물 모드에서만) -->
+        <!-- 건강어때 AI 챗 (반려동물 모드에서만) -->
         <button class="home-card vetchat" onclick="enterVetChat()">
           <span class="card-new-badge">NEW</span>
           <div class="card-orb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12c0 4.5-4 8-9 8-1.4 0-2.8-.3-4-.8L3 21l1.5-4.5C3.5 15.2 3 13.6 3 12c0-4.5 4-8 9-8s9 3.5 9 8z"/></svg></div>
-          <div class="card-label">VET CHAT</div>
-          <div class="card-title">닥터 냐옹</div>
-          <div class="card-meta">AI 수의영양사 · 24시간 상담</div>
+          <div class="card-label">AI CHAT</div>
+          <div class="card-title">건강어때 AI 챗</div>
+          <div class="card-meta">반려동물 영양·생활 코치</div>
         </button>
 
         <!-- 식품 성분 분석 (NEW) -->
@@ -4338,16 +4338,16 @@ window.appIcon = function(name, size){
     <button onclick="goHome()" class="btn-outline" style="margin-top:12px">← 홈으로</button>
   </div>
 
-  <!-- ════════════ 👩‍⚕️ 닥터 냐옹 · AI 수의영양사 채팅 ════════════ -->
+  <!-- ════════════ 🐾 건강어때 AI 챗 · 반려동물 영양 코치 ════════════ -->
   <div class="screen" id="screenVetChat">
     <div class="page-header" style="display:flex;align-items:center;gap:10px;padding-right:6px">
       <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
-      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#CECBF6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👩‍⚕️</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#EEEDFE,#CECBF6);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:14.5px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px">닥터 냐옹</div>
+        <div style="font-size:14.5px;font-weight:900;color:#0F1F1A;letter-spacing:-.3px">건강어때 AI 챗</div>
         <div style="font-size:10.5px;color:#059669;font-weight:800;display:flex;align-items:center;gap:4px;margin-top:1px">
           <span style="width:6px;height:6px;background:#059669;border-radius:50%"></span>
-          수의영양사 · 지금 답장 가능
+          반려동물 코치 · 지금 답장 가능
         </div>
       </div>
       <button onclick="_resetVetChat()" style="background:transparent;border:1px solid #E5E7EB;border-radius:8px;padding:5px 10px;font-size:10.5px;font-weight:800;color:#64748B;cursor:pointer;font-family:inherit">🗑 초기화</button>
@@ -5415,6 +5415,328 @@ function _getWittyFromRecentFoods(records) {
   return `${prefix} ${wittyLine}`;
 }
 
+// ═══ v2.0 · 한국 식품 영양 DB (성인 기준 · 1인분 기준 g/mg/μg) ═══
+// 필드: kcal · protein · carbs · fat · fiber · sodium · calcium · iron · magnesium · vitA · vitC · vitD · omega3
+// 단위: kcal / g / g / g / g / mg / mg / mg / mg / μgRAE / mg / μg / mg
+const KOREAN_FOOD_DB = {
+  // ── 밥/죽류 ──
+  '쌀밥':         { kcal:310, protein:6,  carbs:69, fat:1,  fiber:1,  sodium:2,   calcium:9,   iron:0.5, magnesium:14,  vitA:0,   vitC:0,  vitD:0,   omega3:0,   tags:['탄수화물'] },
+  '잡곡밥':       { kcal:290, protein:8,  carbs:60, fat:2,  fiber:5,  sodium:3,   calcium:22,  iron:1.5, magnesium:60,  vitA:0,   vitC:0,  vitD:0,   omega3:30,  tags:['탄수화물','식이섬유'] },
+  '현미밥':       { kcal:305, protein:7,  carbs:65, fat:2,  fiber:4,  sodium:2,   calcium:16,  iron:1.2, magnesium:80,  vitA:0,   vitC:0,  vitD:0,   omega3:20,  tags:['탄수화물','식이섬유'] },
+  '전복죽':       { kcal:220, protein:11, carbs:35, fat:3,  fiber:1,  sodium:900, calcium:60,  iron:2.5, magnesium:40,  vitA:80,  vitC:5,  vitD:0,   omega3:100, tags:['소화편안'] },
+  '야채죽':       { kcal:180, protein:5,  carbs:32, fat:2,  fiber:3,  sodium:600, calcium:40,  iron:1.5, magnesium:35,  vitA:200, vitC:12, vitD:0,   omega3:40,  tags:['소화편안'] },
+  // ── 국/찌개/탕 ──
+  '순두부찌개':   { kcal:280, protein:16, carbs:12, fat:18, fiber:3,  sodium:1400,calcium:180, iron:2.5, magnesium:70,  vitA:60,  vitC:8,  vitD:0.5, omega3:100, tags:['단백질','칼슘'] },
+  '김치찌개':     { kcal:350, protein:18, carbs:12, fat:22, fiber:4,  sodium:1800,calcium:60,  iron:2.0, magnesium:50,  vitA:180, vitC:14, vitD:0.3, omega3:120, tags:['유익균','비타민C'] },
+  '된장찌개':     { kcal:200, protein:14, carbs:15, fat:10, fiber:4,  sodium:1300,calcium:120, iron:2.0, magnesium:60,  vitA:80,  vitC:6,  vitD:0.3, omega3:80,  tags:['유익균','단백질'] },
+  '미역국':       { kcal:120, protein:8,  carbs:8,  fat:6,  fiber:3,  sodium:900, calcium:180, iron:3.0, magnesium:70,  vitA:60,  vitC:2,  vitD:0.2, omega3:200, tags:['미네랄','칼슘'] },
+  '삼계탕':       { kcal:850, protein:78, carbs:35, fat:42, fiber:2,  sodium:1200,calcium:80,  iron:4.5, magnesium:80,  vitA:180, vitC:8,  vitD:1.0, omega3:600, tags:['단백질','회복'] },
+  '갈비탕':       { kcal:520, protein:38, carbs:12, fat:32, fiber:1,  sodium:1600,calcium:60,  iron:5.0, magnesium:50,  vitA:40,  vitC:2,  vitD:0.5, omega3:300, tags:['단백질','미네랄'] },
+  '설렁탕':       { kcal:480, protein:36, carbs:15, fat:28, fiber:1,  sodium:1500,calcium:80,  iron:4.5, magnesium:50,  vitA:20,  vitC:1,  vitD:0.4, omega3:200, tags:['단백질'] },
+  '순대국':       { kcal:550, protein:32, carbs:25, fat:32, fiber:2,  sodium:1800,calcium:80,  iron:5.5, magnesium:60,  vitA:40,  vitC:3,  vitD:0.5, omega3:250, tags:['단백질','철분'] },
+  '사골곰탕':     { kcal:420, protein:34, carbs:8,  fat:28, fiber:0,  sodium:1400,calcium:120, iron:3.0, magnesium:35,  vitA:20,  vitC:1,  vitD:0.4, omega3:180, tags:['단백질','칼슘','회복'] },
+  '해장국':       { kcal:380, protein:26, carbs:18, fat:22, fiber:3,  sodium:1600,calcium:100, iron:4.5, magnesium:50,  vitA:80,  vitC:8,  vitD:0.4, omega3:200, tags:['단백질','철분'] },
+  '콩나물국밥':   { kcal:340, protein:14, carbs:52, fat:8,  fiber:3,  sodium:1300,calcium:80,  iron:2.5, magnesium:50,  vitA:20,  vitC:14, vitD:0.2, omega3:100, tags:['수분','비타민C'] },
+  '육개장':       { kcal:420, protein:24, carbs:22, fat:24, fiber:4,  sodium:1700,calcium:80,  iron:4.0, magnesium:55,  vitA:200, vitC:10, vitD:0.3, omega3:220, tags:['단백질','철분'] },
+  '감자탕':       { kcal:620, protein:36, carbs:32, fat:36, fiber:4,  sodium:1900,calcium:100, iron:5.0, magnesium:70,  vitA:80,  vitC:14, vitD:0.6, omega3:280, tags:['단백질','미네랄'] },
+  '뼈해장국':     { kcal:520, protein:32, carbs:24, fat:32, fiber:3,  sodium:1800,calcium:100, iron:4.5, magnesium:60,  vitA:60,  vitC:8,  vitD:0.5, omega3:240, tags:['단백질','회복'] },
+  '부대찌개':     { kcal:680, protein:34, carbs:38, fat:38, fiber:5,  sodium:2100,calcium:120, iron:3.5, magnesium:60,  vitA:200, vitC:16, vitD:0.6, omega3:220, tags:['단백질','포만감'] },
+  '돼지김치찌개': { kcal:480, protein:26, carbs:14, fat:34, fiber:5,  sodium:1800,calcium:80,  iron:3.0, magnesium:55,  vitA:180, vitC:18, vitD:0.5, omega3:180, tags:['단백질','유익균'] },
+  '뚝배기불고기': { kcal:520, protein:32, carbs:22, fat:30, fiber:3,  sodium:1400,calcium:100, iron:4.0, magnesium:55,  vitA:100, vitC:8,  vitD:0.4, omega3:200, tags:['단백질','철분'] },
+  '알탕':         { kcal:340, protein:32, carbs:8,  fat:20, fiber:2,  sodium:1500,calcium:120, iron:3.5, magnesium:60,  vitA:120, vitC:6,  vitD:2.0, omega3:600, tags:['단백질','오메가3'] },
+  '아구찜':       { kcal:380, protein:36, carbs:18, fat:16, fiber:5,  sodium:1600,calcium:100, iron:3.0, magnesium:70,  vitA:180, vitC:20, vitD:1.5, omega3:500, tags:['단백질','저지방'] },
+  '낙지볶음':     { kcal:320, protein:28, carbs:22, fat:12, fiber:4,  sodium:1500,calcium:80,  iron:6.0, magnesium:70,  vitA:180, vitC:20, vitD:0.5, omega3:300, tags:['단백질','철분'] },
+  // ── 면류 ──
+  '콩국수':       { kcal:520, protein:24, carbs:70, fat:14, fiber:6,  sodium:600, calcium:280, iron:3.5, magnesium:120, vitA:20,  vitC:2,  vitD:0.5, omega3:400, tags:['단백질','칼슘','마그네슘'] },
+  '냉면':         { kcal:450, protein:15, carbs:75, fat:8,  fiber:3,  sodium:1400,calcium:40,  iron:2.5, magnesium:50,  vitA:60,  vitC:8,  vitD:0.2, omega3:80,  tags:['수분'] },
+  '칼국수':       { kcal:520, protein:20, carbs:78, fat:12, fiber:3,  sodium:1600,calcium:80,  iron:3.0, magnesium:50,  vitA:80,  vitC:6,  vitD:0.3, omega3:100, tags:['수분','따뜻함'] },
+  '어묵우동':     { kcal:480, protein:18, carbs:70, fat:12, fiber:3,  sodium:1500,calcium:80,  iron:2.5, magnesium:45,  vitA:40,  vitC:4,  vitD:0.2, omega3:150, tags:['수분','따뜻함'] },
+  '들기름막국수': { kcal:460, protein:14, carbs:78, fat:10, fiber:4,  sodium:800, calcium:60,  iron:2.5, magnesium:70,  vitA:20,  vitC:4,  vitD:0.2, omega3:800, tags:['오메가3','저염'] },
+  '비빔국수':     { kcal:480, protein:14, carbs:80, fat:10, fiber:4,  sodium:1200,calcium:60,  iron:2.5, magnesium:55,  vitA:100, vitC:14, vitD:0.2, omega3:120, tags:['탄수화물'] },
+  '잔치국수':     { kcal:420, protein:14, carbs:72, fat:8,  fiber:3,  sodium:1400,calcium:60,  iron:2.0, magnesium:40,  vitA:60,  vitC:4,  vitD:0.2, omega3:100, tags:['수분','간편'] },
+  '짜장면':       { kcal:680, protein:20, carbs:95, fat:22, fiber:5,  sodium:1500,calcium:60,  iron:3.0, magnesium:60,  vitA:80,  vitC:10, vitD:0.3, omega3:120, tags:['탄수화물'] },
+  '짬뽕':         { kcal:640, protein:26, carbs:75, fat:22, fiber:4,  sodium:2400,calcium:120, iron:4.0, magnesium:70,  vitA:120, vitC:14, vitD:0.6, omega3:300, tags:['단백질'] },
+  // ── 비빔밥/덮밥 ──
+  '비빔밥':       { kcal:620, protein:24, carbs:88, fat:18, fiber:8,  sodium:1200,calcium:140, iron:4.5, magnesium:100, vitA:400, vitC:20, vitD:0.4, omega3:200, tags:['균형','식이섬유'] },
+  '나물비빔밥':   { kcal:560, protein:18, carbs:82, fat:14, fiber:10, sodium:1000,calcium:180, iron:5.0, magnesium:120, vitA:600, vitC:25, vitD:0.3, omega3:250, tags:['균형','식이섬유','철분'] },
+  '회덮밥':       { kcal:520, protein:35, carbs:70, fat:10, fiber:5,  sodium:900, calcium:80,  iron:2.5, magnesium:80,  vitA:150, vitC:15, vitD:1.2, omega3:800, tags:['오메가3','단백질'] },
+  '연어초밥':     { kcal:480, protein:28, carbs:65, fat:12, fiber:2,  sodium:1000,calcium:40,  iron:1.5, magnesium:60,  vitA:80,  vitC:2,  vitD:2.5, omega3:1200,tags:['오메가3','단백질','비타민D'] },
+  '오징어덮밥':   { kcal:540, protein:26, carbs:80, fat:12, fiber:3,  sodium:1400,calcium:60,  iron:2.5, magnesium:70,  vitA:100, vitC:12, vitD:0.4, omega3:250, tags:['단백질'] },
+  '제육덮밥':     { kcal:680, protein:30, carbs:82, fat:24, fiber:4,  sodium:1500,calcium:60,  iron:3.0, magnesium:60,  vitA:80,  vitC:12, vitD:0.4, omega3:150, tags:['단백질'] },
+  '김치볶음밥':   { kcal:620, protein:16, carbs:88, fat:20, fiber:4,  sodium:1500,calcium:60,  iron:2.5, magnesium:50,  vitA:180, vitC:16, vitD:0.3, omega3:120, tags:['간편','유익균'] },
+  '카레라이스':   { kcal:640, protein:18, carbs:98, fat:20, fiber:5,  sodium:1200,calcium:60,  iron:3.0, magnesium:60,  vitA:200, vitC:8,  vitD:0.3, omega3:100, tags:['탄수화물','포만감'] },
+  '오므라이스':   { kcal:580, protein:20, carbs:80, fat:20, fiber:3,  sodium:1200,calcium:80,  iron:2.5, magnesium:40,  vitA:200, vitC:6,  vitD:1.0, omega3:120, tags:['균형'] },
+  '돈까스':       { kcal:720, protein:32, carbs:60, fat:38, fiber:3,  sodium:1200,calcium:60,  iron:2.5, magnesium:50,  vitA:60,  vitC:8,  vitD:0.4, omega3:180, tags:['단백질','포만감'] },
+  '치킨마요덮밥': { kcal:680, protein:28, carbs:82, fat:24, fiber:3,  sodium:1400,calcium:80,  iron:2.5, magnesium:40,  vitA:80,  vitC:4,  vitD:0.5, omega3:160, tags:['단백질','간편'] },
+  '초밥세트':     { kcal:520, protein:26, carbs:75, fat:12, fiber:2,  sodium:1000,calcium:60,  iron:2.0, magnesium:55,  vitA:80,  vitC:2,  vitD:1.8, omega3:900, tags:['오메가3','단백질'] },
+  '연어회':       { kcal:220, protein:24, carbs:0,  fat:14, fiber:0,  sodium:80,  calcium:20,  iron:0.8, magnesium:30,  vitA:60,  vitC:0,  vitD:6.0, omega3:1800,tags:['오메가3','비타민D'] },
+  '광어회':       { kcal:180, protein:26, carbs:0,  fat:8,  fiber:0,  sodium:100, calcium:20,  iron:0.5, magnesium:25,  vitA:20,  vitC:0,  vitD:2.5, omega3:400, tags:['단백질','저지방'] },
+  '삼겹살':       { kcal:520, protein:30, carbs:2,  fat:44, fiber:0,  sodium:600, calcium:20,  iron:1.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.6, omega3:180, tags:['단백질','포만감'] },
+  '갈비':         { kcal:480, protein:32, carbs:6,  fat:36, fiber:1,  sodium:900, calcium:20,  iron:3.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.4, omega3:150, tags:['단백질','철분'] },
+  '곱창구이':     { kcal:520, protein:24, carbs:6,  fat:44, fiber:1,  sodium:1200,calcium:60,  iron:6.0, magnesium:30,  vitA:120, vitC:4,  vitD:0.6, omega3:200, tags:['단백질','철분'] },
+  // ── 구이/조림/볶음 반찬 ──
+  '고등어구이':   { kcal:280, protein:26, carbs:1,  fat:20, fiber:0,  sodium:400, calcium:40,  iron:1.5, magnesium:40,  vitA:60,  vitC:0,  vitD:5.0, omega3:2500,tags:['오메가3','비타민D','단백질'] },
+  '연어스테이크': { kcal:320, protein:34, carbs:2,  fat:20, fiber:0,  sodium:200, calcium:20,  iron:0.8, magnesium:35,  vitA:60,  vitC:0,  vitD:8.0, omega3:2200,tags:['오메가3','비타민D','단백질'] },
+  '닭가슴살':     { kcal:180, protein:34, carbs:1,  fat:4,  fiber:0,  sodium:400, calcium:12,  iron:1.0, magnesium:30,  vitA:20,  vitC:1,  vitD:0.2, omega3:80,  tags:['단백질'] },
+  '두부구이':     { kcal:180, protein:16, carbs:4,  fat:12, fiber:2,  sodium:100, calcium:250, iron:2.5, magnesium:60,  vitA:0,   vitC:0,  vitD:0,   omega3:150, tags:['단백질','칼슘'] },
+  '두부김치':     { kcal:280, protein:20, carbs:12, fat:16, fiber:5,  sodium:1200,calcium:300, iron:3.0, magnesium:80,  vitA:120, vitC:18, vitD:0.2, omega3:200, tags:['단백질','칼슘','유익균'] },
+  '제육볶음':     { kcal:420, protein:28, carbs:15, fat:28, fiber:2,  sodium:1200,calcium:40,  iron:2.5, magnesium:40,  vitA:100, vitC:14, vitD:0.4, omega3:120, tags:['단백질'] },
+  '불고기':       { kcal:380, protein:30, carbs:12, fat:22, fiber:1,  sodium:1000,calcium:20,  iron:3.5, magnesium:35,  vitA:20,  vitC:4,  vitD:0.3, omega3:100, tags:['단백질','철분'] },
+  '오징어볶음':   { kcal:280, protein:24, carbs:18, fat:12, fiber:3,  sodium:1200,calcium:80,  iron:2.5, magnesium:60,  vitA:100, vitC:16, vitD:0.4, omega3:250, tags:['단백질'] },
+  '시금치나물':   { kcal:80,  protein:5,  carbs:8,  fat:3,  fiber:4,  sodium:400, calcium:120, iron:3.5, magnesium:80,  vitA:600, vitC:25, vitD:0,   omega3:150, tags:['철분','엽산'] },
+  '콩나물무침':   { kcal:60,  protein:5,  carbs:6,  fat:2,  fiber:2,  sodium:300, calcium:60,  iron:1.5, magnesium:40,  vitA:20,  vitC:15, vitD:0,   omega3:50,  tags:['비타민C'] },
+  '김치':         { kcal:40,  protein:2,  carbs:6,  fat:1,  fiber:3,  sodium:800, calcium:40,  iron:0.6, magnesium:20,  vitA:80,  vitC:14, vitD:0,   omega3:20,  tags:['유익균','비타민C'] },
+  '계란후라이':   { kcal:100, protein:7,  carbs:1,  fat:8,  fiber:0,  sodium:150, calcium:30,  iron:1.0, magnesium:8,   vitA:80,  vitC:0,  vitD:2.0, omega3:80,  tags:['단백질','비타민D'] },
+  // ── 스낵/음료/가벼운 것 ──
+  '바나나':       { kcal:100, protein:1,  carbs:23, fat:0,  fiber:3,  sodium:1,   calcium:6,   iron:0.3, magnesium:32,  vitA:6,   vitC:10, vitD:0,   omega3:30,  tags:['위편안'] },
+  '사과':         { kcal:80,  protein:0,  carbs:22, fat:0,  fiber:4,  sodium:1,   calcium:8,   iron:0.2, magnesium:8,   vitA:5,   vitC:6,  vitD:0,   omega3:20,  tags:['식이섬유'] },
+  '고구마':       { kcal:130, protein:2,  carbs:30, fat:0,  fiber:4,  sodium:60,  calcium:30,  iron:0.6, magnesium:25,  vitA:800, vitC:20, vitD:0,   omega3:15,  tags:['비타민A','식이섬유'] },
+  '요거트':       { kcal:100, protein:6,  carbs:12, fat:2,  fiber:0,  sodium:80,  calcium:180, iron:0.1, magnesium:20,  vitA:20,  vitC:1,  vitD:0.3, omega3:20,  tags:['칼슘','유익균'] },
+  '그릭요거트':   { kcal:120, protein:12, carbs:6,  fat:5,  fiber:0,  sodium:60,  calcium:200, iron:0.1, magnesium:20,  vitA:20,  vitC:1,  vitD:0.5, omega3:30,  tags:['단백질','칼슘'] },
+  '우유':         { kcal:120, protein:8,  carbs:12, fat:5,  fiber:0,  sodium:100, calcium:280, iron:0.1, magnesium:25,  vitA:60,  vitC:2,  vitD:1.2, omega3:50,  tags:['칼슘'] },
+  '견과류믹스':   { kcal:180, protein:6,  carbs:6,  fat:16, fiber:3,  sodium:5,   calcium:40,  iron:1.5, magnesium:80,  vitA:0,   vitC:0,  vitD:0,   omega3:400, tags:['오메가3','마그네슘'] },
+  '아보카도':     { kcal:160, protein:2,  carbs:9,  fat:15, fiber:7,  sodium:7,   calcium:12,  iron:0.6, magnesium:30,  vitA:15,  vitC:10, vitD:0,   omega3:180, tags:['지용성','식이섬유'] },
+  '삶은계란':     { kcal:80,  protein:6,  carbs:1,  fat:5,  fiber:0,  sodium:60,  calcium:25,  iron:0.9, magnesium:6,   vitA:80,  vitC:0,  vitD:1.8, omega3:60,  tags:['단백질','비타민D'] },
+  '샐러드':       { kcal:120, protein:4,  carbs:12, fat:6,  fiber:5,  sodium:300, calcium:60,  iron:1.5, magnesium:40,  vitA:400, vitC:30, vitD:0,   omega3:100, tags:['식이섬유','비타민'] },
+  '샌드위치':     { kcal:380, protein:16, carbs:45, fat:14, fiber:4,  sodium:800, calcium:100, iron:2.0, magnesium:40,  vitA:100, vitC:8,  vitD:0.5, omega3:120, tags:['균형'] },
+  '김밥':         { kcal:450, protein:14, carbs:70, fat:12, fiber:4,  sodium:1000,calcium:100, iron:2.5, magnesium:50,  vitA:200, vitC:8,  vitD:0.3, omega3:150, tags:['균형'] },
+  '햄버거':       { kcal:520, protein:22, carbs:45, fat:26, fiber:3,  sodium:900, calcium:100, iron:3.0, magnesium:35,  vitA:80,  vitC:4,  vitD:0.3, omega3:150, tags:['단백질'] }
+};
+
+// 성인 1일 권장/기준 (한국인 영양섭취기준 · 평균)
+const RDA_ADULT = {
+  kcal:2200, protein:60, carbs:130, fat:60, fiber:25,
+  sodium:2000, calcium:750, iron:12, magnesium:325,
+  vitA:725, vitC:100, vitD:10, omega3:1000
+};
+// 나트륨은 상한 · 다른 것들은 하한(권장 최소)
+
+// 영양소 한글 라벨
+const NUTRIENT_LABEL = {
+  kcal:'칼로리', protein:'단백질', carbs:'탄수화물', fat:'지방', fiber:'식이섬유',
+  sodium:'나트륨', calcium:'칼슘', iron:'철분', magnesium:'마그네슘',
+  vitA:'비타민A', vitC:'비타민C', vitD:'비타민D', omega3:'오메가3'
+};
+
+// 음식 이름 → DB 매칭 (유연한 substring 검색)
+function _matchFoodInDB(name) {
+  if (!name) return null;
+  const n = String(name).replace(/\s+/g,'');
+  // 정확 매칭 먼저
+  if (KOREAN_FOOD_DB[n]) return KOREAN_FOOD_DB[n];
+  // substring
+  for (const key of Object.keys(KOREAN_FOOD_DB)) {
+    if (n.includes(key) || key.includes(n)) return KOREAN_FOOD_DB[key];
+  }
+  return null;
+}
+
+// 여러 음식 리스트 → 영양 총합
+function sumNutrition(foods) {
+  const total = { kcal:0, protein:0, carbs:0, fat:0, fiber:0, sodium:0, calcium:0, iron:0, magnesium:0, vitA:0, vitC:0, vitD:0, omega3:0 };
+  (foods || []).forEach(f => {
+    const item = _matchFoodInDB(f.name || f);
+    if (!item) return;
+    const portion = f.portion || 1; // 1인분 기본
+    Object.keys(total).forEach(k => { total[k] += (item[k] || 0) * portion; });
+  });
+  return total;
+}
+
+// 오늘 총합 · %DV 계산 · 신호등 상태
+function getTodayNutritionBalance() {
+  const today = new Date().toDateString();
+  let todayFoods = [];
+  try {
+    const fh = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    todayFoods = fh.filter(f => new Date(f.date).toDateString() === today)
+      .flatMap(f => (f.items || (f.foodName ? [{name: f.foodName, portion: 1}] : [])));
+  } catch(e){}
+  const total = sumNutrition(todayFoods);
+  const pct = {};
+  const status = {};
+  Object.keys(RDA_ADULT).forEach(k => {
+    const p = RDA_ADULT[k] > 0 ? Math.round((total[k] / RDA_ADULT[k]) * 100) : 0;
+    pct[k] = p;
+    // 신호등: 나트륨은 반대 (초과 나쁨) · 나머지는 70% 미만 부족 · 100~130% 충분 · 130% 초과 과잉
+    if (k === 'sodium') {
+      status[k] = p <= 100 ? 'ok' : p <= 130 ? 'warn' : 'bad';
+    } else {
+      status[k] = p < 50 ? 'bad' : p < 80 ? 'warn' : 'ok';
+    }
+  });
+  // 종합 스코어 (핵심 6개 지표 평균, 100 상한)
+  const keys = ['protein','fiber','calcium','iron','magnesium','vitC'];
+  const scores = keys.map(k => Math.min(100, pct[k]));
+  const score = Math.round(scores.reduce((s,v) => s+v, 0) / keys.length);
+  return { total, pct, status, score, mealCount: todayFoods.length };
+}
+
+// 부족 영양소 TOP N (핵심 지표 우선)
+function getShortageTop(n) {
+  const b = getTodayNutritionBalance();
+  const CORE = ['protein','fiber','calcium','iron','magnesium','vitC','vitD','omega3'];
+  const shortages = CORE
+    .map(k => ({ key: k, label: NUTRIENT_LABEL[k], pct: b.pct[k], status: b.status[k] }))
+    .filter(x => x.status !== 'ok')
+    .sort((a,b) => a.pct - b.pct)
+    .slice(0, n || 3);
+  return shortages;
+}
+
+// ═══ v2.0 · 오늘 뭐 먹지? · 부족 영양소 → 한식 메뉴 추천 ═══
+// 상황별 메뉴 풀 (집밥/배달/외식/편의점)
+const MEAL_POOL_BY_SITUATION = {
+  // 집에서 · 간단히 해먹거나 데워먹는 것
+  home:      ['잡곡밥','현미밥','된장찌개','순두부찌개','김치찌개','돼지김치찌개','미역국','계란후라이','삶은계란','두부구이','두부김치','시금치나물','콩나물무침','카레라이스','오므라이스','김치볶음밥'],
+  // 배달 · 직장인 점심 배달 라인업
+  delivery:  ['제육덮밥','김치볶음밥','치킨마요덮밥','돈까스','카레라이스','짜장면','짬뽕','뚝배기불고기','부대찌개','돼지김치찌개','비빔국수','비빔밥','회덮밥','초밥세트'],
+  // 외식 · 주변 밥집·국밥집·고깃집
+  eatout:    ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','부대찌개','뚝배기불고기','돼지김치찌개','들기름막국수','잔치국수','비빔국수','냉면','칼국수','삼겹살','갈비','돈까스','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트'],
+  // 편의점 · GS·CU 라인
+  convenience:['김밥','샌드위치','삶은계란','바나나','사과','고구마','요거트','그릭요거트','우유','견과류믹스','아보카도']
+};
+
+// 부족 영양소 → 실제 메뉴 매칭 (영양소별 강력 후보)
+const SHORTAGE_TO_FOODS = {
+  protein:   ['순대국','사골곰탕','설렁탕','갈비탕','해장국','감자탕','뚝배기불고기','돈까스','제육덮밥','삼겹살','갈비','회덮밥','초밥세트','알탕','아구찜','부대찌개','두부김치'],
+  fiber:     ['나물비빔밥','비빔밥','잡곡밥','현미밥','시금치나물','콩나물무침','고구마','견과류믹스','아보카도','들기름막국수'],
+  calcium:   ['사골곰탕','뼈해장국','우유','그릭요거트','요거트','두부김치','두부구이','미역국','순두부찌개','콩국수'],
+  iron:      ['순대국','감자탕','육개장','해장국','갈비탕','뚝배기불고기','낙지볶음','곱창구이','시금치나물','나물비빔밥','제육덮밥'],
+  magnesium: ['들기름막국수','견과류믹스','아보카도','콩국수','잡곡밥','현미밥','시금치나물','두부구이','낙지볶음'],
+  vitA:      ['카레라이스','고구마','시금치나물','나물비빔밥','육개장','돼지김치찌개'],
+  vitC:      ['콩나물국밥','부대찌개','제육볶음','오징어볶음','낙지볶음','아구찜','김치','바나나','사과','콩나물무침'],
+  vitD:      ['연어회','초밥세트','알탕','연어스테이크','고등어구이','회덮밥','연어초밥','계란후라이','삶은계란'],
+  omega3:    ['연어회','들기름막국수','연어초밥','초밥세트','고등어구이','연어스테이크','알탕','회덮밥','아구찜','견과류믹스']
+};
+
+// 각 메뉴가 부족 영양소를 얼마나 채우는지 스코어 (kcal/100kcal 정규화)
+function _mealScore(mealName, shortages) {
+  const item = _matchFoodInDB(mealName);
+  if (!item || !item.kcal) return 0;
+  let score = 0;
+  shortages.forEach(s => {
+    const rda = RDA_ADULT[s.key] || 1;
+    const val = item[s.key] || 0;
+    // 이 메뉴가 부족분의 %DV를 얼마나 채우는가
+    score += (val / rda) * 100;
+  });
+  return Math.round(score);
+}
+
+// 오늘 뭐 먹지? · 상황별 TOP3
+function getWhatToEatNow(situation) {
+  const shortages = getShortageTop(3);
+  if (!shortages.length) return { shortagesLabel: '오늘 균형이 좋아요', top3: [] };
+  const pool = MEAL_POOL_BY_SITUATION[situation || 'home'] || MEAL_POOL_BY_SITUATION.home;
+  // 부족 영양소를 채우는 메뉴 우선 스코어링
+  const scored = pool.map(name => {
+    const item = _matchFoodInDB(name);
+    return { name, item, score: _mealScore(name, shortages) };
+  }).filter(m => m.item).sort((a,b) => b.score - a.score);
+  const top3 = scored.slice(0, 3).map((m, i) => {
+    const matches = shortages
+      .filter(s => (m.item[s.key] || 0) > 0 && (m.item[s.key] / RDA_ADULT[s.key]) * 100 >= 10)
+      .map(s => s.label);
+    return {
+      rank: i + 1,
+      name: m.name,
+      reason: matches.length ? `${matches.join(' · ')} 보충` : '균형 잡힌 한 끼',
+      matchCount: matches.length,
+      kcal: m.item.kcal
+    };
+  });
+  return {
+    shortagesLabel: shortages.map(s => s.label).join(' · ') + ' 부족',
+    shortages,
+    top3
+  };
+}
+
+// ═══ v2.0 · 오늘의 미션 · 매일 다른 2가지 · 자동 완료 체크 ═══
+const MISSION_POOL = [
+  { id:'veg',      label:'채소 한 접시 먹기',       match:['시금치나물','콩나물무침','나물비빔밥','비빔밥','콩나물국밥','샐러드'] },
+  { id:'calcium',  label:'칼슘 식품 1회 먹기',      match:['사골곰탕','뼈해장국','우유','요거트','그릭요거트','두부구이','두부김치','순두부찌개','미역국','콩국수'] },
+  { id:'protein',  label:'단백질 1인분 먹기',       match:['순대국','사골곰탕','설렁탕','갈비탕','해장국','감자탕','삼계탕','뚝배기불고기','돈까스','제육덮밥','제육볶음','불고기','삼겹살','갈비','회덮밥','초밥세트','연어회','두부김치'] },
+  { id:'fiber',    label:'식이섬유 1회 채우기',     match:['나물비빔밥','비빔밥','잡곡밥','현미밥','고구마','견과류믹스','들기름막국수'] },
+  { id:'omega3',   label:'오메가3 한 끼 먹기',      match:['연어회','들기름막국수','연어초밥','초밥세트','고등어구이','연어스테이크','알탕','회덮밥','아구찜'] },
+  { id:'water',    label:'물 1L 이상 마시기',       match:[] },
+  { id:'sodium',   label:'저염 한 끼 (담백하게)',   match:['들기름막국수','잡곡밥','현미밥','두부구이','바나나','사과','고구마','삶은계란','요거트','광어회'] }
+];
+
+// 오늘 미션 2개 (날짜 seed로 순환)
+function getTodayMissions() {
+  const dayIdx = Math.floor(Date.now() / (1000*60*60*24));
+  const a = MISSION_POOL[dayIdx % MISSION_POOL.length];
+  const b = MISSION_POOL[(dayIdx + 3) % MISSION_POOL.length];
+  const picks = a.id === b.id ? [a, MISSION_POOL[(dayIdx+5)%MISSION_POOL.length]] : [a, b];
+  // 오늘 촬영한 음식들 가져오기
+  const today = new Date().toDateString();
+  let todayFoods = [];
+  try {
+    const fh = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    todayFoods = fh.filter(f => new Date(f.date).toDateString() === today)
+      .flatMap(f => (f.items || (f.foodName ? [{name: f.foodName}] : [])))
+      .map(x => x.name || x);
+  } catch(e){}
+  // 매칭 확인
+  return picks.map(m => {
+    const done = m.match.length ? m.match.some(mn => todayFoods.some(fn => fn && (fn.includes(mn) || mn.includes(fn)))) : false;
+    return { id: m.id, label: m.label, done };
+  });
+}
+
+// ═══ v2.0 · AI 코치 인사이트 (7일 트렌드) ═══
+function getCoachInsights() {
+  const insights = [];
+  try {
+    const fh = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+    const now = Date.now();
+    const in7d = fh.filter(f => (now - new Date(f.date).getTime()) < 7*24*60*60*1000);
+    const in14d = fh.filter(f => {
+      const d = now - new Date(f.date).getTime();
+      return d < 14*24*60*60*1000 && d >= 7*24*60*60*1000;
+    });
+    // 이번 주 vs 지난 주 칼슘 비교
+    const sum7 = sumNutrition(in7d.flatMap(f => f.items || (f.foodName ? [{name: f.foodName}] : [])));
+    const sum14 = sumNutrition(in14d.flatMap(f => f.items || (f.foodName ? [{name: f.foodName}] : [])));
+    // 이번 주 채소 먹은 날 카운트
+    const vegDays = new Set();
+    in7d.forEach(f => {
+      const foods = f.items || (f.foodName ? [{name: f.foodName}] : []);
+      foods.forEach(x => {
+        const n = x.name || x;
+        if (['시금치','나물','샐러드','비빔밥','채소','브로콜리'].some(k => n && n.includes(k))) {
+          vegDays.add(new Date(f.date).toDateString());
+        }
+      });
+    });
+    if (vegDays.size <= 3 && in7d.length > 3) {
+      insights.push({ type:'warn', text:`최근 7일 동안 채소를 먹은 날이 <b>${vegDays.size}일뿐</b>이에요. 오늘 점심에는 채소 하나 추가해볼까요?` });
+    }
+    // 칼슘 개선?
+    if (sum14.calcium > 0) {
+      const diff = Math.round(((sum7.calcium - sum14.calcium) / sum14.calcium) * 100);
+      if (diff >= 15) insights.push({ type:'good', text:`칼슘 섭취가 지난주보다 <b>${diff}% 좋아졌어요</b>. 이 페이스로 계속!` });
+      else if (diff <= -15) insights.push({ type:'warn', text:`칼슘이 지난주보다 <b>${Math.abs(diff)}% 줄었어요</b>. 우유·두부·미역국 어때요?` });
+    }
+    // 부족 지표 알림
+    const shortages = getShortageTop(1);
+    if (shortages.length) {
+      const s = shortages[0];
+      insights.push({ type:'info', text:`오늘 <b>${s.label}</b>가 부족해요 (권장의 ${s.pct}%). 지금 뭘 먹으면 좋은지 물어봐요.` });
+    }
+  } catch(e){}
+  return insights;
+}
+
+const COACH_SUGGESTED_QUESTIONS = [
+  '왜 칼슘이 부족해?',
+  '편의점 음식 추천해줘',
+  '오늘 저녁 뭐 먹지?',
+  '내 영양제 조합 괜찮아?'
+];
+
 // ═══ v12 홈 렌더링 (Premium Health Report) ═══
 // ═══ v13 · 스마트 크로스체크 엔진 (영양제↔영양제·음식·약) ═══
 // 성분 표기 유연성: 이름 substring 매칭 (예: '비타민C', '아스코르빈산' 둘 다 매칭)
@@ -5689,43 +6011,43 @@ function getTodayDinnerCandidates() {
   if (!plan || !plan.foods.length) return { main: null, alts: [] };
   const compose = (f) => {
     const map = {
-      // 오메가3 계열 (연어·고등어·오메가3 흡수 도움 재료)
-      '연어':        { name: '연어 회덮밥',       reason: '오메가3가 뇌 회복과 집중력에 좋아요',    q: 'salmon rice bowl korean' },
-      '고등어':      { name: '고등어구이 정식',   reason: '오메가3와 단백질로 오후가 든든해요',       q: 'grilled mackerel korean meal' },
-      // 견과류·아보카도 → 잡곡·비빔밥·덮밥으로
-      '견과류':      { name: '잡곡 비빔밥',       reason: '식이섬유와 마그네슘이 몸을 편안하게',   q: 'mixed grain bibimbap' },
-      '아보카도':    { name: '아보카도 참치덮밥', reason: '지용성 비타민이 잘 흡수돼요',            q: 'avocado tuna bowl korean' },
-      // 브로콜리·해독 계열 → 담백한 한식
-      '브로콜리':    { name: '닭가슴살 브로콜리 볶음밥', reason: '간에 부담 적은 담백 조합',        q: 'chicken broccoli fried rice' },
+      // 오메가3 계열 → 회·초밥·구이집·들기름막국수
+      '연어':        { name: '연어회 한접시',       reason: '오메가3·비타민D 한 번에 · 회식 대신 가볍게',  q: 'salmon sashimi korean' },
+      '고등어':      { name: '고등어조림 백반',     reason: '오메가3와 단백질로 오후가 든든해요',           q: 'braised mackerel korean meal' },
+      // 견과류·아보카도 → 든든한 국밥·비빔밥
+      '견과류':      { name: '나물비빔밥',           reason: '식이섬유·마그네슘 · 속이 편해요',              q: 'namul bibimbap korean' },
+      '아보카도':    { name: '들기름막국수',         reason: '오메가3·지용성 비타민 흡수에 좋아요',          q: 'perilla oil buckwheat noodle' },
+      // 브로콜리·해독 계열 → 담백한 국밥
+      '브로콜리':    { name: '콩나물국밥',           reason: '가볍고 담백한 속풀이 한 끼',                  q: 'kongnamul gukbap korean' },
       // 신장·방광 → 저염·담백
-      '크랜베리':    { name: '담백한 미역국 백반', reason: '수분·미네랄 회복 · 신장 부담 적어요',  q: 'korean seaweed soup meal' },
+      '크랜베리':    { name: '들기름막국수',         reason: '저염·오메가3 · 신장 부담 적어요',              q: 'perilla oil buckwheat noodle' },
       // 여름·수분
-      '수박':        { name: '콩국수',             reason: '여름 수분·단백질 보충에 딱',            q: 'korean bean noodle soup' },
+      '수박':        { name: '콩국수',               reason: '여름 수분·단백질 보충에 딱',                   q: 'korean bean noodle soup' },
       // 장 건강 · 유익균
-      '요거트':      { name: '순두부찌개 정식',    reason: '따뜻한 국물이 속을 편안하게',           q: 'sundubu jjigae korean meal' },
+      '요거트':      { name: '돼지김치찌개',         reason: '유익균과 단백질이 한 번에',                    q: 'kimchi stew pork korean' },
       // 위·소화 부담 낮춤
-      '오트밀':      { name: '전복죽',             reason: '위 부담 낮추고 회복에 좋아요',          q: 'korean abalone porridge' },
+      '오트밀':      { name: '콩나물국밥',           reason: '위 부담 낮추고 속풀이에 좋아요',               q: 'kongnamul gukbap korean' },
       // 항산화 · 혈관
-      '베리류':      { name: '베리 그릭 요거트',   reason: '항산화가 혈관을 지켜줘요',              q: 'berry greek yogurt' },
+      '베리류':      { name: '연어회 한접시',        reason: '오메가3 · 혈관 관리에 좋아요',                q: 'salmon sashimi korean' },
       // 위 진정
-      '바나나':      { name: '바나나 우유 라떼',   reason: '위 점막을 진정시켜줘요',                q: 'banana milk korean' },
+      '바나나':      { name: '잔치국수',             reason: '가볍고 위에 부담 없어요',                     q: 'janchi guksu korean noodle' },
       // 신장·콩
-      '검은콩':      { name: '검은콩밥 백반',      reason: '신장 기능과 단백질 보충에 좋아요',      q: 'black bean rice meal' },
+      '검은콩':      { name: '순두부찌개 백반',      reason: '식물성 단백질이 담백하게 든든해요',           q: 'sundubu jjigae korean meal' },
       // 철분·엽산
-      '시금치':      { name: '시금치 된장국 백반', reason: '철분과 엽산을 채워줘요',                q: 'sigumchi doenjang meal' },
+      '시금치':      { name: '육개장',               reason: '얼큰한 국물에 철분·단백질 든든',              q: 'yukgaejang korean spicy beef' },
       // 단백질 담백
-      '두부':        { name: '두부김치',           reason: '식물성 단백질이 담백하게 든든해요',     q: 'dubu kimchi korean' },
-      // 계절·계란·다양
-      '귤':          { name: '삼계탕',             reason: '비타민C와 단백질로 회복 UP',            q: 'samgyetang korean chicken soup' },
-      '딸기':        { name: '연어 초밥 세트',     reason: '오메가3와 항산화 조합',                 q: 'salmon sushi set' },
-      '봄나물':      { name: '나물 비빔밥',        reason: '봄 채소가 몸을 가볍게 해줘요',          q: 'namul bibimbap korean' },
-      '오이':        { name: '냉면',               reason: '더위에 소화 부담 없이 시원하게',        q: 'korean cold noodle' },
-      '복숭아':      { name: '오징어덮밥',         reason: '단백질과 채소를 한 그릇에',             q: 'squid rice bowl korean' },
-      '배':          { name: '갈비탕',             reason: '따뜻한 국물이 기관지를 편하게',         q: 'galbi tang korean beef soup' },
-      '고구마':      { name: '고구마 라떼 & 잡곡밥', reason: '식이섬유가 든든하게 채워줘요',        q: 'sweet potato korean' },
-      '사과':        { name: '제육볶음 백반',      reason: '단백질로 하루 컨디션 지켜요',           q: 'jeyuk bokkeum meal' },
-      '생강':        { name: '어묵 우동',          reason: '따뜻함이 몸을 데워줘요',                q: 'odeng udon korean' },
-      '배추':        { name: '김치찌개 백반',      reason: '유익균이 소화를 도와요',                q: 'kimchi jjigae meal' }
+      '두부':        { name: '두부김치',             reason: '식물성 단백질이 담백하게 든든해요',           q: 'dubu kimchi korean' },
+      // 계절·회복
+      '귤':          { name: '사골곰탕',             reason: '진한 국물이 몸을 데워줘요',                   q: 'sagol gomtang korean beef bone soup' },
+      '딸기':        { name: '초밥세트',             reason: '오메가3·단백질 균형이 좋아요',                q: 'sushi set korean' },
+      '봄나물':      { name: '나물비빔밥',           reason: '봄 채소가 몸을 가볍게 해줘요',                q: 'namul bibimbap korean' },
+      '오이':        { name: '냉면',                 reason: '더위에 소화 부담 없이 시원하게',              q: 'korean cold noodle' },
+      '복숭아':      { name: '낙지볶음',             reason: '단백질·철분·매콤한 활력',                     q: 'stir fried octopus korean' },
+      '배':          { name: '갈비탕',               reason: '따뜻한 국물이 기관지를 편하게',               q: 'galbi tang korean beef soup' },
+      '고구마':      { name: '카레라이스',           reason: '비타민A·식이섬유가 든든해요',                 q: 'korean curry rice' },
+      '사과':        { name: '제육덮밥',             reason: '단백질로 오후 컨디션 지켜요',                 q: 'jeyuk deopbap korean' },
+      '생강':        { name: '해장국',               reason: '따뜻한 국물이 피로를 풀어줘요',               q: 'haejangguk korean hangover soup' },
+      '배추':        { name: '돼지김치찌개',         reason: '유익균과 단백질이 한 번에',                   q: 'kimchi stew pork korean' }
     };
     return map[f.food] || { name: `${f.food} 한상`, reason: f.reason, q: f.food + ' korean' };
   };
@@ -9062,12 +9384,12 @@ function renderPrescription() {
       <div style="display:flex;flex-direction:column;gap:6px">
         <button onclick="enterPetPantryOrCapture()" style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:11px 13px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px">
           <span style="font-size:18px">📷</span>
-          <div style="flex:1"><div style="font-size:12px;font-weight:900;color:#065F46">현재 사료 스캔하기</div><div style="font-size:10px;color:#059669;font-weight:700;margin-top:1px">처방과 맞는지 자동 검증</div></div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:900;color:#065F46">현재 사료 스캔하기</div><div style="font-size:10px;color:#059669;font-weight:700;margin-top:1px">성분·영양 균형 자동 확인</div></div>
           <span style="color:#059669;font-size:14px">›</span>
         </button>
         <button onclick="enterVetChat()" style="background:#EEEDFE;border:1px solid #CECBF6;border-radius:10px;padding:11px 13px;text-align:left;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">👩‍⚕️</span>
-          <div style="flex:1"><div style="font-size:12px;font-weight:900;color:#3C3489">닥터 냐옹에게 물어보기</div><div style="font-size:10px;color:#5B21B6;font-weight:700;margin-top:1px">처방 관련 궁금한 점</div></div>
+          <span style="font-size:18px">🐾</span>
+          <div style="flex:1"><div style="font-size:12px;font-weight:900;color:#3C3489">건강어때 AI 챗에게 물어보기</div><div style="font-size:10px;color:#5B21B6;font-weight:700;margin-top:1px">사료·간식·생활 관리 질문</div></div>
           <span style="color:#5B21B6;font-size:14px">›</span>
         </button>
       </div>
@@ -9080,7 +9402,7 @@ function renderPrescription() {
 }
 
 // ═══════════════════════════════════════════
-// 👩‍⚕️ 닥터 냐옹 · AI 수의영양사 챗봇
+// 🐾 건강어때 AI 챗 · 반려동물 영양 코치
 // ═══════════════════════════════════════════
 const VET_CHAT_STORAGE = 'vetChatHistory_v1';
 function _getVetChatHistory() {
@@ -9146,7 +9468,7 @@ function _renderVetChat() {
       : '하루 마무리 잘 하고 계신가요?';
     history.push({
       role: 'assistant',
-      text: `${greet} 저는 <b>닥터 냐옹</b>이에요 👩‍⚕️<br>${escapeHtml(petName)}의 사료·건강 · 뭐든 편하게 물어보세요.<br><br>참고로 저는 앱에 기록된 ${escapeHtml(petName)}의 <b>프로필 · 사료 · 검사 결과</b>를 다 알고 답변해드려요.`,
+      text: `${greet} 저는 <b>건강어때 AI 챗</b>이에요 🐾<br>${escapeHtml(petName)}의 사료·간식·생활 관리 · 뭐든 편하게 물어보세요.<br><br>참고로 저는 앱에 기록된 ${escapeHtml(petName)}의 <b>프로필 · 사료 · 검사 결과</b>를 다 알고 답변해드려요. (진단·처방이 필요한 증상은 동물병원 상담을 권해드려요.)`,
       time: Date.now()
     });
     _saveVetChatHistory(history);
@@ -15732,22 +16054,38 @@ function showInstagramShareModal() {
 // ════════════════════════════════════════════════════════════════
 
 const FORTUNE_LUCKY_FOODS = [
-  { emoji: '🍚', name: '순두부찌개', reason: '따뜻한 국물이 속을 편안하게' },
-  { emoji: '🥗', name: '잡곡 비빔밥', reason: '식이섬유와 채소 균형이 좋아요' },
-  { emoji: '🍜', name: '콩국수', reason: '식물성 단백질이 든든해요' },
-  { emoji: '🍲', name: '된장국 백반', reason: '발효 유익균이 장에 좋아요' },
-  { emoji: '🐟', name: '고등어구이 정식', reason: '오메가3로 하루 활력 UP' },
-  { emoji: '🍚', name: '연어 회덮밥', reason: '오메가3와 채소 조합이 좋아요' },
-  { emoji: '🍲', name: '삼계탕', reason: '단백질로 회복이 빨라요' },
-  { emoji: '🍚', name: '전복죽', reason: '위 부담 낮추고 든든해요' },
-  { emoji: '🥘', name: '제육볶음 백반', reason: '단백질이 오후 컨디션 지켜줘요' },
-  { emoji: '🍜', name: '칼국수', reason: '따끈한 국물이 위장을 데워줘요' },
-  { emoji: '🍚', name: '시금치 된장국 백반', reason: '철분·엽산을 채워요' },
-  { emoji: '🥗', name: '회덮밥', reason: '가벼운 단백질로 속이 편해요' },
-  { emoji: '🍢', name: '어묵 우동', reason: '따뜻하게 소화 부담 낮춰줘요' },
-  { emoji: '🍲', name: '갈비탕', reason: '단백질·미네랄이 풍성해요' },
-  { emoji: '🥘', name: '두부김치', reason: '식물성 단백질이 담백해요' },
-  { emoji: '🍚', name: '미역국 백반', reason: '수분과 미네랄 회복에 좋아요' }
+  { emoji: '🍲', name: '순대국', reason: '든든한 국물에 단백질·철분까지' },
+  { emoji: '🍲', name: '사골곰탕', reason: '진한 국물이 몸을 데워줘요' },
+  { emoji: '🍲', name: '설렁탕', reason: '담백한 국물로 속이 편안' },
+  { emoji: '🍲', name: '갈비탕', reason: '단백질·미네랄이 든든해요' },
+  { emoji: '🍲', name: '해장국', reason: '피로 쌓인 오늘 딱 좋아요' },
+  { emoji: '🍲', name: '뼈해장국', reason: '칼슘·단백질 회복에 좋아요' },
+  { emoji: '🍲', name: '콩나물국밥', reason: '가벼운 속풀이에 딱' },
+  { emoji: '🍲', name: '육개장', reason: '얼큰한 국물로 컨디션 UP' },
+  { emoji: '🍲', name: '감자탕', reason: '든든하게 하루를 채워줘요' },
+  { emoji: '🍲', name: '순두부찌개', reason: '부드럽고 담백해서 속이 편해요' },
+  { emoji: '🍲', name: '돼지김치찌개', reason: '유익균과 단백질을 한 번에' },
+  { emoji: '🍲', name: '부대찌개', reason: '든든하게 배 채우고 싶을 때' },
+  { emoji: '🥘', name: '뚝배기불고기', reason: '단백질·철분이 풍성해요' },
+  { emoji: '🍜', name: '들기름막국수', reason: '오메가3와 담백함이 만나요' },
+  { emoji: '🍜', name: '잔치국수', reason: '가볍고 속이 편안한 한 끼' },
+  { emoji: '🍜', name: '비빔국수', reason: '새콤달콤 입맛 살리기 좋아요' },
+  { emoji: '🍜', name: '냉면', reason: '시원하게 컨디션 리셋' },
+  { emoji: '🍜', name: '칼국수', reason: '따끈한 국물이 위를 데워줘요' },
+  { emoji: '🍚', name: '김치볶음밥', reason: '유익균과 든든함 한 번에' },
+  { emoji: '🍚', name: '카레라이스', reason: '비타민A가 하루를 밝게' },
+  { emoji: '🍚', name: '오므라이스', reason: '부담 없이 든든한 한 끼' },
+  { emoji: '🍚', name: '제육덮밥', reason: '단백질로 오후 컨디션 UP' },
+  { emoji: '🍚', name: '회덮밥', reason: '가벼운 단백질로 속이 편해요' },
+  { emoji: '🍣', name: '초밥세트', reason: '오메가3·단백질 균형이 좋아요' },
+  { emoji: '🍣', name: '연어회', reason: '오메가3·비타민D를 한 번에' },
+  { emoji: '🍤', name: '아구찜', reason: '고단백 저지방 · 매콤한 활력' },
+  { emoji: '🍤', name: '낙지볶음', reason: '철분과 얼큰함으로 기운 UP' },
+  { emoji: '🍤', name: '알탕', reason: '오메가3·비타민D 챙기기 좋아요' },
+  { emoji: '🥩', name: '삼겹살 한상', reason: '든든한 단백질 · 오늘은 회식 모드' },
+  { emoji: '🥩', name: '갈비 한상', reason: '단백질·철분 · 회복이 필요한 날' },
+  { emoji: '🍖', name: '돈까스', reason: '든든한 한 끼로 오후를 채워요' },
+  { emoji: '🍖', name: '치킨마요덮밥', reason: '단백질 든든하게 · 간편한 한 끼' }
 ];
 const FORTUNE_COLORS = [
   { emoji: '💛', name: '노란색' }, { emoji: '💚', name: '초록색' },
@@ -18699,10 +19037,10 @@ function updateHomeCardsByProfile(active) {
       hide: isPet // 반려동물 모드에선 Pantry에 통합돼서 숨김
     },
     vetchat: {
-      title: '닥터 냐옹',
-      label: 'VET CHAT',
-      emoji: '👩‍⚕️',
-      meta: 'AI 수의영양사 · 24시간',
+      title: '건강어때 AI 챗',
+      label: 'AI CHAT',
+      emoji: '🐾',
+      meta: '반려동물 코치 · 24시간',
       hide: !isPet // 반려동물 모드에서만
     },
     prescription: {
