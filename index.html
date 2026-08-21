@@ -2231,8 +2231,110 @@ window.appIcon = function(name, size){
       </div>
 
 
-      <!-- ═════════ v14 · 새 홈 (음식 촬영 · 규칙 엔진 · 사진 톤) ═════════ -->
-      <div class="v14-home" style="background:var(--gg-bg);margin:0 -18px;padding:14px 18px 20px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:var(--gg-ink)">
+      <!-- ═════════ v2.0 · 새 홈 (영양 코치 톤) ═════════ -->
+      <div class="v20-home" style="background:#F8F9FB;margin:0 -18px;padding:14px 16px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
+
+        <!-- 헤더 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <img src="assets/logo-mark.png" alt="건강어때" style="height:26px;width:auto" draggable="false">
+            <div style="font-size:16px;font-weight:800;color:#0F172A">건강어때</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onclick="openProfileSwitcher()" style="background:transparent;border:none;display:flex;align-items:center;gap:3px;cursor:pointer;font-family:inherit;padding:6px 4px">
+              <span id="v20ProfileName" style="font-size:12.5px;font-weight:700;color:#0F172A">주인님</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <button onclick="openStreakInfo()" style="background:transparent;border:none;padding:6px;cursor:pointer" aria-label="알림">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ① 히어로 · 오늘 밸런스 스코어 -->
+        <div style="background:#1E3A8A;border-radius:20px;padding:18px 18px 14px;color:#fff;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+            <div style="flex:1;min-width:0">
+              <div id="v20HeroHeadline" style="font-size:18px;font-weight:800;line-height:1.3;letter-spacing:-.3px;margin-bottom:8px">오늘 첫 기록을 남겨보세요</div>
+              <div id="v20HeroSub" style="font-size:12px;color:#BFDBFE;line-height:1.5;font-weight:500">한 끼만 찍으면 바로 밸런스를 볼 수 있어요.</div>
+            </div>
+            <div style="width:88px;height:88px;position:relative;flex-shrink:0">
+              <svg viewBox="0 0 100 100" style="width:100%;height:100%;transform:rotate(-90deg)">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="8"/>
+                <circle id="v20HeroRing" cx="50" cy="50" r="42" fill="none" stroke="url(#v20HeroGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 264" style="transition:stroke-dasharray .6s ease"/>
+                <defs><linearGradient id="v20HeroGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#22D3EE"/></linearGradient></defs>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+                <div style="font-size:9px;color:#BFDBFE;font-weight:600;letter-spacing:-.2px">오늘의 영양 밸런스</div>
+                <div style="font-size:24px;font-weight:900;letter-spacing:-1.2px;line-height:1.1"><span id="v20HeroScore">0</span><span style="font-size:11px;margin-left:1px;font-weight:800">점</span></div>
+                <div id="v20HeroDelta" style="font-size:9.5px;color:#4ADE80;font-weight:800">—</div>
+              </div>
+            </div>
+          </div>
+          <div id="v20HeroAvgLine" style="border-top:1px solid rgba(255,255,255,0.15);margin-top:12px;padding-top:9px;font-size:10.5px;color:#93C5FD;font-weight:600">최근 7일 평균: 계산 중</div>
+        </div>
+
+        <!-- ② 지금 챙기면 좋은 영양소 (3 카드) -->
+        <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:8px">지금 챙기면 좋은 영양소</div>
+        <div id="v20ShortageCards" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">
+          <div style="background:#F1F5F9;border-radius:12px;padding:12px 8px;text-align:center;font-size:11px;color:#94A3B8;font-weight:700">데이터 없음</div>
+          <div style="background:#F1F5F9;border-radius:12px;padding:12px 8px;text-align:center;font-size:11px;color:#94A3B8;font-weight:700">데이터 없음</div>
+          <div style="background:#F1F5F9;border-radius:12px;padding:12px 8px;text-align:center;font-size:11px;color:#94A3B8;font-weight:700">데이터 없음</div>
+        </div>
+
+        <!-- ③ 오늘 뭐 먹지? · 상황별 -->
+        <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;color:#64748B;font-weight:700;margin-bottom:4px">오늘 뭐 먹지?</div>
+              <div id="v20MealName" style="font-size:16px;font-weight:900;color:#0F172A;letter-spacing:-.3px;margin-bottom:4px;line-height:1.3">첫 기록을 남겨보세요</div>
+              <div id="v20MealReason" style="font-size:11px;color:#64748B;font-weight:600;line-height:1.4">한 끼만 찍으면 상황별 메뉴를 추천드려요.</div>
+            </div>
+            <div id="v20MealPhoto" style="width:78px;height:68px;border-radius:12px;background:linear-gradient(135deg,#FED7AA,#FBBF24);display:flex;align-items:center;justify-content:center;font-size:34px;flex-shrink:0">🍲</div>
+          </div>
+          <div id="v20SituationSeg" style="display:flex;gap:4px">
+            <button onclick="_v20SelectSituation('home')" data-sit="home" class="v20-sit-btn" style="flex:1;background:#2563EB;color:#fff;border:none;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">집밥</button>
+            <button onclick="_v20SelectSituation('delivery')" data-sit="delivery" class="v20-sit-btn" style="flex:1;background:#F3F4F6;color:#374151;border:none;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">배달</button>
+            <button onclick="_v20SelectSituation('eatout')" data-sit="eatout" class="v20-sit-btn" style="flex:1;background:#F3F4F6;color:#374151;border:none;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">외식</button>
+            <button onclick="_v20SelectSituation('convenience')" data-sit="convenience" class="v20-sit-btn" style="flex:1;background:#F3F4F6;color:#374151;border:none;padding:8px 4px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">편의점</button>
+          </div>
+        </div>
+
+        <!-- ④ 오늘의 영양 미션 + AI 코치 한마디 -->
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-bottom:14px">
+          <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+              <span style="font-size:11.5px;font-weight:800;color:#0F172A">오늘의 영양 미션</span>
+              <span id="v20MissionProgress" style="font-size:10px;color:#64748B;font-weight:800">0 / 2 완료</span>
+            </div>
+            <div id="v20MissionList">
+              <div style="background:#F9FAFB;border-radius:8px;padding:7px 9px;font-size:10.5px;color:#94A3B8;font-weight:700">불러오는 중</div>
+            </div>
+          </div>
+          <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:11px">
+            <div style="font-size:11px;font-weight:800;color:#1E40AF;margin-bottom:6px">AI 코치 한마디</div>
+            <div id="v20CoachMessage" style="font-size:10.5px;color:#1E3A8A;line-height:1.5;font-weight:600">데이터가 쌓이면 개인화된 조언을 드려요.</div>
+          </div>
+        </div>
+
+        <!-- ⑤ 3 chip -->
+        <div style="display:flex;gap:5px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px">
+          <button onclick="_v20OpenChip('why_low')" style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:7px 12px;font-size:11px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">왜 부족해?</button>
+          <button onclick="_v20OpenChip('convenience')" style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:7px 12px;font-size:11px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">편의점에서는?</button>
+          <button onclick="_v20OpenChip('supplement_check')" style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:7px 12px;font-size:11px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">내 영양제 괜찮아?</button>
+        </div>
+
+        <!-- ⑥ CTA · 오늘 먹은 음식 찍기 -->
+        <button onclick="enterFood('human')" style="width:100%;background:#2563EB;color:#fff;border:none;padding:15px;border-radius:14px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(37,99,235,.25)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          + 오늘 먹은 음식 찍기
+        </button>
+
+      </div>
+      <!-- v2.0 홈 끝 · 아래는 레거시 v14 (숨김) -->
+
+      <!-- ═════════ v14 · 레거시 홈 (숨김 · 롤백용) ═════════ -->
+      <div class="v14-home" style="display:none;background:var(--gg-bg);margin:0 -18px;padding:14px 18px 20px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:var(--gg-ink)">
 
         <!-- 헤더 -->
         <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 14px">
@@ -3823,41 +3925,43 @@ window.appIcon = function(name, size){
   </div>
 
   <!-- ════════════ 🎯 큐레이션 화면 v7 (Pretendard · 브랜드 톤) ════════════ -->
-  <div class="screen gg-font" id="screenCuration" style="padding:0">
-    <div style="min-height:100vh;padding:20px 20px 32px;background:#fff">
-      <!-- 상단 헤더 -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <button onclick="showScreen('screenResult')" style="background:transparent;border:none;cursor:pointer;color:var(--gg-ink);padding:6px" aria-label="뒤로">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div class="gg-mark" style="width:22px;height:22px"></div>
-          <div style="font-size:15px;font-weight:600;color:var(--gg-ink)">추천</div>
+  <div class="screen" id="screenCuration" style="padding:0;background:#F8F9FB">
+    <div style="min-height:100vh;padding:16px 16px 100px;background:#F8F9FB;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
+
+      <!-- 상단 타이틀 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="font-size:24px;font-weight:900;color:#0F172A;letter-spacing:-.5px">추천</div>
+        <button onclick="goHome()" style="background:#fff;border:1px solid #E5E7EB;padding:6px 12px;border-radius:99px;font-size:11px;color:#475569;font-weight:700;cursor:pointer;font-family:inherit">홈</button>
+      </div>
+
+      <!-- ① 상단 배너 -->
+      <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800;color:#1E3A8A;margin-bottom:3px">지금 필요한 영양부터</div>
+          <div style="font-size:11px;color:#1E40AF;line-height:1.5;font-weight:600">최근 7일 기록을 바탕으로 부족한 영양소를 분석했어요.</div>
         </div>
-        <button onclick="goHome()" style="background:var(--gg-sub);border:none;padding:6px 12px;border-radius:99px;font-size:11.5px;color:var(--gg-ink);font-weight:600;cursor:pointer">홈</button>
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
       </div>
 
-      <!-- 헤더 배지 -->
-      <div style="display:flex;align-items:center;gap:8px;margin-top:14px">
-        <span class="gg-pill">이번 주 · 진영님을 위한</span>
+      <!-- ② 3 탭 -->
+      <div id="v20RecTabs" style="display:flex;gap:5px;margin-bottom:14px">
+        <button onclick="_v20RecSwitch('nutrient')" data-tab="nutrient" class="v20-rec-tab" style="flex:1;background:#fff;border:1px solid #2563EB;color:#2563EB;padding:8px;border-radius:99px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">영양소 추천</button>
+        <button onclick="_v20RecSwitch('food')" data-tab="food" class="v20-rec-tab" style="flex:1;background:#fff;border:1px solid #E5E7EB;color:#64748B;padding:8px;border-radius:99px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">음식 추천</button>
+        <button onclick="_v20RecSwitch('lifestyle')" data-tab="lifestyle" class="v20-rec-tab" style="flex:1;background:#fff;border:1px solid #E5E7EB;color:#64748B;padding:8px;border-radius:99px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">생활 팁</button>
       </div>
 
-      <!-- 큐레이션 히어로 -->
-      <div style="margin-top:12px;padding:18px 0 20px;border-top:4px solid var(--gg-blue);border-bottom:1px solid var(--gg-line)">
-        <div id="curationHeadline" class="gg-huge" style="margin-bottom:8px">추천보다 먼저,<br><em style="color:var(--gg-blue);font-style:normal">지금 필요한 이유</em>부터.</div>
-        <div class="gg-sm" style="line-height:1.6" id="curationHeadSub">피피키트 검사와 최근 식단·수분 기록을 함께 반영한 이번 주 큐레이션이에요.</div>
-        <div id="curationPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px"></div>
+      <!-- ③ 탭 컨텐츠 컨테이너 -->
+      <div id="v20RecContent"></div>
+
+      <!-- ④ 하단 · 영양제 전에 음식 -->
+      <div onclick="alert('음식이 최고의 영양제예요. 먼저 오늘의 식단을 기록하고, 부족한 영양소부터 채워보세요.')" style="background:#FEF9C3;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer">
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:800;color:#854D0E;margin-bottom:3px">⭐ 영양제를 추천하기 전에 음식을 추천해요</div>
+          <div style="font-size:10.5px;color:#92400E;font-weight:600;line-height:1.5">음식이 최고의 영양제에요. 먼저 음식으로 채워보세요.</div>
+        </div>
+        <span style="color:#A16207;font-size:16px;font-weight:700">›</span>
       </div>
 
-      <!-- 스텝 카드 컨테이너 -->
-      <div id="curationList" style="margin-top:4px"></div>
-
-      <!-- 하단 안내 -->
-      <div style="margin-top:14px;padding:12px 14px;background:var(--gg-sub);border-radius:10px;font-size:11.5px;color:var(--gg-muted);line-height:1.55">
-        본 큐레이션은 임상 가이드 기반 참고 정보이며, 진단 · 처방을 대신하지 않습니다.
-      </div>
-
-      <button onclick="showScreen('screenResult')" class="gg-cta" style="margin-top:16px">검사 결과로 돌아가기</button>
     </div>
   </div>
 
@@ -5518,6 +5622,152 @@ const NUTRIENT_LABEL = {
   vitA:'비타민A', vitC:'비타민C', vitD:'비타민D', omega3:'오메가3'
 };
 
+// ═══ v2.0 · 영양소 지식 DB (팩트 기반 · 3-column) ═══
+// 참고: 한국인 영양섭취기준(KDRIs 2020) · 식품의약품안전처 · 대한영양학회
+// 톤: 진단·처방 없이 · 자연식품 우선 · 정보성
+const NUTRIENT_KNOWLEDGE = {
+  protein: {
+    label:'단백질', code:'Pr', color:'#DC2626', bg:'#FEF2F2', bgLight:'#FEE2E2',
+    why_needed:'근육·장기·호르몬을 만드는 재료. 면역 세포와 효소의 기본 구성 성분이에요.',
+    why_low:'단백질 반찬 없이 밥·면 위주로 먹은 날이 많았어요.',
+    how_to_fix:'달걀, 두부, 닭가슴살, 생선, 콩류를 매 끼 한 가지 이상 챙겨보세요.',
+    supp_hint:'식사만으로 채우기 어려운 헬스인·회복기라면 유청 단백질 보충제를 고려해요.'
+  },
+  fiber: {
+    label:'식이섬유', code:'Fi', color:'#16A34A', bg:'#F0FDF4', bgLight:'#DCFCE7',
+    why_needed:'장 건강, 혈당·콜레스테롤 조절, 포만감 유지에 도움을 줘요.',
+    why_low:'채소·과일·통곡물 섭취가 적어 평균 섭취량이 낮았어요.',
+    how_to_fix:'채소, 과일, 콩류, 귀리 등을 매일 다양하게 드세요.',
+    supp_hint:'식이 조절이 정말 어려울 때만 차전자피(사일리움) 등 식이섬유 보충제 고려.'
+  },
+  calcium: {
+    label:'칼슘', code:'Ca', color:'#2563EB', bg:'#EFF6FF', bgLight:'#DBEAFE',
+    why_needed:'뼈·치아 건강 유지, 근육 수축과 신경 전달에 필요해요.',
+    why_low:'우유·유제품 섭취가 적고 채소 위주 식단이 많았어요.',
+    how_to_fix:'우유, 요거트, 두부, 멸치, 청경채 등으로 식사에서 먼저 채워요.',
+    supp_hint:'폐경 이후·유당불내증 등 식사로 어렵다면 칼슘 보충제(비타민D 동반)를 고려.'
+  },
+  iron: {
+    label:'철분', code:'Fe', color:'#B91C1C', bg:'#FEF2F2', bgLight:'#FEE2E2',
+    why_needed:'적혈구가 산소를 운반하는 데 필수. 부족하면 쉽게 피로해져요.',
+    why_low:'붉은 살코기·간·해산물 섭취가 적었어요.',
+    how_to_fix:'소고기, 시금치, 낙지, 굴, 잡곡을 챙기고 비타민C(과일)와 함께 드세요.',
+    supp_hint:'빈혈 진단이 있거나 여성·임산부는 의사와 상의 후 철분제 고려.'
+  },
+  magnesium: {
+    label:'마그네슘', code:'Mg', color:'#9333EA', bg:'#FAF5FF', bgLight:'#F3E8FF',
+    why_needed:'에너지 생성, 근육·신경 기능, 스트레스 관리에 필요해요.',
+    why_low:'견과류·통곡물·녹색 채소 섭취가 부족한 날이 많았어요.',
+    how_to_fix:'견과류, 통곡물, 바나나, 시금치, 아보카도 등에 풍부해요.',
+    supp_hint:'수면·근육 경련이 잦다면 저녁 마그네슘(글리시네이트) 고려.'
+  },
+  vitA: {
+    label:'비타민A', code:'A', color:'#EA580C', bg:'#FFF7ED', bgLight:'#FFEDD5',
+    why_needed:'시력·피부·점막 건강 유지, 면역력에 필요해요.',
+    why_low:'주황·녹색 채소(당근·시금치·고구마) 섭취가 적었어요.',
+    how_to_fix:'고구마, 당근, 시금치, 카레(강황), 계란노른자 등으로 채워요.',
+    supp_hint:'과잉 시 부작용이 있어 보통 식품만으로 충분합니다.'
+  },
+  vitC: {
+    label:'비타민C', code:'C', color:'#F59E0B', bg:'#FFFBEB', bgLight:'#FEF3C7',
+    why_needed:'항산화, 콜라겐 합성, 철분 흡수 촉진에 필요해요.',
+    why_low:'과일·생채소 섭취가 며칠 이상 적었어요.',
+    how_to_fix:'귤·오렌지·딸기·파프리카·브로콜리·키위 등 하루 한 가지는 챙겨요.',
+    supp_hint:'감기·회복기에 추가 섭취 고려. 하루 2,000mg 이하 유지.'
+  },
+  vitD: {
+    label:'비타민D', code:'D', color:'#0EA5E9', bg:'#F0F9FF', bgLight:'#E0F2FE',
+    why_needed:'칼슘 흡수와 뼈·면역 건강에 필수. 부족 시 피로·우울감과 관련.',
+    why_low:'실내 생활이 많고 등푸른생선 섭취가 적었어요.',
+    how_to_fix:'하루 15~20분 햇볕 + 연어·고등어·계란노른자·강화 우유를 챙겨요.',
+    supp_hint:'혈중 농도가 낮은 한국인이 많아 D3 1000~2000IU 보충제가 흔히 추천돼요.'
+  },
+  omega3: {
+    label:'오메가3', code:'ω', color:'#0891B2', bg:'#ECFEFF', bgLight:'#CFFAFE',
+    why_needed:'뇌·심혈관·염증 조절에 관여. 체내 합성이 안 돼 반드시 음식으로.',
+    why_low:'등푸른 생선·들기름·견과류 섭취가 적었어요.',
+    how_to_fix:'주 2회 이상 연어·고등어·꽁치, 들기름막국수, 견과류 한 줌.',
+    supp_hint:'생선을 거의 안 먹는다면 오메가3(EPA+DHA) 캡슐 고려.'
+  },
+  sodium: {
+    label:'나트륨', code:'Na', color:'#EF4444', bg:'#FEF2F2', bgLight:'#FEE2E2',
+    why_needed:'체액 균형에 필요하지만, 과다 시 혈압·부종·신장 부담을 줘요.',
+    why_low:'국물·찌개·라면·가공식품 섭취가 많으면 오히려 과다합니다.',
+    how_to_fix:'국물 반만 · 라면·인스턴트 줄이기 · 신선한 식재료 위주로.',
+    supp_hint:'부족보다 과다가 문제. 보충제 필요 X.'
+  }
+};
+
+// ═══ v2.0 · 최근 7일 통계 헬퍼 ═══
+function _getFoodHistory() {
+  try { return JSON.parse(localStorage.getItem('foodHistoryV1') || '[]'); } catch(e){ return []; }
+}
+function _foodsFromEntry(f) {
+  return f.items || (f.foodName ? [{name: f.foodName, portion: 1}] : []);
+}
+// 최근 N일간 각 날짜의 밸런스 점수 배열
+function get7DayScores() {
+  const now = new Date();
+  const fh = _getFoodHistory();
+  const scores = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const dayStr = d.toDateString();
+    const dayFoods = fh.filter(e => new Date(e.date).toDateString() === dayStr).flatMap(_foodsFromEntry);
+    if (dayFoods.length === 0) { scores.push(null); continue; }
+    const total = sumNutrition(dayFoods);
+    const keys = ['protein','fiber','calcium','iron','magnesium','vitC'];
+    const pct = keys.map(k => Math.min(100, RDA_ADULT[k] > 0 ? (total[k] / RDA_ADULT[k]) * 100 : 0));
+    scores.push(Math.round(pct.reduce((s,v) => s+v, 0) / keys.length));
+  }
+  return scores;
+}
+// 7일 평균과 오늘 대비 delta
+function get7DayScoreAvg() {
+  const scores = get7DayScores();
+  const valid = scores.filter(s => s !== null);
+  if (valid.length === 0) return { avg: 0, delta: 0, hasData: false };
+  const avg = Math.round(valid.reduce((s,v) => s+v, 0) / valid.length);
+  const today = scores[scores.length - 1] || 0;
+  return { avg, delta: today - avg, hasData: true, today };
+}
+// 각 영양소별 최근 7일 중 부족한 날 카운트
+function getShortageDayCount(nutrientKey) {
+  const now = new Date();
+  const fh = _getFoodHistory();
+  let cnt = 0;
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const dayStr = d.toDateString();
+    const dayFoods = fh.filter(e => new Date(e.date).toDateString() === dayStr).flatMap(_foodsFromEntry);
+    if (dayFoods.length === 0) { cnt++; continue; }
+    const total = sumNutrition(dayFoods);
+    const pct = RDA_ADULT[nutrientKey] > 0 ? (total[nutrientKey] / RDA_ADULT[nutrientKey]) * 100 : 0;
+    if (nutrientKey === 'sodium') { if (pct > 130) cnt++; }
+    else if (pct < 80) cnt++;
+  }
+  return cnt;
+}
+// 히어로 요약 문장 (부족 영양소로 자연스러운 한 문장 생성)
+function getHeroSummary() {
+  const bal = (typeof getTodayNutritionBalance === 'function') ? getTodayNutritionBalance() : null;
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(2) : [];
+  if (!bal || bal.mealCount === 0) {
+    return { headline:'오늘 첫 기록을 남겨보세요', sub:'한 끼만 찍으면 바로 밸런스를 볼 수 있어요.' };
+  }
+  const score = bal.score;
+  let headline;
+  if (score >= 85) headline = '오늘 정말 잘 먹고 있어요';
+  else if (score >= 70) headline = '오늘은 꽤 잘 먹고 있어요';
+  else if (score >= 50) headline = '조금만 더 챙겨볼까요';
+  else headline = '오늘은 밸런스가 아쉬워요';
+  let sub;
+  if (shortages.length === 0) sub = '지금 페이스로 계속 이어가요.';
+  else if (shortages.length === 1) sub = `${shortages[0].label}만 조금 더 챙겨보세요.`;
+  else sub = `${shortages[0].label}과 ${shortages[1].label}만 조금 더 챙겨보세요.`;
+  return { headline, sub, score, shortages };
+}
+
 // 음식 이름 → DB 매칭 (유연한 substring 검색)
 function _matchFoodInDB(name) {
   if (!name) return null;
@@ -6085,7 +6335,301 @@ function loadFoodPhoto(query, imgEl, creditEl) {
 }
 
 // v14 홈 실제 렌더 (renderGgHomeV12 안에서 호출)
+// ═══ v2.0 · 새 홈 렌더 ═══
+let _v20CurrentSituation = 'home';
+
+function renderV20Home() {
+  try {
+    // ① 프로필 이름
+    try {
+      const p = (typeof getPersonalProfile === 'function') ? getPersonalProfile() : null;
+      const nameEl = document.getElementById('v20ProfileName');
+      if (nameEl) {
+        const name = (p && p.name) || localStorage.getItem('userName') || '주인님';
+        nameEl.textContent = name.endsWith('님') ? name : name + '님';
+      }
+    } catch(e){}
+
+    // ② 히어로 스코어·delta
+    const bal = (typeof getTodayNutritionBalance === 'function') ? getTodayNutritionBalance() : { score:0, mealCount:0 };
+    const summary = getHeroSummary();
+    const avg7 = get7DayScoreAvg();
+    const score = bal.score || 0;
+    const scoreEl = document.getElementById('v20HeroScore');
+    if (scoreEl) scoreEl.textContent = score;
+    const headEl = document.getElementById('v20HeroHeadline');
+    if (headEl) headEl.textContent = summary.headline;
+    const subEl = document.getElementById('v20HeroSub');
+    if (subEl) subEl.textContent = summary.sub;
+    // 도넛 링 dasharray (원둘레 264, score 0~100)
+    const ring = document.getElementById('v20HeroRing');
+    if (ring) {
+      const dash = Math.max(0, Math.min(264, (score/100) * 264));
+      ring.setAttribute('stroke-dasharray', `${dash} 264`);
+    }
+    // Delta
+    const deltaEl = document.getElementById('v20HeroDelta');
+    if (deltaEl) {
+      if (avg7.hasData && avg7.delta !== 0) {
+        const sign = avg7.delta > 0 ? '▲' : '▼';
+        const color = avg7.delta > 0 ? '#4ADE80' : '#F87171';
+        deltaEl.style.color = color;
+        deltaEl.textContent = `${sign} ${Math.abs(avg7.delta)}`;
+      } else {
+        deltaEl.textContent = '—';
+        deltaEl.style.color = '#93C5FD';
+      }
+    }
+    const avgLineEl = document.getElementById('v20HeroAvgLine');
+    if (avgLineEl) {
+      if (avg7.hasData) {
+        const sign = avg7.delta > 0 ? '+' : '';
+        const cls = avg7.delta > 0 ? '#4ADE80' : avg7.delta < 0 ? '#F87171' : '#93C5FD';
+        avgLineEl.innerHTML = `최근 7일 평균 <span style="color:#fff;font-weight:800">${avg7.avg}점</span>보다 <span style="color:${cls};font-weight:800">${sign}${avg7.delta}</span>`;
+      } else {
+        avgLineEl.textContent = '기록이 쌓이면 7일 평균이 보여요';
+      }
+    }
+
+    // ③ 지금 챙기면 좋은 영양소 (3 카드)
+    const shortagesArr = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+    const cardsEl = document.getElementById('v20ShortageCards');
+    if (cardsEl) {
+      if (shortagesArr.length === 0) {
+        cardsEl.innerHTML = `<div style="grid-column:1/-1;background:#F0FDF4;border:1px solid #DCFCE7;border-radius:12px;padding:14px;text-align:center;font-size:11.5px;color:#16A34A;font-weight:800">오늘 영양 밸런스가 좋아요 · 이대로 유지해요</div>`;
+      } else {
+        cardsEl.innerHTML = shortagesArr.map(s => {
+          const k = NUTRIENT_KNOWLEDGE[s.key] || { label:s.label, code:'—', color:'#64748B', bg:'#F9FAFB', bgLight:'#F1F5F9' };
+          const dayCnt = getShortageDayCount(s.key);
+          return `<div style="background:${k.bg};border:1px solid ${k.bgLight};border-radius:12px;padding:10px 8px">
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px">
+              <div style="width:18px;height:18px;background:${k.color};border-radius:5px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">${k.code}</div>
+              <span style="font-size:11px;font-weight:800;color:#0F172A">${k.label}</span>
+            </div>
+            <div style="font-size:9.5px;color:#64748B;font-weight:600;line-height:1.3">최근 7일 중</div>
+            <div style="font-size:11.5px;font-weight:800;color:${k.color}">${dayCnt}일 부족</div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // ④ 오늘 뭐 먹지?
+    _v20RenderMealSuggestion();
+
+    // ⑤ 오늘의 영양 미션
+    _v20RenderMissions();
+
+    // ⑥ AI 코치 한마디
+    _v20RenderCoach();
+
+  } catch(e) { console.error('renderV20Home', e); }
+}
+
+function _v20RenderMealSuggestion() {
+  try {
+    const rec = (typeof getWhatToEatNow === 'function') ? getWhatToEatNow(_v20CurrentSituation) : null;
+    const nameEl = document.getElementById('v20MealName');
+    const reasonEl = document.getElementById('v20MealReason');
+    const photoEl = document.getElementById('v20MealPhoto');
+    if (!rec || !rec.top3 || rec.top3.length === 0) {
+      if (nameEl) nameEl.textContent = '첫 기록을 남겨보세요';
+      if (reasonEl) reasonEl.textContent = '한 끼만 찍으면 상황별 메뉴를 추천드려요.';
+      return;
+    }
+    const top = rec.top3[0];
+    if (nameEl) nameEl.textContent = top.name;
+    if (reasonEl) reasonEl.textContent = top.reason;
+    if (photoEl) {
+      // 이모지 매핑 · 국물류/덮밥/구이/면 등
+      const n = top.name;
+      let emoji = '🍲';
+      if (/국|탕|찌개|해장/.test(n)) emoji = '🍲';
+      else if (/덮밥|비빔밥|볶음밥|카레|오므/.test(n)) emoji = '🍚';
+      else if (/면|국수|우동|짜|짬/.test(n)) emoji = '🍜';
+      else if (/회|초밥/.test(n)) emoji = '🍣';
+      else if (/구이|갈비|삼겹/.test(n)) emoji = '🥩';
+      else if (/샌드|김밥|삶은/.test(n)) emoji = '🥪';
+      photoEl.textContent = emoji;
+    }
+  } catch(e){ console.error('_v20RenderMealSuggestion', e); }
+}
+
+function _v20SelectSituation(sit) {
+  _v20CurrentSituation = sit;
+  document.querySelectorAll('.v20-sit-btn').forEach(b => {
+    if (b.dataset.sit === sit) { b.style.background = '#2563EB'; b.style.color = '#fff'; b.style.fontWeight = '800'; }
+    else { b.style.background = '#F3F4F6'; b.style.color = '#374151'; b.style.fontWeight = '700'; }
+  });
+  _v20RenderMealSuggestion();
+}
+
+function _v20RenderMissions() {
+  try {
+    const missions = (typeof getTodayMissions === 'function') ? getTodayMissions() : [];
+    const listEl = document.getElementById('v20MissionList');
+    const progEl = document.getElementById('v20MissionProgress');
+    if (!listEl) return;
+    if (missions.length === 0) {
+      listEl.innerHTML = '<div style="font-size:10.5px;color:#94A3B8;font-weight:700">미션 준비 중</div>';
+      return;
+    }
+    const done = missions.filter(m => m.done).length;
+    if (progEl) progEl.textContent = `${done} / ${missions.length} 완료`;
+    listEl.innerHTML = missions.map(m => {
+      const kn = NUTRIENT_KNOWLEDGE[m.id] || null;
+      const chipColor = kn ? kn.color : '#64748B';
+      const chipBg = kn ? kn.bgLight : '#F1F5F9';
+      const doneBg = m.done ? '#F0FDF4' : '#F9FAFB';
+      const doneBorder = m.done ? '1px solid #DCFCE7' : '1px solid transparent';
+      return `<div style="background:${doneBg};border:${doneBorder};border-radius:8px;padding:7px 9px;margin-bottom:5px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${m.done ? '4px' : '0'}">
+          <div style="display:flex;align-items:center;gap:5px">
+            <div style="width:16px;height:16px;background:${chipColor};border-radius:4px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">${kn ? kn.code : '·'}</div>
+            <span style="font-size:10.5px;font-weight:700;color:#0F172A">${m.label}</span>
+          </div>
+          <span style="font-size:9.5px;color:${m.done ? '#16A34A' : '#64748B'};font-weight:800">${m.done ? '완료' : '0 / 1'}</span>
+        </div>
+        ${m.done ? '<div style="height:3px;background:#DCFCE7;border-radius:2px;overflow:hidden"><div style="height:100%;background:#16A34A;width:100%"></div></div>' : ''}
+      </div>`;
+    }).join('');
+  } catch(e){ console.error('_v20RenderMissions', e); }
+}
+
+function _v20RenderCoach() {
+  try {
+    const el = document.getElementById('v20CoachMessage');
+    if (!el) return;
+    const ins = (typeof getCoachInsights === 'function') ? getCoachInsights() : null;
+    if (!ins || !ins.messages || ins.messages.length === 0) {
+      el.textContent = '데이터가 쌓이면 개인화된 조언을 드려요.';
+      return;
+    }
+    // 가장 관련성 높은 인사이트 하나
+    const top = ins.messages[0];
+    el.innerHTML = `"${top.text || top}"`;
+  } catch(e){}
+}
+
+// ═══ v2.0 · chip 3개 · 모달 오픈 ═══
+async function _v20OpenChip(topic) {
+  const overlay = document.createElement('div');
+  overlay.id = '_v20ChipModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease';
+  const titleMap = { why_low:'왜 부족했을까?', convenience:'편의점에서는?', supplement_check:'내 영양제 괜찮아?' };
+  overlay.innerHTML = `<div style="background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:20px 20px 32px;max-height:80vh;overflow-y:auto;animation:slideUp .28s ease">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${titleMap[topic] || '조언'}</div>
+      <button onclick="document.getElementById('_v20ChipModal').remove()" style="background:transparent;border:none;font-size:20px;color:#94A3B8;cursor:pointer;padding:2px 6px">×</button>
+    </div>
+    <div id="_v20ChipBody" style="min-height:120px;display:flex;align-items:center;justify-content:center">
+      <div style="font-size:12px;color:#64748B;font-weight:700">AI 코치가 답을 준비 중이에요…</div>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  // 데이터 준비
+  const userProfile = (typeof getPersonalProfile === 'function') ? getPersonalProfile() : {};
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  const scores7 = get7DayScores();
+  const fh = _getFoodHistory();
+  const now = new Date();
+  const recent7Days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const dayStr = d.toDateString();
+    const foods = fh.filter(e => new Date(e.date).toDateString() === dayStr).flatMap(_foodsFromEntry).map(f => f.name || String(f));
+    recent7Days.push({ foods });
+  }
+  const supplements = (typeof getSupplementList === 'function') ? getSupplementList().map(s => ({ name: s.productName || s.heroIngredient || s.name, dosage: s.dailyDose || '' })) : [];
+
+  try {
+    const r = await fetch('/api/nutrient-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, userProfile, shortages, recent7Days, supplements })
+    });
+    const data = await r.json();
+    _v20RenderChipAnswer(topic, data);
+  } catch(e) {
+    const body = document.getElementById('_v20ChipBody');
+    if (body) body.innerHTML = `<div style="text-align:center;padding:20px;color:#DC2626;font-size:12px;font-weight:700">답변을 불러오지 못했어요.<br><span style="color:#94A3B8;font-size:11px">${e.message || '네트워크 오류'}</span></div>`;
+  }
+}
+
+function _v20RenderChipAnswer(topic, data) {
+  const body = document.getElementById('_v20ChipBody');
+  if (!body) return;
+  if (data.error) {
+    body.innerHTML = `<div style="color:#DC2626;font-size:12px;font-weight:700">${data.error}</div>`;
+    return;
+  }
+  let html = '';
+  if (data.answer) {
+    html += `<div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:12px;margin-bottom:12px;font-size:12.5px;color:#1E3A8A;line-height:1.6;font-weight:600">${_v20Esc(data.answer)}</div>`;
+  }
+  if (topic === 'why_low' && Array.isArray(data.reasons)) {
+    html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin-bottom:6px">핵심 원인</div>';
+    data.reasons.forEach(r => {
+      html += `<div style="background:#FEF2F2;border-radius:8px;padding:9px 11px;margin-bottom:6px">
+        <div style="font-size:11.5px;font-weight:800;color:#B91C1C;margin-bottom:2px">${_v20Esc(r.point)}</div>
+        <div style="font-size:11px;color:#7F1D1D;font-weight:600;line-height:1.5">${_v20Esc(r.detail)}</div>
+      </div>`;
+    });
+  }
+  if (topic === 'convenience' && Array.isArray(data.combos)) {
+    html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin:10px 0 6px">편의점 조합</div>';
+    data.combos.forEach(c => {
+      const items = (c.items || []).map(it => `<span style="background:#F1F5F9;border-radius:6px;padding:3px 8px;font-size:10.5px;color:#0F172A;font-weight:700">${_v20Esc(it)}</span>`).join(' ');
+      html += `<div style="background:#F0FDF4;border-radius:8px;padding:9px 11px;margin-bottom:6px">
+        <div style="font-size:11.5px;font-weight:800;color:#15803D;margin-bottom:4px">${_v20Esc(c.title)}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${items}</div>
+        <div style="font-size:10.5px;color:#166534;font-weight:600;line-height:1.5">${_v20Esc(c.why || '')}</div>
+      </div>`;
+    });
+  }
+  if (topic === 'supplement_check') {
+    if (Array.isArray(data.reviews) && data.reviews.length > 0) {
+      html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin:10px 0 6px">복용중인 영양제 리뷰</div>';
+      data.reviews.forEach(r => {
+        const badgeColor = { '겹침':'#F59E0B', '보완':'#16A34A', '불필요':'#94A3B8' }[r.status] || '#64748B';
+        html += `<div style="background:#F9FAFB;border-radius:8px;padding:9px 11px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:11.5px;font-weight:800;color:#0F172A">${_v20Esc(r.supplement)}</span>
+            <span style="background:${badgeColor};color:#fff;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:6px">${_v20Esc(r.status)}</span>
+          </div>
+          <div style="font-size:10.5px;color:#64748B;font-weight:600;line-height:1.5">${_v20Esc(r.note)}</div>
+        </div>`;
+      });
+    }
+    if (Array.isArray(data.gaps) && data.gaps.length > 0) {
+      html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin:10px 0 6px">음식으로 먼저 채우기</div>';
+      data.gaps.forEach(g => {
+        html += `<div style="background:#FFFBEB;border-radius:8px;padding:9px 11px;margin-bottom:6px">
+          <div style="font-size:11.5px;font-weight:800;color:#92400E;margin-bottom:2px">${_v20Esc(g.nutrient)}</div>
+          <div style="font-size:10.5px;color:#854D0E;font-weight:600;line-height:1.5">${_v20Esc(g.food_first)}</div>
+        </div>`;
+      });
+    }
+  }
+  if (Array.isArray(data.actions) && data.actions.length > 0) {
+    html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin:12px 0 6px">✓ 다음 행동</div>';
+    data.actions.forEach(a => {
+      html += `<div style="background:#EFF6FF;border-radius:8px;padding:9px 11px;margin-bottom:5px">
+        <div style="font-size:11.5px;font-weight:800;color:#1E40AF;margin-bottom:2px">${_v20Esc(a.title)}</div>
+        <div style="font-size:10.5px;color:#1E3A8A;font-weight:600;line-height:1.5">${_v20Esc(a.how)}</div>
+      </div>`;
+    });
+  }
+  html += '<div style="font-size:10px;color:#94A3B8;text-align:center;margin-top:12px;line-height:1.5">본 안내는 참고용이며 진단·처방이 아니에요.</div>';
+  body.innerHTML = html;
+}
+
+function _v20Esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c]); }
+
 function renderV14Home() {
+  // v2.0 홈이 표시중이면 v2.0 렌더 · 그 다음 레거시 v14도 렌더 (숨김이라 화면엔 안 뜨지만 데이터 준비)
+  try { renderV20Home(); } catch(e){ console.error('v20 home', e); }
   // 1. 프로필 이름
   try {
     const p = (typeof getPersonalProfile === 'function') ? getPersonalProfile() : null;
@@ -8600,7 +9144,214 @@ function openCuration() {
   showScreen('screenCuration');
 }
 
-function renderCuration(rules, subject) {
+// ═══ v2.0 · 추천 화면 렌더 ═══
+let _v20RecCurrentTab = 'nutrient';
+
+function renderV20Curation() {
+  _v20RecCurrentTab = 'nutrient';
+  _v20RecSwitch('nutrient');
+}
+
+function _v20RecSwitch(tab) {
+  _v20RecCurrentTab = tab;
+  document.querySelectorAll('.v20-rec-tab').forEach(b => {
+    if (b.dataset.tab === tab) { b.style.background = '#fff'; b.style.borderColor = '#2563EB'; b.style.color = '#2563EB'; b.style.fontWeight = '800'; }
+    else { b.style.background = '#fff'; b.style.borderColor = '#E5E7EB'; b.style.color = '#64748B'; b.style.fontWeight = '700'; }
+  });
+  if (tab === 'nutrient') _v20RecRenderNutrients();
+  else if (tab === 'food') _v20RecRenderFoods();
+  else if (tab === 'lifestyle') _v20RecRenderLifestyle();
+}
+
+function _v20RecRenderNutrients() {
+  const el = document.getElementById('v20RecContent');
+  if (!el) return;
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  if (shortages.length === 0) {
+    el.innerHTML = `<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:14px;padding:20px;text-align:center">
+      <div style="font-size:14px;font-weight:800;color:#16A34A;margin-bottom:6px">✓ 오늘 영양 밸런스가 좋아요</div>
+      <div style="font-size:11.5px;color:#166534;font-weight:600;line-height:1.5">먼저 오늘의 식사를 기록하면<br>더 정확한 추천을 받을 수 있어요.</div>
+    </div>`;
+    _v20RecAppendMenus(el);
+    return;
+  }
+  const priorityLabels = ['우선순위 1','우선순위 2','우선순위 3'];
+  let html = '';
+  shortages.forEach((s, idx) => {
+    const k = NUTRIENT_KNOWLEDGE[s.key];
+    if (!k) return;
+    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <div style="width:22px;height:22px;background:${k.color};border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800">${k.code}</div>
+        <span style="font-size:13px;font-weight:800;color:#0F172A">${k.label}</span>
+        <span style="font-size:10px;background:${k.bgLight};color:${k.color};padding:2px 8px;border-radius:8px;font-weight:800">${priorityLabels[idx]}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;color:#64748B;font-weight:700;margin-bottom:3px">? 왜 필요한가</div>
+          <div style="font-size:10px;color:#0F172A;line-height:1.5;font-weight:600">${_v20Esc(k.why_needed)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:#B91C1C;font-weight:700;margin-bottom:3px">! 왜 부족한가</div>
+          <div style="font-size:10px;color:#0F172A;line-height:1.5;font-weight:600">${_v20Esc(k.why_low)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:#16A34A;font-weight:700;margin-bottom:3px">✓ 어떻게 보충할까</div>
+          <div style="font-size:10px;color:#0F172A;line-height:1.5;font-weight:600">${_v20Esc(k.how_to_fix)}</div>
+        </div>
+      </div>
+      <div style="background:#F9FAFB;border-radius:8px;padding:7px 10px;font-size:10px;color:#64748B;font-weight:600;display:flex;justify-content:space-between;align-items:center">
+        <span>${_v20Esc(k.supp_hint)}</span>
+        <span style="color:#9CA3AF;flex-shrink:0;margin-left:6px">›</span>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+  _v20RecAppendMenus(el);
+}
+
+function _v20RecAppendMenus(el) {
+  // 오늘 먹기 좋은 메뉴 · SHORTAGE_TO_FOODS 기반
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  let menus = [];
+  if (shortages.length > 0 && typeof SHORTAGE_TO_FOODS !== 'undefined') {
+    const seen = new Set();
+    shortages.forEach(s => {
+      const arr = SHORTAGE_TO_FOODS[s.key] || [];
+      arr.slice(0, 2).forEach(name => {
+        if (seen.has(name)) return;
+        seen.add(name);
+        menus.push({ name, reason: `${s.label} 보충` });
+      });
+    });
+    menus = menus.slice(0, 3);
+  }
+  if (menus.length === 0) menus = [
+    { name:'순두부찌개', reason:'단백질·칼슘 보충' },
+    { name:'나물비빔밥', reason:'식이섬유 풍부' },
+    { name:'들기름막국수', reason:'오메가3 강화' }
+  ];
+  const emojiFor = n => /국|탕|찌개|해장/.test(n) ? '🍲' : /덮밥|비빔밥|볶음밥|카레|오므/.test(n) ? '🍚' : /면|국수|우동|짜|짬/.test(n) ? '🍜' : /회|초밥/.test(n) ? '🍣' : /구이|갈비|삼겹/.test(n) ? '🥩' : '🍚';
+  const gradients = ['linear-gradient(135deg,#FED7AA,#FB923C)','linear-gradient(135deg,#FDE68A,#F59E0B)','linear-gradient(135deg,#BBF7D0,#22C55E)'];
+  const menuHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><span style="font-size:13px;font-weight:800;color:#0F172A">오늘 먹기 좋은 메뉴</span><span style="font-size:11px;color:#64748B;font-weight:700;cursor:pointer">더보기 ›</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">${menus.map((m,i) => `
+    <div>
+      <div style="width:100%;height:70px;border-radius:10px;background:${gradients[i%3]};display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:5px">${emojiFor(m.name)}</div>
+      <div style="font-size:11px;font-weight:800;color:#0F172A;letter-spacing:-.2px">${_v20Esc(m.name)}</div>
+      <div style="font-size:9.5px;color:#64748B;font-weight:600;margin-top:1px">${_v20Esc(m.reason)}</div>
+    </div>
+  `).join('')}</div>`;
+  el.insertAdjacentHTML('beforeend', menuHtml);
+}
+
+function _v20RecRenderFoods() {
+  const el = document.getElementById('v20RecContent');
+  if (!el) return;
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  const situations = [
+    { key:'home', label:'집밥', icon:'🏠' },
+    { key:'delivery', label:'배달', icon:'🛵' },
+    { key:'eatout', label:'외식', icon:'🍽' },
+    { key:'convenience', label:'편의점', icon:'🏪' }
+  ];
+  let html = '<div style="font-size:11.5px;color:#64748B;font-weight:600;line-height:1.5;margin-bottom:12px">부족 영양소 기준으로 상황별 실전 메뉴를 추천해요.</div>';
+  situations.forEach(sit => {
+    const rec = (typeof getWhatToEatNow === 'function') ? getWhatToEatNow(sit.key) : null;
+    if (!rec || !rec.top3 || rec.top3.length === 0) return;
+    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <span style="font-size:18px">${sit.icon}</span>
+        <span style="font-size:13px;font-weight:800;color:#0F172A">${sit.label}</span>
+      </div>
+      ${rec.top3.map(t => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #F1F5F9">
+        <div><div style="font-size:12px;font-weight:800;color:#0F172A">${_v20Esc(t.name)}</div><div style="font-size:10px;color:#64748B;font-weight:600;margin-top:1px">${_v20Esc(t.reason)}</div></div>
+        <span style="font-size:10px;color:#64748B;font-weight:700">${t.kcal || '—'} kcal</span>
+      </div>`).join('')}
+    </div>`;
+  });
+  if (html.split('background:#fff').length < 3) {
+    html = '<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:14px;padding:20px;text-align:center"><div style="font-size:13px;font-weight:800;color:#16A34A;margin-bottom:4px">먼저 식단을 기록해주세요</div><div style="font-size:11px;color:#166534;font-weight:600">기록이 쌓이면 상황별 실전 메뉴를 추천해드려요.</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+function _v20RecRenderLifestyle() {
+  const el = document.getElementById('v20RecContent');
+  if (!el) return;
+  // 부족 영양소에 따른 생활 팁 (정적 매핑)
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  const tipMap = {
+    vitD: [
+      { icon:'☀️', title:'하루 15분 햇볕 쬐기', how:'점심시간 산책 · 손·팔에 직접 햇빛 (자외선 차단제 X)' },
+      { icon:'🐟', title:'주 2회 등푸른 생선', how:'연어·고등어·꽁치 · 회식 대신 회덮밥·초밥세트' }
+    ],
+    magnesium: [
+      { icon:'🌙', title:'저녁에 견과류 한 줌', how:'아몬드 20알 or 호두 5알 · 수면·근육 이완' },
+      { icon:'🥬', title:'점심에 녹색 채소 추가', how:'시금치나물 반찬 or 나물비빔밥' }
+    ],
+    iron: [
+      { icon:'🥩', title:'주 1회 붉은 살코기', how:'소불고기·갈비탕·순대국 · 여성은 특히 주기적으로' },
+      { icon:'🍊', title:'철분 식품 + 비타민C', how:'철분 반찬 옆에 오렌지·귤 하나 · 흡수율 3배' }
+    ],
+    calcium: [
+      { icon:'🥛', title:'하루 우유 or 요거트 1잔', how:'아침 or 잠자기 전 · 두유도 대체 OK' },
+      { icon:'🐟', title:'멸치·뱅어포 자주', how:'뼈째 먹는 생선이 흡수율 좋아요' }
+    ],
+    fiber: [
+      { icon:'🍚', title:'흰밥 대신 잡곡밥', how:'점심 한 끼만 바꿔도 하루 섬유질 확 늘어요' },
+      { icon:'🥗', title:'매 끼 채소 한 접시', how:'나물·김치·샐러드 중 아무거나 하나' }
+    ],
+    protein: [
+      { icon:'🍳', title:'아침에 단백질 한 가지', how:'달걀 2개 or 그릭요거트 or 두부 반 모' },
+      { icon:'🍖', title:'점심에 국밥·덮밥', how:'순대국·갈비탕·제육덮밥으로 든든하게' }
+    ],
+    vitC: [
+      { icon:'🍊', title:'매일 과일 하나', how:'귤·오렌지·딸기·키위 중 아무거나' },
+      { icon:'🥒', title:'생채소 챙기기', how:'파프리카·브로콜리 살짝만 데쳐서' }
+    ],
+    omega3: [
+      { icon:'🐟', title:'주 2회 등푸른 생선', how:'연어·고등어·꽁치 · 회덮밥·구이 정식' },
+      { icon:'🥜', title:'들기름 or 견과류', how:'들기름막국수 · 매일 호두 3~4알' }
+    ]
+  };
+  const genericTips = [
+    { icon:'💧', title:'물 하루 1.5~2L', how:'식사 사이에 컵 · 국물만으론 부족' },
+    { icon:'🚶', title:'하루 30분 걷기', how:'점심 후 10분 산책만 해도 소화·혈당 개선' },
+    { icon:'😴', title:'11시 이전 잠자기', how:'수면이 곧 회복 · 다음 날 컨디션 결정' }
+  ];
+  let html = '<div style="font-size:11.5px;color:#64748B;font-weight:600;line-height:1.5;margin-bottom:12px">부족 영양소를 채우는 데 도움되는 일상 습관이에요.</div>';
+  const shownKeys = new Set();
+  shortages.forEach(s => {
+    if (!tipMap[s.key]) return;
+    shownKeys.add(s.key);
+    const k = NUTRIENT_KNOWLEDGE[s.key];
+    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <div style="width:20px;height:20px;background:${k.color};border-radius:5px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">${k.code}</div>
+        <span style="font-size:12.5px;font-weight:800;color:#0F172A">${k.label} 챙기는 습관</span>
+      </div>
+      ${tipMap[s.key].map(t => `<div style="display:flex;gap:9px;padding:7px 0;border-top:1px solid #F1F5F9">
+        <div style="font-size:18px;flex-shrink:0">${t.icon}</div>
+        <div style="flex:1"><div style="font-size:11.5px;font-weight:800;color:#0F172A">${_v20Esc(t.title)}</div><div style="font-size:10px;color:#64748B;font-weight:600;line-height:1.5;margin-top:1px">${_v20Esc(t.how)}</div></div>
+      </div>`).join('')}
+    </div>`;
+  });
+  // 일반 생활 팁
+  html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px">
+    <div style="font-size:12.5px;font-weight:800;color:#0F172A;margin-bottom:8px">기본기 · 매일 챙기면 좋은 것</div>
+    ${genericTips.map(t => `<div style="display:flex;gap:9px;padding:7px 0;border-top:1px solid #F1F5F9">
+      <div style="font-size:18px;flex-shrink:0">${t.icon}</div>
+      <div style="flex:1"><div style="font-size:11.5px;font-weight:800;color:#0F172A">${_v20Esc(t.title)}</div><div style="font-size:10px;color:#64748B;font-weight:600;line-height:1.5;margin-top:1px">${_v20Esc(t.how)}</div></div>
+    </div>`).join('')}
+  </div>`;
+  el.innerHTML = html;
+}
+
+// 통합 renderCuration · openCuration 호출도 v2.0으로 리다이렉트
+function renderCuration(_rules, _subject) { renderV20Curation(); }
+
+// 레거시 (사용 안 함 · 참고용)
+function renderCuration_legacy(rules, subject) {
   const primary = rules[0];
   // 헤드라인
   const hl = document.getElementById('curationHeadline');
@@ -20579,18 +21330,10 @@ function ggGoTab(tab) {
   if (tab === 'today') showScreen('screenHome');
   else if (tab === 'analyze') showScreen('screenAnalyzeHub');
   else if (tab === 'curation') {
-    // v12: 최근 결과 있으면 추천 열기, 없으면 분석 picker 로 유도
-    try {
-      const uh = JSON.parse(localStorage.getItem('urineHistoryV2') || '[]');
-      if (uh.length && uh[0].fullResult) {
-        currentResult = uh[0].fullResult;
-        subjectMode = uh[0].subject || 'human';
-        openCuration();
-      } else {
-        showScreen('screenAnalyzeHub');
-        showPointToast && showPointToast('먼저 검사를 완료하면 맞춤 추천을 볼 수 있어요');
-      }
-    } catch(e) { showScreen('screenAnalyzeHub'); }
+    // v2.0: 항상 추천 화면 열기 · 식단 기반 부족 영양소 코칭
+    try { renderV20Curation(); } catch(e){ console.error('renderV20Curation', e); }
+    showScreen('screenCuration');
+    try { window.scrollTo(0, 0); } catch(e){}
   }
   else if (tab === 'my') {
     const contentEl = document.getElementById('myScreenContent');
