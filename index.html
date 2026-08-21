@@ -5782,14 +5782,42 @@ function getHeroSummary() {
 }
 
 // 음식 이름 → DB 매칭 (유연한 substring 검색)
+// 흔한 표기 → DB 정식 명 매핑 (AI가 다양하게 표현해도 매칭되도록)
+const FOOD_ALIAS = {
+  '달걀':'삶은계란','계란':'삶은계란','삶은달걀':'삶은계란','완숙':'삶은계란','반숙':'삶은계란',
+  '곡물밥':'잡곡밥','현미':'현미밥','쌀':'쌀밥','흰밥':'쌀밥','공깃밥':'쌀밥',
+  '돼지고기볶음':'제육볶음','제육':'제육볶음','두루치기':'제육볶음','돼지고기구이':'삼겹살','목살구이':'삼겹살','오겹살':'삼겹살',
+  '소고기구이':'갈비','한우구이':'갈비','등심':'갈비','안심':'갈비','불백':'불고기','뚝불':'뚝배기불고기',
+  '닭고기':'닭가슴살','닭구이':'닭가슴살','치킨':'닭가슴살',
+  '연어':'연어회','참치':'회덮밥','장어구이':'고등어구이','생선구이':'고등어구이','생선':'고등어구이',
+  '오징어':'오징어볶음','낙지':'낙지볶음',
+  '샐러드채소':'샐러드','모듬샐러드':'샐러드','채소샐러드':'샐러드','야채':'샐러드','채소':'샐러드',
+  '시금치':'시금치나물','시금치무침':'시금치나물','콩나물':'콩나물무침',
+  '두부':'두부구이','두부부침':'두부구이',
+  '요구르트':'요거트','플레인요거트':'요거트',
+  '고구마구이':'고구마','군고구마':'고구마','찐고구마':'고구마',
+  '토마토':'샐러드','방울토마토':'샐러드','오이':'샐러드','양배추':'샐러드','적양배추':'샐러드','상추':'샐러드','로메인':'샐러드','파프리카':'샐러드','피망':'샐러드','할라피뇨':'샐러드','옥수수':'샐러드','당근':'샐러드','브로콜리':'샐러드',
+  '김치찌개백반':'김치찌개','된장찌개백반':'된장찌개','순두부백반':'순두부찌개',
+  '떡볶이':'짜장면','라면':'짬뽕','우동':'어묵우동','수제비':'칼국수'
+};
+
 function _matchFoodInDB(name) {
   if (!name) return null;
-  const n = String(name).replace(/\s+/g,'');
+  const nRaw = String(name).replace(/\s+/g,'');
   // 정확 매칭 먼저
-  if (KOREAN_FOOD_DB[n]) return KOREAN_FOOD_DB[n];
-  // substring
+  if (KOREAN_FOOD_DB[nRaw]) return KOREAN_FOOD_DB[nRaw];
+  // 별칭
+  if (FOOD_ALIAS[nRaw] && KOREAN_FOOD_DB[FOOD_ALIAS[nRaw]]) return KOREAN_FOOD_DB[FOOD_ALIAS[nRaw]];
+  // substring 양방향
   for (const key of Object.keys(KOREAN_FOOD_DB)) {
-    if (n.includes(key) || key.includes(n)) return KOREAN_FOOD_DB[key];
+    if (nRaw.includes(key) || key.includes(nRaw)) return KOREAN_FOOD_DB[key];
+  }
+  // 별칭 substring
+  for (const alias of Object.keys(FOOD_ALIAS)) {
+    if (nRaw.includes(alias) || alias.includes(nRaw)) {
+      const target = FOOD_ALIAS[alias];
+      if (KOREAN_FOOD_DB[target]) return KOREAN_FOOD_DB[target];
+    }
   }
   return null;
 }
@@ -11937,6 +11965,27 @@ async function confirmAndAnalyze() {
         }));
       }
       if (typeof sumNutrition === 'function' && typeof KOREAN_FOOD_DB !== 'undefined' && typeof RDA_ADULT !== 'undefined') {
+        // ① 개별 음식마다 kcal·영양소 채우기 (인식된 음식 카드에 표시됨)
+        result.foods.forEach(f => {
+          const dbItem = _matchFoodInDB(f.name);
+          const portion = f.portion || 1;
+          if (dbItem) {
+            f.kcal = Math.round((dbItem.kcal || 0) * portion);
+            f.calories = f.kcal;
+            f.protein = Math.round((dbItem.protein || 0) * portion);
+            f.carbs = Math.round((dbItem.carbs || 0) * portion);
+            f.fat = Math.round((dbItem.fat || 0) * portion);
+            f.fiber = Math.round((dbItem.fiber || 0) * portion);
+            f.sodium = Math.round((dbItem.sodium || 0) * portion);
+            f._matched = true;
+          } else {
+            // DB 미매칭 · 최소 기본값 (사용자에게 0으로 보이지 않게)
+            f.kcal = f.kcal || 150;
+            f.calories = f.kcal;
+            f._matched = false;
+          }
+        });
+        // ② 합계 계산
         const items = result.foods.map(f => ({name: f.name, portion: f.portion || 1}));
         const totals = sumNutrition(items);
         // 항상 로컬 계산으로 덮어쓰기 (AI 숫자 무시 · 정확성 우선)
