@@ -6443,26 +6443,40 @@ function renderV20Home() {
     const scoreEl = document.getElementById('v20HeroScore');
     if (scoreEl) scoreEl.textContent = score;
 
-    // 헤드라인 · 부족 영양소를 파란 하이라이트로
+    // 헤드라인 · 실전 메뉴 먼저 · 이유(부족 영양소)는 서브에서
     const headEl = document.getElementById('v20HeroHeadline');
+    const subEl = document.getElementById('v20HeroSub');
+    const hour = new Date().getHours();
+    const mealSlot = hour < 10 ? '아침' : hour < 14 ? '점심' : hour < 18 ? '오후 간식' : '저녁';
+    let topMenus = [];
+    if (typeof getWhatToEatNow === 'function' && shortagesArr.length > 0) {
+      try {
+        const rec = getWhatToEatNow('eatout');
+        topMenus = (rec && rec.top3) ? rec.top3.slice(0, 2).map(m => m.name) : [];
+      } catch(e){}
+    }
     if (headEl) {
-      if (shortagesArr.length >= 2) {
-        headEl.innerHTML = `오늘은 <span style="color:#2563EB">${shortagesArr[0].label}</span>와<br><span style="color:#2563EB">${shortagesArr[1].label}</span>을 챙겨보세요`;
-      } else if (shortagesArr.length === 1) {
-        headEl.innerHTML = `오늘은 <span style="color:#2563EB">${shortagesArr[0].label}</span>을 조금 더 챙겨보세요`;
-      } else if (bal.mealCount === 0) {
+      if (bal.mealCount === 0) {
         headEl.textContent = '오늘 첫 기록을 남겨보세요';
+      } else if (topMenus.length >= 2) {
+        headEl.innerHTML = `${mealSlot}엔 <span style="color:#2563EB">${topMenus[0]}</span><br>또는 <span style="color:#2563EB">${topMenus[1]}</span> 어때요?`;
+      } else if (topMenus.length === 1) {
+        headEl.innerHTML = `${mealSlot}엔 <span style="color:#2563EB">${topMenus[0]}</span><br>한 그릇 어때요?`;
       } else {
         headEl.textContent = summary.headline || '오늘 밸런스가 좋아요';
       }
     }
-    const subEl = document.getElementById('v20HeroSub');
     if (subEl) {
-      if (shortagesArr.length > 0) {
-        const labels = shortagesArr.map(s => s.label).join('와 ');
-        subEl.textContent = `최근 7일, ${labels} 식품이 부족한 날이 많았어요.`;
+      if (bal.mealCount === 0) {
+        subEl.textContent = '한 끼만 찍으면 바로 밸런스를 볼 수 있어요.';
+      } else if (shortagesArr.length > 0 && topMenus.length > 0) {
+        const labels = shortagesArr.map(s => s.label).join('과 ');
+        subEl.textContent = `최근 7일 ${labels}이 부족했거든요.`;
+      } else if (shortagesArr.length > 0) {
+        const labels = shortagesArr.map(s => s.label).join('과 ');
+        subEl.textContent = `${labels}을 챙겨보세요.`;
       } else {
-        subEl.textContent = summary.sub || '한 끼만 찍으면 바로 밸런스를 볼 수 있어요.';
+        subEl.textContent = summary.sub || '지금 페이스로 이어가요.';
       }
     }
     // Delta
@@ -6695,6 +6709,31 @@ function _v20RenderBodySignal(shortages) {
 
 // ═══ 하단 3카드 · 실제 데이터로 채움 ═══
 function _v20RenderBottomCards() {
+  // 수면 · Apple Health / Health Connect (Flutter 브릿지) 연동 준비
+  const sleepEl = document.getElementById('v20SleepValue');
+  if (sleepEl) {
+    try {
+      const s = localStorage.getItem('sleepDataV1');
+      if (s) {
+        const parsed = JSON.parse(s);
+        if (parsed && parsed.avgMinutes) {
+          const h = Math.floor(parsed.avgMinutes / 60);
+          const m = parsed.avgMinutes % 60;
+          sleepEl.textContent = `${h}시간 ${m}분`;
+        } else {
+          sleepEl.innerHTML = '<span style="color:#94A3B8;font-size:11px;font-weight:700">연결하기</span>';
+        }
+      } else {
+        // Flutter 브릿지 요청 (있으면 자동 fetch)
+        try {
+          if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+            window.flutter_inappwebview.callHandler('requestSleepData').catch(() => {});
+          }
+        } catch(e){}
+        sleepEl.innerHTML = '<span style="color:#94A3B8;font-size:11px;font-weight:700">연결하기</span>';
+      }
+    } catch(e){}
+  }
   // 소변검사 · 최근 결과
   const urineEl = document.getElementById('v20UrineValue');
   if (urineEl) {
@@ -6722,6 +6761,18 @@ function _v20RenderBottomCards() {
     } catch(e){}
   }
 }
+
+// Flutter Wrapper → 웹으로 수면 데이터 주입할 때 호출 (Flutter 쪽 구현 필요)
+window.receiveSleepData = function(payload) {
+  try {
+    // payload: { avgMinutes: 372, lastNight: 420, days: [...] }
+    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    if (data && data.avgMinutes) {
+      localStorage.setItem('sleepDataV1', JSON.stringify(data));
+      _v20RenderBottomCards();
+    }
+  } catch(e) { console.warn('[receiveSleepData]', e); }
+};
 
 // 음식명 → Unsplash 쿼리 매핑 (한식 검색어 최적화)
 const _v20FoodQueryMap = {
