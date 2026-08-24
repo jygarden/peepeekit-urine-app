@@ -114,7 +114,8 @@ async function build() {
             // v2.0 · 식단 스토리 카드 + Unsplash 통합
             'renderV20FoodStoryDOM', 'FOOD_ALIAS', '_v20FoodQueryMap', '_v20FetchFoodPhoto',
             // v2.0 v3 · 홈 재작성
-            '_v20RenderRecentMeal', 'BODY_SIGNAL_MAP', '_v20RenderBodySignal', '_v20RenderBottomCards', '_v20MakeThumb'
+            '_v20RenderRecentMeal', 'BODY_SIGNAL_MAP', '_v20RenderBodySignal', '_v20RenderBottomCards', '_v20MakeThumb',
+            'receiveSleepData', 'requestSleepData', '_v20RenderHeroFace'
           ]
         },
         format: {
