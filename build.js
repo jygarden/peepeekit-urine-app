@@ -1,4 +1,4 @@
-// 🔒 Vercel 빌드 스크립트
+\// 🔒 Vercel 빌드 스크립트
 // index.html 안의 <script> 태그를 Terser로 minify + 난독화
 // 결과물은 dist/index.html에 배포
 
