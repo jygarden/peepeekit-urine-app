@@ -2249,21 +2249,8 @@ window.appIcon = function(name, size){
 
         <!-- ① 히어로 · TODAY'S AI 코칭 (백지 흰 카드 · 파란 하이라이트 문장) -->
         <div style="background:#fff;border-radius:22px;padding:22px 22px 20px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);position:relative;overflow:hidden;margin-bottom:14px">
-          <!-- 우측 스마일 얼굴 -->
-          <svg width="120" height="120" viewBox="0 0 120 120" style="position:absolute;top:14px;right:6px;pointer-events:none" aria-hidden="true">
-            <defs>
-              <linearGradient id="v20SmileGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#DBEAFE"/>
-                <stop offset="1" stop-color="#93C5FD"/>
-              </linearGradient>
-            </defs>
-            <circle cx="60" cy="60" r="52" fill="url(#v20SmileGrad)" opacity=".35"/>
-            <circle cx="60" cy="60" r="42" fill="#fff"/>
-            <circle cx="60" cy="60" r="41" fill="none" stroke="#3B82F6" stroke-width="2.5"/>
-            <circle cx="46" cy="52" r="4" fill="#0F172A"/>
-            <circle cx="74" cy="52" r="4" fill="#0F172A"/>
-            <path d="M42 68 Q60 84 78 68" stroke="#0F172A" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-          </svg>
+          <!-- 우측 스마일 · 점수에 따라 표정·색상 동적 -->
+          <div id="v20HeroFace" style="position:absolute;top:14px;right:6px;pointer-events:none;width:120px;height:120px"></div>
           <div style="position:relative;z-index:1">
             <div style="display:inline-flex;align-items:center;gap:5px;margin-bottom:14px">
               <span style="font-size:10.5px;font-weight:800;color:#2563EB;letter-spacing:.6px">TODAY'S AI 코칭</span>
@@ -6442,6 +6429,8 @@ function renderV20Home() {
 
     const scoreEl = document.getElementById('v20HeroScore');
     if (scoreEl) scoreEl.textContent = score;
+    // 점수 기반 스마일 얼굴 · 5단계 (0~30 / 30~55 / 55~75 / 75~90 / 90+)
+    try { _v20RenderHeroFace(score, bal.mealCount === 0); } catch(e){}
 
     // 헤드라인 · 실전 메뉴 먼저 · 이유(부족 영양소)는 서브에서
     const headEl = document.getElementById('v20HeroHeadline');
@@ -6506,6 +6495,53 @@ function renderV20Home() {
     _v20RenderBottomCards();
 
   } catch(e) { console.error('renderV20Home', e); }
+}
+
+// ═══ 히어로 스마일 얼굴 · 점수 기반 5단계 표정·색상 ═══
+function _v20RenderHeroFace(score, isEmpty) {
+  const el = document.getElementById('v20HeroFace');
+  if (!el) return;
+  let tier;
+  if (isEmpty) {
+    tier = { grad1:'#F1F5F9', grad2:'#CBD5E1', ring:'#94A3B8', eye:'#64748B', mouthType:'flat', label:'대기 중' };
+  } else if (score >= 90) {
+    tier = { grad1:'#DCFCE7', grad2:'#4ADE80', ring:'#16A34A', eye:'#0F172A', mouthType:'bigSmile', label:'매우 좋음' };
+  } else if (score >= 75) {
+    tier = { grad1:'#DBEAFE', grad2:'#3B82F6', ring:'#2563EB', eye:'#0F172A', mouthType:'smile', label:'좋음' };
+  } else if (score >= 55) {
+    tier = { grad1:'#FEF3C7', grad2:'#FBBF24', ring:'#F59E0B', eye:'#0F172A', mouthType:'okay', label:'무난' };
+  } else if (score >= 30) {
+    tier = { grad1:'#FED7AA', grad2:'#FB923C', ring:'#EA580C', eye:'#0F172A', mouthType:'flat', label:'주의' };
+  } else {
+    tier = { grad1:'#FECACA', grad2:'#F87171', ring:'#DC2626', eye:'#7F1D1D', mouthType:'sad', label:'낮음' };
+  }
+  const mouth = {
+    bigSmile: '<path d="M38 66 Q60 90 82 66" stroke="' + tier.eye + '" stroke-width="3.8" fill="none" stroke-linecap="round"/><path d="M42 68 Q60 82 78 68" fill="' + tier.eye + '" opacity=".25"/>',
+    smile:    '<path d="M42 68 Q60 84 78 68" stroke="' + tier.eye + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>',
+    okay:     '<path d="M44 72 Q60 78 76 72" stroke="' + tier.eye + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>',
+    flat:     '<line x1="45" y1="72" x2="75" y2="72" stroke="' + tier.eye + '" stroke-width="3.2" stroke-linecap="round"/>',
+    sad:      '<path d="M42 76 Q60 62 78 76" stroke="' + tier.eye + '" stroke-width="3.2" fill="none" stroke-linecap="round"/>'
+  }[tier.mouthType];
+  // 눈 스타일 (sad일 때만 살짝 처짐)
+  const eyes = tier.mouthType === 'sad'
+    ? '<path d="M42 50 Q46 48 50 50" stroke="' + tier.eye + '" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M70 50 Q74 48 78 50" stroke="' + tier.eye + '" stroke-width="3" fill="none" stroke-linecap="round"/>'
+    : '<circle cx="46" cy="52" r="4" fill="' + tier.eye + '"/><circle cx="74" cy="52" r="4" fill="' + tier.eye + '"/>';
+  const gradId = 'v20FaceGrad_' + Math.random().toString(36).slice(2, 7);
+  el.innerHTML = `
+    <svg width="120" height="120" viewBox="0 0 120 120" style="width:100%;height:100%" aria-label="영양 밸런스 ${tier.label}">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="${tier.grad1}"/>
+          <stop offset="1" stop-color="${tier.grad2}"/>
+        </linearGradient>
+      </defs>
+      <circle cx="60" cy="60" r="52" fill="url(#${gradId})" opacity=".4"/>
+      <circle cx="60" cy="60" r="42" fill="#fff"/>
+      <circle cx="60" cy="60" r="41" fill="none" stroke="${tier.ring}" stroke-width="2.5"/>
+      ${eyes}
+      ${mouth}
+    </svg>
+  `;
 }
 
 // ═══ 사용자 촬영 사진 저용량 썸네일 생성 (200x200 · webp) ═══
