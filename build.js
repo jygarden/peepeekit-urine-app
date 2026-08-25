@@ -123,7 +123,7 @@ async function build() {
             'SLEEP_QUESTIONS', 'SLEEP_VAL', 'calculateSleepPattern', 'getSleepLifestyleContext', 'buildSleepCoaching',
             'saveSleepCheck', 'getSleepCheckHistory', 'getLastSleepCheck', 'daysSinceLastSleepCheck',
             'enterSleepCheck', 'renderSleepIntro', '_sleepStartQuestions', '_sleepRenderQuestion',
-            '_v20EstimateNutrition',
+            '_v20EstimateNutrition', '_sleepMakeHeadline', '_sleepMakeWhyText', '_sleepPatternStatus', '_sleepInvertedStatus',
             '_sleepAnswer', '_sleepPrev', '_sleepShowLoading', 'renderSleepResult', '_sleepSetAsMission',
             '_sleepAnswers', '_sleepCurrentQ'
           ]
