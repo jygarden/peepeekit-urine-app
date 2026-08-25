@@ -6875,6 +6875,53 @@ function _sleepShowLoading() {
   }, 1600);
 }
 
+// ═══ 헤드라인 · 첫 화면 3초 안에 이해되는 한 문장 ═══
+function _sleepMakeHeadline(pr) {
+  const p = pr.patterns;
+  const primary = pr.primary;
+  // 두 축 대비 문장 (X보다 Y가 먼저) 을 생성
+  const scoreMap = [
+    { key:'fragmented', label:'밤중 각성' },
+    { key:'morning_heaviness', label:'아침 회복감' },
+    { key:'daytime_drowsy', label:'낮 컨디션' },
+    { key:'schedule_irregular', label:'수면 리듬' },
+    { key:'pre_sleep_habit', label:'잠자기 전 습관' }
+  ];
+  const ranked = scoreMap.slice().sort((a, b) => p[b.key] - p[a.key]);
+  const top = ranked[0], second = ranked[1];
+  if (p[top.key] === 0) return '이번 주 수면은 전반적으로 안정적이에요';
+  // 두 번째가 매우 낮으면 단일 초점
+  if (p[second.key] <= 1) {
+    return `'${top.label}'을(를) 먼저<br>살펴보면 좋아요`;
+  }
+  // 대비 문장
+  return `${second.label}보다<br>'${top.label}' 관리가 먼저예요`;
+}
+
+// ═══ "왜 이렇게 봤을까요" · 응답 근거 자연어 요약 ═══
+function _sleepMakeWhyText(entry) {
+  const p = entry.patternResult.patterns;
+  const pieces = [];
+  if (p.fragmented >= 2) pieces.push('자다가 깨는 일이 자주 있었고');
+  if (p.morning_heaviness >= 2) pieces.push('아침에 개운하지 않은 날이 반복됐어요');
+  if (p.daytime_drowsy >= 2) pieces.push('낮 동안 피곤함도 함께 나타났어요');
+  if (p.schedule_irregular >= 2) pieces.push('취침·기상 시간의 편차도 컸어요');
+  if (p.pre_sleep_habit >= 2) pieces.push('잠자기 전 카페인·야식·화면 노출도 잦았어요');
+  if (pieces.length === 0) return '전반적인 응답이 안정적인 범위에 있었어요.';
+  if (pieces.length === 1) return `최근 2주 응답에서 ${pieces[0]}.`;
+  const last = pieces.pop();
+  return `최근 2주 응답을 보면 ${pieces.join(', ')}, ${last}.`;
+}
+
+// ═══ 3 패턴 상태 라벨 (숫자 X · 상태 표현) ═══
+function _sleepPatternStatus(v) {
+  return v >= 3 ? '높음' : v >= 2 ? '보통 이상' : v >= 1 ? '보통' : '낮음';
+}
+function _sleepInvertedStatus(v) {
+  // 회복감·리듬처럼 낮을수록 문제인 지표
+  return v >= 3 ? '낮음' : v >= 2 ? '아쉬움' : v >= 1 ? '보통' : '좋음';
+}
+
 function renderSleepResult(entry) {
   const el = document.getElementById('sleepCheckContent');
   if (!el || !entry) return;
@@ -6882,78 +6929,152 @@ function renderSleepResult(entry) {
   const c = entry.coaching;
   const l = entry.lifestyle;
   const prevEntry = getSleepCheckHistory()[1] || null;
+  const isFirst = !prevEntry;
 
-  // 지난주 비교
-  let compareHtml = '';
-  if (prevEntry) {
-    const prevPr = prevEntry.patternResult;
-    const diffs = [];
-    if (prevPr.patterns.fragmented !== pr.patterns.fragmented) diffs.push({ label:'밤 중 각성', from:prevPr.patterns.fragmented, to:pr.patterns.fragmented });
-    if (prevPr.patterns.morning_heaviness !== pr.patterns.morning_heaviness) diffs.push({ label:'아침 개운함', from:prevPr.patterns.morning_heaviness, to:pr.patterns.morning_heaviness });
-    if (l.avgSleepMinutes && prevEntry.lifestyle?.avgSleepMinutes) {
-      const dmin = l.avgSleepMinutes - prevEntry.lifestyle.avgSleepMinutes;
-      const fmtH = m => `${Math.floor(m/60)}시간 ${m%60}분`;
-      diffs.push({ label:'평균 수면', text:`${fmtH(prevEntry.lifestyle.avgSleepMinutes)} → ${fmtH(l.avgSleepMinutes)}` });
+  // 헤드라인
+  const headline = _sleepMakeHeadline(pr);
+  const whyText = _sleepMakeWhyText(entry);
+  const whyTitle = {
+    fragmented:'밤중 각성이 가장 두드러졌어요',
+    morning_heaviness:'아침 회복감이 낮은 편이었어요',
+    daytime_drowsy:'낮 시간 컨디션이 자주 저하됐어요',
+    schedule_irregular:'수면 리듬이 안정적이지 않았어요',
+    pre_sleep_habit:'잠자기 전 습관을 살펴볼 만해요'
+  }[pr.primary] || '눈에 띄는 패턴이 있었어요';
+
+  // 3 패턴 카드 (숫자 X · 상태 라벨)
+  const chipCards = [
+    { label:'밤중 각성', status: _sleepPatternStatus(pr.patterns.fragmented), score: pr.patterns.fragmented },
+    { label:'아침 회복감', status: _sleepInvertedStatus(pr.patterns.morning_heaviness), score: pr.patterns.morning_heaviness },
+    { label:'수면 리듬', status: _sleepInvertedStatus(pr.patterns.schedule_irregular), score: pr.patterns.schedule_irregular }
+  ];
+  const chipTone = (label, score) => {
+    // 걱정도 = score. 파랑 통일 · 강도만 다르게
+    if (score >= 3) return { bg:'#EFF6FF', text:'#1E40AF', accent:'#2563EB' };
+    if (score >= 2) return { bg:'#F0F9FF', text:'#075985', accent:'#0EA5E9' };
+    return { bg:'#F8FAFC', text:'#475569', accent:'#94A3B8' };
+  };
+  const patternCardsHtml = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;margin-bottom:24px">
+      ${chipCards.map(c => {
+        const t = chipTone(c.label, c.score);
+        return `<div style="background:${t.bg};border-radius:14px;padding:14px 8px;text-align:center">
+          <div style="font-size:10.5px;color:${t.text};font-weight:700;letter-spacing:-.2px;margin-bottom:6px">${c.label}</div>
+          <div style="font-size:15px;font-weight:900;color:${t.accent};letter-spacing:-.3px">${c.status}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  // 생활 기록 섹션 · 데이터 유무에 따라 분기
+  const hasLifestyleData = l && (l.lateCaffeine > 0 || l.lateMeal > 0 || l.alcohol > 0 || l.avgSleepMinutes);
+  let lifestyleHtml;
+  if (hasLifestyleData) {
+    const rows = [];
+    if (l.lateCaffeine > 0) rows.push({ label:'늦은 카페인', value:`주 ${l.lateCaffeine}회`, tone:'#2563EB' });
+    if (l.lateMeal > 0) rows.push({ label:'늦은 저녁', value:`주 ${l.lateMeal}회`, tone:'#2563EB' });
+    if (l.alcohol > 0) rows.push({ label:'저녁 음주', value:`주 ${l.alcohol}회`, tone:'#2563EB' });
+    if (l.avgSleepMinutes) {
+      const h = Math.floor(l.avgSleepMinutes/60);
+      const m = l.avgSleepMinutes % 60;
+      rows.push({ label:'평균 수면', value:`${h}시간 ${m}분`, tone:'#0F172A' });
     }
-    compareHtml = diffs.length ? `
-      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-bottom:14px">
-        <div style="font-size:13px;font-weight:800;color:#0F172A;margin-bottom:10px">지난주와 비교해볼까요?</div>
-        ${diffs.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:#475569;font-weight:600"><span>${d.label}</span><span style="color:#0F172A;font-weight:800">${d.text || (d.to < d.from ? '개선 ↓' : '증가 ↑')}</span></div>`).join('')}
-      </div>` : '';
+    // AI 해석
+    let insight = '';
+    if (l.lateCaffeine >= 3 && l.avgSleepMinutes && l.avgSleepMinutes < 420) {
+      insight = '수면 문제를 특정 영양소 탓으로 보기보다, 늦은 카페인과 짧은 수면시간부터 조정해보는 게 좋아 보여요.';
+    } else if (l.lateMeal >= 3) {
+      insight = '늦은 저녁이 잦으면 자는 동안 위 부담이 커져 밤중 각성이 늘어요. 야식부터 조정해봐요.';
+    } else if (l.lateCaffeine >= 2) {
+      insight = '오후 카페인이 수면 패턴에 영향을 줄 수 있어요. 이번 주엔 오후 3시 이후 카페인부터 살펴봐요.';
+    } else if (l.avgSleepMinutes && l.avgSleepMinutes < 400) {
+      insight = '전반적으로 수면 시간 자체가 부족한 편이에요. 잠자리에 드는 시간을 30분만 앞당겨봐요.';
+    } else {
+      insight = '지금 생활 흐름은 큰 문제 없어 보여요. 이번 주 응답 변화만 지켜보면 될 것 같아요.';
+    }
+    lifestyleHtml = `
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px 20px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:14px">생활 기록과 같이 보면</div>
+        ${rows.map(r => `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #F1F5F9;font-size:13px;color:#475569;font-weight:600"><span>${r.label}</span><span style="color:${r.tone};font-weight:900">${r.value}</span></div>`).join('')}
+        <div style="background:#F8FAFC;border-radius:12px;padding:14px 16px;margin-top:14px;font-size:12.5px;color:#334155;line-height:1.7;font-weight:500">${insight}</div>
+      </div>`;
   } else {
-    compareHtml = `<div style="background:#F8FAFC;border-radius:16px;padding:14px 16px;font-size:12px;color:#64748B;font-weight:600;line-height:1.55;margin-bottom:14px;text-align:center">다음 주 다시 체크하면 변화를 볼 수 있어요.</div>`;
+    lifestyleHtml = `
+      <div style="background:#F8FAFC;border-radius:18px;padding:22px 20px;margin-bottom:14px;text-align:center">
+        <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:6px">생활 기록과 같이 보면 더 정확해요</div>
+        <div style="font-size:12px;color:#64748B;line-height:1.65;font-weight:500;margin-bottom:14px">식사와 생활 기록이 쌓이면<br>수면 패턴과 함께 분석해드릴게요.</div>
+        <button onclick="if(typeof enterFood==='function'){goHome();setTimeout(()=>enterFood('human'),200)}" style="background:#2563EB;color:#fff;border:none;padding:11px 22px;border-radius:99px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.2px">생활 기록 시작하기 →</button>
+      </div>`;
   }
 
-  const severityColor = { high:'#DC2626', mid:'#F59E0B' };
-  const chipsHtml = pr.observed.length ? pr.observed.map(o => `
-    <span style="background:${o.severity === 'high' ? '#FEF2F2' : '#FFFBEB'};color:${severityColor[o.severity]};padding:6px 12px;border-radius:99px;font-size:11.5px;font-weight:800">${o.label}</span>
-  `).join('') : '<span style="font-size:11.5px;color:#94A3B8;font-weight:700">특별히 걱정할 패턴은 없어요</span>';
-
-  const lifestyleHtml = c.observedPatterns.length ? c.observedPatterns.map(p => {
-    const val = p.diff !== undefined
-      ? `<span style="color:${p.diff < 0 ? '#EF4444' : '#10B981'}">${p.diff > 0 ? '+' : ''}${p.diff}${p.unit}</span>`
-      : `최근 7일 중 <b>${p.count}${p.unit}</b>`;
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #F1F5F9;font-size:12.5px;color:#475569;font-weight:600"><span>${p.icon} ${p.label}</span><span style="color:#0F172A;font-weight:700">${val}</span></div>`;
-  }).join('') : '<div style="padding:10px 0;font-size:11.5px;color:#94A3B8;font-weight:600">최근 식사 기록이 쌓이면 함께 볼 수 있어요.</div>';
+  // 지난주 비교 · 데이터 부족 시 솔직하게
+  let compareHtml;
+  if (isFirst) {
+    compareHtml = `<div style="background:#F8FAFC;border-radius:14px;padding:14px 16px;font-size:12px;color:#64748B;font-weight:500;line-height:1.65;margin-bottom:14px;text-align:center">이번이 첫 체크예요. <b style="color:#0F172A">다음 주</b>에 다시 체크하면 변화 흐름을 보여드릴게요.</div>`;
+  } else {
+    const prevPr = prevEntry.patternResult;
+    const diffs = [];
+    const dFrag = pr.patterns.fragmented - prevPr.patterns.fragmented;
+    const dMorn = pr.patterns.morning_heaviness - prevPr.patterns.morning_heaviness;
+    if (dFrag !== 0) diffs.push({ label:'밤중 각성', arrow: dFrag < 0 ? '↓' : '↑', color: dFrag < 0 ? '#10B981' : '#EF4444' });
+    if (dMorn !== 0) diffs.push({ label:'아침 회복감', arrow: dMorn < 0 ? '↑' : '↓', color: dMorn < 0 ? '#10B981' : '#EF4444' });
+    if (l?.lateCaffeine !== undefined && prevEntry.lifestyle?.lateCaffeine !== undefined) {
+      const dC = l.lateCaffeine - prevEntry.lifestyle.lateCaffeine;
+      if (dC !== 0) diffs.push({ label:'늦은 카페인', arrow: dC < 0 ? '↓' : '↑', color: dC < 0 ? '#10B981' : '#EF4444' });
+    }
+    const improved = diffs.filter(d => d.color === '#10B981').length;
+    const worsened = diffs.filter(d => d.color === '#EF4444').length;
+    let interp;
+    if (improved > worsened) interp = '전반적으로 개선되는 흐름이 보여요. 다만 인과관계를 단정하지 않고 몇 주 더 지켜볼게요.';
+    else if (worsened > improved) interp = '일부 지표가 이전보다 나빠졌어요. 다시 이번 주 행동에 집중해봐요.';
+    else interp = '큰 변화 없이 안정적이에요.';
+    compareHtml = diffs.length ? `
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px 20px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:14px">지난주와 비교</div>
+        ${diffs.map(d => `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #F1F5F9;font-size:13px;color:#475569;font-weight:600"><span>${d.label}</span><span style="color:${d.color};font-weight:900;font-size:15px">${d.arrow}</span></div>`).join('')}
+        <div style="background:#F8FAFC;border-radius:12px;padding:14px 16px;margin-top:14px;font-size:12.5px;color:#334155;line-height:1.7;font-weight:500">${interp}</div>
+      </div>` : `<div style="background:#F8FAFC;border-radius:14px;padding:14px 16px;font-size:12px;color:#64748B;font-weight:500;line-height:1.65;margin-bottom:14px;text-align:center">지난주와 큰 변화 없이 안정적이에요.</div>`;
+  }
 
   el.innerHTML = `
-    <div style="padding:8px 0 4px">
-      <div style="font-size:11px;color:#8B5CF6;font-weight:800;letter-spacing:.4px;margin-bottom:8px">이번 주 수면 패턴</div>
-      <div style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.35">${pr.friendlyLabel}</div>
+    <div style="padding:20px 4px 0">
+      <div style="font-size:11px;color:#2563EB;font-weight:800;letter-spacing:.4px;margin-bottom:12px">이번 주 내 수면</div>
+      <div style="font-size:26px;font-weight:900;color:#0F172A;letter-spacing:-.7px;line-height:1.35">${headline}</div>
+      <div style="font-size:12.5px;color:#64748B;font-weight:500;margin-top:10px">최근 2주 응답과 생활 기록을 함께 봤어요</div>
     </div>
 
-    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-top:20px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:800;color:#0F172A;margin-bottom:10px">건강어때가 확인한 패턴</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${chipsHtml}</div>
+    ${patternCardsHtml}
+
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
+      <div style="font-size:11px;color:#94A3B8;font-weight:700;letter-spacing:.4px;margin-bottom:8px">왜 이렇게 봤을까요?</div>
+      <div style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.4px;line-height:1.4;margin-bottom:8px">${whyTitle}</div>
+      <div style="font-size:12.5px;color:#475569;line-height:1.75;font-weight:500">${whyText}</div>
     </div>
 
-    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px">생활 기록과 같이 봤어요</div>
-      <div style="margin-top:2px">${lifestyleHtml}</div>
-    </div>
+    ${lifestyleHtml}
 
-    <div style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:16px;padding:18px 20px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:800;color:#6D28D9;letter-spacing:.3px;margin-bottom:8px">이번 주 하나만 바꿔볼까요?</div>
-      <div style="font-size:17px;font-weight:900;color:#0F172A;letter-spacing:-.4px;line-height:1.35;margin-bottom:10px">${c.recommendedAction.title}</div>
-      <div style="font-size:12.5px;color:#4C1D95;font-weight:500;line-height:1.65;margin-bottom:16px">${c.recommendedAction.reason}</div>
-      <button onclick="_sleepSetAsMission('${c.recommendedAction.title.replace(/'/g,"\\'")}')" style="width:100%;background:#6D28D9;color:#fff;border:none;padding:13px;border-radius:12px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px">이번 주 목표로 설정</button>
+    <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:18px;padding:22px 22px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:800;color:#2563EB;letter-spacing:.4px;margin-bottom:10px">이번 주 하나만 바꿔볼까요?</div>
+      <div style="font-size:19px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.4;margin-bottom:12px">${c.recommendedAction.title}</div>
+      <div style="font-size:12.5px;color:#1E3A8A;font-weight:500;line-height:1.7;margin-bottom:18px">${c.recommendedAction.reason}</div>
+      <button onclick="_sleepSetAsMission('${c.recommendedAction.title.replace(/'/g,"\\'")}')" style="width:100%;background:#2563EB;color:#fff;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(37,99,235,.25)">이번 주 목표로 설정</button>
     </div>
 
     ${compareHtml}
 
     ${c.redFlag ? `
-      <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:16px;padding:16px 18px;margin-bottom:14px">
-        <div style="display:flex;gap:8px;align-items:flex-start">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <div style="font-size:12px;color:#7F1D1D;font-weight:600;line-height:1.6">${c.redFlag.message}</div>
+      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:14px;padding:16px 18px;margin-bottom:14px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <div style="font-size:12.5px;font-weight:800;color:#92400E;margin-bottom:3px">전문 평가 안내</div>
+            <div style="font-size:11.5px;color:#78350F;font-weight:500;line-height:1.65">${c.redFlag.message}</div>
+          </div>
         </div>
       </div>` : ''}
 
-    <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;font-size:10.5px;color:#64748B;line-height:1.6;font-weight:500;margin-bottom:14px">
-      본 결과는 참고용 습관 코칭이며 의학적 진단이 아닙니다. 심한 코골이·낮 졸림이 반복되면 전문가 상담을 권해드려요.
-    </div>
+    <div style="font-size:10.5px;color:#94A3B8;line-height:1.65;font-weight:500;margin-bottom:16px;padding:0 4px;text-align:center">본 결과는 참고용 습관 코칭이며 의학적 진단이 아닙니다.</div>
 
-    <button onclick="_sleepStartQuestions()" style="width:100%;background:transparent;border:1px solid #E2E8F0;color:#475569;padding:13px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">다시 체크하기</button>
+    <button type="button" onclick="_sleepStartQuestions()" style="width:100%;background:transparent;border:1px solid #E2E8F0;color:#475569;padding:14px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">다시 체크하기</button>
   `;
 }
 
