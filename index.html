@@ -6757,11 +6757,13 @@ function enterSleepCheck() {
   if (days !== null && days < 7) {
     // 최근 7일 내 결과 있으면 결과부터 보여줌
     renderSleepResult(getLastSleepCheck());
-    showScreen('screenSleepCheck');
-    return;
+  } else {
+    renderSleepIntro();
   }
-  renderSleepIntro();
   showScreen('screenSleepCheck');
+  // 화면 진입 시 스크롤 최상단으로
+  try { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; } catch(e){}
+  setTimeout(() => { try { window.scrollTo(0, 0); } catch(e){} }, 50);
 }
 
 function renderSleepIntro() {
