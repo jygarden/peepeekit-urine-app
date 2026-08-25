@@ -2330,7 +2330,7 @@ window.appIcon = function(name, size){
 
         <!-- ⑤ 하단 3카드 · 수면 / 소변검사 / 변화 리포트 -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <button onclick="if(typeof enterSleepCheck==='function')enterSleepCheck()" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
+          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -5609,6 +5609,48 @@ const KOREAN_FOOD_DB = {
   '삼겹살':       { kcal:520, protein:30, carbs:2,  fat:44, fiber:0,  sodium:600, calcium:20,  iron:1.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.6, omega3:180, tags:['단백질','포만감'] },
   '갈비':         { kcal:480, protein:32, carbs:6,  fat:36, fiber:1,  sodium:900, calcium:20,  iron:3.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.4, omega3:150, tags:['단백질','철분'] },
   '곱창구이':     { kcal:520, protein:24, carbs:6,  fat:44, fiber:1,  sodium:1200,calcium:60,  iron:6.0, magnesium:30,  vitA:120, vitC:4,  vitD:0.6, omega3:200, tags:['단백질','철분'] },
+  // ── 해산물류 (신규) ──
+  '새우구이':     { kcal:180, protein:26, carbs:2,  fat:8,  fiber:0,  sodium:600, calcium:80,  iron:2.5, magnesium:40,  vitA:60,  vitC:2,  vitD:0.3, omega3:400, tags:['단백질','저지방'] },
+  '새우튀김':     { kcal:340, protein:20, carbs:22, fat:20, fiber:1,  sodium:700, calcium:60,  iron:2.0, magnesium:35,  vitA:40,  vitC:2,  vitD:0.3, omega3:350, tags:['단백질'] },
+  '오징어구이':   { kcal:220, protein:26, carbs:6,  fat:10, fiber:0,  sodium:800, calcium:80,  iron:2.0, magnesium:60,  vitA:100, vitC:4,  vitD:0.4, omega3:300, tags:['단백질','저지방'] },
+  '조개구이':     { kcal:180, protein:22, carbs:6,  fat:6,  fiber:0,  sodium:900, calcium:100, iron:6.0, magnesium:50,  vitA:60,  vitC:8,  vitD:0.6, omega3:400, tags:['단백질','철분'] },
+  '가리비구이':   { kcal:200, protein:24, carbs:8,  fat:8,  fiber:0,  sodium:700, calcium:80,  iron:3.5, magnesium:50,  vitA:40,  vitC:6,  vitD:0.5, omega3:500, tags:['단백질','오메가3'] },
+  '전복':         { kcal:160, protein:20, carbs:8,  fat:4,  fiber:0,  sodium:600, calcium:60,  iron:3.0, magnesium:45,  vitA:60,  vitC:4,  vitD:0.3, omega3:200, tags:['단백질','철분'] },
+  '굴':           { kcal:140, protein:18, carbs:6,  fat:4,  fiber:0,  sodium:800, calcium:80,  iron:6.5, magnesium:50,  vitA:80,  vitC:6,  vitD:0.4, omega3:500, tags:['철분','아연'] },
+  '멸치볶음':     { kcal:160, protein:18, carbs:8,  fat:6,  fiber:1,  sodium:800, calcium:400, iron:4.0, magnesium:50,  vitA:80,  vitC:0,  vitD:1.5, omega3:600, tags:['칼슘','오메가3'] },
+  '뱅어포':       { kcal:180, protein:24, carbs:4,  fat:6,  fiber:0,  sodium:900, calcium:500, iron:5.0, magnesium:60,  vitA:60,  vitC:0,  vitD:2.0, omega3:500, tags:['칼슘'] },
+  '장어구이':     { kcal:380, protein:28, carbs:4,  fat:28, fiber:0,  sodium:900, calcium:60,  iron:1.5, magnesium:35,  vitA:800, vitC:2,  vitD:8.0, omega3:1800,tags:['오메가3','비타민D','단백질'] },
+  '골뱅이무침':   { kcal:220, protein:20, carbs:22, fat:6,  fiber:3,  sodium:1200,calcium:100, iron:5.0, magnesium:50,  vitA:100, vitC:14, vitD:0.4, omega3:200, tags:['단백질','철분'] },
+  // ── 안주/술집 라인 (신규) ──
+  '닭꼬치':       { kcal:280, protein:26, carbs:14, fat:14, fiber:1,  sodium:900, calcium:20,  iron:1.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.3, omega3:100, tags:['단백질'] },
+  '양꼬치':       { kcal:420, protein:32, carbs:6,  fat:32, fiber:0,  sodium:800, calcium:20,  iron:3.0, magnesium:30,  vitA:20,  vitC:2,  vitD:0.3, omega3:150, tags:['단백질','철분'] },
+  '닭발':         { kcal:320, protein:22, carbs:12, fat:22, fiber:1,  sodium:1200,calcium:100, iron:2.0, magnesium:20,  vitA:80,  vitC:6,  vitD:0.3, omega3:100, tags:['콜라겐'] },
+  '족발':         { kcal:440, protein:36, carbs:8,  fat:32, fiber:1,  sodium:1400,calcium:80,  iron:3.5, magnesium:30,  vitA:60,  vitC:4,  vitD:0.5, omega3:200, tags:['단백질','콜라겐'] },
+  '보쌈':         { kcal:420, protein:34, carbs:8,  fat:30, fiber:2,  sodium:1200,calcium:60,  iron:3.0, magnesium:30,  vitA:80,  vitC:8,  vitD:0.4, omega3:180, tags:['단백질'] },
+  '두부부침':     { kcal:220, protein:16, carbs:6,  fat:16, fiber:2,  sodium:200, calcium:250, iron:2.5, magnesium:60,  vitA:0,   vitC:0,  vitD:0,   omega3:150, tags:['단백질','칼슘'] },
+  '어묵탕':       { kcal:220, protein:16, carbs:20, fat:8,  fiber:2,  sodium:1500,calcium:80,  iron:2.0, magnesium:40,  vitA:40,  vitC:4,  vitD:0.3, omega3:150, tags:['단백질','수분'] },
+  // ── 밑반찬 · 김치류 (신규) ──
+  '깻잎무침':     { kcal:40,  protein:2,  carbs:4,  fat:2,  fiber:2,  sodium:300, calcium:120, iron:2.5, magnesium:40,  vitA:400, vitC:20, vitD:0,   omega3:100, tags:['비타민'] },
+  '오이무침':     { kcal:30,  protein:1,  carbs:6,  fat:0,  fiber:2,  sodium:300, calcium:20,  iron:0.5, magnesium:15,  vitA:60,  vitC:8,  vitD:0,   omega3:20,  tags:['수분'] },
+  '깍두기':       { kcal:35,  protein:1,  carbs:7,  fat:0,  fiber:2,  sodium:700, calcium:30,  iron:0.5, magnesium:15,  vitA:40,  vitC:10, vitD:0,   omega3:15,  tags:['유익균'] },
+  '총각김치':     { kcal:40,  protein:1,  carbs:7,  fat:0,  fiber:3,  sodium:800, calcium:40,  iron:0.6, magnesium:20,  vitA:60,  vitC:12, vitD:0,   omega3:20,  tags:['유익균'] },
+  '멸치조림':     { kcal:180, protein:20, carbs:12, fat:6,  fiber:1,  sodium:1000,calcium:400, iron:4.0, magnesium:50,  vitA:60,  vitC:0,  vitD:1.5, omega3:600, tags:['칼슘','오메가3'] },
+  '콩자반':       { kcal:180, protein:12, carbs:22, fat:5,  fiber:6,  sodium:600, calcium:60,  iron:3.0, magnesium:60,  vitA:0,   vitC:0,  vitD:0,   omega3:100, tags:['식이섬유'] },
+  '조미김':       { kcal:20,  protein:2,  carbs:2,  fat:1,  fiber:1,  sodium:200, calcium:20,  iron:0.5, magnesium:20,  vitA:80,  vitC:2,  vitD:0,   omega3:100, tags:['미네랄'] },
+  // ── 국물류 추가 (신규) ──
+  '북엇국':       { kcal:180, protein:16, carbs:8,  fat:8,  fiber:1,  sodium:1200,calcium:60,  iron:2.0, magnesium:35,  vitA:40,  vitC:4,  vitD:0.5, omega3:200, tags:['단백질','회복'] },
+  '무국':         { kcal:100, protein:4,  carbs:12, fat:3,  fiber:2,  sodium:900, calcium:40,  iron:1.0, magnesium:20,  vitA:20,  vitC:12, vitD:0,   omega3:50,  tags:['수분','가벼움'] },
+  '시금치된장국': { kcal:120, protein:8,  carbs:12, fat:4,  fiber:3,  sodium:1000,calcium:120, iron:3.0, magnesium:60,  vitA:400, vitC:18, vitD:0.2, omega3:100, tags:['철분','미네랄'] },
+  '콩나물국':     { kcal:80,  protein:6,  carbs:8,  fat:2,  fiber:2,  sodium:800, calcium:40,  iron:1.5, magnesium:30,  vitA:20,  vitC:14, vitD:0,   omega3:40,  tags:['수분','비타민C'] },
+  '떡국':         { kcal:520, protein:18, carbs:80, fat:12, fiber:2,  sodium:1400,calcium:60,  iron:2.5, magnesium:40,  vitA:80,  vitC:4,  vitD:0.4, omega3:120, tags:['탄수화물'] },
+  '만두국':       { kcal:480, protein:22, carbs:65, fat:15, fiber:3,  sodium:1500,calcium:80,  iron:3.0, magnesium:45,  vitA:100, vitC:8,  vitD:0.4, omega3:150, tags:['단백질','탄수'] },
+  '순두부백반':   { kcal:320, protein:20, carbs:15, fat:20, fiber:3,  sodium:1400,calcium:200, iron:3.0, magnesium:70,  vitA:80,  vitC:8,  vitD:0.5, omega3:120, tags:['단백질','칼슘'] },
+  // ── 분식·간편식 (신규) ──
+  '떡볶이':       { kcal:520, protein:12, carbs:95, fat:12, fiber:3,  sodium:1600,calcium:60,  iron:2.0, magnesium:35,  vitA:100, vitC:14, vitD:0.2, omega3:80,  tags:['탄수화물','매콤'] },
+  '순대':         { kcal:340, protein:12, carbs:38, fat:16, fiber:2,  sodium:1000,calcium:40,  iron:3.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.3, omega3:100, tags:['철분'] },
+  '튀김모듬':     { kcal:420, protein:10, carbs:48, fat:22, fiber:3,  sodium:800, calcium:40,  iron:1.5, magnesium:30,  vitA:100, vitC:8,  vitD:0.2, omega3:120, tags:['탄수화물'] },
+  '김치전':       { kcal:380, protein:10, carbs:48, fat:18, fiber:4,  sodium:1400,calcium:60,  iron:2.0, magnesium:35,  vitA:180, vitC:14, vitD:0.2, omega3:120, tags:['간편'] },
+  '파전':         { kcal:420, protein:14, carbs:52, fat:20, fiber:3,  sodium:1200,calcium:80,  iron:2.5, magnesium:40,  vitA:100, vitC:12, vitD:0.2, omega3:140, tags:['간편'] },
   // ── 구이/조림/볶음 반찬 ──
   '고등어구이':   { kcal:280, protein:26, carbs:1,  fat:20, fiber:0,  sodium:400, calcium:40,  iron:1.5, magnesium:40,  vitA:60,  vitC:0,  vitD:5.0, omega3:2500,tags:['오메가3','비타민D','단백질'] },
   '연어스테이크': { kcal:320, protein:34, carbs:2,  fat:20, fiber:0,  sodium:200, calcium:20,  iron:0.8, magnesium:35,  vitA:60,  vitC:0,  vitD:8.0, omega3:2200,tags:['오메가3','비타민D','단백질'] },
@@ -5831,6 +5873,59 @@ const FOOD_ALIAS = {
   '김치찌개백반':'김치찌개','된장찌개백반':'된장찌개','순두부백반':'순두부찌개',
   '떡볶이':'짜장면','라면':'짬뽕','우동':'어묵우동','수제비':'칼국수'
 };
+
+// 이름 → 카테고리 기반 스마트 영양 추정 (DB 미매칭 fallback)
+function _v20EstimateNutrition(name) {
+  const n = String(name || '');
+  // 해산물 (새우·오징어·조개·굴·회 등)
+  if (/(새우|오징어|낙지|문어|조개|굴|가리비|전복|홍합|바지락|랍스터|킹크랩)/.test(n)) {
+    if (/(구이|찜|볶음|튀김)/.test(n)) return { kcal:220, protein:24, carbs:6, fat:10, fiber:1, sodium:700 };
+    return { kcal:150, protein:22, carbs:4, fat:4, fiber:0, sodium:500 };
+  }
+  // 생선
+  if (/(생선|고등어|연어|참치|삼치|갈치|장어|꽁치|명태|황태|가자미|도미|광어)/.test(n)) {
+    if (/(구이|조림|찜)/.test(n)) return { kcal:260, protein:26, carbs:2, fat:18, fiber:0, sodium:500 };
+    return { kcal:200, protein:24, carbs:0, fat:12, fiber:0, sodium:200 };
+  }
+  // 육류
+  if (/(닭|치킨|돼지|소고기|삼겹|목살|갈비|안심|등심|양고기|오리)/.test(n)) {
+    if (/(구이|찜|바비큐|스테이크)/.test(n)) return { kcal:380, protein:28, carbs:2, fat:28, fiber:0, sodium:600 };
+    if (/(볶음|덮밥|찜)/.test(n)) return { kcal:420, protein:26, carbs:20, fat:24, fiber:2, sodium:1000 };
+    return { kcal:300, protein:24, carbs:4, fat:20, fiber:0, sodium:400 };
+  }
+  // 국물류
+  if (/(국|탕|찌개|해장)/.test(n)) return { kcal:280, protein:18, carbs:18, fat:14, fiber:2, sodium:1400 };
+  // 면류
+  if (/(면|국수|우동|파스타|짜장|짬뽕)/.test(n)) return { kcal:480, protein:16, carbs:70, fat:12, fiber:3, sodium:1300 };
+  // 밥/덮밥/비빔밥
+  if (/(밥|덮밥|비빔밥|볶음밥|카레|오므)/.test(n)) return { kcal:520, protein:16, carbs:80, fat:12, fiber:3, sodium:1000 };
+  // 채소/샐러드/나물
+  if (/(채소|샐러드|나물|무침|볶음|시금치|콩나물|브로콜리|양배추|양파|당근|토마토|파프리카|피망|버섯)/.test(n)) {
+    return { kcal:80, protein:4, carbs:10, fat:3, fiber:3, sodium:300 };
+  }
+  // 두부/콩
+  if (/(두부|콩|템페|낫토)/.test(n)) return { kcal:180, protein:16, carbs:6, fat:12, fiber:2, sodium:200 };
+  // 계란
+  if (/(계란|달걀|에그|오믈렛)/.test(n)) return { kcal:120, protein:9, carbs:2, fat:8, fiber:0, sodium:120 };
+  // 과일
+  if (/(사과|바나나|귤|오렌지|딸기|포도|배|복숭아|자두|수박|참외|망고|파인애플|블루베리|키위|과일)/.test(n)) {
+    return { kcal:70, protein:1, carbs:18, fat:0, fiber:2, sodium:2 };
+  }
+  // 빵/떡/과자
+  if (/(빵|토스트|샌드위치|버거|피자|떡|과자|쿠키|케이크|도넛|와플|팬케이크)/.test(n)) {
+    return { kcal:340, protein:8, carbs:52, fat:12, fiber:2, sodium:500 };
+  }
+  // 음료
+  if (/(우유|주스|커피|라떼|아메리카노|스무디|요거트|음료)/.test(n)) return { kcal:120, protein:4, carbs:16, fat:4, fiber:0, sodium:60 };
+  // 튀김
+  if (/(튀김|프라이|커틀릿|까스|가라아게|카츠)/.test(n)) return { kcal:400, protein:18, carbs:32, fat:24, fiber:1, sodium:700 };
+  // 김치/젓갈
+  if (/(김치|깍두기|장아찌|젓갈)/.test(n)) return { kcal:40, protein:1, carbs:7, fat:0, fiber:2, sodium:700 };
+  // 견과류
+  if (/(견과|아몬드|호두|땅콩|캐슈|피스타치오|잣)/.test(n)) return { kcal:180, protein:6, carbs:6, fat:16, fiber:3, sodium:5 };
+  // 기본값
+  return { kcal:200, protein:8, carbs:24, fat:8, fiber:2, sodium:500 };
+}
 
 function _matchFoodInDB(name) {
   if (!name) return null;
@@ -12716,10 +12811,17 @@ async function confirmAndAnalyze() {
             f.sodium = Math.round((dbItem.sodium || 0) * portion);
             f._matched = true;
           } else {
-            // DB 미매칭 · 최소 기본값 (사용자에게 0으로 보이지 않게)
-            f.kcal = f.kcal || 150;
+            // DB 미매칭 · 카테고리 기반 스마트 추정 (0 표시 방지)
+            const est = _v20EstimateNutrition(f.name);
+            f.kcal = Math.round((est.kcal || 150) * portion);
             f.calories = f.kcal;
+            f.protein = Math.round((est.protein || 0) * portion);
+            f.carbs = Math.round((est.carbs || 0) * portion);
+            f.fat = Math.round((est.fat || 0) * portion);
+            f.fiber = Math.round((est.fiber || 0) * portion);
+            f.sodium = Math.round((est.sodium || 0) * portion);
             f._matched = false;
+            f._estimated = true;
           }
         });
         // ② 합계 계산
@@ -13042,7 +13144,7 @@ const DISH_PAIRING_DICT = {
     bad:  []
   },
   '콩나물무침': {
-    good: [{'with':'잡곡밥', reason:'아미노산·식이섬유 보충'}],
+    good: [{'with':'잡곡밥', reason:'단백질·식이섬유 보충'}],
     bad:  []
   },
   '나물': {
@@ -13849,7 +13951,7 @@ function renderFoodResult(r) {
   if (!m || typeof m !== 'object' || Object.keys(m).filter(k => Number(m[k]) > 0).length < 3) {
     try { m = estimateMicronutrients(r.foods || []); } catch(e) { m = {}; }
   }
-  // 그룹 정의
+  // 그룹 정의 · 비타민 그룹 제거 · 아연·칼륨 제거 (숫자 정확도 낮음)
   const STAT_GROUPS = {
     macro: {
       title: '기본 영양소',
@@ -13859,8 +13961,7 @@ function renderFoodResult(r) {
         protein: { label:'단백질',   target:60,   unit:'g',  bad:false },
         fat:     { label:'지방',     target:65,   unit:'g',  bad:false },
         fiber:   { label:'식이섬유', target:25,   unit:'g',  bad:false },
-        sodium:  { label:'나트륨',   target:2000, unit:'mg', bad:true },
-        sugar:   { label:'당류',     target:50,   unit:'g',  bad:true }
+        sodium:  { label:'나트륨',   target:2000, unit:'mg', bad:true }
       }
     },
     mineral: {
@@ -13869,23 +13970,11 @@ function renderFoodResult(r) {
       items: {
         calcium:   { label:'칼슘',     target:800,  unit:'mg' },
         iron:      { label:'철분',     target:12,   unit:'mg' },
-        magnesium: { label:'마그네슘', target:320,  unit:'mg' },
-        zinc:      { label:'아연',     target:9,    unit:'mg' },
-        potassium: { label:'칼륨',     target:3500, unit:'mg' }
-      }
-    },
-    vitamin: {
-      title: '비타민',
-      src: m,
-      items: {
-        vitaminA: { label:'비타민 A',  target:800, unit:'μg' },
-        vitaminC: { label:'비타민 C',  target:100, unit:'mg' },
-        vitaminD: { label:'비타민 D',  target:10,  unit:'μg' },
-        vitaminE: { label:'비타민 E',  target:12,  unit:'mg' },
-        vitaminB: { label:'비타민 B군',target:5,   unit:'mg' },
-        folate:   { label:'엽산',      target:400, unit:'μg' }
+        magnesium: { label:'마그네슘', target:320,  unit:'mg' }
       }
     }
+    // 비타민 그룹 제거 · 미량 영양소 숫자는 정확도가 낮아 노출 X
+    // (부족 감지는 내부 로직에서 계속 사용 · 사용자에겐 정성적 문구만)
   };
 
   // 그룹별 HTML — 깔끔한 라인 디자인
