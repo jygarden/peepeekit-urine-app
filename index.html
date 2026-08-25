@@ -6648,10 +6648,13 @@ function calculateSleepPattern(input) {
     fragmented:        SLEEP_VAL.q4[input.q4] || 0,
     pre_sleep_habit:   SLEEP_VAL.q5[input.q5] || 0
   };
-  // 우선순위: 분절 > 아침무거움 > 낮졸림 > 리듬불안정 > 잠자리습관
-  const order = ['fragmented','morning_heaviness','daytime_drowsy','schedule_irregular','pre_sleep_habit'];
-  let primary = order[0], max = -1;
-  order.forEach(k => { if (p[k] > max) { max = p[k]; primary = k; } });
+  // primary: 점수 최고 · 동점 시 우선순위: 분절 > 아침무거움 > 낮졸림 > 리듬불안정 > 잠자리습관
+  const priority = ['fragmented','morning_heaviness','daytime_drowsy','schedule_irregular','pre_sleep_habit'];
+  const sortedByScore = priority.slice().sort((a, b) => {
+    if (p[b] !== p[a]) return p[b] - p[a];
+    return priority.indexOf(a) - priority.indexOf(b);
+  });
+  const primary = sortedByScore[0];
   const friendlyLabel = {
     fragmented:'밤에 자꾸 깨는 편이에요',
     morning_heaviness:'아침이 무거운 편이에요',
@@ -6659,16 +6662,22 @@ function calculateSleepPattern(input) {
     schedule_irregular:'잠자리 시간이 들쭉날쭉한 편이에요',
     pre_sleep_habit:'잠자기 전 습관을 살펴볼 만해요'
   }[primary];
-  const patternChips = {
-    fragmented:'밤 중 각성',
-    morning_heaviness:'아침 무거움',
-    daytime_drowsy:'낮 졸림',
-    schedule_irregular:'수면 리듬 불안정',
-    pre_sleep_habit:'잠자기 전 자극'
+  const patternMeta = {
+    fragmented: { chip:'밤중 각성', qid:'q4' },
+    morning_heaviness: { chip:'아침 회복감', qid:'q1' },
+    daytime_drowsy: { chip:'낮 컨디션', qid:'q2' },
+    schedule_irregular: { chip:'수면 리듬', qid:'q3' },
+    pre_sleep_habit: { chip:'잠자기 전 습관', qid:'q5' }
   };
-  const observed = Object.keys(p).filter(k => p[k] >= 2).slice(0, 3)
-    .map(k => ({ key:k, label:patternChips[k], severity: p[k] >= 3 ? 'high' : 'mid' }));
-  return { patterns: p, primary, friendlyLabel, observed };
+  // 상위 3개 동적 (점수 순 · 0점도 포함 · 상태 라벨은 렌더에서 처리)
+  const top3 = sortedByScore.slice(0, 3).map(k => ({
+    key: k,
+    label: patternMeta[k].chip,
+    score: p[k],
+    qid: patternMeta[k].qid,
+    severity: p[k] >= 3 ? 'high' : p[k] >= 2 ? 'mid' : 'low'
+  }));
+  return { patterns: p, primary, friendlyLabel, top3, patternMeta };
 }
 
 // 생활 기록에서 관련 신호 추출
@@ -6913,6 +6922,30 @@ function _sleepMakeWhyText(entry) {
   return `최근 2주 응답을 보면 ${pieces.join(', ')}, ${last}.`;
 }
 
+// ═══ 응답 근거 리스트 · 실제 답변 인용 ═══
+function _sleepMakeEvidenceList(entry) {
+  const input = entry.input || {};
+  const shortLabels = {
+    q1: { refreshing:'매우 개운', refreshing_mild:'개운', okay:'보통', heavy:'무거움', very_heavy:'매우 무거움' },
+    q2: { none:'거의 없음', sometimes:'가끔', often:'종종', frequent:'자주', daily:'거의 매일' },
+    q3: { very_regular:'매우 규칙적', regular:'규칙적', okay:'보통', irregular:'들쭉날쭉', chaotic:'매우 불규칙' },
+    q4: { none:'거의 없음', sometimes:'가끔', often:'종종', frequent:'자주', daily:'거의 매일' },
+    q5: { none:'거의 없음', sometimes:'가끔', often:'종종', frequent:'자주', daily:'매일' }
+  };
+  const questionTag = {
+    q1:'아침 개운함', q2:'낮 졸림', q3:'수면 규칙성', q4:'밤중 각성', q5:'잠자기 전 습관'
+  };
+  const p = entry.patternResult.patterns;
+  const scoreMap = { q1: p.morning_heaviness, q2: p.daytime_drowsy, q3: p.schedule_irregular, q4: p.fragmented, q5: p.pre_sleep_habit };
+  // 점수 2 이상만 · 최대 3개
+  const evidence = ['q4','q1','q2','q3','q5'].filter(q => scoreMap[q] >= 2).slice(0, 3);
+  return evidence.map(q => ({
+    tag: questionTag[q],
+    answer: shortLabels[q][input[q]] || '—',
+    strong: scoreMap[q] >= 3
+  }));
+}
+
 // ═══ 3 패턴 상태 라벨 (숫자 X · 상태 표현) ═══
 function _sleepPatternStatus(v) {
   return v >= 3 ? '높음' : v >= 2 ? '보통 이상' : v >= 1 ? '보통' : '낮음';
@@ -6942,12 +6975,13 @@ function renderSleepResult(entry) {
     pre_sleep_habit:'잠자기 전 습관을 살펴볼 만해요'
   }[pr.primary] || '눈에 띄는 패턴이 있었어요';
 
-  // 3 패턴 카드 (숫자 X · 상태 라벨)
-  const chipCards = [
-    { label:'밤중 각성', status: _sleepPatternStatus(pr.patterns.fragmented), score: pr.patterns.fragmented },
-    { label:'아침 회복감', status: _sleepInvertedStatus(pr.patterns.morning_heaviness), score: pr.patterns.morning_heaviness },
-    { label:'수면 리듬', status: _sleepInvertedStatus(pr.patterns.schedule_irregular), score: pr.patterns.schedule_irregular }
-  ];
+  // 3 패턴 카드 · 실제 응답 상위 3개 동적 (score가 낮아도 표시하되 상태 라벨로 톤 조절)
+  const invertedKeys = ['morning_heaviness','schedule_irregular']; // 낮을수록 문제인 지표
+  const chipCards = (pr.top3 || []).map(t => ({
+    label: t.label,
+    status: invertedKeys.includes(t.key) ? _sleepInvertedStatus(t.score) : _sleepPatternStatus(t.score),
+    score: t.score
+  }));
   const chipTone = (label, score) => {
     // 걱정도 = score. 파랑 통일 · 강도만 다르게
     if (score >= 3) return { bg:'#EFF6FF', text:'#1E40AF', accent:'#2563EB' };
@@ -7047,7 +7081,15 @@ function renderSleepResult(entry) {
     <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
       <div style="font-size:11px;color:#94A3B8;font-weight:700;letter-spacing:.4px;margin-bottom:8px">왜 이렇게 봤을까요?</div>
       <div style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.4px;line-height:1.4;margin-bottom:8px">${whyTitle}</div>
-      <div style="font-size:12.5px;color:#475569;line-height:1.75;font-weight:500">${whyText}</div>
+      <div style="font-size:12.5px;color:#475569;line-height:1.75;font-weight:500;margin-bottom:${_sleepMakeEvidenceList(entry).length ? '14px' : '0'}">${whyText}</div>
+      ${(() => {
+        const ev = _sleepMakeEvidenceList(entry);
+        if (!ev.length) return '';
+        return `<div style="padding-top:14px;border-top:1px solid #F1F5F9">
+          <div style="font-size:10.5px;color:#94A3B8;font-weight:700;letter-spacing:.4px;margin-bottom:8px">체크한 응답</div>
+          ${ev.map(e => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:12px;color:#475569;font-weight:600"><span>${e.tag}</span><span style="background:${e.strong ? '#EFF6FF' : '#F1F5F9'};color:${e.strong ? '#1E40AF' : '#475569'};padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800">${e.answer}</span></div>`).join('')}
+        </div>`;
+      })()}
     </div>
 
     ${lifestyleHtml}
@@ -7055,7 +7097,29 @@ function renderSleepResult(entry) {
     <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:18px;padding:22px 22px;margin-bottom:14px">
       <div style="font-size:11px;font-weight:800;color:#2563EB;letter-spacing:.4px;margin-bottom:10px">이번 주 하나만 바꿔볼까요?</div>
       <div style="font-size:19px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.4;margin-bottom:12px">${c.recommendedAction.title}</div>
-      <div style="font-size:12.5px;color:#1E3A8A;font-weight:500;line-height:1.7;margin-bottom:18px">${c.recommendedAction.reason}</div>
+      <div style="font-size:12.5px;color:#1E3A8A;font-weight:500;line-height:1.7;margin-bottom:14px">${c.recommendedAction.reason}</div>
+      <div style="background:#fff;border-radius:12px;padding:11px 13px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:6px;font-size:10.5px;color:#2563EB;font-weight:800;letter-spacing:.3px;margin-bottom:5px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          왜 이 하나예요?
+        </div>
+        <div style="font-size:11.5px;color:#334155;font-weight:600;line-height:1.6">${(() => {
+          const p = pr.patterns;
+          const hasLc = l && l.lateCaffeine >= 3;
+          const hasLm = l && l.lateMeal >= 3;
+          const primary = pr.primary;
+          if (hasLc && (primary === 'pre_sleep_habit' || primary === 'fragmented' || primary === 'morning_heaviness')) {
+            return '문항 응답과 최근 카페인 기록이 <b>같은 방향</b>을 가리켜 근거가 가장 강했어요.';
+          }
+          if (hasLm && (primary === 'fragmented' || primary === 'morning_heaviness')) {
+            return '늦은 저녁 기록과 밤중 각성 응답이 <b>겹쳐 나타나</b> 이 행동부터 우선했어요.';
+          }
+          if (primary === 'schedule_irregular') return '수면 리듬 응답이 가장 두드러져 <b>기상 시간 고정</b>이 근본이에요.';
+          if (primary === 'daytime_drowsy') return '낮 졸림 응답이 반복되어 <b>아침 햇빛</b>이 가장 안전한 시작점이에요.';
+          if (primary === 'morning_heaviness') return '아침 회복감이 낮아 <b>수면 시간 자체</b>부터 늘려보는 게 우선이에요.';
+          return '응답 패턴에서 가장 개선 여지가 큰 부분부터 시작해요.';
+        })()}</div>
+      </div>
       <button onclick="_sleepSetAsMission('${c.recommendedAction.title.replace(/'/g,"\\'")}')" style="width:100%;background:#2563EB;color:#fff;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(37,99,235,.25)">이번 주 목표로 설정</button>
     </div>
 
