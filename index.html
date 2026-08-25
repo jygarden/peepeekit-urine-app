@@ -190,6 +190,26 @@ window.appIcon = function(name, size){
     background: #F7F8FA;
   }
   #screenMy > div{ padding-top: 0 !important; margin-top: 0 !important; }
+  /* 🌙 수면 체크 화면 · My와 같은 방식 (상단 여백 이슈 방지) */
+  #screenSleepCheck{
+    padding: 0 !important;
+    margin: 0 !important;
+    animation: none !important;
+    min-height: 0 !important;
+  }
+  #screenSleepCheck.active{
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    animation: none !important;
+    transform: none !important;
+    background: #FBFBFD;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #screenSleepCheck > div{ padding-top: 16px !important; margin-top: 0 !important; }
   /* v12 · 홈은 오늘 상태만 · 나머지는 다른 탭으로 이관 */
   #screenHome .home-top-bar,
   #screenHome > .home-wrap > div[onclick*="openFortune"],
