@@ -2330,7 +2330,7 @@ window.appIcon = function(name, size){
 
         <!-- ⑤ 하단 3카드 · 수면 / 소변검사 / 변화 리포트 -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <button onclick="alert('수면 기록은 준비 중입니다.')" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
+          <button onclick="if(typeof enterSleepCheck==='function')enterSleepCheck()" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -5132,6 +5132,8 @@ function installApp() {
 }
 function dismissInstall() { document.getElementById('installBanner').style.display = 'none'; }
 window.addEventListener('load', () => {
+  // v20 · 앱 시작 시 저장된 영양제 알림 Flutter에 재예약
+  setTimeout(() => { try { _v20SyncAllReminders && _v20SyncAllReminders(); } catch(e){} }, 1200);
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone;
   if (isIOS && !isStandalone) {
@@ -6495,6 +6497,355 @@ function renderV20Home() {
     _v20RenderBottomCards();
 
   } catch(e) { console.error('renderV20Home', e); }
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🌙 내 수면 체크 (v20) · 5문항 · 로컬 판정 · 진단 X · 습관 코칭
+// ════════════════════════════════════════════════════════════════
+const SLEEP_QUESTIONS = [
+  { id:'q1', text:'아침에 일어났을 때 개운한 편인가요?',
+    opts:[{v:'refreshing',label:'매우 개운해요'},{v:'refreshing_mild',label:'개운한 편'},{v:'okay',label:'보통'},{v:'heavy',label:'무거운 편'},{v:'very_heavy',label:'매우 무거워요'}] },
+  { id:'q2', text:'낮에 졸리거나 집중이 흐려지는 날이 있나요?',
+    opts:[{v:'none',label:'거의 없어요'},{v:'sometimes',label:'가끔'},{v:'often',label:'종종'},{v:'frequent',label:'자주'},{v:'daily',label:'거의 매일'}] },
+  { id:'q3', text:'취침·기상 시간이 매일 비슷한가요?',
+    opts:[{v:'very_regular',label:'매우 규칙적'},{v:'regular',label:'규칙적'},{v:'okay',label:'보통'},{v:'irregular',label:'들쭉날쭉'},{v:'chaotic',label:'매우 불규칙'}] },
+  { id:'q4', text:'밤에 자다가 깨거나 다시 잠들기 어려운 날이 있나요?',
+    opts:[{v:'none',label:'거의 없어요'},{v:'sometimes',label:'가끔'},{v:'often',label:'종종'},{v:'frequent',label:'자주'},{v:'daily',label:'거의 매일'}] },
+  { id:'q5', text:'잠자기 전에 카페인·야식·핸드폰이 많은 편인가요?',
+    opts:[{v:'none',label:'거의 없어요'},{v:'sometimes',label:'가끔'},{v:'often',label:'종종'},{v:'frequent',label:'자주'},{v:'daily',label:'매일'}] }
+];
+
+// 각 응답값 → 0~3 점수 (문항별 방향)
+const SLEEP_VAL = {
+  q1:{refreshing:0,refreshing_mild:0,okay:1,heavy:2,very_heavy:3},
+  q2:{none:0,sometimes:1,often:2,frequent:2,daily:3},
+  q3:{very_regular:0,regular:0,okay:1,irregular:2,chaotic:3},
+  q4:{none:0,sometimes:1,often:2,frequent:2,daily:3},
+  q5:{none:0,sometimes:1,often:2,frequent:2,daily:3}
+};
+
+// 문항 → 패턴 매핑
+function calculateSleepPattern(input) {
+  const p = {
+    morning_heaviness: SLEEP_VAL.q1[input.q1] || 0,
+    daytime_drowsy:    SLEEP_VAL.q2[input.q2] || 0,
+    schedule_irregular:SLEEP_VAL.q3[input.q3] || 0,
+    fragmented:        SLEEP_VAL.q4[input.q4] || 0,
+    pre_sleep_habit:   SLEEP_VAL.q5[input.q5] || 0
+  };
+  // 우선순위: 분절 > 아침무거움 > 낮졸림 > 리듬불안정 > 잠자리습관
+  const order = ['fragmented','morning_heaviness','daytime_drowsy','schedule_irregular','pre_sleep_habit'];
+  let primary = order[0], max = -1;
+  order.forEach(k => { if (p[k] > max) { max = p[k]; primary = k; } });
+  const friendlyLabel = {
+    fragmented:'밤에 자꾸 깨는 편이에요',
+    morning_heaviness:'아침이 무거운 편이에요',
+    daytime_drowsy:'낮에 졸린 날이 많은 편이에요',
+    schedule_irregular:'잠자리 시간이 들쭉날쭉한 편이에요',
+    pre_sleep_habit:'잠자기 전 습관을 살펴볼 만해요'
+  }[primary];
+  const patternChips = {
+    fragmented:'밤 중 각성',
+    morning_heaviness:'아침 무거움',
+    daytime_drowsy:'낮 졸림',
+    schedule_irregular:'수면 리듬 불안정',
+    pre_sleep_habit:'잠자기 전 자극'
+  };
+  const observed = Object.keys(p).filter(k => p[k] >= 2).slice(0, 3)
+    .map(k => ({ key:k, label:patternChips[k], severity: p[k] >= 3 ? 'high' : 'mid' }));
+  return { patterns: p, primary, friendlyLabel, observed };
+}
+
+// 생활 기록에서 관련 신호 추출
+function getSleepLifestyleContext() {
+  const now = new Date();
+  const fh = _getFoodHistory();
+  const last7 = fh.filter(e => {
+    const d = new Date(e.date);
+    return (now - d) < 7 * 86400000;
+  });
+  // 늦은 카페인 (17시 이후 · 커피/에스프레소/아메리카노/라떼 등 이름 포함)
+  let lateCaffeine = 0;
+  let lateMeal = 0;
+  let alcohol = 0;
+  const caffeinePattern = /(커피|에스프레소|아메리카노|라떼|카푸치노|콜라|에너지드링크|카페인)/;
+  const alcoholPattern = /(맥주|소주|와인|막걸리|위스키|하이볼|칵테일|삼겹살\s*술|회식)/;
+  last7.forEach(e => {
+    const foods = e.foods || '';
+    const hour = new Date(e.date).getHours();
+    if (hour >= 17 && caffeinePattern.test(foods)) lateCaffeine++;
+    if (hour >= 22 || e.mealTime === 'snack' && hour >= 21) lateMeal++;
+    if (alcoholPattern.test(foods)) alcohol++;
+  });
+  // 수면 데이터 (Apple Health 연동 시)
+  let sleepData = null;
+  try { sleepData = JSON.parse(localStorage.getItem('sleepDataV1') || 'null'); } catch(e){}
+  return {
+    lateCaffeine, lateMeal, alcohol,
+    avgSleepMinutes: sleepData?.avgMinutes || null,
+    lastWeekAvgMinutes: sleepData?.lastWeekAvgMinutes || null
+  };
+}
+
+// 코칭 결과 · Level 2 (문항 + 생활)
+function buildSleepCoaching(patternResult, lifestyle) {
+  const obs = [];
+  if (lifestyle.lateCaffeine >= 2) obs.push({ icon:'☕', label:'늦은 카페인', count:lifestyle.lateCaffeine, unit:'일' });
+  if (lifestyle.lateMeal >= 2) obs.push({ icon:'🍽', label:'늦은 저녁', count:lifestyle.lateMeal, unit:'일' });
+  if (lifestyle.alcohol >= 2) obs.push({ icon:'🍺', label:'저녁 음주', count:lifestyle.alcohol, unit:'회' });
+  if (lifestyle.avgSleepMinutes && lifestyle.lastWeekAvgMinutes) {
+    const diff = lifestyle.avgSleepMinutes - lifestyle.lastWeekAvgMinutes;
+    if (Math.abs(diff) >= 20) obs.push({ icon:'🌙', label:'평균 수면', diff:diff, unit:'분' });
+  }
+
+  // 행동 우선순위 결정 매트릭스
+  const primary = patternResult.primary;
+  let action;
+  if (lifestyle.lateCaffeine >= 3 && (primary === 'pre_sleep_habit' || primary === 'fragmented' || primary === 'morning_heaviness')) {
+    action = { title:'오후 3시 이후 카페인 줄이기', reason:'최근 늦은 카페인 섭취가 반복됐어요. 이번 주엔 오후 카페인부터 줄여보고 수면이 어떻게 변하는지 확인해봐요.' };
+  } else if (lifestyle.lateMeal >= 3 && (primary === 'fragmented' || primary === 'morning_heaviness')) {
+    action = { title:'취침 3시간 전엔 야식 줄이기', reason:'늦은 저녁이 자주 있었어요. 자기 전 위 부담을 줄이면 밤에 덜 깨는 데 도움이 돼요.' };
+  } else if (lifestyle.alcohol >= 3 && primary === 'fragmented') {
+    action = { title:'저녁 음주 절제해보기', reason:'음주는 잠드는 건 쉽게 해도 밤중 각성을 늘리는 경향이 있어요.' };
+  } else if (primary === 'schedule_irregular') {
+    action = { title:'매일 같은 시간에 기상하기', reason:'주말 포함 매일 같은 시간에 일어나면 리듬이 안정돼요. 취침 시간은 자연스럽게 따라와요.' };
+  } else if (primary === 'daytime_drowsy') {
+    action = { title:'아침 햇빛 10분 쬐기', reason:'아침 햇빛은 낮 각성과 밤 수면 리듬을 함께 맞춰줘요. 창가만 가도 좋아요.' };
+  } else if (primary === 'morning_heaviness') {
+    action = { title:'취침을 30분 앞당기기', reason:'아침이 무겁다면 잠자는 시간을 먼저 조금 늘려보는 게 첫 걸음이에요.' };
+  } else if (primary === 'fragmented') {
+    action = { title:'자기 전 1시간 스크린 오프', reason:'화면 빛과 자극은 밤중 각성에 영향을 줘요. 자기 전 1시간만이라도 화면을 멀리해보세요.' };
+  } else {
+    action = { title:'자기 전 30분 스크린 오프', reason:'가볍게 시작할 수 있는 습관이에요. 이번 주 실천해보고 다음 체크로 확인해봐요.' };
+  }
+  const followUp = new Date(); followUp.setDate(followUp.getDate() + 7);
+
+  // Red Flag · 매우 좁게
+  const q2 = patternResult.patterns.daytime_drowsy;
+  const q4 = patternResult.patterns.fragmented;
+  const redFlag = (q2 >= 3 && q4 >= 3) ? {
+    type:'severe_combined',
+    message:'생활습관 조정만으로 개선되지 않는 심한 수면 문제는 전문가와 상담해보시는 것을 권해드려요.'
+  } : null;
+
+  return {
+    observedPatterns: obs,
+    recommendedAction: { ...action, followUpDate: followUp.toISOString() },
+    redFlag
+  };
+}
+
+// localStorage 저장·조회
+function saveSleepCheck(entry) {
+  const list = getSleepCheckHistory();
+  list.unshift({ ...entry, date: new Date().toISOString() });
+  localStorage.setItem('sleepCheckV1', JSON.stringify(list.slice(0, 30)));
+}
+function getSleepCheckHistory() {
+  try { return JSON.parse(localStorage.getItem('sleepCheckV1') || '[]'); } catch(e){ return []; }
+}
+function getLastSleepCheck() { return getSleepCheckHistory()[0] || null; }
+function daysSinceLastSleepCheck() {
+  const last = getLastSleepCheck();
+  if (!last) return null;
+  return Math.floor((Date.now() - new Date(last.date).getTime()) / 86400000);
+}
+
+// ═══ 수면체크 화면 ═══
+let _sleepAnswers = {};
+let _sleepCurrentQ = 0;
+
+function enterSleepCheck() {
+  _sleepAnswers = {};
+  _sleepCurrentQ = 0;
+  const days = daysSinceLastSleepCheck();
+  if (days !== null && days < 7) {
+    // 최근 7일 내 결과 있으면 결과부터 보여줌
+    renderSleepResult(getLastSleepCheck());
+    showScreen('screenSleepCheck');
+    return;
+  }
+  renderSleepIntro();
+  showScreen('screenSleepCheck');
+}
+
+function renderSleepIntro() {
+  const el = document.getElementById('sleepCheckContent');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="padding:28px 0 20px;text-align:center">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,#DDD6FE,#8B5CF6);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 20px;box-shadow:0 12px 28px rgba(139,92,246,.25)">🌙</div>
+      <div style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;margin-bottom:8px">내 수면 체크</div>
+      <div style="font-size:13px;color:#64748B;font-weight:500;line-height:1.6;max-width:280px;margin:0 auto">약 30초면 최근 수면 패턴을<br>확인할 수 있어요.</div>
+    </div>
+    <div style="background:#F8FAFC;border-radius:16px;padding:18px 20px;margin:20px 0;font-size:12px;color:#475569;line-height:1.7;font-weight:500">
+      <div style="font-weight:800;color:#0F172A;margin-bottom:8px">이렇게 진행돼요</div>
+      • 5개 짧은 질문에 답하기<br>
+      • 최근 식사·시간 기록을 함께 봐요<br>
+      • 이번 주 <b style="color:#8B5CF6">하나만 바꿔볼 행동</b>을 제안해요
+    </div>
+    <div style="background:#FFFBEB;border-radius:12px;padding:12px 14px;font-size:11px;color:#92400E;line-height:1.55;font-weight:600;margin-bottom:24px">
+      본 체크는 참고용 습관 코칭이며, 의학적 진단이 아닙니다.
+    </div>
+    <button onclick="_sleepStartQuestions()" style="width:100%;background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;border:none;padding:16px;border-radius:14px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(139,92,246,.35);letter-spacing:-.3px">체크 시작하기</button>
+  `;
+}
+
+function _sleepStartQuestions() {
+  _sleepCurrentQ = 0;
+  _sleepAnswers = {};
+  _sleepRenderQuestion();
+}
+
+function _sleepRenderQuestion() {
+  const q = SLEEP_QUESTIONS[_sleepCurrentQ];
+  const el = document.getElementById('sleepCheckContent');
+  if (!el || !q) return;
+  const total = SLEEP_QUESTIONS.length;
+  const pct = ((_sleepCurrentQ + 1) / total) * 100;
+  el.innerHTML = `
+    <div style="padding:6px 0 4px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;color:#8B5CF6;font-weight:800">${_sleepCurrentQ+1} / ${total}</span>
+        <span style="font-size:11px;color:#94A3B8;font-weight:600">30초 안에 끝나요</span>
+      </div>
+      <div style="height:4px;background:#F1F5F9;border-radius:2px;overflow:hidden">
+        <div style="height:100%;background:linear-gradient(90deg,#A78BFA,#8B5CF6);width:${pct}%;transition:width .3s"></div>
+      </div>
+    </div>
+    <div style="padding:36px 4px 24px">
+      <div style="font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.4">${q.text}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${q.opts.map(o => `<button onclick="_sleepAnswer('${q.id}','${o.v}')" style="width:100%;background:#fff;border:1.5px solid #E2E8F0;color:#0F172A;padding:16px 18px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:left;letter-spacing:-.2px;transition:all .15s">${o.label}</button>`).join('')}
+    </div>
+    ${_sleepCurrentQ > 0 ? `<button onclick="_sleepPrev()" style="width:100%;background:transparent;border:none;color:#64748B;padding:16px;margin-top:16px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">← 이전 질문</button>` : ''}
+  `;
+}
+
+function _sleepAnswer(qid, val) {
+  _sleepAnswers[qid] = val;
+  if (_sleepCurrentQ < SLEEP_QUESTIONS.length - 1) {
+    _sleepCurrentQ++;
+    _sleepRenderQuestion();
+  } else {
+    _sleepShowLoading();
+  }
+}
+
+function _sleepPrev() {
+  if (_sleepCurrentQ > 0) { _sleepCurrentQ--; _sleepRenderQuestion(); }
+}
+
+function _sleepShowLoading() {
+  const el = document.getElementById('sleepCheckContent');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="padding:80px 0;text-align:center">
+      <div style="width:60px;height:60px;border:4px solid #F1F5F9;border-top-color:#8B5CF6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px"></div>
+      <div style="font-size:14px;color:#64748B;font-weight:700">최근 식사·수면 기록과 함께 보고 있어요…</div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  `;
+  setTimeout(() => {
+    const patternResult = calculateSleepPattern(_sleepAnswers);
+    const lifestyle = getSleepLifestyleContext();
+    const coaching = buildSleepCoaching(patternResult, lifestyle);
+    const entry = { input:_sleepAnswers, patternResult, lifestyle, coaching };
+    saveSleepCheck(entry);
+    renderSleepResult(entry);
+    try { window.scrollTo(0, 0); } catch(e){}
+  }, 1600);
+}
+
+function renderSleepResult(entry) {
+  const el = document.getElementById('sleepCheckContent');
+  if (!el || !entry) return;
+  const pr = entry.patternResult;
+  const c = entry.coaching;
+  const l = entry.lifestyle;
+  const prevEntry = getSleepCheckHistory()[1] || null;
+
+  // 지난주 비교
+  let compareHtml = '';
+  if (prevEntry) {
+    const prevPr = prevEntry.patternResult;
+    const diffs = [];
+    if (prevPr.patterns.fragmented !== pr.patterns.fragmented) diffs.push({ label:'밤 중 각성', from:prevPr.patterns.fragmented, to:pr.patterns.fragmented });
+    if (prevPr.patterns.morning_heaviness !== pr.patterns.morning_heaviness) diffs.push({ label:'아침 개운함', from:prevPr.patterns.morning_heaviness, to:pr.patterns.morning_heaviness });
+    if (l.avgSleepMinutes && prevEntry.lifestyle?.avgSleepMinutes) {
+      const dmin = l.avgSleepMinutes - prevEntry.lifestyle.avgSleepMinutes;
+      const fmtH = m => `${Math.floor(m/60)}시간 ${m%60}분`;
+      diffs.push({ label:'평균 수면', text:`${fmtH(prevEntry.lifestyle.avgSleepMinutes)} → ${fmtH(l.avgSleepMinutes)}` });
+    }
+    compareHtml = diffs.length ? `
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:800;color:#0F172A;margin-bottom:10px">지난주와 비교해볼까요?</div>
+        ${diffs.map(d => `<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:#475569;font-weight:600"><span>${d.label}</span><span style="color:#0F172A;font-weight:800">${d.text || (d.to < d.from ? '개선 ↓' : '증가 ↑')}</span></div>`).join('')}
+      </div>` : '';
+  } else {
+    compareHtml = `<div style="background:#F8FAFC;border-radius:16px;padding:14px 16px;font-size:12px;color:#64748B;font-weight:600;line-height:1.55;margin-bottom:14px;text-align:center">다음 주 다시 체크하면 변화를 볼 수 있어요.</div>`;
+  }
+
+  const severityColor = { high:'#DC2626', mid:'#F59E0B' };
+  const chipsHtml = pr.observed.length ? pr.observed.map(o => `
+    <span style="background:${o.severity === 'high' ? '#FEF2F2' : '#FFFBEB'};color:${severityColor[o.severity]};padding:6px 12px;border-radius:99px;font-size:11.5px;font-weight:800">${o.label}</span>
+  `).join('') : '<span style="font-size:11.5px;color:#94A3B8;font-weight:700">특별히 걱정할 패턴은 없어요</span>';
+
+  const lifestyleHtml = c.observedPatterns.length ? c.observedPatterns.map(p => {
+    const val = p.diff !== undefined
+      ? `<span style="color:${p.diff < 0 ? '#EF4444' : '#10B981'}">${p.diff > 0 ? '+' : ''}${p.diff}${p.unit}</span>`
+      : `최근 7일 중 <b>${p.count}${p.unit}</b>`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #F1F5F9;font-size:12.5px;color:#475569;font-weight:600"><span>${p.icon} ${p.label}</span><span style="color:#0F172A;font-weight:700">${val}</span></div>`;
+  }).join('') : '<div style="padding:10px 0;font-size:11.5px;color:#94A3B8;font-weight:600">최근 식사 기록이 쌓이면 함께 볼 수 있어요.</div>';
+
+  el.innerHTML = `
+    <div style="padding:8px 0 4px">
+      <div style="font-size:11px;color:#8B5CF6;font-weight:800;letter-spacing:.4px;margin-bottom:8px">이번 주 수면 패턴</div>
+      <div style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.35">${pr.friendlyLabel}</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-top:20px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:#0F172A;margin-bottom:10px">건강어때가 확인한 패턴</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${chipsHtml}</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:#0F172A;margin-bottom:4px">생활 기록과 같이 봤어요</div>
+      <div style="margin-top:2px">${lifestyleHtml}</div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE);border:1px solid #DDD6FE;border-radius:16px;padding:18px 20px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:#6D28D9;letter-spacing:.3px;margin-bottom:8px">이번 주 하나만 바꿔볼까요?</div>
+      <div style="font-size:17px;font-weight:900;color:#0F172A;letter-spacing:-.4px;line-height:1.35;margin-bottom:10px">${c.recommendedAction.title}</div>
+      <div style="font-size:12.5px;color:#4C1D95;font-weight:500;line-height:1.65;margin-bottom:16px">${c.recommendedAction.reason}</div>
+      <button onclick="_sleepSetAsMission('${c.recommendedAction.title.replace(/'/g,"\\'")}')" style="width:100%;background:#6D28D9;color:#fff;border:none;padding:13px;border-radius:12px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px">이번 주 목표로 설정</button>
+    </div>
+
+    ${compareHtml}
+
+    ${c.redFlag ? `
+      <div style="background:#FEF2F2;border:1px solid #FCA5A5;border-radius:16px;padding:16px 18px;margin-bottom:14px">
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div style="font-size:12px;color:#7F1D1D;font-weight:600;line-height:1.6">${c.redFlag.message}</div>
+        </div>
+      </div>` : ''}
+
+    <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;font-size:10.5px;color:#64748B;line-height:1.6;font-weight:500;margin-bottom:14px">
+      본 결과는 참고용 습관 코칭이며 의학적 진단이 아닙니다. 심한 코골이·낮 졸림이 반복되면 전문가 상담을 권해드려요.
+    </div>
+
+    <button onclick="_sleepStartQuestions()" style="width:100%;background:transparent;border:1px solid #E2E8F0;color:#475569;padding:13px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">다시 체크하기</button>
+  `;
+}
+
+function _sleepSetAsMission(actionTitle) {
+  try {
+    localStorage.setItem('sleepWeeklyMissionV1', JSON.stringify({ title: actionTitle, startDate: new Date().toISOString(), completed: false }));
+    if (typeof showPointToast === 'function') showPointToast('🎯 이번 주 목표로 설정됐어요');
+  } catch(e){}
+  if (typeof goHome === 'function') setTimeout(() => goHome(), 500);
 }
 
 // ═══ 히어로 스마일 얼굴 · 점수 기반 5단계 표정·색상 ═══
@@ -17647,6 +17998,89 @@ function markSupplementTaken(id) {
   updateSupplement(id, { lastTaken: new Date().toISOString() });
 }
 
+// ═══ v20 · 영양제 복용 알림 · Flutter 로컬 알림 브릿지 ═══
+function _v20SetSupplementReminder(id, hour, minute, enabled) {
+  const list = getSupplementList();
+  const item = list.find(s => s.id === id);
+  if (!item) return false;
+  const h = Math.max(0, Math.min(23, parseInt(hour) || 9));
+  const m = Math.max(0, Math.min(59, parseInt(minute) || 0));
+  updateSupplement(id, { reminderHour: h, reminderMinute: m, reminderEnabled: !!enabled });
+  const updated = { id: item.id, name: item.name, hour: h, minute: m, enabled: !!enabled };
+  try {
+    if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+      if (enabled) window.flutter_inappwebview.callHandler('scheduleSupplementReminder', updated).catch(() => {});
+      else window.flutter_inappwebview.callHandler('cancelSupplementReminder', { id: item.id }).catch(() => {});
+    }
+  } catch(e){ console.warn('[bridge]', e); }
+  return true;
+}
+
+// 앱 시작 시 활성화된 모든 알림 Flutter에 재예약
+function _v20SyncAllReminders() {
+  try {
+    if (!window.flutter_inappwebview || !window.flutter_inappwebview.callHandler) return;
+    const list = getSupplementList().filter(s => s.reminderEnabled && (s.reminderHour !== undefined));
+    list.forEach(s => {
+      window.flutter_inappwebview.callHandler('scheduleSupplementReminder', {
+        id: s.id, name: s.name, hour: s.reminderHour, minute: s.reminderMinute || 0, enabled: true
+      }).catch(() => {});
+    });
+  } catch(e){}
+}
+// 알림 탭 시 Flutter가 호출 · 자동 복용 처리
+window.markSupplementFromNotification = function(id) {
+  try {
+    markSupplementTaken(id);
+    if (typeof showPointToast === 'function') showPointToast('복용 기록 완료 ✓');
+  } catch(e){}
+};
+
+// 알림 시간 설정 모달
+function _v20OpenReminderModal(id) {
+  const item = getSupplementList().find(s => s.id === id);
+  if (!item) return;
+  const overlay = document.createElement('div');
+  overlay.id = '_v20ReminderModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  const curHour = item.reminderHour !== undefined ? item.reminderHour : 9;
+  const curMin = item.reminderMinute !== undefined ? item.reminderMinute : 0;
+  const enabled = !!item.reminderEnabled;
+  const hourOpts = Array.from({length: 24}, (_, i) => `<option value="${i}" ${i===curHour?'selected':''}>${String(i).padStart(2,'0')}시</option>`).join('');
+  const minOpts = [0,15,30,45].map(m => `<option value="${m}" ${m===curMin?'selected':''}>${String(m).padStart(2,'0')}분</option>`).join('');
+  overlay.innerHTML = `<div style="background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:24px 22px 30px;font-family:inherit">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div><div style="font-size:16px;font-weight:900;color:#0F172A;letter-spacing:-.3px">복용 알림 설정</div>
+        <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">${_v20Esc(item.name)}</div></div>
+      <button type="button" onclick="document.getElementById('_v20ReminderModal').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:2px 6px">×</button>
+    </div>
+    <label style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:#F8FAFC;border-radius:12px;margin-bottom:14px;cursor:pointer">
+      <span style="font-size:13px;font-weight:700;color:#0F172A">매일 알림 켜기</span>
+      <input type="checkbox" id="_v20RemToggle" ${enabled ? 'checked' : ''} style="width:44px;height:26px;appearance:none;background:#E2E8F0;border-radius:99px;position:relative;cursor:pointer;outline:none;transition:.2s">
+    </label>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <select id="_v20RemHour" style="flex:1;padding:14px;border:1px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:700;color:#0F172A;font-family:inherit;background:#fff">${hourOpts}</select>
+      <select id="_v20RemMin" style="flex:1;padding:14px;border:1px solid #E2E8F0;border-radius:12px;font-size:15px;font-weight:700;color:#0F172A;font-family:inherit;background:#fff">${minOpts}</select>
+    </div>
+    <div style="font-size:11px;color:#64748B;font-weight:500;line-height:1.6;margin-bottom:16px;padding:10px 12px;background:#EFF6FF;border-radius:10px">💡 매일 설정 시간에 알림이 와요. 알림 탭 → 자동 복용 기록.</div>
+    <div style="display:flex;gap:8px">
+      <button type="button" onclick="document.getElementById('_v20ReminderModal').remove()" style="flex:1;background:#F1F5F9;color:#475569;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">취소</button>
+      <button type="button" onclick="(function(){var h=document.getElementById('_v20RemHour').value,m=document.getElementById('_v20RemMin').value,e=document.getElementById('_v20RemToggle').checked;_v20SetSupplementReminder('${id}',h,m,e);document.getElementById('_v20ReminderModal').remove();if(typeof showPointToast==='function')showPointToast(e?'⏰ '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+' 알림 설정':'알림 꺼짐');})()" style="flex:1;background:#2563EB;color:#fff;border:none;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">저장</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  // 체크박스 스타일 (동그라미)
+  const toggle = document.getElementById('_v20RemToggle');
+  if (toggle) {
+    const applyStyle = () => {
+      toggle.style.background = toggle.checked ? '#2563EB' : '#E2E8F0';
+    };
+    applyStyle();
+    toggle.addEventListener('change', applyStyle);
+  }
+}
+
 const FORTUNE_ZODIACS = [
   { name: '쥐',    emoji: '🐁', trait: '영리·기민' },
   { name: '소',    emoji: '🐄', trait: '성실·인내' },
@@ -18407,7 +18841,8 @@ function renderSupplementList() {
               </div>
               ${takenToday
                 ? `<div style="background:#F0FDF4;color:#059669;font-size:10px;font-weight:900;padding:4px 8px;border-radius:6px">✓ 완료</div>`
-                : `<div style="display:flex;gap:4px">
+                : `<div style="display:flex;gap:4px;align-items:center">
+                     <button onclick="_v20OpenReminderModal('${item.id}')" title="알림 설정" style="background:${item.reminderEnabled ? '#EFF6FF' : '#F1F5F9'};color:${item.reminderEnabled ? '#2563EB' : '#94A3B8'};font-size:10px;font-weight:900;padding:5px 8px;border-radius:6px;border:none;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px">${item.reminderEnabled ? '🔔 '+String(item.reminderHour).padStart(2,'0')+':'+String(item.reminderMinute||0).padStart(2,'0') : '🔕'}</button>
                      <button onclick="onSupplementTaken('${item.id}')" style="background:#059669;color:#FFF;font-size:10px;font-weight:900;padding:5px 8px;border-radius:6px;border:none;cursor:pointer;font-family:inherit">먹었어요</button>
                      <button onclick="editSupplement('${item.id}')" style="background:#FFF;color:#65756B;font-size:10px;font-weight:900;padding:5px 8px;border-radius:6px;border:1px solid #E5D9BA;cursor:pointer;font-family:inherit">편집</button>
                    </div>`}
@@ -22206,7 +22641,7 @@ function updateGgTabbar(screenId) {
   const bar = document.getElementById('ggTabbar');
   if (!bar) return;
   // v12 · 메인 + 분석 하위 화면에서 노출
-  const mainScreens = ['screenHome', 'screenResult', 'screenCuration', 'screenFoodResult', 'screenPrescription', 'screenAnalyzeHub', 'screenMy', 'screenProfilePicker', 'screenCapture', 'screenFoodCapture', 'screenIngredient', 'screenPetPantry', 'screenPetFood', 'screenSupplement'];
+  const mainScreens = ['screenHome', 'screenResult', 'screenCuration', 'screenFoodResult', 'screenPrescription', 'screenAnalyzeHub', 'screenMy', 'screenProfilePicker', 'screenCapture', 'screenFoodCapture', 'screenIngredient', 'screenPetPantry', 'screenPetFood', 'screenSupplement', 'screenSleepCheck'];
   const shouldShow = mainScreens.includes(screenId);
   bar.style.display = shouldShow ? 'grid' : 'none';
   document.body.classList.toggle('gg-tab-shown', shouldShow);
@@ -22224,6 +22659,20 @@ function updateGgTabbar(screenId) {
   }
 }
 </script>
+<!-- ════════════ 🌙 내 수면 체크 화면 (v20) ════════════ -->
+<div class="screen" id="screenSleepCheck" style="background:#FBFBFD">
+  <div style="padding:16px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <button onclick="goHome()" style="background:transparent;border:none;padding:6px;cursor:pointer" aria-label="홈으로">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div style="font-size:13px;font-weight:800;color:#0F172A">내 수면 체크</div>
+      <button onclick="goHome()" style="background:#F1F5F9;border:none;padding:6px 12px;border-radius:99px;font-size:11px;color:#475569;font-weight:700;cursor:pointer;font-family:inherit">홈</button>
+    </div>
+    <div id="sleepCheckContent"></div>
+  </div>
+</div>
+
 <!-- ════════════ v12 · My 탭 화면 ════════════ -->
 <div class="screen gg-font" id="screenMy">
   <div style="padding:6px 2px 24px">
