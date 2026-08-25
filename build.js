@@ -1,4 +1,4 @@
-\// 🔒 Vercel 빌드 스크립트
+// 🔒 Vercel 빌드 스크립트
 // index.html 안의 <script> 태그를 Terser로 minify + 난독화
 // 결과물은 dist/index.html에 배포
 
@@ -115,7 +115,16 @@ async function build() {
             'renderV20FoodStoryDOM', 'FOOD_ALIAS', '_v20FoodQueryMap', '_v20FetchFoodPhoto',
             // v2.0 v3 · 홈 재작성
             '_v20RenderRecentMeal', 'BODY_SIGNAL_MAP', '_v20RenderBodySignal', '_v20RenderBottomCards', '_v20MakeThumb',
-            'receiveSleepData', 'requestSleepData', '_v20RenderHeroFace'
+            'receiveSleepData', 'requestSleepData', '_v20RenderHeroFace',
+            // v20 · 영양제 복용 알림 Flutter 브릿지
+            '_v20SetSupplementReminder', '_v20SyncAllReminders', '_v20OpenReminderModal',
+            'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
+            // v20 · 수면 체크
+            'SLEEP_QUESTIONS', 'SLEEP_VAL', 'calculateSleepPattern', 'getSleepLifestyleContext', 'buildSleepCoaching',
+            'saveSleepCheck', 'getSleepCheckHistory', 'getLastSleepCheck', 'daysSinceLastSleepCheck',
+            'enterSleepCheck', 'renderSleepIntro', '_sleepStartQuestions', '_sleepRenderQuestion',
+            '_sleepAnswer', '_sleepPrev', '_sleepShowLoading', 'renderSleepResult', '_sleepSetAsMission',
+            '_sleepAnswers', '_sleepCurrentQ'
           ]
         },
         format: {
