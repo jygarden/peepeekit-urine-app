@@ -3769,7 +3769,7 @@ window.appIcon = function(name, size){
 
     <div class="loading-box" id="loadingBox">
       <div class="emoji">🤖</div>
-      <p>건강어떄 AI가 종합 분석 중입니다</p>
+      <p>건강어때 AI가 종합 분석 중입니다</p>
       <small>소변 수치 + 프로필 정보를 함께 분석하고 있어요...</small>
     </div>
   </div>
@@ -6074,11 +6074,45 @@ function _mealScore(mealName, shortages) {
 }
 
 // 오늘 뭐 먹지? · 상황별 TOP3
-function getWhatToEatNow(situation) {
+// 시간대별 부적절한 메뉴 제외 리스트 (한국 식문화 기준)
+const MEAL_TIME_EXCLUDE = {
+  // 아침 · 무거운 것, 회, 술안주, 국물 없는 고기류 제외
+  breakfast: ['연어회','광어회','회덮밥','초밥세트','삼겹살','갈비','곱창구이','족발','보쌈','닭꼬치','양꼬치','닭발','아구찜','낙지볶음','부대찌개','감자탕','뼈해장국','제육덮밥','김치볶음밥','돈까스','치킨마요덮밥','짜장면','짬뽕','냉면','들기름막국수','비빔국수','오징어볶음','뚝배기불고기'],
+  // 점심 · 회·안주류·회식 무거운 것 제외
+  lunch: ['연어회','광어회','삼겹살','갈비','곱창구이','족발','보쌈','닭꼬치','양꼬치','닭발','알탕'],
+  // 오후 간식 · 식사 메뉴 대부분 제외 · 가벼운 것만
+  snack: [], // pool에서 편의점·간편 위주로 자동 필터
+  // 저녁 · 대부분 OK
+  dinner: []
+};
+
+// 시간대 → 카테고리 자동 판정 (없으면 지금 시각 기준)
+function _mealTimeSlot() {
+  const h = new Date().getHours();
+  if (h < 10) return 'breakfast';
+  if (h < 14) return 'lunch';
+  if (h < 17) return 'snack';
+  return 'dinner';
+}
+
+function getWhatToEatNow(situation, mealTime) {
   const shortages = getShortageTop(3);
   if (!shortages.length) return { shortagesLabel: '오늘 균형이 좋아요', top3: [] };
-  const pool = MEAL_POOL_BY_SITUATION[situation || 'home'] || MEAL_POOL_BY_SITUATION.home;
-  // 부족 영양소를 채우는 메뉴 우선 스코어링
+  const rawPool = MEAL_POOL_BY_SITUATION[situation || 'home'] || MEAL_POOL_BY_SITUATION.home;
+  const slot = mealTime || _mealTimeSlot();
+  const excludeList = MEAL_TIME_EXCLUDE[slot] || [];
+  // 시간대 부적절 메뉴 제외
+  let pool = rawPool.filter(n => !excludeList.includes(n));
+  // 아침엔 특별히 가벼운 것만 우선 (덮밥·볶음밥 밀어내기)
+  if (slot === 'breakfast') {
+    const morningOK = pool.filter(n => /(죽|국밥|계란|삶은|요거트|우유|바나나|사과|고구마|김밥|샌드위치|잔치국수|콩나물국|미역국|된장찌개|순두부찌개|북엇국|무국|시금치된장국|잡곡밥|현미밥|샐러드)/.test(n));
+    if (morningOK.length >= 3) pool = morningOK;
+  }
+  // 오후 간식이면 정말 가벼운 것만
+  if (slot === 'snack') {
+    pool = pool.filter(n => /(요거트|바나나|사과|고구마|견과류믹스|아보카도|삶은계란|샌드위치|김밥|우유|그릭요거트)/.test(n));
+    if (!pool.length) pool = ['요거트','바나나','견과류믹스','고구마'];
+  }
   const scored = pool.map(name => {
     const item = _matchFoodInDB(name);
     return { name, item, score: _mealScore(name, shortages) };
@@ -6098,6 +6132,7 @@ function getWhatToEatNow(situation) {
   return {
     shortagesLabel: shortages.map(s => s.label).join(' · ') + ' 부족',
     shortages,
+    slot,
     top3
   };
 }
@@ -6569,7 +6604,9 @@ function renderV20Home() {
     let topMenus = [];
     if (typeof getWhatToEatNow === 'function' && shortagesArr.length > 0) {
       try {
-        const rec = getWhatToEatNow('eatout');
+        // 시간대 → 상황 자동 매핑 · 아침·점심=배달/외식, 저녁=외식, 간식=편의점
+        const sitByTime = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+        const rec = getWhatToEatNow(sitByTime);
         topMenus = (rec && rec.top3) ? rec.top3.slice(0, 2).map(m => m.name) : [];
       } catch(e){}
     }
