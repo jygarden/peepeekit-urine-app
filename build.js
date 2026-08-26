@@ -100,7 +100,7 @@ async function build() {
             '_petShotCaptured', '_petUpdateCta', '_petSubmitShots', '_petMultiSelected',
             'KOREAN_FOOD_DB', 'RDA_ADULT', 'NUTRIENT_LABEL', 'sumNutrition', '_matchFoodInDB',
             'getTodayNutritionBalance', 'getShortageTop',
-            'MEAL_POOL_BY_SITUATION', 'SHORTAGE_TO_FOODS', 'getWhatToEatNow',
+            'MEAL_POOL_BY_SITUATION', 'SHORTAGE_TO_FOODS', 'getWhatToEatNow', 'MEAL_TIME_EXCLUDE', '_mealTimeSlot',
             'MISSION_POOL', 'getTodayMissions',
             'getCoachInsights', 'COACH_SUGGESTED_QUESTIONS',
             // v2.0 신규 · 홈/추천 재작성
