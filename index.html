@@ -2258,12 +2258,14 @@ window.appIcon = function(name, size){
       <!-- ═════════ v2.0 v3 · 새 홈 (AI 코치 톤 · 프리미엄 iOS) ═════════ -->
       <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
 
-        <!-- 헤더 -->
+        <!-- 헤더 · 로고 + 브랜드 + 인사 + 알림 -->
         <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0 18px">
           <div style="flex:1;min-width:0">
-            <div style="font-size:22px;font-weight:900;color:#2563EB;letter-spacing:-.6px;margin-bottom:10px">건강어때</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <img src="assets/logo-mark.png" alt="건강어때" style="height:26px;width:auto" draggable="false">
+              <div style="font-size:20px;font-weight:900;color:#2563EB;letter-spacing:-.5px">건강어때</div>
+            </div>
             <div style="font-size:19px;font-weight:800;color:#0F172A;letter-spacing:-.5px">안녕하세요, <span id="v20ProfileName">재율님</span> <span style="font-size:17px">👋</span></div>
-            <div style="font-size:12.5px;color:#64748B;font-weight:500;margin-top:5px;letter-spacing:-.2px">오늘 내게 필요한 영양만 챙겨볼까요?</div>
           </div>
           <button onclick="openStreakInfo()" style="background:transparent;border:none;padding:8px 4px;cursor:pointer;position:relative;margin-top:4px" aria-label="알림">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
@@ -2272,34 +2274,37 @@ window.appIcon = function(name, size){
         </div>
 
         <!-- ① 히어로 · TODAY'S AI 코칭 (백지 흰 카드 · 파란 하이라이트 문장) -->
-        <div style="background:#fff;border-radius:22px;padding:22px 22px 20px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);position:relative;overflow:hidden;margin-bottom:14px">
-          <!-- 우측 · 6대 영양 밸런스 맵 (6각형 레이더) -->
-          <div id="v20HeroHex" style="position:absolute;top:16px;right:8px;width:130px;pointer-events:auto;cursor:pointer" onclick="_v20OpenNutrientMap()"></div>
-          <div style="position:relative;z-index:1">
-            <div style="display:inline-flex;align-items:center;gap:5px;margin-bottom:14px">
-              <span style="font-size:10.5px;font-weight:800;color:#2563EB;letter-spacing:.6px">TODAY'S AI 코칭</span>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="#2563EB"><path d="M12 2l2.5 6.5L21 10l-5 4.5L17.5 21 12 17.5 6.5 21 8 14.5 3 10l6.5-.5z"/></svg>
-            </div>
-            <div id="v20HeroHeadline" style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.6px;line-height:1.35;margin-bottom:10px;max-width:230px">오늘 첫 기록을 남겨보세요</div>
-            <div id="v20HeroSub" style="font-size:12.5px;color:#64748B;line-height:1.65;font-weight:500;max-width:230px">한 끼만 찍으면 바로 밸런스를 볼 수 있어요.</div>
-            <div style="border-top:1px solid #F1F5F9;margin:16px 0 12px;max-width:280px"></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#0F172A;font-weight:600;letter-spacing:-.2px">
-              <div style="width:22px;height:22px;background:#EFF6FF;border-radius:7px;display:flex;align-items:center;justify-content:center">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+        <div style="background:#fff;border-radius:22px;padding:22px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:14px">
+          <!-- 상단 · 좌측 텍스트 + 우측 6각 맵 (flex) -->
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="flex:1;min-width:0">
+              <div style="display:inline-flex;align-items:center;gap:5px;margin-bottom:14px">
+                <span style="font-size:10.5px;font-weight:800;color:#2563EB;letter-spacing:.6px">TODAY'S AI 코칭</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="#2563EB"><path d="M12 2l2.5 6.5L21 10l-5 4.5L17.5 21 12 17.5 6.5 21 8 14.5 3 10l6.5-.5z"/></svg>
               </div>
-              <span>영양 밸런스 <span id="v20HeroScore" style="font-weight:900">82</span>점</span>
-              <span style="color:#CBD5E1">·</span>
-              <span>지난주보다 <span id="v20HeroDelta" style="color:#2563EB;font-weight:900">+4</span></span>
+              <div id="v20HeroHeadline" style="font-size:20px;font-weight:900;color:#0F172A;letter-spacing:-.6px;line-height:1.35">오늘 첫 기록을 남겨보세요</div>
+              <div id="v20HeroSub" style="font-size:12.5px;color:#64748B;line-height:1.65;font-weight:500;margin-top:8px">한 끼만 찍으면 바로 밸런스를 볼 수 있어요.</div>
             </div>
-            <div id="v20HeroBoost" style="display:none;padding:12px 14px;background:#F8FAFC;border-radius:12px;margin-top:14px">
-              <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.2px;margin-bottom:6px">오늘 보완할 2가지</div>
-              <div id="v20HeroBoostChips" style="display:flex;gap:5px;flex-wrap:wrap"></div>
-            </div>
-            <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="width:100%;background:linear-gradient(135deg,#3B82F6 0%,#2563EB 100%);color:#fff;border:none;padding:15px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:-.3px;box-shadow:0 6px 18px rgba(37,99,235,.28);margin-top:14px">
-              오늘 뭐 먹을까?
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-            </button>
+            <div id="v20HeroHex" style="width:150px;flex-shrink:0;margin-top:-4px;cursor:pointer" onclick="_v20OpenNutrientMap()"></div>
           </div>
+
+          <div style="border-top:1px solid #F1F5F9;margin:16px 0 12px"></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#0F172A;font-weight:600;letter-spacing:-.2px">
+            <div style="width:22px;height:22px;background:#EFF6FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+            </div>
+            <span>영양 밸런스 <span id="v20HeroScore" style="font-weight:900">82</span>점</span>
+            <span style="color:#CBD5E1">·</span>
+            <span>지난주보다 <span id="v20HeroDelta" style="color:#2563EB;font-weight:900">+4</span></span>
+          </div>
+          <div id="v20HeroBoost" style="display:none;padding:12px 14px;background:#F8FAFC;border-radius:12px;margin-top:14px">
+            <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.2px;margin-bottom:6px">오늘 보완할 2가지</div>
+            <div id="v20HeroBoostChips" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+          </div>
+          <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="width:100%;background:linear-gradient(135deg,#3B82F6 0%,#2563EB 100%);color:#fff;border:none;padding:15px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:-.3px;box-shadow:0 6px 18px rgba(37,99,235,.28);margin-top:14px">
+            오늘 뭐 먹을까?
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+          </button>
         </div>
 
         <!-- ② 음식 사진 찍기 · 연파랑 박스 -->
@@ -7250,8 +7255,8 @@ function _v20RenderHexMap(bal, shortagesArr, isEmpty) {
   const stateOf = v => v < 0.6 ? 'low' : v < 0.85 ? 'mid' : v <= 1.2 ? 'ok' : 'high';
   const colorMap = { low:'#EF4444', mid:'#F59E0B', ok:'#2563EB', high:'#EAB308' };
 
-  // 6각형 좌표 · 중심 (65,68) · 반지름 55
-  const cx = 65, cy = 68, R = 52;
+  // 6각형 좌표 · 중심 (80,72) · 반지름 46 · 라벨 공간 확보
+  const cx = 80, cy = 72, R = 46;
   const pts = axisScores.map((v, i) => {
     const angle = (Math.PI / 3) * i - Math.PI / 2;
     // 축 값이 1일 때 반지름의 65% (적정 표시) · 최대 1.5일 때 100% 도달
@@ -7273,16 +7278,16 @@ function _v20RenderHexMap(bal, shortagesArr, isEmpty) {
   const dataPts = pts.map(p => `${p.x},${p.y}`).join(' ');
 
   const labelPos = [
-    { x: cx, y: 6, anchor:'middle' },        // 탄수
-    { x: cx + R + 12, y: cy - R*0.5 + 3, anchor:'middle' }, // 단백
-    { x: cx + R + 12, y: cy + R*0.5 + 4, anchor:'middle' }, // 지방
-    { x: cx, y: cy + R + 12, anchor:'middle' },     // 식이섬유
-    { x: cx - R - 12, y: cy + R*0.5 + 4, anchor:'middle' }, // 비타민
-    { x: cx - R - 12, y: cy - R*0.5 + 3, anchor:'middle' }  // 미네랄
+    { x: cx, y: 12, anchor:'middle' },        // 탄수 (위)
+    { x: cx + R + 18, y: cy - R*0.5 + 4, anchor:'middle' }, // 단백 (우상)
+    { x: cx + R + 18, y: cy + R*0.5 + 5, anchor:'middle' }, // 지방 (우하)
+    { x: cx, y: cy + R + 16, anchor:'middle' },     // 식이섬유 (아래)
+    { x: cx - R - 18, y: cy + R*0.5 + 5, anchor:'middle' }, // 비타민 (좌하)
+    { x: cx - R - 18, y: cy - R*0.5 + 4, anchor:'middle' }  // 미네랄 (좌상)
   ];
 
   const emptyFill = isEmpty;
-  const svg = `<svg viewBox="0 0 130 140" style="width:100%;height:auto" aria-label="6대 영양 밸런스 맵">
+  const svg = `<svg viewBox="0 0 160 150" style="width:100%;height:auto;overflow:visible" aria-label="6대 영양 밸런스 맵">
     <defs>
       <linearGradient id="v20HexFill" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="#60A5FA" stop-opacity=".38"/>
