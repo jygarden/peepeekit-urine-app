@@ -210,6 +210,10 @@ window.appIcon = function(name, size){
     -webkit-overflow-scrolling: touch;
   }
   #screenSleepCheck > div{ padding-top: 16px !important; margin-top: 0 !important; }
+  /* 📄 리포트 화면 · My와 같은 방식 */
+  #screenReport{ padding: 0 !important; margin: 0 !important; animation: none !important; min-height: 0 !important; }
+  #screenReport.active{ position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; animation: none !important; transform: none !important; background: #FBFBFD; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #screenReport > div{ padding-top: 20px !important; margin-top: 0 !important; }
   /* v12 · 홈은 오늘 상태만 · 나머지는 다른 탭으로 이관 */
   #screenHome .home-top-bar,
   #screenHome > .home-wrap > div[onclick*="openFortune"],
@@ -7714,6 +7718,137 @@ function _v20OpenMealWhy() {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
+// ═══ 리포트 화면 렌더 · 7일 트렌드·기록 요약 ═══
+function renderV20Report() {
+  const el = document.getElementById('v20ReportContent');
+  if (!el) return;
+  const scores = (typeof get7DayScores === 'function') ? get7DayScores() : [];
+  const avg7 = (typeof get7DayScoreAvg === 'function') ? get7DayScoreAvg() : { hasData:false };
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  const fh = _getFoodHistory();
+  const now = new Date();
+  const mealsLast7 = fh.filter(e => (now - new Date(e.date)) < 7*86400000);
+  const supplements = (typeof getSupplementList === 'function') ? getSupplementList() : [];
+  const sleepEntry = (typeof getLastSleepCheck === 'function') ? getLastSleepCheck() : null;
+  const urineHistory = (() => { try { return JSON.parse(localStorage.getItem('urineHistoryV2') || '[]'); } catch(e){ return []; } })();
+  const urineLatest = urineHistory.find(h => h.subject === 'human' && h.fullResult);
+
+  // 트렌드 그래프 데이터
+  const validScores = scores.map(s => s === null ? 0 : s);
+  const maxScore = Math.max(...validScores, 100);
+  const dayLabels = ['월','화','수','목','금','토','일'];
+  const today = new Date();
+  const startDayIdx = (today.getDay() + 6 - 6) % 7; // 6일 전의 요일 인덱스
+  const labels = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    labels.push('월화수목금토일'[d.getDay() === 0 ? 6 : d.getDay() - 1] || '·');
+  }
+
+  const trendBars = validScores.map((v, i) => {
+    const h = Math.max(4, (v / Math.max(100, maxScore)) * 90);
+    const isToday = i === 6;
+    const color = v === 0 ? '#F1F5F9' : isToday ? '#2563EB' : '#93C5FD';
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="width:100%;max-width:24px;height:100px;display:flex;align-items:flex-end">
+        <div style="width:100%;height:${h}px;background:${color};border-radius:6px 6px 0 0"></div>
+      </div>
+      <div style="font-size:10px;color:${isToday ? '#2563EB' : '#94A3B8'};font-weight:${isToday ? '900' : '700'}">${labels[i]}</div>
+      <div style="font-size:9px;color:${isToday ? '#2563EB' : '#CBD5E1'};font-weight:800">${v || '·'}</div>
+    </div>`;
+  }).join('');
+
+  // 이번 주 요약 통계
+  const mealCount = mealsLast7.length;
+  const daysWithMeal = new Set(mealsLast7.map(e => new Date(e.date).toDateString())).size;
+  const suppTakenToday = supplements.filter(s => s.lastTaken && new Date(s.lastTaken).toDateString() === today.toDateString()).length;
+
+  el.innerHTML = `
+    <!-- 이번 주 밸런스 트렌드 -->
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px">영양 밸런스 흐름</div>
+          <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">지난 7일 · 매일의 점수</div>
+        </div>
+        ${avg7.hasData ? `<div style="text-align:right"><div style="font-size:20px;font-weight:900;color:#2563EB;letter-spacing:-.5px">${avg7.avg}<span style="font-size:11px;color:#64748B;font-weight:700"> 평균</span></div>${avg7.delta !== 0 ? `<div style="font-size:11px;font-weight:800;color:${avg7.delta > 0 ? '#10B981' : '#EF4444'}">${avg7.delta > 0 ? '+' : ''}${avg7.delta}</div>` : ''}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:6px;margin-top:14px">${trendBars}</div>
+    </div>
+
+    <!-- 이번 주 활동 -->
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:12px">이번 주 활동</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div style="background:#EFF6FF;border-radius:12px;padding:14px 8px;text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#2563EB;letter-spacing:-.5px">${mealCount}</div>
+          <div style="font-size:10.5px;color:#1E40AF;font-weight:700;margin-top:3px">식사 기록</div>
+        </div>
+        <div style="background:#F0FDF4;border-radius:12px;padding:14px 8px;text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#16A34A;letter-spacing:-.5px">${daysWithMeal}</div>
+          <div style="font-size:10.5px;color:#15803D;font-weight:700;margin-top:3px">기록한 날</div>
+        </div>
+        <div style="background:#FEF3C7;border-radius:12px;padding:14px 8px;text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#B45309;letter-spacing:-.5px">${supplements.length}</div>
+          <div style="font-size:10.5px;color:#92400E;font-weight:700;margin-top:3px">복용 중 영양제</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 반복 부족 영양소 -->
+    ${shortages.length > 0 ? `
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:4px">반복 부족 영양소</div>
+      <div style="font-size:11px;color:#64748B;font-weight:600;margin-bottom:12px">지난 7일 중 부족했던 날</div>
+      ${shortages.map(s => {
+        const k = NUTRIENT_KNOWLEDGE[s.key] || {};
+        const days = (typeof getShortageDayCount === 'function') ? getShortageDayCount(s.key) : 0;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #F1F5F9">
+          <div style="width:26px;height:26px;background:${k.color || '#64748B'};border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${k.code || '·'}</div>
+          <span style="flex:1;font-size:12.5px;font-weight:700;color:#0F172A">${s.label}</span>
+          <span style="font-size:12px;font-weight:800;color:${k.color || '#64748B'}">${days}일 부족</span>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <!-- 수면 체크 -->
+    ${sleepEntry ? `
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px">수면 체크</div>
+        <button type="button" onclick="if(typeof enterSleepCheck==='function')enterSleepCheck()" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;font-family:inherit">다시 체크 ›</button>
+      </div>
+      <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4">${_v20Esc(sleepEntry.patternResult?.friendlyLabel || '')}</div>
+      <div style="font-size:11.5px;color:#64748B;font-weight:600;margin-top:6px">이번 주 목표: ${_v20Esc(sleepEntry.coaching?.recommendedAction?.title || '—')}</div>
+    </div>` : `
+    <div style="background:#F8FAFC;border-radius:14px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="font-size:24px">🌙</div>
+      <div style="flex:1">
+        <div style="font-size:12.5px;font-weight:800;color:#0F172A">수면 체크 기록 없음</div>
+        <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">30초면 수면 패턴 확인 가능</div>
+      </div>
+      <button type="button" onclick="if(typeof enterSleepCheck==='function')enterSleepCheck()" style="background:#2563EB;color:#fff;border:none;padding:8px 14px;border-radius:99px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">시작 ›</button>
+    </div>`}
+
+    <!-- 소변검사 -->
+    ${urineLatest ? `
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:20px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.3px">최근 소변검사</div>
+        <span style="font-size:10.5px;color:#94A3B8;font-weight:600">${new Date(urineLatest.date).getMonth()+1}/${new Date(urineLatest.date).getDate()}</span>
+      </div>
+      ${(() => {
+        const items = urineLatest.fullResult?.testItems || [];
+        const ok = items.filter(i => i.status === 'normal').length;
+        const warn = items.filter(i => i.status === 'warning' || i.status === 'danger').length;
+        return `<div style="font-size:14px;font-weight:800;color:#0F172A">정상 <b style="color:#10B981">${ok}</b> · 관심 <b style="color:${warn > 0 ? '#F59E0B' : '#94A3B8'}">${warn}</b></div>`;
+      })()}
+    </div>` : ''}
+
+    <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:11px;color:#64748B;line-height:1.6;font-weight:500">기록이 쌓일수록 더 정확한 변화 흐름을 볼 수 있어요.</div>
+  `;
+}
+
 // ═══ 최근 식사 결과 열기 (전체 보기 · 왜 이렇게 봤을까?) ═══
 function _v20OpenRecentMealResult() {
   try {
@@ -10446,6 +10581,25 @@ function _v20RecSwitch(tab) {
   else if (tab === 'lifestyle') _v20RecRenderLifestyle();
 }
 
+// 영양소 → 채우는 음식 요약 (짧게)
+const NUTRIENT_QUICK_FOODS = {
+  protein:['달걀','닭가슴살','두부'],
+  fiber:['채소','과일','통곡물'],
+  calcium:['우유','요거트','멸치'],
+  iron:['소고기','시금치','굴'],
+  magnesium:['견과류','바나나','시금치'],
+  vitA:['고구마','당근','시금치'],
+  vitC:['귤','딸기','파프리카'],
+  vitD:['연어','고등어','계란노른자'],
+  omega3:['연어','들기름','견과류'],
+  sodium:['국물 반만','저염 반찬','신선 식재료']
+};
+const NUTRIENT_TAGLINE = {
+  protein:'근육·회복', fiber:'장 건강·포만감', calcium:'뼈·치아',
+  iron:'혈액·에너지', magnesium:'수면·근육', vitA:'시력·피부',
+  vitC:'면역·항산화', vitD:'뼈·면역', omega3:'뇌·심혈관', sodium:'혈압 관리'
+};
+
 function _v20RecRenderNutrients() {
   const el = document.getElementById('v20RecContent');
   if (!el) return;
@@ -10463,34 +10617,40 @@ function _v20RecRenderNutrients() {
   shortages.forEach((s, idx) => {
     const k = NUTRIENT_KNOWLEDGE[s.key];
     if (!k) return;
-    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px;margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <div style="width:22px;height:22px;background:${k.color};border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800">${k.code}</div>
-        <span style="font-size:13px;font-weight:800;color:#0F172A">${k.label}</span>
-        <span style="font-size:10px;background:${k.bgLight};color:${k.color};padding:2px 8px;border-radius:8px;font-weight:800">${priorityLabels[idx]}</span>
+    const foods = NUTRIENT_QUICK_FOODS[s.key] || [];
+    const tag = NUTRIENT_TAGLINE[s.key] || '';
+    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:26px;height:26px;background:${k.color};border-radius:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${k.code}</div>
+        <span style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${k.label}</span>
+        <span style="font-size:10px;background:${k.bgLight};color:${k.color};padding:3px 8px;border-radius:8px;font-weight:800;margin-left:auto">${priorityLabels[idx]}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-        <div>
-          <div style="font-size:10px;color:#64748B;font-weight:700;margin-bottom:3px">? 왜 필요한가</div>
-          <div style="font-size:10px;color:#0F172A;line-height:1.5;font-weight:600">${_v20Esc(k.why_needed)}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;color:#B91C1C;font-weight:700;margin-bottom:3px">! 왜 부족한가</div>
-          <div style="font-size:10px;color:#0F172A;line-height:1.5;font-weight:600">${_v20Esc(k.why_low)}</div>
-        </div>
-        <div>
-          <div style="font-size:10px;color:#16A34A;font-weight:700;margin-bottom:3px">✓ 어떻게 보충할까</div>
-          <div style="font-size:10px;color:#0F172A;line-height:1.5;font-weight:600">${_v20Esc(k.how_to_fix)}</div>
-        </div>
+      <div style="font-size:11.5px;color:#64748B;font-weight:600;margin-bottom:12px">${_v20Esc(tag)}</div>
+      <div style="display:flex;gap:5px;margin-bottom:12px">
+        ${foods.map(f => `<span style="background:${k.bg};color:${k.color};padding:6px 10px;border-radius:99px;font-size:11px;font-weight:800">${_v20Esc(f)}</span>`).join('')}
       </div>
-      <div style="background:#F9FAFB;border-radius:8px;padding:7px 10px;font-size:10px;color:#64748B;font-weight:600;display:flex;justify-content:space-between;align-items:center">
-        <span>${_v20Esc(k.supp_hint)}</span>
-        <span style="color:#9CA3AF;flex-shrink:0;margin-left:6px">›</span>
+      <button type="button" onclick="_v20ToggleNutrientDetail('${s.key}')" id="nutDetailBtn_${s.key}" style="width:100%;background:transparent;border:none;padding:0;font-size:11.5px;color:#2563EB;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:3px">자세히 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div id="nutDetail_${s.key}" style="display:none;padding-top:14px;margin-top:14px;border-top:1px solid #F1F5F9">
+        <div style="display:grid;grid-template-columns:1fr;gap:10px">
+          <div><div style="font-size:10.5px;color:#64748B;font-weight:800;margin-bottom:4px">? 왜 필요한가</div><div style="font-size:11.5px;color:#334155;line-height:1.6;font-weight:500">${_v20Esc(k.why_needed)}</div></div>
+          <div><div style="font-size:10.5px;color:#B91C1C;font-weight:800;margin-bottom:4px">! 왜 부족했나</div><div style="font-size:11.5px;color:#334155;line-height:1.6;font-weight:500">${_v20Esc(k.why_low)}</div></div>
+          <div style="background:#F9FAFB;border-radius:8px;padding:8px 10px;font-size:10.5px;color:#64748B;line-height:1.55;font-weight:500">${_v20Esc(k.supp_hint)}</div>
+        </div>
       </div>
     </div>`;
   });
   el.innerHTML = html;
   _v20RecAppendMenus(el);
+}
+
+// 자세히 보기 토글
+function _v20ToggleNutrientDetail(key) {
+  const d = document.getElementById('nutDetail_' + key);
+  const b = document.getElementById('nutDetailBtn_' + key);
+  if (!d || !b) return;
+  const isOpen = d.style.display !== 'none';
+  d.style.display = isOpen ? 'none' : 'block';
+  b.innerHTML = (isOpen ? '자세히 보기' : '접기') + ` <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="${isOpen ? '6 9 12 15 18 9' : '18 15 12 9 6 15'}"/></svg>`;
 }
 
 function _v20RecAppendMenus(el) {
@@ -22956,9 +23116,9 @@ function ggGoTab(tab) {
     try { window.scrollTo(0, 0); } catch(e){}
   }
   else if (tab === 'report') {
-    // v20 v3: 리포트 탭 · 임시로 추천 화면 재사용 (변화 리포트는 후속)
-    try { renderV20Curation && renderV20Curation(); } catch(e){}
-    showScreen('screenCuration');
+    // v20 · 리포트 탭 · 7일 트렌드·기록 요약
+    try { renderV20Report(); } catch(e){ console.error('renderV20Report', e); }
+    showScreen('screenReport');
     try { window.scrollTo(0, 0); } catch(e){}
   }
   else if (tab === 'my') {
@@ -23140,7 +23300,7 @@ function updateGgTabbar(screenId) {
   const bar = document.getElementById('ggTabbar');
   if (!bar) return;
   // v12 · 메인 + 분석 하위 화면에서 노출
-  const mainScreens = ['screenHome', 'screenResult', 'screenCuration', 'screenFoodResult', 'screenPrescription', 'screenAnalyzeHub', 'screenMy', 'screenProfilePicker', 'screenCapture', 'screenFoodCapture', 'screenIngredient', 'screenPetPantry', 'screenPetFood', 'screenSupplement', 'screenSleepCheck'];
+  const mainScreens = ['screenHome', 'screenResult', 'screenCuration', 'screenFoodResult', 'screenPrescription', 'screenAnalyzeHub', 'screenMy', 'screenProfilePicker', 'screenCapture', 'screenFoodCapture', 'screenIngredient', 'screenPetPantry', 'screenPetFood', 'screenSupplement', 'screenSleepCheck', 'screenReport'];
   const shouldShow = mainScreens.includes(screenId);
   bar.style.display = shouldShow ? 'grid' : 'none';
   document.body.classList.toggle('gg-tab-shown', shouldShow);
@@ -23158,6 +23318,17 @@ function updateGgTabbar(screenId) {
   }
 }
 </script>
+<!-- ════════════ 📄 리포트 화면 (v20) ════════════ -->
+<div class="screen" id="screenReport" style="background:#FBFBFD">
+  <div style="padding:20px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif">
+    <div style="margin-bottom:18px">
+      <div style="font-size:28px;font-weight:900;color:#0F172A;letter-spacing:-.7px;margin-bottom:4px">리포트</div>
+      <div style="font-size:12.5px;color:#64748B;font-weight:500">지난 7일 · 내 몸의 변화 흐름</div>
+    </div>
+    <div id="v20ReportContent"></div>
+  </div>
+</div>
+
 <!-- ════════════ 🌙 내 수면 체크 화면 (v20) ════════════ -->
 <div class="screen" id="screenSleepCheck" style="background:#FBFBFD">
   <div style="padding:16px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif">
