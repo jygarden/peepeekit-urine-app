@@ -118,6 +118,8 @@ async function build() {
             'receiveSleepData', 'requestSleepData', '_v20RenderHeroFace',
             // v20 · 영양제 복용 알림 Flutter 브릿지
             '_v20SetSupplementReminder', '_v20SyncAllReminders', '_v20OpenReminderModal',
+            '_v20OpenRecentMealResult', '_v20OpenMealWhy', '_v20SelectAnalyzeTarget',
+            'renderV20Report', 'NUTRIENT_QUICK_FOODS', 'NUTRIENT_TAGLINE', '_v20ToggleNutrientDetail',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
             // v20 · 수면 체크
             'SLEEP_QUESTIONS', 'SLEEP_VAL', 'calculateSleepPattern', 'getSleepLifestyleContext', 'buildSleepCoaching',
