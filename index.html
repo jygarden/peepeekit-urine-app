@@ -2288,7 +2288,7 @@ window.appIcon = function(name, size){
               <span>지난주보다 <span id="v20HeroDelta" style="color:#2563EB;font-weight:900">+4</span></span>
             </div>
             <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="width:100%;background:linear-gradient(135deg,#3B82F6 0%,#2563EB 100%);color:#fff;border:none;padding:15px;border-radius:14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:-.3px;box-shadow:0 6px 18px rgba(37,99,235,.28);margin-top:16px">
-              오늘 뭐 먹을지 보기
+              오늘 뭐 먹을까?
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
             </button>
           </div>
@@ -2312,7 +2312,7 @@ window.appIcon = function(name, size){
         <!-- ③ 최근 식사 분석 -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 2px">
           <span style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">최근 식사 분석</span>
-          <button onclick="if(typeof ggGoTab==='function')ggGoTab('analyze')" style="background:transparent;border:none;font-size:11.5px;color:#64748B;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:2px">전체 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
+          <button type="button" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;font-size:11.5px;color:#64748B;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:2px;font-family:inherit">전체 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
         </div>
         <div id="v20RecentMealCard" style="background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(15,23,42,.06);margin-bottom:20px;display:flex;gap:14px">
           <div id="v20RecentMealPhoto" style="width:110px;height:110px;border-radius:14px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0;overflow:hidden">🥗</div>
@@ -2322,7 +2322,7 @@ window.appIcon = function(name, size){
               <div id="v20RecentMealChips" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"></div>
               <div id="v20RecentMealComment" style="font-size:11px;color:#475569;font-weight:500;line-height:1.55">사진 한 장이면 AI가<br>영양을 분석해드려요.</div>
             </div>
-            <div id="v20RecentMealMore" style="font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:2px">왜 이렇게 봤을까요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></div>
+            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px 0;font-family:inherit">왜 이렇게 봤을까요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
           </div>
         </div>
 
@@ -2345,7 +2345,7 @@ window.appIcon = function(name, size){
             <span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A">🍎 과일 1회</span>
             <span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A">💧 물 한 잔</span>
           </div>
-          <button type="button" onclick="try{_v20OpenChip('why_low')}catch(e){alert('오류: '+e.message)}" style="width:100%;background:transparent;border:none;padding:8px 0 0;text-align:right;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:2px;font-family:inherit">식사와 어떤 관계가 있나요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
+          <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){alert('오류: '+e.message)}" style="width:100%;background:transparent;border:none;padding:8px 0 0;text-align:right;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:2px;font-family:inherit">식사와 어떤 관계가 있나요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
         </div>
 
         <!-- ⑤ 건강어때 스토어 · 정품 키트 -->
@@ -7639,12 +7639,69 @@ function _v20RenderCoach() {
   } catch(e){}
 }
 
+// ═══ 최근 식사 결과 열기 (전체 보기 · 왜 이렇게 봤을까?) ═══
+function _v20OpenRecentMealResult() {
+  try {
+    const fh = _getFoodHistory();
+    const latest = fh[0];
+    if (!latest) {
+      alert('아직 기록된 식사가 없어요. 먼저 오늘 먹은 음식을 찍어보세요.');
+      if (typeof enterFood === 'function') enterFood('human');
+      return;
+    }
+    // currentFoodResult 복원 · renderFoodResult 재사용
+    const restored = {
+      totalCalories: latest.totalCalories || 0,
+      balanceScore: latest.balanceScore || 0,
+      balanceGrade: latest.balanceGrade || 'B',
+      nutrition: latest.nutrition || {},
+      foods: (latest.items || (latest.foods || '').split(',').filter(Boolean).map(n => ({name: n.trim(), portion: 1}))).map(f => ({
+        name: f.name || f,
+        portion: f.portion || 1,
+        kcal: 0
+      })),
+      summary: latest.summary || '',
+      missing: latest.missing || [],
+      excessive: latest.excessive || []
+    };
+    // enrichment · 각 음식 kcal·영양소 복원
+    try {
+      restored.foods.forEach(f => {
+        const dbItem = _matchFoodInDB(f.name);
+        const p = f.portion || 1;
+        if (dbItem) {
+          f.kcal = Math.round((dbItem.kcal || 0) * p);
+          f.calories = f.kcal;
+          f.protein = Math.round((dbItem.protein || 0) * p);
+          f.carbs = Math.round((dbItem.carbs || 0) * p);
+          f.fat = Math.round((dbItem.fat || 0) * p);
+          f.fiber = Math.round((dbItem.fiber || 0) * p);
+          f.sodium = Math.round((dbItem.sodium || 0) * p);
+        } else {
+          const est = _v20EstimateNutrition(f.name);
+          f.kcal = Math.round((est.kcal || 150) * p);
+          f.calories = f.kcal;
+          f.protein = Math.round((est.protein || 0) * p);
+          f.carbs = Math.round((est.carbs || 0) * p);
+          f.fat = Math.round((est.fat || 0) * p);
+          f.fiber = Math.round((est.fiber || 0) * p);
+        }
+      });
+    } catch(e){}
+    if (typeof currentFoodResult !== 'undefined') currentFoodResult = restored;
+    else window.currentFoodResult = restored;
+    if (typeof renderFoodResult === 'function') renderFoodResult(restored);
+    if (typeof showScreen === 'function') showScreen('screenFoodResult');
+    try { window.scrollTo(0, 0); } catch(e){}
+  } catch(e) { alert('결과를 여는 중 오류: ' + e.message); }
+}
+
 // ═══ v2.0 · chip 3개 · 모달 오픈 ═══
 async function _v20OpenChip(topic) {
   const overlay = document.createElement('div');
   overlay.id = '_v20ChipModal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease';
-  const titleMap = { why_low:'왜 부족했을까?', convenience:'편의점에서는?', supplement_check:'내 영양제 괜찮아?' };
+  const titleMap = { why_low:'왜 부족했을까?', convenience:'편의점에서는?', supplement_check:'내 영양제 괜찮아?', body_signal:'몸 신호와 식사의 관계' };
   overlay.innerHTML = `<div style="background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:20px 20px 32px;max-height:80vh;overflow-y:auto;animation:slideUp .28s ease">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${titleMap[topic] || '조언'}</div>
@@ -7693,9 +7750,31 @@ function _v20RenderChipAnswer(topic, data) {
     body.innerHTML = `<div style="color:#DC2626;font-size:12px;font-weight:700">${data.error}</div>`;
     return;
   }
+  // 안전망 · answer 안에 nested JSON 문자열이 오면 실제 답변만 추출
+  if (data.answer && typeof data.answer === 'string') {
+    let a = data.answer.trim();
+    if (a.startsWith('{') || a.startsWith('"answer"') || a.startsWith('```')) {
+      a = a.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      const m = a.match(/"answer"\s*:\s*"([\s\S]*?)(?:"\s*[,}]|$)/);
+      if (m && m[1]) data.answer = m[1].replace(/\\n/g, ' ').replace(/\\"/g, '"').trim();
+    }
+  }
   let html = '';
   if (data.answer) {
     html += `<div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:12px;padding:12px;margin-bottom:12px;font-size:12.5px;color:#1E3A8A;line-height:1.6;font-weight:600">${_v20Esc(data.answer)}</div>`;
+  }
+  // body_signal · possibleFactors 렌더
+  if (topic === 'body_signal' && Array.isArray(data.possibleFactors)) {
+    html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin-bottom:6px">관련 있어 보이는 요인</div>';
+    data.possibleFactors.forEach(f => {
+      html += `<div style="background:#F8FAFC;border-radius:8px;padding:9px 11px;margin-bottom:6px">
+        <div style="font-size:11.5px;font-weight:800;color:#0F172A;margin-bottom:2px">${_v20Esc(f.factor)}</div>
+        <div style="font-size:11px;color:#64748B;font-weight:600;line-height:1.5">${_v20Esc(f.why)}</div>
+      </div>`;
+    });
+  }
+  if (topic === 'body_signal' && data.note) {
+    html += `<div style="background:#FFFBEB;border-radius:8px;padding:9px 11px;font-size:10.5px;color:#92400E;font-weight:600;line-height:1.5;margin-top:8px">${_v20Esc(data.note)}</div>`;
   }
   if (topic === 'why_low' && Array.isArray(data.reasons)) {
     html += '<div style="font-size:11px;font-weight:800;color:#0F172A;margin-bottom:6px">핵심 원인</div>';
