@@ -35,7 +35,11 @@ module.exports = async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.5, maxOutputTokens: 800 }
+          generationConfig: {
+            temperature: 0.5,
+            maxOutputTokens: 2048,
+            responseMimeType: 'application/json'
+          }
         })
       }
     );
@@ -48,8 +52,17 @@ module.exports = async function handler(req, res) {
 
     const parsed = parseJsonLoose(raw);
     if (!parsed) {
-      // 파싱 실패 시 raw text를 그대로 답변으로
-      return res.status(200).json({ answer: raw, actions: [], topic });
+      // 파싱 실패 시 · raw text에서 JSON 구조 제거하고 answer만 뽑기 시도
+      const cleaned = String(raw || '')
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .replace(/^\s*\{[\s\S]*?"answer"\s*:\s*"/, '')
+        .replace(/"\s*[,}][\s\S]*$/, '')
+        .replace(/\\n/g, ' ')
+        .replace(/\\"/g, '"')
+        .trim();
+      const fallbackAnswer = cleaned || '답변 생성 중 문제가 있었어요. 다시 시도해주세요.';
+      return res.status(200).json({ answer: fallbackAnswer, actions: [], topic });
     }
     return res.status(200).json({ ...parsed, topic });
   } catch (err) {
@@ -166,16 +179,57 @@ function buildPrompt({ topic, userProfile, shortages, recent7Days, supplements }
 - 복용 중 영양제가 없으면 reviews를 빈 배열로 두고 answer에서 "아직 복용중인 영양제가 없다면 음식으로 우선 채우는 것을 추천한다"고 안내.`;
   }
 
+  if (topic === 'body_signal') {
+    return common + `
+
+【이번 질문】: "내 몸이 보내는 신호(피로·수면·소화·컨디션 등)와 최근 식사·생활 패턴이 어떻게 연결되어 있나요?"
+
+【출력 JSON】
+{
+  "answer": "최근 식사·생활 패턴을 종합해 몸이 보내는 신호가 어디서 왔을 수 있는지 2~3문장 요약. 특정 영양소 부족으로 단정 X. 여러 요인 가능성 열어둠.",
+  "possibleFactors": [
+    { "factor": "관련 있어 보이는 요인 1 (예: '늦은 카페인')", "why": "최근 기록에서 관찰된 근거 1문장" },
+    { "factor": "요인 2", "why": "근거 1문장" }
+  ],
+  "actions": [
+    { "title": "먼저 시도해볼 행동 1개", "how": "구체 실행법 1문장" }
+  ],
+  "note": "몸 신호는 다양한 원인이 있을 수 있어요. 지속되면 전문가 상담을 권해드려요."
+}
+
+【제약】
+- "이 신호 = 이 영양소 부족" 같은 1:1 단정 절대 금지
+- 최근 데이터에서 관찰된 것만 언급
+- 데이터가 없으면 answer에서 "아직 기록이 적어 정확한 관찰이 어려워요. 먼저 며칠 기록을 쌓아볼게요"`;
+  }
+
   return common + `\n\n【이번 질문】: 알 수 없는 topic. {"error":"지원하지 않는 topic입니다."} 로 응답.`;
 }
 
 function parseJsonLoose(raw) {
-  try {
-    const cleaned = String(raw || '').replace(/```json\s*/gi, '').replace(/```\s*$/g, '').trim();
-    const m = cleaned.match(/\{[\s\S]*\}/);
-    if (!m) return null;
-    return JSON.parse(m[0]);
-  } catch(e) { return null; }
+  const src = String(raw || '').replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  // 1차 · 그대로 파싱
+  try { return JSON.parse(src); } catch(e){}
+  // 2차 · 첫 { 부터 마지막 } 까지
+  const first = src.indexOf('{');
+  const last = src.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    try { return JSON.parse(src.slice(first, last + 1)); } catch(e){}
+    // 3차 · 잘린 응답 · 마지막 } 위치를 뒤로 밀어가며 시도
+    for (let end = last; end > first + 10; end--) {
+      if (src[end] === '}') {
+        try { return JSON.parse(src.slice(first, end + 1)); } catch(e){}
+      }
+    }
+    // 4차 · 잘린 마지막 필드 잘라내고 강제 닫기
+    let trimmed = src.slice(first);
+    const lastComma = trimmed.lastIndexOf(',');
+    if (lastComma > 0) {
+      trimmed = trimmed.slice(0, lastComma) + '}';
+      try { return JSON.parse(trimmed); } catch(e){}
+    }
+  }
+  return null;
 }
 
 module.exports.config = { maxDuration: 30 };
