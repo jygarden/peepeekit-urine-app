@@ -2322,7 +2322,7 @@ window.appIcon = function(name, size){
               <div id="v20RecentMealChips" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"></div>
               <div id="v20RecentMealComment" style="font-size:11px;color:#475569;font-weight:500;line-height:1.55">사진 한 장이면 AI가<br>영양을 분석해드려요.</div>
             </div>
-            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px 0;font-family:inherit">왜 이렇게 봤을까요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
+            <button type="button" id="v20RecentMealMore" onclick="_v20OpenMealWhy()" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px 0;font-family:inherit">왜 이렇게 봤을까요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
           </div>
         </div>
 
@@ -3573,97 +3573,103 @@ window.appIcon = function(name, size){
   <!-- ════════════ 촬영 화면 ════════════ -->
   <!-- ════════════ v12 · 분석 허브 (분석 탭 진입 시 노출) ════════════ -->
   <div class="screen gg-font" id="screenAnalyzeHub">
-    <div style="padding:6px 2px 20px">
-      <div style="margin-bottom:20px">
-        <div class="gg-huge" style="font-size:22px;margin-bottom:6px">분석</div>
-        <div class="gg-sm" style="font-size:12.5px">무엇을 분석할지 선택하세요.</div>
+    <div style="padding:6px 2px 100px">
+      <div style="margin-bottom:16px">
+        <div style="font-size:28px;font-weight:900;color:#0F172A;letter-spacing:-.7px;margin-bottom:4px">분석</div>
+        <div style="font-size:12.5px;color:#64748B;font-weight:500">무엇을 분석할지 선택하세요</div>
       </div>
 
-      <!-- 소변검사 (좌우 2열 · 세로 divider) -->
-      <div style="margin-bottom:22px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-          <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">소변검사</div>
-          <div style="font-size:11px;color:var(--gg-muted);font-weight:500">1분 · 10가지 항목 자동 판독</div>
-        </div>
-        <div style="background:#FFF;border-radius:14px;border:0.5px solid #D9DEDC;display:grid;grid-template-columns:1fr 1fr">
-          <button onclick="enterHuman()" style="background:transparent;border:none;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:inherit;text-align:left;border-right:0.5px solid #E8E9E5">
-            <img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
+      <!-- ═══ 상단 큰 세그먼트: 사람 / 반려동물 ═══ -->
+      <div style="background:#F1F5F9;border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:22px">
+        <button type="button" onclick="_v20SelectAnalyzeTarget('human')" data-tgt="human" class="v20-atgt-btn" style="background:#2563EB;color:#fff;border:none;padding:12px;border-radius:11px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px">사람</button>
+        <button type="button" onclick="_v20SelectAnalyzeTarget('pet')" data-tgt="pet" class="v20-atgt-btn" style="background:transparent;color:#64748B;border:none;padding:12px;border-radius:11px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px">반려동물</button>
+      </div>
+
+      <!-- ═══ 사람 컨텐츠 · 4카드 ═══ -->
+      <div id="v20AnalyzeHumanBlock">
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <button type="button" onclick="enterHuman()" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#FEF3C7;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">인체용</div>
-              <div style="font-size:10.5px;color:#8B95A1;margin-top:1px">본인·가족</div>
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">소변검사</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">본인·가족 / 1분 자동 판독</div>
             </div>
-            <svg width="12" height="12" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
           </button>
-          <button onclick="enterPet()" style="background:transparent;border:none;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:inherit;text-align:left">
-            <img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
+          <button type="button" onclick="enterFood('human')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#DBEAFE;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-meal.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">반려동물용</div>
-              <div style="font-size:10.5px;color:#8B95A1;margin-top:1px">강아지·고양이</div>
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">식사 분석</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">칼로리·영양 균형 / 20초 AI 인식</div>
             </div>
-            <svg width="12" height="12" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+          </button>
+          <button type="button" onclick="enterIngredient()" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#E9D5FF;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/ingredient-scan.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">원재료·첨가물 분석</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">포장 식품 라벨 / 알레르기 체크</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+          </button>
+          <button type="button" onclick="enterSupplement('human')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#FEF9C3;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">영양제 분석</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">KRDA 대비 %DV / 중복 성분 체크</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
           </button>
         </div>
       </div>
 
-      <!-- 식단 (통합 카드 · 상하 divider) -->
-      <div style="margin-bottom:22px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-          <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">식단</div>
-          <div style="font-size:11px;color:var(--gg-muted);font-weight:500">20초 · AI 자동 인식</div>
-        </div>
-        <div style="background:#FFF;border-radius:14px;border:0.5px solid #D9DEDC">
-          <button onclick="enterFood('human')" style="width:100%;background:transparent;border:none;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;border-bottom:0.5px solid #E8E9E5">
-            <img src="assets/icons/v14/human-meal.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
-            <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">사람 식사</div><div style="font-size:10.5px;color:#8B95A1;margin-top:1px">칼로리·영양 균형</div></div>
-            <svg width="14" height="14" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <!-- ═══ 반려동물 컨텐츠 · 3카드 (원재료 X) ═══ -->
+      <div id="v20AnalyzePetBlock" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <button type="button" onclick="enterPet()" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#FEF3C7;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">소변검사</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">강아지·고양이 / 1분 자동 판독</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
           </button>
-          <button onclick="enterFood('pet')" style="width:100%;background:transparent;border:none;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left">
-            <img src="assets/icons/v14/pet-food.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
-            <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">반려동물 사료</div><div style="font-size:10.5px;color:#8B95A1;margin-top:1px">사료·간식 성분</div></div>
-            <svg width="14" height="14" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <button type="button" onclick="enterFood('pet')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#FED7AA;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-food.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">사료 분석</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">사료·간식 성분 분석</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
           </button>
-        </div>
-      </div>
-
-      <!-- 식품 성분 -->
-      <div style="margin-bottom:22px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-          <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">식품 성분</div>
-          <div style="font-size:11px;color:var(--gg-muted);font-weight:500">포장 식품 라벨</div>
-        </div>
-        <button onclick="enterIngredient()" style="width:100%;background:#FFF;border:0.5px solid #D9DEDC;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left">
-          <img src="assets/icons/v14/ingredient-scan.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
-          <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">원재료·첨가물 분석</div><div style="font-size:10.5px;color:#8B95A1;margin-top:1px">알레르기 자동 크로스체크</div></div>
-          <svg width="14" height="14" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-        </button>
-      </div>
-
-      <!-- 영양제 (통합 카드 · 상하 divider) -->
-      <div style="margin-bottom:22px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-          <div style="font-size:13.5px;font-weight:700;color:var(--gg-ink);letter-spacing:-.2px">영양제 관리</div>
-          <div style="font-size:11px;color:var(--gg-muted);font-weight:500">라벨 자동 인식 · 종합 분석</div>
-        </div>
-        <div style="background:#FFF;border-radius:14px;border:0.5px solid #D9DEDC">
-          <button onclick="enterSupplement('human')" style="width:100%;background:transparent;border:none;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;border-bottom:0.5px solid #E8E9E5">
-            <img src="assets/icons/v14/human-supplement.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
-            <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">사람 영양제</div><div style="font-size:10.5px;color:#8B95A1;margin-top:1px">KRDA 대비 %DV</div></div>
-            <svg width="14" height="14" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-          </button>
-          <button onclick="enterSupplement('pet')" style="width:100%;background:transparent;border:none;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left">
-            <img src="assets/icons/v14/pet-supplement.svg" alt="" style="width:36px;height:36px;flex-shrink:0;object-fit:contain">
-            <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:#17243A;letter-spacing:-.2px">반려동물 영양제</div><div style="font-size:10.5px;color:#8B95A1;margin-top:1px">체중 기준 급여량</div></div>
-            <svg width="14" height="14" viewBox="0 0 128 128" style="flex-shrink:0"><path d="m49 29 35 35-35 35" stroke="#C0C4C8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <button type="button" onclick="enterSupplement('pet')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#FEE2E2;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">영양제 분석</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">체중 기준 급여량 / 성분 분석</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
           </button>
         </div>
-      </div>
-
-      <!-- 도움말 -->
-      <div style="background:var(--gg-sub);border-radius:12px;padding:12px 14px;font-size:11.5px;color:var(--gg-muted);line-height:1.55">
-        각 항목은 촬영 → AI 자동 분석 → 결과·추천으로 이어집니다. 결과는 홈·추천 탭에서도 확인할 수 있어요.
+        <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:11px;color:#64748B;line-height:1.6;font-weight:500">사료·간식 자체가 라벨 스캔이라 원재료 분석은 사료 분석에 포함돼요.</div>
       </div>
     </div>
   </div>
+  <script>
+    function _v20SelectAnalyzeTarget(t) {
+      const hb = document.getElementById('v20AnalyzeHumanBlock');
+      const pb = document.getElementById('v20AnalyzePetBlock');
+      if (hb) hb.style.display = t === 'human' ? 'block' : 'none';
+      if (pb) pb.style.display = t === 'pet' ? 'block' : 'none';
+      document.querySelectorAll('.v20-atgt-btn').forEach(b => {
+        const on = b.dataset.tgt === t;
+        b.style.background = on ? '#fff' : 'transparent';
+        b.style.color = on ? '#2563EB' : '#64748B';
+        b.style.fontWeight = on ? '800' : '700';
+        b.style.boxShadow = on ? '0 2px 6px rgba(15,23,42,.08)' : 'none';
+      });
+    }
+  </script>
 
   <div class="screen" id="screenCapture">
     <!-- v14 새 헤더 · 심플 -->
@@ -7637,6 +7643,75 @@ function _v20RenderCoach() {
     const top = ins.messages[0];
     el.innerHTML = `"${top.text || top}"`;
   } catch(e){}
+}
+
+// ═══ "왜 이렇게 봤을까요?" · chip 판정 근거를 짧은 팝업으로 (AI X · 로컬 계산) ═══
+function _v20OpenMealWhy() {
+  const fh = _getFoodHistory();
+  const latest = fh[0];
+  if (!latest) { alert('아직 기록된 식사가 없어요.'); return; }
+  const nut = latest.nutrition || {};
+  const cal = latest.totalCalories || 0;
+  const RDA = { protein:60, fiber:25, sodium:2000, calcium:800, iron:12 };
+  const rows = [];
+  const push = (k, label, unit, higherIsBad) => {
+    const v = Number(nut[k]) || 0;
+    if (!RDA[k]) return;
+    const pctOfDay = Math.round((v / RDA[k]) * 100);
+    let status, color;
+    if (higherIsBad) {
+      if (pctOfDay >= 60) { status = '과다'; color = '#EF4444'; }
+      else if (pctOfDay >= 40) { status = '주의'; color = '#F59E0B'; }
+      else { status = '적정'; color = '#10B981'; }
+    } else {
+      if (pctOfDay >= 30) { status = '충분'; color = '#10B981'; }
+      else if (pctOfDay >= 15) { status = '무난'; color = '#64748B'; }
+      else { status = '부족'; color = '#EA580C'; }
+    }
+    rows.push({ label, v, unit, pct: pctOfDay, status, color });
+  };
+  push('protein', '단백질', 'g', false);
+  push('fiber', '식이섬유', 'g', false);
+  push('calcium', '칼슘', 'mg', false);
+  push('sodium', '나트륨', 'mg', true);
+
+  const foods = (latest.items || (latest.foods || '').split(',').filter(Boolean).map(n => ({name: n.trim()}))).slice(0, 4);
+  const foodsText = foods.map(f => f.name || f).join(' + ');
+
+  const overlay = document.createElement('div');
+  overlay.id = '_v20WhyModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  overlay.innerHTML = `<div style="background:#fff;width:100%;max-width:420px;border-radius:20px 20px 0 0;padding:22px 22px 30px;max-height:80vh;overflow-y:auto;font-family:inherit">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="font-size:16px;font-weight:900;color:#0F172A;letter-spacing:-.3px">왜 이렇게 봤을까요?</div>
+      <button type="button" onclick="document.getElementById('_v20WhyModal').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:2px 6px">×</button>
+    </div>
+    <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;margin-bottom:14px">
+      <div style="font-size:11px;color:#64748B;font-weight:700;margin-bottom:4px">이번 식사</div>
+      <div style="font-size:13.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px">${_v20Esc(foodsText || '기록된 음식')}</div>
+      <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:4px">총 ${cal || '—'} kcal</div>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:#0F172A;margin-bottom:8px">영양소별 판정</div>
+    ${rows.map(r => `
+      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:12px 14px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:12.5px;font-weight:800;color:#0F172A">${r.label}</span>
+          <span style="background:${r.color};color:#fff;font-size:10px;font-weight:900;padding:3px 9px;border-radius:99px">${r.status}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#64748B;font-weight:600;margin-bottom:6px">
+          <span>이번 식사에 ${r.v}${r.unit}</span>
+          <span>하루 권장의 ${r.pct}%</span>
+        </div>
+        <div style="height:5px;background:#F1F5F9;border-radius:3px;overflow:hidden">
+          <div style="height:100%;background:${r.color};width:${Math.min(100, r.pct)}%"></div>
+        </div>
+      </div>
+    `).join('')}
+    <div style="font-size:10.5px;color:#94A3B8;line-height:1.6;font-weight:500;margin-top:14px;text-align:center">한국인 영양섭취기준(성인) 근거 · 참고용</div>
+    <button type="button" onclick="document.getElementById('_v20WhyModal').remove();_v20OpenRecentMealResult()" style="width:100%;background:#2563EB;color:#fff;border:none;padding:13px;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px">전체 결과 보기 →</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 }
 
 // ═══ 최근 식사 결과 열기 (전체 보기 · 왜 이렇게 봤을까?) ═══
