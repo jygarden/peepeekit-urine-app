@@ -97,6 +97,50 @@ window.appIcon = function(name, size){
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>건강어때 — AI 건강검진</title>
 
+  <!-- 📊 GA4 & Posthog 애널리틱스 -->
+  <script>
+    // ⚠️ 설정: Vercel 배포 후 아래 두 키를 실제 값으로 교체
+    // 1) GA4 Measurement ID (https://analytics.google.com > 관리 > 데이터 스트림)
+    // 2) Posthog Project API Key (https://app.posthog.com > Project Settings)
+    window.GA4_ID = 'G-XXXXXXXXXX';   // TODO: 실제 값으로 교체
+    window.POSTHOG_KEY = 'phc_XXXXXXXX'; // TODO: 실제 값으로 교체
+    window.POSTHOG_HOST = 'https://us.i.posthog.com'; // 또는 https://eu.i.posthog.com
+  </script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    if (window.GA4_ID && !window.GA4_ID.includes('XXX')) {
+      gtag('js', new Date());
+      gtag('config', window.GA4_ID, { send_page_view: true });
+    }
+    // Posthog snippet
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    if (window.POSTHOG_KEY && !window.POSTHOG_KEY.includes('XXX')) {
+      posthog.init(window.POSTHOG_KEY, { api_host: window.POSTHOG_HOST, person_profiles: 'identified_only' });
+    }
+    // 익명 유저 ID (localStorage) · 세션 간 트래킹
+    (function(){
+      var uid = localStorage.getItem('anon_uid_v1');
+      if (!uid) {
+        uid = 'u_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+        localStorage.setItem('anon_uid_v1', uid);
+      }
+      window.ANON_UID = uid;
+      if (window.posthog && posthog.identify) try { posthog.identify(uid); } catch(e){}
+      if (window.GA4_ID && !window.GA4_ID.includes('XXX')) try { gtag('set', {user_id: uid}); } catch(e){}
+    })();
+    // 통합 이벤트 트래킹 헬퍼 · 앱 어디서든 track('event_name', {prop:value}) 호출
+    window.track = function(eventName, props) {
+      try {
+        if (window.gtag && window.GA4_ID && !window.GA4_ID.includes('XXX')) gtag('event', eventName, props || {});
+      } catch(e){}
+      try {
+        if (window.posthog && posthog.capture) posthog.capture(eventName, props || {});
+      } catch(e){}
+    };
+  </script>
+
   <!-- PWA 설정 -->
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#6366f1"/>
@@ -2275,8 +2319,8 @@ window.appIcon = function(name, size){
 
         <!-- ① 히어로 · AI 코칭 (세로 구성 · 문장 크게 · 6각 맵 풀너비) -->
         <div style="background:#fff;border-radius:22px;padding:22px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:14px">
-          <div id="v20HeroHeadline" style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.35;margin-bottom:8px">오늘 첫 기록을 남겨보세요</div>
-          <div id="v20HeroSub" style="font-size:13px;color:#64748B;line-height:1.6;font-weight:500;margin-bottom:16px">한 끼만 찍으면 바로 밸런스를 볼 수 있어요.</div>
+          <div id="v20HeroHeadline" style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.35;margin-bottom:8px">먹은 음식을 찍어보세요</div>
+          <div id="v20HeroSub" style="font-size:13px;color:#DC2626;line-height:1.6;font-weight:700;margin-bottom:16px">사진을 등록하면 오늘의 영양 그래프가 바로 채워져요.</div>
 
           <div style="background:#F8FAFF;border-radius:16px;padding:8px 14px 6px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:center" onclick="_v20OpenNutrientMap()">
             <div id="v20HeroHex" style="width:80%;max-width:240px"></div>
@@ -2306,11 +2350,11 @@ window.appIcon = function(name, size){
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px">오늘 먹은 음식 기록하기</div>
+            <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px">음식 사진 등록하기</div>
             <div style="font-size:11.5px;color:#64748B;font-weight:500;margin-top:2px">사진 한 장이면 충분해요.</div>
           </div>
           <button onclick="event.stopPropagation();if(typeof enterFood==='function')enterFood('human')" style="background:#fff;border:1.5px solid #2563EB;color:#2563EB;padding:9px 14px;border-radius:99px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;letter-spacing:-.2px;flex-shrink:0">
-            음식 사진 찍기
+            음식 사진 등록하기
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
           </button>
         </div>
@@ -2324,9 +2368,9 @@ window.appIcon = function(name, size){
           <div id="v20RecentMealPhoto" style="width:110px;height:110px;border-radius:14px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0;overflow:hidden">🥗</div>
           <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between">
             <div>
-              <div id="v20RecentMealName" style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:8px">첫 기록을 남겨보세요</div>
+              <div id="v20RecentMealName" style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:8px">AI가 음식 속 영양을 분석해드려요</div>
               <div id="v20RecentMealChips" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"></div>
-              <div id="v20RecentMealComment" style="font-size:11px;color:#475569;font-weight:500;line-height:1.55">사진 한 장이면 AI가<br>영양을 분석해드려요.</div>
+              <div id="v20RecentMealComment" style="font-size:11px;color:#475569;font-weight:500;line-height:1.55">음식과 양을 확인해<br>주요 영양소를 한눈에 정리해드려요.</div>
             </div>
             <button type="button" id="v20RecentMealMore" onclick="_v20OpenMealWhy()" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px 0;font-family:inherit">왜 이렇게 봤을까요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
           </div>
@@ -5435,6 +5479,8 @@ function showScreen(id) {
 
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  // 📊 화면 진입 이벤트
+  try { if (window.track) window.track('screen_view', { screen: id }); } catch(e){}
   // 홈 버튼은 홈 화면 외에서 보임
   document.getElementById('btnBackHome').style.display = (id === 'screenHome' || id === 'screenWelcome') ? 'none' : 'inline-block';
   // 하단 탭바 (메인 4개 화면에서만 보임)
@@ -5883,7 +5929,7 @@ function getHeroSummary() {
   const bal = (typeof getTodayNutritionBalance === 'function') ? getTodayNutritionBalance() : null;
   const shortages = (typeof getShortageTop === 'function') ? getShortageTop(2) : [];
   if (!bal || bal.mealCount === 0) {
-    return { headline:'오늘 첫 기록을 남겨보세요', sub:'한 끼만 찍으면 바로 밸런스를 볼 수 있어요.' };
+    return { headline:'먹은 음식을 찍어보세요', sub:'사진을 등록하면 오늘의 영양 그래프가 바로 채워져요.' };
   }
   const score = bal.score;
   let headline;
@@ -6624,7 +6670,7 @@ function renderV20Home() {
     }
     if (headEl) {
       if (bal.mealCount === 0) {
-        headEl.textContent = '오늘 첫 기록을 남겨보세요';
+        headEl.textContent = '먹은 음식을 찍어보세요';
       } else if (topMenus.length >= 2) {
         headEl.innerHTML = `${mealSlot}엔 <span style="color:#2563EB">${topMenus[0]}</span><br>또는 <span style="color:#2563EB">${topMenus[1]}</span> 어때요?`;
       } else if (topMenus.length === 1) {
@@ -6635,7 +6681,7 @@ function renderV20Home() {
     }
     if (subEl) {
       if (bal.mealCount === 0) {
-        subEl.textContent = '한 끼만 찍으면 바로 밸런스를 볼 수 있어요.';
+        subEl.textContent = '사진을 등록하면 오늘의 영양 그래프가 바로 채워져요.';
       } else if (shortagesArr.length > 0 && topMenus.length > 0) {
         const labels = shortagesArr.map(s => s.label).join('과 ');
         subEl.textContent = `최근 7일 ${labels}이 부족했거든요.`;
@@ -6879,6 +6925,7 @@ function renderSleepIntro() {
 }
 
 function _sleepStartQuestions() {
+  try { if (window.track) window.track('sleep_check_started'); } catch(e){}
   _sleepCurrentQ = 0;
   _sleepAnswers = {};
   _sleepRenderQuestion();
@@ -6940,6 +6987,7 @@ function _sleepShowLoading() {
     const coaching = buildSleepCoaching(patternResult, lifestyle);
     const entry = { input:_sleepAnswers, patternResult, lifestyle, coaching };
     saveSleepCheck(entry);
+    try { if (window.track) window.track('sleep_check_completed', { primary_pattern: patternResult.primary, has_red_flag: !!coaching.redFlag }); } catch(e){}
     renderSleepResult(entry);
     try { window.scrollTo(0, 0); } catch(e){}
   }, 1600);
@@ -7298,8 +7346,8 @@ function _v20RenderHexMap(bal, shortagesArr, isEmpty) {
     ${emptyFill ? '' : pts.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${colorMap[p.state]}" stroke="#fff" stroke-width="1.5"/>`).join('')}
     ${HEX_AXES.map((ax, i) => {
       const lp = labelPos[i];
-      const c = emptyFill ? '#94A3B8' : (pts[i].state === 'low' ? '#EF4444' : pts[i].state === 'mid' ? '#B45309' : '#64748B');
-      return `<text x="${lp.x}" y="${lp.y}" text-anchor="${lp.anchor}" font-size="8" font-weight="700" fill="${c}">${ax.label}</text>`;
+      const c = emptyFill ? '#94A3B8' : (pts[i].state === 'low' ? '#EF4444' : pts[i].state === 'mid' ? '#B45309' : '#334155');
+      return `<text x="${lp.x}" y="${lp.y}" text-anchor="${lp.anchor}" font-size="13" font-weight="800" fill="${c}">${ax.label}</text>`;
     }).join('')}
   </svg>`;
 
@@ -7327,6 +7375,7 @@ function _v20RenderHexMap(bal, shortagesArr, isEmpty) {
 
 // 6각형 탭 → 상세 화면 (일단 추천 탭으로 · 후속에 별도 화면 신설 가능)
 function _v20OpenNutrientMap() {
+  try { if (window.track) window.track('hex_map_clicked'); } catch(e){}
   if (typeof ggGoTab === 'function') ggGoTab('curation');
 }
 
@@ -7686,7 +7735,7 @@ function _v20RenderMealSuggestion() {
     const reasonEl = document.getElementById('v20MealReason');
     const photoEl = document.getElementById('v20MealPhoto');
     if (!rec || !rec.top3 || rec.top3.length === 0) {
-      if (nameEl) nameEl.textContent = '첫 기록을 남겨보세요';
+      if (nameEl) nameEl.textContent = 'AI가 음식 속 영양을 분석해드려요';
       if (reasonEl) reasonEl.textContent = '한 끼만 찍으면 상황별 메뉴를 추천드려요.';
       return;
     }
@@ -8029,6 +8078,7 @@ function _v20OpenRecentMealResult() {
 
 // ═══ v2.0 · chip 3개 · 모달 오픈 ═══
 async function _v20OpenChip(topic) {
+  try { if (window.track) window.track('nutrient_chip_opened', { topic: topic }); } catch(e){}
   const overlay = document.createElement('div');
   overlay.id = '_v20ChipModal';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease';
@@ -10687,8 +10737,8 @@ function openCuration() {
 let _v20RecCurrentTab = 'nutrient';
 
 function renderV20Curation() {
-  _v20RecCurrentTab = 'nutrient';
-  _v20RecSwitch('nutrient');
+  _v20RecCurrentTab = 'food';
+  _v20RecSwitch('food');
 }
 
 function _v20RecSwitch(tab) {
@@ -10808,34 +10858,58 @@ function _v20RecAppendMenus(el) {
   el.insertAdjacentHTML('beforeend', menuHtml);
 }
 
+// 대표 메뉴별 1인분 기준 (음식 추천 카드에 표시)
+const FOOD_PORTION = {
+  '삶은계란':'1개','계란후라이':'1개','우유':'1잔(200ml)','요거트':'1컵(150g)','그릭요거트':'1컵(150g)',
+  '바나나':'1개','사과':'1개','고구마':'중간 1개','견과류믹스':'한 줌(30g)','아보카도':'반 개','샌드위치':'1개','김밥':'1줄',
+  '샐러드':'1접시','두부구이':'반 모','두부김치':'1접시','시금치나물':'1접시','콩나물무침':'1접시','김치':'1종지',
+  '순두부찌개':'1뚝배기','김치찌개':'1뚝배기','된장찌개':'1뚝배기','미역국':'1공기','삼계탕':'1인분','갈비탕':'1인분','설렁탕':'1인분','순대국':'1인분','해장국':'1인분','뼈해장국':'1인분','콩나물국밥':'1인분','육개장':'1인분','감자탕':'1인분','사골곰탕':'1인분','부대찌개':'1인분','돼지김치찌개':'1인분','뚝배기불고기':'1인분','알탕':'1인분','아구찜':'1인분','낙지볶음':'1인분','오징어볶음':'1인분','제육볶음':'1인분','불고기':'1인분','회덮밥':'1그릇','비빔밥':'1그릇','나물비빔밥':'1그릇','제육덮밥':'1그릇','오징어덮밥':'1그릇','김치볶음밥':'1그릇','카레라이스':'1그릇','오므라이스':'1그릇','치킨마요덮밥':'1그릇','돈까스':'1인분','들기름막국수':'1인분','비빔국수':'1인분','잔치국수':'1인분','냉면':'1인분','칼국수':'1인분','짜장면':'1인분','짬뽕':'1인분','어묵우동':'1인분','콩국수':'1인분','고등어구이':'1토막','연어스테이크':'1인분','연어회':'8~10점','광어회':'8~10점','초밥세트':'10피스','삼겹살':'2인분(200g)','갈비':'2인분(200g)','곱창구이':'1인분','잡곡밥':'1공기','현미밥':'1공기','쌀밥':'1공기'
+};
+function _foodPortion(name) { return FOOD_PORTION[name] || '1인분'; }
+
 function _v20RecRenderFoods() {
   const el = document.getElementById('v20RecContent');
   if (!el) return;
-  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
   const situations = [
-    { key:'home', label:'집밥', icon:'🏠' },
-    { key:'delivery', label:'배달', icon:'🛵' },
-    { key:'eatout', label:'외식', icon:'🍽' },
-    { key:'convenience', label:'편의점', icon:'🏪' }
+    { key:'home', label:'집밥', icon:'🏠', tone:'#F0FDF4', text:'#15803D' },
+    { key:'delivery', label:'배달', icon:'🛵', tone:'#EFF6FF', text:'#1E40AF' },
+    { key:'eatout', label:'외식', icon:'🍽', tone:'#FEF3C7', text:'#92400E' },
+    { key:'convenience', label:'편의점', icon:'🏪', tone:'#FAF5FF', text:'#7C2D92' }
   ];
-  let html = '<div style="font-size:11.5px;color:#64748B;font-weight:600;line-height:1.5;margin-bottom:12px">부족 영양소 기준으로 상황별 실전 메뉴를 추천해요.</div>';
+  let html = '<div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:14px 16px;margin-bottom:14px"><div style="font-size:12.5px;color:#1E3A8A;font-weight:700;line-height:1.55">부족 영양소 <b>3개 기준</b>으로 상황별 실전 메뉴를 골랐어요.</div></div>';
+  let hasAny = false;
   situations.forEach(sit => {
     const rec = (typeof getWhatToEatNow === 'function') ? getWhatToEatNow(sit.key) : null;
     if (!rec || !rec.top3 || rec.top3.length === 0) return;
-    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px;margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <span style="font-size:18px">${sit.icon}</span>
-        <span style="font-size:13px;font-weight:800;color:#0F172A">${sit.label}</span>
+    hasAny = true;
+    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:18px;padding:18px 18px 8px;margin-bottom:12px;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <div style="width:38px;height:38px;background:${sit.tone};border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${sit.icon}</div>
+        <div style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${sit.label}</div>
       </div>
-      ${rec.top3.map(t => `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #F1F5F9">
-        <div><div style="font-size:12px;font-weight:800;color:#0F172A">${_v20Esc(t.name)}</div><div style="font-size:10px;color:#64748B;font-weight:600;margin-top:1px">${_v20Esc(t.reason)}</div></div>
-        <span style="font-size:10px;color:#64748B;font-weight:700">${t.kcal || '—'} kcal</span>
-      </div>`).join('')}
+      ${rec.top3.map(t => {
+        const portion = _foodPortion(t.name);
+        return `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px 0;border-top:1px solid #F1F5F9">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:3px">${_v20Esc(t.name)}</div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:10.5px;color:#64748B;font-weight:700">
+              <span style="background:#F8FAFC;padding:2px 8px;border-radius:99px">${_v20Esc(portion)}</span>
+              <span style="color:${sit.text};font-weight:800">${_v20Esc(t.reason)}</span>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${t.kcal || '—'}</div>
+            <div style="font-size:9.5px;color:#94A3B8;font-weight:700;margin-top:1px">kcal</div>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="padding:8px 0"></div>
     </div>`;
   });
-  if (html.split('background:#fff').length < 3) {
-    html = '<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:14px;padding:20px;text-align:center"><div style="font-size:13px;font-weight:800;color:#16A34A;margin-bottom:4px">먼저 식단을 기록해주세요</div><div style="font-size:11px;color:#166534;font-weight:600">기록이 쌓이면 상황별 실전 메뉴를 추천해드려요.</div></div>';
+  if (!hasAny) {
+    html += '<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:14px;padding:20px;text-align:center"><div style="font-size:13px;font-weight:800;color:#16A34A;margin-bottom:4px">먼저 식단을 기록해주세요</div><div style="font-size:11px;color:#166534;font-weight:600">기록이 쌓이면 상황별 실전 메뉴를 추천해드려요.</div></div>';
   }
+  html += '<div style="background:#F8FAFC;border-radius:12px;padding:11px 14px;margin-top:8px;font-size:10.5px;color:#64748B;line-height:1.55;font-weight:500">칼로리는 1인분 표준 기준(왼쪽 회색 태그 참고)</div>';
   el.innerHTML = html;
 }
 
@@ -13553,6 +13627,8 @@ async function confirmAndAnalyze() {
     currentFoodResult = result;
     renderFoodResult(result);
     saveFoodHistory(result);
+    // 📊 식단 분석 완료
+    try { if (window.track) window.track('food_analyze_completed', { target: foodTarget, calories: result.totalCalories || 0, score: result.balanceScore || 0, foods_count: (result.foods||[]).length }); } catch(e){}
     if (canEarn('test')) { incrementDailyCount('test'); addPoints(100, '식단 분석 완료'); }
     showScreen('screenFoodResult');
   } catch (err) {
@@ -18780,6 +18856,7 @@ function markSupplementTaken(id) {
 
 // ═══ v20 · 영양제 복용 알림 · Flutter 로컬 알림 브릿지 ═══
 function _v20SetSupplementReminder(id, hour, minute, enabled) {
+  try { if (window.track) window.track('supplement_reminder_set', { enabled: !!enabled, hour: hour }); } catch(e){}
   const list = getSupplementList();
   const item = list.find(s => s.id === id);
   if (!item) return false;
