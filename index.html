@@ -13335,6 +13335,7 @@ function renderConfirmFoods() {
         <span style="font-size:20px">🍽</span>
         <input type="text" value="${escapeHtml(food.name)}" oninput="updateFoodName(${fi}, this.value)" placeholder="음식 이름"/>
       </div>
+      ${food.brand ? `<div style="margin:6px 0 0 28px;display:inline-flex;align-items:center;gap:4px;background:#EFF6FF;color:#1E40AF;font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;border:1px solid #DBEAFE"><span style="font-size:11px">🏪</span> ${escapeHtml(food.brand)}</div>` : ''}
 
       <button onclick="toggleFoodIngredients(${fi})" style="margin-top:8px;background:transparent;border:none;color:#6366F1;font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 0;font-family:inherit;display:inline-flex;align-items:center;gap:4px">
         ${isExpanded ? '▾' : '▸'} 재료 ${ingredients.length}개 ${isExpanded ? '접기' : '보기·수정'}
