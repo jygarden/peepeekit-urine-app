@@ -24,16 +24,17 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
 
   try {
-    const { mode = 'detect', imageB64, target = 'human', confirmedFoods, mealTime, userProfile, todayMeals } = req.body;
+    const { mode = 'detect', imageB64, target = 'human', confirmedFoods, mealTime, userProfile, todayMeals, userMemo } = req.body;
+    const memo = String(userMemo || '').trim().slice(0, 200); // 최대 200자 안전 컷
 
     if (mode === 'detect') {
       if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
-      return await runDetect({ apiKey, imageB64, target, res });
+      return await runDetect({ apiKey, imageB64, target, userMemo: memo, res });
     }
 
     if (mode === 'analyze') {
       if (!confirmedFoods || !confirmedFoods.length) return res.status(400).json({ error: '확정된 음식 리스트가 없습니다.' });
-      return await runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, res });
+      return await runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo: memo, res });
     }
 
     return res.status(400).json({ error: `알 수 없는 mode: ${mode}` });
@@ -44,8 +45,8 @@ module.exports = async function handler(req, res) {
 };
 
 // ═══ DETECT MODE · 음식 인식 + 양 추정 ═══
-async function runDetect({ apiKey, imageB64, target, res }) {
-  const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt();
+async function runDetect({ apiKey, imageB64, target, userMemo, res }) {
+  const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt(userMemo);
 
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -76,10 +77,10 @@ async function runDetect({ apiKey, imageB64, target, res }) {
 }
 
 // ═══ ANALYZE MODE · 확정 음식 → 코칭 텍스트 ═══
-async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, res }) {
+async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo, res }) {
   const prompt = target === 'pet'
     ? buildPetFoodAnalyzePrompt({ confirmedFoods, userProfile, todayMeals })
-    : buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals });
+    : buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo });
 
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -112,10 +113,22 @@ async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfil
 }
 
 // ═══ HUMAN · DETECT PROMPT ═══
-function buildHumanFoodDetectPrompt() {
+function buildHumanFoodDetectPrompt(userMemo) {
+  const memoBlock = userMemo ? `
+
+【사용자가 알려준 정보 · 최우선 참고】
+"${userMemo}"
+
+이 정보를 반드시 참고해서 인식·양 추정에 반영한다:
+- 프랜차이즈(예: 김밥천국·맘스터치·롯데리아)면 해당 브랜드의 공식 메뉴명·표준 용량으로 매칭
+- 지역 가게명이면 그 카테고리의 일반적 용량 반영
+- 양(1인분·2인분·라지·곱빼기) 힌트가 있으면 portion 필드에 정확히 반영 (2인분 → portion:2)
+- 사용자 메모가 사진과 모순되면 사용자 메모를 우선한다 (사용자가 실제로 먹은 사람이므로)
+` : '';
+
   return `너는 한식 이미지 인식 전문가다. 사진 속 음식을 식별하고 1인분 대비 양을 추정한다.
 JSON 하나만 응답한다. 마크다운 코드블록 금지.
-
+${memoBlock}
 【역할 · 절대 규칙】
 1. 너는 음식 인식과 양 추정만 담당한다.
 2. 칼로리·단백질·나트륨 같은 영양소 숫자는 절대 생성하지 않는다 (내가 별도 DB에서 조회함).
@@ -126,6 +139,7 @@ JSON 하나만 응답한다. 마크다운 코드블록 금지.
 - 한식 표준 용량 기준 (밥 1공기 = 200g, 국 1공기 = 300ml, 반찬 1접시 = 50~100g)
 - 애매하면 "1", "0.5", "1.5" 세 단계 옵션으로 물어봄
 - 이름은 KOREAN_FOOD_DB에 있을 법한 대표명 사용 (예: '순두부찌개', '고등어구이', '잡곡밥')
+- 사용자 메모에 브랜드명이 있으면 name에 브랜드+메뉴로 표기 (예: '김밥천국 참치김밥')
 
 【JSON 스키마】
 {
@@ -155,7 +169,7 @@ JSON 하나만 응답한다. 마크다운 코드블록 금지.
 }
 
 // ═══ HUMAN · ANALYZE PROMPT ═══
-function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals }) {
+function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo }) {
   const p = userProfile || {};
   const profileLine = [
     p.gender === 'male' ? '남성' : p.gender === 'female' ? '여성' : '',
@@ -190,6 +204,8 @@ JSON 하나만 응답. 마크다운 금지.
 - 프로필: ${profileLine || '정보 없음'}
 - 이번 식사(${mealTime || '식사'}): ${foodsLine}
 - 오늘 앞 식사들: ${todayLine}
+${userMemo ? `- 사용자 메모(브랜드·가게·양): "${userMemo}"` : ''}
+${userMemo ? `※ 사용자 메모가 있으면 프랜차이즈의 실제 영양 특성(예: 배달 음식은 나트륨↑, 프랜차이즈 버거는 지방↑)을 반영해 코칭한다.` : ''}
 
 【출력 스키마】
 {
