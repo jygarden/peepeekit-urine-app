@@ -205,8 +205,14 @@ async function build() {
       if (st.isDirectory()) {
         count += copyDirRecursive(srcPath, destPath);
       } else {
-        fs.copyFileSync(srcPath, destPath);
-        count++;
+        try {
+          if (fs.existsSync(destPath) && fs.statSync(destPath).size === st.size) continue;
+          fs.copyFileSync(srcPath, destPath);
+          count++;
+        } catch(e) {
+          if (e.code === 'EACCES') continue; // 권한 문제 파일은 스킵
+          throw e;
+        }
       }
     }
     return count;
