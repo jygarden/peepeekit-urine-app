@@ -2408,31 +2408,31 @@ window.appIcon = function(name, size){
         <!-- ⑥ 하단 3카드 · 수면 / 소변검사 / 변화 리포트 -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
-            <div style="display:flex;justify-content:center;align-items:center;margin-bottom:10px;position:relative">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
               <img src="assets/home-icons/sleep.png" alt="수면" width="30" height="30" style="display:block;object-fit:contain"/>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5" style="position:absolute;right:0;top:2px"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div style="font-size:12px;font-weight:800;color:#8B5CF6;margin-bottom:3px;text-align:center">수면</div>
-            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px;text-align:center">최근 3일 평균</div>
-            <div id="v20SleepValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px;text-align:center">6시간 12분</div>
+            <div style="font-size:12px;font-weight:800;color:#8B5CF6;margin-bottom:3px">수면</div>
+            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px">최근 3일 평균</div>
+            <div id="v20SleepValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">6시간 12분</div>
           </button>
           <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
-            <div style="display:flex;justify-content:center;align-items:center;margin-bottom:10px;position:relative">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
               <img src="assets/home-icons/urine-test.png" alt="소변검사" width="30" height="30" style="display:block;object-fit:contain"/>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5" style="position:absolute;right:0;top:2px"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div style="font-size:12px;font-weight:800;color:#2563EB;margin-bottom:3px;text-align:center">소변검사</div>
-            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px;text-align:center">최근 검사 결과</div>
-            <div id="v20UrineValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px;text-align:center">보기</div>
+            <div style="font-size:12px;font-weight:800;color:#2563EB;margin-bottom:3px">소변검사</div>
+            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px">최근 검사 결과</div>
+            <div id="v20UrineValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">보기</div>
           </button>
           <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
-            <div style="display:flex;justify-content:center;align-items:center;margin-bottom:10px;position:relative">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
               <img src="assets/home-icons/change-report.png" alt="변화 리포트" width="30" height="30" style="display:block;object-fit:contain"/>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5" style="position:absolute;right:0;top:2px"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <div style="font-size:12px;font-weight:800;color:#10B981;margin-bottom:3px;text-align:center">변화 리포트</div>
-            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px;text-align:center">이번 주</div>
-            <div id="v20ReportValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px;text-align:center">식이섬유 ↑</div>
+            <div style="font-size:12px;font-weight:800;color:#10B981;margin-bottom:3px">변화 리포트</div>
+            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px">이번 주</div>
+            <div id="v20ReportValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">식이섬유 ↑</div>
           </button>
         </div>
 
