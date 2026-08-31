@@ -120,7 +120,9 @@ async function build() {
             '_v20SetSupplementReminder', '_v20SyncAllReminders', '_v20OpenReminderModal',
             '_v20OpenRecentMealResult', '_v20OpenMealWhy', '_v20SelectAnalyzeTarget',
             'renderV20Report', 'NUTRIENT_QUICK_FOODS', 'NUTRIENT_TAGLINE', '_v20ToggleNutrientDetail',
-            'HEX_AXES', '_v20RenderHexMap', '_v20OpenNutrientMap',
+            'HEX_AXES', '_v20RenderHexMap', '_v20OpenNutrientMap', 'FOOD_PORTION', '_foodPortion',
+            'BODY_SIGNAL_CARDS', 'BODY_SIGNAL_MAP', 'pickBodySignalCard', '_v20RenderBodySignal',
+            'foodUserMemo', '_foodMemoOnInput', '_foodMemoAppend',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
             // v20 · 수면 체크
             'SLEEP_QUESTIONS', 'SLEEP_VAL', 'calculateSleepPattern', 'getSleepLifestyleContext', 'buildSleepCoaching',
