@@ -2385,12 +2385,12 @@ window.appIcon = function(name, size){
               <div id="v20BodySignalDesc" style="font-size:11.5px;color:#475569;font-weight:500;line-height:1.6">최근 식사에서 식이섬유가<br>부족한 날이 많았어요.</div>
             </div>
           </div>
-          <div id="v20BodySignalChips" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">
-            <span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A">🌿 채소 한 접시</span>
-            <span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A">🍎 과일 1회</span>
-            <span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A">💧 물 한 잔</span>
+          <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:9px 11px;margin-bottom:10px;gap:6px;align-items:flex-start"></div>
+          <div id="v20BodySignalChips" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid #F1F5F9;margin-top:2px">
+            <span id="v20BodySignalDisclaimer" style="font-size:9.5px;color:#94A3B8;font-weight:600;line-height:1.4;flex:1;min-width:0;padding-right:8px">가능성 중 하나 · 3일 이상 지속되면 진료</span>
+            <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){alert('오류: '+e.message)}" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:2px;font-family:inherit;flex-shrink:0">식사와 관계 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
           </div>
-          <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){alert('오류: '+e.message)}" style="width:100%;background:transparent;border:none;padding:8px 0 0;text-align:right;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:2px;font-family:inherit">식사와 어떤 관계가 있나요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
         </div>
 
         <!-- ⑤ 건강어때 스토어 · 정품 키트 -->
@@ -7537,106 +7537,154 @@ function _v20RenderRecentMeal() {
 }
 
 // ═══ 내 몸이 보내는 신호 (부족 영양소 → 신체 신호 매핑) ═══
-const BODY_SIGNAL_MAP = {
-  fiber: {
-    icon: '🌿', color: '#8B5CF6', bg: '#F5F3FF',
-    title: '요즘 배변이 개운하지 않다면?',
-    desc: '최근 식사에서 식이섬유가<br>부족한 날이 많았어요.',
-    chips: [
-      {emoji:'🌿', label:'채소 한 접시'},
-      {emoji:'🍎', label:'과일 1회'},
-      {emoji:'💧', label:'물 한 잔'}
-    ]
-  },
-  protein: {
-    icon: '💪', color: '#DC2626', bg: '#FEF2F2',
-    title: '오후에 쉽게 피곤한가요?',
-    desc: '최근 식사에서 단백질이<br>부족한 날이 많았어요.',
-    chips: [
-      {emoji:'🥚', label:'달걀 2개'},
-      {emoji:'🍗', label:'닭가슴살'},
-      {emoji:'🐟', label:'생선 한 조각'}
-    ]
-  },
-  iron: {
-    icon: '🩸', color: '#B91C1C', bg: '#FEF2F2',
-    title: '자주 어지럽거나 창백해 보이나요?',
-    desc: '최근 식사에서 철분이<br>부족한 날이 많았어요.',
-    chips: [
-      {emoji:'🥩', label:'붉은 살코기'},
-      {emoji:'🥬', label:'시금치나물'},
-      {emoji:'🍊', label:'과일 (비타민C)'}
-    ]
-  },
-  calcium: {
-    icon: '🦴', color: '#2563EB', bg: '#EFF6FF',
-    title: '뼈 · 치아가 신경 쓰이나요?',
-    desc: '최근 식사에서 칼슘이<br>부족한 날이 많았어요.',
-    chips: [
-      {emoji:'🥛', label:'우유 or 요거트'},
-      {emoji:'🧀', label:'두부 반 모'},
-      {emoji:'🐟', label:'멸치'}
-    ]
-  },
-  magnesium: {
-    icon: '😴', color: '#9333EA', bg: '#FAF5FF',
-    title: '요즘 쉽게 잠들지 못하나요?',
-    desc: '최근 식사에서 마그네슘이<br>부족한 날이 많았어요.',
-    chips: [
-      {emoji:'🌰', label:'견과류 한 줌'},
-      {emoji:'🥑', label:'아보카도'},
-      {emoji:'🥬', label:'녹색 채소'}
-    ]
-  },
-  vitD: {
-    icon: '☀️', color: '#0EA5E9', bg: '#F0F9FF',
-    title: '컨디션이 쉽게 처지나요?',
-    desc: '햇볕과 등푸른 생선 섭취가<br>부족한 편이에요.',
-    chips: [
-      {emoji:'☀️', label:'점심 산책'},
-      {emoji:'🐟', label:'연어·고등어'},
-      {emoji:'🥚', label:'계란노른자'}
-    ]
-  },
-  omega3: {
-    icon: '🧠', color: '#0891B2', bg: '#ECFEFF',
-    title: '오후 집중력이 떨어지나요?',
-    desc: '오메가3 섭취가 최근<br>부족한 편이에요.',
-    chips: [
-      {emoji:'🐟', label:'연어·고등어'},
-      {emoji:'🥜', label:'들기름 or 견과류'},
-      {emoji:'🍣', label:'회 or 초밥'}
-    ]
-  },
-  vitC: {
-    icon: '🍊', color: '#F59E0B', bg: '#FFFBEB',
-    title: '피부 · 면역이 신경 쓰이나요?',
-    desc: '과일·생채소 섭취가<br>최근 적었어요.',
-    chips: [
-      {emoji:'🍊', label:'귤 or 오렌지'},
-      {emoji:'🍓', label:'딸기·키위'},
-      {emoji:'🫑', label:'파프리카'}
-    ]
-  }
-};
+// 증상 기반 몸 신호 카드 v2 · 총 20종 (부족 영양소 + 요일 로테이션으로 노출)
+// 각 카드: {id, nutrients:[매칭키], icon, bg, title, desc, chips, disclaimer, medical(선택)}
+const BODY_SIGNAL_CARDS = [
+  { id:'fiber_gut', nutrients:['fiber'], icon:'🌿', bg:'#F0FDF4',
+    title:'요즘 배변이 개운하지 않다면?',
+    desc:'식이섬유·수분 부족과<br>관련된 경우가 많아요.',
+    chips:[{emoji:'🥬',label:'채소 한 접시'},{emoji:'🍎',label:'과일 1회'},{emoji:'💧',label:'물 6~8잔'}],
+    disclaimer:'가능성 중 하나 · 3일 이상 지속되면 진료' },
+  { id:'protein_fatigue', nutrients:['protein'], icon:'💪', bg:'#FEF2F2',
+    title:'오후에 쉽게 피곤한가요?',
+    desc:'단백질 부족으로 근육 회복이<br>느릴 때 흔한 신호예요.',
+    chips:[{emoji:'🥚',label:'달걀 2개'},{emoji:'🍗',label:'닭가슴살'},{emoji:'🐟',label:'생선 한 조각'}],
+    disclaimer:'가능성 중 하나 · 수면·운동도 함께 점검하세요' },
+  { id:'iron_dizzy', nutrients:['iron'], icon:'🩸', bg:'#FEF2F2',
+    title:'앉았다 일어날 때 자주 어지럽나요?',
+    desc:'철분 부족·저혈압·저혈당과<br>관련된 경우가 있어요.',
+    chips:[{emoji:'🥩',label:'붉은 살코기'},{emoji:'🥬',label:'시금치나물'},{emoji:'🍊',label:'비타민C 과일'}],
+    disclaimer:'심하거나 자주 반복되면 내과 검진 권장',
+    medical:'심한 어지러움·기절이 반복되면 내과 진료를 먼저 권해요.' },
+  { id:'calcium_bones', nutrients:['calcium'], icon:'🦴', bg:'#EFF6FF',
+    title:'뼈 · 치아가 신경 쓰이나요?',
+    desc:'칼슘·비타민D 섭취가<br>부족한 편이에요.',
+    chips:[{emoji:'🥛',label:'우유·요거트'},{emoji:'🧀',label:'두부 반 모'},{emoji:'🐟',label:'멸치'}],
+    disclaimer:'가능성 중 하나 · 골밀도가 걱정되면 검진' },
+  { id:'mg_sleep', nutrients:['magnesium'], icon:'😴', bg:'#FAF5FF',
+    title:'요즘 쉽게 잠들지 못하나요?',
+    desc:'마그네슘·수면 위생·카페인이<br>서로 얽혀 있는 경우가 많아요.',
+    chips:[{emoji:'🌰',label:'견과류 한 줌'},{emoji:'🥑',label:'아보카도'},{emoji:'☕',label:'커피 오후 2시 전'}],
+    disclaimer:'2주 이상 불면이면 수면클리닉 권장' },
+  { id:'mg_eye_twitch', nutrients:['magnesium'], icon:'👁', bg:'#FAF5FF',
+    title:'요즘 눈 밑이 떨리나요?',
+    desc:'마그네슘 부족·과도한 카페인과<br>관련된 경우가 많아요.',
+    chips:[{emoji:'🌰',label:'견과류 한 줌'},{emoji:'🥑',label:'아보카도'},{emoji:'☕',label:'커피 오후 2시 전'}],
+    disclaimer:'가능성 중 하나 · 3일 이상 지속되면 진료' },
+  { id:'mg_leg_cramp', nutrients:['magnesium','potassium'], icon:'🦵', bg:'#FEF2F2',
+    title:'밤에 다리에 쥐가 자주 나나요?',
+    desc:'마그네슘·칼륨·수분 부족과<br>관련이 있어요.',
+    chips:[{emoji:'🍌',label:'바나나 1개'},{emoji:'🌰',label:'견과류'},{emoji:'💧',label:'자기 전 물 반 컵'}],
+    disclaimer:'가능성 중 하나 · 자주 반복되면 진료' },
+  { id:'vitD_lowmood', nutrients:['vitD'], icon:'☀️', bg:'#F0F9FF',
+    title:'컨디션이 쉽게 처지나요?',
+    desc:'햇볕·비타민D·오메가3<br>섭취가 부족한 편이에요.',
+    chips:[{emoji:'☀️',label:'점심 산책 10분'},{emoji:'🐟',label:'연어·고등어'},{emoji:'🥚',label:'계란노른자'}],
+    disclaimer:'2주 이상 무기력·우울감은 전문가 상담 권장' },
+  { id:'omega3_focus', nutrients:['omega3'], icon:'🧠', bg:'#ECFEFF',
+    title:'오후 집중력이 확 떨어지나요?',
+    desc:'점심에 정제 탄수 위주였을 때<br>흔한 반응이에요.',
+    chips:[{emoji:'🥚',label:'삶은 계란 1개'},{emoji:'🍠',label:'고구마·잡곡'},{emoji:'🚶',label:'커피 대신 산책'}],
+    disclaimer:'패턴이 반복되면 저녁 식단도 점검' },
+  { id:'vitC_immune', nutrients:['vitC'], icon:'🍊', bg:'#FFFBEB',
+    title:'감기·피부 트러블이 잦은가요?',
+    desc:'과일·생채소·비타민C<br>섭취가 최근 적었어요.',
+    chips:[{emoji:'🍊',label:'귤·오렌지'},{emoji:'🍓',label:'딸기·키위'},{emoji:'🫑',label:'파프리카'}],
+    disclaimer:'가능성 중 하나 · 수면·스트레스도 확인' },
+  { id:'b12_hand_numb', nutrients:['vitB12','vitB'], icon:'✋', bg:'#FEF2F2',
+    title:'손 저림이 자주 있나요?',
+    desc:'비타민B12 부족일 수도, 자세·<br>디스크 문제일 수도 있어요.',
+    chips:[{emoji:'🥚',label:'달걀노른자'},{emoji:'🐟',label:'생선·조개'},{emoji:'🥛',label:'우유·요거트'}],
+    disclaimer:'식이 문제 아닐 가능성이 커요 · 진료 우선',
+    medical:'한쪽만 저리거나 지속되면 정형외과·신경과 진료를 먼저 권해요.' },
+  { id:'sodium_swell', nutrients:['sodium'], icon:'💧', bg:'#EFF6FF',
+    title:'아침에 얼굴이 잘 붓나요?',
+    desc:'전날 저녁 나트륨 과다·수면 자세와<br>관련이 있어요.',
+    chips:[{emoji:'🥒',label:'오이·수박'},{emoji:'🍌',label:'바나나(칼륨)'},{emoji:'🍜',label:'국물 반만 드시기'}],
+    disclaimer:'매일 심하게 붓거나 다리도 부으면 신장 검진' },
+  { id:'protein_hair', nutrients:['protein','iron','zinc'], icon:'💇', bg:'#FEF2F2',
+    title:'요즘 머리카락이 잘 빠지나요?',
+    desc:'단백질·철분·아연 섭취<br>부족과 관련된 경우가 있어요.',
+    chips:[{emoji:'🥚',label:'달걀 2개'},{emoji:'🥩',label:'붉은 살코기'},{emoji:'🌰',label:'견과류·굴'}],
+    disclaimer:'급격한 탈모는 피부과 진료 권장' },
+  { id:'biotin_nails', nutrients:['protein','vitB'], icon:'💅', bg:'#FFFBEB',
+    title:'손톱이 잘 갈라지나요?',
+    desc:'비오틴·단백질·철분 부족과<br>관련된 경우가 있어요.',
+    chips:[{emoji:'🥚',label:'달걀노른자'},{emoji:'🥑',label:'아보카도'},{emoji:'🐟',label:'연어'}],
+    disclaimer:'가능성 중 하나 · 갑상선 이상도 원인 가능' },
+  { id:'omega3_skin', nutrients:['omega3'], icon:'🧴', bg:'#ECFEFF',
+    title:'피부가 유난히 건조한가요?',
+    desc:'오메가3·수분·비타민A<br>섭취가 부족할 수 있어요.',
+    chips:[{emoji:'🐟',label:'등푸른 생선'},{emoji:'🥑',label:'아보카도'},{emoji:'💧',label:'물 자주'}],
+    disclaimer:'만성 피부 트러블은 피부과 상담' },
+  { id:'vitB_lips', nutrients:['vitB'], icon:'👄', bg:'#FFFBEB',
+    title:'입술이 자주 갈라지나요?',
+    desc:'비타민B군·수분 부족과<br>관련된 경우가 많아요.',
+    chips:[{emoji:'🐟',label:'생선·달걀'},{emoji:'🥬',label:'녹색 채소'},{emoji:'💧',label:'물 자주'}],
+    disclaimer:'입 주위 통증·물집은 진료 권장' },
+  { id:'vitC_gums', nutrients:['vitC'], icon:'😬', bg:'#FFFBEB',
+    title:'잇몸이 자주 붓거나 피가 나나요?',
+    desc:'비타민C 부족·구강 위생과<br>관련이 있어요.',
+    chips:[{emoji:'🍊',label:'귤·오렌지'},{emoji:'🍓',label:'딸기·키위'},{emoji:'🫑',label:'파프리카'}],
+    disclaimer:'치과 정기 검진을 함께 권장' },
+  { id:'fiber_digest', nutrients:['fiber'], icon:'🍽', bg:'#F0FDF4',
+    title:'식후에 소화가 잘 안 되나요?',
+    desc:'식이섬유·식사 속도·유산균이<br>영향을 줘요.',
+    chips:[{emoji:'🥬',label:'식전 채소'},{emoji:'🍚',label:'천천히 30번 씹기'},{emoji:'🥛',label:'요거트'}],
+    disclaimer:'만성 소화불량은 위·장 검진 권장' },
+  { id:'omega3_inflame', nutrients:['omega3'], icon:'🔥', bg:'#FEF2F2',
+    title:'요즘 온몸이 쑤시나요?',
+    desc:'수면 부족·수분 부족·오메가3 부족<br>등 여러 요인이 겹칠 수 있어요.',
+    chips:[{emoji:'🐟',label:'등푸른 생선'},{emoji:'💧',label:'물 6~8잔'},{emoji:'😴',label:'7시간 이상 수면'}],
+    disclaimer:'특정 부위 통증이 지속되면 진료',
+    medical:'한 부위가 계속 아프거나 열이 나면 진료를 먼저 권해요.' },
+  { id:'mg_bcomplex_anxiety', nutrients:['magnesium','vitB'], icon:'😰', bg:'#FAF5FF',
+    title:'요즘 스트레스·불안이 자주 오나요?',
+    desc:'마그네슘·비타민B군·수면·운동이<br>서로 얽혀 있어요.',
+    chips:[{emoji:'🌰',label:'견과류'},{emoji:'🥬',label:'녹색 채소'},{emoji:'🚶',label:'낮 산책 15분'}],
+    disclaimer:'2주 이상 지속되면 전문가 상담 권장' }
+];
+
+// ↓ 레거시 호환 (기존 코드가 BODY_SIGNAL_MAP 참조하는 경우 대비)
+const BODY_SIGNAL_MAP = BODY_SIGNAL_CARDS.reduce((m, c) => {
+  c.nutrients.forEach(n => { if (!m[n]) m[n] = c; });
+  return m;
+}, {});
+
+// 부족 영양소·요일 기반으로 카드 하나 선택 (매일 조금씩 바뀜)
+function pickBodySignalCard(shortages) {
+  const shortKeys = new Set((shortages || []).map(s => s.key));
+  const matched = BODY_SIGNAL_CARDS.filter(c => c.nutrients.some(n => shortKeys.has(n)));
+  const pool = matched.length ? matched : BODY_SIGNAL_CARDS;
+  const day = new Date().getDate();
+  return pool[day % pool.length];
+}
 
 function _v20RenderBodySignal(shortages) {
   const iconEl = document.getElementById('v20BodySignalIcon');
   const titleEl = document.getElementById('v20BodySignalTitle');
   const descEl = document.getElementById('v20BodySignalDesc');
   const chipsEl = document.getElementById('v20BodySignalChips');
+  const discEl = document.getElementById('v20BodySignalDisclaimer');
+  const medEl = document.getElementById('v20BodySignalMedical');
   if (!titleEl) return;
-  // 부족 영양소 중 매핑이 있는 첫 번째 항목
-  const key = (shortages || []).find(s => BODY_SIGNAL_MAP[s.key]);
-  const sig = key ? BODY_SIGNAL_MAP[key.key] : BODY_SIGNAL_MAP.fiber;
+  const sig = pickBodySignalCard(shortages);
   if (iconEl) {
     iconEl.style.background = sig.bg;
     iconEl.innerHTML = `<span style="font-size:24px">${sig.icon}</span>`;
   }
-  if (titleEl) titleEl.textContent = sig.title;
-  if (descEl) descEl.innerHTML = sig.desc;
-  if (chipsEl) {
-    chipsEl.innerHTML = sig.chips.map(c => `<span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A;display:inline-flex;align-items:center;gap:4px">${c.emoji} ${c.label}</span>`).join('');
+  titleEl.textContent = sig.title;
+  descEl.innerHTML = sig.desc;
+  chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A;display:inline-flex;align-items:center;gap:4px">${c.emoji} ${c.label}</span>`).join('');
+  if (discEl) discEl.textContent = sig.disclaimer || '가능성 중 하나 · 지속되면 진료';
+  if (medEl) {
+    if (sig.medical) {
+      medEl.style.display = 'flex';
+      medEl.innerHTML = `<span style="font-size:12px;flex-shrink:0">⚠️</span><div style="font-size:10.5px;color:#92400E;font-weight:700;line-height:1.5">${sig.medical}</div>`;
+    } else {
+      medEl.style.display = 'none';
+      medEl.innerHTML = '';
+    }
   }
 }
 
