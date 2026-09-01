@@ -8130,7 +8130,7 @@ function renderV20Report() {
         const k = NUTRIENT_KNOWLEDGE[s.key] || {};
         const days = (typeof getShortageDayCount === 'function') ? getShortageDayCount(s.key) : 0;
         return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #F1F5F9">
-          <div style="width:26px;height:26px;background:${k.color || '#64748B'};border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${k.code || '·'}</div>
+          <div style="width:28px;height:28px;background:${k.color || '#64748B'};border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${k.code || '·'}</div>
           <span style="flex:1;font-size:12.5px;font-weight:700;color:#0F172A">${s.label}</span>
           <span style="font-size:12px;font-weight:800;color:${k.color || '#64748B'}">${days}일 부족</span>
         </div>`;
@@ -11121,7 +11121,7 @@ function _v20RecRenderLifestyle() {
     const k = NUTRIENT_KNOWLEDGE[s.key];
     html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:12px;margin-bottom:8px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <div style="width:20px;height:20px;background:${k.color};border-radius:5px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">${k.code}</div>
+        <div style="width:22px;height:22px;background:${k.color};border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800">${k.code}</div>
         <span style="font-size:12.5px;font-weight:800;color:#0F172A">${k.label} 챙기는 습관</span>
       </div>
       ${tipMap[s.key].map(t => `<div style="display:flex;gap:9px;padding:7px 0;border-top:1px solid #F1F5F9">
