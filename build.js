@@ -122,6 +122,7 @@ async function build() {
             'renderV20Report', 'NUTRIENT_QUICK_FOODS', 'NUTRIENT_TAGLINE', '_v20ToggleNutrientDetail',
             'HEX_AXES', '_v20RenderHexMap', '_v20OpenNutrientMap', 'FOOD_PORTION', '_foodPortion',
             'BODY_SIGNAL_CARDS', 'BODY_SIGNAL_MAP', 'pickBodySignalCard', '_v20RenderBodySignal',
+            '_v20BuildHeroMessage',
             'foodUserMemo', '_foodMemoOnInput', '_foodMemoAppend',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
             // v20 · 수면 체크
