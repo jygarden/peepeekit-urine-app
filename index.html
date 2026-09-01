@@ -6678,7 +6678,10 @@ function renderV20Home() {
       } catch(e){}
     }
     if (headEl) {
-      if (bal.mealCount === 0) {
+      // 심리 훅 다이나믹 헤드라인 (요일·시간·수면·부족·기록 기반)
+      const dyn = _v20BuildHeroMessage(bal, shortagesArr, topMenus, mealSlot, hour);
+      if (dyn.head) headEl.innerHTML = dyn.head;
+      else if (bal.mealCount === 0) {
         headEl.textContent = '먹은 음식을 찍어보세요';
       } else if (topMenus.length >= 2) {
         headEl.innerHTML = `${mealSlot}엔 <span style="color:#2563EB">${topMenus[0]}</span><br>또는 <span style="color:#2563EB">${topMenus[1]}</span> 어때요?`;
@@ -6687,6 +6690,7 @@ function renderV20Home() {
       } else {
         headEl.textContent = summary.headline || '오늘 밸런스가 좋아요';
       }
+      if (dyn.sub && subEl) subEl.textContent = dyn.sub;
     }
     if (subEl) {
       if (bal.mealCount === 0) {
@@ -7652,6 +7656,101 @@ function pickBodySignalCard(shortages) {
   const pool = matched.length ? matched : BODY_SIGNAL_CARDS;
   const day = new Date().getDate();
   return pool[day % pool.length];
+}
+
+// 심리 훅 다이나믹 히어로 메시지 · 요일·시간·수면·야식·부족·기록 기반
+function _v20BuildHeroMessage(bal, shortages, topMenus, mealSlot, hour) {
+  try {
+    const now = new Date();
+    const dow = now.getDay(); // 0=일 1=월 ...
+    const dayIdx = now.getDate();
+
+    // 최근 수면 · 야식 감지
+    let poorSleep = false;
+    try {
+      const s = JSON.parse(localStorage.getItem('sleepDataV1') || 'null');
+      if (s && s.avgMinutes && s.avgMinutes < 380) poorSleep = true; // 6시간 20분 미만
+    } catch(e){}
+
+    let ateLate = false;
+    try {
+      const fh = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]');
+      const y = new Date(); y.setDate(y.getDate() - 1);
+      const yStr = y.toISOString().slice(0,10);
+      ateLate = fh.some(e => {
+        if (!e.date) return false;
+        const d = new Date(e.date);
+        return d.toISOString().slice(0,10) === yStr && d.getHours() >= 21;
+      });
+    } catch(e){}
+
+    // 케이스별 문장 pool (심리 훅)
+    const pools = [];
+
+    // 월요일 아침
+    if (dow === 1 && hour < 11) pools.push({ w:3,
+      head:'월요일이라 힘드시죠?<br><span style="color:#2563EB">이유가 있을 수 있어요</span>',
+      sub:'주말 식습관이 몸에 남아 있어요. 오늘 아침이 회복의 시작이에요.' });
+
+    // 전날 야식
+    if (ateLate) pools.push({ w:4,
+      head:'어제 야식 드셨죠?<br><span style="color:#2563EB">오늘 이렇게 회복해요</span>',
+      sub:'따뜻한 국물 + 채소로 속을 깨우면 오후가 훨씬 가벼워요.' });
+
+    // 수면 짧음
+    if (poorSleep) pools.push({ w:3,
+      head:'6시간도 못 주무셨네요<br><span style="color:#2563EB">몸이 원하는 건</span>',
+      sub:'단백질과 마그네슘이 오늘 컨디션을 잡아줄 수 있어요.' });
+
+    // 오후 3시 무기력존
+    if (hour >= 14 && hour < 17) pools.push({ w:2,
+      head:'오후 3시 무기력<br><span style="color:#2563EB">사실 점심 때문일 수도</span>',
+      sub:'다음 끼 단백질 챙기면 저녁까지 든든해요.' });
+
+    // 금요일 저녁
+    if (dow === 5 && hour >= 17) pools.push({ w:2,
+      head:'주말 앞두고<br><span style="color:#2563EB">몸 상태 미리 체크</span>',
+      sub:'금요일 저녁 한 끼가 주말 컨디션을 결정해요.' });
+
+    // 아침·기록 있음·부족 영양
+    if (hour < 10 && bal.mealCount > 0 && shortages.length > 0) pools.push({ w:2,
+      head:`아침이 하루를 만들어요<br><span style="color:#2563EB">${shortages[0].label} 챙겨봐요</span>`,
+      sub:'첫 끼 20분 안이 흡수율 가장 좋아요.' });
+
+    // 저녁·부족 영양
+    if (hour >= 17 && shortages.length > 0) pools.push({ w:2,
+      head:`오늘 아직 <span style="color:#2563EB">${shortages[0].label}</span>가<br>부족해요`,
+      sub:'저녁 한 끼로 하루 밸런스를 정리해볼까요?' });
+
+    // 오래 기록 없음
+    if (bal.mealCount === 0 && hour >= 12) pools.push({ w:3,
+      head:'아직 오늘 첫 기록이<br><span style="color:#2563EB">없어요</span>',
+      sub:'사진 한 장이면 지금까지 흐름이 그려져요.' });
+
+    // 잘 하고 있음 (부족 없음)
+    if (bal.mealCount >= 2 && shortages.length === 0) pools.push({ w:2,
+      head:'오늘 밸런스<br><span style="color:#10B981">아주 좋아요</span>',
+      sub:'이 흐름 유지하면 이번 주 리포트가 밝아져요.' });
+
+    // 화·수·목 일반
+    if ([2,3,4].includes(dow) && hour >= 10 && hour < 14) pools.push({ w:1,
+      head:`${mealSlot} 뭐 드셨어요?<br><span style="color:#2563EB">사진 한 장 남겨봐요</span>`,
+      sub:'꾸준한 기록이 진짜 변화를 만들어요.' });
+
+    if (!pools.length) return { head:null, sub:null };
+
+    // 가중치 기반 선택 · 날짜별 로테이션
+    const total = pools.reduce((s,p)=>s+p.w, 0);
+    let target = (dayIdx * 7 + hour) % total;
+    for (const p of pools) {
+      if (target < p.w) return { head:p.head, sub:p.sub };
+      target -= p.w;
+    }
+    return { head:pools[0].head, sub:pools[0].sub };
+  } catch(e) {
+    console.error('_v20BuildHeroMessage', e);
+    return { head:null, sub:null };
+  }
 }
 
 function _v20RenderBodySignal(shortages) {
@@ -11299,9 +11398,9 @@ function _buildObSlides() {
   const slide1 = { html: `
     <div style="position:relative;padding:0 2px;display:flex;flex-direction:column;height:100%;animation:apFadeIn .35s ease-out">
       ${_obChapterHead('WHY', '01')}
-      ${_obHeadline('같은 기준으로<br>관리할 수 없으니까.')}
-      ${_obSub('사람은 <b style="color:#0F172A;font-weight:600">나이·성별·체중·생활 습관</b>에 따라,<br>반려동물은 <b style="color:#0F172A;font-weight:600">견종·나이·체중·활동량</b>에 따라<br>필요한 건강관리와 영양이 달라집니다.')}
-      ${_obHighlight('건강은 모두에게 필요하지만, 기준은 모두 다릅니다.')}
+      ${_obHeadline('요즘 이런 적,<br>없으셨어요?')}
+      ${_obSub('아침이 유독 무겁고,<br>오후엔 <b style="color:#0F172A;font-weight:600">이유 없이 무기력</b>하고,<br>밤에는 뒤척이며 잘 못 주무신 적.')}
+      ${_obHighlight('그건 나이·성별·습관·견종·활동량이 다르기 때문이에요.')}
       <!-- 일러스트 행 -->
       <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0 16px">
         <div style="display:flex;align-items:flex-end;gap:2px">${_SVG.man}${_SVG.woman}</div>
@@ -11325,8 +11424,8 @@ function _buildObSlides() {
   const slide2 = { html: `
     <div style="position:relative;padding:0 2px;display:flex;flex-direction:column;height:100%;animation:apFadeIn .35s ease-out">
       ${_obChapterHead('HOW', '02')}
-      ${_obHeadline('검사하고 찍으면,<br>건강 정보가<br>하나로 연결됩니다.')}
-      ${_obSub('소변 검사 결과부터<br><b style="color:#0F172A;font-weight:600">음식·영양제·사료 라벨</b>까지 찍어보세요.<br>흩어져 있던 정보를 건강어때가<br>한곳에서 분석합니다.')}
+      ${_obHeadline('그 이유, 사실<br>며칠 전부터<br>시작됐을 수 있어요.')}
+      ${_obSub('흩어진 <b style="color:#0F172A;font-weight:600">식단·소변·영양제 데이터</b>에<br>답이 있어요.<br>사진 한 장이면 건강어때가 연결해드려요.')}
       <!-- 일러스트 행 -->
       <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin:6px 0 16px;flex-wrap:nowrap">
         <div>${_SVG.urineCup}</div>
@@ -11360,7 +11459,7 @@ function _buildObSlides() {
   const slide3 = { html: `
     <div style="position:relative;padding:0 2px;display:flex;flex-direction:column;height:100%;animation:apFadeIn .35s ease-out">
       ${_obChapterHead('FOR YOU', '03')}
-      ${_obHeadline('그래서 오늘,<br>무엇을 얼마나<br>챙길지 알 수 있습니다.')}
+      ${_obHeadline('매일 아침,<br>몸의 이유를<br>알려드립니다.')}
       <!-- 나에게는 카드 -->
       <div style="background:#fff;border:1.4px solid #F0E9D0;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start">
         <div style="flex-shrink:0">${_SVG.womanFace}</div>
