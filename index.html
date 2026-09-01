@@ -13202,13 +13202,23 @@ function compressImageForUpload(dataUrl, maxDim=1200, quality=0.78) {
 // ════════════════════════════════════════════════════════════════
 let foodLoadingInterval = null;
 let foodLoadingProgress = 0;
-const FOOD_LOADING_STAGES = [
-  { emoji: '📸', msg: '사진을 분석하고 있어요...', sub: 'AI가 음식을 인식 중', threshold: 0 },
-  { emoji: '🤖', msg: '건강어때AI가 보는 중이에요', sub: '재료와 양을 추정 중', threshold: 25 },
-  { emoji: '🔬', msg: '영양소 계산 중이에요', sub: '칼로리·단백질·비타민 분석 중', threshold: 50 },
-  { emoji: '🍱', msg: '음식 궁합 분석 중이에요', sub: '재료별 시너지 체크 중', threshold: 75 },
-  { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 90 }
-];
+// 심리 훅 · 개인화된 처리 단계 (Processing Effect)
+const FOOD_LOADING_STAGES = (function() {
+  let userName = '지녕';
+  try {
+    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human');
+    if (p && p.name) userName = p.name;
+  } catch(e){}
+  return [
+    { emoji: '📸', msg: '사진 속 음식을 살펴보는 중...', sub: '재료 하나씩 인식하고 있어요', threshold: 0 },
+    { emoji: '📊', msg: `${userName}님의 최근 7일 식단 조회 중...`, sub: '반복되는 패턴 찾는 중', threshold: 20 },
+    { emoji: '🧬', msg: `${userName}님 나이·성별 특성 반영 중...`, sub: '개인 맞춤 기준으로 계산', threshold: 40 },
+    { emoji: '🔬', msg: '부족한 영양소 찾고 있어요', sub: '10가지 지표 크로스체크 중', threshold: 60 },
+    { emoji: '🍽', msg: '지금 상황에 맞는 실전 메뉴 고르는 중', sub: '집·배달·외식 편의점 중 매칭', threshold: 75 },
+    { emoji: '⏰', msg: '오늘 예상 컨디션 계산 중...', sub: '식사 후 반응 시간대별 예측', threshold: 88 },
+    { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 95 }
+  ];
+})();
 
 function startFoodLoading() {
   const loadingBox = document.getElementById('foodLoadingBox');
@@ -14384,7 +14394,31 @@ function renderFoodResult(r) {
     heroWrap.id = 'foodGameHero';
     document.getElementById('foodResultCapture').prepend(heroWrap);
   }
-  heroWrap.innerHTML = charHero + scoreCard;
+  // ⏰ 심리 훅 · 예상 컨디션 카드 (AI predictedEffect 활용)
+  let predictedCard = '';
+  const pe = Array.isArray(r.predictedEffect) ? r.predictedEffect.filter(e => e && (e.what || e.when)) : [];
+  if (pe.length > 0) {
+    const items = pe.slice(0, 3).map(e => `
+      <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid #F1F5F9">
+        <div style="flex-shrink:0;width:56px;text-align:center">
+          <div style="font-size:10.5px;color:#2563EB;font-weight:800;letter-spacing:-.2px">${_v20Esc(e.when || '')}</div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;color:#0F172A;font-weight:800;letter-spacing:-.2px;margin-bottom:2px">${_v20Esc(e.what || '')}</div>
+          <div style="font-size:10.5px;color:#64748B;font-weight:500;line-height:1.5">${_v20Esc(e.why || '')}</div>
+        </div>
+      </div>`).join('');
+    predictedCard = `
+      <div style="background:#fff;border-radius:16px;padding:16px 18px 4px;border:1px solid rgba(15,23,42,.06);margin:12px 0;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <span style="font-size:14px">⏰</span>
+          <span style="font-size:13.5px;font-weight:900;color:#0F172A;letter-spacing:-.3px">오늘 예상되는 컨디션</span>
+        </div>
+        <div style="font-size:10.5px;color:#94A3B8;font-weight:600;margin-bottom:2px">이 식사 기준 · 다음 끼로 조정 가능</div>
+        ${items}
+      </div>`;
+  }
+  heroWrap.innerHTML = charHero + scoreCard + predictedCard;
   // 호환용 (PDF에서도 보이게 옛 데이터 유지)
   document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
   document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
