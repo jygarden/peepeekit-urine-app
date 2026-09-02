@@ -2299,97 +2299,74 @@ window.appIcon = function(name, size){
       </div>
 
 
-      <!-- ═════════ v2.0 v3 · 새 홈 (AI 코치 톤 · 프리미엄 iOS) ═════════ -->
+      <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
       <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
 
-        <!-- 헤더 · 로고 + 브랜드 + 인사 + 알림 -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0 18px">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-              <img src="assets/logo-mark.png" alt="건강어때" style="height:26px;width:auto" draggable="false">
-              <div style="font-size:20px;font-weight:900;color:#2563EB;letter-spacing:-.5px">건강어때</div>
-            </div>
-            <div style="font-size:19px;font-weight:800;color:#0F172A;letter-spacing:-.5px">안녕하세요, <span id="v20ProfileName">재율님</span> <span style="font-size:17px">👋</span></div>
-          </div>
-          <button onclick="openStreakInfo()" style="background:transparent;border:none;padding:8px 4px;cursor:pointer;position:relative;margin-top:4px" aria-label="알림">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-            <span style="position:absolute;top:8px;right:5px;width:7px;height:7px;background:#2563EB;border-radius:50%;border:1.5px solid #FBFBFD"></span>
+        <!-- 헤더 · 인사말만 (로고 삭제) -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 16px">
+          <div style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px">안녕하세요, <span id="v20ProfileName">재율님</span></div>
+          <button onclick="openStreakInfo()" style="background:transparent;border:none;padding:6px 4px;cursor:pointer;position:relative" aria-label="알림">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+            <span style="position:absolute;top:6px;right:3px;width:6px;height:6px;background:#2563EB;border-radius:50%;border:1.5px solid #FBFBFD"></span>
           </button>
         </div>
 
-        <!-- ① 히어로 · AI 코칭 (세로 구성 · 문장 크게 · 6각 맵 풀너비) -->
-        <div style="background:#fff;border-radius:22px;padding:22px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:14px">
-          <div id="v20HeroHeadline" style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.35;margin-bottom:8px">먹은 음식을 찍어보세요</div>
-          <div id="v20HeroSub" style="font-size:13px;color:#DC2626;line-height:1.6;font-weight:700;margin-bottom:16px">사진을 등록하면 오늘의 영양 그래프가 바로 채워져요.</div>
-
-          <div style="background:#F8FAFF;border-radius:16px;padding:8px 14px 6px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:center" onclick="_v20OpenNutrientMap()">
-            <div id="v20HeroHex" style="width:80%;max-width:240px"></div>
-          </div>
-
-          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#0F172A;font-weight:600;letter-spacing:-.2px;margin-bottom:14px">
-            <div style="width:22px;height:22px;background:#EFF6FF;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+        <!-- ① 히어로 · 좌 텍스트 / 우 원형 사진 -->
+        <div onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#fff;border-radius:22px;padding:16px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:12px;cursor:pointer">
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;padding:6px 4px">
+            <div style="flex:1;min-width:0">
+              <div id="v21HeroTitle" style="font-size:17px;font-weight:800;color:#0F172A;line-height:1.45;letter-spacing:-.4px">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>은<br><span id="v21RecName" style="color:#15803D;font-size:20px">시금치나물</span>을<br>추천드려요!</div>
+              <!-- 레거시 · JS가 참조하는 히든 노드 -->
+              <span id="v20HeroHeadline" style="display:none"></span>
+              <span id="v20HeroSub" style="display:none"></span>
+              <span id="v20HeroScore" style="display:none"></span>
+              <span id="v20HeroDelta" style="display:none"></span>
+              <div id="v20HeroHex" style="display:none"></div>
+              <div id="v20HeroBoost" style="display:none"></div>
+              <div id="v20HeroBoostChips" style="display:none"></div>
             </div>
-            <span>영양 밸런스 <span id="v20HeroScore" style="font-weight:900">82</span>점</span>
-            <span style="color:#CBD5E1">·</span>
-            <span>지난주보다 <span id="v20HeroDelta" style="color:#2563EB;font-weight:900">+4</span></span>
-          </div>
-          <div id="v20HeroBoost" style="display:none;padding:14px;background:#F8FAFC;border-radius:12px;margin-bottom:16px">
-            <div style="font-size:11px;color:#94A3B8;font-weight:800;letter-spacing:.2px;margin-bottom:8px">오늘 보완할 2가지</div>
-            <div id="v20HeroBoostChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-          </div>
-          <div style="display:flex;justify-content:center">
-            <button onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#fff;border:2px solid #2563EB;color:#2563EB;padding:12px 28px;border-radius:99px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;letter-spacing:-.3px">
-              음식 사진 등록하기
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- ② 오늘 뭐 먹을까 · 파란 pill -->
-        <div style="display:flex;justify-content:center;margin-bottom:20px">
-          <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="background:#2563EB;border:none;color:#fff;padding:14px 32px;border-radius:99px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;letter-spacing:-.3px;box-shadow:0 6px 18px rgba(37,99,235,.28)">
-            오늘 뭐 먹을까?
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-          </button>
-        </div>
-
-        <!-- ③ 최근 식사 분석 -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 2px">
-          <span style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">최근 식사 분석</span>
-          <button type="button" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;font-size:11.5px;color:#64748B;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:2px;font-family:inherit">전체 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
-        </div>
-        <div id="v20RecentMealCard" style="background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(15,23,42,.06);margin-bottom:20px;display:flex;gap:14px">
-          <div id="v20RecentMealPhoto" style="width:110px;height:110px;border-radius:14px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);display:flex;align-items:center;justify-content:center;font-size:38px;flex-shrink:0;overflow:hidden">🥗</div>
-          <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between">
-            <div>
-              <div id="v20RecentMealName" style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:8px">AI가 음식 속 영양을 분석해드려요</div>
-              <div id="v20RecentMealChips" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"></div>
-              <div id="v20RecentMealComment" style="font-size:11px;color:#475569;font-weight:500;line-height:1.55">음식과 양을 확인해<br>주요 영양소를 한눈에 정리해드려요.</div>
-            </div>
-            <button type="button" id="v20RecentMealMore" onclick="_v20OpenMealWhy()" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;margin-top:8px;display:flex;align-items:center;justify-content:flex-end;gap:2px;padding:4px 0;font-family:inherit">왜 이렇게 봤을까요? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
-          </div>
-        </div>
-
-        <!-- ④ 내 몸이 보내는 신호 -->
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 2px">
-          <span style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">내 몸이 보내는 신호</span>
-        </div>
-        <div id="v20BodySignalCard" style="background:#fff;border-radius:18px;padding:16px;border:1px solid rgba(15,23,42,.06);margin-bottom:20px">
-          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
-            <div id="v20BodySignalIcon" style="width:52px;height:52px;background:#F5F3FF;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3M16 3v3M8 6c-2 0-3.5 1.5-3.5 3.5S6 13 8 13c2 0 2 2 2 4s-1 4-3.5 4"/><path d="M16 6c2 0 3.5 1.5 3.5 3.5S18 13 16 13c-2 0-2 2-2 4s1 4 3.5 4"/></svg>
-            </div>
-            <div style="flex:1;min-width:0;padding-top:4px">
-              <div id="v20BodySignalTitle" style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;margin-bottom:6px">요즘 배변이 개운하지 않다면?</div>
-              <div id="v20BodySignalDesc" style="font-size:11.5px;color:#475569;font-weight:500;line-height:1.6">최근 식사에서 식이섬유가<br>부족한 날이 많았어요.</div>
+            <div style="text-align:center;flex-shrink:0">
+              <div id="v21HeroPhoto" style="width:110px;height:110px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);border-radius:50%;box-shadow:0 6px 16px rgba(15,23,42,.15);margin-bottom:6px;display:flex;align-items:center;justify-content:center;font-size:38px;overflow:hidden">🍽</div>
+              <div id="v21HeroKcal" style="font-size:12px;font-weight:800;color:#0F172A;letter-spacing:-.2px">— kcal</div>
             </div>
           </div>
-          <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:9px 11px;margin-bottom:10px;gap:6px;align-items:flex-start"></div>
-          <div id="v20BodySignalChips" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px"></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid #F1F5F9;margin-top:2px">
-            <span id="v20BodySignalDisclaimer" style="font-size:9.5px;color:#94A3B8;font-weight:600;line-height:1.4;flex:1;min-width:0;padding-right:8px">가능성 중 하나 · 3일 이상 지속되면 진료</span>
-            <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){alert('오류: '+e.message)}" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:2px;font-family:inherit;flex-shrink:0">식사와 관계 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg></button>
+          <div id="v21HeroChips" style="display:flex;gap:5px;flex-wrap:wrap;padding:0 4px;margin-bottom:12px"></div>
+          <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="width:100%;background:#F8FAFC;border:none;padding:10px;border-radius:10px;font-size:11.5px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">자세히 보기 ›</button>
+        </div>
+
+        <!-- ② 좌우 2카드 · 최근 식사 (6각 그래프+왜이렇게봤을까) | 몸 신호 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <!-- 좌 · 최근 식사 -->
+          <div id="v20RecentMealCard" style="background:#fff;border-radius:14px;padding:12px;border:1px solid rgba(15,23,42,.06);display:flex;flex-direction:column">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+              <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.3px">최근 식사</div>
+              <div id="v21RecentScore" style="font-size:10.5px;font-weight:800;color:#64748B;background:#F1F5F9;padding:2px 6px;border-radius:99px">—점</div>
+            </div>
+            <div id="v20RecentMealName" style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:6px">기록을 남겨보세요</div>
+            <div style="display:flex;justify-content:center;background:#F8FAFC;border-radius:10px;padding:6px;margin-bottom:8px">
+              <div id="v21RecentHex" style="width:100%;max-width:100px"></div>
+            </div>
+            <div id="v20RecentMealComment" style="background:#EFF6FF;border-radius:8px;padding:8px 9px;font-size:10.5px;color:#1E3A8A;font-weight:600;line-height:1.5;margin-bottom:8px;flex:1">사진 한 장이면 AI가 영양을 분석해드려요.</div>
+            <div id="v20RecentMealChips" style="display:none"></div>
+            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:10.5px;color:#2563EB;font-weight:700;cursor:pointer;text-align:right;font-family:inherit">자세히 보기 ›</button>
+          </div>
+
+          <!-- 우 · 몸 신호 -->
+          <div id="v20BodySignalCard" style="background:#fff;border-radius:14px;padding:12px;border:1px solid rgba(15,23,42,.06);display:flex;flex-direction:column">
+            <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.3px;margin-bottom:8px">내 몸 신호</div>
+            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
+              <div id="v20BodySignalIcon" style="width:36px;height:36px;background:#F0FDF4;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌿</div>
+              <div style="flex:1;min-width:0">
+                <div id="v20BodySignalTitle" style="font-size:12.5px;font-weight:800;color:#0F172A;line-height:1.3;letter-spacing:-.3px">요즘 배변이<br>개운하지 않다면?</div>
+              </div>
+            </div>
+            <div id="v20BodySignalDesc" style="font-size:10.5px;color:#475569;font-weight:500;line-height:1.5;margin-bottom:8px">식이섬유·수분 부족과 관련될 수 있어요.</div>
+            <div id="v20BodySignalChips" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;flex:1"></div>
+            <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:6px 8px;margin-bottom:6px;font-size:9.5px;color:#92400E;font-weight:700;line-height:1.4"></div>
+            <div style="border-top:1px solid #F1F5F9;padding-top:6px;margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:6px">
+              <span id="v20BodySignalDisclaimer" style="font-size:8.5px;color:#94A3B8;font-weight:600;line-height:1.3;flex:1;min-width:0">가능성 중 하나 · 지속되면 진료</span>
+              <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){}" style="background:transparent;border:none;font-size:10.5px;color:#2563EB;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 보기 ›</button>
+            </div>
           </div>
         </div>
 
@@ -2408,35 +2385,12 @@ window.appIcon = function(name, size){
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg>
         </a>
 
-        <!-- ⑥ 하단 3카드 · 수면 / 소변검사 / 변화 리포트 -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <img src="assets/home-icons/sleep.png" alt="수면" width="30" height="30" style="display:block;object-fit:contain;margin-left:-6px"/>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div style="font-size:12px;font-weight:800;color:#8B5CF6;margin-bottom:3px">수면</div>
-            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px">최근 3일 평균</div>
-            <div id="v20SleepValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">6시간 12분</div>
-          </button>
-          <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <img src="assets/home-icons/urine-test.png" alt="소변검사" width="30" height="30" style="display:block;object-fit:contain"/>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div style="font-size:12px;font-weight:800;color:#2563EB;margin-bottom:3px">소변검사</div>
-            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px">최근 검사 결과</div>
-            <div id="v20UrineValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">보기</div>
-          </button>
-          <button onclick="if(typeof ggGoTab==='function')ggGoTab('curation')" style="background:#fff;border:1px solid rgba(15,23,42,.06);border-radius:16px;padding:14px 12px;cursor:pointer;font-family:inherit;text-align:left">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-              <img src="assets/home-icons/change-report.png" alt="변화 리포트" width="30" height="30" style="display:block;object-fit:contain"/>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div style="font-size:12px;font-weight:800;color:#10B981;margin-bottom:3px">변화 리포트</div>
-            <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-bottom:4px">이번 주</div>
-            <div id="v20ReportValue" style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">식이섬유 ↑</div>
-          </button>
+        <!-- v21 · 하단 3카드 제거 · 수면은 분석 탭으로 이동 -->
+        <!-- 레거시 · JS 참조용 히든 노드 유지 -->
+        <div style="display:none">
+          <span id="v20SleepValue"></span>
+          <span id="v20UrineValue"></span>
+          <span id="v20ReportValue"></span>
         </div>
 
       </div>
@@ -3676,6 +3630,16 @@ window.appIcon = function(name, size){
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">영양제 분석</div>
               <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">KRDA 대비 %DV / 중복 성분 체크</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+          </button>
+
+          <!-- v21 · 수면 카드 (사람만) -->
+          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
+            <div style="width:52px;height:52px;background:#F5F3FF;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/home-icons/sleep.png" alt="수면" style="width:34px;height:34px;object-fit:contain;margin-left:-4px"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">수면 체크</div>
+              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px"><span id="v21AnalyzeSleepValue">최근 3일 평균</span> · 5문항 30초</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
           </button>
@@ -6794,14 +6758,18 @@ function renderV20Home() {
       }
     }
 
-    // ③ 최근 식사 분석
+    // v21 · ① 히어로 (오늘의 추천 음식 + 사진)
+    try { _v21RenderHero(); } catch(e){ console.error('_v21RenderHero', e); }
+    // v21 · ② 최근 식사 (미니 6각 그래프)
+    try { _v21RenderRecentHex(); } catch(e){ console.error('_v21RenderRecentHex', e); }
+
+    // ③ 최근 식사 분석 (레거시 · 이름/코멘트만 갱신)
     _v20RenderRecentMeal();
 
     // ④ 내 몸이 보내는 신호
     _v20RenderBodySignal(shortagesArr);
 
-    // ⑤ 하단 3카드 (수면·소변검사·변화리포트)
-    _v20RenderBottomCards();
+    // ⑤ 하단 3카드 삭제됨 (v21) · 수면은 분석 탭으로 이동
 
   } catch(e) { console.error('renderV20Home', e); }
 }
@@ -7726,11 +7694,28 @@ const BODY_SIGNAL_MAP = BODY_SIGNAL_CARDS.reduce((m, c) => {
   return m;
 }, {});
 
-// 부족 영양소·요일 기반으로 카드 하나 선택 (매일 조금씩 바뀜)
+// 부족 영양소·수면 상태·요일 기반으로 카드 하나 선택
 function pickBodySignalCard(shortages) {
   const shortKeys = new Set((shortages || []).map(s => s.key));
-  const matched = BODY_SIGNAL_CARDS.filter(c => c.nutrients.some(n => shortKeys.has(n)));
-  const pool = matched.length ? matched : BODY_SIGNAL_CARDS;
+  // 수면 상태 감지 (6시간 20분 미만 = poor)
+  let poorSleep = false;
+  try {
+    const s = JSON.parse(localStorage.getItem('sleepDataV1') || 'null');
+    if (s && s.avgMinutes && s.avgMinutes < 380) poorSleep = true;
+  } catch(e){}
+  // 수면 관련 카드 id
+  const SLEEP_RELATED = new Set(['mg_sleep','mg_eye_twitch','mg_leg_cramp','mg_bcomplex_anxiety','omega3_focus','protein_fatigue']);
+  let pool;
+  if (poorSleep) {
+    // 수면 관련 카드 + 부족 매칭 카드 우선
+    const sleepCards = BODY_SIGNAL_CARDS.filter(c => SLEEP_RELATED.has(c.id));
+    const matchedShort = BODY_SIGNAL_CARDS.filter(c => c.nutrients.some(n => shortKeys.has(n)));
+    pool = sleepCards.concat(matchedShort.filter(c => !SLEEP_RELATED.has(c.id)));
+    if (!pool.length) pool = BODY_SIGNAL_CARDS;
+  } else {
+    const matched = BODY_SIGNAL_CARDS.filter(c => c.nutrients.some(n => shortKeys.has(n)));
+    pool = matched.length ? matched : BODY_SIGNAL_CARDS;
+  }
   const day = new Date().getDate();
   return pool[day % pool.length];
 }
@@ -7859,6 +7844,133 @@ function _v20RenderBodySignal(shortages) {
 }
 
 // ═══ 하단 3카드 · 실제 데이터로 채움 ═══
+// ═══ v21 · 히어로 카드 (오늘의 추천 음식) ═══
+function _v21RenderHero() {
+  try {
+    const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+    const hour = new Date().getHours();
+    const mealSlot = hour < 10 ? '아침' : hour < 14 ? '점심' : hour < 18 ? '오후 간식' : '저녁';
+    const sitByTime = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+    let rec = null;
+    if (typeof getWhatToEatNow === 'function' && shortages.length > 0) {
+      try {
+        const r = getWhatToEatNow(sitByTime);
+        rec = (r && r.top3) ? r.top3[0] : null;
+      } catch(e){}
+    }
+    const nameEl = document.getElementById('v21RecName');
+    const slotEl = document.getElementById('v21MealSlot');
+    const photoEl = document.getElementById('v21HeroPhoto');
+    const kcalEl = document.getElementById('v21HeroKcal');
+    const chipsEl = document.getElementById('v21HeroChips');
+    if (slotEl) slotEl.textContent = mealSlot;
+    if (!rec) {
+      if (nameEl) nameEl.textContent = '먹은 음식';
+      if (photoEl) photoEl.innerHTML = '<span style="font-size:38px">🍽</span>';
+      if (kcalEl) kcalEl.textContent = '— kcal';
+      if (chipsEl) chipsEl.innerHTML = '';
+      const titleWrap = document.getElementById('v21HeroTitle');
+      if (titleWrap) titleWrap.innerHTML = '먼저 <span style="color:#2563EB">사진 한 장</span>이면<br>영양 그래프가 <span style="color:#2563EB">바로 채워져요</span>';
+      return;
+    }
+    if (nameEl) nameEl.textContent = rec.name;
+    // 사진
+    if (photoEl) {
+      const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(rec.name) : null;
+      if (url) {
+        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(rec.name)}" style="width:100%;height:100%;object-fit:cover">`;
+      } else {
+        photoEl.innerHTML = '<span style="font-size:38px">🍽</span>';
+      }
+    }
+    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal';
+    // chips
+    if (chipsEl) {
+      const chipColors = { fiber:['#DCFCE7','#15803D','🌿'], protein:['#DBEAFE','#1E40AF','💪'], iron:['#FEE2E2','#B91C1C','🩸'], calcium:['#EFF6FF','#1E40AF','🦴'], vitC:['#FEF3C7','#B45309','🍊'], vitD:['#F0F9FF','#0369A1','☀️'], magnesium:['#FAF5FF','#7C2D92','🌰'], omega3:['#ECFEFF','#0891B2','🐟'] };
+      const chips = shortages.slice(0,3).map(s => {
+        const c = chipColors[s.key] || ['#F8FAFC','#64748B','·'];
+        return `<span style="background:${c[0]};color:${c[1]};font-size:10.5px;font-weight:800;padding:5px 10px;border-radius:99px">${c[2]} ${_v20Esc(s.label)}</span>`;
+      }).join('');
+      chipsEl.innerHTML = chips;
+    }
+  } catch(e) { console.error('v21RenderHero', e); }
+}
+
+function _v21OpenRecReason() {
+  try {
+    if (typeof _v20OpenChip === 'function') _v20OpenChip('why_low');
+    else if (typeof ggGoTab === 'function') ggGoTab('curation');
+  } catch(e){}
+}
+
+// ═══ v21 · 최근 식사 미니 6각 그래프 ═══
+function _v21RenderRecentHex() {
+  const el = document.getElementById('v21RecentHex');
+  if (!el) return;
+  let recent;
+  try {
+    const fh = _getFoodHistory();
+    recent = fh[0];
+  } catch(e) { recent = null; }
+  const nut = (recent && recent.nutrition) || null;
+  const scoreEl = document.getElementById('v21RecentScore');
+  if (!nut) {
+    el.innerHTML = _v21MiniHexSVG([0,0,0,0,0,0], true);
+    if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background='#F1F5F9'; scoreEl.style.color='#64748B'; }
+    return;
+  }
+  // 6축 · 탄수/단백/지방/섬유/비타민/미네랄 (0-100 정규화)
+  const rda = { carbs:300, protein:60, fat:65, fiber:25, vit:100, min:100 };
+  const vitScore = Math.min(100, ((nut.vitC||0)/60 + (nut.vitD||0)/10 + (nut.vitA||0)/500) * 33);
+  const minScore = Math.min(100, ((nut.calcium||0)/800 + (nut.iron||0)/12 + (nut.magnesium||0)/320) * 33);
+  const values = [
+    Math.min(100, (nut.carbs||0)/rda.carbs*100),
+    Math.min(100, (nut.protein||0)/rda.protein*100),
+    Math.min(100, (nut.fat||0)/rda.fat*100),
+    Math.min(100, (nut.fiber||0)/rda.fiber*100),
+    vitScore, minScore
+  ];
+  el.innerHTML = _v21MiniHexSVG(values, false);
+  // score badge (평균)
+  if (scoreEl) {
+    const avg = Math.round(values.reduce((a,b)=>a+b,0)/6);
+    scoreEl.textContent = avg + '점';
+    if (avg >= 80) { scoreEl.style.background='#DCFCE7'; scoreEl.style.color='#15803D'; }
+    else if (avg >= 60) { scoreEl.style.background='#FEF3C7'; scoreEl.style.color='#B45309'; }
+    else { scoreEl.style.background='#FEE2E2'; scoreEl.style.color='#DC2626'; }
+  }
+}
+
+function _v21MiniHexSVG(values, empty) {
+  const cx = 60, cy = 60, r = 42;
+  const angles = [-90, -30, 30, 90, 150, 210].map(a => a * Math.PI / 180);
+  const gridPts = angles.map(a => [cx + r*Math.cos(a), cy + r*Math.sin(a)]);
+  const gridPath = gridPts.map(p=>p.join(',')).join(' ');
+  const midPts = angles.map(a => [cx + (r*0.66)*Math.cos(a), cy + (r*0.66)*Math.sin(a)]);
+  const midPath = midPts.map(p=>p.join(',')).join(' ');
+  const dataPts = values.map((v,i) => { const rr = r * (v/100); const a = angles[i]; return [cx + rr*Math.cos(a), cy + rr*Math.sin(a)]; });
+  const dataPath = dataPts.map(p=>p.join(',')).join(' ');
+  const dots = dataPts.map((p,i) => {
+    const isRed = values[i] < 50;
+    return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="${isRed ? '#EF4444' : '#2563EB'}"/>`;
+  }).join('');
+  const labels = ['탄수','단백','지방','섬유','비타민','미네랄'];
+  const labelEls = angles.map((a,i) => {
+    const lr = r + 10;
+    const lx = cx + lr*Math.cos(a);
+    const ly = cy + lr*Math.sin(a);
+    const color = values[i] < 50 ? '#EF4444' : '#334155';
+    return `<text x="${lx.toFixed(1)}" y="${(ly+3).toFixed(1)}" text-anchor="middle" font-size="7" font-weight="800" fill="${color}">${labels[i]}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 120 120" width="100%" style="max-width:110px;display:block;margin:0 auto">
+    <polygon points="${gridPath}" fill="none" stroke="#CBD5E1" stroke-width="1.2" stroke-dasharray="2,3"/>
+    <polygon points="${midPath}" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+    ${empty ? '' : `<polygon points="${dataPath}" fill="rgba(37,99,235,.18)" stroke="#2563EB" stroke-width="1.5"/>`}
+    ${empty ? '' : dots}
+    ${labelEls}
+  </svg>`;
+}
+
 function _v20RenderBottomCards() {
   // 수면 · Apple Health / Health Connect (Flutter 브릿지) 연동 준비
   const sleepEl = document.getElementById('v20SleepValue');
