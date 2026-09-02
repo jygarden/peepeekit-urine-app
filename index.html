@@ -6026,6 +6026,78 @@ function _v20EstimateNutrition(name) {
   return { kcal:200, protein:8, carbs:24, fat:8, fiber:2, sodium:500 };
 }
 
+// ═══ 음식 사진 매핑 · 90개 카테고리 이미지에 개별 음식 매핑 ═══
+// 파일 위치: assets/food-photos/{카테고리}.webp (400×400 <30KB)
+const FOOD_PHOTO_MAP = {
+  // 밥·죽
+  '쌀밥':'잡곡밥','잡곡밥':'잡곡밥','현미밥':'잡곡밥','전복죽':'죽','야채죽':'죽',
+  '비빔밥':'비빔밥','나물비빔밥':'비빔밥','회덮밥':'생선회','연어초밥':'사시미',
+  '오징어덮밥':'오징어요리','제육덮밥':'고기볶음','김치볶음밥':'중식볶음밥',
+  '카레라이스':'커리','오므라이스':'브런치','치킨마요덮밥':'닭고기요리',
+  '초밥세트':'사시미','돈까스':'함박스테이크',
+  // 국·탕·찌개
+  '순두부찌개':'두부요리','김치찌개':'된장찌개','된장찌개':'된장찌개',
+  '미역국':'미역국','삼계탕':'삼계탕','갈비탕':'삼계탕','설렁탕':'삼계탕',
+  '순대국':'삼계탕','사골곰탕':'삼계탕','해장국':'삼계탕','콩나물국밥':'콩나물국',
+  '육개장':'삼계탕','감자탕':'삼계탕','뼈해장국':'삼계탕','부대찌개':'된장찌개',
+  '돼지김치찌개':'된장찌개','뚝배기불고기':'고기찜','알탕':'생선탕','아구찜':'해산물찜',
+  '어묵탕':'생선탕','북엇국':'생선탕','무국':'맑은채소국','시금치된장국':'된장국',
+  '콩나물국':'콩나물국',
+  // 면
+  '콩국수':'콩국수','냉면':'우동','칼국수':'우동','어묵우동':'우동',
+  '들기름막국수':'메밀국수','비빔국수':'메밀국수','잔치국수':'우동',
+  '짜장면':'라멘','짬뽕':'라멘',
+  // 회
+  '연어회':'사시미','광어회':'사시미',
+  // 구이·볶음
+  '삼겹살':'돼지고기구이','갈비':'소고기구이','곱창구이':'돼지고기구이',
+  '낙지볶음':'오징어요리','새우구이':'새우요리','새우튀김':'새우요리',
+  '오징어구이':'오징어요리','조개구이':'조개요리','가리비구이':'조개요리',
+  '전복':'해산물숙회','굴':'조개요리','멸치볶음':'해조류요리','뱅어포':'해조류요리',
+  '장어구이':'생선구이','골뱅이무침':'해산물숙회','닭꼬치':'양꼬치','양꼬치':'양꼬치',
+  '닭발':'양꼬치','족발':'수육','보쌈':'수육','제육볶음':'고기볶음','불고기':'고기볶음',
+  '고등어구이':'생선구이','연어스테이크':'스테이크','닭가슴살':'닭고기요리',
+  // 반찬
+  '두부부침':'두부요리','두부구이':'두부요리','깻잎무침':'잎채소나물',
+  '오이무침':'뿌리채소요리','깍두기':'뿌리채소요리','총각김치':'뿌리채소요리',
+  '멸치조림':'해조류요리','콩자반':'콩요리','조미김':'해조류요리',
+  '시금치나물':'잎채소나물','콩나물무침':'콩나물요리',
+  // 간편
+  '김밥':'김밥','샌드위치':'샌드위치','샐러드':'채소샐러드','삶은계란':'달걀요리',
+  '고구마':'고구마','감자':'감자','옥수수':'옥수수','바나나':'일반과일',
+  '사과':'일반과일','귤':'감귤류','오렌지':'감귤류','딸기':'베리_키위','키위':'베리_키위',
+  '요거트':'우유_요거트','우유':'우유_요거트','그릭요거트':'우유_요거트',
+  '견과류믹스':'견과류_씨앗','아보카도':'베리_키위'
+};
+
+// 규칙 기반 fallback (매핑 없을 때 이름에서 추론)
+function _guessPhotoCategory(name) {
+  if (!name) return null;
+  const n = String(name).replace(/\s+/g,'');
+  const rules = [
+    [/찌개$/,'된장찌개'], [/탕$/,'삼계탕'], [/국$/,'맑은채소국'],
+    [/회$/,'사시미'], [/사시미$/,'사시미'],
+    [/구이$/,'생선구이'], [/볶음$/,'고기볶음'], [/조림$/,'생선탕'],
+    [/전$/,'채소전'], [/부침$/,'두부요리'], [/무침$/,'뿌리채소요리'],
+    [/샐러드$/,'채소샐러드'], [/면$|국수$/,'우동'], [/밥$|덮밥$/,'잡곡밥'],
+    [/찜$/,'해산물찜'], [/전골$/,'버섯전골'], [/나물$/,'잎채소나물'],
+    [/파스타/,'파스타'], [/피자/,'피자'], [/버거/,'햄버거']
+  ];
+  for (const [re, cat] of rules) if (re.test(n)) return cat;
+  return null;
+}
+
+// 음식 이름 → 사진 URL (매핑 → 규칙 → null)
+function _foodPhotoUrl(name) {
+  if (!name) return null;
+  const key = String(name).replace(/\s+/g,'');
+  // 브랜드 앞부분 제거 (예: "슈퍼런 샐러드" → "샐러드")
+  const clean = key.replace(/^[가-힣A-Za-z]+\s+/, '') || key;
+  const cat = FOOD_PHOTO_MAP[key] || FOOD_PHOTO_MAP[clean] || _guessPhotoCategory(key) || _guessPhotoCategory(clean);
+  if (!cat) return null;
+  return 'assets/food-photos/' + encodeURIComponent(cat) + '.webp';
+}
+
 function _matchFoodInDB(name) {
   if (!name) return null;
   const nRaw = String(name).replace(/\s+/g,'');
@@ -7518,11 +7590,15 @@ function _v20RenderRecentMeal() {
     }
   }
   if (moreEl) moreEl.style.display = '';
-  // 사진 우선순위: ① 사용자 촬영 썸네일 → ② Unsplash → ③ 이모지 fallback
+  // 사진 우선순위: ① 사용자 촬영 썸네일 → ② 로컬 90개 카테고리 → ③ Unsplash → ④ 이모지 fallback
   if (photoEl) {
     if (recent.thumb) {
       photoEl.innerHTML = `<img src="${recent.thumb}" alt="${_v20Esc(foodName)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
-    } else if (foodName) {
+    } else {
+      const localUrl = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(foodName) : null;
+      if (localUrl) {
+        photoEl.innerHTML = `<img src="${localUrl}" alt="${_v20Esc(foodName)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+      } else if (foodName) {
       try {
         _v20FetchFoodPhoto(foodName).then(data => {
           if (data && data.url && photoEl && document.body.contains(photoEl)) {
@@ -7530,6 +7606,7 @@ function _v20RenderRecentMeal() {
           }
         });
       } catch(e){}
+      }
     }
   }
 }
