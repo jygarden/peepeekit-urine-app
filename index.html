@@ -2319,8 +2319,8 @@ window.appIcon = function(name, size){
               <div id="v21HeroTitle" style="font-size:16.5px;font-weight:800;color:#0F172A;line-height:1.45;letter-spacing:-.4px">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>은<br><span id="v21RecName" style="color:#15803D;font-size:19.5px">시금치나물</span>을<br>추천드려요!</div>
               <div id="v21HeroKcal" style="font-size:12.5px;font-weight:800;color:#334155;letter-spacing:-.2px;margin-top:10px">— kcal</div>
             </div>
-            <div style="position:absolute;top:-14px;right:-18px;z-index:1">
-              <div id="v21HeroPhoto" style="width:180px;height:180px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);border-radius:50%;box-shadow:0 14px 32px rgba(15,23,42,.24);display:flex;align-items:center;justify-content:center;font-size:60px;overflow:hidden">🍽</div>
+            <div style="position:absolute;top:-6px;right:-4px;z-index:1">
+              <div id="v21HeroPhoto" style="width:170px;height:170px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);border-radius:50%;box-shadow:0 12px 28px rgba(15,23,42,.22);display:flex;align-items:center;justify-content:center;font-size:56px;overflow:hidden">🍽</div>
             </div>
             <!-- 레거시 · JS 참조용 히든 노드 -->
             <span id="v20HeroHeadline" style="display:none"></span>
@@ -7868,12 +7868,44 @@ function _v21RenderHero() {
     const hour = new Date().getHours();
     const mealSlot = hour < 10 ? '아침' : hour < 14 ? '점심' : hour < 18 ? '오후 간식' : '저녁';
     const sitByTime = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+
+    // 신규 유저 · 기록 0건 감지
+    let hasHistory = false;
+    try {
+      const fh = _getFoodHistory();
+      hasHistory = fh && fh.length > 0;
+    } catch(e){}
+
+    // 신규 유저 empty state
+    if (!hasHistory) {
+      const nameEl = document.getElementById('v21RecName');
+      const slotEl = document.getElementById('v21MealSlot');
+      const photoEl = document.getElementById('v21HeroPhoto');
+      const kcalEl = document.getElementById('v21HeroKcal');
+      const chipsEl = document.getElementById('v21HeroChips');
+      const titleWrap = document.getElementById('v21HeroTitle');
+      if (titleWrap) titleWrap.innerHTML = '먼저 <span style="color:#2563EB">음식을 찍어주세요</span><br>AI가 <span style="color:#15803D">맞춤 추천</span>을 시작해요';
+      if (kcalEl) kcalEl.textContent = '';
+      if (photoEl) photoEl.innerHTML = '<span style="font-size:56px">📷</span>';
+      if (chipsEl) chipsEl.innerHTML = '<span style="color:#94A3B8;font-size:11px;font-weight:600;padding:6px 0">기록이 쌓이면 오늘 부족한 영양을 채우는 음식을 알려드려요</span>';
+      return;
+    }
+
     let rec = null;
-    if (typeof getWhatToEatNow === 'function' && shortages.length > 0) {
+    if (typeof getWhatToEatNow === 'function') {
       try {
         const r = getWhatToEatNow(sitByTime);
         rec = (r && r.top3) ? r.top3[0] : null;
       } catch(e){}
+    }
+    // fallback · 부족 영양소 없어도 상황 pool에서 하나 뽑기
+    if (!rec && typeof MEAL_POOL_BY_SITUATION !== 'undefined') {
+      const pool = MEAL_POOL_BY_SITUATION[sitByTime] || [];
+      if (pool.length) {
+        const name = pool[new Date().getDate() % pool.length];
+        const db = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(name) : null;
+        rec = { name, kcal: (db && db.kcal) ? db.kcal : '—' };
+      }
     }
     const nameEl = document.getElementById('v21RecName');
     const slotEl = document.getElementById('v21MealSlot');
