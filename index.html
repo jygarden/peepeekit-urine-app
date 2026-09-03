@@ -2342,36 +2342,32 @@ window.appIcon = function(name, size){
 
         <!-- ② 좌우 2카드 · 최근 식사 (6각 그래프+왜이렇게봤을까) | 몸 신호 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-          <!-- 좌 · 최근 식사 -->
+          <!-- 좌 · 최근 식사 (위계 조정: 이름>설명>score) -->
           <div id="v20RecentMealCard" style="background:#fff;border-radius:14px;padding:12px;border:1px solid rgba(15,23,42,.06);display:flex;flex-direction:column">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
               <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.3px">최근 식사</div>
-              <div id="v21RecentScore" style="font-size:10.5px;font-weight:800;color:#64748B;background:#F1F5F9;padding:2px 6px;border-radius:99px">—점</div>
+              <div id="v21RecentScore" style="font-size:10.5px;font-weight:800;color:#64748B;background:#F1F5F9;padding:2px 7px;border-radius:99px">—점</div>
             </div>
-            <div id="v20RecentMealName" style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:6px">기록을 남겨보세요</div>
-            <div style="display:flex;justify-content:center;background:#F8FAFC;border-radius:10px;padding:6px;margin-bottom:8px">
+            <div id="v20RecentMealName" style="font-size:13.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:8px">기록을 남겨보세요</div>
+            <div style="display:flex;justify-content:center;background:#F8FAFC;border-radius:10px;padding:6px;margin-bottom:10px">
               <div id="v21RecentHex" style="width:100%;max-width:100px"></div>
             </div>
-            <div id="v20RecentMealComment" style="background:#EFF6FF;border-radius:8px;padding:8px 9px;font-size:10.5px;color:#1E3A8A;font-weight:600;line-height:1.5;margin-bottom:8px;flex:1">사진 한 장이면 AI가 영양을 분석해드려요.</div>
+            <div id="v20RecentMealComment" style="background:#EFF6FF;border-radius:8px;padding:9px 10px;font-size:11.5px;color:#1E3A8A;font-weight:600;line-height:1.55;margin-bottom:10px;flex:1">사진 한 장이면 AI가 영양을 분석해드려요.</div>
             <div id="v20RecentMealChips" style="display:none"></div>
-            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:10.5px;color:#2563EB;font-weight:700;cursor:pointer;text-align:right;font-family:inherit">자세히 보기 ›</button>
+            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:11px;color:#2563EB;font-weight:800;cursor:pointer;text-align:right;font-family:inherit">자세히 보기 ›</button>
           </div>
 
-          <!-- 우 · 몸 신호 -->
+          <!-- 우 · 몸 신호 (이모지 제거 · 텍스트 전폭) -->
           <div id="v20BodySignalCard" style="background:#fff;border-radius:14px;padding:12px;border:1px solid rgba(15,23,42,.06);display:flex;flex-direction:column">
-            <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.3px;margin-bottom:8px">내 몸 신호</div>
-            <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">
-              <div id="v20BodySignalIcon" style="width:36px;height:36px;background:#F0FDF4;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌿</div>
-              <div style="flex:1;min-width:0">
-                <div id="v20BodySignalTitle" style="font-size:12.5px;font-weight:800;color:#0F172A;line-height:1.3;letter-spacing:-.3px">요즘 배변이<br>개운하지 않다면?</div>
-              </div>
-            </div>
-            <div id="v20BodySignalDesc" style="font-size:10.5px;color:#475569;font-weight:500;line-height:1.5;margin-bottom:8px">식이섬유·수분 부족과 관련될 수 있어요.</div>
-            <div id="v20BodySignalChips" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;flex:1"></div>
+            <div style="font-size:10.5px;color:#94A3B8;font-weight:800;letter-spacing:.3px;margin-bottom:10px">내 몸 신호</div>
+            <div id="v20BodySignalIcon" style="display:none"></div>
+            <div id="v20BodySignalTitle" style="font-size:14px;font-weight:800;color:#0F172A;line-height:1.35;letter-spacing:-.3px;margin-bottom:8px">요즘 배변이 개운하지 않다면?</div>
+            <div id="v20BodySignalDesc" style="font-size:11.5px;color:#334155;font-weight:600;line-height:1.55;margin-bottom:10px">식이섬유·수분 부족과 관련될 수 있어요.</div>
+            <div id="v20BodySignalChips" style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px;flex:1"></div>
             <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:6px 8px;margin-bottom:6px;font-size:9.5px;color:#92400E;font-weight:700;line-height:1.4"></div>
-            <div style="border-top:1px solid #F1F5F9;padding-top:6px;margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:6px">
-              <span id="v20BodySignalDisclaimer" style="font-size:8.5px;color:#94A3B8;font-weight:600;line-height:1.3;flex:1;min-width:0">가능성 중 하나 · 지속되면 진료</span>
-              <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){}" style="background:transparent;border:none;font-size:10.5px;color:#2563EB;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 보기 ›</button>
+            <div style="border-top:1px solid #F1F5F9;padding-top:7px;margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:6px">
+              <span id="v20BodySignalDisclaimer" style="font-size:9px;color:#94A3B8;font-weight:600;line-height:1.3;flex:1;min-width:0">가능성 중 하나 · 지속되면 진료</span>
+              <button type="button" onclick="try{_v20OpenChip('body_signal')}catch(e){}" style="background:transparent;border:none;font-size:11px;color:#2563EB;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
             </div>
           </div>
         </div>
@@ -7850,7 +7846,7 @@ function _v20RenderBodySignal(shortages) {
   }
   titleEl.textContent = sig.title;
   descEl.innerHTML = sig.desc;
-  chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="background:#F1F5F9;color:#2563EB;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;display:inline-flex;align-items:center">#${c.label}</span>`).join('');
+  chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="color:#64748B;padding:1px 2px;font-size:9.5px;font-weight:700;display:inline-flex;align-items:center">#${c.label}</span>`).join('');
   if (discEl) discEl.textContent = sig.disclaimer || '가능성 중 하나 · 지속되면 진료';
   if (medEl) {
     if (sig.medical) {
@@ -24353,19 +24349,19 @@ function updateGgTabbar(screenId) {
 <!-- ═══ v20 v3 하단 탭바 (홈 / 분석 / 추천 / 리포트 / 마이) · 5탭 ═══ -->
 <nav id="ggTabbar" class="gg-tabbar" style="display:none">
   <button data-tab="today" onclick="ggGoTab('today')" aria-label="홈">
-    <img class="gg-tab-icon" data-icon="home" alt="홈">
+    <img class="gg-tab-icon" src="assets/tab-icons/home.svg" alt="홈">
     <span>홈</span>
   </button>
   <button data-tab="analyze" onclick="ggGoTab('analyze')" aria-label="분석">
-    <img class="gg-tab-icon" data-icon="analyze" alt="분석">
+    <img class="gg-tab-icon" src="assets/tab-icons/analysis.svg" alt="분석">
     <span>분석</span>
   </button>
   <button data-tab="curation" onclick="ggGoTab('curation')" aria-label="추천">
-    <img class="gg-tab-icon" data-icon="star" alt="추천">
+    <img class="gg-tab-icon" src="assets/tab-icons/recommendation.svg" alt="추천">
     <span>추천</span>
   </button>
   <button data-tab="report" onclick="ggGoTab('report')" aria-label="리포트">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+    <img class="gg-tab-icon" src="assets/tab-icons/report.svg" alt="리포트">
     <span>리포트</span>
   </button>
   <button data-tab="my" onclick="ggGoTab('my')" aria-label="마이">
