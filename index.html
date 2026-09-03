@@ -7980,30 +7980,44 @@ function _findIngredientGroup(name) {
 
 function _v21RerollHero() {
   try {
-    _v21IsRerolled = true; // 리롤 시작 · 구체 음식명 모드
-    // 현재 pool 없으면 초기화
+    // 카테고리 단위 pool 생성 (초기화 or 이미 만들어진 것 재사용)
     if (!_v21RerollPool || _v21RerollPool.length === 0) {
-      const grp = _findIngredientGroup(_v21CurrentRec && _v21CurrentRec.name);
-      if (grp) _v21RerollPool = FOOD_INGREDIENT_GROUP[grp].slice();
-      else {
-        // fallback · getWhatToEatNow 재호출
-        const hour = new Date().getHours();
-        const sit = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
-        if (typeof getWhatToEatNow === 'function') {
+      const hour = new Date().getHours();
+      const sit = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+      let rawList = [];
+      if (typeof getWhatToEatNow === 'function') {
+        try {
           const r = getWhatToEatNow(sit);
-          _v21RerollPool = (r && r.top3) ? r.top3.map(m => m.name) : [];
+          rawList = (r && r.top3) ? r.top3.map(m => m.name) : [];
+        } catch(e){}
+      }
+      // fallback · 상황 pool 전체
+      if (rawList.length < 3 && typeof MEAL_POOL_BY_SITUATION !== 'undefined') {
+        rawList = rawList.concat(MEAL_POOL_BY_SITUATION[sit] || []);
+      }
+      // 카테고리로 정규화 + 중복 제거
+      const seen = new Set();
+      const pool = [];
+      for (const name of rawList) {
+        const cat = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(name) : name;
+        if (!seen.has(cat)) {
+          seen.add(cat);
+          // 카테고리 대표 kcal은 rawList의 첫 음식 값
+          const dbItem = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(name) : null;
+          pool.push({ name, category: cat, kcal: (dbItem && dbItem.kcal) ? dbItem.kcal : '—' });
         }
       }
-      _v21RerollIdx = 0;
+      _v21RerollPool = pool;
+      // 현재 카테고리 위치 찾기
+      const curCat = _v21CurrentRec ? ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(_v21CurrentRec.name) : _v21CurrentRec.name) : null;
+      _v21RerollIdx = pool.findIndex(p => p.category === curCat);
+      if (_v21RerollIdx < 0) _v21RerollIdx = 0;
     }
+    if (_v21RerollPool.length === 0) return;
     _v21RerollIdx = (_v21RerollIdx + 1) % _v21RerollPool.length;
-    const nextName = _v21RerollPool[_v21RerollIdx];
-    if (!nextName) return;
-    // DB에서 kcal 조회
-    const dbItem = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(nextName) : null;
-    const kcal = (dbItem && dbItem.kcal) ? dbItem.kcal : '—';
-    _v21CurrentRec = { name: nextName, kcal };
-    // 재렌더
+    const next = _v21RerollPool[_v21RerollIdx];
+    if (!next) return;
+    _v21CurrentRec = { name: next.name, kcal: next.kcal };
     _v21RenderHeroWithRec(_v21CurrentRec);
   } catch(e) { console.error('_v21RerollHero', e); }
 }
@@ -8016,8 +8030,8 @@ function _v21RenderHeroWithRec(rec) {
     const photoEl = document.getElementById('v21HeroPhoto');
     const kcalEl = document.getElementById('v21HeroKcal');
     const chipsEl = document.getElementById('v21HeroChips');
-    // 리롤 시 구체 음식명, 초기엔 카테고리명
-    const displayName = _v21IsRerolled ? rec.name : ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name);
+    // 항상 카테고리명 표시 (과일·계란요리·삼계탕 등)
+    const displayName = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name;
     if (nameEl) nameEl.textContent = displayName;
     if (photoEl) {
       const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(rec.name) : null;
