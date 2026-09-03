@@ -2379,11 +2379,8 @@ window.appIcon = function(name, size){
             <img src="assets/home-icons/store-bag.png" alt="스토어" width="28" height="28" style="display:block;object-fit:contain"/>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">
-              <span style="font-size:13.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px">건강어때 스토어</span>
-              <span style="background:#2563EB;color:#fff;font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:4px;letter-spacing:.3px">공식</span>
-            </div>
-            <div style="font-size:11px;color:#64748B;font-weight:600">키트부터 영양제까지 · 스마트스토어에서 만나요</div>
+            <div style="font-size:13.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:2px">내 몸에 맞는 건강 관리 시작하기</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#64748B;font-weight:600">건강어때 스토어<span style="background:#EFF6FF;color:#2563EB;font-size:8.5px;font-weight:800;padding:1px 6px;border-radius:4px;letter-spacing:.3px">공식</span></div>
           </div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg>
         </a>
@@ -7536,10 +7533,13 @@ function _v20RenderRecentMeal() {
     recent = fh[0];
   } catch(e) { recent = null; }
   if (!recent) {
-    if (nameEl) nameEl.textContent = '첫 기록을 남겨보세요';
+    if (nameEl) nameEl.textContent = '기록 대기 중';
     if (chipsEl) chipsEl.innerHTML = '';
-    if (commentEl) commentEl.innerHTML = '사진 한 장이면 AI가<br>영양을 분석해드려요.';
+    if (commentEl) commentEl.innerHTML = '음식을 찍으면 6대 영양 밸런스와 부족한 영양소를 이 자리에 보여드려요.';
     if (moreEl) moreEl.style.display = 'none';
+    // score 초기화
+    const scoreEl = document.getElementById('v21RecentScore');
+    if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background = '#F1F5F9'; scoreEl.style.color = '#94A3B8'; }
     return;
   }
   const firstFood = _foodsFromEntry(recent)[0];
@@ -7840,6 +7840,17 @@ function _v20RenderBodySignal(shortages) {
   const discEl = document.getElementById('v20BodySignalDisclaimer');
   const medEl = document.getElementById('v20BodySignalMedical');
   if (!titleEl) return;
+  // 신규 유저 empty state · 기록 0건이면 안내 문구만
+  let hasHistory = false;
+  try { const fh = _getFoodHistory(); hasHistory = fh && fh.length > 0; } catch(e){}
+  if (!hasHistory) {
+    titleEl.textContent = '신호 분석 대기 중';
+    descEl.innerHTML = '음식을 며칠 기록하면 부족한 영양과 관련된 몸 신호를 이 자리에 알려드려요.';
+    if (chipsEl) chipsEl.innerHTML = '';
+    if (medEl) { medEl.style.display = 'none'; medEl.innerHTML = ''; }
+    if (discEl) discEl.textContent = '먼저 음식을 찍어보세요';
+    return;
+  }
   const sig = pickBodySignalCard(shortages);
   if (iconEl) {
     iconEl.style.background = sig.bg;
@@ -7876,20 +7887,33 @@ function _v21RenderHero() {
       hasHistory = fh && fh.length > 0;
     } catch(e){}
 
-    // 신규 유저 empty state
+    // 신규 유저 empty state · 실사 사진 opacity 50% + 2초마다 자동 전환
     if (!hasHistory) {
-      const nameEl = document.getElementById('v21RecName');
-      const slotEl = document.getElementById('v21MealSlot');
       const photoEl = document.getElementById('v21HeroPhoto');
       const kcalEl = document.getElementById('v21HeroKcal');
       const chipsEl = document.getElementById('v21HeroChips');
       const titleWrap = document.getElementById('v21HeroTitle');
       if (titleWrap) titleWrap.innerHTML = '먼저 <span style="color:#2563EB">음식을 찍어주세요</span><br>AI가 <span style="color:#15803D">맞춤 추천</span>을 시작해요';
       if (kcalEl) kcalEl.textContent = '';
-      if (photoEl) photoEl.innerHTML = '<span style="font-size:56px">📷</span>';
+      if (photoEl) {
+        photoEl.style.background = '#F8FAFC';
+        photoEl.style.boxShadow = '0 8px 20px rgba(15,23,42,.10)';
+        _v21UpdateEmptyPhoto();
+      }
       if (chipsEl) chipsEl.innerHTML = '<span style="color:#94A3B8;font-size:11px;font-weight:600;padding:6px 0">기록이 쌓이면 오늘 부족한 영양을 채우는 음식을 알려드려요</span>';
+      // 버튼 2개 숨김 (다른 음식 보기·자세히 보기)
+      const heroCardBtns = document.querySelectorAll('#v21HeroChips ~ div button');
+      heroCardBtns.forEach(b => b.style.display = 'none');
+      const heroBtnRow = document.querySelector('#v21HeroChips + div');
+      if (heroBtnRow) heroBtnRow.style.display = 'none';
+      // 자동 카루셀 시작
+      _v21StartEmptyCarousel();
       return;
     }
+    // 기록 있는 유저 · 카루셀 중지 & 버튼 복원
+    _v21StopEmptyCarousel();
+    const heroBtnRow2 = document.querySelector('#v21HeroChips + div');
+    if (heroBtnRow2) heroBtnRow2.style.display = 'flex';
 
     let rec = null;
     if (typeof getWhatToEatNow === 'function') {
@@ -7960,6 +7984,30 @@ let _v21RerollIdx = 0;
 let _v21RerollPool = [];
 let _v21CurrentRec = null;
 let _v21IsRerolled = false; // true면 구체 음식명, false면 카테고리 표시
+// empty state (신규 유저) 프리뷰용 · 2초마다 자동 순환
+const _V21_EMPTY_PREVIEW = ['잡곡밥','비빔밥','과일','삼계탕','김밥','샌드위치','오일파스타','회덮밥','고구마','견과류·씨앗'];
+let _v21EmptyIdx = 0;
+let _v21EmptyTimer = null;
+
+function _v21StartEmptyCarousel() {
+  if (_v21EmptyTimer) clearInterval(_v21EmptyTimer);
+  _v21EmptyTimer = setInterval(() => {
+    _v21EmptyIdx = (_v21EmptyIdx + 1) % _V21_EMPTY_PREVIEW.length;
+    _v21UpdateEmptyPhoto();
+  }, 2000);
+}
+function _v21StopEmptyCarousel() {
+  if (_v21EmptyTimer) { clearInterval(_v21EmptyTimer); _v21EmptyTimer = null; }
+}
+function _v21UpdateEmptyPhoto() {
+  const photoEl = document.getElementById('v21HeroPhoto');
+  if (!photoEl) return;
+  const hero = _V21_EMPTY_PREVIEW[_v21EmptyIdx % _V21_EMPTY_PREVIEW.length];
+  const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(hero) : null;
+  if (url) {
+    photoEl.innerHTML = `<img src="${url}" alt="" style="width:100%;height:100%;object-fit:cover;opacity:0.5;filter:saturate(0.9);transition:opacity .4s ease">`;
+  }
+}
 
 // 재료 계열 그룹 (한 음식을 리롤할 때 같은 계열로 순환)
 const FOOD_INGREDIENT_GROUP = {
@@ -8012,6 +8060,14 @@ function _findIngredientGroup(name) {
 
 function _v21RerollHero() {
   try {
+    // 신규 유저 · 프리뷰 사진 순환만 (실제 추천 X)
+    let hasHistory = false;
+    try { const fh = _getFoodHistory(); hasHistory = fh && fh.length > 0; } catch(e){}
+    if (!hasHistory) {
+      _v21EmptyIdx = (_v21EmptyIdx + 1) % _V21_EMPTY_PREVIEW.length;
+      _v21RenderHero();
+      return;
+    }
     // 카테고리 단위 pool 생성 (초기화 or 이미 만들어진 것 재사용)
     if (!_v21RerollPool || _v21RerollPool.length === 0) {
       const hour = new Date().getHours();
