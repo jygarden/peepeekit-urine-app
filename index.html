@@ -2331,8 +2331,14 @@ window.appIcon = function(name, size){
               <div id="v21HeroKcal" style="font-size:12px;font-weight:800;color:#0F172A;letter-spacing:-.2px">— kcal</div>
             </div>
           </div>
-          <div id="v21HeroChips" style="display:flex;gap:5px;flex-wrap:wrap;padding:0 4px;margin-bottom:12px"></div>
-          <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="width:100%;background:#F8FAFC;border:none;padding:10px;border-radius:10px;font-size:11.5px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">자세히 보기 ›</button>
+          <div id="v21HeroChips" style="display:flex;gap:5px;flex-wrap:wrap;padding:0 4px;margin-bottom:10px"></div>
+          <div style="display:flex;gap:6px;padding:0 4px">
+            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#fff;border:1.5px solid #E5E7EB;padding:10px;border-radius:10px;font-size:11.5px;font-weight:700;color:#475569;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              다른 음식 보기
+            </button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:#F8FAFC;border:none;padding:10px;border-radius:10px;font-size:11.5px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">자세히 보기 ›</button>
+          </div>
         </div>
 
         <!-- ② 좌우 2카드 · 최근 식사 (6각 그래프+왜이렇게봤을까) | 몸 신호 -->
@@ -6139,28 +6145,42 @@ function getShortageTop(n) {
 
 // ═══ v2.0 · 오늘 뭐 먹지? · 부족 영양소 → 한식 메뉴 추천 ═══
 // 상황별 메뉴 풀 (집밥/배달/외식/편의점)
+// ═══ MEAL_POOL · 메인 요리만 · 정크·나트륨 폭탄 제거 · 반찬 제외 ═══
 const MEAL_POOL_BY_SITUATION = {
-  // 집에서 · 간단히 해먹거나 데워먹는 것
-  home:      ['잡곡밥','현미밥','된장찌개','순두부찌개','김치찌개','돼지김치찌개','미역국','계란후라이','삶은계란','두부김치','시금치나물','콩나물무침','카레라이스','오므라이스','김치볶음밥','북엇국','무국','시금치된장국'],
-  // 배달 · 직장인 점심 배달 라인업
-  delivery:  ['제육덮밥','김치볶음밥','치킨마요덮밥','돈까스','카레라이스','짜장면','짬뽕','뚝배기불고기','부대찌개','돼지김치찌개','비빔국수','비빔밥','회덮밥','초밥세트'],
-  // 외식 · 주변 밥집·국밥집·고깃집
-  eatout:    ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','부대찌개','뚝배기불고기','돼지김치찌개','들기름막국수','잔치국수','비빔국수','냉면','칼국수','삼겹살','갈비','돈까스','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트'],
-  // 편의점 · GS·CU 라인
+  // 집에서 · 간단히 해먹거나 데워먹는 것 (반찬·정크 제외)
+  home:      ['잡곡밥','현미밥','나물비빔밥','비빔밥','된장찌개','순두부찌개','김치찌개','돼지김치찌개','미역국','북엇국','무국','시금치된장국','콩나물국','두부김치','두부부침','계란찜','삶은계란','오므라이스'],
+  // 배달 · 영양 좋은 것만 (짜장·짬뽕·치킨·마요·튀김 다 제거)
+  delivery:  ['회덮밥','연어초밥','초밥세트','비빔밥','나물비빔밥','뚝배기불고기','제육덮밥','오징어덮밥','오일파스타','알리오올리오','서양샐러드','그릭요거트볼','규동','쌀국수','딤섬'],
+  // 외식 · 국밥·고깃집·회집·오일파스타집 (부대찌개·튀김 제거)
+  eatout:    ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','뚝배기불고기','들기름막국수','잔치국수','냉면','칼국수','삼겹살','갈비','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트','스테이크','오일파스타','쌀국수','커리'],
+  // 편의점 · 그대로 (다 균형)
   convenience:['김밥','샌드위치','삶은계란','바나나','사과','고구마','요거트','그릭요거트','우유','견과류믹스','아보카도']
 };
 
-// 부족 영양소 → 실제 메뉴 매칭 (영양소별 강력 후보)
+// ═══ SHORTAGE_TO_FOODS · 반찬 제외 · 메인 요리만 ═══
 const SHORTAGE_TO_FOODS = {
-  protein:   ['순대국','사골곰탕','설렁탕','갈비탕','해장국','감자탕','뚝배기불고기','돈까스','제육덮밥','삼겹살','갈비','회덮밥','초밥세트','알탕','아구찜','부대찌개','두부김치'],
-  fiber:     ['나물비빔밥','비빔밥','잡곡밥','현미밥','시금치나물','콩나물무침','고구마','견과류믹스','아보카도','들기름막국수'],
-  calcium:   ['사골곰탕','뼈해장국','우유','그릭요거트','요거트','두부김치','순두부찌개','미역국','콩국수','두부부침'],
-  iron:      ['순대국','감자탕','육개장','해장국','갈비탕','뚝배기불고기','낙지볶음','곱창구이','시금치나물','나물비빔밥','제육덮밥'],
-  magnesium: ['들기름막국수','견과류믹스','아보카도','콩국수','잡곡밥','현미밥','시금치나물','두부부침','낙지볶음','순두부찌개'],
-  vitA:      ['카레라이스','고구마','시금치나물','나물비빔밥','육개장','돼지김치찌개'],
-  vitC:      ['콩나물국밥','부대찌개','제육볶음','오징어볶음','낙지볶음','아구찜','김치','바나나','사과','콩나물무침'],
-  vitD:      ['연어회','초밥세트','알탕','연어스테이크','고등어구이','회덮밥','연어초밥','계란후라이','삶은계란'],
+  protein:   ['순대국','사골곰탕','설렁탕','갈비탕','해장국','감자탕','뚝배기불고기','제육덮밥','삼겹살','갈비','회덮밥','초밥세트','알탕','아구찜','두부김치','스테이크','규동'],
+  fiber:     ['나물비빔밥','비빔밥','잡곡밥','현미밥','고구마','견과류믹스','아보카도','들기름막국수','오일파스타','서양샐러드'],
+  calcium:   ['사골곰탕','뼈해장국','우유','그릭요거트','요거트','두부김치','순두부찌개','미역국','콩국수','두부부침','리조또'],
+  iron:      ['순대국','감자탕','육개장','해장국','갈비탕','뚝배기불고기','낙지볶음','나물비빔밥','제육덮밥','스테이크','회덮밥'],
+  magnesium: ['들기름막국수','견과류믹스','아보카도','콩국수','잡곡밥','현미밥','두부부침','낙지볶음','순두부찌개','오일파스타'],
+  vitA:      ['고구마','나물비빔밥','육개장','돼지김치찌개','서양샐러드','커리'],
+  vitC:      ['콩나물국밥','제육볶음','오징어볶음','낙지볶음','아구찜','바나나','사과','서양샐러드','비빔밥'],
+  vitD:      ['연어회','초밥세트','알탕','연어스테이크','고등어구이','회덮밥','연어초밥','삶은계란'],
   omega3:    ['연어회','들기름막국수','연어초밥','초밥세트','고등어구이','연어스테이크','알탕','회덮밥','아구찜','견과류믹스']
+};
+
+// ═══ 반찬 · 사진 X · 메인과 곁들일 것 · 자세히 보기 텍스트에만 노출 ═══
+const NUTRIENT_BANCHAN = {
+  protein:   ['달걀말이','두부조림','콩자반'],
+  fiber:     ['시금치나물','콩나물무침','도라지무침','깻잎무침'],
+  calcium:   ['멸치볶음','뱅어포','치즈'],
+  iron:      ['시금치나물','근대나물','굴','조갯살볶음'],
+  magnesium: ['시금치나물','아몬드·호두','두유'],
+  vitA:      ['당근무침','시금치나물','호박볶음'],
+  vitC:      ['김치','오이무침','파프리카','귤·오렌지'],
+  vitD:      ['달걀노른자','표고버섯','시금치'],
+  omega3:    ['들기름 나물','호두','아마씨']
 };
 
 // 각 메뉴가 부족 영양소를 얼마나 채우는지 스코어 (kcal/100kcal 정규화)
@@ -7874,6 +7894,12 @@ function _v21RenderHero() {
       if (titleWrap) titleWrap.innerHTML = '먼저 <span style="color:#2563EB">사진 한 장</span>이면<br>영양 그래프가 <span style="color:#2563EB">바로 채워져요</span>';
       return;
     }
+    // 초기 rec 저장 · 리롤 pool 초기화
+    _v21CurrentRec = rec;
+    const grp = _findIngredientGroup(rec.name);
+    _v21RerollPool = grp ? FOOD_INGREDIENT_GROUP[grp].slice() : [];
+    _v21RerollIdx = _v21RerollPool.indexOf(rec.name);
+    if (_v21RerollIdx < 0) _v21RerollIdx = 0;
     if (nameEl) nameEl.textContent = rec.name;
     // 사진 (로드 실패 시 이모지 fallback)
     if (photoEl) {
@@ -7896,6 +7922,94 @@ function _v21RenderHero() {
       chipsEl.innerHTML = chips;
     }
   } catch(e) { console.error('v21RenderHero', e); }
+}
+
+// ═══ v21 · 히어로 재추천 (같은 재료 계열 다음 후보로) ═══
+let _v21RerollIdx = 0;
+let _v21RerollPool = [];
+let _v21CurrentRec = null;
+
+// 재료 계열 그룹 (한 음식을 리롤할 때 같은 계열로 순환)
+const FOOD_INGREDIENT_GROUP = {
+  두부: ['두부김치','순두부찌개','두부부침','두부전골','두부국','청국장','콩국수'],
+  닭: ['삼계탕','닭백숙','치킨마요덮밥','규동'],
+  돼지: ['제육덮밥','제육볶음','삼겹살','뚝배기불고기','돼지김치찌개','갈비'],
+  소고기: ['갈비','스테이크','설렁탕','갈비탕','사골곰탕','뚝배기불고기','미역국'],
+  생선: ['연어회','광어회','고등어구이','연어스테이크','생선구이','회덮밥','알탕','아구찜'],
+  해산물: ['낙지볶음','오징어볶음','아구찜','알탕','새우구이','조개구이'],
+  국물: ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','미역국','북엇국'],
+  면: ['잔치국수','칼국수','냉면','들기름막국수','콩국수','메밀국수','쌀국수','우동','오일파스타','알리오올리오'],
+  밥: ['잡곡밥','현미밥','비빔밥','나물비빔밥','회덮밥','제육덮밥','오징어덮밥','오므라이스','리조또'],
+  샐러드: ['서양샐러드','채소샐러드'],
+  간편식: ['김밥','샌드위치','삶은계란','요거트','바나나','사과']
+};
+
+function _findIngredientGroup(name) {
+  if (!name) return null;
+  for (const grp in FOOD_INGREDIENT_GROUP) {
+    if (FOOD_INGREDIENT_GROUP[grp].includes(name)) return grp;
+    if (name.includes(grp)) return grp;
+  }
+  return null;
+}
+
+function _v21RerollHero() {
+  try {
+    // 현재 pool 없으면 초기화
+    if (!_v21RerollPool || _v21RerollPool.length === 0) {
+      const grp = _findIngredientGroup(_v21CurrentRec && _v21CurrentRec.name);
+      if (grp) _v21RerollPool = FOOD_INGREDIENT_GROUP[grp].slice();
+      else {
+        // fallback · getWhatToEatNow 재호출
+        const hour = new Date().getHours();
+        const sit = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+        if (typeof getWhatToEatNow === 'function') {
+          const r = getWhatToEatNow(sit);
+          _v21RerollPool = (r && r.top3) ? r.top3.map(m => m.name) : [];
+        }
+      }
+      _v21RerollIdx = 0;
+    }
+    _v21RerollIdx = (_v21RerollIdx + 1) % _v21RerollPool.length;
+    const nextName = _v21RerollPool[_v21RerollIdx];
+    if (!nextName) return;
+    // DB에서 kcal 조회
+    const dbItem = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(nextName) : null;
+    const kcal = (dbItem && dbItem.kcal) ? dbItem.kcal : '—';
+    _v21CurrentRec = { name: nextName, kcal };
+    // 재렌더
+    _v21RenderHeroWithRec(_v21CurrentRec);
+  } catch(e) { console.error('_v21RerollHero', e); }
+}
+
+// 특정 rec으로 히어로 렌더 (재사용)
+function _v21RenderHeroWithRec(rec) {
+  try {
+    const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+    const nameEl = document.getElementById('v21RecName');
+    const photoEl = document.getElementById('v21HeroPhoto');
+    const kcalEl = document.getElementById('v21HeroKcal');
+    const chipsEl = document.getElementById('v21HeroChips');
+    if (nameEl) nameEl.textContent = rec.name;
+    if (photoEl) {
+      const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(rec.name) : null;
+      if (url) {
+        const fbHtml = `<span style=\\'font-size:38px\\'>🍽</span>`;
+        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(rec.name)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='${fbHtml}'">`;
+      } else {
+        photoEl.innerHTML = '<span style="font-size:38px">🍽</span>';
+      }
+    }
+    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal';
+    if (chipsEl) {
+      const chipColors = { fiber:['#DCFCE7','#15803D','🌿'], protein:['#DBEAFE','#1E40AF','💪'], iron:['#FEE2E2','#B91C1C','🩸'], calcium:['#EFF6FF','#1E40AF','🦴'], vitC:['#FEF3C7','#B45309','🍊'], vitD:['#F0F9FF','#0369A1','☀️'], magnesium:['#FAF5FF','#7C2D92','🌰'], omega3:['#ECFEFF','#0891B2','🐟'] };
+      const chips = shortages.slice(0,3).map(s => {
+        const c = chipColors[s.key] || ['#F8FAFC','#64748B','·'];
+        return `<span style="background:${c[0]};color:${c[1]};font-size:10.5px;font-weight:800;padding:5px 10px;border-radius:99px">${c[2]} ${_v20Esc(s.label)}</span>`;
+      }).join('');
+      chipsEl.innerHTML = chips;
+    }
+  } catch(e){ console.error('_v21RenderHeroWithRec', e); }
 }
 
 function _v21OpenRecReason() {
@@ -11152,6 +11266,7 @@ function _v20RecRenderNutrients() {
         <div style="display:grid;grid-template-columns:1fr;gap:10px">
           <div><div style="font-size:10.5px;color:#64748B;font-weight:800;margin-bottom:4px">? 왜 필요한가</div><div style="font-size:11.5px;color:#334155;line-height:1.6;font-weight:500">${_v20Esc(k.why_needed)}</div></div>
           <div><div style="font-size:10.5px;color:#B91C1C;font-weight:800;margin-bottom:4px">! 왜 부족했나</div><div style="font-size:11.5px;color:#334155;line-height:1.6;font-weight:500">${_v20Esc(k.why_low)}</div></div>
+          ${(typeof NUTRIENT_BANCHAN !== 'undefined' && NUTRIENT_BANCHAN[s.key]) ? `<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:8px;padding:9px 11px"><div style="font-size:10.5px;color:#15803D;font-weight:800;margin-bottom:4px">🥗 함께 곁들이면 좋은 반찬</div><div style="font-size:11px;color:#166534;line-height:1.55;font-weight:600">${NUTRIENT_BANCHAN[s.key].join(' · ')}</div></div>` : ''}
           <div style="background:#F9FAFB;border-radius:8px;padding:8px 10px;font-size:10.5px;color:#64748B;line-height:1.55;font-weight:500">${_v20Esc(k.supp_hint)}</div>
         </div>
       </div>
