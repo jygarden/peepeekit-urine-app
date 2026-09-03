@@ -7947,13 +7947,22 @@ const FOOD_INGREDIENT_GROUP = {
 
 // 개별 음식명 → 카테고리 이름 (사진과 매칭)
 // 예: 삶은계란 → 계란요리, 두부김치 → 두부요리, 순대국 → 삼계탕
+const _CATEGORY_DISPLAY_RENAME = {
+  '일반과일': '과일',
+  '베리_키위': '베리·키위',
+  '베리·키위': '베리·키위',
+  '우유_요거트': '우유·요거트',
+  '견과류_씨앗': '견과류·씨앗',
+  '해조류요리': '해조류',
+  '타코야키_오코노미야키': '타코야키·오코노미야키'
+};
 function _v21GetCategoryName(name) {
   if (!name) return name;
   const cat = (typeof FOOD_PHOTO_MAP !== 'undefined' && FOOD_PHOTO_MAP[name]) ||
               (typeof _guessPhotoCategory === 'function' ? _guessPhotoCategory(name) : null);
-  // 카테고리 이름 표시 · 언더스코어·특수문자 정리
   if (!cat) return name;
-  return cat.replace(/_/g, '·');
+  const clean = cat.replace(/_/g, '·');
+  return _CATEGORY_DISPLAY_RENAME[cat] || _CATEGORY_DISPLAY_RENAME[clean] || clean;
 }
 
 function _findIngredientGroup(name) {
@@ -8107,21 +8116,158 @@ const REC_REASON_DB = {
       { name: '갈비·불고기', tip: '한식 대안' }
     ],
     tip: '샐러드·잡곡밥과 함께 먹으면 혈당 급상승 완화.'
+  },
+  '김밥': {
+    reason: '탄수·단백질·채소가 한 번에 · 간편식의 정석.',
+    dishes: [
+      { name: '참치김밥', tip: '오메가3 + 단백질' },
+      { name: '치즈김밥', tip: '칼슘 추가' },
+      { name: '김치김밥', tip: '유산균 + 비타민C' },
+      { name: '야채·계란김밥', tip: '가장 균형 잡힌 기본' }
+    ],
+    tip: '단무지·햄 많이 든 것보다 야채·통곡물 든 것이 더 건강해요.'
+  },
+  '샌드위치': {
+    reason: '탄수·단백질·채소 · 아침이나 바쁜 점심 대체용.',
+    dishes: [
+      { name: '치킨·닭가슴살 샌드위치', tip: '저지방 고단백' },
+      { name: '에그·아보카도 샌드위치', tip: '비타민E + 좋은 지방' },
+      { name: '연어·훈제연어 샌드위치', tip: '오메가3' },
+      { name: '통밀·호밀빵 선택', tip: '식이섬유·혈당 관리' }
+    ],
+    tip: '마요네즈 대신 머스타드·과카몰리로 지방 조절.'
+  },
+  '잡곡밥': {
+    reason: '식이섬유·마그네슘·비타민B군 · 흰밥보다 혈당 완만.',
+    dishes: [
+      { name: '5곡·7곡·13곡밥', tip: '섬유질 3배' },
+      { name: '현미밥', tip: '가장 대중적인 잡곡' },
+      { name: '보리·수수·귀리 혼합', tip: '식후 혈당 관리' }
+    ],
+    tip: '처음엔 잡곡:흰쌀 = 3:7 비율부터 시작해서 늘려가면 소화 부담 X.'
+  },
+  '비빔밥': {
+    reason: '채소·단백질·탄수 한 그릇 균형 · 나트륨은 낮은 편.',
+    dishes: [
+      { name: '나물비빔밥', tip: '식이섬유·미네랄 풍부' },
+      { name: '돌솥비빔밥', tip: '따뜻하게 · 소화 편함' },
+      { name: '전주비빔밥', tip: '고명 다양 · 프리미엄' },
+      { name: '회비빔밥', tip: '오메가3 · 단백질 강화' }
+    ],
+    tip: '고추장 대신 참기름·간장으로 나트륨 낮추기.'
+  },
+  '된장찌개': {
+    reason: '단백질·이소플라본·프로바이오틱스 · 발효 콩의 힘.',
+    dishes: [
+      { name: '된장찌개', tip: '두부·호박·감자 넣어' },
+      { name: '김치찌개', tip: '유산균·비타민C' },
+      { name: '순두부찌개', tip: '부드럽고 소화 편함' },
+      { name: '청국장', tip: '유산균 발효 극대' }
+    ],
+    tip: '국물은 반만, 건더기 중심으로 먹으면 나트륨 부담↓.'
+  },
+  '미역국': {
+    reason: '요오드·칼슘·식이섬유 · 저열량 저나트륨 국물.',
+    dishes: [
+      { name: '소고기미역국', tip: '단백질·철분 함께' },
+      { name: '조개미역국', tip: '아연 추가' },
+      { name: '들깨미역국', tip: '오메가3 강화' }
+    ],
+    tip: '미역은 산모식으로 유명하지만 남녀노소 다 좋아요.'
+  },
+  '삼계탕': {
+    reason: '단백질·비타민B군·미네랄 · 회복식의 대표.',
+    dishes: [
+      { name: '삼계탕·닭백숙', tip: '기력 회복' },
+      { name: '설렁탕·사골곰탕', tip: '뽀얀 국물 · 칼슘' },
+      { name: '순대국·감자탕', tip: '철분·비타민B군' },
+      { name: '갈비탕·설렁탕', tip: '단백질 · 진한 국물' }
+    ],
+    tip: '국물은 반만, 건더기·고기 중심으로 · 나트륨 관리.'
+  },
+  '삼겹살': {
+    reason: '단백질·비타민B1·아연 · 잘 굽고 먹으면 좋은 지방.',
+    dishes: [
+      { name: '삼겹살·목살구이', tip: '기본' },
+      { name: '갈비·양념갈비', tip: '풍미' },
+      { name: '오리구이·훈제오리', tip: '불포화지방' }
+    ],
+    tip: '상추·깻잎쌈으로 채소 균형 · 소금·기름장은 소량만.'
+  },
+  '회덮밥': {
+    reason: '오메가3·비타민D·단백질 · 저지방 고영양 한 그릇.',
+    dishes: [
+      { name: '연어회덮밥', tip: '오메가3 최상' },
+      { name: '광어·참치회덮밥', tip: '저지방 고단백' },
+      { name: '초밥세트', tip: '탄수 균형' },
+      { name: '연어초밥', tip: '한 조각씩 부담 없이' }
+    ],
+    tip: '와사비 조금은 항염 효과. 간장은 소량만 찍기.'
+  },
+  '오일파스타': {
+    reason: '지중해 식단 · 좋은 지방·식이섬유 · 다이어트 친화.',
+    dishes: [
+      { name: '알리오올리오', tip: '가장 심플한 오일 파스타' },
+      { name: '봉골레', tip: '조개·오메가3' },
+      { name: '토마토 파스타', tip: '리코펜 · 저열량' },
+      { name: '페스토 파스타', tip: '바질·잣·좋은 지방' }
+    ],
+    tip: '크림·미트소스보다 오일계열이 열량·나트륨 다 낮음.'
+  },
+  '고구마': {
+    reason: '복합 탄수·비타민A·식이섬유 · GI 낮은 스마트 탄수.',
+    dishes: [
+      { name: '군고구마', tip: '가장 대중적' },
+      { name: '찐고구마', tip: '더 촉촉·건강' },
+      { name: '밤고구마·호박고구마', tip: '식감 취향' }
+    ],
+    tip: '아침 대체·저녁 야식 대체로 최고 · 껍질까지 먹으면 섬유질 배가.'
+  },
+  '샐러드': {
+    reason: '채소·비타민·식이섬유 · 저열량 채우기.',
+    dishes: [
+      { name: '치킨·연어 샐러드', tip: '단백질 함께' },
+      { name: '아보카도·에그 샐러드', tip: '좋은 지방' },
+      { name: '시저·그릭 샐러드', tip: '유제품 + 채소' },
+      { name: '샐러드볼 (통곡물 + 채소)', tip: '한 그릇 균형' }
+    ],
+    tip: '드레싱은 오일·발사믹 위주 · 마요·시저는 소량만.'
   }
 };
+
+// 카테고리 이름 별칭 (한 카테고리 여러 이름 대응)
+const _REC_REASON_ALIAS = {
+  '과일': '과일',
+  '일반과일': '과일',
+  '베리·키위': '베리·키위',
+  '베리_키위': '베리·키위',
+  '우유·요거트': '우유·요거트',
+  '우유_요거트': '우유·요거트',
+  '견과류·씨앗': '견과류·씨앗',
+  '견과류_씨앗': '견과류·씨앗'
+};
+// alias 반영 · '과일' 키 정의를 위해 별도 저장
+REC_REASON_DB['과일'] = REC_REASON_DB['일반과일'];
+
+// fallback · 카테고리 못 찾을 때 기본 안내
+function _v21GetRecReason(catName) {
+  if (!catName) return null;
+  const key = _REC_REASON_ALIAS[catName] || catName;
+  if (REC_REASON_DB[key]) return REC_REASON_DB[key];
+  return {
+    reason: '이 음식은 오늘 부족한 영양을 채우는 데 도움돼요.',
+    dishes: [{ name: catName, tip: '지금 상황·부족 영양에 맞는 추천' }],
+    tip: '기록이 쌓이면 더 정확한 추천을 드릴 수 있어요.'
+  };
+}
 
 function _v21OpenRecReason() {
   try {
     const cat = (_v21CurrentRec && _v21CurrentRec.name)
       ? ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(_v21CurrentRec.name) : _v21CurrentRec.name)
       : null;
-    if (cat && REC_REASON_DB[cat]) {
-      _v21ShowRecReasonSheet(cat, REC_REASON_DB[cat]);
-      return;
-    }
-    // fallback · 카테고리 정보 없으면 부족 영양소 챗
-    if (typeof _v20OpenChip === 'function') _v20OpenChip('why_low');
-    else if (typeof ggGoTab === 'function') ggGoTab('curation');
+    const data = _v21GetRecReason(cat);
+    _v21ShowRecReasonSheet(cat || '추천 음식', data);
   } catch(e){ console.error('_v21OpenRecReason', e); }
 }
 
