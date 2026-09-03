@@ -8025,11 +8025,137 @@ function _v21RenderHeroWithRec(rec) {
   } catch(e){ console.error('_v21RenderHeroWithRec', e); }
 }
 
+// ═══ 카테고리별 추천 이유·구체 예시·팁 (즉시 표시 · AI 없이) ═══
+const REC_REASON_DB = {
+  '우유·요거트': {
+    reason: '칼슘·단백질 부족 시 즉시 채울 수 있는 대표 유제품이에요. 아침이나 저녁 한 잔이면 하루 칼슘의 25%가 채워져요.',
+    dishes: [
+      { name: '그릭요거트 + 견과류', tip: '단백질·마그네슘 한 번에' },
+      { name: '락토프리 우유·두유', tip: '유당 불내증이면 대체' },
+      { name: '따뜻한 우유 200ml', tip: '자기 전 흡수율 높음' }
+    ],
+    tip: '저녁에 마시면 마그네슘 흡수가 좋아 숙면에도 도움돼요.'
+  },
+  '일반과일': {
+    reason: '비타민C·수분·식이섬유 부족 시 도움. 다만 당도 높은 과일보단 저당·수분 많은 것을 우선해요.',
+    dishes: [
+      { name: '수박·멜론·배', tip: '수분 90%+ · 여름 최고' },
+      { name: '사과·바나나·귤', tip: '식이섬유·칼륨 균형' },
+      { name: '망고·포도·곶감 소량만', tip: '당도 높아 조금씩' }
+    ],
+    tip: '아침 공복보단 식후 30분에 먹으면 혈당 스파이크가 줄어요.'
+  },
+  '감귤류': {
+    reason: '비타민C·항산화 부족 시 대표 · 감기·피부에 좋아요.',
+    dishes: [
+      { name: '귤 2~3개', tip: '하루 비타민C 100% 충당' },
+      { name: '오렌지 1개', tip: '식이섬유 + 비타민C' },
+      { name: '자몽 반개', tip: '저칼로리 · 다이어트 친화' }
+    ],
+    tip: '껍질까지 얇게 함께 갈면 플라보노이드가 3배 더 나와요.'
+  },
+  '베리·키위': {
+    reason: '항산화·비타민C·엽산 부족 시 · 뇌 건강과 피부에 좋아요.',
+    dishes: [
+      { name: '딸기·블루베리 한 컵', tip: '아침 요거트에 토핑' },
+      { name: '골드키위 1~2개', tip: '비타민C·소화 효소' },
+      { name: '아사이볼', tip: '섬유질 + 항산화' }
+    ],
+    tip: '냉동 베리도 영양가 그대로. 냉동실에 상비해두면 편해요.'
+  },
+  '견과류·씨앗': {
+    reason: '마그네슘·오메가3·양질의 지방 부족 시 · 소량으로 큰 영양 효과.',
+    dishes: [
+      { name: '아몬드 10~15알', tip: '하루 마그네슘 25%' },
+      { name: '호두 3~4쪽', tip: '오메가3 대표' },
+      { name: '해바라기·호박씨', tip: '아연·비타민E' }
+    ],
+    tip: '무염·볶지 않은 것 우선. 한 줌(30g) 이상은 열량 부담.'
+  },
+  '두부요리': {
+    reason: '단백질·칼슘·마그네슘 부족 시 · 저칼로리 고단백 대표.',
+    dishes: [
+      { name: '순두부찌개', tip: '따뜻한 국물 + 단백질' },
+      { name: '두부김치 (돼지고기 볶음)', tip: '단백질·비타민C 함께' },
+      { name: '두부부침·두부조림', tip: '조리 쉽고 저염 조절 가능' }
+    ],
+    tip: '연두부는 소화 잘 되고, 부침용 두부는 단백질 밀도가 더 높아요.'
+  },
+  '삼계탕': {
+    reason: '단백질·미네랄·수분 회복에 좋은 국물류.',
+    dishes: [
+      { name: '삼계탕·닭백숙', tip: '지방 적은 단백질' },
+      { name: '설렁탕·사골곰탕', tip: '뽀얀 국물 · 칼슘' },
+      { name: '순대국·감자탕', tip: '철분·비타민B군' }
+    ],
+    tip: '국물은 반만, 건더기 중심으로 · 나트륨 부담 줄이기.'
+  },
+  '생선회': {
+    reason: '오메가3·비타민D·단백질 부족 시 · 지방 적고 회복 빠른 단백질.',
+    dishes: [
+      { name: '연어회·광어회', tip: '오메가3 최상' },
+      { name: '초밥세트', tip: '탄수·단백 균형' },
+      { name: '회덮밥', tip: '채소 + 단백질 한 그릇' }
+    ],
+    tip: '식후 30분 이내가 오메가3 흡수율 최고.'
+  },
+  '스테이크': {
+    reason: '단백질·철분·비타민B12 회복에 좋은 붉은 살코기.',
+    dishes: [
+      { name: '등심·안심 스테이크', tip: '지방 적은 부위' },
+      { name: '함박스테이크', tip: '부담 없는 조리' },
+      { name: '갈비·불고기', tip: '한식 대안' }
+    ],
+    tip: '샐러드·잡곡밥과 함께 먹으면 혈당 급상승 완화.'
+  }
+};
+
 function _v21OpenRecReason() {
   try {
+    const cat = (_v21CurrentRec && _v21CurrentRec.name)
+      ? ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(_v21CurrentRec.name) : _v21CurrentRec.name)
+      : null;
+    if (cat && REC_REASON_DB[cat]) {
+      _v21ShowRecReasonSheet(cat, REC_REASON_DB[cat]);
+      return;
+    }
+    // fallback · 카테고리 정보 없으면 부족 영양소 챗
     if (typeof _v20OpenChip === 'function') _v20OpenChip('why_low');
     else if (typeof ggGoTab === 'function') ggGoTab('curation');
-  } catch(e){}
+  } catch(e){ console.error('_v21OpenRecReason', e); }
+}
+
+function _v21ShowRecReasonSheet(catName, data) {
+  // 기존 시트 있으면 제거
+  const old = document.getElementById('v21RecReasonSheet');
+  if (old) old.remove();
+  const backdrop = document.createElement('div');
+  backdrop.id = 'v21RecReasonSheet';
+  backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.remove(); };
+  const dishesHtml = (data.dishes || []).map(d => `
+    <div style="padding:11px 13px;background:#F8FAFC;border-radius:12px;margin-bottom:6px">
+      <div style="font-size:13.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:2px">${_v20Esc(d.name)}</div>
+      <div style="font-size:11.5px;color:#64748B;font-weight:600">${_v20Esc(d.tip)}</div>
+    </div>`).join('');
+  backdrop.innerHTML = `
+    <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 34px;width:100%;max-height:80vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;color:#2563EB;font-weight:800;letter-spacing:.3px;margin-bottom:4px">🍽 왜 이 음식을 추천했을까요?</div>
+          <div style="font-size:19px;font-weight:900;color:#0F172A;letter-spacing:-.4px">${_v20Esc(catName)}</div>
+        </div>
+        <button onclick="document.getElementById('v21RecReasonSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:4px 8px;font-family:inherit">×</button>
+      </div>
+      <div style="background:#EFF6FF;border-radius:12px;padding:12px 14px;margin-bottom:16px">
+        <div style="font-size:12.5px;color:#1E3A8A;font-weight:600;line-height:1.6">${_v20Esc(data.reason)}</div>
+      </div>
+      <div style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:8px">👇 이런 메뉴들을 추천해요</div>
+      ${dishesHtml}
+      ${data.tip ? `<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:12px;padding:11px 13px;margin-top:12px"><div style="font-size:11px;color:#15803D;font-weight:800;margin-bottom:3px">💡 팁</div><div style="font-size:11.5px;color:#166534;font-weight:600;line-height:1.6">${_v20Esc(data.tip)}</div></div>` : ''}
+    </div>
+    <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(backdrop);
 }
 
 // ═══ v21 · 최근 식사 미니 6각 그래프 ═══
