@@ -2306,8 +2306,9 @@ window.appIcon = function(name, size){
         <!-- 헤더 · 인사말 + 카메라 아이콘 (식사 촬영 진입) -->
         <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 16px">
           <div style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px">안녕하세요, <span id="v20ProfileName">재율님</span></div>
-          <button onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#EFF6FF;border:none;padding:8px;cursor:pointer;border-radius:10px;display:flex;align-items:center;justify-content:center" aria-label="식사 찍기">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <button onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#2563EB;border:none;padding:8px 14px 8px 11px;cursor:pointer;border-radius:99px;display:flex;align-items:center;gap:6px;color:#fff;font-family:inherit;font-size:12.5px;font-weight:800;letter-spacing:-.2px;box-shadow:0 3px 10px rgba(37,99,235,.28)" aria-label="음식 찍기">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            음식 찍기
           </button>
         </div>
 
@@ -7891,6 +7892,7 @@ function _v21RenderHero() {
     }
     // 초기 rec 저장 · 리롤 pool 초기화
     _v21CurrentRec = rec;
+    _v21IsRerolled = false; // 초기엔 카테고리명 표시
     const grp = _findIngredientGroup(rec.name);
     _v21RerollPool = grp ? FOOD_INGREDIENT_GROUP[grp].slice() : [];
     _v21RerollIdx = _v21RerollPool.indexOf(rec.name);
@@ -7925,6 +7927,7 @@ function _v21RenderHero() {
 let _v21RerollIdx = 0;
 let _v21RerollPool = [];
 let _v21CurrentRec = null;
+let _v21IsRerolled = false; // true면 구체 음식명, false면 카테고리 표시
 
 // 재료 계열 그룹 (한 음식을 리롤할 때 같은 계열로 순환)
 const FOOD_INGREDIENT_GROUP = {
@@ -7977,6 +7980,7 @@ function _findIngredientGroup(name) {
 
 function _v21RerollHero() {
   try {
+    _v21IsRerolled = true; // 리롤 시작 · 구체 음식명 모드
     // 현재 pool 없으면 초기화
     if (!_v21RerollPool || _v21RerollPool.length === 0) {
       const grp = _findIngredientGroup(_v21CurrentRec && _v21CurrentRec.name);
@@ -8012,7 +8016,8 @@ function _v21RenderHeroWithRec(rec) {
     const photoEl = document.getElementById('v21HeroPhoto');
     const kcalEl = document.getElementById('v21HeroKcal');
     const chipsEl = document.getElementById('v21HeroChips');
-    const displayName = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name;
+    // 리롤 시 구체 음식명, 초기엔 카테고리명
+    const displayName = _v21IsRerolled ? rec.name : ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name);
     if (nameEl) nameEl.textContent = displayName;
     if (photoEl) {
       const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(rec.name) : null;
