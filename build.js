@@ -124,6 +124,8 @@ async function build() {
             'BODY_SIGNAL_CARDS', 'BODY_SIGNAL_MAP', 'pickBodySignalCard', '_v20RenderBodySignal',
             '_v20BuildHeroMessage', 'FOOD_PHOTO_MAP', '_guessPhotoCategory', '_foodPhotoUrl',
             '_v21RenderHero', '_v21RenderRecentHex', '_v21MiniHexSVG', '_v21OpenRecReason',
+            '_v21RerollHero', '_v21RenderHeroWithRec', '_findIngredientGroup',
+            'FOOD_INGREDIENT_GROUP', 'NUTRIENT_BANCHAN',
             'foodUserMemo', '_foodMemoOnInput', '_foodMemoAppend',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
             // v20 · 수면 체크
