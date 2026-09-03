@@ -2303,17 +2303,16 @@ window.appIcon = function(name, size){
       <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
       <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
 
-        <!-- 헤더 · 인사말만 (로고 삭제) -->
+        <!-- 헤더 · 인사말 + 카메라 아이콘 (식사 촬영 진입) -->
         <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 16px">
           <div style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px">안녕하세요, <span id="v20ProfileName">재율님</span></div>
-          <button onclick="openStreakInfo()" style="background:transparent;border:none;padding:6px 4px;cursor:pointer;position:relative" aria-label="알림">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
-            <span style="position:absolute;top:6px;right:3px;width:6px;height:6px;background:#2563EB;border-radius:50%;border:1.5px solid #FBFBFD"></span>
+          <button onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#EFF6FF;border:none;padding:8px;cursor:pointer;border-radius:10px;display:flex;align-items:center;justify-content:center" aria-label="식사 찍기">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </button>
         </div>
 
         <!-- ① 히어로 · 좌 텍스트 / 우 원형 사진 -->
-        <div onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#fff;border-radius:22px;padding:16px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:12px;cursor:pointer">
+        <div style="background:#fff;border-radius:22px;padding:16px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:12px">
           <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;padding:6px 4px">
             <div style="flex:1;min-width:0">
               <div id="v21HeroTitle" style="font-size:17px;font-weight:800;color:#0F172A;line-height:1.45;letter-spacing:-.4px">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>은<br><span id="v21RecName" style="color:#15803D;font-size:20px">시금치나물</span>을<br>추천드려요!</div>
@@ -7900,7 +7899,9 @@ function _v21RenderHero() {
     _v21RerollPool = grp ? FOOD_INGREDIENT_GROUP[grp].slice() : [];
     _v21RerollIdx = _v21RerollPool.indexOf(rec.name);
     if (_v21RerollIdx < 0) _v21RerollIdx = 0;
-    if (nameEl) nameEl.textContent = rec.name;
+    // 개별 음식 → 카테고리 이름 (예: 삶은계란 → 계란요리)
+    const displayName = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name;
+    if (nameEl) nameEl.textContent = displayName;
     // 사진 (로드 실패 시 이모지 fallback)
     if (photoEl) {
       const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(rec.name) : null;
@@ -7943,6 +7944,17 @@ const FOOD_INGREDIENT_GROUP = {
   샐러드: ['서양샐러드','채소샐러드'],
   간편식: ['김밥','샌드위치','삶은계란','요거트','바나나','사과']
 };
+
+// 개별 음식명 → 카테고리 이름 (사진과 매칭)
+// 예: 삶은계란 → 계란요리, 두부김치 → 두부요리, 순대국 → 삼계탕
+function _v21GetCategoryName(name) {
+  if (!name) return name;
+  const cat = (typeof FOOD_PHOTO_MAP !== 'undefined' && FOOD_PHOTO_MAP[name]) ||
+              (typeof _guessPhotoCategory === 'function' ? _guessPhotoCategory(name) : null);
+  // 카테고리 이름 표시 · 언더스코어·특수문자 정리
+  if (!cat) return name;
+  return cat.replace(/_/g, '·');
+}
 
 function _findIngredientGroup(name) {
   if (!name) return null;
@@ -7990,12 +8002,13 @@ function _v21RenderHeroWithRec(rec) {
     const photoEl = document.getElementById('v21HeroPhoto');
     const kcalEl = document.getElementById('v21HeroKcal');
     const chipsEl = document.getElementById('v21HeroChips');
-    if (nameEl) nameEl.textContent = rec.name;
+    const displayName = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name;
+    if (nameEl) nameEl.textContent = displayName;
     if (photoEl) {
       const url = (typeof _foodPhotoUrl === 'function') ? _foodPhotoUrl(rec.name) : null;
       if (url) {
         const fbHtml = `<span style=\\'font-size:38px\\'>🍽</span>`;
-        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(rec.name)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='${fbHtml}'">`;
+        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(displayName)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='${fbHtml}'">`;
       } else {
         photoEl.innerHTML = '<span style="font-size:38px">🍽</span>';
       }
