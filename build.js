@@ -126,6 +126,7 @@ async function build() {
             '_v21RenderHero', '_v21RenderRecentHex', '_v21MiniHexSVG', '_v21OpenRecReason',
             '_v21RerollHero', '_v21RenderHeroWithRec', '_findIngredientGroup', '_v21GetCategoryName',
             'REC_REASON_DB', '_v21ShowRecReasonSheet', '_v21GetRecReason', '_REC_REASON_ALIAS', '_CATEGORY_DISPLAY_RENAME',
+            '_v21ShowBodySignalDetail',
             'FOOD_INGREDIENT_GROUP', 'NUTRIENT_BANCHAN',
             'foodUserMemo', '_foodMemoOnInput', '_foodMemoAppend',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
