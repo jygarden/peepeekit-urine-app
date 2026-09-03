@@ -2312,23 +2312,23 @@ window.appIcon = function(name, size){
         </div>
 
         <!-- ① 히어로 · 좌 텍스트 / 우 원형 사진 -->
-        <div style="background:#fff;border-radius:22px;padding:16px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:12px">
-          <div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;padding:6px 4px">
-            <div style="flex:1;min-width:0">
-              <div id="v21HeroTitle" style="font-size:17px;font-weight:800;color:#0F172A;line-height:1.45;letter-spacing:-.4px">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>은<br><span id="v21RecName" style="color:#15803D;font-size:20px">시금치나물</span>을<br>추천드려요!</div>
-              <!-- 레거시 · JS가 참조하는 히든 노드 -->
-              <span id="v20HeroHeadline" style="display:none"></span>
-              <span id="v20HeroSub" style="display:none"></span>
-              <span id="v20HeroScore" style="display:none"></span>
-              <span id="v20HeroDelta" style="display:none"></span>
-              <div id="v20HeroHex" style="display:none"></div>
-              <div id="v20HeroBoost" style="display:none"></div>
-              <div id="v20HeroBoostChips" style="display:none"></div>
+        <div style="background:#fff;border-radius:22px;padding:16px 16px 14px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:12px;position:relative;overflow:hidden">
+          <div style="position:relative;padding:6px 4px 8px;min-height:160px">
+            <div style="max-width:58%;position:relative;z-index:2">
+              <div id="v21HeroTitle" style="font-size:16.5px;font-weight:800;color:#0F172A;line-height:1.45;letter-spacing:-.4px">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>은<br><span id="v21RecName" style="color:#15803D;font-size:19.5px">시금치나물</span>을<br>추천드려요!</div>
+              <div id="v21HeroKcal" style="font-size:12.5px;font-weight:800;color:#334155;letter-spacing:-.2px;margin-top:10px">— kcal</div>
             </div>
-            <div style="text-align:center;flex-shrink:0">
-              <div id="v21HeroPhoto" style="width:150px;height:150px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);border-radius:50%;box-shadow:0 8px 22px rgba(15,23,42,.18);margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:52px;overflow:hidden">🍽</div>
-              <div id="v21HeroKcal" style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.2px">— kcal</div>
+            <div style="position:absolute;top:-14px;right:-18px;z-index:1">
+              <div id="v21HeroPhoto" style="width:180px;height:180px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);border-radius:50%;box-shadow:0 14px 32px rgba(15,23,42,.24);display:flex;align-items:center;justify-content:center;font-size:60px;overflow:hidden">🍽</div>
             </div>
+            <!-- 레거시 · JS 참조용 히든 노드 -->
+            <span id="v20HeroHeadline" style="display:none"></span>
+            <span id="v20HeroSub" style="display:none"></span>
+            <span id="v20HeroScore" style="display:none"></span>
+            <span id="v20HeroDelta" style="display:none"></span>
+            <div id="v20HeroHex" style="display:none"></div>
+            <div id="v20HeroBoost" style="display:none"></div>
+            <div id="v20HeroBoostChips" style="display:none"></div>
           </div>
           <div id="v21HeroChips" style="display:flex;gap:5px;flex-wrap:wrap;padding:0 4px;margin-bottom:10px"></div>
           <div style="display:flex;gap:6px;padding:0 4px">
@@ -7850,7 +7850,7 @@ function _v20RenderBodySignal(shortages) {
   }
   titleEl.textContent = sig.title;
   descEl.innerHTML = sig.desc;
-  chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="background:#F8FAFC;border:1px solid #E2E8F0;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700;color:#0F172A;display:inline-flex;align-items:center;gap:4px">${c.emoji} ${c.label}</span>`).join('');
+  chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="background:#F1F5F9;color:#2563EB;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:700;display:inline-flex;align-items:center">#${c.label}</span>`).join('');
   if (discEl) discEl.textContent = sig.disclaimer || '가능성 중 하나 · 지속되면 진료';
   if (medEl) {
     if (sig.medical) {
