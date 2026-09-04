@@ -8100,64 +8100,45 @@ function _findIngredientGroup(name) {
 
 function _v21RerollHero() {
   try {
-    // 신규 유저 · 프리뷰 사진 순환만 (실제 추천 X)
+    // 기록 확인 · 3중 폴백
     let hasHistory = false;
-    try { const fh = _getFoodHistory(); hasHistory = fh && fh.length > 0; } catch(e){}
+    try {
+      const fh = _getFoodHistory();
+      if (fh && fh.length > 0) hasHistory = true;
+      if (!hasHistory && typeof getShortageTop === 'function' && getShortageTop(3).length > 0) hasHistory = true;
+      if (!hasHistory && typeof getTodayNutritionBalance === 'function' && getTodayNutritionBalance().mealCount > 0) hasHistory = true;
+    } catch(e){}
     if (!hasHistory) {
       _v21EmptyIdx = (_v21EmptyIdx + 1) % _V21_EMPTY_PREVIEW.length;
-      _v21RenderHero();
+      _v21UpdateEmptyPhoto();
       return;
     }
-    // 카테고리 단위 pool 생성 (초기화 or 이미 만들어진 것 재사용)
-    if (!_v21RerollPool || _v21RerollPool.length === 0) {
-      const hour = new Date().getHours();
-      const sit = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
-      let rawList = [];
-      if (typeof getWhatToEatNow === 'function') {
-        try {
-          const r = getWhatToEatNow(sit);
-          rawList = (r && r.top3) ? r.top3.map(m => m.name) : [];
-        } catch(e){}
-      }
-      // 상황 pool 항상 추가 (카테고리 다양성 확보 · 리롤 실효성)
-      if (typeof MEAL_POOL_BY_SITUATION !== 'undefined') {
-        rawList = rawList.concat(MEAL_POOL_BY_SITUATION[sit] || []);
-      }
-      // 카테고리로 정규화 + 중복 제거 · 빈 이름 필터링
-      const seen = new Set();
-      const pool = [];
-      for (const rawName of rawList) {
-        const name = (rawName || '').toString().trim();
-        if (!name) continue;  // 빈 이름 스킵
-        const cat = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(name) : name;
-        if (!cat || seen.has(cat)) continue;
-        seen.add(cat);
-        const dbItem = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(name) : null;
-        pool.push({ name, category: cat, kcal: (dbItem && dbItem.kcal) ? dbItem.kcal : '—' });
-      }
-      _v21RerollPool = pool;
-      // 현재 카테고리 위치 찾기
-      const curCat = _v21CurrentRec ? ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(_v21CurrentRec.name) : _v21CurrentRec.name) : null;
-      _v21RerollIdx = pool.findIndex(p => p.category === curCat);
-      if (_v21RerollIdx < 0) _v21RerollIdx = 0;
+    // pool 매번 재생성 · 캐시 X · 확실한 다양성
+    const hour = new Date().getHours();
+    const sit = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+    let rawList = [];
+    if (typeof MEAL_POOL_BY_SITUATION !== 'undefined') {
+      rawList = (MEAL_POOL_BY_SITUATION[sit] || []).slice();
     }
-    // pool 여전히 비면 강제로 MEAL_POOL_BY_SITUATION 재사용
-    if (!_v21RerollPool || _v21RerollPool.length === 0) {
-      if (typeof MEAL_POOL_BY_SITUATION !== 'undefined') {
-        const hour2 = new Date().getHours();
-        const sit2 = hour2 < 10 ? 'delivery' : hour2 < 14 ? 'delivery' : hour2 < 17 ? 'convenience' : 'eatout';
-        const raw = MEAL_POOL_BY_SITUATION[sit2] || [];
-        _v21RerollPool = raw.filter(n => n && String(n).trim()).map(n => ({ name: n, category: (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(n) : n, kcal: '—' }));
-      }
+    // 카테고리 dedup · 빈 이름 필터
+    const seen = new Set();
+    const pool = [];
+    for (const rawName of rawList) {
+      const name = (rawName || '').toString().trim();
+      if (!name) continue;
+      const cat = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(name) : name;
+      if (!cat || seen.has(cat)) continue;
+      seen.add(cat);
+      const dbItem = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(name) : null;
+      pool.push({ name, category: cat, kcal: (dbItem && dbItem.kcal) ? dbItem.kcal : '—' });
     }
-    if (!_v21RerollPool || _v21RerollPool.length === 0) return;
-    // 다음 유효한 항목 찾기
-    let next = null;
-    for (let i = 0; i < _v21RerollPool.length; i++) {
-      _v21RerollIdx = (_v21RerollIdx + 1) % _v21RerollPool.length;
-      const cand = _v21RerollPool[_v21RerollIdx];
-      if (cand && cand.name && String(cand.name).trim()) { next = cand; break; }
-    }
+    if (pool.length === 0) return;
+    _v21RerollPool = pool;
+    // 현재 카테고리와 다른 걸 무조건 선택
+    const curCat = _v21CurrentRec ? ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(_v21CurrentRec.name) : _v21CurrentRec.name) : null;
+    const candidates = pool.filter(p => p.category !== curCat);
+    const finalPool = candidates.length > 0 ? candidates : pool;
+    const next = finalPool[Math.floor(Math.random() * finalPool.length)];
     if (!next) return;
     _v21CurrentRec = { name: next.name, kcal: next.kcal };
     _v21RenderHeroWithRec(_v21CurrentRec);
