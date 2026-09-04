@@ -2319,7 +2319,7 @@ window.appIcon = function(name, size){
               <div id="v21HeroKcal" style="font-size:13px;font-weight:800;color:#334155;letter-spacing:-.2px;margin-top:10px">— kcal</div>
             </div>
             <div style="position:absolute;top:50%;right:-4px;transform:translateY(-50%);z-index:1">
-              <div id="v21HeroPhoto" style="width:170px;height:170px;background:transparent;border-radius:50%;filter:drop-shadow(0 14px 22px rgba(15,23,42,.25));display:flex;align-items:center;justify-content:center;font-size:56px;overflow:hidden;position:relative">🍽</div>
+              <div id="v21HeroPhoto" style="width:170px;height:170px;background:linear-gradient(135deg,#F1F5F9,#E2E8F0);border-radius:50%;box-shadow:0 12px 28px rgba(15,23,42,.22);display:flex;align-items:center;justify-content:center;font-size:56px;overflow:hidden">🍽</div>
             </div>
             <!-- 레거시 · JS 참조용 히든 노드 -->
             <span id="v20HeroHeadline" style="display:none"></span>
@@ -7976,9 +7976,9 @@ function _v21RenderHero() {
       const inlineUrl = cat && _V21_EMPTY_PHOTOS ? _V21_EMPTY_PHOTOS[cat] : null;
       if (url) {
         const fb = inlineUrl ? `this.onerror=null;this.src='${inlineUrl}'` : `_v21PhotoFallback(this)`;
-        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(rec.name)}" style="width:135%;height:135%;object-fit:cover;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" onerror="${fb}">`;
+        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(rec.name)}" style="width:100%;height:100%;object-fit:cover" onerror="${fb}">`;
       } else if (inlineUrl) {
-        photoEl.innerHTML = `<img src="${inlineUrl}" alt="${_v20Esc(rec.name)}" style="width:135%;height:135%;object-fit:cover;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">`;
+        photoEl.innerHTML = `<img src="${inlineUrl}" alt="${_v20Esc(rec.name)}" style="width:100%;height:100%;object-fit:cover">`;
       } else {
         _v21PhotoFallback({parentElement: photoEl});
       }
@@ -8043,7 +8043,7 @@ function _v21UpdateEmptyPhoto() {
   // 인라인 base64 사진 즉시 사용 (외부 로드 X)
   const dataUrl = _V21_EMPTY_PHOTOS[hero];
   if (dataUrl) {
-    photoEl.innerHTML = `<img src="${dataUrl}" alt="" style="width:135%;height:135%;object-fit:cover;opacity:0.55;filter:saturate(0.9);transition:opacity .4s ease;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">`;
+    photoEl.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%;height:100%;object-fit:cover;opacity:0.55;filter:saturate(0.9);transition:opacity .4s ease">`;
   } else {
     _v21PhotoFallback({parentElement: photoEl});
   }
@@ -8186,9 +8186,9 @@ function _v21RenderHeroWithRec(rec) {
       const inlineUrl = cat && _V21_EMPTY_PHOTOS ? _V21_EMPTY_PHOTOS[cat] : null;
       if (url) {
         const fb = inlineUrl ? `this.onerror=null;this.src='${inlineUrl}'` : `_v21PhotoFallback(this)`;
-        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(displayName)}" style="width:135%;height:135%;object-fit:cover;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)" onerror="${fb}">`;
+        photoEl.innerHTML = `<img src="${url}" alt="${_v20Esc(displayName)}" style="width:100%;height:100%;object-fit:cover" onerror="${fb}">`;
       } else if (inlineUrl) {
-        photoEl.innerHTML = `<img src="${inlineUrl}" alt="${_v20Esc(displayName)}" style="width:135%;height:135%;object-fit:cover;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">`;
+        photoEl.innerHTML = `<img src="${inlineUrl}" alt="${_v20Esc(displayName)}" style="width:100%;height:100%;object-fit:cover">`;
       } else {
         _v21PhotoFallback({parentElement: photoEl});
       }
