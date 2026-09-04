@@ -158,21 +158,30 @@ ${memoBlock}
       "portion": 1,
       "portionLabel": "1공기",
       "needsConfirmation": false,
-      "options": ["0.5공기", "1공기", "1.5공기"]
+      "options": ["0.5공기", "1공기", "1.5공기"],
+      "ingredients": [{"name":"쌀"},{"name":"현미"},{"name":"보리"}]
     },
     {
-      "name": "샐러드",
-      "brand": "슈퍼런",
+      "name": "계란말이",
+      "brand": "",
       "portion": 1,
-      "portionLabel": "1인분",
+      "portionLabel": "1접시",
       "needsConfirmation": false,
-      "options": ["작은 사이즈", "1인분", "라지"]
+      "options": ["반접시","1접시","2접시"],
+      "ingredients": [{"name":"계란"},{"name":"당근"},{"name":"파"},{"name":"소금"}]
     }
   ],
-  "sceneNote": "슈퍼런 샐러드 1인분"
+  "sceneNote": "계란말이 · 반찬 위주"
 }
 
 ★ name은 반드시 KOREAN_FOOD_DB 표준 카테고리명 (샐러드/김밥/버거/제육볶음/삼겹살…). brand는 별도 필드.
+★ ingredients는 필수. 각 음식마다 눈에 보이는 주요 재료 3~6개를 배열로 넣어라. 없으면 대표 재료라도 넣어라. 절대 빈 배열 금지.
+  예시 매핑:
+  - 계란말이 → [계란, 당근, 파, 소금]
+  - 김밥 → [쌀, 김, 계란, 시금치, 당근, 단무지]
+  - 비빔밥 → [쌀, 시금치, 콩나물, 계란, 소고기, 고추장]
+  - 제육볶음 → [돼지고기, 양파, 파, 고추장, 고춧가루]
+  - 샐러드 → [양상추, 토마토, 오이, 드레싱]
 
 【톤】
 - 한 끼를 평가하지 않는다. 그냥 인식만.
