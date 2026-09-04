@@ -126,7 +126,7 @@ async function build() {
             '_v21RenderHero', '_v21RenderRecentHex', '_v21MiniHexSVG', '_v21OpenRecReason',
             '_v21RerollHero', '_v21RenderHeroWithRec', '_findIngredientGroup', '_v21GetCategoryName',
             'REC_REASON_DB', '_v21ShowRecReasonSheet', '_v21GetRecReason', '_REC_REASON_ALIAS', '_CATEGORY_DISPLAY_RENAME',
-            '_v21ShowBodySignalDetail',
+            '_v21ShowBodySignalDetail', '_V21_EMPTY_PREVIEW', '_v21StartEmptyCarousel', '_v21StopEmptyCarousel', '_v21UpdateEmptyPhoto', '_v21PhotoFallback',
             'FOOD_INGREDIENT_GROUP', 'NUTRIENT_BANCHAN',
             'foodUserMemo', '_foodMemoOnInput', '_foodMemoAppend',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
@@ -225,6 +225,15 @@ async function build() {
   }
   const assetsCount = copyDirRecursive(path.join(rootDir, 'assets'), path.join(distDir, 'assets'));
   if (assetsCount > 0) console.log(`   assets 파일 ${assetsCount}개 복사`);
+
+  // 🍚 루트에 잘못 올라간 이미지 폴더들도 자동 복사 (food-photos, home-icons, tab-icons, icons, guide)
+  const extraFolders = ['food-photos', 'home-icons', 'tab-icons', 'icons', 'guide'];
+  for (const folder of extraFolders) {
+    const src = path.join(rootDir, folder);
+    if (!fs.existsSync(src)) continue;
+    const n = copyDirRecursive(src, path.join(distDir, folder));
+    if (n > 0) console.log(`   ${folder} 파일 ${n}개 복사`);
+  }
 
   // API 파일들 dist/api로 복사
   const apiSrcDir = path.join(rootDir, 'api');
