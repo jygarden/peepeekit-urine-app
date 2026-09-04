@@ -3234,25 +3234,6 @@
     </div>
     <div class="error-box" id="foodErrorBox"></div>
 
-    <!-- 브랜드·가게·메모 입력 (선택) -->
-    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin:12px 0">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <span style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px">브랜드 · 가게 · 메모</span>
-        <span style="font-size:10px;color:#94A3B8;font-weight:700;background:#F1F5F9;padding:2px 7px;border-radius:99px">선택</span>
-      </div>
-      <input type="text" id="foodUserMemoInput" placeholder="예) 김밥천국 참치김밥, 백종원 제육 2인분" style="width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box" oninput="_foodMemoOnInput()" onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'" />
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:9px">
-        <button type="button" onclick="_foodMemoAppend('프랜차이즈')" style="background:#F8FAFC;color:#475569;font-size:10.5px;font-weight:700;padding:6px 10px;border-radius:99px;border:1px solid #E5E7EB;cursor:pointer;font-family:inherit">+ 프랜차이즈</button>
-        <button type="button" onclick="_foodMemoAppend('배달')" style="background:#F8FAFC;color:#475569;font-size:10.5px;font-weight:700;padding:6px 10px;border-radius:99px;border:1px solid #E5E7EB;cursor:pointer;font-family:inherit">+ 배달</button>
-        <button type="button" onclick="_foodMemoAppend('집밥')" style="background:#F8FAFC;color:#475569;font-size:10.5px;font-weight:700;padding:6px 10px;border-radius:99px;border:1px solid #E5E7EB;cursor:pointer;font-family:inherit">+ 집밥</button>
-        <button type="button" onclick="_foodMemoAppend('2인분')" style="background:#F8FAFC;color:#475569;font-size:10.5px;font-weight:700;padding:6px 10px;border-radius:99px;border:1px solid #E5E7EB;cursor:pointer;font-family:inherit">+ 2인분</button>
-      </div>
-      <div style="background:#EFF6FF;border-radius:10px;padding:9px 11px;margin-top:10px;display:flex;gap:7px;align-items:flex-start">
-        <span style="font-size:12px;flex-shrink:0">💡</span>
-        <div style="font-size:10.5px;color:#1E40AF;font-weight:600;line-height:1.5">프랜차이즈·배달 앱 스샷은 공식 영양정보로 정확도가 크게 올라가요.</div>
-      </div>
-    </div>
-
     <button class="btn-primary" id="btnFoodAnalyze" onclick="analyzeFood()" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 4px 14px rgba(245,158,11,.40)">🤖 AI 식단 분석 시작</button>
     <div class="loading-box" id="foodLoadingBox">
       <div class="emoji">🍴</div>
@@ -3268,6 +3249,16 @@
       <p>틀리면 직접 수정해주세요. 정확할수록 더 좋은 분석!</p>
     </div>
     <div id="confirmFoodList"></div>
+
+    <!-- 브랜드·가게·메모 입력 (인식 결과 확인 후 이 위치) -->
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin:12px 0">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px">브랜드 · 가게 · 메모</span>
+        <span style="font-size:10px;color:#94A3B8;font-weight:700;background:#F1F5F9;padding:2px 7px;border-radius:99px">선택</span>
+      </div>
+      <input type="text" id="foodUserMemoInput" placeholder="예) 김밥천국 참치김밥, 백종원 제육 2인분" style="width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box" oninput="_foodMemoOnInput()" onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'" />
+    </div>
+
     <div class="confirm-actions">
       <button class="btn-primary" style="background:linear-gradient(135deg,#F59E0B,#EA580C)" onclick="confirmAndAnalyze()">✅ 이대로 정확하게 분석하기</button>
       <button class="btn-outline" onclick="showScreen('screenFoodPreview')">📷 다시 찍기</button>
