@@ -8418,6 +8418,28 @@ function _v21GetRecReason(catName) {
   };
 }
 
+// 앱 실행 시도 · 1.2초 안에 앱 안 열리면 웹으로 폴백
+function _v21TryAppLaunch(idx) {
+  try {
+    const l = (window._v21DeliveryLinks || [])[idx];
+    if (!l) return;
+    const start = Date.now();
+    // 앱 스킴 시도 (숨겨진 iframe)
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;width:1px;height:1px';
+    iframe.src = l.appUrl;
+    document.body.appendChild(iframe);
+    // 폴백 타이머 · 앱 안 열리면 웹으로
+    setTimeout(() => {
+      try { iframe.remove(); } catch(e){}
+      // 페이지가 아직 활성 상태 (앱으로 안 넘어감) 이면 웹 열기
+      if (Date.now() - start < 1600 && !document.hidden) {
+        window.open(l.webUrl, '_blank', 'noopener');
+      }
+    }, 1200);
+  } catch(e) { console.error('_v21TryAppLaunch', e); }
+}
+
 // ═══ 배달·근처 시트 · 배민·쿠팡이츠·캐치테이블·네이버맵 딥링크 ═══
 function _v21OpenDeliverySheet() {
   try {
@@ -8427,11 +8449,24 @@ function _v21OpenDeliverySheet() {
     const q = encodeURIComponent(name);
     const qNearby = encodeURIComponent('근처 ' + name);
     const qFood = encodeURIComponent(name);
+    // 앱 스킴 + 웹 폴백 · 앱 설치돼있으면 앱, 없으면 웹 (혹은 스토어)
     const links = [
-      { label:'배달의민족에서 시키기', desc:`홈에서 "${name}" 검색해주세요`, bg:'#DEF6F5', color:'#2AC1BC', emoji:'🛵', href:`https://www.baemin.com/` },
-      { label:'쿠팡이츠에서 시키기', desc:`앱에서 "${name}" 검색해주세요`, bg:'#FFEBEC', color:'#D8232A', emoji:'🥡', href:`https://www.coupangeats.com/` },
-      { label:'네이버 지도로 근처 매장', desc:`"근처 ${name}" 자동 검색`, bg:'#E6F4EA', color:'#0F9D58', emoji:'🗺', href:`https://m.map.naver.com/search2/search.naver?query=${qNearby}` },
-      { label:'캐치테이블에서 예약', desc:`"${name}" 예약 가능 매장`, bg:'#EEF2FF', color:'#4F46E5', emoji:'🍽', href:`https://ct.catchtable.co.kr/search?keyword=${qFood}` }
+      {
+        label:'배달의민족에서 시키기', desc:'앱이 있으면 자동 열림', bg:'#DEF6F5', color:'#2AC1BC', emoji:'🛵',
+        appUrl:'baeminfoodmarket://open', webUrl:'https://baemin.me/'
+      },
+      {
+        label:'쿠팡이츠에서 시키기', desc:'앱이 있으면 자동 열림', bg:'#FFEBEC', color:'#D8232A', emoji:'🥡',
+        appUrl:'coupangeats://', webUrl:'https://www.coupangeats.com/'
+      },
+      {
+        label:'네이버 지도로 근처 매장', desc:`"근처 ${name}" 자동 검색`, bg:'#E6F4EA', color:'#0F9D58', emoji:'🗺',
+        appUrl:`nmap://search?query=${qNearby}&appname=com.checkmyhealth`, webUrl:`https://m.map.naver.com/search2/search.naver?query=${qNearby}`
+      },
+      {
+        label:'캐치테이블에서 예약', desc:'앱이 있으면 자동 열림', bg:'#EEF2FF', color:'#4F46E5', emoji:'🍽',
+        appUrl:'catchtable://', webUrl:`https://ct.catchtable.co.kr/search?keyword=${qFood}`
+      }
     ];
     const old = document.getElementById('v21RecReasonSheet');
     if (old) old.remove();
@@ -8439,15 +8474,17 @@ function _v21OpenDeliverySheet() {
     backdrop.id = 'v21RecReasonSheet';
     backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
     backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.remove(); };
-    const linksHtml = links.map(l => `
-      <a href="${l.href}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;background:${l.bg};border-radius:14px;padding:14px 16px;margin-bottom:8px;text-decoration:none;color:inherit">
+    const linksHtml = links.map((l, i) => `
+      <div data-idx="${i}" onclick="_v21TryAppLaunch(${i})" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:${l.bg};border-radius:14px;padding:14px 16px;margin-bottom:8px">
         <div style="width:40px;height:40px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${l.emoji}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:13.5px;font-weight:800;color:${l.color};letter-spacing:-.2px">${l.label}</div>
           <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">${l.desc}</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg>
-      </a>`).join('');
+      </div>`).join('');
+    // 앱 실행 시도 · 실패 시 웹 폴백
+    window._v21DeliveryLinks = links;
     backdrop.innerHTML = `
       <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 34px;width:100%;max-height:82vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
