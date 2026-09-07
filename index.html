@@ -3312,6 +3312,16 @@ window.appIcon = function(name, size){
       </button>
     </div>
 
+    <!-- 브랜드·가게 입력 · 촬영 전에 알려주면 정확도 ↑ -->
+    <div id="foodBrandPreCard" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.2px">🏪 브랜드 · 가게명</span>
+        <span style="font-size:10px;color:#94A3B8;font-weight:700;background:#F1F5F9;padding:2px 7px;border-radius:99px">선택 · 정확도 ↑</span>
+      </div>
+      <input type="text" id="foodUserMemoInputPre" placeholder="예) 김밥천국, 서브웨이, 백종원 제육" style="width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box" oninput="try{const t=document.getElementById('foodUserMemoInput');if(t)t.value=this.value;if(typeof _foodMemoOnInput==='function')_foodMemoOnInput();}catch(e){}" onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'" />
+      <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:7px;line-height:1.5">브랜드 알려주시면 <b style="color:#2563EB">그 매장 메뉴 데이터</b>를 참고해서 훨씬 정확하게 분석해요.</div>
+    </div>
+
     <!-- 사람 · 촬영 / 갤러리 (기존) -->
     <div id="foodHumanCta" style="display:flex;gap:8px;margin-bottom:12px">
       <button onclick="safeCameraClick('foodCameraInput')" style="flex:2;background:#17243A;color:#FFF;border:none;border-radius:12px;padding:14px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;display:flex;align-items:center;justify-content:center;gap:8px">
@@ -3353,16 +3363,6 @@ window.appIcon = function(name, size){
       <button class="btn-close-img" onclick="showScreen('screenFoodCapture')">×</button>
     </div>
     <div class="error-box" id="foodErrorBox"></div>
-
-    <!-- 브랜드·가게 입력 · 분석 전에 미리 알려주면 훨씬 정확 -->
-    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin:12px 0">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <span style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px">🏪 브랜드 · 가게명</span>
-        <span style="font-size:10px;color:#94A3B8;font-weight:700;background:#F1F5F9;padding:2px 7px;border-radius:99px">선택 · 정확도 ↑</span>
-      </div>
-      <input type="text" id="foodUserMemoInputPre" placeholder="예) 김밥천국, 서브웨이, 백종원 제육" style="width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box" oninput="try{document.getElementById('foodUserMemoInput').value=this.value;_foodMemoOnInput();}catch(e){}" onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'" />
-      <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:7px;line-height:1.5">브랜드 알려주시면 <b style="color:#2563EB">그 매장 메뉴 데이터</b>를 참고해서 훨씬 정확하게 분석해요.</div>
-    </div>
 
     <button class="btn-primary" id="btnFoodAnalyze" onclick="analyzeFood()" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 4px 14px rgba(245,158,11,.40)">🤖 AI 식단 분석 시작</button>
     <div class="loading-box" id="foodLoadingBox">
