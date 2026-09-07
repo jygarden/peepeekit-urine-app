@@ -8425,11 +8425,13 @@ function _v21OpenDeliverySheet() {
     if (!rec || !rec.name) return;
     const name = String(rec.name).trim();
     const q = encodeURIComponent(name);
+    const qDelivery = encodeURIComponent(name + ' 배달');
+    const qStore = encodeURIComponent('근처 ' + name);
+    const qReview = encodeURIComponent(name + ' 맛집');
     const links = [
-      { label:'배민에서 시키기', desc:'배달의민족 앱에서 검색', bg:'#FFF4E5', color:'#E85D0F', emoji:'🛵', href:`https://baemin.me/search?query=${q}` },
-      { label:'쿠팡이츠에서 시키기', desc:'쿠팡이츠 앱에서 검색', bg:'#FFEBEC', color:'#D8232A', emoji:'🥡', href:`https://www.coupangeats.com/search?keyword=${q}` },
-      { label:'근처 매장 찾기', desc:'네이버 지도에서 근처 검색', bg:'#E6F4EA', color:'#0F9D58', emoji:'🗺', href:`https://map.naver.com/p/search/${q}` },
-      { label:'캐치테이블에서 예약', desc:'외식·예약 앱에서 검색', bg:'#EEF2FF', color:'#4F46E5', emoji:'🍽', href:`https://app.catchtable.co.kr/ct/search?keyword=${q}` }
+      { label:`"${name} 배달" 검색`, desc:'네이버가 배민·쿠팡이츠·요기요를 모아 보여줘요', bg:'#FEF3E2', color:'#B45309', emoji:'🍚', href:`https://search.naver.com/search.naver?query=${qDelivery}` },
+      { label:`근처 ${name} 매장`, desc:'네이버 지도에서 가까운 순 정렬', bg:'#E6F4EA', color:'#0F9D58', emoji:'🗺', href:`https://m.map.naver.com/search2/search.naver?query=${qStore}` },
+      { label:`${name} 맛집·리뷰`, desc:'예약·평점·후기 한 번에', bg:'#EEF2FF', color:'#4F46E5', emoji:'🍽', href:`https://search.naver.com/search.naver?query=${qReview}` }
     ];
     const old = document.getElementById('v21RecReasonSheet');
     if (old) old.remove();
