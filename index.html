@@ -9035,6 +9035,150 @@ function _v20OpenMealWhy() {
 }
 
 // ═══ 리포트 화면 렌더 · 7일 트렌드·기록 요약 ═══
+// 리포트 기간 탭 전환 · 오늘 / 일주일 / 한달
+let _v21ReportPeriod = 'week';
+function _v21SwitchReportTab(period) {
+  _v21ReportPeriod = period;
+  // 탭 스타일 업데이트
+  document.querySelectorAll('#v21ReportTabs button').forEach(b => {
+    const active = b.getAttribute('data-period') === period;
+    b.style.background = active ? '#fff' : 'transparent';
+    b.style.color = active ? '#0F172A' : '#64748B';
+    b.style.boxShadow = active ? '0 1px 3px rgba(15,23,42,.08)' : 'none';
+  });
+  // 서브타이틀
+  const sub = document.getElementById('v21ReportSubtitle');
+  if (sub) {
+    sub.textContent = period === 'today' ? '오늘 하루 · 지금까지 챙긴 영양' :
+                      period === 'month' ? '지난 30일 · 한 달간 변화' :
+                      '지난 7일 · 이번 주 흐름';
+  }
+  // 렌더
+  if (period === 'today') _v21RenderReportToday();
+  else if (period === 'month') _v21RenderReportMonth();
+  else renderV20Report();
+}
+
+// 오늘 리포트 · 하루 누적 진행률
+function _v21RenderReportToday() {
+  const el = document.getElementById('v20ReportContent');
+  if (!el) return;
+  const fh = _getFoodHistory();
+  const today = new Date().toISOString().slice(0,10);
+  const todayMeals = fh.filter(f => f.date && String(f.date).slice(0,10) === today);
+  if (!todayMeals.length) {
+    el.innerHTML = `<div style="background:#fff;border-radius:16px;padding:32px 20px;text-align:center;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.04)">
+      <div style="font-size:38px;margin-bottom:10px">🍽</div>
+      <div style="font-size:15px;font-weight:800;color:#0F172A;margin-bottom:6px">오늘 첫 기록을 남겨보세요</div>
+      <div style="font-size:12px;color:#64748B;font-weight:600;line-height:1.6">식사 사진을 찍으면 오늘 하루 영양 진행률을 확인할 수 있어요.</div>
+    </div>`;
+    return;
+  }
+  // 누적 영양
+  const tot = { carbs:0, protein:0, fat:0, fiber:0, vitA:0, vitC:0, vitD:0, calcium:0, iron:0, magnesium:0 };
+  todayMeals.forEach(m => { const n = m.nutrition || {}; Object.keys(tot).forEach(k => tot[k] += (n[k]||0)); });
+  const rda = { carbs:300, protein:60, fat:65, fiber:25 };
+  const vitScore = Math.min(100, ((tot.vitC||0)/60 + (tot.vitD||0)/10 + (tot.vitA||0)/500) * 33);
+  const minScore = Math.min(100, ((tot.calcium||0)/800 + (tot.iron||0)/12 + (tot.magnesium||0)/320) * 33);
+  const values = [
+    Math.min(100, tot.carbs/rda.carbs*100),
+    Math.min(100, tot.protein/rda.protein*100),
+    Math.min(100, tot.fat/rda.fat*100),
+    Math.min(100, tot.fiber/rda.fiber*100),
+    vitScore, minScore
+  ];
+  const avg = Math.round(values.reduce((a,b)=>a+b,0)/6);
+  const mealListHtml = todayMeals.map(m => {
+    const name = m.foodName || (m.foods && m.foods[0] && m.foods[0].name) || '식사';
+    const time = m.date ? new Date(m.date).toTimeString().slice(0,5) : '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #F1F5F9;font-size:12.5px"><span style="color:#0F172A;font-weight:700">${_v20Esc(name)}</span><span style="color:#94A3B8;font-weight:600">${time}</span></div>`;
+  }).join('');
+  el.innerHTML = `
+    <div style="background:#fff;border-radius:18px;padding:18px 16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;color:#94A3B8;font-weight:700">오늘 · 일일 권장량 대비</div>
+          <div style="font-size:22px;font-weight:900;color:${avg>=80?'#15803D':avg>=50?'#B45309':'#B91C1C'};letter-spacing:-.5px;margin-top:2px">${avg}점</div>
+        </div>
+        <div style="background:#F1F5F9;color:#64748B;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:99px">${todayMeals.length}끼 기록</div>
+      </div>
+      ${_v21NutrientBars(values, false, 'grid')}
+    </div>
+    <div style="background:#fff;border-radius:16px;padding:14px 16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 10px rgba(15,23,42,.04)">
+      <div style="font-size:12px;color:#94A3B8;font-weight:700;margin-bottom:6px">오늘 먹은 식사</div>
+      ${mealListHtml || '<div style="font-size:12px;color:#94A3B8;padding:10px 0">기록 없음</div>'}
+    </div>`;
+}
+
+// 한달 리포트 · 30일 요약
+function _v21RenderReportMonth() {
+  const el = document.getElementById('v20ReportContent');
+  if (!el) return;
+  const fh = _getFoodHistory();
+  const now = new Date();
+  const meals30 = fh.filter(e => e.date && (now - new Date(e.date)) < 30*86400000);
+  if (!meals30.length) {
+    el.innerHTML = `<div style="background:#fff;border-radius:16px;padding:32px 20px;text-align:center;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.04)">
+      <div style="font-size:38px;margin-bottom:10px">📅</div>
+      <div style="font-size:15px;font-weight:800;color:#0F172A;margin-bottom:6px">한 달 기록 데이터가 아직 없어요</div>
+      <div style="font-size:12px;color:#64748B;font-weight:600;line-height:1.6">2주 이상 꾸준히 기록하면 한 달 흐름을 확인할 수 있어요.</div>
+    </div>`;
+    return;
+  }
+  // 일자별 avg score
+  const byDay = {};
+  meals30.forEach(m => {
+    const d = String(m.date).slice(0,10);
+    if (!byDay[d]) byDay[d] = { count:0, tot:{carbs:0,protein:0,fat:0,fiber:0,vitA:0,vitC:0,vitD:0,calcium:0,iron:0,magnesium:0} };
+    byDay[d].count++;
+    const n = m.nutrition || {};
+    Object.keys(byDay[d].tot).forEach(k => byDay[d].tot[k] += (n[k]||0));
+  });
+  const rda = { carbs:300, protein:60, fat:65, fiber:25 };
+  const scoreOfDay = (t) => {
+    const vs = Math.min(100, ((t.vitC||0)/60 + (t.vitD||0)/10 + (t.vitA||0)/500) * 33);
+    const ms = Math.min(100, ((t.calcium||0)/800 + (t.iron||0)/12 + (t.magnesium||0)/320) * 33);
+    const vals = [
+      Math.min(100, t.carbs/rda.carbs*100), Math.min(100, t.protein/rda.protein*100),
+      Math.min(100, t.fat/rda.fat*100), Math.min(100, t.fiber/rda.fiber*100), vs, ms
+    ];
+    return Math.round(vals.reduce((a,b)=>a+b,0)/6);
+  };
+  const dayScores = Object.entries(byDay).map(([d,v]) => ({ d, score: scoreOfDay(v.tot), count: v.count })).sort((a,b) => a.d.localeCompare(b.d));
+  const avgScore = Math.round(dayScores.reduce((s,x) => s + x.score, 0) / dayScores.length);
+  const bestDay = dayScores.reduce((a,b) => a.score > b.score ? a : b);
+  const daysLogged = dayScores.length;
+
+  // 미니 히트맵 · 30일
+  const heatmap = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0,10);
+    const found = dayScores.find(x => x.d === ds);
+    const s = found ? found.score : null;
+    const bg = s === null ? '#F1F5F9' : s >= 80 ? '#15803D' : s >= 60 ? '#65A30D' : s >= 40 ? '#EAB308' : s >= 20 ? '#F59E0B' : '#EF4444';
+    heatmap.push(`<div title="${ds}${s !== null ? ' · '+s+'점' : ''}" style="aspect-ratio:1;background:${bg};border-radius:4px;opacity:${s===null?0.4:1}"></div>`);
+  }
+  el.innerHTML = `
+    <div style="background:#fff;border-radius:18px;padding:18px 16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;color:#94A3B8;font-weight:700">지난 30일 평균 균형 점수</div>
+          <div style="font-size:26px;font-weight:900;color:${avgScore>=80?'#15803D':avgScore>=50?'#B45309':'#B91C1C'};letter-spacing:-.7px;margin-top:2px">${avgScore}<span style="font-size:14px;color:#64748B;font-weight:700;margin-left:4px">점</span></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10.5px;color:#94A3B8;font-weight:700">기록한 날</div>
+          <div style="font-size:17px;font-weight:900;color:#0F172A">${daysLogged}<span style="font-size:11px;color:#64748B;font-weight:700"> / 30</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#94A3B8;font-weight:700;margin-bottom:6px">한 달 히트맵 (진할수록 균형 ↑)</div>
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px">${heatmap.join('')}</div>
+    </div>
+    <div style="background:#EFF6FF;border-radius:14px;padding:14px 16px;font-size:12.5px;color:#1E40AF;font-weight:700;line-height:1.6">
+      🏆 <b>${bestDay.d.slice(5).replace('-','.')}</b>에 ${bestDay.score}점으로 균형이 가장 좋았어요.
+    </div>`;
+}
+
 function renderV20Report() {
   const el = document.getElementById('v20ReportContent');
   if (!el) return;
@@ -24750,9 +24894,15 @@ function updateGgTabbar(screenId) {
 <!-- ════════════ 📄 리포트 화면 (v20) ════════════ -->
 <div class="screen" id="screenReport" style="background:#FBFBFD">
   <div style="padding:20px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif">
-    <div style="margin-bottom:18px">
+    <div style="margin-bottom:16px">
       <div style="font-size:28px;font-weight:900;color:#0F172A;letter-spacing:-.7px;margin-bottom:4px">리포트</div>
-      <div style="font-size:12.5px;color:#64748B;font-weight:500">지난 7일 · 내 몸의 변화 흐름</div>
+      <div id="v21ReportSubtitle" style="font-size:12.5px;color:#64748B;font-weight:500">기간별 내 몸의 변화 흐름</div>
+    </div>
+    <!-- 기간 탭 · 오늘 / 일주일 / 한달 -->
+    <div id="v21ReportTabs" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:#F1F5F9;padding:4px;border-radius:12px;margin-bottom:16px">
+      <button data-period="today" onclick="_v21SwitchReportTab('today')" style="background:transparent;border:none;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:800;color:#64748B;font-family:inherit;cursor:pointer">오늘</button>
+      <button data-period="week" onclick="_v21SwitchReportTab('week')" style="background:#fff;border:none;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:800;color:#0F172A;font-family:inherit;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.08)">일주일</button>
+      <button data-period="month" onclick="_v21SwitchReportTab('month')" style="background:transparent;border:none;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:800;color:#64748B;font-family:inherit;cursor:pointer">한달</button>
     </div>
     <div id="v20ReportContent"></div>
   </div>
