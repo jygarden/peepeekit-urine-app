@@ -207,7 +207,9 @@ window.appIcon = function(name, size){
   .gg-cta{background:var(--gg-blue);color:#fff;border:0;border-radius:12px;padding:15px;font-family:inherit;font-weight:600;font-size:14.5px;letter-spacing:-.02em;width:100%;cursor:pointer}
   /* 하단 탭바 */
   /* v12 · 탭바 · 고정 높이 54px · 갤럭시 시스템바 위 명확한 경계 */
-  .gg-tabbar{position:fixed;bottom:0;left:0;right:0;height:54px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--gg-line);background:#fff;z-index:50;font-family:'Pretendard Variable',Pretendard,sans-serif;max-width:520px;margin:0 auto;padding:0;box-sizing:border-box}
+  .gg-tabbar{position:fixed;bottom:0;left:0;right:0;height:56px;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--gg-line);background:#fff;z-index:50;font-family:'Pretendard Variable',Pretendard,sans-serif;max-width:520px;margin:0 auto;padding:0;box-sizing:border-box;overflow:visible}
+  .gg-tabbar .gg-tab-cam{overflow:visible}
+  .gg-tabbar .gg-tab-cam > span:first-child{overflow:visible}
   .gg-tabbar .gg-tab-cam{overflow:visible}
   .gg-tabbar .gg-tab-cam > span:first-child{overflow:visible}
   .gg-tabbar button{position:relative;border:0;background:transparent;color:var(--gg-muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;font-family:inherit;font-size:11px;font-weight:500;cursor:pointer;transition:color .15s;height:54px;line-height:1.1;-webkit-tap-highlight-color:transparent}
@@ -2305,13 +2307,9 @@ window.appIcon = function(name, size){
       <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
       <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
 
-        <!-- 헤더 · 인사말 + 우측 카메라 -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 4px">
+        <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
+        <div style="padding:14px 0 4px">
           <div style="font-size:15px;font-weight:600;color:#64748B;letter-spacing:-.2px">안녕하세요, <b style="color:#0F172A;font-weight:800" id="v20ProfileName">재율님</b></div>
-          <button onclick="if(typeof enterFood==='function')enterFood('human')" style="background:#F1F5F9;border:none;padding:7px 12px 7px 10px;cursor:pointer;border-radius:99px;display:flex;align-items:center;gap:5px;color:#475569;font-family:inherit;font-size:11.5px;font-weight:700" aria-label="음식 찍기">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            음식 찍기
-          </button>
         </div>
         <div id="v21CoachHeadline" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;padding:2px 0 14px">요즘 <span style="color:#F59E0B">균형</span>을 챙겨보세요!</div>
 
@@ -24664,6 +24662,12 @@ function updateGgTabbar(screenId) {
   <button data-tab="analyze" onclick="ggGoTab('analyze')" aria-label="분석">
     <svg width="26" height="26" viewBox="0 0 64 64" fill="none"><circle cx="27" cy="26" r="17" fill="#fff" stroke="#17243A" stroke-width="4"/><path d="m39.3 38.2 15.6 15.4c1.4 1.4 1.4 3.5 0 4.9-1.4 1.4-3.6 1.4-5 0L34.6 43" stroke="#17243A" stroke-width="5.5" stroke-linecap="round"/></svg>
     <span>분석</span>
+  </button>
+  <button data-tab="capture" onclick="if(typeof enterFood==='function')enterFood('human')" aria-label="음식 찍기" class="gg-tab-cam">
+    <span style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#2563EB);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(37,99,235,.35);border:4px solid #fff;margin-top:-22px">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </span>
+    <span style="font-size:9.5px;color:#2563EB;font-weight:800;margin-top:2px">촬영</span>
   </button>
   <button data-tab="curation" onclick="ggGoTab('curation')" aria-label="추천">
     <svg width="26" height="26" viewBox="0 0 64 64" fill="none"><path d="m32 8.2 7.3 14.9 16.4 2.4-11.9 11.6 2.8 16.3L32 45.7l-14.7 7.7 2.8-16.3L8.3 25.5l16.4-2.4L32 8.2Z" fill="#FFD438" stroke="#17243A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
