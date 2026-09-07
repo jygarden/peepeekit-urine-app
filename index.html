@@ -2345,8 +2345,8 @@ window.appIcon = function(name, size){
         <div id="v20RecentMealCard" style="background:#fff;border-radius:18px;padding:15px 14px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
             <div>
-              <div style="font-size:11px;color:#94A3B8;font-weight:700">최근 식사</div>
-              <div id="v20RecentMealName" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-top:2px">기록을 남겨보세요</div>
+              <div style="font-size:11px;color:#94A3B8;font-weight:700">오늘 하루 · 일일 권장량 대비</div>
+              <div id="v20RecentMealName" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-top:2px">오늘 첫 기록을 남겨보세요</div>
             </div>
             <div id="v21RecentScore" style="font-size:11px;font-weight:800;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:99px">—점</div>
           </div>
@@ -8660,29 +8660,41 @@ function _v21ShowRecReasonSheet(catName, data) {
 function _v21RenderRecentHex() {
   const el = document.getElementById('v21RecentHex');
   if (!el) return;
-  let recent;
+  // 오늘 하루 누적 영양 · 하루 일일 권장량(RDA) 대비 %
+  let todayNut = null;
   try {
     const fh = _getFoodHistory();
-    recent = fh[0];
-  } catch(e) { recent = null; }
-  const nut = (recent && recent.nutrition) || null;
+    const today = new Date().toISOString().slice(0,10);
+    const todayMeals = fh.filter(f => f.date && String(f.date).slice(0,10) === today);
+    if (todayMeals.length) {
+      todayNut = { carbs:0, protein:0, fat:0, fiber:0, vitA:0, vitC:0, vitD:0, calcium:0, iron:0, magnesium:0 };
+      todayMeals.forEach(m => {
+        const n = m.nutrition || {};
+        Object.keys(todayNut).forEach(k => { todayNut[k] += (n[k] || 0); });
+      });
+    }
+  } catch(e){}
   const scoreEl = document.getElementById('v21RecentScore');
-  if (!nut) {
+  const nameEl = document.getElementById('v20RecentMealName');
+  if (!todayNut) {
     el.innerHTML = _v21NutrientBars([0,0,0,0,0,0], true, 'grid');
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background='#F1F5F9'; scoreEl.style.color='#64748B'; }
+    if (nameEl) nameEl.textContent = '오늘 첫 기록을 남겨보세요';
     return;
   }
-  // 6축 · 탄수/단백/지방/섬유/비타민/미네랄 (0-100 정규화)
-  const rda = { carbs:300, protein:60, fat:65, fiber:25, vit:100, min:100 };
-  const vitScore = Math.min(100, ((nut.vitC||0)/60 + (nut.vitD||0)/10 + (nut.vitA||0)/500) * 33);
-  const minScore = Math.min(100, ((nut.calcium||0)/800 + (nut.iron||0)/12 + (nut.magnesium||0)/320) * 33);
+  // 오늘 하루 진행률 · 6축 대비 %
+  const rda = { carbs:300, protein:60, fat:65, fiber:25 };
+  const vitScore = Math.min(100, ((todayNut.vitC||0)/60 + (todayNut.vitD||0)/10 + (todayNut.vitA||0)/500) * 33);
+  const minScore = Math.min(100, ((todayNut.calcium||0)/800 + (todayNut.iron||0)/12 + (todayNut.magnesium||0)/320) * 33);
   const values = [
-    Math.min(100, (nut.carbs||0)/rda.carbs*100),
-    Math.min(100, (nut.protein||0)/rda.protein*100),
-    Math.min(100, (nut.fat||0)/rda.fat*100),
-    Math.min(100, (nut.fiber||0)/rda.fiber*100),
+    Math.min(100, (todayNut.carbs||0)/rda.carbs*100),
+    Math.min(100, (todayNut.protein||0)/rda.protein*100),
+    Math.min(100, (todayNut.fat||0)/rda.fat*100),
+    Math.min(100, (todayNut.fiber||0)/rda.fiber*100),
     vitScore, minScore
   ];
+  // 카드 제목 · "오늘 하루 진행"
+  if (nameEl) nameEl.textContent = '오늘 하루 진행';
   el.innerHTML = _v21NutrientBars(values, false, 'grid');
   // score badge (평균)
   if (scoreEl) {
