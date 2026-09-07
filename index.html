@@ -14069,27 +14069,33 @@ function compressImageForUpload(dataUrl, maxDim=1200, quality=0.78) {
 // ════════════════════════════════════════════════════════════════
 let foodLoadingInterval = null;
 let foodLoadingProgress = 0;
-// 심리 훅 · 개인화된 처리 단계 (Processing Effect)
-const FOOD_LOADING_STAGES = (function() {
-  let userName = '지녕';
+// 심리 훅 · 개인화된 처리 단계 (Processing Effect) · 호출 시마다 최신 닉네임 읽음
+function _getFoodLoadingStages() {
+  let userName = '';
   try {
-    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human');
-    if (p && p.name) userName = p.name;
+    const arr = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]');
+    const p = arr.find(x => x.type === 'human') || arr[0];
+    if (p && p.name) userName = String(p.name).replace(/님$/, '').trim();
   } catch(e){}
+  const namePrefix = userName ? `${userName}님의 ` : '';
+  const nameOnly = userName ? `${userName}님 ` : '';
   return [
     { emoji: '📸', msg: '사진 속 음식을 살펴보는 중...', sub: '재료 하나씩 인식하고 있어요', threshold: 0 },
-    { emoji: '📊', msg: `${userName}님의 최근 7일 식단 조회 중...`, sub: '반복되는 패턴 찾는 중', threshold: 20 },
-    { emoji: '🧬', msg: `${userName}님 나이·성별 특성 반영 중...`, sub: '개인 맞춤 기준으로 계산', threshold: 40 },
+    { emoji: '📊', msg: `${namePrefix}최근 7일 식단 조회 중...`, sub: '반복되는 패턴 찾는 중', threshold: 20 },
+    { emoji: '🧬', msg: `${nameOnly}나이·성별 특성 반영 중...`, sub: '개인 맞춤 기준으로 계산', threshold: 40 },
     { emoji: '🔬', msg: '부족한 영양소 찾고 있어요', sub: '10가지 지표 크로스체크 중', threshold: 60 },
     { emoji: '🍽', msg: '지금 상황에 맞는 실전 메뉴 고르는 중', sub: '집·배달·외식 편의점 중 매칭', threshold: 75 },
     { emoji: '⏰', msg: '오늘 예상 컨디션 계산 중...', sub: '식사 후 반응 시간대별 예측', threshold: 88 },
     { emoji: '✨', msg: '거의 다 됐어요!', sub: '결과 정리 중...', threshold: 95 }
   ];
-})();
+}
+const FOOD_LOADING_STAGES = _getFoodLoadingStages();
 
 function startFoodLoading() {
   const loadingBox = document.getElementById('foodLoadingBox');
   if (!loadingBox) return;
+  // 매번 최신 닉네임으로 stages 재생성
+  const stages = _getFoodLoadingStages();
 
   loadingBox.classList.add('show');
 
@@ -14125,7 +14131,7 @@ function startFoodLoading() {
   const updateStage = (newIdx) => {
     if (newIdx === stageIdx) return;
     stageIdx = newIdx;
-    const stage = FOOD_LOADING_STAGES[newIdx];
+    const stage = stages[newIdx];
     if (emojiEl) { emojiEl.style.transition = 'opacity .25s'; emojiEl.style.opacity = '0'; }
     setTimeout(() => {
       if (emojiEl) { emojiEl.textContent = stage.emoji; emojiEl.style.opacity = '1'; }
@@ -14145,8 +14151,8 @@ function startFoodLoading() {
     }
     // 단계 자동 전환
     let newStage = 0;
-    for (let i = FOOD_LOADING_STAGES.length - 1; i >= 0; i--) {
-      if (foodLoadingProgress >= FOOD_LOADING_STAGES[i].threshold) { newStage = i; break; }
+    for (let i = stages.length - 1; i >= 0; i--) {
+      if (foodLoadingProgress >= stages[i].threshold) { newStage = i; break; }
     }
     updateStage(newStage);
   }, 250);
