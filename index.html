@@ -2324,7 +2324,7 @@ window.appIcon = function(name, size){
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               다른 음식
             </button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenDeliverySheet()}catch(e){}" style="flex:1;background:#EFF6FF;border:none;padding:9px 4px;border-radius:10px;font-size:11.5px;font-weight:800;color:#2563EB;font-family:inherit;cursor:pointer">🚚 배달·근처</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:#E6F4EA;border:none;padding:9px 4px;border-radius:10px;font-size:11.5px;font-weight:800;color:#0F9D58;font-family:inherit;cursor:pointer">🗺 내 주변 음식점</button>
             <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:#F8FAFC;border:none;padding:9px 4px;border-radius:10px;font-size:11.5px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">자세히 ›</button>
           </div>
           <!-- 레거시 · JS 참조 유지 (히든) -->
@@ -8442,7 +8442,18 @@ function _v21TryAppLaunch(evt, idx) {
   } catch(e) { console.error('_v21TryAppLaunch', e); return false; }
 }
 
-// ═══ 배달·근처 시트 · 배민·쿠팡이츠·캐치테이블·네이버맵 딥링크 ═══
+// ═══ 내 주변 음식점 · 네이버 지도로 바로 이동 (앱 있으면 앱, 없으면 웹) ═══
+function _v21OpenNearbyMap() {
+  try {
+    const rec = _v21CurrentRec;
+    if (!rec || !rec.name) return;
+    const q = encodeURIComponent(String(rec.name).trim());
+    // 네이버 지도 · 앱 있으면 자동으로 앱 실행됨 (Universal Link)
+    window.open(`https://m.map.naver.com/search2/search.naver?query=${q}`, '_blank', 'noopener');
+  } catch(e) { console.error('_v21OpenNearbyMap', e); }
+}
+
+// ═══ (레거시) 배달·근처 시트 · 사용 안 함 · 향후 파트너십 시 부활 ═══
 function _v21OpenDeliverySheet() {
   try {
     const rec = _v21CurrentRec;
