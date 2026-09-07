@@ -3354,6 +3354,16 @@ window.appIcon = function(name, size){
     </div>
     <div class="error-box" id="foodErrorBox"></div>
 
+    <!-- 브랜드·가게 입력 · 분석 전에 미리 알려주면 훨씬 정확 -->
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin:12px 0">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+        <span style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px">🏪 브랜드 · 가게명</span>
+        <span style="font-size:10px;color:#94A3B8;font-weight:700;background:#F1F5F9;padding:2px 7px;border-radius:99px">선택 · 정확도 ↑</span>
+      </div>
+      <input type="text" id="foodUserMemoInputPre" placeholder="예) 김밥천국, 서브웨이, 백종원 제육" style="width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box" oninput="try{document.getElementById('foodUserMemoInput').value=this.value;_foodMemoOnInput();}catch(e){}" onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'" />
+      <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:7px;line-height:1.5">브랜드 알려주시면 <b style="color:#2563EB">그 매장 메뉴 데이터</b>를 참고해서 훨씬 정확하게 분석해요.</div>
+    </div>
+
     <button class="btn-primary" id="btnFoodAnalyze" onclick="analyzeFood()" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 4px 14px rgba(245,158,11,.40)">🤖 AI 식단 분석 시작</button>
     <div class="loading-box" id="foodLoadingBox">
       <div class="emoji">🍴</div>
@@ -6133,13 +6143,18 @@ function getShortageTop(n) {
 // 상황별 메뉴 풀 (집밥/배달/외식/편의점)
 // ═══ MEAL_POOL · 메인 요리만 · 정크·나트륨 폭탄 제거 · 반찬 제외 ═══
 const MEAL_POOL_BY_SITUATION = {
-  // 집에서 · 간단히 해먹거나 데워먹는 것 (반찬·정크 제외)
+  // 아침 · 담백·따뜻·소화 편한 것 (회·삼겹살·부대찌개 X)
+  breakfast: ['콩나물국밥','순두부찌개','북엇국','미역국','전복죽','야채죽','시금치된장국','계란찜','삶은계란','요거트','그릭요거트','바나나','고구마','잔치국수','우유'],
+  // 점심 · 든든·균형 (회 단품·삼겹살 X · 덮밥·비빔밥·국밥·정식 위주)
+  lunch: ['비빔밥','나물비빔밥','잡곡밥','현미밥','제육덮밥','오징어덮밥','오므라이스','뚝배기불고기','회덮밥','초밥세트','규동','쌀국수','오일파스타','알리오올리오','서양샐러드','김치찌개','된장찌개','순두부찌개','돼지김치찌개','설렁탕','갈비탕','콩나물국밥','육개장','칼국수','들기름막국수','냉면','김밥','샌드위치'],
+  // 오후 간식 · 가볍게 (식사류 X)
+  snack: ['요거트','그릭요거트','바나나','사과','견과류믹스','삶은계란','고구마','아보카도','우유','두유'],
+  // 저녁 · 대부분 OK · 회식·삼겹살·회·안주류 자유
+  dinner: ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','뚝배기불고기','들기름막국수','잔치국수','냉면','칼국수','삼겹살','갈비','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트','스테이크','오일파스타','쌀국수','커리','부대찌개'],
+  // 레거시 alias (다른 코드가 참조 중일 수 있음)
   home:      ['잡곡밥','현미밥','나물비빔밥','비빔밥','된장찌개','순두부찌개','김치찌개','돼지김치찌개','미역국','북엇국','무국','시금치된장국','콩나물국','두부김치','두부부침','계란찜','삶은계란','오므라이스'],
-  // 배달 · 영양 좋은 것만 (짜장·짬뽕·치킨·마요·튀김 다 제거)
-  delivery:  ['회덮밥','연어초밥','초밥세트','비빔밥','나물비빔밥','뚝배기불고기','제육덮밥','오징어덮밥','오일파스타','알리오올리오','서양샐러드','그릭요거트볼','규동','쌀국수','딤섬'],
-  // 외식 · 국밥·고깃집·회집·오일파스타집 (부대찌개·튀김 제거)
+  delivery:  ['비빔밥','나물비빔밥','뚝배기불고기','제육덮밥','오징어덮밥','오일파스타','알리오올리오','서양샐러드','규동','쌀국수','딤섬','회덮밥','초밥세트'],
   eatout:    ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','뚝배기불고기','들기름막국수','잔치국수','냉면','칼국수','삼겹살','갈비','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트','스테이크','오일파스타','쌀국수','커리'],
-  // 편의점 · 그대로 (다 균형)
   convenience:['김밥','샌드위치','삶은계란','바나나','사과','고구마','요거트','그릭요거트','우유','견과류믹스','아보카도']
 };
 
@@ -6715,7 +6730,7 @@ function renderV20Home() {
     if (typeof getWhatToEatNow === 'function' && shortagesArr.length > 0) {
       try {
         // 시간대 → 상황 자동 매핑 · 아침·점심=배달/외식, 저녁=외식, 간식=편의점
-        const sitByTime = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+        const sitByTime = hour < 10 ? 'breakfast' : hour < 14 ? 'lunch' : hour < 17 ? 'snack' : 'dinner';
         const rec = getWhatToEatNow(sitByTime);
         topMenus = (rec && rec.top3) ? rec.top3.slice(0, 2).map(m => m.name) : [];
       } catch(e){}
@@ -8090,7 +8105,7 @@ function _v21RerollHero() {
     }
     // pool 매번 재생성 · 캐시 X · 확실한 다양성
     const hour = new Date().getHours();
-    const sit = hour < 10 ? 'delivery' : hour < 14 ? 'delivery' : hour < 17 ? 'convenience' : 'eatout';
+    const sit = hour < 10 ? 'breakfast' : hour < 14 ? 'lunch' : hour < 17 ? 'snack' : 'dinner';
     let rawList = [];
     if (typeof MEAL_POOL_BY_SITUATION !== 'undefined') {
       rawList = (MEAL_POOL_BY_SITUATION[sit] || []).slice();
