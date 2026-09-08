@@ -2311,21 +2311,22 @@ window.appIcon = function(name, size){
         <div style="padding:14px 0 4px">
           <div style="font-size:15px;font-weight:600;color:#64748B;letter-spacing:-.2px">안녕하세요, <b style="color:#0F172A;font-weight:800" id="v20ProfileName">재율님</b></div>
         </div>
-        <div id="v21CoachHeadline" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;padding:2px 0 14px">요즘 <span style="color:#F59E0B">균형</span>을 챙겨보세요!</div>
+        <div id="v21CoachHeadline" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;padding:2px 0 14px">요즘 <span style="color:#F59E0B">단백질</span> 어때?</div>
 
-        <!-- ① 히어로 · 사진 X · 이름 크게 (타이포 중심) -->
-        <div style="background:#fff;border-radius:22px;padding:20px 18px;box-shadow:0 6px 24px rgba(15,23,42,.05),0 1px 3px rgba(15,23,42,.04);border:1px solid rgba(15,23,42,.04);margin-bottom:12px">
-          <div id="v21HeroTitle" style="font-size:12px;color:#94A3B8;font-weight:700;letter-spacing:.3px;margin-bottom:4px">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span> 추천</div>
-          <div id="v21RecName" style="font-size:30px;font-weight:900;color:#15803D;letter-spacing:-.8px;line-height:1.15">시금치나물</div>
-          <div id="v21HeroKcal" style="font-size:13px;color:#64748B;font-weight:700;margin-top:6px">— kcal</div>
+        <!-- ① 다음 한 끼 추천 (영양 빈칸 통합) · 어때? 톤 -->
+        <div style="background:#fff;border-radius:20px;padding:20px 18px 14px;box-shadow:0 6px 20px rgba(15,23,42,.05);margin-bottom:10px">
+          <div id="v21HeroTitle" style="font-size:22px;font-weight:800;color:#0F172A;letter-spacing:-.5px;line-height:1.4">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>, <span id="v21RecName" style="color:#15803D">고등어구이</span> 어때?</div>
+          <div id="v21RecWhy" style="font-size:13px;color:#64748B;font-weight:500;line-height:1.65;margin-top:10px">최근 식사에서 부족했던 단백질을 채울 수 있어요.</div>
+          <div id="v21HeroKcal" style="font-size:12px;color:#94A3B8;font-weight:500;margin-top:6px">— kcal</div>
           <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"></div>
           <div style="display:flex;gap:6px;margin-top:14px">
-            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#fff;border:1.5px solid #E5E7EB;padding:9px 4px;border-radius:10px;font-size:11.5px;font-weight:700;color:#475569;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              다른 음식
-            </button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:#E6F4EA;border:none;padding:9px 4px;border-radius:10px;font-size:11.5px;font-weight:800;color:#0F9D58;font-family:inherit;cursor:pointer">🗺 내 주변 음식점</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:#F8FAFC;border:none;padding:9px 4px;border-radius:10px;font-size:11.5px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">자세히 ›</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#fff;border:1.5px solid #E5E7EB;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#64748B;font-family:inherit;cursor:pointer">↻ 다른 음식</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:#EFF6FF;border:none;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">🗺 내 주변</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:#F8FAFC;border:none;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#64748B;font-family:inherit;cursor:pointer">자세히 ›</button>
+          </div>
+          <!-- 레거시 · JS 참조 유지 -->
+          <div style="display:none">
+            <div id="v21GapCard"><div id="v21GapMain"></div><div id="v21GapAct"></div></div>
           </div>
           <!-- 레거시 · JS 참조 유지 (히든) -->
           <div style="display:none">
@@ -7891,10 +7892,32 @@ function _v21RenderHero() {
       if (coachEl) {
         const top = shortages && shortages[0];
         if (top && top.label) {
-          const josa = _v21Josa(top.label, '가', '이');
-          coachEl.innerHTML = `요즘 <span style="color:#F59E0B">${_v20Esc(top.label)}</span>${josa} 조금 부족해요!`;
+          coachEl.innerHTML = `요즘 <span style="color:#F59E0B">${_v20Esc(top.label)}</span> 어때?`;
         } else {
-          coachEl.innerHTML = `요즘 <span style="color:#15803D">균형</span>이 잘 잡히고 있어요!`;
+          coachEl.innerHTML = `오늘 컨디션은 어때?`;
+        }
+      }
+    } catch(e){}
+    // 오늘의 영양 빈칸 카드 채우기 · 부족 영양소 1~2개 + 해결 음식
+    try {
+      const gapMain = document.getElementById('v21GapMain');
+      const gapAct = document.getElementById('v21GapAct');
+      if (gapMain && gapAct) {
+        if (shortages && shortages.length) {
+          const top1 = shortages[0], top2 = shortages[1];
+          const j1 = _v21Josa(top1.label, '가', '이');
+          if (top2) {
+            gapMain.innerHTML = `<span style="color:#F59E0B">${_v20Esc(top1.label)}</span>과 <span style="color:#F59E0B">${_v20Esc(top2.label)}</span>이 부족해요`;
+          } else {
+            gapMain.innerHTML = `<span style="color:#F59E0B">${_v20Esc(top1.label)}</span>${j1} 아직 부족해요`;
+          }
+          // 매칭 음식 추천
+          const foodByShort = { fiber:['🥬','시금치나물'], protein:['🐟','고등어구이'], iron:['🥩','붉은살코기'], calcium:['🥛','우유'], vitC:['🍊','귤'], vitD:['🐟','연어구이'], magnesium:['🌰','아몬드'], omega3:['🐟','고등어구이'] };
+          const [emoji, food] = foodByShort[top1.key] || ['🍽','고등어구이'];
+          gapAct.innerHTML = `${emoji} <b style="color:#15803D">${food} 한 접시</b>면 채울 수 있어요.`;
+        } else {
+          gapMain.innerHTML = `오늘 <span style="color:#15803D">잘 챙기고</span> 계세요!`;
+          gapAct.innerHTML = `✨ 지금 페이스만 유지하면 균형 완성이에요.`;
         }
       }
     } catch(e){}
@@ -7980,8 +8003,18 @@ function _v21RenderHero() {
     // 을/를 조사 자동 (고구마→를, 삼계탕→을)
     const josaEl = document.getElementById('v21RecJosa');
     if (josaEl) josaEl.textContent = _v21Josa(displayName, '를', '을');
+    // 추천 근거 · 부족 영양소 기반 (설명은 전문가처럼 · 존댓말)
+    try {
+      const whyEl = document.getElementById('v21RecWhy');
+      if (whyEl && shortages && shortages.length) {
+        const labels = shortages.slice(0, 2).map(s => s.label).join('·');
+        const josa = _v21Josa(shortages.slice(0,2).slice(-1)[0].label, '를', '을');
+        whyEl.innerHTML = `최근 식사에서 부족했던 <b style="color:#0F172A;font-weight:700">${_v20Esc(labels)}</b>${josa} 함께 채울 수 있어요.`;
+        whyEl.style.display = 'block';
+      }
+    } catch(e){}
     // 사진 X · 데코 원만 유지 (촌스러움 방지)
-    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal · 다음 끼로 이거 어때요?';
+    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal';
     // chips
     if (chipsEl) {
       // #해시태그 스타일 · 배경/이모지 X · 회색
@@ -8152,7 +8185,7 @@ function _v21RenderHeroWithRec(rec) {
     const josaEl = document.getElementById('v21RecJosa');
     if (josaEl) josaEl.textContent = _v21Josa(displayName, '를', '을');
     // 사진 X · 데코 원만 유지
-    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal · 다음 끼로 이거 어때요?';
+    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal';
     if (chipsEl) {
       // #해시태그 스타일 · 배경/이모지 X · 회색
       const chips = shortages.slice(0,3).map(s =>
