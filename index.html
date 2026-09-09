@@ -6371,22 +6371,31 @@ function sumNutrition(foods) {
   const total = { kcal:0, protein:0, carbs:0, fat:0, fiber:0, sodium:0, calcium:0, iron:0, magnesium:0, vitA:0, vitC:0, vitD:0, omega3:0 };
   const allTags = new Set();
   (foods || []).forEach(f => {
-    // 🥗 재료 기반 우선 (있으면 훨씬 정확)
+    const portion = f.portion || 1;
+    let handled = false;
+    // 1️⃣ 재료 기반 우선 (재료 1개라도 매칭되면 사용)
     if (f.ingredients && f.ingredients.length && typeof sumIngredientsNutrition === 'function') {
       const ingSum = sumIngredientsNutrition(f.ingredients);
-      if (ingSum && ingSum.matchedCount >= 2) {
-        const portion = f.portion || 1;
+      if (ingSum && ingSum.matchedCount >= 1) {
         Object.keys(total).forEach(k => { total[k] += (ingSum[k] || 0) * portion; });
         (ingSum.tags || []).forEach(t => allTags.add(t));
-        return;
+        handled = true;
       }
     }
-    // fallback · 음식명 매칭
-    const item = _matchFoodInDB(f.name || f);
-    if (!item) return;
-    const portion = f.portion || 1;
-    Object.keys(total).forEach(k => { total[k] += (item[k] || 0) * portion; });
-    if (item.tags) item.tags.forEach(t => allTags.add(t));
+    // 2️⃣ 재료 매칭 실패 or 부족 → 음식명 DB 매칭
+    if (!handled) {
+      const item = _matchFoodInDB(f.name || f);
+      if (item) {
+        Object.keys(total).forEach(k => { total[k] += (item[k] || 0) * portion; });
+        if (item.tags) item.tags.forEach(t => allTags.add(t));
+        handled = true;
+      }
+    }
+    // 3️⃣ 둘 다 실패 · 기본값 (한 끼 평균) 부여 · 0점 방지
+    if (!handled) {
+      const fallback = { kcal:350, protein:15, carbs:45, fat:12, fiber:3, sodium:600, calcium:80, iron:2, magnesium:40, vitA:100, vitC:10, vitD:0.5, omega3:100 };
+      Object.keys(total).forEach(k => { total[k] += (fallback[k] || 0) * portion; });
+    }
   });
   total.tags = Array.from(allTags);
   return total;
