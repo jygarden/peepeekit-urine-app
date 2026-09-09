@@ -14810,6 +14810,24 @@ async function confirmAndAnalyze() {
   const oldBanner = document.getElementById('foodRetryBanner');
   if (oldBanner) oldBanner.remove();
 
+  // 👥 크라우드소싱 · 사용자가 확정한 내용 저장 (실패해도 분석은 계속)
+  try {
+    const brand = String(foodUserMemo || '').trim();
+    detectedFoodsData.forEach(f => {
+      if (!f.name) return;
+      fetch('/api/crowd-save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand,
+          foodName: f.name,
+          ingredients: f.ingredients || [],
+          portion: f.portion || 1
+        })
+      }).catch(() => {}); // fire-and-forget
+    });
+  } catch(e){}
+
   const btn = (event && event.target) || document.querySelector('#screenFoodConfirm .btn-primary');
   const originalText = btn ? btn.textContent : '✅ 이대로 정확하게 분석하기';
   if (btn) { btn.disabled = true; btn.textContent = '🤖 건강어때AI 분석 중...'; }
