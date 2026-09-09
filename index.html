@@ -5617,6 +5617,189 @@ function _getWittyFromRecentFoods(records) {
 // ═══ v2.0 · 한국 식품 영양 DB (성인 기준 · 1인분 기준 g/mg/μg) ═══
 // 필드: kcal · protein · carbs · fat · fiber · sodium · calcium · iron · magnesium · vitA · vitC · vitD · omega3
 // 단위: kcal / g / g / g / g / mg / mg / mg / mg / μgRAE / mg / μg / mg
+// 🥗 재료 영양 DB · 100g당 · 130+ 재료
+// 사용: sumIngredientsNutrition([{name:'현미',grams:120},...]) → 실제 영양 합산
+const INGREDIENT_NUTRITION_DB = {
+  // ═ 곡물·밥 ═
+  '쌀':      { kcal:130, carbs:28, protein:2.7, fat:0.3, fiber:0.4, sodium:1 },
+  '백미':    { kcal:130, carbs:28, protein:2.7, fat:0.3, fiber:0.4, sodium:1 },
+  '현미':    { kcal:112, carbs:24, protein:2.6, fat:0.9, fiber:1.8, sodium:5, magnesium:44, tags:['식이섬유','마그네슘'] },
+  '잡곡':    { kcal:130, carbs:26, protein:4, fat:1, fiber:3, sodium:2, tags:['식이섬유'] },
+  '보리':    { kcal:123, carbs:28, protein:2.3, fat:0.4, fiber:3.8, tags:['식이섬유'] },
+  '귀리':    { kcal:389, carbs:66, protein:17, fat:7, fiber:11, magnesium:177, tags:['식이섬유','베타글루칸'] },
+  '통밀':    { kcal:340, carbs:72, protein:13, fat:2.5, fiber:12, tags:['식이섬유'] },
+  '퀴노아':  { kcal:120, carbs:21, protein:4.4, fat:1.9, fiber:2.8, iron:1.5, tags:['완전단백질','철분'] },
+  '메밀':    { kcal:343, carbs:71, protein:13, fat:3.4, fiber:10, magnesium:231, tags:['식이섬유'] },
+  '옥수수':  { kcal:96, carbs:21, protein:3.4, fat:1.5, fiber:2.4, vitC:6.8 },
+  // ═ 육류 ═
+  '돼지고기':     { kcal:242, protein:27, fat:14, iron:1.0, zinc:2.2, vitB1:0.8, tags:['단백질','B1'] },
+  '돼지목살':     { kcal:225, protein:20, fat:16, iron:1.0, zinc:2.5, vitB1:0.9, tags:['단백질','B1'] },
+  '삼겹살':       { kcal:518, protein:14, fat:53, sodium:34, tags:['지방'] },
+  '돼지앞다리':   { kcal:207, protein:22, fat:13, tags:['단백질'] },
+  '소고기':       { kcal:250, protein:26, fat:15, iron:2.6, zinc:6.3, vitB12:2.5, tags:['단백질','철분','B12'] },
+  '한우':         { kcal:283, protein:22, fat:21, iron:2.6, zinc:5.8, tags:['단백질','철분'] },
+  '닭가슴살':     { kcal:165, protein:31, fat:3.6, tags:['고단백','저지방'] },
+  '닭다리':       { kcal:172, protein:28, fat:5.7, iron:1.3, tags:['단백질'] },
+  '닭날개':       { kcal:203, protein:30, fat:8.1, tags:['단백질'] },
+  '오리고기':     { kcal:404, protein:11, fat:39, iron:2.4, tags:['단백질','지방'] },
+  // ═ 어패류 ═
+  '고등어':       { kcal:190, protein:19, fat:12, omega3:2670, vitD:16, tags:['오메가3','비타민D'] },
+  '연어':         { kcal:206, protein:22, fat:13, omega3:2260, vitD:11, tags:['오메가3','비타민D'] },
+  '참치':         { kcal:132, protein:28, fat:1, omega3:1300, vitD:1.9, tags:['오메가3','고단백'] },
+  '광어':         { kcal:96, protein:20, fat:1.4, tags:['고단백','저지방'] },
+  '가자미':       { kcal:91, protein:19, fat:1.2, tags:['고단백'] },
+  '멸치':         { kcal:131, protein:20, fat:5, calcium:509, iron:3.3, tags:['칼슘','철분','오메가3'] },
+  '새우':         { kcal:99, protein:24, fat:0.3, cholesterol:189, iodine:39, tags:['고단백','저지방'] },
+  '오징어':       { kcal:92, protein:16, fat:1.4, taurine:770, tags:['타우린','고단백'] },
+  '낙지':         { kcal:82, protein:16, fat:1, iron:5.5, taurine:854, tags:['철분','타우린'] },
+  '조개':         { kcal:81, protein:11, fat:2.6, iron:2.3, tags:['철분'] },
+  '굴':           { kcal:81, protein:9, fat:2, zinc:47, iron:5.1, vitB12:16, tags:['아연','B12','철분'] },
+  // ═ 채소 (잎·뿌리·열매) ═
+  '양상추':       { kcal:15, protein:1.4, carbs:2.9, fiber:1.3, vitK:126, folate:38, tags:['비타민K','엽산'] },
+  '상추':         { kcal:16, protein:1.6, fiber:1.3, vitA:436, vitK:174, tags:['비타민K','비타민A'] },
+  '시금치':       { kcal:23, protein:2.9, fiber:2.2, iron:2.7, folate:194, vitK:483, vitA:469, tags:['철분','엽산','비타민K','비타민A'] },
+  '케일':         { kcal:49, protein:4.3, fiber:3.6, vitC:120, vitK:817, calcium:150, tags:['비타민C','비타민K','칼슘'] },
+  '루꼴라':       { kcal:25, protein:2.6, fiber:1.6, calcium:160, vitK:109, tags:['칼슘','비타민K'] },
+  '깻잎':         { kcal:53, protein:3.5, fiber:5.5, calcium:296, vitA:492, tags:['칼슘','비타민A','폴리페놀'] },
+  '브로콜리':     { kcal:34, protein:2.8, fiber:2.6, vitC:89, vitK:102, folate:63, tags:['비타민C','비타민K','설포라판'] },
+  '콜리플라워':   { kcal:25, protein:1.9, fiber:2.0, vitC:48, folate:57, tags:['비타민C'] },
+  '양배추':       { kcal:25, protein:1.3, fiber:2.5, vitC:36.6, vitK:76, tags:['비타민C','비타민K'] },
+  '당근':         { kcal:41, protein:0.9, fiber:2.8, vitA:835, betacarotene:8285, tags:['비타민A','베타카로틴'] },
+  '오이':         { kcal:16, protein:0.7, fiber:0.5, water:95, vitK:16, tags:['수분'] },
+  '방울토마토':   { kcal:18, protein:0.9, fiber:1.2, vitC:14, vitA:80, lycopene:2570, tags:['비타민C','리코펜','항산화'] },
+  '토마토':       { kcal:18, protein:0.9, fiber:1.2, vitC:14, lycopene:2570, tags:['리코펜','항산화','비타민C'] },
+  '파프리카':     { kcal:31, protein:1, fiber:2.1, vitC:127, vitA:157, tags:['비타민C','비타민A'] },
+  '피망':         { kcal:20, protein:0.9, fiber:1.7, vitC:80, tags:['비타민C'] },
+  '가지':         { kcal:25, protein:1, fiber:3, tags:['식이섬유','안토시아닌'] },
+  '호박':         { kcal:26, protein:1, fiber:0.5, vitA:426, vitC:9, tags:['비타민A'] },
+  '단호박':       { kcal:40, protein:1.3, fiber:1.4, vitA:857, tags:['비타민A','베타카로틴'] },
+  '고구마':       { kcal:86, protein:1.6, fiber:3, vitA:709, vitC:2.4, potassium:337, tags:['비타민A','식이섬유'] },
+  '감자':         { kcal:77, protein:2, fiber:2.2, vitC:19, potassium:421, tags:['비타민C','칼륨'] },
+  '무':           { kcal:18, protein:0.6, fiber:1.6, vitC:15, tags:['식이섬유'] },
+  '양파':         { kcal:40, protein:1.1, fiber:1.7, vitC:7.4, quercetin:'high', tags:['케르세틴','폴리페놀'] },
+  '대파':         { kcal:31, protein:1.6, fiber:2.6, vitK:207, tags:['비타민K'] },
+  '마늘':         { kcal:149, protein:6.4, fiber:2.1, vitC:31, allicin:'high', tags:['알리신','항염'] },
+  '생강':         { kcal:80, fiber:2, gingerol:'high', tags:['진저롤','항염'] },
+  '버섯':         { kcal:22, protein:3.1, fiber:1, vitD:0.2, selenium:9.3, tags:['셀레늄'] },
+  '표고버섯':     { kcal:34, protein:2.2, fiber:2.5, vitD:18, tags:['비타민D','베타글루칸'] },
+  '느타리버섯':   { kcal:33, protein:3.3, fiber:2.3, tags:['식이섬유'] },
+  '콩나물':       { kcal:31, protein:5.3, fiber:1.9, vitC:12, tags:['비타민C','아스파라긴산'] },
+  '숙주':         { kcal:30, protein:3, fiber:1.8, vitC:13, tags:['비타민C'] },
+  '미역':         { kcal:45, protein:3, fiber:0.5, calcium:150, iodine:'high', tags:['칼슘','요오드'] },
+  '다시마':       { kcal:43, protein:1.7, fiber:1.3, iodine:'very-high', calcium:168, tags:['요오드','칼슘'] },
+  '김':           { kcal:35, protein:5.8, fiber:0.3, vitA:260, iron:1.8, tags:['비타민A','철분'] },
+  // ═ 콩·두부 ═
+  '두부':         { kcal:76, protein:8, fat:4.8, calcium:350, iron:5.4, tags:['칼슘','철분','완전단백질'] },
+  '순두부':       { kcal:52, protein:6, fat:2.5, calcium:130, tags:['단백질','칼슘'] },
+  '콩':           { kcal:173, protein:16.6, fat:9, fiber:6, iron:5.1, magnesium:60, tags:['식이섬유','철분','마그네슘'] },
+  '검은콩':       { kcal:132, protein:8.9, fat:0.5, fiber:8.7, iron:2.4, anthocyanin:'high', tags:['안토시아닌','식이섬유'] },
+  '팥':           { kcal:329, protein:20, fat:0.5, fiber:13, iron:5.5, tags:['식이섬유','철분'] },
+  '병아리콩':     { kcal:164, protein:8.9, fat:2.6, fiber:7.6, folate:172, tags:['식이섬유','엽산'] },
+  '렌즈콩':       { kcal:116, protein:9, fat:0.4, fiber:7.9, iron:3.3, folate:181, tags:['식이섬유','철분','엽산'] },
+  // ═ 계란·유제품 ═
+  '계란':         { kcal:155, protein:13, fat:11, cholesterol:373, vitD:2.0, vitB12:1.1, choline:294, tags:['완전단백질','콜린','비타민D'] },
+  '달걀':         { kcal:155, protein:13, fat:11, cholesterol:373, vitD:2.0, vitB12:1.1, choline:294, tags:['완전단백질','콜린','비타민D'] },
+  '노른자':       { kcal:322, protein:16, fat:27, choline:820, vitD:5.4, biotin:33, tags:['콜린','비타민D','비오틴'] },
+  '흰자':         { kcal:52, protein:11, fat:0.2, tags:['고단백','저지방'] },
+  '우유':         { kcal:60, protein:3.4, fat:3.3, carbs:5, calcium:113, vitD:1.3, tags:['칼슘','비타민D'] },
+  '요거트':       { kcal:59, protein:10, fat:0.4, calcium:110, probiotic:'high', tags:['칼슘','유산균'] },
+  '그릭요거트':   { kcal:59, protein:10, fat:0.4, calcium:110, probiotic:'high', tags:['고단백','칼슘','유산균'] },
+  '치즈':         { kcal:402, protein:25, fat:33, calcium:721, sodium:621, tags:['칼슘','고단백'] },
+  '체다치즈':     { kcal:402, protein:25, fat:33, calcium:721, sodium:621, tags:['칼슘'] },
+  '모짜렐라':     { kcal:280, protein:22, fat:22, calcium:731, tags:['칼슘','저나트륨'] },
+  // ═ 견과·씨앗 ═
+  '아몬드':       { kcal:579, protein:21, fat:50, fiber:12, vitE:26, magnesium:270, tags:['비타민E','마그네슘','식이섬유'] },
+  '호두':         { kcal:654, protein:15, fat:65, fiber:6.7, omega3:9080, tags:['오메가3','식이섬유'] },
+  '캐슈넛':       { kcal:553, protein:18, fat:44, fiber:3.3, iron:6.7, zinc:5.8, tags:['철분','아연'] },
+  '피스타치오':   { kcal:562, protein:20, fat:45, fiber:10, vitB6:1.7, tags:['B6','식이섬유'] },
+  '땅콩':         { kcal:567, protein:26, fat:49, fiber:8.5, vitE:8.3, tags:['비타민E','고단백'] },
+  '치아씨드':     { kcal:486, protein:17, fat:31, fiber:34, omega3:17800, calcium:631, tags:['오메가3','식이섬유','칼슘'] },
+  '아마씨':       { kcal:534, protein:18, fat:42, fiber:27, omega3:22800, lignan:'high', tags:['오메가3','리그난'] },
+  '해바라기씨':   { kcal:584, protein:21, fat:51, vitE:35, magnesium:325, tags:['비타민E','마그네슘'] },
+  // ═ 과일 ═
+  '사과':         { kcal:52, protein:0.3, fiber:2.4, vitC:4.6, quercetin:'high', tags:['식이섬유','케르세틴'] },
+  '바나나':       { kcal:89, protein:1.1, fiber:2.6, potassium:358, vitB6:0.4, tags:['칼륨','B6'] },
+  '딸기':         { kcal:32, protein:0.7, fiber:2, vitC:59, folate:24, tags:['비타민C','폴리페놀'] },
+  '블루베리':     { kcal:57, protein:0.7, fiber:2.4, vitC:9.7, anthocyanin:'high', tags:['안토시아닌','항산화'] },
+  '오렌지':       { kcal:47, protein:0.9, fiber:2.4, vitC:53, folate:30, tags:['비타민C','엽산'] },
+  '귤':           { kcal:53, protein:0.8, fiber:1.8, vitC:26, tags:['비타민C'] },
+  '자몽':         { kcal:42, protein:0.8, fiber:1.6, vitC:31, lycopene:1419, tags:['비타민C','리코펜'] },
+  '키위':         { kcal:61, protein:1.1, fiber:3, vitC:93, vitK:40, tags:['비타민C','비타민K'] },
+  '포도':         { kcal:69, protein:0.7, fiber:0.9, resveratrol:'high', tags:['레스베라트롤','항산화'] },
+  '수박':         { kcal:30, protein:0.6, fiber:0.4, vitC:8.1, lycopene:4532, tags:['리코펜','수분'] },
+  '망고':         { kcal:60, protein:0.8, fiber:1.6, vitC:36, vitA:54, tags:['비타민C','비타민A'] },
+  '아보카도':     { kcal:160, protein:2, fat:15, fiber:6.7, potassium:485, monounsaturated:9.8, tags:['건강한지방','식이섬유','칼륨'] },
+  // ═ 유지·소스 ═
+  '올리브오일':   { kcal:884, fat:100, vitE:14, monounsaturated:73, polyphenol:'high', tags:['건강한지방','폴리페놀','비타민E'] },
+  '들기름':       { kcal:884, fat:100, omega3:63000, tags:['오메가3'] },
+  '참기름':       { kcal:884, fat:100, sesamin:'high', tags:['참기름리그난'] },
+  '카놀라유':     { kcal:884, fat:100, omega3:9100, tags:['오메가3'] },
+  '버터':         { kcal:717, protein:0.9, fat:81, vitA:684, sodium:11, tags:['비타민A','포화지방'] },
+  '마요네즈':     { kcal:680, fat:75, sodium:635, tags:['고지방','고나트륨'] },
+  '고추장':       { kcal:210, carbs:36, protein:5, sodium:2830, capsaicin:'high', tags:['고나트륨','캡사이신'] },
+  '된장':         { kcal:194, protein:12, carbs:26, sodium:4275, isoflavone:'high', tags:['고나트륨','이소플라본','유산균'] },
+  '간장':         { kcal:53, protein:8, sodium:5493, tags:['고나트륨'] },
+  '식초':         { kcal:22, sodium:5, tags:['소화도움'] },
+  '꿀':           { kcal:304, carbs:82, tags:['천연당'] },
+  // ═ 김치·발효식품 ═
+  '김치':         { kcal:15, protein:1.1, fiber:1.6, vitC:18, sodium:498, probiotic:'high', tags:['유산균','비타민C','고나트륨'] },
+  '깍두기':       { kcal:31, protein:1.4, fiber:2, vitC:15, sodium:600, tags:['유산균','고나트륨'] },
+  '단무지':       { kcal:15, sodium:900, tags:['고나트륨'] },
+  '올리브':       { kcal:115, fat:11, fiber:3.2, vitE:1.6, polyphenol:'high', tags:['폴리페놀','건강한지방'] },
+  '블랙올리브':   { kcal:115, fat:11, fiber:3.2, vitE:1.6, polyphenol:'high', anthocyanin:'high', tags:['폴리페놀','안토시아닌','항산화'] },
+  '그린올리브':   { kcal:145, fat:15, fiber:3.3, polyphenol:'high', tags:['폴리페놀','건강한지방'] },
+  // ═ 기타 조미·양념 ═
+  '설탕':         { kcal:387, carbs:100, tags:['정제당'] },
+  '소금':         { sodium:38758, tags:['나트륨'] },
+  '고춧가루':     { kcal:282, protein:12, fiber:28, vitA:2081, capsaicin:'high', tags:['비타민A','캡사이신'] },
+  '후추':         { kcal:251, protein:10, piperine:'high', tags:['피페린'] },
+  '강황':         { kcal:354, protein:8, fiber:21, curcumin:'high', tags:['커큐민','항염','폴리페놀'] },
+  '겨자':         { kcal:66, protein:4.4, tags:['톡쏘는맛'] },
+  '와사비':       { kcal:109, protein:5, isothiocyanate:'high', tags:['항균'] }
+};
+
+// 🧮 재료 배열로부터 실제 영양 합산 (재료마다 g 정보 필수)
+// input: [{name:'현미',grams:120},{name:'돼지목살',grams:80}...]
+// output: { kcal, protein, ..., tags: ['오메가3','폴리페놀'...] }
+function sumIngredientsNutrition(ingredients) {
+  const total = {
+    kcal:0, carbs:0, protein:0, fat:0, fiber:0, sodium:0,
+    calcium:0, iron:0, magnesium:0, zinc:0, potassium:0,
+    vitA:0, vitB1:0, vitB6:0, vitB12:0, vitC:0, vitD:0, vitE:0, vitK:0, folate:0,
+    omega3:0
+  };
+  const tagSet = new Set();
+  if (!Array.isArray(ingredients) || ingredients.length === 0) return null;
+  let matchedCount = 0;
+  ingredients.forEach(ing => {
+    const name = typeof ing === 'string' ? ing : (ing && ing.name) || '';
+    const grams = (typeof ing === 'object' && ing.grams) ? Number(ing.grams) : 50;
+    if (!name || !grams) return;
+    // 정확 매칭 → 부분 매칭 순
+    let data = INGREDIENT_NUTRITION_DB[name];
+    if (!data) {
+      // 부분 매칭 (양상추 → 상추, 현미밥 → 현미)
+      for (const key in INGREDIENT_NUTRITION_DB) {
+        if (name.includes(key) || key.includes(name)) { data = INGREDIENT_NUTRITION_DB[key]; break; }
+      }
+    }
+    if (!data) return;
+    matchedCount++;
+    const factor = grams / 100;
+    Object.keys(total).forEach(k => {
+      if (typeof data[k] === 'number') total[k] += data[k] * factor;
+    });
+    if (data.tags) data.tags.forEach(t => tagSet.add(t));
+  });
+  if (matchedCount === 0) return null;
+  // 반올림
+  Object.keys(total).forEach(k => { total[k] = Math.round(total[k] * 10) / 10; });
+  total.tags = Array.from(tagSet);
+  total.matchedCount = matchedCount;
+  total.totalIngredients = ingredients.length;
+  return total;
+}
+
 const KOREAN_FOOD_DB = {
   // ── 밥/죽류 ──
   '쌀밥':         { kcal:310, protein:6,  carbs:69, fat:1,  fiber:1,  sodium:2,   calcium:9,   iron:0.5, magnesium:14,  vitA:0,   vitC:0,  vitD:0,   omega3:0,   tags:['탄수화물'] },
@@ -6090,12 +6273,26 @@ function _matchFoodInDB(name) {
 // 여러 음식 리스트 → 영양 총합
 function sumNutrition(foods) {
   const total = { kcal:0, protein:0, carbs:0, fat:0, fiber:0, sodium:0, calcium:0, iron:0, magnesium:0, vitA:0, vitC:0, vitD:0, omega3:0 };
+  const allTags = new Set();
   (foods || []).forEach(f => {
+    // 🥗 재료 기반 우선 (있으면 훨씬 정확)
+    if (f.ingredients && f.ingredients.length && typeof sumIngredientsNutrition === 'function') {
+      const ingSum = sumIngredientsNutrition(f.ingredients);
+      if (ingSum && ingSum.matchedCount >= 2) {
+        const portion = f.portion || 1;
+        Object.keys(total).forEach(k => { total[k] += (ingSum[k] || 0) * portion; });
+        (ingSum.tags || []).forEach(t => allTags.add(t));
+        return;
+      }
+    }
+    // fallback · 음식명 매칭
     const item = _matchFoodInDB(f.name || f);
     if (!item) return;
-    const portion = f.portion || 1; // 1인분 기본
+    const portion = f.portion || 1;
     Object.keys(total).forEach(k => { total[k] += (item[k] || 0) * portion; });
+    if (item.tags) item.tags.forEach(t => allTags.add(t));
   });
+  total.tags = Array.from(allTags);
   return total;
 }
 
@@ -16213,6 +16410,30 @@ function renderFoodResult(r) {
     const t = nutriGrid.querySelector('.nutri-title');
     if (t) { t.className = 'game-stats-title'; t.innerHTML = '영양 스텟'; }
   }
+  // 🌟 특수 성분 뱃지 (재료 기반 · 폴리페놀·오메가3·안토시아닌 등)
+  try {
+    const specialTags = new Set();
+    (r.foods || []).forEach(f => {
+      if (f.ingredients && typeof sumIngredientsNutrition === 'function') {
+        const sum = sumIngredientsNutrition(f.ingredients);
+        if (sum && sum.tags) sum.tags.forEach(t => specialTags.add(t));
+      }
+    });
+    // 기본 6대 영양이 아닌 특수 태그만 필터
+    const commonTags = new Set(['식이섬유','단백질','지방','고나트륨','칼슘','철분','B12','비타민D','비타민A','비타민C','비타민K','비타민E','저나트륨','저지방']);
+    const specialOnly = Array.from(specialTags).filter(t => !commonTags.has(t));
+    if (specialOnly.length && nutriGrid) {
+      const badgeHtml = `
+        <div style="background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-radius:14px;padding:13px 15px;margin-top:12px;border:1px solid #FCD34D">
+          <div style="font-size:11px;color:#92400E;font-weight:800;letter-spacing:.3px;margin-bottom:8px">🌟 이 재료의 특별한 성분</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${specialOnly.map(t => `<span style="background:#fff;color:#92400E;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:99px;border:1px solid #FDE68A">${t}</span>`).join('')}
+          </div>
+          <div style="font-size:10.5px;color:#92400E;font-weight:600;line-height:1.55;margin-top:8px">숫자로 안 잡히는 · 몸에 좋은 성분들이에요.</div>
+        </div>`;
+      nutriGrid.insertAdjacentHTML('beforeend', badgeHtml);
+    }
+  } catch(e){}
   // 요약
   document.getElementById('foodSummary').textContent = r.summary || '';
   // 옛 영양사 코멘트 박스 숨김 (새 말풍선이 위에서 같은 내용 보여줌)
