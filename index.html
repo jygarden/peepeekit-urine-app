@@ -5931,11 +5931,107 @@ const KOREAN_FOOD_DB = {
 };
 
 // 성인 1일 권장/기준 (한국인 영양섭취기준 · 평균)
+// 📊 KDRIs 2020 · 19~49세 성인 남녀 RDA (한국영양학회 · 보건복지부)
+// 이 값은 남성 기준 · 여성/연령/BMI/활동량 보정은 _getPersonalRDA()가 처리
 const RDA_ADULT = {
-  kcal:2200, protein:60, carbs:130, fat:60, fiber:25,
-  sodium:2000, calcium:750, iron:12, magnesium:325,
-  vitA:725, vitC:100, vitD:10, omega3:1000
+  // 열량·다량영양소
+  kcal:2500, protein:65, carbs:130, fat:55, fiber:30,
+  // 나트륨·미네랄
+  sodium:2000,      // 상한
+  calcium:800, phosphorus:700, magnesium:360,
+  iron:10, zinc:10, copper:0.85, selenium:60, iodine:150,
+  potassium:3500,
+  // 비타민 (지용성)
+  vitA:800, vitD:10, vitE:12, vitK:75,
+  // 비타민 (수용성)
+  vitC:100, vitB1:1.2, vitB2:1.5, vitB3:16,
+  vitB6:1.5, vitB12:2.4, folate:400, biotin:30, pantothenic:5,
+  // 지방산
+  omega3:1600, omega6:10000, cholesterol:300
 };
+
+// 🎋 사주 오행 · 은밀히 참고 (사용자에겐 숨김)
+// 생년월일 · 태어난 시간 기반 · 부족한 오행에 도움되는 음식·영양소 반환
+// 오행 매칭: 木=푸른잎채소·신맛·간, 火=붉은음식·쓴맛·심장, 土=단맛·비장, 金=매운맛·폐, 水=검은음식·짠맛·신장
+function _getSajuHint() {
+  try {
+    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human') || {};
+    if (!p.birthYear || !p.birthMonth) return null;
+    const y = parseInt(p.birthYear);
+    const m = parseInt(p.birthMonth || 6);
+    const d = parseInt(p.birthDay || 15);
+    // 간단화 · 년주(태세) 기반 오행 · 정통 사주는 만세력 필요하나 대략적 매핑
+    // 십간(甲乙丙丁戊己庚辛壬癸) → 오행(木木火火土土金金水水)
+    const stemIdx = (y - 4) % 10;
+    const stemElement = ['木','木','火','火','土','土','金','金','水','水'][stemIdx];
+    // 십이지(子丑寅卯辰巳午未申酉戌亥) → 오행 (약식)
+    const branchIdx = (y - 4) % 12;
+    const branchElement = ['水','土','木','木','土','火','火','土','金','金','土','水'][branchIdx];
+    // 월지 오행 (계절)
+    const monthElement = ['水','水','木','木','木','火','火','火','土','金','金','水'][m-1];
+    // 3개 요소 카운트 → 부족한 오행 찾기
+    const count = {'木':0,'火':0,'土':0,'金':0,'水':0};
+    count[stemElement]++; count[branchElement]++; count[monthElement]++;
+    // 부족한 오행 = 카운트 0 또는 가장 낮음
+    const sorted = Object.entries(count).sort((a,b) => a[1] - b[1]);
+    const weak = sorted[0][0];
+    // 오행별 추천 음식·영양소 매핑
+    const map = {
+      '木': { foods:['시금치','케일','브로콜리','아스파라거스','키위'], nutrients:['엽산','비타민K','비타민C'], color:'초록' },
+      '火': { foods:['방울토마토','파프리카','고추','자몽','석류'], nutrients:['리코펜','비타민C','베타카로틴'], color:'빨강' },
+      '土': { foods:['호박','고구마','당근','옥수수','기장'], nutrients:['비타민A','베타카로틴','칼륨'], color:'노랑' },
+      '金': { foods:['배','도라지','무','양파','마늘'], nutrients:['알리신','케르세틴','비타민C'], color:'흰색' },
+      '水': { foods:['검은콩','다시마','미역','블루베리','흑미'], nutrients:['안토시아닌','요오드','오메가3'], color:'검정' }
+    };
+    return { weak, ...map[weak] };
+  } catch(e) { return null; }
+}
+
+// 개인 맞춤 RDA · 나이·성별·키·몸무게·활동량 반영
+function _getPersonalRDA() {
+  const base = { ...RDA_ADULT };
+  try {
+    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human') || {};
+    const gender = p.gender || 'male';
+    const age = p.birthYear ? (new Date().getFullYear() - parseInt(p.birthYear) + 1) : 30;
+    const height = p.height ? parseInt(p.height) : 170;
+    const weight = p.weight ? parseInt(p.weight) : 65;
+    const lifestyle = p.lifestyle || 'moderate'; // sedentary/light/moderate/active
+
+    // 여성 보정 (KDRIs 여성 기준)
+    if (gender === 'female') {
+      base.kcal = 2000; base.protein = 55; base.fat = 45; base.fiber = 20;
+      base.calcium = 700; base.iron = 14; base.magnesium = 280; // 철분 여성 더 높음 (월경)
+      base.zinc = 8; base.vitA = 650; base.vitE = 12;
+      base.vitB1 = 1.1; base.vitB2 = 1.2; base.vitB3 = 14; base.vitB6 = 1.4;
+      base.folate = 400; base.omega3 = 1100;
+    }
+
+    // 연령 보정
+    if (age >= 65) { // 65+
+      base.kcal *= 0.9; base.protein *= 1.1; base.calcium *= 1.2; base.vitD *= 1.5;
+    } else if (age >= 50) { // 50~64
+      base.calcium *= 1.1; base.vitD *= 1.2;
+    } else if (age < 19) { // 청소년
+      base.kcal *= 1.05; base.calcium *= 1.15; base.iron *= 1.1;
+    }
+
+    // BMI 보정 · 저체중은 더 필요, 과체중은 열량 억제
+    const bmi = weight / ((height/100) ** 2);
+    if (bmi < 18.5) { base.kcal *= 1.05; base.protein *= 1.1; }
+    else if (bmi >= 25) { base.kcal *= 0.95; }
+    else if (bmi >= 30) { base.kcal *= 0.9; base.fat *= 0.85; }
+
+    // 활동량 보정 (열량·단백질만)
+    const activityFactor = { sedentary:0.9, light:1.0, moderate:1.1, active:1.25 }[lifestyle] || 1;
+    base.kcal *= activityFactor;
+    if (activityFactor >= 1.1) base.protein *= 1.1;
+
+    // 반올림
+    Object.keys(base).forEach(k => { base[k] = Math.round(base[k] * 10) / 10; });
+  } catch(e) {}
+  return base;
+}
 // 나트륨은 상한 · 다른 것들은 하한(권장 최소)
 
 // 영양소 한글 라벨
@@ -16341,30 +16437,55 @@ function renderFoodResult(r) {
   if (!m || typeof m !== 'object' || Object.keys(m).filter(k => Number(m[k]) > 0).length < 3) {
     try { m = estimateMicronutrients(r.foods || []); } catch(e) { m = {}; }
   }
-  // 그룹 정의 · 비타민 그룹 제거 · 아연·칼륨 제거 (숫자 정확도 낮음)
+  // KDRIs 2020 기반 · 개인 맞춤 RDA
+  const rda = (typeof _getPersonalRDA === 'function') ? _getPersonalRDA() : RDA_ADULT;
   const STAT_GROUPS = {
     macro: {
       title: '기본 영양소',
       src: n,
       items: {
-        carbs:   { label:'탄수화물', target:300,  unit:'g',  bad:false },
-        protein: { label:'단백질',   target:60,   unit:'g',  bad:false },
-        fat:     { label:'지방',     target:65,   unit:'g',  bad:false },
-        fiber:   { label:'식이섬유', target:25,   unit:'g',  bad:false },
-        sodium:  { label:'나트륨',   target:2000, unit:'mg', bad:true }
+        kcal:    { label:'칼로리',   target:rda.kcal,    unit:'kcal', bad:false },
+        carbs:   { label:'탄수화물', target:rda.carbs,   unit:'g',    bad:false },
+        protein: { label:'단백질',   target:rda.protein, unit:'g',    bad:false },
+        fat:     { label:'지방',     target:rda.fat,     unit:'g',    bad:false },
+        fiber:   { label:'식이섬유', target:rda.fiber,   unit:'g',    bad:false },
+        sodium:  { label:'나트륨',   target:rda.sodium,  unit:'mg',   bad:true }
+      }
+    },
+    vitamin: {
+      title: '비타민',
+      src: { ...n, ...m },
+      items: {
+        vitA:    { label:'비타민 A',   target:rda.vitA,    unit:'μg' },
+        vitC:    { label:'비타민 C',   target:rda.vitC,    unit:'mg' },
+        vitD:    { label:'비타민 D',   target:rda.vitD,    unit:'μg' },
+        vitE:    { label:'비타민 E',   target:rda.vitE,    unit:'mg' },
+        vitK:    { label:'비타민 K',   target:rda.vitK,    unit:'μg' },
+        vitB1:   { label:'비타민 B1',  target:rda.vitB1,   unit:'mg' },
+        vitB2:   { label:'비타민 B2',  target:rda.vitB2,   unit:'mg' },
+        vitB6:   { label:'비타민 B6',  target:rda.vitB6,   unit:'mg' },
+        vitB12:  { label:'비타민 B12', target:rda.vitB12,  unit:'μg' },
+        folate:  { label:'엽산',       target:rda.folate,  unit:'μg' }
       }
     },
     mineral: {
       title: '미네랄',
-      src: m,
+      src: { ...n, ...m },
       items: {
-        calcium:   { label:'칼슘',     target:800,  unit:'mg' },
-        iron:      { label:'철분',     target:12,   unit:'mg' },
-        magnesium: { label:'마그네슘', target:320,  unit:'mg' }
+        calcium:    { label:'칼슘',     target:rda.calcium,    unit:'mg' },
+        iron:       { label:'철분',     target:rda.iron,       unit:'mg' },
+        magnesium:  { label:'마그네슘', target:rda.magnesium,  unit:'mg' },
+        zinc:       { label:'아연',     target:rda.zinc,       unit:'mg' },
+        potassium:  { label:'칼륨',     target:rda.potassium,  unit:'mg' }
+      }
+    },
+    fat: {
+      title: '지방산',
+      src: { ...n, ...m },
+      items: {
+        omega3: { label:'오메가3', target:rda.omega3, unit:'mg' }
       }
     }
-    // 비타민 그룹 제거 · 미량 영양소 숫자는 정확도가 낮아 노출 X
-    // (부족 감지는 내부 로직에서 계속 사용 · 사용자에겐 정성적 문구만)
   };
 
   // 그룹별 HTML — 깔끔한 라인 디자인
@@ -16419,9 +16540,11 @@ function renderFoodResult(r) {
         if (sum && sum.tags) sum.tags.forEach(t => specialTags.add(t));
       }
     });
-    // 기본 6대 영양이 아닌 특수 태그만 필터
-    const commonTags = new Set(['식이섬유','단백질','지방','고나트륨','칼슘','철분','B12','비타민D','비타민A','비타민C','비타민K','비타민E','저나트륨','저지방']);
-    const specialOnly = Array.from(specialTags).filter(t => !commonTags.has(t));
+    // 기본 6대 영양이 아닌 특수 태그만 필터 · 중립/부정 태그도 제외
+    const commonTags = new Set(['식이섬유','단백질','지방','고나트륨','칼슘','철분','B12','B1','B6','비타민D','비타민A','비타민C','비타민K','비타민E','저나트륨','저지방','고단백','완전단백질','수분']);
+    // 명확히 좋은 성분만 화이트리스트
+    const positiveWhitelist = new Set(['폴리페놀','오메가3','안토시아닌','리코펜','베타카로틴','케르세틴','레스베라트롤','알리신','설포라판','커큐민','이소플라본','유산균','베타글루칸','비오틴','콜린','타우린','엽산','아연','마그네슘','셀레늄','칼륨','건강한지방','항산화','항염','파이토케미컬','리그난','참기름리그난','진저롤','피페린'].map(s=>s.toLowerCase()));
+    const specialOnly = Array.from(specialTags).filter(t => !commonTags.has(t) && positiveWhitelist.has(t.toLowerCase()));
     if (specialOnly.length && nutriGrid) {
       const badgeHtml = `
         <div style="background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);border-radius:14px;padding:13px 15px;margin-top:12px;border:1px solid #FCD34D">
