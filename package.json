@@ -6,6 +6,9 @@
   "scripts": {
     "build": "node build.js"
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
   "devDependencies": {
     "terser": "^5.36.0"
   }
