@@ -14,10 +14,34 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
 
   try {
-    const { imageB64 } = req.body;
+    const { imageB64, currentSupplements, productHint } = req.body;
     if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
 
-    const PROMPT = buildSupplementLabelPrompt();
+    // 🔍 제품명 힌트가 있으면 · 네이버 블로그 검색으로 사용법·시너지 정보 수집
+    let naverInfo = null;
+    if (productHint && productHint.trim()) {
+      try {
+        const keyId = process.env.NCP_API_KEY_ID;
+        const key = process.env.NCP_API_KEY;
+        if (keyId && key) {
+          const q = encodeURIComponent(productHint.trim() + ' 효능 복용법');
+          const nr = await fetch(`https://naveropenapi.apigw.ntruss.com/search/v1/blog?query=${q}&display=5&sort=sim`, {
+            headers: { 'X-NCP-APIGW-API-KEY-ID': keyId, 'X-NCP-APIGW-API-KEY': key }
+          });
+          if (nr.ok) {
+            const nd = await nr.json();
+            if (nd.items && nd.items.length) {
+              naverInfo = nd.items.map(it => ({
+                t: (it.title || '').replace(/<[^>]+>/g, '').slice(0, 80),
+                d: (it.description || '').replace(/<[^>]+>/g, '').slice(0, 200)
+              }));
+            }
+          }
+        }
+      } catch(e){ console.error('naver supplement search', e.message); }
+    }
+
+    const PROMPT = buildSupplementLabelPrompt(currentSupplements, naverInfo);
 
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -63,8 +87,29 @@ module.exports = async function handler(req, res) {
   }
 };
 
-function buildSupplementLabelPrompt() {
+function buildSupplementLabelPrompt(currentSupplements, naverInfo) {
+  const naverBlock = (naverInfo && naverInfo.length) ? `
+
+=== 네이버 블로그 실제 사용자 후기 (${naverInfo.length}건 · 정확도 크게 상승) ===
+${naverInfo.map((h, i) => `${i+1}. ${h.t}\n   → ${h.d}`).join('\n')}
+
+⚠️ 위 후기를 참고해서 · benefits (효능·언제 좋음)·userExperience (실제 사용자 경험)·bestTimeToTake (최적 복용 시간) 를 채워라.
+` : '';
+
+  const currentBlock = (currentSupplements && currentSupplements.length) ? `
+
+=== 사용자가 이미 먹고 있는 영양제 목록 ===
+${currentSupplements.map((s, i) => `${i+1}. ${s.name}${s.dose ? ` (${s.dose})` : ''}`).join('\n')}
+
+⚠️ 이번 새 영양제를 분석하면서 · 위 목록과 성분 겹침/상호작용/과다 우려를 반드시 체크하고 · combinationWarnings 필드에 담아라.
+- 같은 성분 중복 (예: 종합비타민 + 비타민B복합 = B군 중복)
+- 흡수 방해 조합 (칼슘 + 철분 · 동시 복용 시 흡수 저하)
+- 시너지 조합 (비타민D + 칼슘 · 비타민C + 철분 · 함께 좋음)
+- 상한량 초과 우려 (같은 미네랄 총합이 UL 넘김)
+` : '';
+
   return `당신은 한국 건강기능식품 라벨 OCR·해석 전문가입니다. 사진의 라벨에서 성분·함량·1일 섭취량·%영양성분기준치 정보를 정확히 뽑아 JSON으로만 응답하세요.
+${naverBlock}${currentBlock}
 
 === 건강어때 2.0 · 영양제 관련 대전제 ===
 - 이 앱은 "영양제를 먹기 전에 음식을 먹자"를 원칙으로 한다.
@@ -116,7 +161,16 @@ function buildSupplementLabelPrompt() {
   "suggestedTiming": "식후 (지방과 함께 흡수)",
   "suggestedSlot": "lunch_after",
   "cautions": ["의약품 복용 중이면 의사와 상담", "임산부·수유부는 섭취 전 상담"],
-  "functionSummary": "항산화 · 혈압 개선 · 에너지 대사 지원 등 라벨상 기능성"
+  "functionSummary": "항산화 · 혈압 개선 · 에너지 대사 지원 등 라벨상 기능성",
+  "combinationWarnings": [
+    {"type":"duplicate","level":"warning","message":"이미 종합비타민에 B6가 25mg 있음 · 이번 제품 50mg 추가 시 합 75mg (UL 100mg 근접)"},
+    {"type":"absorption","level":"info","message":"철분과 칼슘은 2시간 이상 간격 두고 복용"},
+    {"type":"synergy","level":"positive","message":"비타민D와 함께 먹으면 칼슘 흡수 상승"}
+  ],
+  "benefits": ["관절 통증 완화 도움", "피부 탄력 유지", "혈관 건강 지원"],
+  "bestTimeToTake": "저녁 식후 · 지방과 함께 흡수 · 자기 전 2시간 전 완료",
+  "userExperience": "실제 사용자 후기 기반 · 3~4주 꾸준히 섭취 시 관절 부드러워짐 후기 다수",
+  "notRecommendedFor": ["임산부·수유부", "항응고제 복용자", "출산 예정 6개월 이내"]
 }
 
 suggestedSlot 값은 다음 중 하나로: morning_empty / morning_after / lunch_after / evening_after / bedtime`;
