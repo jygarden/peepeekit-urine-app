@@ -2311,14 +2311,14 @@ window.appIcon = function(name, size){
         <div style="padding:14px 0 4px">
           <div style="font-size:15px;font-weight:600;color:#64748B;letter-spacing:-.2px">안녕하세요, <b style="color:#0F172A;font-weight:800" id="v20ProfileName">재율님</b></div>
         </div>
-        <div id="v21CoachHeadline" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;padding:2px 0 14px">요즘 <span style="color:#F59E0B">단백질</span> 어때?</div>
-
-        <!-- ① 다음 한 끼 추천 (영양 빈칸 통합) · 어때? 톤 -->
-        <div style="background:#fff;border-radius:20px;padding:20px 18px 14px;box-shadow:0 6px 20px rgba(15,23,42,.05);margin-bottom:10px">
-          <div id="v21HeroTitle" style="font-size:22px;font-weight:800;color:#0F172A;letter-spacing:-.5px;line-height:1.4">오늘 <span id="v21MealSlot" style="color:#2563EB">점심</span>, <span id="v21RecName" style="color:#15803D">고등어구이</span> 어때?</div>
+        <!-- ① 다음 한 끼 추천 (영양 빈칸 통합) · 어때? 톤 · 색 절제 -->
+        <div style="background:#fff;border-radius:20px;padding:20px 18px 14px;box-shadow:0 6px 20px rgba(15,23,42,.05);margin-bottom:12px;margin-top:8px">
+          <div id="v21HeroTitle" style="font-size:22px;font-weight:800;color:#17243A;letter-spacing:-.5px;line-height:1.4">오늘 <span id="v21MealSlot" style="color:#17243A">점심</span>, <span id="v21RecName" style="color:#15803D">고등어구이</span> 어때?</div>
           <div id="v21RecWhy" style="font-size:13px;color:#64748B;font-weight:500;line-height:1.65;margin-top:10px">최근 식사에서 부족했던 단백질을 채울 수 있어요.</div>
           <div id="v21HeroKcal" style="font-size:12px;color:#94A3B8;font-weight:500;margin-top:6px">— kcal</div>
           <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px"></div>
+          <!-- 히든 · 코치 헤드라인 참조 유지 -->
+          <div id="v21CoachHeadline" style="display:none"></div>
           <div style="display:flex;gap:6px;margin-top:14px">
             <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#fff;border:1.5px solid #E5E7EB;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#64748B;font-family:inherit;cursor:pointer">↻ 다른 음식</button>
             <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:#EFF6FF;border:none;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">🗺 내 주변</button>
@@ -9083,16 +9083,16 @@ function _v21RenderRecentHex() {
   }
 }
 
-// 🌈 6대 영양 바차트 · 건강어때 시그니처
-// mode: 'grid' (2x3 파스텔 카드 · 넓은 카드용) | 'compact' (한 행씩 · 좁은 카드용, 기본)
+// 🌈 6대 영양 바차트 · 건강어때 시그니처 · 색 절제 (통일 그레이 배경 + 네이비 바)
+// mode: 'grid' (2x3 카드 · 넓은 카드용) | 'compact' (한 행씩 · 좁은 카드용, 기본)
 function _v21NutrientBars(values, empty, mode) {
   const axes = [
-    { label:'탄수화물', bg:'#EFF6FF', textDark:'#1E40AF', barBg:'#DBEAFE', barFg:'#2563EB' },
-    { label:'단백질',   bg:'#FEF3C7', textDark:'#B45309', barBg:'#FDE68A', barFg:'#F59E0B' },
-    { label:'지방',     bg:'#FEE2E2', textDark:'#B91C1C', barBg:'#FECACA', barFg:'#EF4444' },
-    { label:'식이섬유', bg:'#DCFCE7', textDark:'#15803D', barBg:'#BBF7D0', barFg:'#10B981' },
-    { label:'비타민',   bg:'#FEF9C3', textDark:'#A16207', barBg:'#FEF08A', barFg:'#EAB308' },
-    { label:'미네랄',   bg:'#DBEAFE', textDark:'#0369A1', barBg:'#BAE6FD', barFg:'#0EA5E9' }
+    { label:'탄수화물', bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
+    { label:'단백질',   bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
+    { label:'지방',     bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
+    { label:'식이섬유', bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
+    { label:'비타민',   bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
+    { label:'미네랄',   bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' }
   ];
   if (mode === 'grid') {
     const cells = axes.map((ax, i) => {
