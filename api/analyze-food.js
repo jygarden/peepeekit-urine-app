@@ -44,9 +44,79 @@ module.exports = async function handler(req, res) {
   }
 };
 
-// ═══ DETECT MODE · 음식 인식 + 양 추정 ═══
+// ═══ 크라우드소싱 조회 · Supabase에서 이전 수정 데이터 힌트 ═══
+async function fetchCrowdHints(brand, foodName) {
+  try {
+    const url = process.env.SUPABASE_URL;
+    const anon = process.env.SUPABASE_ANON_KEY;
+    if (!url || !anon || !foodName) return null;
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(url, anon);
+    let query = supabase
+      .from('crowd_corrections')
+      .select('ingredients, portion')
+      .ilike('food_name', `%${foodName.trim()}%`);
+    if (brand && brand.trim()) {
+      query = query.ilike('brand', `%${brand.trim()}%`);
+    }
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(50);
+    if (error || !data || data.length === 0) return null;
+    const ingCount = {};
+    data.forEach(r => {
+      (r.ingredients || []).forEach(ing => {
+        const name = typeof ing === 'string' ? ing : (ing.name || '');
+        if (name) ingCount[name] = (ingCount[name] || 0) + 1;
+      });
+    });
+    const top = Object.entries(ingCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    return {
+      confidence: data.length,
+      topIngredients: top.map(([n,c]) => ({ name: n, count: c }))
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// ═══ 네이버 블로그 검색 · 브랜드·메뉴 힌트 활용 ═══
+async function fetchNaverBlogHints(query) {
+  const keyId = process.env.NCP_API_KEY_ID;
+  const key = process.env.NCP_API_KEY;
+  if (!keyId || !key || !query) return null;
+  try {
+    const url = `https://naveropenapi.apigw.ntruss.com/search/v1/blog?query=${encodeURIComponent(query)}&display=5&sort=sim`;
+    const r = await fetch(url, {
+      headers: {
+        'X-NCP-APIGW-API-KEY-ID': keyId,
+        'X-NCP-APIGW-API-KEY': key
+      }
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (!data.items || !data.items.length) return null;
+    // HTML 태그 제거 · 상위 5개 리뷰 요약
+    return data.items.map(it => ({
+      t: (it.title || '').replace(/<[^>]+>/g, '').slice(0, 80),
+      d: (it.description || '').replace(/<[^>]+>/g, '').slice(0, 200)
+    }));
+  } catch (e) {
+    console.error('naver hint fetch fail', e.message);
+    return null;
+  }
+}
+
+// ═══ DETECT MODE · 음식 인식 + 양 추정 (+ 브랜드 시 네이버 · 크라우드 힌트) ═══
 async function runDetect({ apiKey, imageB64, target, userMemo, res }) {
-  const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt(userMemo);
+  // 브랜드·메뉴 힌트가 있으면 병렬로 네이버 블로그 + 크라우드 조회
+  let naverHints = null, crowdHints = null;
+  if (userMemo && userMemo.length >= 2 && target !== 'pet') {
+    [naverHints, crowdHints] = await Promise.all([
+      fetchNaverBlogHints(userMemo),
+      fetchCrowdHints(userMemo, userMemo) // 초기에는 memo를 brand+name 둘 다로 검색
+    ]);
+  }
+
+  const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints);
 
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -113,7 +183,28 @@ async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfil
 }
 
 // ═══ HUMAN · DETECT PROMPT ═══
-function buildHumanFoodDetectPrompt(userMemo) {
+function buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints) {
+  // 네이버 블로그 검색 힌트가 있으면 프롬프트에 컨텍스트 추가
+  const naverBlock = (naverHints && naverHints.length) ? `
+
+【네이버 블로그 실제 후기 (${naverHints.length}건) · 정확도 크게 상승】
+${naverHints.map((h, i) => `${i+1}. ${h.t}\n   → ${h.d}`).join('\n')}
+
+⚠️ 위 블로그 후기를 참고해서 이 메뉴의 실제 양·재료·조리법을 추정하라.
+   - 후기에 "밥 200g · 목살 80g" 이런 식으로 나오면 그대로 반영
+   - 여러 후기에서 공통 언급되는 재료를 ingredients에 넣기
+   - 나트륨·기름·양념 강도도 후기 언급대로
+` : '';
+
+  // 크라우드소싱 힌트 (이전 사용자들이 확인·수정한 재료)
+  const crowdBlock = (crowdHints && crowdHints.topIngredients && crowdHints.topIngredients.length) ? `
+
+【이전 사용자 ${crowdHints.confidence}명이 확인한 실제 재료 (신뢰도 높음)】
+${crowdHints.topIngredients.map(t => `- ${t.name} (${t.count}명이 확인)`).join('\n')}
+
+⚠️ 이 재료들을 우선적으로 ingredients에 포함시켜라. 사진에서 안 보여도 이 브랜드 표준 재료면 넣기.
+` : '';
+
   const memoBlock = userMemo ? `
 
 【사용자가 알려준 정보 · 최우선 참고】
@@ -136,7 +227,7 @@ function buildHumanFoodDetectPrompt(userMemo) {
 
   return `너는 한식 이미지 인식 전문가다. 사진 속 음식을 식별하고 1인분 대비 양을 추정한다.
 JSON 하나만 응답한다. 마크다운 코드블록 금지.
-${memoBlock}
+${memoBlock}${naverBlock}${crowdBlock}
 【역할 · 절대 규칙】
 1. 너는 음식 인식과 양 추정만 담당한다.
 2. 칼로리·단백질·나트륨 같은 영양소 숫자는 절대 생성하지 않는다 (내가 별도 DB에서 조회함).
