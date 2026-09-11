@@ -2305,7 +2305,7 @@ window.appIcon = function(name, size){
 
 
       <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
-      <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
+      <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Gowun Dodum','Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A;letter-spacing:-.1px">
 
         <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
         <div style="padding:14px 0 4px">
@@ -2330,9 +2330,8 @@ window.appIcon = function(name, size){
               </svg>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:11px;color:#94A3B8;font-weight:800;letter-spacing:.3px;text-transform:uppercase">오늘의 코칭</div>
-              <div id="v21HeroTitle" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.35;margin-top:2px">
-                오늘 <span id="v21MealSlot">점심</span>, <span id="v21RecName" style="color:#15803D">고등어구이</span> 어때?
+              <div id="v21HeroTitle" style="font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.35">
+                오늘 <span id="v21MealSlot">저녁</span>, <span id="v21RecName" style="color:#15803D">고등어구이</span> 어때?
               </div>
             </div>
           </div>
@@ -9208,21 +9207,24 @@ function _v21RenderRecentHex() {
 // 🌈 6대 영양 바차트 · 건강어때 시그니처 · 색 절제 (통일 그레이 배경 + 네이비 바)
 // mode: 'grid' (2x3 카드 · 넓은 카드용) | 'compact' (한 행씩 · 좁은 카드용, 기본)
 function _v21NutrientBars(values, empty, mode) {
+  // 6대 영양소 · 각자 파스텔 색상으로 개성 부여
   const axes = [
-    { label:'탄수화물', bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
-    { label:'단백질',   bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
-    { label:'지방',     bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
-    { label:'식이섬유', bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
-    { label:'비타민',   bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' },
-    { label:'미네랄',   bg:'#F8FAFC', textDark:'#475569', barBg:'#E2E8F0', barFg:'#17243A' }
+    { label:'탄수', bg:'#FEF3C7', textDark:'#92400E', barBg:'#FDE68A', barFg:'#F59E0B' },
+    { label:'단백질', bg:'#FEE2E2', textDark:'#991B1B', barBg:'#FECACA', barFg:'#EF4444' },
+    { label:'지방', bg:'#FED7AA', textDark:'#9A3412', barBg:'#FDBA74', barFg:'#EA580C' },
+    { label:'식이섬유', bg:'#DCFCE7', textDark:'#166534', barBg:'#BBF7D0', barFg:'#16A34A' },
+    { label:'비타민', bg:'#DBEAFE', textDark:'#1E40AF', barBg:'#BFDBFE', barFg:'#2563EB' },
+    { label:'미네랄', bg:'#E9D5FF', textDark:'#6B21A8', barBg:'#DDD6FE', barFg:'#9333EA' }
   ];
   if (mode === 'grid') {
     const cells = axes.map((ax, i) => {
       const v = empty ? 0 : Math.max(0, Math.min(100, Math.round(values[i] || 0)));
-      return `<div style="background:${ax.bg};border-radius:12px;padding:9px 10px">
-        <div style="font-size:10.5px;color:${ax.textDark};font-weight:800;letter-spacing:-.2px;margin-bottom:2px">${ax.label}</div>
-        <div style="font-size:14px;color:${ax.textDark};font-weight:900;letter-spacing:-.3px;margin-bottom:5px">${empty ? '—' : v + '%'}</div>
-        <div style="background:${ax.barBg};height:4px;border-radius:99px;overflow:hidden"><div style="width:${v}%;height:100%;background:${ax.barFg};border-radius:99px;transition:width .4s ease"></div></div>
+      return `<div style="background:${ax.bg};border-radius:14px;padding:10px 11px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:4px">
+          <span style="font-size:11px;color:${ax.textDark};font-weight:800;letter-spacing:-.2px">${ax.label}</span>
+          <span style="font-size:12px;color:${ax.textDark};font-weight:900;letter-spacing:-.3px">${empty ? '—' : v + '%'}</span>
+        </div>
+        <div style="background:${ax.barBg};height:9px;border-radius:99px;overflow:hidden"><div style="width:${v}%;height:100%;background:${ax.barFg};border-radius:99px;transition:width .4s ease"></div></div>
       </div>`;
     }).join('');
     return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">${cells}</div>`;
