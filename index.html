@@ -6512,15 +6512,17 @@ function getShortageTop(n) {
 const MEAL_POOL_BY_SITUATION = {
   // 아침 · 담백·따뜻·소화 편한 것 (회·삼겹살·부대찌개 X)
   breakfast: ['콩나물국밥','순두부찌개','북엇국','미역국','전복죽','야채죽','시금치된장국','계란찜','삶은계란','요거트','그릭요거트','바나나','고구마','잔치국수','우유'],
-  // 점심 · 든든·균형 (회 단품·삼겹살 X · 덮밥·비빔밥·국밥·정식 위주)
-  lunch: ['비빔밥','나물비빔밥','잡곡밥','현미밥','제육덮밥','오징어덮밥','오므라이스','뚝배기불고기','회덮밥','초밥세트','규동','쌀국수','오일파스타','알리오올리오','서양샐러드','김치찌개','된장찌개','순두부찌개','돼지김치찌개','설렁탕','갈비탕','콩나물국밥','육개장','칼국수','들기름막국수','냉면','김밥','샌드위치'],
+  // 점심 · 든든·균형 · 모듬사시미(회 단품)·삼겹살 X · 덮밥·비빔밥·국밥·정식·초밥/회덮밥 OK
+  lunch: ['비빔밥','나물비빔밥','잡곡밥','현미밥','제육덮밥','오징어덮밥','오므라이스','뚝배기불고기','규동','쌀국수','오일파스타','알리오올리오','서양샐러드','김치찌개','된장찌개','순두부찌개','돼지김치찌개','설렁탕','갈비탕','콩나물국밥','육개장','칼국수','들기름막국수','냉면','김밥','샌드위치','불고기덮밥','치킨마요덮밥','참치김밥','채소김밥','순두부','제육정식','김치볶음밥','새우볶음밥','회덮밥','초밥세트','연어초밥','참치초밥','카레라이스'],
   // 오후 간식 · 가볍게 (식사류 X)
-  snack: ['요거트','그릭요거트','바나나','사과','견과류믹스','삶은계란','고구마','아보카도','우유','두유'],
+  snack: ['요거트','그릭요거트','바나나','사과','견과류믹스','삶은계란','고구마','아보카도','우유','두유','귤','블루베리','아몬드','호두','치즈','오렌지','키위'],
   // 저녁 · 대부분 OK · 회식·삼겹살·회·안주류 자유
-  dinner: ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','뚝배기불고기','들기름막국수','잔치국수','냉면','칼국수','삼겹살','갈비','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트','스테이크','오일파스타','쌀국수','커리','부대찌개'],
+  dinner: ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','뚝배기불고기','들기름막국수','잔치국수','냉면','칼국수','삼겹살','갈비','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','모듬사시미','모듬회','참치회','방어회','초밥세트','연어초밥','참치초밥','스테이크','오일파스타','쌀국수','커리','부대찌개','고등어구이','연어구이','장어구이','뚝배기불고기','닭백숙','삼계탕'],
+  // 야식 · 가볍고 소화 편한 것만 (기름·매운·튀김 X)
+  latenight: ['삶은계란','바나나','우유','요거트','견과류믹스','두부부침','시금치나물','오이','파프리카','블루베리','고구마','귤','따뜻한 우유','캐모마일차','미역국','북엇국','계란찜'],
   // 레거시 alias (다른 코드가 참조 중일 수 있음)
   home:      ['잡곡밥','현미밥','나물비빔밥','비빔밥','된장찌개','순두부찌개','김치찌개','돼지김치찌개','미역국','북엇국','무국','시금치된장국','콩나물국','두부김치','두부부침','계란찜','삶은계란','오므라이스'],
-  delivery:  ['비빔밥','나물비빔밥','뚝배기불고기','제육덮밥','오징어덮밥','오일파스타','알리오올리오','서양샐러드','규동','쌀국수','딤섬','회덮밥','초밥세트'],
+  delivery:  ['비빔밥','나물비빔밥','뚝배기불고기','제육덮밥','오징어덮밥','오일파스타','알리오올리오','서양샐러드','규동','쌀국수','딤섬','치킨마요덮밥','불고기덮밥','참치김밥','채소김밥','카레라이스'],
   eatout:    ['순대국','사골곰탕','설렁탕','갈비탕','해장국','뼈해장국','콩나물국밥','육개장','감자탕','뚝배기불고기','들기름막국수','잔치국수','냉면','칼국수','삼겹살','갈비','아구찜','알탕','낙지볶음','오징어볶음','제육볶음','비빔밥','나물비빔밥','회덮밥','연어회','광어회','초밥세트','스테이크','오일파스타','쌀국수','커리'],
   convenience:['김밥','샌드위치','삶은계란','바나나','사과','고구마','요거트','그릭요거트','우유','견과류믹스','아보카도']
 };
@@ -6575,7 +6577,9 @@ const MEAL_TIME_EXCLUDE = {
   // 오후 간식 · 식사 메뉴 대부분 제외 · 가벼운 것만
   snack: [], // pool에서 편의점·간편 위주로 자동 필터
   // 저녁 · 대부분 OK
-  dinner: []
+  dinner: [],
+  // 야식 · 별도 pool 사용
+  latenight: []
 };
 
 // 시간대 → 카테고리 자동 판정 (없으면 지금 시각 기준)
@@ -6584,7 +6588,8 @@ function _mealTimeSlot() {
   if (h < 10) return 'breakfast';
   if (h < 14) return 'lunch';
   if (h < 17) return 'snack';
-  return 'dinner';
+  if (h < 21) return 'dinner';
+  return 'latenight';
 }
 
 function getWhatToEatNow(situation, mealTime) {
@@ -8858,39 +8863,22 @@ function _v21TryAppLaunch(evt, idx) {
 }
 
 // ═══ 내 주변 음식점 · 네이버 지도로 바로 이동 (앱 있으면 앱, 없으면 웹) ═══
-// ═══ 오늘 실천할 한 가지 · 음식 중심 (먼저, 음식 철학) ═══
-const _V21_PRACTICE_POOL = {
-  protein:   [{a:'저녁 반찬에 두부구이 반접시 어때?', w:'부족한 단백질을 부담 없이 채울 수 있어요.'},
-              {a:'간식으로 삶은 계란 하나 어때?', w:'완전 단백질 · 콜린까지 함께 챙길 수 있어요.'},
-              {a:'저녁 국에 두부 한 조각 넣어봐요.', w:'하루 목표의 15%를 그릇 하나로 채워요.'}],
-  fiber:     [{a:'저녁 반찬으로 시금치나물 어때?', w:'식이섬유와 엽산을 한 접시로 채울 수 있어요.'},
-              {a:'간식 대신 사과 반 개 어때?', w:'식이섬유·수분을 부담 없이 채울 수 있어요.'},
-              {a:'점심에 나물 반찬 하나 더 어때?', w:'하루 식이섬유 목표의 20%가 채워져요.'}],
-  vitD:      [{a:'저녁으로 고등어구이 어때?', w:'비타민D와 오메가3를 한 접시로 채울 수 있어요.'},
-              {a:'노른자 하나 더 챙겨봐요.', w:'비타민D 자연 공급 중 가장 편한 방법이에요.'}],
-  calcium:   [{a:'저녁에 우유 한 잔 어때?', w:'하루 칼슘 목표의 30%를 한 잔으로 채워요.'},
-              {a:'요거트 한 컵 어때?', w:'칼슘과 유산균을 함께 챙길 수 있어요.'}],
-  iron:      [{a:'점심에 소고기 반찬 어때?', w:'철분과 아연을 함께 채울 수 있어요.'},
-              {a:'시금치 나물 챙겨봐요.', w:'비타민C 반찬과 곁들이면 흡수율이 3배 올라가요.'}],
-  vitC:      [{a:'간식으로 귤 두 개 어때?', w:'하루 비타민C를 한 번에 채울 수 있어요.'},
-              {a:'파프리카 한 조각 씹어봐요.', w:'비타민C가 오렌지보다 많아요.'}],
-  magnesium: [{a:'간식으로 아몬드 한 줌 어때?', w:'마그네슘 부족 · 수면 질 개선에도 도움돼요.'}],
-  omega3:    [{a:'저녁에 등푸른 생선 한 토막 어때?', w:'오메가3와 비타민D를 한 번에 채울 수 있어요.'}]
-};
-const _V21_PRACTICE_DEFAULT = [
-  {a:'물 한 잔 지금 어때?', w:'수분 부족 · 오후 피로·집중력 저하 원인이 될 수 있어요.'},
-  {a:'간식 대신 견과류 한 줌 어때?', w:'혈당 안정에 좋아요 · 좋은 지방·마그네슘 함께.'},
-  {a:'저녁에 채소 반찬 한 접시 어때?', w:'식이섬유 챙기면서 포만감도 커요.'}
+// ═══ 오늘 실천할 한 가지 · 식사 습관·방법 (뭘 먹을지는 추천 카드가 담당) ═══
+const _V21_PRACTICE_HABITS = [
+  {a:'식전 물 한 잔 마셔봐요.', w:'포만감 상승·과식 방지 · 소화도 부드러워져요.'},
+  {a:'한 입 30번 씹어봐요.', w:'포만감 신호가 뇌에 20분 걸림 · 천천히 먹으면 자연 절제.'},
+  {a:'반찬부터 먼저 젓가락질 어때?', w:'채소·단백질 먼저 · 혈당 스파이크 줄어요.'},
+  {a:'저녁은 8시 전에 마쳐봐요.', w:'수면 질 향상 · 내일 아침 컨디션 확 달라져요.'},
+  {a:'밥 반 공기부터 시작.', w:'모자라면 추가 · 시작 양이 자연스럽게 줄어요.'},
+  {a:'식후 바로 앉지 말고 10분 서 있어봐요.', w:'혈당 완만하게 · 소화도 편해져요.'},
+  {a:'국물은 반 그릇만.', w:'나트륨 자동 절반 · 저녁 붓기 줄어요.'},
+  {a:'물 한 잔 먼저 · 그다음 간식.', w:'배고픔인지 목마름인지 구분돼요.'},
+  {a:'오늘 하루 · 튀김 하나만 참아봐요.', w:'하루만 · 부담 없이 · 내일도 이어질 수 있어요.'},
+  {a:'식탁 위 반찬 종류 3가지 이상 두기.', w:'다양한 영양소 자연 섭취 · 편식 줄어요.'}
 ];
 let _v21PracticeIdx = 0;
 function _v21PickPractice() {
-  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
-  const pool = [];
-  shortages.forEach(s => {
-    if (_V21_PRACTICE_POOL[s.key]) pool.push(..._V21_PRACTICE_POOL[s.key]);
-  });
-  if (pool.length === 0) return _V21_PRACTICE_DEFAULT[_v21PracticeIdx % _V21_PRACTICE_DEFAULT.length];
-  return pool[_v21PracticeIdx % pool.length];
+  return _V21_PRACTICE_HABITS[_v21PracticeIdx % _V21_PRACTICE_HABITS.length];
 }
 function _v21RenderPractice() {
   try {
@@ -15001,6 +14989,44 @@ function stopUrineLoading() {
   }, 400);
 }
 
+// 👥 크라우드소싱 · 저장 helper (성공·실패 로깅 + 카운터)
+// stage: 'confirm' (확인 버튼) · 'final' (AI 최종 분석 후 · 정확도 UP) · 'edit' (수정)
+function _crowdSave(brand, foodName, ingredients, portion, stage) {
+  if (!foodName || !String(foodName).trim()) return;
+  // 재료 3개 미만 노이즈 (간장 홀로 저장 같은 것) 제외
+  const ings = Array.isArray(ingredients) ? ingredients.filter(x => x && String(x).trim()) : [];
+  if (stage !== 'final' && ings.length < 2) return; // final은 재료 없어도 저장
+  // 5분 내 같은 음식 중복 저장 방지 (dedupe)
+  try {
+    const key = `_cs_${(brand||'').trim()}_${foodName.trim()}`;
+    const last = Number(sessionStorage.getItem(key) || 0);
+    if (Date.now() - last < 5 * 60 * 1000) return;
+    sessionStorage.setItem(key, String(Date.now()));
+  } catch(e){}
+  fetch('/api/crowd-save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      brand: (brand || '').trim() || null,
+      foodName: foodName.trim(),
+      ingredients: ings,
+      portion: portion || 1
+    })
+  })
+  .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+  .then(data => {
+    // 성공 카운터 · 나중에 홈에 "덕분에 N번 다른 사람 도움됨" 표시용
+    try {
+      const n = Number(localStorage.getItem('crowdContribCount') || 0) + 1;
+      localStorage.setItem('crowdContribCount', String(n));
+    } catch(e){}
+    console.log(`[crowd-save OK · ${stage}] ${foodName} · id=${data.id}`);
+  })
+  .catch(err => {
+    console.warn(`[crowd-save FAIL · ${stage}] ${foodName} · ${err.message || err}`);
+  });
+}
+
 // 1단계: AI가 음식·재료 인식 → 확인 화면으로
 let detectedFoodsData = null;
 let originalDetectedFoodsData = null; // detect 원본 (사용자 수정 추적용)
@@ -15219,6 +15245,7 @@ function removeIngredient(fi, ii) {
   if (detectedFoodsData[fi] && detectedFoodsData[fi].ingredients) {
     detectedFoodsData[fi].ingredients.splice(ii, 1);
     renderConfirmFoods();
+    _scheduleEditSave(fi);
   }
 }
 function addIngredient(fi) {
@@ -15227,7 +15254,23 @@ function addIngredient(fi) {
     detectedFoodsData[fi].ingredients = detectedFoodsData[fi].ingredients || [];
     detectedFoodsData[fi].ingredients.push(val.trim());
     renderConfirmFoods();
+    _scheduleEditSave(fi);
   }
+}
+// 재료 편집 시 · 3초 debounce로 crowd DB 저장 (연속 편집 방지)
+let _editSaveTimer = null;
+function _scheduleEditSave(fi) {
+  if (_editSaveTimer) clearTimeout(_editSaveTimer);
+  _editSaveTimer = setTimeout(() => {
+    try {
+      const f = detectedFoodsData?.[fi];
+      if (!f || !f.name) return;
+      const brand = String(foodUserMemo || '').trim();
+      // 편집 시엔 dedupe 우회 (사용자가 명시적으로 손대는 중이니 최신 상태 반영)
+      try { sessionStorage.removeItem(`_cs_${brand}_${f.name}`); } catch(e){}
+      _crowdSave(brand, f.name, f.ingredients || [], f.portion || 1, 'edit');
+    } catch(e){ console.warn('[crowd-save edit]', e); }
+  }, 3000);
 }
 
 // 2단계: 확인된 데이터로 풀 분석
@@ -15241,23 +15284,14 @@ async function confirmAndAnalyze() {
   const oldBanner = document.getElementById('foodRetryBanner');
   if (oldBanner) oldBanner.remove();
 
-  // 👥 크라우드소싱 · 사용자가 확정한 내용 저장 (실패해도 분석은 계속)
+  // 👥 크라우드소싱 · 사용자가 확정한 내용 저장 (1차 · confirm 시점)
   try {
     const brand = String(foodUserMemo || '').trim();
     detectedFoodsData.forEach(f => {
       if (!f.name) return;
-      fetch('/api/crowd-save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          brand,
-          foodName: f.name,
-          ingredients: f.ingredients || [],
-          portion: f.portion || 1
-        })
-      }).catch(() => {}); // fire-and-forget
+      _crowdSave(brand, f.name, f.ingredients || [], f.portion || 1, 'confirm');
     });
-  } catch(e){}
+  } catch(e){ console.warn('[crowd-save confirm]', e); }
 
   const btn = (event && event.target) || document.querySelector('#screenFoodConfirm .btn-primary');
   const originalText = btn ? btn.textContent : '✅ 이대로 정확하게 분석하기';
@@ -15445,6 +15479,23 @@ async function confirmAndAnalyze() {
     currentFoodResult = result;
     renderFoodResult(result);
     saveFoodHistory(result);
+    // 👥 크라우드소싱 · 2차 저장 (최종 분석 결과 · AI가 재료 보정한 최종본)
+    // sessionStorage 5분 dedupe로 confirm 시점과 중복 방지 · 하지만 재료가 늘어난 경우엔 갱신 필요
+    try {
+      const brand = String(foodUserMemo || '').trim();
+      (result.foods || []).forEach(f => {
+        if (!f.name) return;
+        const ings = (f.ingredients || []).map(x => (typeof x === 'string' ? x : (x && x.name) || '')).filter(Boolean);
+        // 최종 결과가 confirm 시점보다 재료 많으면 강제 저장 (dedupe 우회)
+        try {
+          const key = `_cs_${brand}_${f.name}`;
+          const confirmed = detectedFoodsData?.find(x => x.name === f.name);
+          const confIngs = (confirmed?.ingredients || []).length;
+          if (ings.length > confIngs) sessionStorage.removeItem(key);
+        } catch(e){}
+        _crowdSave(brand, f.name, ings, f.portion || 1, 'final');
+      });
+    } catch(e){ console.warn('[crowd-save final]', e); }
     // 📊 식단 분석 완료
     try { if (window.track) window.track('food_analyze_completed', { target: foodTarget, calories: result.totalCalories || 0, score: result.balanceScore || 0, foods_count: (result.foods||[]).length }); } catch(e){}
     if (canEarn('test')) { incrementDailyCount('test'); addPoints(100, '식단 분석 완료'); }
