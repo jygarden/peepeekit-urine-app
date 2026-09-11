@@ -2346,6 +2346,24 @@ window.appIcon = function(name, size){
           </div>
         </div>
 
+        <!-- ⓐ 오늘 실천할 한 가지 · 음식 중심 · 부드러운 파스텔 카드 -->
+        <div id="v21PracticeCard" style="background:linear-gradient(135deg,#F0F9FF 0%,#EFF6FF 100%);border-radius:24px;padding:20px 18px;margin-bottom:12px;box-shadow:0 6px 20px rgba(37,99,235,.06)">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="flex-shrink:0;width:54px;height:54px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(37,99,235,.08)">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 3 C7 3 4 6 4 10 C4 14 8 18 12 21 C16 18 20 14 20 10 C20 6 17 3 12 3 Z" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="3" fill="#2563EB"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;color:#3454C4;font-weight:800;letter-spacing:.3px">오늘 실천할 한 가지</div>
+              <div id="v21PracticeMain" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;margin-top:4px">저녁 반찬으로 시금치나물 어때?</div>
+              <div id="v21PracticeWhy" style="font-size:12px;color:#5A6371;font-weight:500;line-height:1.65;margin-top:8px">부족한 식이섬유와 엽산을 한 접시로 채울 수 있어요.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button type="button" onclick="event.stopPropagation();try{_v21NextPractice()}catch(e){}" style="flex:1;background:#fff;border:none;padding:12px;border-radius:99px;font-size:12.5px;font-weight:700;color:#475569;font-family:inherit;cursor:pointer">다른 제안</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21MarkPractice()}catch(e){}" style="flex:1;background:#10B981;color:#fff;border:none;padding:12px;border-radius:99px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 6px 14px rgba(16,185,129,.28)">해봤어요</button>
+          </div>
+        </div>
+
         <!-- ② 최근 식사 · 풀 폭 (2×3 파스텔 셀) -->
         <div id="v20RecentMealCard" style="background:#fff;border-radius:18px;padding:15px 14px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
@@ -7131,6 +7149,7 @@ function renderV20Home() {
 
     // v21 · ① 히어로 (오늘의 추천 음식 + 사진)
     try { _v21RenderHero(); } catch(e){ console.error('_v21RenderHero', e); }
+    try { _v21RenderPractice(); } catch(e){ console.error('_v21RenderPractice', e); }
     // v21 · ② 최근 식사 (미니 6각 그래프)
     try { _v21RenderRecentHex(); } catch(e){ console.error('_v21RenderRecentHex', e); }
 
@@ -8839,6 +8858,70 @@ function _v21TryAppLaunch(evt, idx) {
 }
 
 // ═══ 내 주변 음식점 · 네이버 지도로 바로 이동 (앱 있으면 앱, 없으면 웹) ═══
+// ═══ 오늘 실천할 한 가지 · 음식 중심 (먼저, 음식 철학) ═══
+const _V21_PRACTICE_POOL = {
+  protein:   [{a:'저녁 반찬에 두부구이 반접시 어때?', w:'부족한 단백질을 부담 없이 채울 수 있어요.'},
+              {a:'간식으로 삶은 계란 하나 어때?', w:'완전 단백질 · 콜린까지 함께 챙길 수 있어요.'},
+              {a:'저녁 국에 두부 한 조각 넣어봐요.', w:'하루 목표의 15%를 그릇 하나로 채워요.'}],
+  fiber:     [{a:'저녁 반찬으로 시금치나물 어때?', w:'식이섬유와 엽산을 한 접시로 채울 수 있어요.'},
+              {a:'간식 대신 사과 반 개 어때?', w:'식이섬유·수분을 부담 없이 채울 수 있어요.'},
+              {a:'점심에 나물 반찬 하나 더 어때?', w:'하루 식이섬유 목표의 20%가 채워져요.'}],
+  vitD:      [{a:'저녁으로 고등어구이 어때?', w:'비타민D와 오메가3를 한 접시로 채울 수 있어요.'},
+              {a:'노른자 하나 더 챙겨봐요.', w:'비타민D 자연 공급 중 가장 편한 방법이에요.'}],
+  calcium:   [{a:'저녁에 우유 한 잔 어때?', w:'하루 칼슘 목표의 30%를 한 잔으로 채워요.'},
+              {a:'요거트 한 컵 어때?', w:'칼슘과 유산균을 함께 챙길 수 있어요.'}],
+  iron:      [{a:'점심에 소고기 반찬 어때?', w:'철분과 아연을 함께 채울 수 있어요.'},
+              {a:'시금치 나물 챙겨봐요.', w:'비타민C 반찬과 곁들이면 흡수율이 3배 올라가요.'}],
+  vitC:      [{a:'간식으로 귤 두 개 어때?', w:'하루 비타민C를 한 번에 채울 수 있어요.'},
+              {a:'파프리카 한 조각 씹어봐요.', w:'비타민C가 오렌지보다 많아요.'}],
+  magnesium: [{a:'간식으로 아몬드 한 줌 어때?', w:'마그네슘 부족 · 수면 질 개선에도 도움돼요.'}],
+  omega3:    [{a:'저녁에 등푸른 생선 한 토막 어때?', w:'오메가3와 비타민D를 한 번에 채울 수 있어요.'}]
+};
+const _V21_PRACTICE_DEFAULT = [
+  {a:'물 한 잔 지금 어때?', w:'수분 부족 · 오후 피로·집중력 저하 원인이 될 수 있어요.'},
+  {a:'간식 대신 견과류 한 줌 어때?', w:'혈당 안정에 좋아요 · 좋은 지방·마그네슘 함께.'},
+  {a:'저녁에 채소 반찬 한 접시 어때?', w:'식이섬유 챙기면서 포만감도 커요.'}
+];
+let _v21PracticeIdx = 0;
+function _v21PickPractice() {
+  const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
+  const pool = [];
+  shortages.forEach(s => {
+    if (_V21_PRACTICE_POOL[s.key]) pool.push(..._V21_PRACTICE_POOL[s.key]);
+  });
+  if (pool.length === 0) return _V21_PRACTICE_DEFAULT[_v21PracticeIdx % _V21_PRACTICE_DEFAULT.length];
+  return pool[_v21PracticeIdx % pool.length];
+}
+function _v21RenderPractice() {
+  try {
+    const p = _v21PickPractice();
+    const mEl = document.getElementById('v21PracticeMain');
+    const wEl = document.getElementById('v21PracticeWhy');
+    if (mEl) mEl.textContent = p.a;
+    if (wEl) wEl.textContent = p.w;
+  } catch(e){}
+}
+function _v21NextPractice() {
+  _v21PracticeIdx++;
+  _v21RenderPractice();
+}
+function _v21MarkPractice() {
+  try {
+    const card = document.getElementById('v21PracticeCard');
+    if (card) {
+      card.style.transition = 'all .4s';
+      card.style.background = 'linear-gradient(135deg,#F0FDF4 0%,#DCFCE7 100%)';
+      const wEl = document.getElementById('v21PracticeWhy');
+      if (wEl) wEl.innerHTML = '✓ 오늘 하나 실천 · <b>잘하셨어요!</b>';
+    }
+    // localStorage에 저장 · 리포트에서 활용
+    const today = new Date().toISOString().slice(0,10);
+    const done = JSON.parse(localStorage.getItem('practiceDoneV1') || '{}');
+    done[today] = (done[today] || 0) + 1;
+    localStorage.setItem('practiceDoneV1', JSON.stringify(done));
+  } catch(e){}
+}
+
 function _v21OpenNearbyMap() {
   try {
     const rec = _v21CurrentRec;
