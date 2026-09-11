@@ -2316,6 +2316,24 @@ window.appIcon = function(name, size){
 
         <!-- ① 다음 한 끼 추천 · 2줄 타이틀 · 음식만 색 -->
         <div style="background:#fff;border-radius:20px;padding:22px 20px 16px;box-shadow:0 6px 20px rgba(15,23,42,.05);margin-bottom:12px;margin-top:14px">
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+            <div style="flex-shrink:0;width:54px;height:54px;border-radius:18px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)">
+              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+                <rect x="8" y="12" width="3" height="16" rx="1.5" fill="#2563EB"/>
+                <rect x="7" y="5" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width="1.2"/>
+                <rect x="9.3" y="5" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width="1.2"/>
+                <rect x="11.6" y="5" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width="1.2"/>
+                <circle cx="20" cy="20" r="9" fill="#FFF" stroke="#0F172A" stroke-width="1.6"/>
+                <circle cx="20" cy="20" r="5.5" fill="#DBEAFE" stroke="#0F172A" stroke-width="1.2"/>
+                <ellipse cx="30" cy="9" rx="3" ry="4" fill="#FFF" stroke="#0F172A" stroke-width="1.4"/>
+                <rect x="28.5" y="12" width="3" height="16" rx="1.5" fill="#2563EB"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;color:#94A3B8;font-weight:800;letter-spacing:.3px;text-transform:uppercase">오늘의 코칭</div>
+              <div style="font-size:12px;color:#64748B;font-weight:600;margin-top:2px">지금 · <span id="v21MealSlotSub">점심 시간</span></div>
+            </div>
+          </div>
           <div id="v21HeroTitle" style="font-size:22px;font-weight:800;color:#17243A;letter-spacing:-.5px;line-height:1.35">
             오늘 <span id="v21MealSlot">점심</span>,<br>
             <span id="v21RecName" style="color:#15803D">고등어구이</span> 어때?
@@ -2366,12 +2384,30 @@ window.appIcon = function(name, size){
 
         <!-- ② 최근 식사 · 풀 폭 (2×3 파스텔 셀) -->
         <div id="v20RecentMealCard" style="background:#fff;border-radius:18px;padding:15px 14px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-            <div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:12px">
+            <div style="flex-shrink:0;width:48px;height:48px;border-radius:16px;background:#DBEAFE;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)">
+              <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+                <rect x="8" y="12" width="3" height="16" rx="1.5" fill="#2563EB"/>
+                <rect x="7" y="5" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width="1.2"/>
+                <rect x="9.3" y="5" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width="1.2"/>
+                <rect x="11.6" y="5" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width="1.2"/>
+                <circle cx="20" cy="20" r="9" fill="#FFF" stroke="#0F172A" stroke-width="1.6"/>
+                <circle cx="20" cy="14.5" r=".7" fill="#0F172A"/>
+                <circle cx="20" cy="25.5" r=".7" fill="#0F172A"/>
+                <circle cx="14.5" cy="20" r=".7" fill="#0F172A"/>
+                <circle cx="25.5" cy="20" r=".7" fill="#0F172A"/>
+                <line x1="20" y1="20" x2="20" y2="16" stroke="#0F172A" stroke-width="1.6" stroke-linecap="round"/>
+                <line x1="20" y1="20" x2="23" y2="22" stroke="#0F172A" stroke-width="1.6" stroke-linecap="round"/>
+                <circle cx="20" cy="20" r="1.2" fill="#FBBF24"/>
+                <ellipse cx="30" cy="9" rx="3" ry="4" fill="#FFF" stroke="#0F172A" stroke-width="1.4"/>
+                <rect x="28.5" y="12" width="3" height="16" rx="1.5" fill="#2563EB"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0">
               <div style="font-size:11px;color:#94A3B8;font-weight:700">오늘 하루 · 일일 권장량 대비</div>
               <div id="v20RecentMealName" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-top:2px">오늘 첫 기록을 남겨보세요</div>
             </div>
-            <div id="v21RecentScore" style="font-size:11px;font-weight:800;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:99px">—점</div>
+            <div id="v21RecentScore" style="font-size:11px;font-weight:800;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:99px;flex-shrink:0">—점</div>
           </div>
           <div id="v21RecentHex"></div>
           <div id="v20RecentMealComment" style="background:#EFF6FF;color:#1E40AF;font-size:11.5px;font-weight:700;line-height:1.55;padding:10px 12px;border-radius:12px;margin-top:11px;display:flex;justify-content:space-between;align-items:center;gap:8px">
@@ -2383,7 +2419,20 @@ window.appIcon = function(name, size){
 
         <!-- ③ 내 몸 신호 · 풀 폭 -->
         <div id="v20BodySignalCard" style="background:#fff;border-radius:18px;padding:15px 14px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:14px">
-          <div style="font-size:11px;color:#94A3B8;font-weight:700">💡 내 몸 신호</div>
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:8px">
+            <div style="flex-shrink:0;width:48px;height:48px;border-radius:16px;background:#DCFCE7;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)">
+              <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+                <circle cx="17" cy="11" r="5" fill="#FFF" stroke="#0F172A" stroke-width="1.8"/>
+                <path d="M8 32 C8 24 12 19 17 19 C22 19 26 24 26 32 Z" fill="#FFF" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M22 22 C24 21 25 22 24 24 L22 27" stroke="#0F172A" stroke-width="1.6" fill="#FFF" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 24 L16 26 L20 22" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M31 12 L28 20 L31 20 L28 30 L34 20 L31 20 L34 12 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0;padding-top:4px">
+              <div style="font-size:11px;color:#94A3B8;font-weight:800;letter-spacing:.3px;text-transform:uppercase">내 몸 신호</div>
+            </div>
+          </div>
           <div id="v20BodySignalIcon" style="display:none"></div>
           <div id="v20BodySignalTitle" style="font-size:16px;font-weight:800;color:#0F172A;line-height:1.35;letter-spacing:-.3px;margin:4px 0 6px">요즘 배변이 개운하지 않다면?</div>
           <div id="v20BodySignalDesc" style="font-size:12.5px;color:#475569;font-weight:500;line-height:1.65;margin-bottom:10px">식이섬유·수분 부족과 관련될 수 있어요.</div>
