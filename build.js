@@ -126,9 +126,10 @@ async function build() {
             '_v21RenderHero', '_v21RenderRecentHex', '_v21MiniHexSVG', '_v21OpenRecReason',
             '_v21RerollHero', '_v21RenderHeroWithRec', '_findIngredientGroup', '_v21GetCategoryName',
             'REC_REASON_DB', '_v21ShowRecReasonSheet', '_v21GetRecReason', '_REC_REASON_ALIAS', '_CATEGORY_DISPLAY_RENAME',
-            '_v21ShowBodySignalDetail', '_V21_EMPTY_PREVIEW', '_v21StartEmptyCarousel', '_v21StopEmptyCarousel', '_v21UpdateEmptyPhoto', '_v21PhotoFallback',
+            '_v21ShowBodySignalDetail', '_V21_EMPTY_PREVIEW', '_v21StartEmptyCarousel', '_v21StopEmptyCarousel', '_v21UpdateEmptyPhoto', '_v21PhotoFallback', '_V21_EMPTY_PHOTOS', '_v21NutrientBars', '_v21Josa', '_getFoodLoadingStages', '_v21OpenDeliverySheet', '_v21TryAppLaunch', '_v21OpenNearbyMap', '_v21SwitchReportTab', '_v21RenderReportToday', '_v21RenderReportMonth', 'INGREDIENT_NUTRITION_DB', 'sumIngredientsNutrition', '_getPersonalRDA', '_getSajuHint', '_v21RenderPractice', '_v21NextPractice', '_v21MarkPractice', '_V21_PRACTICE_POOL', '_V21_PRACTICE_DEFAULT',
             'FOOD_INGREDIENT_GROUP', 'NUTRIENT_BANCHAN',
             'foodUserMemo', '_foodMemoOnInput', '_foodMemoAppend',
+            '_crowdSave', '_scheduleEditSave', '_editSaveTimer',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
             // v20 · 수면 체크
             'SLEEP_QUESTIONS', 'SLEEP_VAL', 'calculateSleepPattern', 'getSleepLifestyleContext', 'buildSleepCoaching',
