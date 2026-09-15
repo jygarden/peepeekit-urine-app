@@ -163,10 +163,10 @@ window.appIcon = function(name, size){
   /* ═══ v12 디자인 토큰 · Premium Health Report ═══ */
   :root{
     --gg-blue:#2E61C4;
-    --gg-blue-soft:#DFE9FB;
+    --gg-blue-soft:#E8EEFB;
     --gg-yellow:#F5D94F;
-    --gg-yellow-soft:#FFF9DC;
-    --gg-butter:#FFF9DC;
+    --gg-yellow-soft:#FEF9E7;
+    --gg-butter:#FEF9E7;
     --gg-butter-deep:#7B5F00;
     --gg-lime:#F5D94F;
     --gg-lime-deep:#7B5F00;
@@ -175,65 +175,65 @@ window.appIcon = function(name, size){
     --gg-danger:#D94A4A;
     --gg-ink:#1D3762;
     --gg-text:#233D68;
-    --gg-muted:#52698F;
-    --gg-line:#DEE6F3;
-    --gg-sub:#EAF0FC;
-    --gg-bg:#F2F5FC;
+    --gg-muted:#5D7597;
+    --gg-line:#E8EDF4;
+    --gg-sub:#F5F8FE;
+    --gg-bg:#FAFBFF;
     --gg-white:#FFFFFF;
-    /* 소프트 블루 공용 */
-    --gg-card-1:#EAF0FC;
-    --gg-card-2:#E2EAF9;
-    --gg-card-3:#DFE8F9;
-    --gg-icon-bg:#F7F9FF;
-    --gg-badge-bg:#D5E2F8;
+    /* 밝고 부드러운 팔레트 · 침울함 X */
+    --gg-card-1:#FFFFFF;
+    --gg-card-2:#F5F8FE;
+    --gg-card-3:#FEF9E7;
+    --gg-icon-bg:#F5F8FE;
+    --gg-badge-bg:#E8EEFB;
     --gg-badge-text:#31558D;
   }
-  /* ═══ 전역 소프트 블루 팔레트 통일 (홈·분석·리포트·결과·영양제·수면 등 모든 화면) ═══ */
-  body{background:#F2F5FC}
-  .screen{background:#F2F5FC}
+  /* ═══ 밝고 부드러운 팔레트 · 침울함 없이 · 모든 화면 통일 ═══ */
+  body{background:#FAFBFF}
+  .screen{background:#FAFBFF}
   .screen .page-title{color:#1D3762!important}
-  /* 하단 tabbar 통일 */
-  #ggTabbar{border-top-color:#DEE6F3!important}
-  #ggTabbar button{color:#52698F}
+  /* 하단 tabbar */
+  #ggTabbar{border-top-color:#E8EDF4!important}
+  #ggTabbar button{color:#5D7597}
   #ggTabbar [data-tab="today"]{color:#2E61C4}
-  /* home-card 통일 */
-  .home-card{background:#EAF0FC!important;border:0!important;box-shadow:none!important;border-radius:22px!important}
-  .home-card:hover{border-color:transparent!important}
+  /* home-card · 흰색 · 얇은 border · 밝은 느낌 */
+  .home-card{background:#FFFFFF!important;border:1px solid #E8EDF4!important;box-shadow:0 2px 8px rgba(30,58,138,.03)!important;border-radius:20px!important}
+  .home-card:hover{border-color:#DFE8F9!important}
   .home-card .card-title{color:#1D3762!important}
-  .home-card .card-meta{color:#52698F!important}
-  .home-card .card-orb, .home-card .card-pet-orb{background:#F7F9FF!important;color:#2E61C4!important}
+  .home-card .card-meta{color:#5D7597!important}
+  .home-card .card-orb, .home-card .card-pet-orb{background:#F5F8FE!important;color:#2E61C4!important}
   /* page-header · back button */
-  .page-header{background:#F2F5FC!important}
+  .page-header{background:#FAFBFF!important}
   .page-header .page-title, .page-header h1, .page-header h2{color:#1D3762!important}
   .back-btn{color:#1D3762}
   .screen [aria-label="뒤로"] svg, .screen [aria-label="홈으로"] svg{stroke:#1D3762!important}
-  /* 공용 card 클래스 */
-  .card:not(.chat-messages){background:#EAF0FC!important;border:0!important;box-shadow:none!important;border-radius:22px!important}
+  /* 공용 card 클래스 · 흰 배경 */
+  .card:not(.chat-messages){background:#FFFFFF!important;border:1px solid #E8EDF4!important;box-shadow:0 2px 8px rgba(30,58,138,.03)!important;border-radius:20px!important}
   /* upload-btn (사진 촬영 버튼) */
-  .upload-btn{background:#EAF0FC!important;border:0!important;color:#1D3762!important;box-shadow:none!important;border-radius:22px!important}
+  .upload-btn{background:#FFFFFF!important;border:1px solid #E8EDF4!important;color:#1D3762!important;box-shadow:0 2px 8px rgba(30,58,138,.03)!important;border-radius:20px!important}
   .upload-btn .lbl{color:#1D3762!important}
-  .upload-btn .sub{color:#52698F!important}
-  .upload-btn.accent{background:#264A8A!important;color:#fff!important}
+  .upload-btn .sub{color:#5D7597!important}
+  .upload-btn.accent{background:#264A8A!important;color:#fff!important;border:0!important}
   .upload-btn.accent .lbl{color:#fff!important}
   .upload-btn.accent .sub{color:#DAE5F8!important}
-  /* warning-banner */
-  .warning-banner{background:#DFE9FB!important;border-color:#C9D7EE!important;color:#1D3762!important}
-  .warning-banner .wtitle{color:#264A8A!important}
-  .warning-banner ul{color:#1D3762!important}
-  .warning-banner b{color:#264A8A!important}
+  /* warning-banner · 부드러운 노란 accent */
+  .warning-banner{background:#FEF9E7!important;border-color:#FDE68A!important;color:#78350F!important}
+  .warning-banner .wtitle{color:#78350F!important}
+  .warning-banner ul{color:#78350F!important}
+  .warning-banner b{color:#B45309!important}
   /* btn-outline */
-  .btn-outline{background:#EAF0FC!important;border:0!important;color:#2E61C4!important}
+  .btn-outline{background:#FFFFFF!important;border:1px solid #E8EDF4!important;color:#2E61C4!important}
   /* 캡처 화면 헤더 title */
   #foodPageTitle, #foodHeroTitle, .page-title{color:#1D3762!important}
   #foodHeroLabel{color:#264A8A!important}
-  #foodHeroSub{color:#52698F!important}
-  #foodProfileBadge{background:#DFE9FB!important;color:#2E61C4!important}
+  #foodHeroSub{color:#5D7597!important}
+  #foodProfileBadge{background:#F5F8FE!important;color:#2E61C4!important}
   /* 채팅 화면 */
-  .chat-header{background:#F2F5FC!important}
+  .chat-header{background:#FAFBFF!important}
   .chat-header h2{color:#1D3762!important}
-  .chat-suggest{background:#EAF0FC!important;color:#31558D!important;border:0!important}
-  /* meal-time-btn · 활성/비활성 구분 강화 (본인·가족/반려동물, 남성/여성 등 세그먼트) */
-  .meal-time-btn{background:#fff!important;color:#52698F!important;border:1px solid #DEE6F3!important;font-weight:600!important}
+  .chat-suggest{background:#F5F8FE!important;color:#31558D!important;border:0!important}
+  /* meal-time-btn · 활성/비활성 구분 강화 */
+  .meal-time-btn{background:#fff!important;color:#5D7597!important;border:1px solid #E8EDF4!important;font-weight:600!important}
   .meal-time-btn.active{background:#264A8A!important;color:#fff!important;border-color:#264A8A!important;font-weight:700!important;box-shadow:0 4px 12px rgba(38,74,138,.2)!important}
   /* v7 유틸 */
   .gg-font{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;letter-spacing:-.02em}
@@ -2359,7 +2359,7 @@ window.appIcon = function(name, size){
 
 
       <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
-      <div class="v20-home" style="background:#F2F5FC;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#19315B;letter-spacing:-.3px">
+      <div class="v20-home" style="background:#FAFBFF;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#19315B;letter-spacing:-.3px">
 
         <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
         <div style="padding:14px 0 4px">
@@ -2368,19 +2368,19 @@ window.appIcon = function(name, size){
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · 딥블루 hero -->
-        <div style="background:#264A8A;border-radius:28px;padding:23px 22px 8px;box-shadow:none;margin-bottom:14px;margin-top:4px;overflow:hidden">
-          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;flex-direction:row-reverse">
-            <div style="flex-shrink:0;width:54px;height:54px;border-radius:18px;background:#DFE9FB;display:flex;align-items:center;justify-content:center">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <!-- ① 다음 한 끼 추천 · 산뜻한 블루 hero -->
+        <div style="background:#3D63D9;border-radius:24px;padding:20px 20px 4px;box-shadow:none;margin-bottom:14px;margin-top:4px;overflow:hidden">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#E8EEFB;display:flex;align-items:center;justify-content:center">
+              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
                 <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
                 <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
                 <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
+                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#3D63D9" stroke="#17243A" stroke-width=".9"/>
                 <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
                 <circle cx="20" cy="22" r="5.5" fill="#DBEAFE" stroke="#17243A" stroke-width="1"/>
                 <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#17243A" stroke-width="1"/>
-                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
+                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#3D63D9" stroke="#17243A" stroke-width=".9"/>
               </svg>
             </div>
             <div style="flex:1;min-width:0">
@@ -2390,12 +2390,14 @@ window.appIcon = function(name, size){
               <div id="v21RecWhy" style="font-size:11px;color:#DAE5F8;font-weight:500;line-height:1.5;margin-top:3px">최근 식사에서 부족했던 단백질을 채울 수 있어요.</div>
             </div>
           </div>
-          <div id="v21HeroKcal" style="font-size:11px;color:#C4D4F0;font-weight:500;margin-bottom:10px">— kcal</div>
-          <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px"></div>
-          <div style="display:flex;gap:0;border-top:1px solid #5470A2;padding-top:4px">
-            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:transparent;border:none;padding:9px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:48px">↻ 다른 음식</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid #5470A2;padding:9px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:48px">🗺 내 주변</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid #5470A2;padding:9px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:48px">자세히 ›</button>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-left:56px">
+            <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:nowrap;overflow:hidden;flex:1;justify-content:flex-start"></div>
+            <div id="v21HeroKcal" style="font-size:11px;color:#C4D4F0;font-weight:500;flex-shrink:0;white-space:nowrap;text-align:right">— kcal</div>
+          </div>
+          <div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.2)">
+            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:transparent;border:none;padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">↻ 다른 음식</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid rgba(255,255,255,.2);padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">🗺 내 주변</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid rgba(255,255,255,.2);padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">자세히 ›</button>
           </div>
           <!-- 레거시 · JS 참조 유지 -->
           <div style="display:none">
@@ -2434,9 +2436,9 @@ window.appIcon = function(name, size){
         </div>
 
         <!-- ⓑ 내 몸 신호 · 실천 자리 대체 -->
-        <div id="v20BodySignalCard" style="background:#E2EAF9;border-radius:24px;padding:20px;border:0;box-shadow:none;margin-bottom:14px">
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
-            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#F7F9FF;display:flex;align-items:center;justify-content:center">
+        <div id="v20BodySignalCard" style="background:#FEF3C7;border-radius:24px;padding:20px 20px 16px;border:0;box-shadow:none;margin-bottom:14px">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#FFFFFF;display:flex;align-items:center;justify-content:center">
               <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
                 <circle cx="15" cy="11" r="5" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
                 <path d="M6 34 C6 25 10 19 15 19 C20 19 24 25 24 34 Z" fill="#FFF" stroke="#17243A" stroke-width="1.3" stroke-linejoin="round"/>
@@ -2446,21 +2448,21 @@ window.appIcon = function(name, size){
             </div>
             <div style="flex:1;min-width:0">
               <div id="v20BodySignalTitle" style="font-size:15px;font-weight:700;color:#1D3762;line-height:1.3;letter-spacing:-.3px">요즘 배변이 개운하지 않다면?</div>
-              <div id="v20BodySignalDesc" style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5;margin-top:3px">식이섬유·수분 부족과 관련될 수 있어요.</div>
+              <div id="v20BodySignalDesc" style="font-size:11px;color:#78654B;font-weight:500;line-height:1.5;margin-top:3px">식이섬유·수분 부족과 관련될 수 있어요.</div>
             </div>
           </div>
           <div id="v20BodySignalIcon" style="display:none"></div>
           <div id="v20BodySignalChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
           <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#92400E;font-weight:700;line-height:1.5"></div>
-          <div style="border-top:1px solid #C9D7EE;padding-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <span id="v20BodySignalDisclaimer" style="font-size:11px;color:#52698F;font-weight:500;flex:1">가능성 중 하나 · 지속되면 진료</span>
-            <button type="button" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:transparent;border:none;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
+          <div style="border-top:1px solid #FDE68A;padding-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <span id="v20BodySignalDisclaimer" style="font-size:11px;color:#78654B;font-weight:500;flex:1">가능성 중 하나 · 지속되면 진료</span>
+            <button type="button" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:transparent;border:none;font-size:11.5px;color:#B45309;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
           </div>
         </div>
 
         <!-- ② 최근 식사 · 풀 폭 (3×2 파스텔 셀) -->
-        <div id="v20RecentMealCard" style="background:#EAF0FC;border-radius:24px;padding:20px;border:0;box-shadow:none;margin-bottom:14px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px">
+        <div id="v20RecentMealCard" style="background:#FFFFFF;border-radius:24px;padding:20px 20px 16px;border:1px solid #E2EAF9;box-shadow:0 2px 10px rgba(30,58,138,.04);margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px">
             <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#F7F9FF;display:flex;align-items:center;justify-content:center">
               <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
                 <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
@@ -2486,7 +2488,7 @@ window.appIcon = function(name, size){
             <div id="v21RecentScore" style="font-size:11px;font-weight:700;color:#31558D;background:#D5E2F8;padding:4px 10px;border-radius:8px;flex-shrink:0">—점</div>
           </div>
           <div id="v21RecentHex"></div>
-          <div id="v20RecentMealComment" style="background:transparent;color:#47628F;font-size:11px;font-weight:500;line-height:1.5;padding:10px 0 0;border-top:1px solid #CFDCF1;border-radius:0;margin-top:11px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div id="v20RecentMealComment" style="background:transparent;color:#5D7597;font-size:11px;font-weight:500;line-height:1.5;padding:10px 0 0;border-top:1px solid #E8EDF4;border-radius:0;margin-top:11px;display:flex;justify-content:space-between;align-items:center;gap:8px">
             <span>사진 한 장이면 AI가 영양을 분석해드려요.</span>
             <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
           </div>
@@ -2494,7 +2496,7 @@ window.appIcon = function(name, size){
         </div>
 
         <!-- ⑤ 건강어때 스토어 · 헤드 + 4개 썸네일 스트립 -->
-        <div style="background:#DFE8F9;border:0;border-radius:22px;padding:17px 18px;margin-bottom:14px;box-shadow:none">
+        <div style="background:#FFFFFF;border:1px solid #E2EAF9;border-radius:22px;padding:17px 18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(30,58,138,.04)">
           <a href="https://smartstore.naver.com/checkmyhealth" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:0;min-height:50px">
             <div style="width:44px;height:44px;background:#F4F7FD;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg width="30" height="30" viewBox="0 0 64 64" fill="none"><path d="M18 22c0-8 6.3-14 14-14s14 6 14 14" stroke="#17243A" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M14 22h36l-2 32a4 4 0 0 1-4 3.6H20a4 4 0 0 1-4-3.6L14 22Z" fill="#E9F0FA" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><path d="M14 38h36l-1.8 16a4 4 0 0 1-4 3.6H19.8a4 4 0 0 1-4-3.6L14 38Z" fill="#3D73F5" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><rect x="22" y="32" width="20" height="4" rx="2" fill="#22C55E"/></svg>
@@ -3706,7 +3708,7 @@ window.appIcon = function(name, size){
 
   <!-- ════════════ 촬영 화면 ════════════ -->
   <!-- ════════════ v12 · 분석 허브 (분석 탭 진입 시 노출) ════════════ -->
-  <div class="screen gg-font" id="screenAnalyzeHub" style="background:#F2F5FC">
+  <div class="screen gg-font" id="screenAnalyzeHub" style="background:#FAFBFF">
     <div style="padding:6px 2px 100px">
       <div style="margin-bottom:16px">
         <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-bottom:4px">분석</div>
@@ -3714,7 +3716,7 @@ window.appIcon = function(name, size){
       </div>
 
       <!-- ═══ 상단 큰 세그먼트: 사람 / 반려동물 ═══ -->
-      <div style="background:#E2EAF9;border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:22px">
+      <div style="background:#F5F8FE;border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:22px">
         <button type="button" onclick="_v20SelectAnalyzeTarget('human')" data-tgt="human" class="v20-atgt-btn" style="background:#fff;color:#2E61C4;border:none;padding:12px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 2px 6px rgba(30,58,138,.08)">사람</button>
         <button type="button" onclick="_v20SelectAnalyzeTarget('pet')" data-tgt="pet" class="v20-atgt-btn" style="background:transparent;color:#52698F;border:none;padding:12px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-.3px">반려동물</button>
       </div>
@@ -3722,32 +3724,32 @@ window.appIcon = function(name, size){
       <!-- ═══ 사람 컨텐츠 · 4카드 ═══ -->
       <div id="v20AnalyzeHumanBlock">
         <div style="display:flex;flex-direction:column;gap:11px">
-          <button type="button" onclick="enterHuman()" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterHuman()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">소변검사</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">본인 / 1분 자동 판독</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterFood('human')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-meal.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterFood('human')" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-meal.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">식사 분석</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">칼로리·영양 균형 / 20초 AI 인식</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterIngredient()" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/ingredient-scan.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterIngredient()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/ingredient-scan.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">원재료·첨가물 분석</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">포장 식품 라벨 / 알레르기 체크</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterSupplement('human')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterSupplement('human')" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">영양제 분석</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">KRDA 대비 %DV / 중복 성분 체크</div>
@@ -3756,8 +3758,8 @@ window.appIcon = function(name, size){
           </button>
 
           <!-- v21 · 수면 카드 (사람만) -->
-          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/home-icons/sleep.png" alt="수면" style="width:34px;height:34px;object-fit:contain;margin-left:-4px"></div>
+          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/home-icons/sleep.png" alt="수면" style="width:34px;height:34px;object-fit:contain;margin-left:-4px"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">수면 체크</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px"><span id="v21AnalyzeSleepValue">최근 3일 평균</span> · 5문항 30초</div>
@@ -3770,24 +3772,24 @@ window.appIcon = function(name, size){
       <!-- ═══ 반려동물 컨텐츠 · 3카드 (원재료 X) ═══ -->
       <div id="v20AnalyzePetBlock" style="display:none">
         <div style="display:flex;flex-direction:column;gap:11px">
-          <button type="button" onclick="enterPet()" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterPet()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">소변검사</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">강아지·고양이 / 1분 자동 판독</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterFood('pet')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-food.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterFood('pet')" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-food.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">사료 분석</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">사료·간식 성분 분석</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterSupplement('pet')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
-            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterSupplement('pet')" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">영양제 분석</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">체중 기준 급여량 / 성분 분석</div>
@@ -4136,8 +4138,8 @@ window.appIcon = function(name, size){
   </div>
 
   <!-- ════════════ 🎯 큐레이션 화면 v7 (Pretendard · 브랜드 톤) ════════════ -->
-  <div class="screen" id="screenCuration" style="padding:0;background:#F2F5FC">
-    <div style="min-height:100vh;padding:16px 16px 100px;background:#F2F5FC;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#19315B;letter-spacing:-.3px">
+  <div class="screen" id="screenCuration" style="padding:0;background:#FAFBFF">
+    <div style="min-height:100vh;padding:16px 16px 100px;background:#FAFBFF;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#19315B;letter-spacing:-.3px">
 
       <!-- 상단 타이틀 -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
@@ -4151,8 +4153,8 @@ window.appIcon = function(name, size){
           <div style="font-size:15px;font-weight:700;color:#FFF;letter-spacing:-.3px;line-height:1.3;margin-bottom:3px">지금 필요한 영양부터</div>
           <div style="font-size:11px;color:#DAE5F8;line-height:1.5;font-weight:500">최근 7일 기록을 바탕으로 부족한 영양소를 분석했어요.</div>
         </div>
-        <div style="width:44px;height:44px;background:#DFE9FB;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        <div style="width:44px;height:44px;background:transparent;border:1px solid rgba(255,255,255,.25);border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
         </div>
       </div>
 
@@ -4184,93 +4186,65 @@ window.appIcon = function(name, size){
       <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
       <div class="page-title">🏷 식품 성분 분석</div>
     </div>
-    <div class="card" style="background:#E2EAF9;border:0">
-      <div style="display:flex;gap:12px;align-items:flex-start">
-        <div style="font-size:28px">🔍</div>
-        <div>
-          <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px;margin-bottom:4px">제품 성분표를 분석해드려요</div>
-          <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.55">
-            정제수·아스파탐·에리스리톨 같은 <b style="font-weight:700;color:#264A8A">인공첨가물의 인체 영향</b>까지 한눈에
-          </div>
+    <!-- 히어로 · LABEL SCAN -->
+    <div style="background:#264A8A;border-radius:24px;padding:20px 22px;margin-bottom:14px">
+      <div style="font-size:10.5px;font-weight:700;color:#FBBF24;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px">LABEL SCAN</div>
+      <div style="font-size:17px;font-weight:700;color:#FFF;letter-spacing:-.3px;line-height:1.35;margin-bottom:6px">성분표 한 장이면 충분해요</div>
+      <div style="font-size:12px;color:#DAE5F8;font-weight:500;line-height:1.55">원재료·첨가물·알레르기까지 자동 체크</div>
+    </div>
+
+    <!-- 예시 사진 카드 -->
+    <div style="background:#EAF0FC;border:0;border-radius:22px;padding:14px;margin-bottom:12px">
+      <div style="position:relative;border-radius:14px;overflow:hidden">
+        <img src="https://images.unsplash.com/photo-1543168256-418811576931?w=600&h=380&fit=crop" alt="성분표 촬영 예시" style="width:100%;display:block;aspect-ratio:16/10;object-fit:cover">
+        <!-- chip -->
+        <div style="position:absolute;top:12px;left:12px;background:rgba(38,74,138,.9);color:#FFF;font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:99px;backdrop-filter:blur(6px);z-index:2">성분표 전체가 보이게</div>
+        <!-- 코너 마커 -->
+        <svg style="position:absolute;top:8px;right:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16 2h6v6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg style="position:absolute;bottom:8px;left:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 16v6h6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg style="position:absolute;bottom:8px;right:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 16v6h-6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div style="text-align:center;font-size:11.5px;color:#52698F;font-weight:600;padding:10px 14px 4px">가까이서 · 그림자 없이 · 정면으로</div>
+    </div>
+
+    <!-- 3 서브 카드 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:#E2EAF9;border:0;border-radius:16px;padding:14px 8px;text-align:center">
+        <div style="width:36px;height:36px;background:transparent;border:1px solid #E8EDF4;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#264A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
         </div>
+        <div style="font-size:11.5px;font-weight:700;color:#1D3762">원재료</div>
+        <div style="font-size:10px;color:#52698F;font-weight:500;margin-top:2px">라벨 자동 스캔</div>
+      </div>
+      <div style="background:#DFE8F9;border:0;border-radius:16px;padding:14px 8px;text-align:center">
+        <div style="width:36px;height:36px;background:transparent;border:1px solid #E8EDF4;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#264A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:#1D3762">첨가물</div>
+        <div style="font-size:10px;color:#52698F;font-weight:500;margin-top:2px">E번호·화학명</div>
+      </div>
+      <div style="background:#DFE9FB;border:0;border-radius:16px;padding:14px 8px;text-align:center">
+        <div style="width:36px;height:36px;background:transparent;border:1px solid #E8EDF4;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#264A8A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:#1D3762">알러지</div>
+        <div style="font-size:10px;color:#52698F;font-weight:500;margin-top:2px">자동 크로스체크</div>
       </div>
     </div>
-    <!-- 📸 성분표 촬영 가이드 (예시 사진) -->
-    <div style="background:#FFF;border:1.5px solid #E5E7EB;border-radius:16px;padding:14px 14px 12px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.03)">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
-        <span style="font-size:16px">📸</span>
-        <div style="font-size:14px;font-weight:900;color:#0F172A;letter-spacing:-.3px">이렇게 촬영해주세요</div>
-      </div>
-      <!-- 예시 그림 (제품 뒷면 + 성분표 표시) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <!-- 좋은 예 -->
-        <div style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:12px;padding:8px 6px;text-align:center;position:relative">
-          <div style="position:absolute;top:6px;right:6px;background:#059669;color:#FFF;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px">GOOD</div>
-          <svg viewBox="0 0 100 90" style="width:100%;height:70px;margin-top:8px">
-            <!-- 제품 박스 -->
-            <rect x="20" y="10" width="60" height="70" rx="4" fill="#FFF" stroke="#065F46" stroke-width="1.5"/>
-            <!-- 성분표 영역 -->
-            <rect x="26" y="16" width="48" height="10" fill="#065F46"/>
-            <text x="50" y="23" text-anchor="middle" font-size="4.5" fill="#FFF" font-weight="bold">성 분 표</text>
-            <!-- 성분 텍스트 라인 -->
-            <line x1="26" y1="32" x2="70" y2="32" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="37" x2="72" y2="37" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="42" x2="65" y2="42" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="47" x2="70" y2="47" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="52" x2="68" y2="52" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="57" x2="72" y2="57" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="62" x2="60" y2="62" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="67" x2="68" y2="67" stroke="#0F172A" stroke-width=".8"/>
-            <line x1="26" y1="72" x2="70" y2="72" stroke="#0F172A" stroke-width=".8"/>
-          </svg>
-          <div style="font-size:10px;color:#065F46;font-weight:800;margin-top:2px">글자 선명 · 성분표 전체</div>
-        </div>
-        <!-- 나쁜 예 -->
-        <div style="background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:12px;padding:8px 6px;text-align:center;position:relative">
-          <div style="position:absolute;top:6px;right:6px;background:#DC2626;color:#FFF;font-size:9px;font-weight:900;padding:2px 6px;border-radius:6px">NO</div>
-          <svg viewBox="0 0 100 90" style="width:100%;height:70px;margin-top:8px">
-            <defs>
-              <filter id="blur"><feGaussianBlur stdDeviation="1.5"/></filter>
-            </defs>
-            <!-- 흐린 제품 -->
-            <rect x="15" y="20" width="50" height="55" rx="4" fill="#FFF" stroke="#991B1B" stroke-width="1.5" filter="url(#blur)"/>
-            <rect x="20" y="26" width="38" height="7" fill="#991B1B" filter="url(#blur)"/>
-            <line x1="20" y1="40" x2="55" y2="40" stroke="#0F172A" stroke-width=".8" filter="url(#blur)"/>
-            <line x1="20" y1="46" x2="52" y2="46" stroke="#0F172A" stroke-width=".8" filter="url(#blur)"/>
-            <line x1="20" y1="52" x2="55" y2="52" stroke="#0F172A" stroke-width=".8" filter="url(#blur)"/>
-          </svg>
-          <div style="font-size:10px;color:#991B1B;font-weight:800;margin-top:2px">흐림 · 잘림 · 어두움</div>
-        </div>
-      </div>
-      <!-- 팁 -->
-      <div style="background:#F8FAFC;border-radius:10px;padding:8px 12px">
-        <div style="font-size:11.5px;color:#334155;font-weight:700;line-height:1.7">
-          ✓ 제품 <b style="color:#059669">뒷면의 성분표</b>를 찍어주세요<br>
-          ✓ 글자가 <b style="color:#059669">선명하게</b> 보이도록<br>
-          ✓ 밝은 곳에서 <b style="color:#059669">전체가 나오게</b>
-        </div>
+
+    <!-- 촬영 팁 -->
+    <div style="background:#DFE9FB;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:14px;flex-shrink:0">💡</span>
+      <div style="font-size:11px;color:#1D3762;font-weight:500;line-height:1.6">
+        <b style="font-weight:700;color:#264A8A">가까이서</b> · 글자가 화면 60% 이상<br>
+        <b style="font-weight:700;color:#264A8A">정면으로</b> · 비스듬한 각도는 인식 어려움<br>
+        <b style="font-weight:700;color:#264A8A">밝은 곳</b>에서 · 반사·손가락 없이
       </div>
     </div>
-    <div class="warning-banner" style="background:#FAF5FF;border-color:#C4B5FD">
-      <div class="wtitle" style="color:#5B21B6">📸 정확한 분석을 위해</div>
-      <ul style="color:#6B21A8">
-        <li><b>가까이</b> — 글자가 화면을 꽉 채우게</li>
-        <li><b>정면으로</b> — 비스듬한 측면 사진은 인식 어려움</li>
-        <li><b>성분 표시 부분만</b> — 손가락·배경 가리기</li>
-        <li><b>밝은 곳</b>에서 반사·그림자 없이</li>
-        <li>흔들리지 않게 꽉 잡고 한 박자 기다린 후 촬영</li>
-      </ul>
-    </div>
-    <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start">
-      <span style="font-size:18px;flex-shrink:0">💡</span>
-      <div style="font-size:12px;color:#92400E;line-height:1.6">
-        <b>안 읽힐 때는?</b><br>
-        제품을 세워서 성분표만 화면 가득 담아보세요. 글자가 손가락 굵기 정도로 크게 보여야 잘 인식돼요!
-      </div>
-    </div>
-    <button class="upload-btn accent" style="border-color:#8B5CF6" onclick="safeCameraClick('ingredientCameraInput')">
+
+    <button class="upload-btn accent" onclick="safeCameraClick('ingredientCameraInput')">
       <div class="icon">📷</div>
-      <div class="lbl" style="color:#8B5CF6">카메라로 촬영</div>
+      <div class="lbl">카메라로 촬영</div>
       <div class="sub">성분표 사진을 찍어주세요</div>
     </button>
     <button class="upload-btn" onclick="openFileInput('ingredientGalleryInput')">
@@ -8491,7 +8465,7 @@ function _v21RenderHero() {
     if (chipsEl) {
       // 히어로 chips · 딥 블루 hero 배경에 맞춘 반투명 블루
       const chips = shortages.slice(0,3).map(s =>
-        `<span style="background:#3A5C97;color:#F0F5FF;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:500">#${_v20Esc(s.label)}</span>`
+        `<span style="background:#FFFFFF;color:#1D3762;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:600">#${_v20Esc(s.label)}</span>`
       ).join('');
       chipsEl.innerHTML = chips;
     }
@@ -8661,7 +8635,7 @@ function _v21RenderHeroWithRec(rec) {
     if (chipsEl) {
       // 히어로 chips · 딥 블루 hero 배경에 맞춘 반투명 블루
       const chips = shortages.slice(0,3).map(s =>
-        `<span style="background:#3A5C97;color:#F0F5FF;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:500">#${_v20Esc(s.label)}</span>`
+        `<span style="background:#FFFFFF;color:#1D3762;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:600">#${_v20Esc(s.label)}</span>`
       ).join('');
       chipsEl.innerHTML = chips;
     }
@@ -12635,7 +12609,7 @@ function _v20RecRenderNutrients() {
     const tag = NUTRIENT_TAGLINE[s.key] || '';
     html += `<div style="background:#EAF0FC;border:0;border-radius:24px;padding:20px;margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <div style="width:28px;height:28px;background:#3D73F5;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${k.code}</div>
+        <div style="width:28px;height:28px;background:transparent;border:1.5px solid #3D63D9;border-radius:50%;color:#3D63D9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${k.code}</div>
         <span style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">${k.label}</span>
         <span style="font-size:10px;background:#D5E2F8;color:#31558D;padding:3px 9px;border-radius:8px;font-weight:700;margin-left:auto">${priorityLabels[idx]}</span>
       </div>
@@ -12694,7 +12668,7 @@ function _v20RecAppendMenus(el) {
   const menuHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><span style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">오늘 먹기 좋은 메뉴</span><span style="font-size:11px;color:#2E61C4;font-weight:700;cursor:pointer">더보기 ›</span></div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${menus.map((m,i) => `
     <div>
-      <div style="width:100%;height:80px;border-radius:16px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px">${emojiFor(m.name)}</div>
+      <div style="width:100%;height:80px;border-radius:16px;background:transparent;border:1px solid #E8EDF4;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px">${emojiFor(m.name)}</div>
       <div style="font-size:11px;font-weight:700;color:#1D3762;letter-spacing:-.2px">${_v20Esc(m.name)}</div>
       <div style="font-size:10px;color:#60759A;font-weight:500;margin-top:1px">${_v20Esc(m.reason)}</div>
     </div>
@@ -21872,89 +21846,137 @@ function goAddSupplement() {
 
   el.innerHTML = `
     <div style="padding:14px 4px">
-      <!-- 📷 사진 촬영 가이드 (음식·소변키트처럼) -->
-      <div style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid #FCD34D;border-radius:14px;padding:14px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <div style="font-size:20px">📸</div>
-          <div style="flex:1">
-            <div style="font-size:12.5px;font-weight:900;color:#78350F">이렇게 찍으면 정확해요</div>
-            <div style="font-size:10.5px;color:#92400E;font-weight:700;margin-top:1px">가이드 지키면 성분·복용법 자동 인식</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-          <div style="background:#fff;border:1.5px solid #FDE68A;border-radius:10px;padding:8px 6px;text-align:center">
-            <div style="font-size:22px;margin-bottom:4px">💊</div>
-            <div style="font-size:10px;color:#92400E;font-weight:900">1. 앞면</div>
-            <div style="font-size:8.5px;color:#78350F;font-weight:700;margin-top:2px;line-height:1.3">제품명·브랜드</div>
-          </div>
-          <div style="background:#fff;border:1.5px solid #FDE68A;border-radius:10px;padding:8px 6px;text-align:center">
-            <div style="font-size:22px;margin-bottom:4px">🧪</div>
-            <div style="font-size:10px;color:#92400E;font-weight:900">2. 성분표</div>
-            <div style="font-size:8.5px;color:#78350F;font-weight:700;margin-top:2px;line-height:1.3">영양성분 · 함량</div>
-          </div>
-          <div style="background:#fff;border:1.5px solid #FDE68A;border-radius:10px;padding:8px 6px;text-align:center">
-            <div style="font-size:22px;margin-bottom:4px">💧</div>
-            <div style="font-size:10px;color:#92400E;font-weight:900">3. 복용법</div>
-            <div style="font-size:8.5px;color:#78350F;font-weight:700;margin-top:2px;line-height:1.3">1일 X캡슐 · 언제</div>
-          </div>
-        </div>
-        <div style="font-size:10.5px;color:#92400E;font-weight:700;line-height:1.55;margin-top:10px;padding-top:10px;border-top:1px dashed #FDE68A">
-          💡 <b>팁</b> · 최소 <b>성분표 한 장</b>은 꼭 · 나머지는 있으면 좋음 · 여러 각도 다 촬영 후 선택
-        </div>
+      <!-- 히어로 · SUPPLEMENT SCAN -->
+      <div style="background:#264A8A;border-radius:24px;padding:20px 22px;margin-bottom:14px">
+        <div style="font-size:10.5px;font-weight:700;color:#FBBF24;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px">SUPPLEMENT SCAN</div>
+        <div style="font-size:17px;font-weight:700;color:#FFF;letter-spacing:-.3px;line-height:1.35;margin-bottom:6px">3장이면 완벽 분석</div>
+        <div style="font-size:12px;color:#DAE5F8;font-weight:500;line-height:1.55">성분·복용법·조합까지 자동 체크</div>
       </div>
 
-      <!-- 📷 사진으로 등록 (스마트) -->
-      <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1.5px solid #86EFAC;border-radius:14px;padding:14px 14px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-          <div style="font-size:20px">📷</div>
+      <!-- 슬롯 1 · 제품 앞면 -->
+      <div id="supShot1Card" style="background:#EAF0FC;border:0;border-radius:22px;padding:16px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:28px;height:28px;background:#264A8A;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FBBF24;flex-shrink:0">1</div>
           <div style="flex:1">
-            <div style="font-size:12.5px;font-weight:900;color:#065F46">라벨 사진으로 자동 등록</div>
-            <div style="font-size:10.5px;color:#059669;font-weight:700;margin-top:1px">성분·용량 자동 인식 · 최적 시간 추천</div>
+            <div style="font-size:14px;font-weight:700;color:#1D3762;letter-spacing:-.3px">제품 앞면</div>
+            <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:2px">제품명·브랜드 인식</div>
+          </div>
+          <div id="supShot1Check" style="display:none;background:#264A8A;color:#FBBF24;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <button onclick="safeCameraClick('supplementCameraInput')" style="background:#FFF;border:1.5px solid #059669;color:#059669;font-size:11.5px;font-weight:900;padding:11px;border-radius:10px;cursor:pointer;font-family:inherit">📷 카메라 촬영</button>
-          <button onclick="openFileInput('supplementGalleryInput')" style="background:#FFF;border:1.5px solid #86EFAC;color:#059669;font-size:11.5px;font-weight:900;padding:11px;border-radius:10px;cursor:pointer;font-family:inherit">🖼 갤러리에서</button>
+        <div style="position:relative;border-radius:14px;overflow:hidden;background:#F7F9FF;aspect-ratio:16/9">
+          <img id="supShot1Img" src="https://images.unsplash.com/photo-1550572017-edd951b55104?w=600&h=350&fit=crop" alt="제품 앞면 예시" style="width:100%;height:100%;object-fit:cover;display:block">
+          <div style="position:absolute;top:8px;left:8px;background:rgba(38,74,138,.9);color:#FFF;font-size:10px;font-weight:700;padding:4px 9px;border-radius:99px;backdrop-filter:blur(4px)">예시 사진</div>
+          <svg style="position:absolute;top:8px;right:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M16 2h6v6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg style="position:absolute;bottom:8px;left:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 16v6h6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg style="position:absolute;bottom:8px;right:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 16v6h-6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <input type="file" id="supplementCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleSupplementLabelFile(event)">
-        <input type="file" id="supplementGalleryInput" accept="image/*" style="display:none" onchange="handleSupplementLabelFile(event)">
-        <div id="supplementLabelLoading" style="display:none;background:rgba(255,255,255,.85);border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:10px">
-          <div style="width:22px;height:22px;border:3px solid #DCFCE7;border-top-color:#059669;border-radius:50%;animation:spin 1s linear infinite"></div>
-          <div style="flex:1;font-size:11.5px;color:#065F46;font-weight:900">라벨에서 성분 판독 중...</div>
-        </div>
+        <button onclick="document.getElementById('supShot1Input').click()" style="width:100%;margin-top:10px;background:#fff;color:#1D3762;border:1px solid #DEE6F3;border-radius:12px;padding:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px" id="supShot1Btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#264A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          앞면 촬영
+        </button>
+        <input type="file" id="supShot1Input" accept="image/*" capture="environment" style="display:none" onchange="_supShotCaptured(1, this)">
       </div>
+
+      <!-- 슬롯 2 · 성분표 (필수) -->
+      <div id="supShot2Card" style="background:#E2EAF9;border:0;border-radius:22px;padding:16px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:28px;height:28px;background:#264A8A;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FBBF24;flex-shrink:0">2</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;color:#1D3762;letter-spacing:-.3px">성분표 <span style="font-size:10px;color:#DC2626;font-weight:700;margin-left:4px">필수</span></div>
+            <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:2px">%DV·mg·1일 섭취량 인식</div>
+          </div>
+          <div id="supShot2Check" style="display:none;background:#264A8A;color:#FBBF24;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div style="position:relative;border-radius:14px;overflow:hidden;background:#F7F9FF;aspect-ratio:16/9">
+          <img id="supShot2Img" src="https://images.unsplash.com/photo-1584362917165-526a968579e8?w=600&h=350&fit=crop" alt="성분표 예시" style="width:100%;height:100%;object-fit:cover;display:block">
+          <div style="position:absolute;top:8px;left:8px;background:rgba(38,74,138,.9);color:#FFF;font-size:10px;font-weight:700;padding:4px 9px;border-radius:99px;backdrop-filter:blur(4px)">예시 사진</div>
+          <svg style="position:absolute;top:8px;right:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M16 2h6v6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg style="position:absolute;bottom:8px;left:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 16v6h6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg style="position:absolute;bottom:8px;right:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 16v6h-6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <button onclick="document.getElementById('supShot2Input').click()" style="width:100%;margin-top:10px;background:#264A8A;color:#FBBF24;border:0;border-radius:12px;padding:12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 12px rgba(38,74,138,.2)" id="supShot2Btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          성분표 촬영 (필수)
+        </button>
+        <input type="file" id="supShot2Input" accept="image/*" capture="environment" style="display:none" onchange="_supShotCaptured(2, this)">
+      </div>
+
+      <!-- 슬롯 3 · 복용법 -->
+      <div id="supShot3Card" style="background:#DFE8F9;border:0;border-radius:22px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:28px;height:28px;background:#264A8A;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#FBBF24;flex-shrink:0">3</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;color:#1D3762;letter-spacing:-.3px">복용법 <span style="font-size:10px;color:#94A3B8;font-weight:600;margin-left:4px">선택</span></div>
+            <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:2px">1일 몇 알·언제 인식</div>
+          </div>
+          <div id="supShot3Check" style="display:none;background:#264A8A;color:#FBBF24;width:22px;height:22px;border-radius:50%;align-items:center;justify-content:center">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div style="position:relative;border-radius:14px;overflow:hidden;background:#F7F9FF;aspect-ratio:16/9">
+          <img id="supShot3Img" src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&h=350&fit=crop" alt="복용법 예시" style="width:100%;height:100%;object-fit:cover;display:block">
+          <div style="position:absolute;top:8px;left:8px;background:rgba(38,74,138,.9);color:#FFF;font-size:10px;font-weight:700;padding:4px 9px;border-radius:99px;backdrop-filter:blur(4px)">예시 사진</div>
+          <svg style="position:absolute;top:8px;right:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M16 2h6v6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg style="position:absolute;bottom:8px;left:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M2 16v6h6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg style="position:absolute;bottom:8px;right:8px;pointer-events:none" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 16v6h-6" stroke="#FBBF24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <button onclick="document.getElementById('supShot3Input').click()" style="width:100%;margin-top:10px;background:#fff;color:#1D3762;border:1px solid #DEE6F3;border-radius:12px;padding:11px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px" id="supShot3Btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#264A8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          복용법 촬영
+        </button>
+        <input type="file" id="supShot3Input" accept="image/*" capture="environment" style="display:none" onchange="_supShotCaptured(3, this)">
+      </div>
+
+      <!-- 팁 · 조합 체크 안내 -->
+      <div style="background:#DFE9FB;border-radius:14px;padding:11px 14px;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start">
+        <span style="font-size:14px;flex-shrink:0">💡</span>
+        <div style="font-size:11px;color:#1D3762;font-weight:500;line-height:1.55">이미 먹고있는 영양제와 <b style="font-weight:700;color:#264A8A">조합 자동 체크</b> · 중복·상호작용 경고</div>
+      </div>
+
+      <div id="supplementLabelLoading" style="display:none;background:#EAF0FC;border-radius:14px;padding:11px 14px;margin-bottom:14px;align-items:center;gap:10px">
+        <div style="width:20px;height:20px;border:3px solid #DFE9FB;border-top-color:#264A8A;border-radius:50%;animation:spin 1s linear infinite"></div>
+        <div style="flex:1;font-size:11.5px;color:#1D3762;font-weight:700">라벨에서 성분 판독 중...</div>
+      </div>
+
+      <!-- Legacy · 예전 인풋 유지 (다른 곳에서 참조 가능) -->
+      <input type="file" id="supplementCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleSupplementLabelFile(event)">
+      <input type="file" id="supplementGalleryInput" accept="image/*" style="display:none" onchange="handleSupplementLabelFile(event)">
 
       <!-- 구분선 -->
-      <div style="text-align:center;font-size:10px;color:#94A3B8;font-weight:800;letter-spacing:1.5px;margin:10px 0 14px;position:relative">
-        <span style="background:#FEFCF5;padding:0 12px;position:relative;z-index:1">또는 직접 입력</span>
-        <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#E5D9BA"></div>
+      <div style="text-align:center;font-size:10px;color:#94A3B8;font-weight:700;letter-spacing:1.5px;margin:10px 0 14px;position:relative">
+        <span style="background:#F2F5FC;padding:0 12px;position:relative;z-index:1">또는 직접 입력</span>
+        <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#DEE6F3"></div>
       </div>
 
       <!-- 이름 입력 -->
-      <label style="display:block;font-size:12px;font-weight:900;color:#0F1F1A;margin-bottom:6px">영양제 이름</label>
-      <input id="_newSup_name" placeholder="예: 비타민D, 오메가3, 마그네슘…" style="width:100%;padding:13px 14px;border:1px solid #E5D9BA;border-radius:12px;background:#FFF;font-size:14px;font-weight:700;margin-bottom:6px;font-family:inherit;box-sizing:border-box" oninput="_previewSupplementTiming()">
-      <div id="_supNameHint" style="font-size:10.5px;color:#65756B;font-weight:700;padding:0 4px 12px">이름을 입력하면 자동으로 최적 시간을 추천해드려요</div>
+      <label style="display:block;font-size:12px;font-weight:700;color:#1D3762;margin-bottom:6px">영양제 이름</label>
+      <input id="_newSup_name" placeholder="예: 비타민D, 오메가3, 마그네슘…" style="width:100%;padding:13px 14px;border:1px solid #DEE6F3;border-radius:12px;background:#FFF;font-size:14px;font-weight:600;color:#1D3762;margin-bottom:6px;font-family:inherit;box-sizing:border-box" oninput="_previewSupplementTiming()">
+      <div id="_supNameHint" style="font-size:10.5px;color:#52698F;font-weight:500;padding:0 4px 12px">이름을 입력하면 자동으로 최적 시간을 추천해드려요</div>
 
       <!-- 용량 -->
-      <label style="display:block;font-size:12px;font-weight:900;color:#0F1F1A;margin-bottom:6px">용량 (선택)</label>
-      <input id="_newSup_dose" placeholder="예: 1000IU, 500mg (선택 사항)" style="width:100%;padding:13px 14px;border:1px solid #E5D9BA;border-radius:12px;background:#FFF;font-size:14px;font-weight:700;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
+      <label style="display:block;font-size:12px;font-weight:700;color:#1D3762;margin-bottom:6px">용량 (선택)</label>
+      <input id="_newSup_dose" placeholder="예: 1000IU, 500mg (선택 사항)" style="width:100%;padding:13px 14px;border:1px solid #DEE6F3;border-radius:12px;background:#FFF;font-size:14px;font-weight:600;color:#1D3762;margin-bottom:14px;font-family:inherit;box-sizing:border-box">
 
       <!-- 시간대 -->
-      <label style="display:block;font-size:12px;font-weight:900;color:#0F1F1A;margin-bottom:6px">복용 시간대</label>
-      <select id="_newSup_slot" style="width:100%;padding:13px 14px;border:1px solid #E5D9BA;border-radius:12px;background:#FFF;font-size:13px;font-weight:700;color:#0F1F1A;margin-bottom:14px;font-family:inherit">
+      <label style="display:block;font-size:12px;font-weight:700;color:#1D3762;margin-bottom:6px">복용 시간대</label>
+      <select id="_newSup_slot" style="width:100%;padding:13px 14px;border:1px solid #DEE6F3;border-radius:12px;background:#FFF;font-size:13px;font-weight:600;color:#1D3762;margin-bottom:14px;font-family:inherit">
         ${slotOptions}
       </select>
 
       <!-- 자연 대체 미리보기 -->
-      <div id="_supNaturalPreview" style="display:none;background:#F0FDF4;border-left:3px solid #059669;padding:10px 13px;border-radius:0 10px 10px 0;margin-bottom:16px">
-        <div style="font-size:10px;font-weight:900;color:#065F46;letter-spacing:.8px;margin-bottom:3px">🌱 자연 대체 아이디어</div>
-        <div id="_supNaturalText" style="font-size:12px;color:#065F46;font-weight:800"></div>
+      <div id="_supNaturalPreview" style="display:none;background:#E2EAF9;border-left:3px solid #264A8A;padding:10px 13px;border-radius:0 12px 12px 0;margin-bottom:16px">
+        <div style="font-size:10px;font-weight:700;color:#264A8A;letter-spacing:.8px;margin-bottom:3px">🌱 자연 대체 아이디어</div>
+        <div id="_supNaturalText" style="font-size:12px;color:#1D3762;font-weight:600"></div>
       </div>
 
       <!-- 저장 -->
-      <button onclick="saveNewSupplement()" style="width:100%;background:#059669;color:#FFF;font-size:14px;font-weight:900;padding:14px;border-radius:14px;border:none;font-family:inherit;cursor:pointer">등록하기</button>
+      <button onclick="saveNewSupplement()" style="width:100%;background:#264A8A;color:#FBBF24;font-size:14px;font-weight:700;padding:14px;border-radius:14px;border:none;font-family:inherit;cursor:pointer;box-shadow:0 4px 12px rgba(38,74,138,.2)">등록하기</button>
 
-      <div style="text-align:center;margin-top:14px;font-size:10.5px;color:#65756B;font-weight:700;line-height:1.6">
+      <div style="text-align:center;margin-top:14px;font-size:10.5px;color:#52698F;font-weight:500;line-height:1.6">
         💡 등록 후 편집·삭제·복용 시간 변경 언제든 가능해요
       </div>
     </div>
@@ -21995,6 +22017,28 @@ function _previewSupplementTiming() {
 }
 
 // 📷 영양제 라벨 사진 → OCR → 성분 매칭 → 폼 자동 채움
+// 3-슬롯 촬영 · 슬롯별 상태
+let _supShots = { 1: null, 2: null, 3: null };
+async function _supShotCaptured(slot, input) {
+  const file = input && input.files && input.files[0];
+  if (!file) return;
+  try {
+    const dataUrl = await fileToDataUrlSafe(file);
+    _supShots[slot] = dataUrl;
+    const img = document.getElementById('supShot' + slot + 'Img');
+    const chk = document.getElementById('supShot' + slot + 'Check');
+    const btn = document.getElementById('supShot' + slot + 'Btn');
+    if (img) img.src = dataUrl;
+    if (chk) chk.style.display = 'flex';
+    if (btn) btn.textContent = (slot === 1 ? '앞면 ' : slot === 2 ? '성분표 ' : '복용법 ') + '다시 촬영';
+    // 성분표(2) 촬영되면 자동 분석 시작
+    if (slot === 2) {
+      // legacy 함수로 실행 (event 객체 대신 파일 넘김)
+      try { await handleSupplementLabelFile({ target: { files: [file] } }); } catch(e){ console.error(e); }
+    }
+  } catch(e) { console.error('_supShotCaptured', e); alert('사진 처리 실패: ' + e.message); }
+}
+
 async function handleSupplementLabelFile(event) {
   const file = event.target?.files?.[0];
   if (!file) return;
@@ -25615,14 +25659,14 @@ function updateGgTabbar(screenId) {
 }
 </script>
 <!-- ════════════ 📄 리포트 화면 (v20) ════════════ -->
-<div class="screen" id="screenReport" style="background:#F2F5FC">
+<div class="screen" id="screenReport" style="background:#FAFBFF">
   <div style="padding:20px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#19315B;letter-spacing:-.3px">
     <div style="margin-bottom:16px">
       <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-bottom:4px">리포트</div>
       <div id="v21ReportSubtitle" style="font-size:11px;color:#52698F;font-weight:500">기간별 내 몸의 변화 흐름</div>
     </div>
     <!-- 기간 탭 · 오늘 / 일주일 / 한달 -->
-    <div id="v21ReportTabs" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:#E2EAF9;padding:4px;border-radius:12px;margin-bottom:16px">
+    <div id="v21ReportTabs" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:#F5F8FE;padding:4px;border-radius:12px;margin-bottom:16px">
       <button data-period="today" onclick="_v21SwitchReportTab('today')" style="background:transparent;border:none;padding:10px 8px;border-radius:9px;font-size:12px;font-weight:700;color:#52698F;font-family:inherit;cursor:pointer">오늘</button>
       <button data-period="week" onclick="_v21SwitchReportTab('week')" style="background:#fff;border:none;padding:10px 8px;border-radius:9px;font-size:12px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;box-shadow:0 2px 6px rgba(30,58,138,.08)">일주일</button>
       <button data-period="month" onclick="_v21SwitchReportTab('month')" style="background:transparent;border:none;padding:10px 8px;border-radius:9px;font-size:12px;font-weight:700;color:#52698F;font-family:inherit;cursor:pointer">한달</button>
@@ -25632,7 +25676,7 @@ function updateGgTabbar(screenId) {
 </div>
 
 <!-- ════════════ 🌙 내 수면 체크 화면 (v20) ════════════ -->
-<div class="screen" id="screenSleepCheck" style="background:#F2F5FC">
+<div class="screen" id="screenSleepCheck" style="background:#FAFBFF">
   <div style="padding:16px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#1D3762;letter-spacing:-.3px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <button onclick="goHome()" style="background:transparent;border:none;padding:6px;cursor:pointer" aria-label="홈으로">
