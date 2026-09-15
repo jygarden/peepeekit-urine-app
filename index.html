@@ -232,9 +232,9 @@ window.appIcon = function(name, size){
   .chat-header{background:#F2F5FC!important}
   .chat-header h2{color:#1D3762!important}
   .chat-suggest{background:#EAF0FC!important;color:#31558D!important;border:0!important}
-  /* meal-time-btn */
-  .meal-time-btn{background:#EAF0FC!important;color:#52698F!important;border:0!important}
-  .meal-time-btn.active{background:#264A8A!important;color:#fff!important}
+  /* meal-time-btn · 활성/비활성 구분 강화 (본인·가족/반려동물, 남성/여성 등 세그먼트) */
+  .meal-time-btn{background:#fff!important;color:#52698F!important;border:1px solid #DEE6F3!important;font-weight:600!important}
+  .meal-time-btn.active{background:#264A8A!important;color:#fff!important;border-color:#264A8A!important;font-weight:700!important;box-shadow:0 4px 12px rgba(38,74,138,.2)!important}
   /* v7 유틸 */
   .gg-font{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;letter-spacing:-.02em}
   .gg-huge{font-size:26px;font-weight:700;line-height:1.25;letter-spacing:-.03em;color:var(--gg-ink)}
@@ -3726,7 +3726,7 @@ window.appIcon = function(name, size){
             <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">소변검사</div>
-              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">본인·가족 / 1분 자동 판독</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">본인 / 1분 자동 판독</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
@@ -4883,7 +4883,7 @@ window.appIcon = function(name, size){
       <div class="field">
         <label>어떤 유형인가요?</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <button id="apTypeAdult" class="meal-time-btn active" onclick="apSelectType('adult')">본인·가족</button>
+          <button id="apTypeAdult" class="meal-time-btn active" onclick="apSelectType('adult')">본인</button>
           <button id="apTypePet" class="meal-time-btn" onclick="apSelectType('pet')">반려동물</button>
         </div>
       </div>
@@ -4891,13 +4891,13 @@ window.appIcon = function(name, size){
       <div class="field">
         <label>프로필 사진 (선택)</label>
         <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
-          <div id="apPhotoPreview" onclick="pickProfilePhoto()" style="width:72px;height:72px;border-radius:50%;background:var(--gg-sub);border:1.5px dashed var(--gg-line);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center;color:var(--gg-muted)">
+          <div id="apPhotoPreview" onclick="pickProfilePhoto()" style="width:72px;height:72px;border-radius:50%;background:#fff;border:2px dashed #B8CDEB;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center;color:#2E61C4">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
           <div style="flex:1">
-            <button type="button" onclick="pickProfilePhoto()" style="width:100%;padding:10px 12px;border:1.5px solid var(--gg-line);border-radius:10px;background:#FFF;font-size:12.5px;font-weight:600;color:var(--gg-ink);cursor:pointer;font-family:inherit">사진 촬영·업로드</button>
-            <button type="button" onclick="clearProfilePhoto()" id="apPhotoClearBtn" style="width:100%;margin-top:6px;padding:7px;border:1px solid var(--gg-line);border-radius:10px;background:#FFF;font-size:11px;font-weight:600;color:var(--gg-muted);cursor:pointer;font-family:inherit;display:none">사진 지우기</button>
-            <div style="font-size:10.5px;color:var(--gg-muted);margin-top:4px">최대 5MB · 정사각 크롭 자동</div>
+            <button type="button" onclick="pickProfilePhoto()" style="width:100%;padding:11px 12px;border:1px solid #DEE6F3;border-radius:12px;background:#FFF;font-size:12.5px;font-weight:600;color:#1D3762;cursor:pointer;font-family:inherit">사진 촬영·업로드</button>
+            <button type="button" onclick="clearProfilePhoto()" id="apPhotoClearBtn" style="width:100%;margin-top:6px;padding:8px;border:1px solid #DEE6F3;border-radius:10px;background:#FFF;font-size:11px;font-weight:600;color:#52698F;cursor:pointer;font-family:inherit;display:none">사진 지우기</button>
+            <div style="font-size:10.5px;color:#94A3B8;margin-top:6px">최대 5MB · 정사각 크롭 자동</div>
           </div>
         </div>
         <input type="file" id="apPhotoFile" accept="image/*" style="display:none" onchange="onProfilePhotoSelected(event)"/>
@@ -4990,7 +4990,7 @@ window.appIcon = function(name, size){
         </div>
       </div>
 
-      <div class="field">
+      <div class="field" id="apAllergiesField">
         <label>알레르기 (선택, 쉼표로 구분)</label>
         <input type="text" id="apAllergies" placeholder="예: 우유, 견과류" style="width:100%;padding:11px 14px;border-radius:12px;border:1.5px solid #E5E7EB;font-size:14px;font-family:inherit"/>
         <div style="font-size:11px;color:#94A3B8;margin-top:4px">이 프로필로 성분 분석 시 자동 크로스체크됩니다</div>
@@ -24171,6 +24171,9 @@ function apSelectType(type) {
   // 중성화 필드 (반려동물만)
   const neuterField = document.getElementById('apNeuterField');
   if (neuterField) neuterField.style.display = type === 'pet' ? 'block' : 'none';
+  // 알레르기 필드 (반려동물은 숨김 · 보통 모르므로)
+  const allergiesField = document.getElementById('apAllergiesField');
+  if (allergiesField) allergiesField.style.display = type === 'pet' ? 'none' : 'block';
   // 생년월일 필드 (adult 필수)
   const birthField = document.getElementById('apBirthField');
   if (birthField) birthField.style.display = type === 'adult' ? 'block' : 'none';
@@ -25465,7 +25468,7 @@ function renderMyScreen() {
   })() : `
     <div style="background:var(--gg-sub);border:1px dashed var(--gg-line);border-radius:14px;padding:16px;text-align:center;cursor:pointer" onclick="goAddProfile()">
       <div style="font-size:13px;font-weight:600;color:var(--gg-ink)">첫 프로필을 추가해주세요</div>
-      <div style="font-size:11px;color:var(--gg-muted);margin-top:4px">본인·가족·반려동물 정보 등록</div>
+      <div style="font-size:11px;color:var(--gg-muted);margin-top:4px">본인·반려동물 정보 등록</div>
     </div>`;
 
   // 프로필 전환 chips
