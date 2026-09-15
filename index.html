@@ -162,25 +162,79 @@ window.appIcon = function(name, size){
   @font-face{font-family:'yg-jalnan';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.2/Jalnan.woff') format('woff');font-display:swap}
   /* ═══ v12 디자인 토큰 · Premium Health Report ═══ */
   :root{
-    --gg-blue:#3454C4;
-    --gg-blue-soft:#E5EAF7;
+    --gg-blue:#2E61C4;
+    --gg-blue-soft:#DFE9FB;
     --gg-yellow:#F5D94F;
     --gg-yellow-soft:#FFF9DC;
     --gg-butter:#FFF9DC;
     --gg-butter-deep:#7B5F00;
-    --gg-lime:#F5D94F;          /* v12: 네온 금지 → 브랜드 옐로로 통일 */
-    --gg-lime-deep:#7B5F00;      /* v12: 옐로 딥 톤 */
+    --gg-lime:#F5D94F;
+    --gg-lime-deep:#7B5F00;
     --gg-caution:#F4B942;
     --gg-caution-deep:#B45309;
     --gg-danger:#D94A4A;
-    --gg-ink:#182338;
-    --gg-text:#202735;
-    --gg-muted:#737986;
-    --gg-line:#E4E6E2;
-    --gg-sub:#F3F4F1;
-    --gg-bg:#FAFAF7;
+    --gg-ink:#1D3762;
+    --gg-text:#233D68;
+    --gg-muted:#52698F;
+    --gg-line:#DEE6F3;
+    --gg-sub:#EAF0FC;
+    --gg-bg:#F2F5FC;
     --gg-white:#FFFFFF;
+    /* 소프트 블루 공용 */
+    --gg-card-1:#EAF0FC;
+    --gg-card-2:#E2EAF9;
+    --gg-card-3:#DFE8F9;
+    --gg-icon-bg:#F7F9FF;
+    --gg-badge-bg:#D5E2F8;
+    --gg-badge-text:#31558D;
   }
+  /* ═══ 전역 소프트 블루 팔레트 통일 (홈·분석·리포트·결과·영양제·수면 등 모든 화면) ═══ */
+  body{background:#F2F5FC}
+  .screen{background:#F2F5FC}
+  .screen .page-title{color:#1D3762!important}
+  /* 하단 tabbar 통일 */
+  #ggTabbar{border-top-color:#DEE6F3!important}
+  #ggTabbar button{color:#52698F}
+  #ggTabbar [data-tab="today"]{color:#2E61C4}
+  /* home-card 통일 */
+  .home-card{background:#EAF0FC!important;border:0!important;box-shadow:none!important;border-radius:22px!important}
+  .home-card:hover{border-color:transparent!important}
+  .home-card .card-title{color:#1D3762!important}
+  .home-card .card-meta{color:#52698F!important}
+  .home-card .card-orb, .home-card .card-pet-orb{background:#F7F9FF!important;color:#2E61C4!important}
+  /* page-header · back button */
+  .page-header{background:#F2F5FC!important}
+  .page-header .page-title, .page-header h1, .page-header h2{color:#1D3762!important}
+  .back-btn{color:#1D3762}
+  .screen [aria-label="뒤로"] svg, .screen [aria-label="홈으로"] svg{stroke:#1D3762!important}
+  /* 공용 card 클래스 */
+  .card:not(.chat-messages){background:#EAF0FC!important;border:0!important;box-shadow:none!important;border-radius:22px!important}
+  /* upload-btn (사진 촬영 버튼) */
+  .upload-btn{background:#EAF0FC!important;border:0!important;color:#1D3762!important;box-shadow:none!important;border-radius:22px!important}
+  .upload-btn .lbl{color:#1D3762!important}
+  .upload-btn .sub{color:#52698F!important}
+  .upload-btn.accent{background:#264A8A!important;color:#fff!important}
+  .upload-btn.accent .lbl{color:#fff!important}
+  .upload-btn.accent .sub{color:#DAE5F8!important}
+  /* warning-banner */
+  .warning-banner{background:#DFE9FB!important;border-color:#C9D7EE!important;color:#1D3762!important}
+  .warning-banner .wtitle{color:#264A8A!important}
+  .warning-banner ul{color:#1D3762!important}
+  .warning-banner b{color:#264A8A!important}
+  /* btn-outline */
+  .btn-outline{background:#EAF0FC!important;border:0!important;color:#2E61C4!important}
+  /* 캡처 화면 헤더 title */
+  #foodPageTitle, #foodHeroTitle, .page-title{color:#1D3762!important}
+  #foodHeroLabel{color:#264A8A!important}
+  #foodHeroSub{color:#52698F!important}
+  #foodProfileBadge{background:#DFE9FB!important;color:#2E61C4!important}
+  /* 채팅 화면 */
+  .chat-header{background:#F2F5FC!important}
+  .chat-header h2{color:#1D3762!important}
+  .chat-suggest{background:#EAF0FC!important;color:#31558D!important;border:0!important}
+  /* meal-time-btn */
+  .meal-time-btn{background:#EAF0FC!important;color:#52698F!important;border:0!important}
+  .meal-time-btn.active{background:#264A8A!important;color:#fff!important}
   /* v7 유틸 */
   .gg-font{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;letter-spacing:-.02em}
   .gg-huge{font-size:26px;font-weight:700;line-height:1.25;letter-spacing:-.03em;color:var(--gg-ink)}
@@ -2305,46 +2359,43 @@ window.appIcon = function(name, size){
 
 
       <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
-      <div class="v20-home" style="background:#FBFBFD;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#0F172A;letter-spacing:-.2px">
+      <div class="v20-home" style="background:#F2F5FC;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#19315B;letter-spacing:-.3px">
 
         <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
         <div style="padding:14px 0 4px">
-          <div style="font-size:15px;font-weight:600;color:#64748B;letter-spacing:-.2px">안녕하세요, <b style="color:#0F172A;font-weight:800" id="v20ProfileName">재율님</b></div>
+          <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:700">재율님</b></div>
         </div>
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · 통일 타이포 -->
-        <div style="background:#fff;border-radius:18px;padding:16px;box-shadow:0 3px 12px rgba(15,23,42,.05);border:1px solid rgba(15,23,42,.06);margin-bottom:10px;margin-top:14px">
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-            <div style="flex-shrink:0;width:48px;height:48px;border-radius:16px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)">
+        <!-- ① 다음 한 끼 추천 · 딥블루 hero -->
+        <div style="background:#264A8A;border-radius:28px;padding:23px 22px 8px;box-shadow:none;margin-bottom:14px;margin-top:4px;overflow:hidden">
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:18px;flex-direction:row-reverse">
+            <div style="flex-shrink:0;width:54px;height:54px;border-radius:18px;background:#DFE9FB;display:flex;align-items:center;justify-content:center">
               <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <!-- 포크 · 얇은 선 -->
-                <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width=".9"/>
-                <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width=".9"/>
-                <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width=".9"/>
-                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#2563EB" stroke="#0F172A" stroke-width=".9"/>
-                <!-- 접시 -->
-                <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#0F172A" stroke-width="1.3"/>
-                <circle cx="20" cy="22" r="5.5" fill="#DBEAFE" stroke="#0F172A" stroke-width="1"/>
-                <!-- 스푼 -->
-                <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#0F172A" stroke-width="1"/>
-                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#2563EB" stroke="#0F172A" stroke-width=".9"/>
+                <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
+                <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
+                <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
+                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
+                <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
+                <circle cx="20" cy="22" r="5.5" fill="#DBEAFE" stroke="#17243A" stroke-width="1"/>
+                <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#17243A" stroke-width="1"/>
+                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
               </svg>
             </div>
             <div style="flex:1;min-width:0">
-              <div id="v21HeroTitle" style="font-size:15px;font-weight:700;color:#0F172A;letter-spacing:-.3px;line-height:1.3">
-                오늘 <span id="v21MealSlot">저녁</span>, <span id="v21RecName" style="font-weight:800">고등어구이</span> 어때?
+              <div id="v21HeroTitle" style="font-size:15px;font-weight:700;color:#FFF;letter-spacing:-.3px;line-height:1.3">
+                오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>, <span id="v21RecName" style="font-weight:800;color:#FFF">고등어구이</span> 어때?
               </div>
+              <div id="v21RecWhy" style="font-size:11px;color:#DAE5F8;font-weight:500;line-height:1.5;margin-top:3px">최근 식사에서 부족했던 단백질을 채울 수 있어요.</div>
             </div>
           </div>
-          <div id="v21RecWhy" style="font-size:11px;color:#64748B;font-weight:500;line-height:1.5;margin-bottom:4px">최근 식사에서 부족했던 단백질을 채울 수 있어요.</div>
-          <div id="v21HeroKcal" style="font-size:11px;color:#94A3B8;font-weight:500;margin-bottom:10px">— kcal</div>
-          <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
-          <div style="display:flex;gap:6px">
-            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#fff;border:1.5px solid #E5E7EB;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#64748B;font-family:inherit;cursor:pointer">↻ 다른 음식</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:#EFF6FF;border:none;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#2563EB;font-family:inherit;cursor:pointer">🗺 내 주변</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:#F8FAFC;border:none;padding:9px 4px;border-radius:10px;font-size:12px;font-weight:700;color:#64748B;font-family:inherit;cursor:pointer">자세히 ›</button>
+          <div id="v21HeroKcal" style="font-size:11px;color:#C4D4F0;font-weight:500;margin-bottom:10px">— kcal</div>
+          <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px"></div>
+          <div style="display:flex;gap:0;border-top:1px solid #5470A2;padding-top:4px">
+            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:transparent;border:none;padding:9px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:48px">↻ 다른 음식</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid #5470A2;padding:9px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:48px">🗺 내 주변</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid #5470A2;padding:9px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:48px">자세히 ›</button>
           </div>
           <!-- 레거시 · JS 참조 유지 -->
           <div style="display:none">
@@ -2383,81 +2434,74 @@ window.appIcon = function(name, size){
         </div>
 
         <!-- ⓑ 내 몸 신호 · 실천 자리 대체 -->
-        <div id="v20BodySignalCard" style="background:#fff;border-radius:18px;padding:16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:10px">
+        <div id="v20BodySignalCard" style="background:#E2EAF9;border-radius:24px;padding:20px;border:0;box-shadow:none;margin-bottom:14px">
           <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
-            <div style="flex-shrink:0;width:48px;height:48px;border-radius:16px;background:#DCFCE7;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <!-- 머리 -->
-                <circle cx="15" cy="11" r="5" fill="#FFF" stroke="#0F172A" stroke-width="1.3"/>
-                <!-- 몸통 -->
-                <path d="M6 34 C6 25 10 19 15 19 C20 19 24 25 24 34 Z" fill="#FFF" stroke="#0F172A" stroke-width="1.3" stroke-linejoin="round"/>
-                <!-- 체크 마크 -->
-                <path d="M11 27 L14 30 L19 24" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                <!-- 번개 -->
-                <path d="M31 8 L27 20 L30 20 L27 32 L35 18 L32 18 L35 8 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="1.1" stroke-linejoin="round"/>
+            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#F7F9FF;display:flex;align-items:center;justify-content:center">
+              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+                <circle cx="15" cy="11" r="5" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
+                <path d="M6 34 C6 25 10 19 15 19 C20 19 24 25 24 34 Z" fill="#FFF" stroke="#17243A" stroke-width="1.3" stroke-linejoin="round"/>
+                <path d="M11 27 L14 30 L19 24" stroke="#3D73F5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M31 8 L27 20 L30 20 L27 32 L35 18 L32 18 L35 8 Z" fill="#FBBF24" stroke="#17243A" stroke-width="1.1" stroke-linejoin="round"/>
               </svg>
             </div>
             <div style="flex:1;min-width:0">
-              <div id="v20BodySignalTitle" style="font-size:15px;font-weight:700;color:#0F172A;line-height:1.3;letter-spacing:-.3px">요즘 배변이 개운하지 않다면?</div>
-              <div id="v20BodySignalDesc" style="font-size:11px;color:#64748B;font-weight:500;line-height:1.5;margin-top:3px">식이섬유·수분 부족과 관련될 수 있어요.</div>
+              <div id="v20BodySignalTitle" style="font-size:15px;font-weight:700;color:#1D3762;line-height:1.3;letter-spacing:-.3px">요즘 배변이 개운하지 않다면?</div>
+              <div id="v20BodySignalDesc" style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5;margin-top:3px">식이섬유·수분 부족과 관련될 수 있어요.</div>
             </div>
           </div>
           <div id="v20BodySignalIcon" style="display:none"></div>
           <div id="v20BodySignalChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
           <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#92400E;font-weight:700;line-height:1.5"></div>
-          <div style="border-top:1px solid #F1F5F9;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <span id="v20BodySignalDisclaimer" style="font-size:10.5px;color:#94A3B8;font-weight:600;flex:1">가능성 중 하나 · 지속되면 진료</span>
-            <button type="button" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:transparent;border:none;font-size:11.5px;color:#2563EB;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
+          <div style="border-top:1px solid #C9D7EE;padding-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <span id="v20BodySignalDisclaimer" style="font-size:11px;color:#52698F;font-weight:500;flex:1">가능성 중 하나 · 지속되면 진료</span>
+            <button type="button" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:transparent;border:none;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
           </div>
         </div>
 
         <!-- ② 최근 식사 · 풀 폭 (3×2 파스텔 셀) -->
-        <div id="v20RecentMealCard" style="background:#fff;border-radius:18px;padding:16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:10px">
+        <div id="v20RecentMealCard" style="background:#EAF0FC;border-radius:24px;padding:20px;border:0;box-shadow:none;margin-bottom:14px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:12px">
-            <div style="flex-shrink:0;width:48px;height:48px;border-radius:16px;background:#DBEAFE;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04)">
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                <!-- 포크 -->
-                <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width=".9"/>
-                <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width=".9"/>
-                <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#0F172A" stroke-width=".9"/>
-                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#2563EB" stroke="#0F172A" stroke-width=".9"/>
-                <!-- 시계 -->
-                <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#0F172A" stroke-width="1.3"/>
-                <circle cx="20" cy="16.5" r=".7" fill="#0F172A"/>
-                <circle cx="20" cy="27.5" r=".7" fill="#0F172A"/>
-                <circle cx="14.5" cy="22" r=".7" fill="#0F172A"/>
-                <circle cx="25.5" cy="22" r=".7" fill="#0F172A"/>
-                <line x1="20" y1="22" x2="20" y2="17.5" stroke="#0F172A" stroke-width="1.3" stroke-linecap="round"/>
-                <line x1="20" y1="22" x2="23.5" y2="24" stroke="#0F172A" stroke-width="1.3" stroke-linecap="round"/>
+            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#F7F9FF;display:flex;align-items:center;justify-content:center">
+              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+                <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
+                <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
+                <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
+                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
+                <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
+                <circle cx="20" cy="16.5" r=".7" fill="#17243A"/>
+                <circle cx="20" cy="27.5" r=".7" fill="#17243A"/>
+                <circle cx="14.5" cy="22" r=".7" fill="#17243A"/>
+                <circle cx="25.5" cy="22" r=".7" fill="#17243A"/>
+                <line x1="20" y1="22" x2="20" y2="17.5" stroke="#17243A" stroke-width="1.3" stroke-linecap="round"/>
+                <line x1="20" y1="22" x2="23.5" y2="24" stroke="#17243A" stroke-width="1.3" stroke-linecap="round"/>
                 <circle cx="20" cy="22" r="1.2" fill="#FBBF24"/>
-                <!-- 스푼 -->
-                <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#0F172A" stroke-width="1"/>
-                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#2563EB" stroke="#0F172A" stroke-width=".9"/>
+                <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#17243A" stroke-width="1"/>
+                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
               </svg>
             </div>
             <div style="flex:1;min-width:0">
-              <div id="v20RecentMealName" style="font-size:15px;font-weight:700;color:#0F172A;letter-spacing:-.3px;line-height:1.3">오늘 하루 진행</div>
-              <div style="font-size:11px;color:#64748B;font-weight:500;line-height:1.5;margin-top:3px">일일 권장량 대비 · 6대 영양소</div>
+              <div id="v20RecentMealName" style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px;line-height:1.3">오늘 하루 진행</div>
+              <div style="font-size:11px;color:#60759A;font-weight:500;line-height:1.5;margin-top:3px">일일 권장량 대비 · 6대 영양소</div>
             </div>
-            <div id="v21RecentScore" style="font-size:11px;font-weight:700;color:#64748B;background:#F1F5F9;padding:4px 10px;border-radius:99px;flex-shrink:0">—점</div>
+            <div id="v21RecentScore" style="font-size:11px;font-weight:700;color:#31558D;background:#D5E2F8;padding:4px 10px;border-radius:8px;flex-shrink:0">—점</div>
           </div>
           <div id="v21RecentHex"></div>
-          <div id="v20RecentMealComment" style="background:#EFF6FF;color:#1E40AF;font-size:11.5px;font-weight:700;line-height:1.55;padding:10px 12px;border-radius:12px;margin-top:11px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div id="v20RecentMealComment" style="background:transparent;color:#47628F;font-size:11px;font-weight:500;line-height:1.5;padding:10px 0 0;border-top:1px solid #CFDCF1;border-radius:0;margin-top:11px;display:flex;justify-content:space-between;align-items:center;gap:8px">
             <span>사진 한 장이면 AI가 영양을 분석해드려요.</span>
-            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:11px;color:#2563EB;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
+            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
           </div>
           <div id="v20RecentMealChips" style="display:none"></div>
         </div>
 
         <!-- ⑤ 건강어때 스토어 · 헤드 + 4개 썸네일 스트립 -->
-        <div style="background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:18px;padding:14px 14px 12px;margin-bottom:16px;box-shadow:0 3px 10px rgba(15,23,42,.04)">
-          <a href="https://smartstore.naver.com/checkmyhealth" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:12px">
-            <div style="width:44px;height:44px;background:#EFF6FF;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="30" height="30" viewBox="0 0 64 64" fill="none"><path d="M18 22c0-8 6.3-14 14-14s14 6 14 14" stroke="#17243A" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M14 22h36l-2 32a4 4 0 0 1-4 3.6H20a4 4 0 0 1-4-3.6L14 22Z" fill="#E9F0FA" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><path d="M14 38h36l-1.8 16a4 4 0 0 1-4 3.6H19.8a4 4 0 0 1-4-3.6L14 38Z" fill="#3B82F6" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><rect x="22" y="32" width="20" height="4" rx="2" fill="#22C55E"/></svg>
+        <div style="background:#DFE8F9;border:0;border-radius:22px;padding:17px 18px;margin-bottom:14px;box-shadow:none">
+          <a href="https://smartstore.naver.com/checkmyhealth" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:0;min-height:50px">
+            <div style="width:44px;height:44px;background:#F4F7FD;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="30" height="30" viewBox="0 0 64 64" fill="none"><path d="M18 22c0-8 6.3-14 14-14s14 6 14 14" stroke="#17243A" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M14 22h36l-2 32a4 4 0 0 1-4 3.6H20a4 4 0 0 1-4-3.6L14 22Z" fill="#E9F0FA" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><path d="M14 38h36l-1.8 16a4 4 0 0 1-4 3.6H19.8a4 4 0 0 1-4-3.6L14 38Z" fill="#3D73F5" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><rect x="22" y="32" width="20" height="4" rx="2" fill="#22C55E"/></svg>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:13.5px;font-weight:800;color:#0F172A;letter-spacing:-.3px;margin-bottom:2px">내 몸에 맞는 건강 관리 시작하기</div>
-              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#64748B;font-weight:600">건강어때 스토어<span style="background:#EFF6FF;color:#2563EB;font-size:8.5px;font-weight:800;padding:1px 6px;border-radius:4px;letter-spacing:.3px">공식</span></div>
+              <div style="font-size:15px;font-weight:700;color:#233D68;letter-spacing:-.3px;line-height:1.3;margin-bottom:3px">내 몸에 맞는 건강 관리 시작하기</div>
+              <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#52698F;font-weight:500;line-height:1.5">건강어때 스토어<span style="background:#F7F9FF;color:#2E61C4;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.3px">공식</span></div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg>
           </a>
@@ -3553,7 +3597,7 @@ window.appIcon = function(name, size){
       <img id="foodResultImg" src="" alt="식단 이미지" style="display:none"/>
     </div>
     <div style="margin-top:14px">
-      <button onclick="shareFoodStory()" style="width:100%;margin-bottom:8px;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#EC4899,#F59E0B);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(236,72,153,.35)">📸 인스타 스토리로 공유</button>
+      <button onclick="shareFoodStory()" style="width:100%;margin-bottom:8px;padding:15px;border:none;border-radius:14px;background:#264A8A;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(38,74,138,.25)">📸 인스타 스토리로 공유</button>
       <button class="btn-download" style="background:linear-gradient(135deg,#F59E0B,#EA580C);box-shadow:0 3px 10px rgba(245,158,11,.35)" onclick="downloadFoodResult()">📥 결과 이미지 저장</button>
       <div class="action-row">
         <button class="btn-retake" style="border-color:#F59E0B;color:#F59E0B" onclick="showScreen('screenFoodCapture')">📷 다시 찍기</button>
@@ -3662,63 +3706,63 @@ window.appIcon = function(name, size){
 
   <!-- ════════════ 촬영 화면 ════════════ -->
   <!-- ════════════ v12 · 분석 허브 (분석 탭 진입 시 노출) ════════════ -->
-  <div class="screen gg-font" id="screenAnalyzeHub">
+  <div class="screen gg-font" id="screenAnalyzeHub" style="background:#F2F5FC">
     <div style="padding:6px 2px 100px">
       <div style="margin-bottom:16px">
-        <div style="font-size:28px;font-weight:900;color:#0F172A;letter-spacing:-.7px;margin-bottom:4px">분석</div>
-        <div style="font-size:12.5px;color:#64748B;font-weight:500">무엇을 분석할지 선택하세요</div>
+        <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-bottom:4px">분석</div>
+        <div style="font-size:11px;color:#52698F;font-weight:500">무엇을 분석할지 선택하세요</div>
       </div>
 
       <!-- ═══ 상단 큰 세그먼트: 사람 / 반려동물 ═══ -->
-      <div style="background:#F1F5F9;border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:22px">
-        <button type="button" onclick="_v20SelectAnalyzeTarget('human')" data-tgt="human" class="v20-atgt-btn" style="background:#2563EB;color:#fff;border:none;padding:12px;border-radius:11px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px">사람</button>
-        <button type="button" onclick="_v20SelectAnalyzeTarget('pet')" data-tgt="pet" class="v20-atgt-btn" style="background:transparent;color:#64748B;border:none;padding:12px;border-radius:11px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px">반려동물</button>
+      <div style="background:#E2EAF9;border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:22px">
+        <button type="button" onclick="_v20SelectAnalyzeTarget('human')" data-tgt="human" class="v20-atgt-btn" style="background:#fff;color:#2E61C4;border:none;padding:12px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 2px 6px rgba(30,58,138,.08)">사람</button>
+        <button type="button" onclick="_v20SelectAnalyzeTarget('pet')" data-tgt="pet" class="v20-atgt-btn" style="background:transparent;color:#52698F;border:none;padding:12px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-.3px">반려동물</button>
       </div>
 
       <!-- ═══ 사람 컨텐츠 · 4카드 ═══ -->
       <div id="v20AnalyzeHumanBlock">
         <div style="display:flex;flex-direction:column;gap:11px">
-          <button type="button" onclick="enterHuman()" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#FEF3C7;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterHuman()" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">소변검사</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">본인·가족 / 1분 자동 판독</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">소변검사</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">본인·가족 / 1분 자동 판독</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterFood('human')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#DBEAFE;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-meal.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterFood('human')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-meal.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">식사 분석</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">칼로리·영양 균형 / 20초 AI 인식</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">식사 분석</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">칼로리·영양 균형 / 20초 AI 인식</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterIngredient()" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#E9D5FF;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/ingredient-scan.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterIngredient()" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/ingredient-scan.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">원재료·첨가물 분석</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">포장 식품 라벨 / 알레르기 체크</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">원재료·첨가물 분석</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">포장 식품 라벨 / 알레르기 체크</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterSupplement('human')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#FEF9C3;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterSupplement('human')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/human-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">영양제 분석</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">KRDA 대비 %DV / 중복 성분 체크</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">영양제 분석</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">KRDA 대비 %DV / 중복 성분 체크</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
 
           <!-- v21 · 수면 카드 (사람만) -->
-          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#F5F3FF;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/home-icons/sleep.png" alt="수면" style="width:34px;height:34px;object-fit:contain;margin-left:-4px"></div>
+          <button type="button" onclick="try{enterSleepCheck()}catch(e){alert('수면체크 오류: '+e.message)}" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/home-icons/sleep.png" alt="수면" style="width:34px;height:34px;object-fit:contain;margin-left:-4px"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">수면 체크</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px"><span id="v21AnalyzeSleepValue">최근 3일 평균</span> · 5문항 30초</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">수면 체크</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px"><span id="v21AnalyzeSleepValue">최근 3일 평균</span> · 5문항 30초</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
         </div>
       </div>
@@ -3726,32 +3770,32 @@ window.appIcon = function(name, size){
       <!-- ═══ 반려동물 컨텐츠 · 3카드 (원재료 X) ═══ -->
       <div id="v20AnalyzePetBlock" style="display:none">
         <div style="display:flex;flex-direction:column;gap:11px">
-          <button type="button" onclick="enterPet()" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#FEF3C7;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterPet()" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">소변검사</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">강아지·고양이 / 1분 자동 판독</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">소변검사</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">강아지·고양이 / 1분 자동 판독</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterFood('pet')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#FED7AA;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-food.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterFood('pet')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-food.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">사료 분석</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">사료·간식 성분 분석</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">사료 분석</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">사료·간식 성분 분석</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
-          <button type="button" onclick="enterSupplement('pet')" style="width:100%;background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 6px rgba(15,23,42,.04)">
-            <div style="width:52px;height:52px;background:#FEE2E2;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
+          <button type="button" onclick="enterSupplement('pet')" style="width:100%;background:#EAF0FC;border:0;border-radius:22px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:none;min-height:50px">
+            <div style="width:44px;height:44px;background:#F7F9FF;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-supplement.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:800;color:#0F172A;letter-spacing:-.3px">영양제 분석</div>
-              <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px">체중 기준 급여량 / 성분 분석</div>
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">영양제 분석</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">체중 기준 급여량 / 성분 분석</div>
             </div>
-            <span style="color:#94A3B8;font-size:18px;font-weight:700">›</span>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
         </div>
-        <div style="background:#F8FAFC;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:11px;color:#64748B;line-height:1.6;font-weight:500">사료·간식 자체가 라벨 스캔이라 원재료 분석은 사료 분석에 포함돼요.</div>
+        <div style="background:#DFE9FB;border-radius:16px;padding:14px 16px;margin-top:14px;font-size:11px;color:#52698F;line-height:1.6;font-weight:500">사료·간식 자체가 라벨 스캔이라 원재료 분석은 사료 분석에 포함돼요.</div>
       </div>
     </div>
   </div>
@@ -3764,9 +3808,9 @@ window.appIcon = function(name, size){
       document.querySelectorAll('.v20-atgt-btn').forEach(b => {
         const on = b.dataset.tgt === t;
         b.style.background = on ? '#fff' : 'transparent';
-        b.style.color = on ? '#2563EB' : '#64748B';
-        b.style.fontWeight = on ? '800' : '700';
-        b.style.boxShadow = on ? '0 2px 6px rgba(15,23,42,.08)' : 'none';
+        b.style.color = on ? '#2E61C4' : '#52698F';
+        b.style.fontWeight = on ? '700' : '600';
+        b.style.boxShadow = on ? '0 2px 6px rgba(30,58,138,.08)' : 'none';
       });
     }
   </script>
@@ -4081,7 +4125,7 @@ window.appIcon = function(name, size){
         </div>
         <span class="cta-arrow">›</span>
       </a>
-      <button onclick="shareUrineStory()" style="width:100%;margin-bottom:8px;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#EC4899,#3B82F6);color:#fff;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(236,72,153,.35)">📸 인스타 스토리로 공유</button>
+      <button onclick="shareUrineStory()" style="width:100%;margin-bottom:8px;padding:15px;border:none;border-radius:14px;background:#264A8A;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(38,74,138,.25)">📸 인스타 스토리로 공유</button>
       <button class="btn-download" onclick="downloadResult()">📥 결과 이미지 저장</button>
       <button class="btn-download" style="background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 3px 10px rgba(16,185,129,.35)" onclick="downloadPDF()">📄 PDF 리포트 다운로드 (병원용)</button>
       <div class="action-row">
@@ -4092,41 +4136,43 @@ window.appIcon = function(name, size){
   </div>
 
   <!-- ════════════ 🎯 큐레이션 화면 v7 (Pretendard · 브랜드 톤) ════════════ -->
-  <div class="screen" id="screenCuration" style="padding:0;background:#F8F9FB">
-    <div style="min-height:100vh;padding:16px 16px 100px;background:#F8F9FB;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#0F172A">
+  <div class="screen" id="screenCuration" style="padding:0;background:#F2F5FC">
+    <div style="min-height:100vh;padding:16px 16px 100px;background:#F2F5FC;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#19315B;letter-spacing:-.3px">
 
       <!-- 상단 타이틀 -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div style="font-size:24px;font-weight:900;color:#0F172A;letter-spacing:-.5px">추천</div>
-        <button onclick="goHome()" style="background:#fff;border:1px solid #E5E7EB;padding:6px 12px;border-radius:99px;font-size:11px;color:#475569;font-weight:700;cursor:pointer;font-family:inherit">홈</button>
+        <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px">추천</div>
+        <button onclick="goHome()" style="background:#fff;border:0;padding:6px 12px;border-radius:99px;font-size:11px;color:#52698F;font-weight:600;cursor:pointer;font-family:inherit">홈</button>
       </div>
 
-      <!-- ① 상단 배너 -->
-      <div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <!-- ① 상단 배너 · 소프트 블루 -->
+      <div style="background:#264A8A;border:0;border-radius:24px;padding:20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px">
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:800;color:#1E3A8A;margin-bottom:3px">지금 필요한 영양부터</div>
-          <div style="font-size:11px;color:#1E40AF;line-height:1.5;font-weight:600">최근 7일 기록을 바탕으로 부족한 영양소를 분석했어요.</div>
+          <div style="font-size:15px;font-weight:700;color:#FFF;letter-spacing:-.3px;line-height:1.3;margin-bottom:3px">지금 필요한 영양부터</div>
+          <div style="font-size:11px;color:#DAE5F8;line-height:1.5;font-weight:500">최근 7일 기록을 바탕으로 부족한 영양소를 분석했어요.</div>
         </div>
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        <div style="width:44px;height:44px;background:#DFE9FB;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+        </div>
       </div>
 
-      <!-- ② 3 탭 -->
+      <!-- ② 3 탭 · 파스텔 블루 -->
       <div id="v20RecTabs" style="display:flex;gap:5px;margin-bottom:14px">
-        <button onclick="_v20RecSwitch('nutrient')" data-tab="nutrient" class="v20-rec-tab" style="flex:1;background:#fff;border:1px solid #2563EB;color:#2563EB;padding:8px;border-radius:99px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">영양소 추천</button>
-        <button onclick="_v20RecSwitch('food')" data-tab="food" class="v20-rec-tab" style="flex:1;background:#fff;border:1px solid #E5E7EB;color:#64748B;padding:8px;border-radius:99px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">음식 추천</button>
-        <button onclick="_v20RecSwitch('lifestyle')" data-tab="lifestyle" class="v20-rec-tab" style="flex:1;background:#fff;border:1px solid #E5E7EB;color:#64748B;padding:8px;border-radius:99px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">생활 팁</button>
+        <button onclick="_v20RecSwitch('nutrient')" data-tab="nutrient" class="v20-rec-tab" style="flex:1;background:#fff;border:0;color:#2E61C4;padding:10px;border-radius:99px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(30,58,138,.08)">영양소 추천</button>
+        <button onclick="_v20RecSwitch('food')" data-tab="food" class="v20-rec-tab" style="flex:1;background:transparent;border:0;color:#52698F;padding:10px;border-radius:99px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">음식 추천</button>
+        <button onclick="_v20RecSwitch('lifestyle')" data-tab="lifestyle" class="v20-rec-tab" style="flex:1;background:transparent;border:0;color:#52698F;padding:10px;border-radius:99px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit">생활 팁</button>
       </div>
 
       <!-- ③ 탭 컨텐츠 컨테이너 -->
       <div id="v20RecContent"></div>
 
-      <!-- ④ 하단 · 영양제 전에 음식 (클릭 시 식사 촬영으로 이동) -->
-      <button onclick="if(typeof enterFood==='function')enterFood('human')" style="width:100%;background:#FEF9C3;border:1px solid #FDE68A;border-radius:12px;padding:12px 14px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;font-family:inherit;text-align:left">
+      <!-- ④ 하단 · 영양제 전에 음식 (블루톤) -->
+      <button onclick="if(typeof enterFood==='function')enterFood('human')" style="width:100%;background:#E2EAF9;border:0;border-radius:22px;padding:17px 18px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;font-family:inherit;text-align:left;min-height:50px">
         <div style="flex:1">
-          <div style="font-size:12px;font-weight:800;color:#854D0E;margin-bottom:3px">⭐ 영양제를 추천하기 전에 음식을 추천해요</div>
-          <div style="font-size:10.5px;color:#92400E;font-weight:600;line-height:1.5">지금 식단을 찍으면 진짜 부족한 게 보여요.</div>
+          <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px;margin-bottom:3px">영양제 전에 음식을 먼저</div>
+          <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5">지금 식단을 찍으면 진짜 부족한 게 보여요</div>
         </div>
-        <span style="color:#A16207;font-size:16px;font-weight:700">›</span>
+        <span style="color:#94A3B8;font-size:16px;font-weight:600">›</span>
       </button>
 
     </div>
@@ -4138,14 +4184,13 @@ window.appIcon = function(name, size){
       <button class="back-btn" onclick="goHome()" aria-label="홈으로">←</button>
       <div class="page-title">🏷 식품 성분 분석</div>
     </div>
-    <div class="card" style="background:linear-gradient(135deg,#FAF7FF 0%,#F3EBFF 100%);border:1px solid #DDD0F8">
+    <div class="card" style="background:#E2EAF9;border:0">
       <div style="display:flex;gap:12px;align-items:flex-start">
         <div style="font-size:28px">🔍</div>
         <div>
-          <div style="font-size:14px;font-weight:800;color:#5B21B6;margin-bottom:4px">제품 성분표를 분석해드려요</div>
-          <div style="font-size:12px;color:#6B46C1;line-height:1.5">
-            정제수·아스파탐·에리스리톨 같은<br>
-            <b>인공첨가물의 인체 영향</b>까지 한눈에
+          <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px;margin-bottom:4px">제품 성분표를 분석해드려요</div>
+          <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.55">
+            정제수·아스파탐·에리스리톨 같은 <b style="font-weight:700;color:#264A8A">인공첨가물의 인체 영향</b>까지 한눈에
           </div>
         </div>
       </div>
@@ -8374,9 +8419,9 @@ function _v21RenderHero() {
       const chipsEl = document.getElementById('v21HeroChips');
       const titleEl = document.getElementById('v21HeroTitle');
       const nameEl = document.getElementById('v21RecName');
-      if (titleEl) titleEl.innerHTML = '먼저 <span style="color:#2563EB">음식을 찍어주세요</span>';
-      if (nameEl) { nameEl.textContent = '맞춤 추천 대기 중'; nameEl.style.color = '#94A3B8'; nameEl.style.fontSize = '22px'; }
-      if (kcalEl) kcalEl.textContent = '기록이 쌓이면 부족 영양을 채우는 음식을 알려드려요';
+      if (titleEl) titleEl.innerHTML = '먼저 <span style="color:#DAE7FF">음식을 찍어주세요</span>';
+      if (nameEl) { nameEl.textContent = '맞춤 추천 대기 중'; nameEl.style.color = '#C4D4F0'; nameEl.style.fontSize = '15px'; nameEl.style.fontWeight = '700'; }
+      if (kcalEl) { kcalEl.textContent = '기록이 쌓이면 부족 영양을 채우는 음식을 알려드려요'; kcalEl.style.color = '#C4D4F0'; }
       if (chipsEl) chipsEl.innerHTML = '';
       // 버튼 숨김
       const heroBtnRow = document.querySelector('#v21HeroChips + div');
@@ -8409,7 +8454,7 @@ function _v21RenderHero() {
     const chipsEl = document.getElementById('v21HeroChips');
     if (slotEl) slotEl.textContent = mealSlot;
     // 이름 스타일 리셋 (empty state에서 바뀐 색·크기 복원)
-    if (nameEl) { nameEl.style.color = '#15803D'; nameEl.style.fontSize = '30px'; }
+    if (nameEl) { nameEl.style.color = '#FFF'; nameEl.style.fontSize = '15px'; nameEl.style.fontWeight = '800'; }
     if (!rec) {
       if (nameEl) nameEl.textContent = '오늘의 추천';
       if (kcalEl) kcalEl.textContent = '— kcal';
@@ -8436,17 +8481,17 @@ function _v21RenderHero() {
       if (whyEl && shortages && shortages.length) {
         const labels = shortages.slice(0, 2).map(s => s.label).join('·');
         const josa = _v21Josa(shortages.slice(0,2).slice(-1)[0].label, '를', '을');
-        whyEl.innerHTML = `최근 식사에서 부족했던 <b style="color:#0F172A;font-weight:700">${_v20Esc(labels)}</b>${josa} 함께 채울 수 있어요.`;
+        whyEl.innerHTML = `최근 식사에서 부족했던 <b style="color:#FFF;font-weight:600">${_v20Esc(labels)}</b>${josa} 함께 채울 수 있어요.`;
         whyEl.style.display = 'block';
       }
     } catch(e){}
     // 사진 X · 데코 원만 유지 (촌스러움 방지)
-    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal';
+    if (kcalEl) { kcalEl.textContent = (rec.kcal || '—') + ' kcal'; kcalEl.style.color = '#C4D4F0'; }
     // chips
     if (chipsEl) {
-      // #해시태그 스타일 · 배경/이모지 X · 회색
+      // 히어로 chips · 딥 블루 hero 배경에 맞춘 반투명 블루
       const chips = shortages.slice(0,3).map(s =>
-        `<span style="color:#64748B;font-size:11px;font-weight:700;padding:2px 4px">#${_v20Esc(s.label)}</span>`
+        `<span style="background:#3A5C97;color:#F0F5FF;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:500">#${_v20Esc(s.label)}</span>`
       ).join('');
       chipsEl.innerHTML = chips;
     }
@@ -8612,11 +8657,11 @@ function _v21RenderHeroWithRec(rec) {
     const josaEl = document.getElementById('v21RecJosa');
     if (josaEl) josaEl.textContent = _v21Josa(displayName, '를', '을');
     // 사진 X · 데코 원만 유지
-    if (kcalEl) kcalEl.textContent = (rec.kcal || '—') + ' kcal';
+    if (kcalEl) { kcalEl.textContent = (rec.kcal || '—') + ' kcal'; kcalEl.style.color = '#C4D4F0'; }
     if (chipsEl) {
-      // #해시태그 스타일 · 배경/이모지 X · 회색
+      // 히어로 chips · 딥 블루 hero 배경에 맞춘 반투명 블루
       const chips = shortages.slice(0,3).map(s =>
-        `<span style="color:#64748B;font-size:11px;font-weight:700;padding:2px 4px">#${_v20Esc(s.label)}</span>`
+        `<span style="background:#3A5C97;color:#F0F5FF;border-radius:7px;padding:5px 8px;font-size:11px;font-weight:500">#${_v20Esc(s.label)}</span>`
       ).join('');
       chipsEl.innerHTML = chips;
     }
@@ -9072,8 +9117,8 @@ function _v21ShowBodySignalDetail() {
     backdrop.id = 'v21RecReasonSheet';
     backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
     backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.remove(); };
-    const chipsHtml = (sig.chips || []).map(c => `<span style="background:#F1F5F9;color:#334155;font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:3px">${c.emoji || ''} ${_v20Esc(c.label)}</span>`).join('');
-    const medicalHtml = sig.medical ? `<div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:11px 13px;margin-bottom:12px;display:flex;gap:7px;align-items:flex-start"><span style="font-size:14px;flex-shrink:0">⚠️</span><div style="font-size:11.5px;color:#92400E;font-weight:700;line-height:1.55">${_v20Esc(sig.medical)}</div></div>` : '';
+    const chipsHtml = (sig.chips || []).map(c => `<span style="background:#F7F9FF;color:#31558D;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:3px">${c.emoji || ''} ${_v20Esc(c.label)}</span>`).join('');
+    const medicalHtml = sig.medical ? `<div style="background:#DFE9FB;border:0;border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;gap:7px;align-items:flex-start"><span style="font-size:14px;flex-shrink:0">⚠️</span><div style="font-size:11px;color:#1D3762;font-weight:500;line-height:1.55">${_v20Esc(sig.medical)}</div></div>` : '';
 
     // 구체 메뉴 · 부족 영양소 매핑에서 최대 4개
     let concreteFoods = [];
@@ -9091,39 +9136,39 @@ function _v21ShowBodySignalDetail() {
       }
     } catch(e){}
     const foodsHtml = concreteFoods.length ? `<div style="margin-bottom:16px">
-      <div style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:8px">🍽 오늘 이런 메뉴 어때요?</div>
+      <div style="font-size:12px;font-weight:700;color:#1D3762;letter-spacing:-.2px;margin-bottom:8px">🍽 오늘 이런 메뉴 어때요?</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${concreteFoods.map(f => `<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:700;color:#065F46;text-align:center">${_v20Esc(f)}</div>`).join('')}
+        ${concreteFoods.map(f => `<div style="background:#EAF0FC;border:0;border-radius:14px;padding:10px 12px;font-size:12px;font-weight:600;color:#1D3762;text-align:center">${_v20Esc(f)}</div>`).join('')}
       </div>
     </div>` : '';
 
     // 왜 이런 신호가 나올까 · 추가 설명
     const whyHtml = `<div style="margin-bottom:16px">
-      <div style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:6px">🔍 왜 이런 신호가 나올까요?</div>
-      <div style="background:${sig.bg || '#F8FAFC'};border-radius:12px;padding:13px 15px;font-size:12.5px;color:#334155;font-weight:600;line-height:1.75">${sig.desc.replace(/<br>/g,' ')}</div>
+      <div style="font-size:12px;font-weight:700;color:#1D3762;letter-spacing:-.2px;margin-bottom:6px">🔍 왜 이런 신호가 나올까요?</div>
+      <div style="background:#EAF0FC;border-radius:14px;padding:13px 15px;font-size:11px;color:#52698F;font-weight:500;line-height:1.7">${sig.desc.replace(/<br>/g,' ')}</div>
     </div>`;
 
     // 실행 팁 · 3일/2주 안에 변화
     const tipHtml = `<div style="margin-bottom:14px">
-      <div style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:6px">📅 이렇게 챙기면 언제 달라져요?</div>
-      <div style="background:#EFF6FF;border-radius:12px;padding:11px 14px;font-size:12px;color:#1E40AF;font-weight:700;line-height:1.65">위 메뉴를 <b>3~5일</b> 꾸준히 챙기면 대부분 몸이 반응해요. <b>2주 이상</b> 지속되면 검진을 권해요.</div>
+      <div style="font-size:12px;font-weight:700;color:#1D3762;letter-spacing:-.2px;margin-bottom:6px">📅 이렇게 챙기면 언제 달라져요?</div>
+      <div style="background:#E2EAF9;border-radius:14px;padding:12px 14px;font-size:11px;color:#1D3762;font-weight:500;line-height:1.65">위 메뉴를 <b style="font-weight:700">3~5일</b> 꾸준히 챙기면 대부분 몸이 반응해요. <b style="font-weight:700">2주 이상</b> 지속되면 검진을 권해요.</div>
     </div>`;
 
     backdrop.innerHTML = `
-      <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 34px;width:100%;max-height:82vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+      <div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:82vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
-          <div>
-            <div style="font-size:11px;color:#8B5CF6;font-weight:800;letter-spacing:.3px;margin-bottom:6px">💡 내 몸이 보내는 신호</div>
-            <div style="font-size:19px;font-weight:900;color:#0F172A;letter-spacing:-.4px;line-height:1.3">${_v20Esc(sig.title)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:10.5px;color:#2E61C4;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">내 몸이 보내는 신호</div>
+            <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px;line-height:1.3">${_v20Esc(sig.title)}</div>
           </div>
-          <button onclick="document.getElementById('v21RecReasonSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:4px 8px;font-family:inherit">×</button>
+          <button onclick="document.getElementById('v21RecReasonSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:4px 8px;font-family:inherit;flex-shrink:0">×</button>
         </div>
         ${medicalHtml}
         ${whyHtml}
         ${foodsHtml}
-        ${chipsHtml ? `<div style="margin-bottom:16px"><div style="font-size:12.5px;font-weight:800;color:#0F172A;letter-spacing:-.2px;margin-bottom:8px">🥗 함께 챙기면 좋은 것</div><div style="display:flex;gap:6px;flex-wrap:wrap">${chipsHtml}</div></div>` : ''}
+        ${chipsHtml ? `<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1D3762;letter-spacing:-.2px;margin-bottom:8px">🥗 함께 챙기면 좋은 것</div><div style="display:flex;gap:6px;flex-wrap:wrap">${chipsHtml}</div></div>` : ''}
         ${tipHtml}
-        <div style="background:#F8FAFC;border-radius:10px;padding:10px 13px;font-size:11px;color:#64748B;font-weight:600;line-height:1.55">${_v20Esc(sig.disclaimer || '가능성 중 하나 · 지속되면 진료')}</div>
+        <div style="background:#DFE8F9;border-radius:14px;padding:11px 14px;font-size:11px;color:#52698F;font-weight:500;line-height:1.55">${_v20Esc(sig.disclaimer || '가능성 중 하나 · 지속되면 진료')}</div>
       </div>
       <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
     document.body.appendChild(backdrop);
@@ -9216,27 +9261,27 @@ function _v21RenderRecentHex() {
 // 🌈 6대 영양 바차트 · 건강어때 시그니처 · 색 절제 (통일 그레이 배경 + 네이비 바)
 // mode: 'grid' (2x3 카드 · 넓은 카드용) | 'compact' (한 행씩 · 좁은 카드용, 기본)
 function _v21NutrientBars(values, empty, mode) {
-  // 6대 영양소 · 각자 파스텔 색상으로 개성 부여
+  // 6대 영양소 · 소프트 블루 톤 통일
   const axes = [
-    { label:'탄수', bg:'#FEF3C7', textDark:'#92400E', barBg:'#FDE68A', barFg:'#F59E0B' },
-    { label:'단백질', bg:'#FEE2E2', textDark:'#991B1B', barBg:'#FECACA', barFg:'#EF4444' },
-    { label:'지방', bg:'#FED7AA', textDark:'#9A3412', barBg:'#FDBA74', barFg:'#EA580C' },
-    { label:'식이섬유', bg:'#DCFCE7', textDark:'#166534', barBg:'#BBF7D0', barFg:'#16A34A' },
-    { label:'비타민', bg:'#DBEAFE', textDark:'#1E40AF', barBg:'#BFDBFE', barFg:'#2563EB' },
-    { label:'미네랄', bg:'#E9D5FF', textDark:'#6B21A8', barBg:'#DDD6FE', barFg:'#9333EA' }
+    { label:'탄수', bg:'#F9FBFF', textDark:'#2C4979', barBg:'#DEE7F7', barFg:'#3D73F5' },
+    { label:'단백질', bg:'#F9FBFF', textDark:'#2C4979', barBg:'#DEE7F7', barFg:'#3D73F5' },
+    { label:'지방', bg:'#F9FBFF', textDark:'#2C4979', barBg:'#DEE7F7', barFg:'#3D73F5' },
+    { label:'식이섬유', bg:'#F9FBFF', textDark:'#2C4979', barBg:'#DEE7F7', barFg:'#3D73F5' },
+    { label:'비타민', bg:'#F9FBFF', textDark:'#2C4979', barBg:'#DEE7F7', barFg:'#3D73F5' },
+    { label:'미네랄', bg:'#F9FBFF', textDark:'#2C4979', barBg:'#DEE7F7', barFg:'#3D73F5' }
   ];
   if (mode === 'grid') {
     const cells = axes.map((ax, i) => {
       const v = empty ? 0 : Math.max(0, Math.min(100, Math.round(values[i] || 0)));
-      return `<div style="background:${ax.bg};border-radius:14px;padding:10px 11px">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:4px">
-          <span style="font-size:11px;color:${ax.textDark};font-weight:800;letter-spacing:-.2px">${ax.label}</span>
-          <span style="font-size:12px;color:${ax.textDark};font-weight:900;letter-spacing:-.3px">${empty ? '—' : v + '%'}</span>
+      return `<div style="background:${ax.bg};border-radius:12px;padding:11px 10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:4px">
+          <span style="font-size:12px;color:${ax.textDark};font-weight:600;letter-spacing:-.2px">${ax.label}</span>
+          <span style="font-size:12px;color:${ax.textDark};font-weight:700;letter-spacing:-.3px">${empty ? '—' : v + '%'}</span>
         </div>
-        <div style="background:${ax.barBg};height:9px;border-radius:99px;overflow:hidden"><div style="width:${v}%;height:100%;background:${ax.barFg};border-radius:99px;transition:width .4s ease"></div></div>
+        <div style="background:${ax.barBg};height:6px;border-radius:99px;overflow:hidden"><div style="width:${v}%;height:100%;background:${ax.barFg};border-radius:99px;transition:width .4s ease"></div></div>
       </div>`;
     }).join('');
-    return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">${cells}</div>`;
+    return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${cells}</div>`;
   }
   // compact 모드 · 한 축당 한 행 (라벨 + 바 + %)
   const rows = axes.map((ax, i) => {
@@ -9575,10 +9620,10 @@ function _v21RenderReportToday() {
   const today = new Date().toISOString().slice(0,10);
   const todayMeals = fh.filter(f => f.date && String(f.date).slice(0,10) === today);
   if (!todayMeals.length) {
-    el.innerHTML = `<div style="background:#fff;border-radius:16px;padding:32px 20px;text-align:center;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.04)">
+    el.innerHTML = `<div style="background:#EAF0FC;border-radius:24px;padding:32px 20px;text-align:center;border:0">
       <div style="font-size:38px;margin-bottom:10px">🍽</div>
-      <div style="font-size:15px;font-weight:800;color:#0F172A;margin-bottom:6px">오늘 첫 기록을 남겨보세요</div>
-      <div style="font-size:12px;color:#64748B;font-weight:600;line-height:1.6">식사 사진을 찍으면 오늘 하루 영양 진행률을 확인할 수 있어요.</div>
+      <div style="font-size:15px;font-weight:700;color:#1D3762;margin-bottom:6px;letter-spacing:-.3px">오늘 첫 기록을 남겨보세요</div>
+      <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5">식사 사진을 찍으면 오늘 하루 영양 진행률을 확인할 수 있어요</div>
     </div>`;
     return;
   }
@@ -9599,22 +9644,22 @@ function _v21RenderReportToday() {
   const mealListHtml = todayMeals.map(m => {
     const name = m.foodName || (m.foods && m.foods[0] && m.foods[0].name) || '식사';
     const time = m.date ? new Date(m.date).toTimeString().slice(0,5) : '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #F1F5F9;font-size:12.5px"><span style="color:#0F172A;font-weight:700">${_v20Esc(name)}</span><span style="color:#94A3B8;font-weight:600">${time}</span></div>`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #CFDCF1;font-size:12px"><span style="color:#1D3762;font-weight:700">${_v20Esc(name)}</span><span style="color:#60759A;font-weight:500">${time}</span></div>`;
   }).join('');
   el.innerHTML = `
-    <div style="background:#fff;border-radius:18px;padding:18px 16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:12px">
+    <div style="background:#EAF0FC;border-radius:24px;padding:20px;border:0;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div>
-          <div style="font-size:11px;color:#94A3B8;font-weight:700">오늘 · 일일 권장량 대비</div>
-          <div style="font-size:22px;font-weight:900;color:${avg>=80?'#15803D':avg>=50?'#B45309':'#B91C1C'};letter-spacing:-.5px;margin-top:2px">${avg}점</div>
+          <div style="font-size:11px;color:#60759A;font-weight:500">오늘 · 일일 권장량 대비</div>
+          <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-top:2px">${avg}<span style="font-size:14px;color:#52698F;font-weight:600;margin-left:2px">점</span></div>
         </div>
-        <div style="background:#F1F5F9;color:#64748B;font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:99px">${todayMeals.length}끼 기록</div>
+        <div style="background:#D5E2F8;color:#31558D;font-size:11px;font-weight:700;padding:5px 11px;border-radius:8px">${todayMeals.length}끼 기록</div>
       </div>
       ${_v21NutrientBars(values, false, 'grid')}
     </div>
-    <div style="background:#fff;border-radius:16px;padding:14px 16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 10px rgba(15,23,42,.04)">
-      <div style="font-size:12px;color:#94A3B8;font-weight:700;margin-bottom:6px">오늘 먹은 식사</div>
-      ${mealListHtml || '<div style="font-size:12px;color:#94A3B8;padding:10px 0">기록 없음</div>'}
+    <div style="background:#E2EAF9;border-radius:24px;padding:20px;border:0">
+      <div style="font-size:11px;color:#60759A;font-weight:500;margin-bottom:6px">오늘 먹은 식사</div>
+      ${mealListHtml || '<div style="font-size:11px;color:#94A3B8;padding:10px 0">기록 없음</div>'}
     </div>`;
 }
 
@@ -9626,10 +9671,10 @@ function _v21RenderReportMonth() {
   const now = new Date();
   const meals30 = fh.filter(e => e.date && (now - new Date(e.date)) < 30*86400000);
   if (!meals30.length) {
-    el.innerHTML = `<div style="background:#fff;border-radius:16px;padding:32px 20px;text-align:center;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.04)">
+    el.innerHTML = `<div style="background:#EAF0FC;border-radius:24px;padding:32px 20px;text-align:center;border:0">
       <div style="font-size:38px;margin-bottom:10px">📅</div>
-      <div style="font-size:15px;font-weight:800;color:#0F172A;margin-bottom:6px">한 달 기록 데이터가 아직 없어요</div>
-      <div style="font-size:12px;color:#64748B;font-weight:600;line-height:1.6">2주 이상 꾸준히 기록하면 한 달 흐름을 확인할 수 있어요.</div>
+      <div style="font-size:15px;font-weight:700;color:#1D3762;margin-bottom:6px;letter-spacing:-.3px">한 달 기록 데이터가 아직 없어요</div>
+      <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5">2주 이상 꾸준히 기록하면 한 달 흐름을 확인할 수 있어요</div>
     </div>`;
     return;
   }
@@ -9664,26 +9709,26 @@ function _v21RenderReportMonth() {
     const ds = d.toISOString().slice(0,10);
     const found = dayScores.find(x => x.d === ds);
     const s = found ? found.score : null;
-    const bg = s === null ? '#F1F5F9' : s >= 80 ? '#15803D' : s >= 60 ? '#65A30D' : s >= 40 ? '#EAB308' : s >= 20 ? '#F59E0B' : '#EF4444';
+    const bg = s === null ? '#DEE7F7' : s >= 80 ? '#264A8A' : s >= 60 ? '#3D73F5' : s >= 40 ? '#7899EE' : s >= 20 ? '#B8CDEB' : '#DEE7F7';
     heatmap.push(`<div title="${ds}${s !== null ? ' · '+s+'점' : ''}" style="aspect-ratio:1;background:${bg};border-radius:4px;opacity:${s===null?0.4:1}"></div>`);
   }
   el.innerHTML = `
-    <div style="background:#fff;border-radius:18px;padding:18px 16px;border:1px solid rgba(15,23,42,.06);box-shadow:0 3px 12px rgba(15,23,42,.05);margin-bottom:12px">
+    <div style="background:#EAF0FC;border-radius:24px;padding:20px;border:0;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div>
-          <div style="font-size:11px;color:#94A3B8;font-weight:700">지난 30일 평균 균형 점수</div>
-          <div style="font-size:26px;font-weight:900;color:${avgScore>=80?'#15803D':avgScore>=50?'#B45309':'#B91C1C'};letter-spacing:-.7px;margin-top:2px">${avgScore}<span style="font-size:14px;color:#64748B;font-weight:700;margin-left:4px">점</span></div>
+          <div style="font-size:11px;color:#60759A;font-weight:500">지난 30일 평균 균형 점수</div>
+          <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-top:2px">${avgScore}<span style="font-size:12px;color:#52698F;font-weight:600;margin-left:4px">점</span></div>
         </div>
         <div style="text-align:right">
-          <div style="font-size:10.5px;color:#94A3B8;font-weight:700">기록한 날</div>
-          <div style="font-size:17px;font-weight:900;color:#0F172A">${daysLogged}<span style="font-size:11px;color:#64748B;font-weight:700"> / 30</span></div>
+          <div style="font-size:11px;color:#60759A;font-weight:500">기록한 날</div>
+          <div style="font-size:17px;font-weight:800;color:#1D3762">${daysLogged}<span style="font-size:11px;color:#52698F;font-weight:500"> / 30</span></div>
         </div>
       </div>
-      <div style="font-size:11px;color:#94A3B8;font-weight:700;margin-bottom:6px">한 달 히트맵 (진할수록 균형 ↑)</div>
+      <div style="font-size:11px;color:#60759A;font-weight:500;margin-bottom:8px">한 달 히트맵 (진할수록 균형 ↑)</div>
       <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px">${heatmap.join('')}</div>
     </div>
-    <div style="background:#EFF6FF;border-radius:14px;padding:14px 16px;font-size:12.5px;color:#1E40AF;font-weight:700;line-height:1.6">
-      🏆 <b>${bestDay.d.slice(5).replace('-','.')}</b>에 ${bestDay.score}점으로 균형이 가장 좋았어요.
+    <div style="background:#E2EAF9;border-radius:22px;padding:17px 18px;font-size:12px;color:#1D3762;font-weight:500;line-height:1.6">
+      🏆 <b style="font-weight:700">${bestDay.d.slice(5).replace('-','.')}</b>에 ${bestDay.score}점으로 균형이 가장 좋았어요
     </div>`;
 }
 
@@ -12542,8 +12587,8 @@ function renderV20Curation() {
 function _v20RecSwitch(tab) {
   _v20RecCurrentTab = tab;
   document.querySelectorAll('.v20-rec-tab').forEach(b => {
-    if (b.dataset.tab === tab) { b.style.background = '#fff'; b.style.borderColor = '#2563EB'; b.style.color = '#2563EB'; b.style.fontWeight = '800'; }
-    else { b.style.background = '#fff'; b.style.borderColor = '#E5E7EB'; b.style.color = '#64748B'; b.style.fontWeight = '700'; }
+    if (b.dataset.tab === tab) { b.style.background = '#fff'; b.style.color = '#2E61C4'; b.style.fontWeight = '700'; b.style.boxShadow = '0 2px 8px rgba(30,58,138,.08)'; }
+    else { b.style.background = 'transparent'; b.style.color = '#52698F'; b.style.fontWeight = '600'; b.style.boxShadow = 'none'; }
   });
   if (tab === 'nutrient') _v20RecRenderNutrients();
   else if (tab === 'food') _v20RecRenderFoods();
@@ -12574,9 +12619,9 @@ function _v20RecRenderNutrients() {
   if (!el) return;
   const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
   if (shortages.length === 0) {
-    el.innerHTML = `<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:14px;padding:20px;text-align:center">
-      <div style="font-size:14px;font-weight:800;color:#16A34A;margin-bottom:6px">✓ 오늘 영양 밸런스가 좋아요</div>
-      <div style="font-size:11.5px;color:#166534;font-weight:600;line-height:1.5">먼저 오늘의 식사를 기록하면<br>더 정확한 추천을 받을 수 있어요.</div>
+    el.innerHTML = `<div style="background:#E2EAF9;border:0;border-radius:24px;padding:24px 20px;text-align:center">
+      <div style="font-size:15px;font-weight:700;color:#1D3762;margin-bottom:6px;letter-spacing:-.3px">✓ 오늘 영양 밸런스가 좋아요</div>
+      <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5">먼저 오늘의 식사를 기록하면 더 정확한 추천을 받을 수 있어요</div>
     </div>`;
     _v20RecAppendMenus(el);
     return;
@@ -12588,23 +12633,23 @@ function _v20RecRenderNutrients() {
     if (!k) return;
     const foods = NUTRIENT_QUICK_FOODS[s.key] || [];
     const tag = NUTRIENT_TAGLINE[s.key] || '';
-    html += `<div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-bottom:10px">
+    html += `<div style="background:#EAF0FC;border:0;border-radius:24px;padding:20px;margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <div style="width:28px;height:28px;background:${k.color};border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">${k.code}</div>
-        <span style="font-size:15px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${k.label}</span>
-        <span style="font-size:10px;background:${k.bgLight};color:${k.color};padding:3px 9px;border-radius:99px;font-weight:800;margin-left:auto">${priorityLabels[idx]}</span>
+        <div style="width:28px;height:28px;background:#3D73F5;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${k.code}</div>
+        <span style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">${k.label}</span>
+        <span style="font-size:10px;background:#D5E2F8;color:#31558D;padding:3px 9px;border-radius:8px;font-weight:700;margin-left:auto">${priorityLabels[idx]}</span>
       </div>
-      <div style="font-size:11.5px;color:#64748B;font-weight:600;margin-bottom:12px">${_v20Esc(tag)}</div>
-      <div style="display:flex;gap:5px;margin-bottom:12px">
-        ${foods.map(f => `<span style="background:${k.bg};color:${k.color};padding:6px 10px;border-radius:99px;font-size:11px;font-weight:800">${_v20Esc(f)}</span>`).join('')}
+      <div style="font-size:11px;color:#52698F;font-weight:500;margin-bottom:12px">${_v20Esc(tag)}</div>
+      <div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap">
+        ${foods.map(f => `<span style="background:#F7F9FF;color:#2C4979;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:600">${_v20Esc(f)}</span>`).join('')}
       </div>
-      <button type="button" onclick="_v20ToggleNutrientDetail('${s.key}')" id="nutDetailBtn_${s.key}" style="width:100%;background:transparent;border:none;padding:0;font-size:11.5px;color:#2563EB;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:3px">자세히 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
-      <div id="nutDetail_${s.key}" style="display:none;padding-top:14px;margin-top:14px;border-top:1px solid #F1F5F9">
+      <button type="button" onclick="_v20ToggleNutrientDetail('${s.key}')" id="nutDetailBtn_${s.key}" style="width:100%;background:transparent;border:none;padding:0;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:3px;min-height:44px">자세히 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div id="nutDetail_${s.key}" style="display:none;padding-top:14px;margin-top:8px;border-top:1px solid #CFDCF1">
         <div style="display:grid;grid-template-columns:1fr;gap:10px">
-          <div><div style="font-size:10.5px;color:#64748B;font-weight:800;margin-bottom:4px">? 왜 필요한가</div><div style="font-size:11.5px;color:#334155;line-height:1.6;font-weight:500">${_v20Esc(k.why_needed)}</div></div>
-          <div><div style="font-size:10.5px;color:#B91C1C;font-weight:800;margin-bottom:4px">! 왜 부족했나</div><div style="font-size:11.5px;color:#334155;line-height:1.6;font-weight:500">${_v20Esc(k.why_low)}</div></div>
-          ${(typeof NUTRIENT_BANCHAN !== 'undefined' && NUTRIENT_BANCHAN[s.key]) ? `<div style="background:#F0FDF4;border:1px solid #DCFCE7;border-radius:8px;padding:9px 11px"><div style="font-size:10.5px;color:#15803D;font-weight:800;margin-bottom:4px">🥗 함께 곁들이면 좋은 반찬</div><div style="font-size:11px;color:#166534;line-height:1.55;font-weight:600">${NUTRIENT_BANCHAN[s.key].join(' · ')}</div></div>` : ''}
-          <div style="background:#F9FAFB;border-radius:8px;padding:8px 10px;font-size:10.5px;color:#64748B;line-height:1.55;font-weight:500">${_v20Esc(k.supp_hint)}</div>
+          <div><div style="font-size:11px;color:#52698F;font-weight:700;margin-bottom:4px">? 왜 필요한가</div><div style="font-size:11px;color:#1D3762;line-height:1.6;font-weight:500">${_v20Esc(k.why_needed)}</div></div>
+          <div><div style="font-size:11px;color:#52698F;font-weight:700;margin-bottom:4px">! 왜 부족했나</div><div style="font-size:11px;color:#1D3762;line-height:1.6;font-weight:500">${_v20Esc(k.why_low)}</div></div>
+          ${(typeof NUTRIENT_BANCHAN !== 'undefined' && NUTRIENT_BANCHAN[s.key]) ? `<div style="background:#E2EAF9;border:0;border-radius:12px;padding:10px 12px"><div style="font-size:11px;color:#31558D;font-weight:700;margin-bottom:4px">🥗 함께 곁들이면 좋은 반찬</div><div style="font-size:11px;color:#1D3762;line-height:1.55;font-weight:500">${NUTRIENT_BANCHAN[s.key].join(' · ')}</div></div>` : ''}
+          <div style="background:#F7F9FF;border-radius:12px;padding:10px 12px;font-size:11px;color:#52698F;line-height:1.55;font-weight:500">${_v20Esc(k.supp_hint)}</div>
         </div>
       </div>
     </div>`;
@@ -12645,13 +12690,13 @@ function _v20RecAppendMenus(el) {
     { name:'들기름막국수', reason:'오메가3 강화' }
   ];
   const emojiFor = n => /국|탕|찌개|해장/.test(n) ? '🍲' : /덮밥|비빔밥|볶음밥|카레|오므/.test(n) ? '🍚' : /면|국수|우동|짜|짬/.test(n) ? '🍜' : /회|초밥/.test(n) ? '🍣' : /구이|갈비|삼겹/.test(n) ? '🥩' : '🍚';
-  const gradients = ['linear-gradient(135deg,#FED7AA,#FB923C)','linear-gradient(135deg,#FDE68A,#F59E0B)','linear-gradient(135deg,#BBF7D0,#22C55E)'];
-  const menuHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><span style="font-size:13px;font-weight:800;color:#0F172A">오늘 먹기 좋은 메뉴</span><span style="font-size:11px;color:#64748B;font-weight:700;cursor:pointer">더보기 ›</span></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">${menus.map((m,i) => `
+  const bgs = ['#DFE9FB','#E2EAF9','#EAF0FC'];
+  const menuHtml = `<div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px"><span style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">오늘 먹기 좋은 메뉴</span><span style="font-size:11px;color:#2E61C4;font-weight:700;cursor:pointer">더보기 ›</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${menus.map((m,i) => `
     <div>
-      <div style="width:100%;height:70px;border-radius:10px;background:${gradients[i%3]};display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:5px">${emojiFor(m.name)}</div>
-      <div style="font-size:11px;font-weight:800;color:#0F172A;letter-spacing:-.2px">${_v20Esc(m.name)}</div>
-      <div style="font-size:9.5px;color:#64748B;font-weight:600;margin-top:1px">${_v20Esc(m.reason)}</div>
+      <div style="width:100%;height:80px;border-radius:16px;background:${bgs[i%3]};display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:8px">${emojiFor(m.name)}</div>
+      <div style="font-size:11px;font-weight:700;color:#1D3762;letter-spacing:-.2px">${_v20Esc(m.name)}</div>
+      <div style="font-size:10px;color:#60759A;font-weight:500;margin-top:1px">${_v20Esc(m.reason)}</div>
     </div>
   `).join('')}</div>`;
   el.insertAdjacentHTML('beforeend', menuHtml);
@@ -12670,12 +12715,12 @@ function _v20RecRenderFoods() {
   const el = document.getElementById('v20RecContent');
   if (!el) return;
   const situations = [
-    { key:'home', label:'집밥', icon:'🏠', tone:'#F0FDF4', text:'#15803D' },
-    { key:'delivery', label:'배달', icon:'🛵', tone:'#EFF6FF', text:'#1E40AF' },
-    { key:'eatout', label:'외식', icon:'🍽', tone:'#FEF3C7', text:'#92400E' },
-    { key:'convenience', label:'편의점', icon:'🏪', tone:'#FAF5FF', text:'#7C2D92' }
+    { key:'home', label:'집밥', icon:'🏠', tone:'#EAF0FC', text:'#1D3762' },
+    { key:'delivery', label:'배달', icon:'🛵', tone:'#E2EAF9', text:'#1D3762' },
+    { key:'eatout', label:'외식', icon:'🍽', tone:'#DFE8F9', text:'#1D3762' },
+    { key:'convenience', label:'편의점', icon:'🏪', tone:'#DFE9FB', text:'#1D3762' }
   ];
-  let html = '<div style="background:#EFF6FF;border:1px solid #DBEAFE;border-radius:14px;padding:14px 16px;margin-bottom:14px"><div style="font-size:12.5px;color:#1E3A8A;font-weight:700;line-height:1.55">부족 영양소 <b>3개 기준</b>으로 상황별 실전 메뉴를 골랐어요.</div></div>';
+  let html = '<div style="background:#E2EAF9;border:0;border-radius:22px;padding:17px 18px;margin-bottom:14px"><div style="font-size:12px;color:#1D3762;font-weight:500;line-height:1.55">부족 영양소 <b style="font-weight:700">3개 기준</b>으로 상황별 실전 메뉴를 골랐어요</div></div>';
   let hasAny = false;
   situations.forEach(sit => {
     const rec = (typeof getWhatToEatNow === 'function') ? getWhatToEatNow(sit.key) : null;
@@ -22400,104 +22445,101 @@ function renderV20FoodStoryDOM(data) {
   };
 
   const shortageCardsHtml = shortages.length ? shortages.map(s => {
-    const color = nutrientColors[s.key] || '#64748B';
-    const bg = nutrientBg[s.key] || '#F9FAFB';
     const icon = nutrientIcon[s.key] || '·';
-    return `<div style="flex:1;background:${bg};border-radius:16px;padding:14px 10px;text-align:center">
+    return `<div style="flex:1;background:#FDFEFF;border-radius:16px;padding:14px 10px;text-align:center;box-shadow:0 2px 6px rgba(30,58,138,.05)">
       <div style="font-size:26px;line-height:1;margin-bottom:6px">${icon}</div>
-      <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.3px">${s.label}</div>
-      <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:3px">최근 7일 중</div>
-      <div style="font-size:14px;font-weight:900;color:${color};margin-top:2px">${s.daysMissing}일 부족</div>
+      <div style="font-size:13px;font-weight:700;color:#1D3762;letter-spacing:-.3px">${s.label}</div>
+      <div style="font-size:10.5px;color:#52698F;font-weight:500;margin-top:3px">최근 7일 중</div>
+      <div style="font-size:13px;font-weight:700;color:#264A8A;margin-top:2px">${s.daysMissing}일 부족</div>
     </div>`;
-  }).join('') : `<div style="flex:1;background:#F0FDF4;border-radius:16px;padding:16px;text-align:center;color:#16A34A;font-size:13px;font-weight:800">밸런스 좋음 · 이대로 유지해요</div>`;
+  }).join('') : `<div style="flex:1;background:#E2EAF9;border-radius:16px;padding:16px;text-align:center;color:#1D3762;font-size:13px;font-weight:700">밸런스 좋음 · 이대로 유지해요</div>`;
 
   const changesHtml = changes.length ? `
-    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-top:14px">
-      <div style="font-size:14px;font-weight:800;color:#0F172A;margin-bottom:12px;letter-spacing:-.3px">지난 7일 변화</div>
+    <div style="background:#FDFEFF;border:0;border-radius:20px;padding:16px 18px;margin-top:14px;box-shadow:0 3px 10px rgba(30,58,138,.05)">
+      <div style="font-size:13px;font-weight:700;color:#1D3762;margin-bottom:12px;letter-spacing:-.3px">지난 7일 변화</div>
       ${changes.map(c => {
-        const color = nutrientColors[c.key] || '#64748B';
         const icon = nutrientIcon[c.key] || '·';
         const beforePct = Math.max(3, Math.min(100, c.before));
         const afterPct = Math.max(3, Math.min(100, c.after));
         return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-          <div style="width:26px;height:26px;border-radius:8px;background:${nutrientBg[c.key]||'#F1F5F9'};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${icon}</div>
-          <div style="width:60px;font-size:13px;font-weight:800;color:#0F172A;flex-shrink:0">${c.label}</div>
-          <div style="width:32px;font-size:13px;font-weight:700;color:#94A3B8;text-align:right;flex-shrink:0">${c.before}</div>
-          <div style="flex:1;position:relative;height:8px;background:#F1F5F9;border-radius:4px;overflow:visible">
-            <div style="position:absolute;left:0;top:0;height:100%;background:${color}55;border-radius:4px;width:${beforePct}%"></div>
-            <div style="position:absolute;left:${beforePct}%;top:-2px;width:12px;height:12px;background:${color};border-radius:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:900">→</div>
-            <div style="position:absolute;right:${100-afterPct}%;top:-2px;width:12px;height:12px;background:${color};border-radius:50%;transform:translateX(50%)"></div>
+          <div style="width:26px;height:26px;border-radius:8px;background:#EAF0FC;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${icon}</div>
+          <div style="width:60px;font-size:12px;font-weight:700;color:#1D3762;flex-shrink:0">${c.label}</div>
+          <div style="width:32px;font-size:12px;font-weight:600;color:#94A3B8;text-align:right;flex-shrink:0">${c.before}</div>
+          <div style="flex:1;position:relative;height:8px;background:#DEE7F7;border-radius:4px;overflow:visible">
+            <div style="position:absolute;left:0;top:0;height:100%;background:#B8CDEB;border-radius:4px;width:${beforePct}%"></div>
+            <div style="position:absolute;left:${beforePct}%;top:-2px;width:12px;height:12px;background:#264A8A;border-radius:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:800">→</div>
+            <div style="position:absolute;right:${100-afterPct}%;top:-2px;width:12px;height:12px;background:#3D73F5;border-radius:50%;transform:translateX(50%)"></div>
           </div>
-          <div style="width:32px;font-size:13px;font-weight:900;color:${color};text-align:left;flex-shrink:0">${c.after}</div>
+          <div style="width:32px;font-size:12px;font-weight:800;color:#264A8A;text-align:left;flex-shrink:0">${c.after}</div>
         </div>`;
       }).join('')}
     </div>` : '';
 
   div.innerHTML = `
-    <div style="width:100%;height:100%;background:linear-gradient(180deg,#F0F9FF 0%,#F8FAFC 30%,#FFFFFF 100%);padding:32px 26px 28px;display:flex;flex-direction:column;box-sizing:border-box;position:relative;color:#0F172A">
-      <div style="position:absolute;top:-10px;left:-20px;width:120px;height:120px;background:radial-gradient(circle,#BBF7D0 0%,transparent 70%);opacity:.5;pointer-events:none"></div>
-      <div style="position:absolute;top:60px;right:-30px;width:100px;height:100px;background:radial-gradient(circle,#DBEAFE 0%,transparent 70%);opacity:.6;pointer-events:none"></div>
+    <div style="width:100%;height:100%;background:linear-gradient(180deg,#F2F5FC 0%,#E2EAF9 60%,#DFE8F9 100%);padding:32px 26px 28px;display:flex;flex-direction:column;box-sizing:border-box;position:relative;color:#1D3762">
+      <div style="position:absolute;top:-10px;left:-20px;width:120px;height:120px;background:radial-gradient(circle,#DFE9FB 0%,transparent 70%);opacity:.6;pointer-events:none"></div>
+      <div style="position:absolute;top:60px;right:-30px;width:100px;height:100px;background:radial-gradient(circle,#D5E2F8 0%,transparent 70%);opacity:.6;pointer-events:none"></div>
 
       <div style="text-align:center;position:relative;z-index:1">
         <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px">
-          <div style="width:26px;height:26px;background:#2563EB;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900">꺼</div>
-          <span style="font-size:15px;font-weight:800;color:#0F172A">건강어때</span>
+          <div style="width:26px;height:26px;background:#264A8A;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800">건</div>
+          <span style="font-size:15px;font-weight:700;color:#1D3762">건강어때</span>
         </div>
-        <div style="font-size:30px;font-weight:900;color:#0F172A;letter-spacing:-1.2px;line-height:1.15">오늘의 영양 코칭</div>
-        <div style="font-size:13px;color:#64748B;font-weight:600;margin-top:6px">먹은 음식 기록을 바탕으로 AI가 분석했어요</div>
+        <div style="font-size:28px;font-weight:800;color:#1D3762;letter-spacing:-1px;line-height:1.15">오늘의 영양 코칭</div>
+        <div style="font-size:12px;color:#52698F;font-weight:500;margin-top:6px">먹은 음식 기록을 바탕으로 AI가 분석했어요</div>
       </div>
 
-      <div style="background:#fff;border-radius:22px;padding:24px 22px;margin-top:20px;box-shadow:0 6px 24px rgba(37,99,235,.08);display:flex;align-items:center;gap:18px;position:relative;z-index:1">
+      <div style="background:#FDFEFF;border-radius:24px;padding:24px 22px;margin-top:20px;box-shadow:0 6px 20px rgba(30,58,138,.08);display:flex;align-items:center;gap:18px;position:relative;z-index:1">
         <div style="width:150px;height:150px;position:relative;flex-shrink:0">
           <svg viewBox="0 0 200 200" style="width:100%;height:100%;transform:rotate(-90deg)">
-            <circle cx="100" cy="100" r="90" fill="none" stroke="#EFF6FF" stroke-width="14"/>
+            <circle cx="100" cy="100" r="90" fill="none" stroke="#EAF0FC" stroke-width="14"/>
             <circle cx="100" cy="100" r="90" fill="none" stroke="url(#gradFood)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${dash} ${circumf}"/>
-            <defs><linearGradient id="gradFood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs>
+            <defs><linearGradient id="gradFood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D73F5"/><stop offset="1" stop-color="#264A8A"/></linearGradient></defs>
           </svg>
           <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            <div style="font-size:56px;font-weight:900;color:#2563EB;letter-spacing:-3px;line-height:.9">${score}<span style="font-size:20px;font-weight:800;margin-left:2px">점</span></div>
-            <div style="font-size:10.5px;color:#2563EB;background:#DBEAFE;padding:3px 10px;border-radius:12px;font-weight:800;margin-top:4px">영양 밸런스 점수</div>
+            <div style="font-size:56px;font-weight:800;color:#264A8A;letter-spacing:-3px;line-height:.9">${score}<span style="font-size:18px;font-weight:700;margin-left:2px">점</span></div>
+            <div style="font-size:10.5px;color:#31558D;background:#D5E2F8;padding:3px 10px;border-radius:12px;font-weight:700;margin-top:4px">영양 밸런스 점수</div>
           </div>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:22px;font-weight:900;color:#0F172A;letter-spacing:-.6px;line-height:1.25">${_v20Esc(headline)} <span style="color:#2563EB">♥</span></div>
-          <div style="font-size:13px;color:#64748B;font-weight:600;line-height:1.55;margin-top:10px">
-            ${subPre ? `<span style="color:#2563EB;font-weight:800">${_v20Esc(subPre)}</span>만<br>${_v20Esc(subPost)}` : _v20Esc(sub || '오늘 잘 먹고 있어요')} 🌱
+          <div style="font-size:20px;font-weight:800;color:#1D3762;letter-spacing:-.5px;line-height:1.25">${_v20Esc(headline)}</div>
+          <div style="font-size:12px;color:#52698F;font-weight:500;line-height:1.55;margin-top:10px">
+            ${subPre ? `<span style="color:#264A8A;font-weight:700">${_v20Esc(subPre)}</span>만<br>${_v20Esc(subPost)}` : _v20Esc(sub || '오늘 잘 먹고 있어요')}
           </div>
         </div>
       </div>
 
       <div style="margin-top:14px;position:relative;z-index:1">
-        <div style="font-size:14px;font-weight:800;color:#0F172A;margin-bottom:8px;letter-spacing:-.3px">지금 챙기면 좋은 영양소</div>
+        <div style="font-size:13px;font-weight:700;color:#1D3762;margin-bottom:8px;letter-spacing:-.3px">지금 챙기면 좋은 영양소</div>
         <div style="display:flex;gap:8px">${shortageCardsHtml}</div>
       </div>
 
-      <div style="background:#fff;border:1px solid #E5E7EB;border-radius:16px;padding:16px 18px;margin-top:14px;display:flex;align-items:center;gap:14px;position:relative;z-index:1">
+      <div style="background:#FDFEFF;border:0;border-radius:20px;padding:16px 18px;margin-top:14px;display:flex;align-items:center;gap:14px;position:relative;z-index:1;box-shadow:0 3px 10px rgba(30,58,138,.05)">
         <div style="flex:1;min-width:0">
-          <div style="font-size:12px;color:#64748B;font-weight:700;margin-bottom:3px">오늘 뭐 먹지?</div>
-          <div style="font-size:20px;font-weight:900;color:#2563EB;letter-spacing:-.5px;line-height:1.2">${_v20Esc(meal.name)}</div>
-          <div style="font-size:11.5px;color:#64748B;font-weight:600;line-height:1.5;margin-top:6px">${_v20Esc(meal.reason)} 💙</div>
+          <div style="font-size:11px;color:#52698F;font-weight:500;margin-bottom:3px">오늘 뭐 먹지?</div>
+          <div style="font-size:18px;font-weight:800;color:#264A8A;letter-spacing:-.5px;line-height:1.2">${_v20Esc(meal.name)}</div>
+          <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.5;margin-top:6px">${_v20Esc(meal.reason)}</div>
         </div>
-        <div style="width:90px;height:90px;border-radius:14px;background:linear-gradient(135deg,#FED7AA,#FB923C);display:flex;align-items:center;justify-content:center;font-size:44px;flex-shrink:0;overflow:hidden">${d.mealPhotoUrl ? `<img src="${d.mealPhotoUrl}" alt="" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover">` : '🍲'}</div>
+        <div style="width:90px;height:90px;border-radius:16px;background:#E2EAF9;display:flex;align-items:center;justify-content:center;font-size:44px;flex-shrink:0;overflow:hidden">${d.mealPhotoUrl ? `<img src="${d.mealPhotoUrl}" alt="" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover">` : '🍲'}</div>
       </div>
 
       ${coach ? `
-      <div style="background:#EFF6FF;border-radius:16px;padding:14px 16px;margin-top:12px;display:flex;gap:12px;align-items:flex-start;position:relative;z-index:1">
-        <div style="width:38px;height:38px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 6px rgba(37,99,235,.15)">🤖</div>
+      <div style="background:#E2EAF9;border-radius:20px;padding:14px 16px;margin-top:12px;display:flex;gap:12px;align-items:flex-start;position:relative;z-index:1">
+        <div style="width:38px;height:38px;background:#F7F9FF;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💡</div>
         <div style="flex:1">
-          <div style="font-size:11px;font-weight:800;color:#1E40AF;margin-bottom:3px">AI 코치 한마디</div>
-          <div style="font-size:11.5px;color:#1E3A8A;font-weight:600;line-height:1.55">${_v20Esc(coach.slice(0, 90))}${coach.length > 90 ? '…' : ''}</div>
+          <div style="font-size:11px;font-weight:700;color:#31558D;margin-bottom:3px">AI 코치 한마디</div>
+          <div style="font-size:11px;color:#1D3762;font-weight:500;line-height:1.55">${_v20Esc(coach.slice(0, 90))}${coach.length > 90 ? '…' : ''}</div>
         </div>
       </div>` : ''}
 
       ${changesHtml}
 
       <div style="margin-top:auto;padding-top:16px;position:relative;z-index:1">
-        <div style="background:linear-gradient(135deg,#3B82F6 0%,#2563EB 100%);border-radius:16px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 6px 20px rgba(37,99,235,.35)">
-          <span style="font-size:16px;font-weight:900;color:#fff;letter-spacing:-.4px">나도 건강어때로 분석하기</span>
-          <span style="width:26px;height:26px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900">›</span>
+        <div style="background:#264A8A;border-radius:18px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 6px 18px rgba(38,74,138,.28)">
+          <span style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px">나도 건강어때로 분석하기</span>
+          <span style="width:26px;height:26px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700">›</span>
         </div>
-        <div style="text-align:center;font-size:11px;color:#64748B;font-weight:600;margin-top:10px">오늘 먹은 음식, AI가 영양 균형으로 바꿔드려요 ✨</div>
+        <div style="text-align:center;font-size:11px;color:#52698F;font-weight:500;margin-top:10px">오늘 먹은 음식, AI가 영양 균형으로 바꿔드려요</div>
       </div>
     </div>`;
   document.body.appendChild(div);
@@ -22951,12 +22993,12 @@ function renderStoryCardDOM(type, data) {
 
   // 🎨 타입별 테마 (색상·이모지·배경) — 시각적으로 확실히 구분
   const themes = {
-    urine:      { emoji: '🧪', hero: '🩺', bg: '#F0FDFA', accent: '#0891B2', accentDark: '#155E75', badge: '#CFFAFE', textDark: '#164E63' },
-    food:       { emoji: '🍱', hero: '🥗', bg: '#FFF7ED', accent: '#EA580C', accentDark: '#9A3412', badge: '#FFEDD5', textDark: '#7C2D12' },
-    ingredient: { emoji: '🏷️', hero: '🧬', bg: '#FAF5FF', accent: '#7C3AED', accentDark: '#5B21B6', badge: '#EDE9FE', textDark: '#4C1D95' },
-    weekly:     { emoji: '📊', hero: '🌿', bg: '#F0FDF4', accent: '#059669', accentDark: '#065F46', badge: '#D1FAE5', textDark: '#064E3B' },
-    challenge:  { emoji: '🏆', hero: '⭐', bg: '#FEFCE8', accent: '#EAB308', accentDark: '#A16207', badge: '#FEF3C7', textDark: '#713F12' },
-    quiz:       { emoji: '🎯', hero: '🧠', bg: '#EFF6FF', accent: '#3B82F6', accentDark: '#1D4ED8', badge: '#DBEAFE', textDark: '#1E3A8A' }
+    urine:      { emoji: '🧪', hero: '🩺', bg: '#F2F5FC', accent: '#3D73F5', accentDark: '#264A8A', badge: '#D5E2F8', textDark: '#1D3762' },
+    food:       { emoji: '🍱', hero: '🥗', bg: '#F2F5FC', accent: '#3D73F5', accentDark: '#264A8A', badge: '#D5E2F8', textDark: '#1D3762' },
+    ingredient: { emoji: '🏷️', hero: '🧬', bg: '#F2F5FC', accent: '#3D73F5', accentDark: '#264A8A', badge: '#D5E2F8', textDark: '#1D3762' },
+    weekly:     { emoji: '📊', hero: '🌿', bg: '#F2F5FC', accent: '#3D73F5', accentDark: '#264A8A', badge: '#D5E2F8', textDark: '#1D3762' },
+    challenge:  { emoji: '🏆', hero: '⭐', bg: '#F2F5FC', accent: '#3D73F5', accentDark: '#264A8A', badge: '#D5E2F8', textDark: '#1D3762' },
+    quiz:       { emoji: '🎯', hero: '🧠', bg: '#F2F5FC', accent: '#3D73F5', accentDark: '#264A8A', badge: '#D5E2F8', textDark: '#1D3762' }
   };
   const theme = themes[type] || themes.food;
 
@@ -25570,31 +25612,31 @@ function updateGgTabbar(screenId) {
 }
 </script>
 <!-- ════════════ 📄 리포트 화면 (v20) ════════════ -->
-<div class="screen" id="screenReport" style="background:#FBFBFD">
-  <div style="padding:20px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif">
+<div class="screen" id="screenReport" style="background:#F2F5FC">
+  <div style="padding:20px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#19315B;letter-spacing:-.3px">
     <div style="margin-bottom:16px">
-      <div style="font-size:28px;font-weight:900;color:#0F172A;letter-spacing:-.7px;margin-bottom:4px">리포트</div>
-      <div id="v21ReportSubtitle" style="font-size:12.5px;color:#64748B;font-weight:500">기간별 내 몸의 변화 흐름</div>
+      <div style="font-size:22px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-bottom:4px">리포트</div>
+      <div id="v21ReportSubtitle" style="font-size:11px;color:#52698F;font-weight:500">기간별 내 몸의 변화 흐름</div>
     </div>
     <!-- 기간 탭 · 오늘 / 일주일 / 한달 -->
-    <div id="v21ReportTabs" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:#F1F5F9;padding:4px;border-radius:12px;margin-bottom:16px">
-      <button data-period="today" onclick="_v21SwitchReportTab('today')" style="background:transparent;border:none;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:800;color:#64748B;font-family:inherit;cursor:pointer">오늘</button>
-      <button data-period="week" onclick="_v21SwitchReportTab('week')" style="background:#fff;border:none;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:800;color:#0F172A;font-family:inherit;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.08)">일주일</button>
-      <button data-period="month" onclick="_v21SwitchReportTab('month')" style="background:transparent;border:none;padding:9px 8px;border-radius:9px;font-size:12.5px;font-weight:800;color:#64748B;font-family:inherit;cursor:pointer">한달</button>
+    <div id="v21ReportTabs" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:#E2EAF9;padding:4px;border-radius:12px;margin-bottom:16px">
+      <button data-period="today" onclick="_v21SwitchReportTab('today')" style="background:transparent;border:none;padding:10px 8px;border-radius:9px;font-size:12px;font-weight:700;color:#52698F;font-family:inherit;cursor:pointer">오늘</button>
+      <button data-period="week" onclick="_v21SwitchReportTab('week')" style="background:#fff;border:none;padding:10px 8px;border-radius:9px;font-size:12px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;box-shadow:0 2px 6px rgba(30,58,138,.08)">일주일</button>
+      <button data-period="month" onclick="_v21SwitchReportTab('month')" style="background:transparent;border:none;padding:10px 8px;border-radius:9px;font-size:12px;font-weight:700;color:#52698F;font-family:inherit;cursor:pointer">한달</button>
     </div>
     <div id="v20ReportContent"></div>
   </div>
 </div>
 
 <!-- ════════════ 🌙 내 수면 체크 화면 (v20) ════════════ -->
-<div class="screen" id="screenSleepCheck" style="background:#FBFBFD">
-  <div style="padding:16px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif">
+<div class="screen" id="screenSleepCheck" style="background:#F2F5FC">
+  <div style="padding:16px 20px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;color:#1D3762;letter-spacing:-.3px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <button onclick="goHome()" style="background:transparent;border:none;padding:6px;cursor:pointer" aria-label="홈으로">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
-      <div style="font-size:13px;font-weight:800;color:#0F172A">내 수면 체크</div>
-      <button onclick="goHome()" style="background:#F1F5F9;border:none;padding:6px 12px;border-radius:99px;font-size:11px;color:#475569;font-weight:700;cursor:pointer;font-family:inherit">홈</button>
+      <div style="font-size:15px;font-weight:700;color:#1D3762">내 수면 체크</div>
+      <button onclick="goHome()" style="background:#fff;border:none;padding:6px 12px;border-radius:99px;font-size:11px;color:#52698F;font-weight:600;cursor:pointer;font-family:inherit">홈</button>
     </div>
     <div id="sleepCheckContent"></div>
   </div>
