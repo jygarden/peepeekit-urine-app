@@ -2331,14 +2331,9 @@ window.appIcon = function(name, size){
   <div class="screen" id="screenHome">
     <div class="home-wrap">
 
-      <!-- 다음 검사 리마인더 배너 -->
-      <div class="reminder-banner" id="reminderBanner" style="display:none">
-        <div class="ic">⏰</div>
-        <div class="txt">
-          <strong>마지막 검사 후 <span id="reminderDays">30</span>일 지났어요!</strong><br>
-          정기적인 검사로 건강 변화를 체크하세요.
-        </div>
-        <button class="close-btn" onclick="dismissReminder()">✕</button>
+      <!-- Legacy · JS 참조 유지 (스마트 리마인더로 대체됨) -->
+      <div class="reminder-banner" id="reminderBanner" style="display:none !important">
+        <span id="reminderDays">0</span>
       </div>
       <!-- 상단 행: 포인트 + 설정 (오른쪽 정렬) -->
       <div class="home-top-bar">
@@ -2362,35 +2357,54 @@ window.appIcon = function(name, size){
       <div class="v20-home" style="background:#FAFBFF;margin:0 -18px;padding:6px 18px 100px;font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#19315B;letter-spacing:-.3px">
 
         <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
-        <div style="padding:14px 0 4px">
-          <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:700">재율님</b></div>
+        <div style="padding:14px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:700">재율님</b></div>
+          <!-- 걸음 수 뱃지 · 실시간 -->
+          <div id="v22StepBadge" onclick="try{_v22ShowStepInfo()}catch(e){}" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#FEF3C7;color:#78350F;font-size:11px;font-weight:700;padding:5px 10px;border-radius:99px;cursor:pointer">
+            🚶 <span id="v22StepCount">0 걸음</span>
+          </div>
         </div>
+        <!-- 스마트 리마인더 · 화면 표시 X · 푸시 알림으로 전환 (JS 참조 유지) -->
+        <div id="v22SmartReminderStack" style="display:none"></div>
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · 큰 hero + 일러스트 -->
-        <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 4px;box-shadow:none;margin-bottom:12px;margin-top:4px;overflow:hidden;position:relative;min-height:340px;display:flex;flex-direction:column">
+        <!-- ① 다음 한 끼 추천 · hero -->
+        <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 6px;box-shadow:none;margin-bottom:12px;margin-top:4px;overflow:hidden;position:relative;min-height:230px">
           <!-- 노란 halo -->
           <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(251,191,36,.24) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
-          <!-- Title · 큰 타이포 + 노란 형광펜 (참고 이미지 스타일) -->
-          <div id="v21HeroTitle" style="font-size:28px;font-weight:900;color:#FFF;letter-spacing:-1px;line-height:1.15;margin-top:6px;margin-bottom:12px;position:relative;z-index:2;max-width:65%">
-            오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 4px">고등어구이</span> 어때
+          <!-- 본문 · 좌측 텍스트 + 우측 일러(kcal 밑에 붙음) -->
+          <div style="display:flex;gap:12px;align-items:flex-start;position:relative;z-index:2;margin-bottom:36px">
+            <div style="flex:1;min-width:0">
+              <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
+              <div id="v21HeroTitle" style="font-size:24px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.2;margin-top:2px;margin-bottom:12px">
+                오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 3px">삼계탕</span> 어때?
+              </div>
+              <!-- Why · 영양소 노란색 · 디테일 · 2줄 허용 -->
+              <div id="v21RecWhy" style="font-size:11.5px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal">부족했던 <b style="color:#FBBF24;font-weight:700">단백질·비타민B</b>를 채우고<br><b style="color:#FBBF24;font-weight:700">아연·마그네슘</b>까지 챙길 수 있어요.</div>
+            </div>
+            <!-- 우측 · 일러 + kcal (그림 바로 밑) -->
+            <div style="flex-shrink:0;width:110px;display:flex;flex-direction:column;align-items:center;gap:3px;margin-right:-8px">
+              <div id="v21HeroIllust" style="width:110px;height:100px;pointer-events:none"></div>
+              <div id="v21HeroKcal" style="font-size:11.5px;color:#FBBF24;font-weight:700;text-align:center;white-space:nowrap">— kcal</div>
+            </div>
           </div>
-          <!-- Why · 영양소 노란색 -->
-          <div id="v21RecWhy" style="font-size:12.5px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.6;margin-bottom:14px;position:relative;z-index:2;max-width:60%">부족했던 <b style="color:#FBBF24;font-weight:700">오메가3</b>와 <b style="color:#FBBF24;font-weight:700">단백질</b>을<br>한 접시로 채울 수 있어요.</div>
-          <!-- 우측 중앙 · 음식 일러스트 (kcal와 겹침 방지) -->
-          <div id="v21HeroIllust" style="position:absolute;top:44%;right:-4px;transform:translateY(-50%);width:140px;height:120px;pointer-events:none;z-index:1"></div>
           <!-- 히든 · chips 참조 유지 -->
           <div id="v21HeroChips" style="display:none"></div>
-          <!-- Kcal -->
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;position:relative;z-index:2;margin-top:auto">
-            <div id="v21HeroKcal" style="font-size:11px;color:#C4D4F0;font-weight:500;flex-shrink:0;white-space:nowrap">— kcal</div>
-          </div>
-          <!-- Buttons -->
-          <div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.2);position:relative;z-index:2">
-            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:transparent;border:none;padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">↻ 다른 음식</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid rgba(255,255,255,.2);padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">🗺 내 주변</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid rgba(255,255,255,.2);padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">자세히 ›</button>
+          <!-- Buttons · 흰 pill 개별 · 작게 · 더 아래로 -->
+          <div style="display:flex;gap:5px;position:relative;z-index:2;padding:8px 0 16px">
+            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              다른 음식
+            </button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              내 주변
+            </button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
+              자세히
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
           <!-- 레거시 · JS 참조 유지 -->
           <div style="display:none">
@@ -2417,18 +2431,19 @@ window.appIcon = function(name, size){
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
 
           <!-- ⓐ 내 몸의 신호 · 노란 -->
-          <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
-            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="50" height="56" viewBox="0 0 120 130" fill="none">
+          <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="30" height="34" viewBox="0 0 120 130" fill="none">
                 <circle cx="45" cy="30" r="14" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
                 <path d="M14 116 C 14 76, 26 60, 45 60 C 64 60, 76 76, 76 116 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
                 <path d="M32 84 L 40 92 L 54 74" stroke="#3D63D9" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 <path d="M96 24 L 82 62 L 92 62 L 78 106 L 108 56 L 96 56 L 108 24 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
               </svg>
             </div>
-            <div id="v20BodySignalTitle" style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">내 몸의 신호</div>
-            <div id="v20BodySignalDesc" style="font-size:10.5px;color:#78654B;font-weight:600;text-align:center;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식이섬유 부족</div>
+            <div id="v20BodySignalTitle" style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">내 몸의 신호</div>
+            <div style="font-size:10px;color:#B45309;font-weight:700;text-align:center;line-height:1.3">자세히 보러가기 ›</div>
+            <div id="v20BodySignalDesc" style="display:none"></div>
             <!-- 히든 · JS 참조 유지 -->
             <div id="v20BodySignalIcon" style="display:none"></div>
             <div id="v20BodySignalChips" style="display:none"></div>
@@ -2437,11 +2452,11 @@ window.appIcon = function(name, size){
           </div>
 
           <!-- ⓑ 식사 기록 · 파란 -->
-          <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:linear-gradient(135deg,#EEF2FF 0%,#DBEAFE 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
+          <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:linear-gradient(135deg,#EEF2FF 0%,#DBEAFE 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21RecentScore" style="display:none">—점</span>
-            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="58" height="56" viewBox="0 0 130 130" fill="none">
+            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="36" height="34" viewBox="0 0 130 130" fill="none">
                 <rect x="8" y="46" width="114" height="70" rx="10" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
                 <rect x="12" y="50" width="106" height="6" rx="3" fill="#F1F5F9"/>
                 <path d="M20 68 C 20 82, 25 88, 35 88 C 45 88, 50 82, 50 68 L 20 68 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
@@ -2453,8 +2468,8 @@ window.appIcon = function(name, size){
                 <circle cx="88" cy="100" r="6" fill="#DC2626" stroke="#0F172A" stroke-width="1.6"/>
               </svg>
             </div>
-            <div id="v20RecentMealName" style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식사 기록</div>
-            <div style="font-size:10.5px;color:#5D7597;font-weight:600;text-align:center;line-height:1.4">오늘 0끼 기록</div>
+            <div id="v20RecentMealName" style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식사 기록</div>
+            <div style="font-size:10px;color:#2E61C4;font-weight:700;text-align:center;line-height:1.3">자세히 보러가기 ›</div>
             <!-- 히든 · JS 참조 유지 -->
             <div id="v21RecentHex" style="display:none"></div>
             <div id="v20RecentMealComment" style="display:none"><span></span><button id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()"></button></div>
@@ -2462,47 +2477,41 @@ window.appIcon = function(name, size){
           </div>
 
           <!-- ⓒ 오늘의 운세 · 초록 -->
-          <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
+          <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21FortuneBadge" style="display:none">吉</span>
-            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="56" height="56" viewBox="0 0 130 130" fill="none">
+            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="34" height="34" viewBox="0 0 130 130" fill="none">
                 <circle cx="65" cy="60" r="46" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
                 <circle cx="65" cy="60" r="40" fill="none" stroke="#0F172A" stroke-width="1.2" opacity=".3" stroke-dasharray="3 3"/>
                 <path d="M65 22 L 74 46 L 100 47 L 80 63 L 87 88 L 65 74 L 43 88 L 50 63 L 30 47 L 56 46 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/>
                 <path d="M65 22 L 74 46 L 100 47 L 80 63 L 65 22 Z" fill="#F59E0B"/>
               </svg>
             </div>
-            <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25">오늘의 운세</div>
-            <div id="v21FortuneSub" style="font-size:10.5px;color:#065F46;font-weight:600;text-align:center;line-height:1.4">大吉 · 건강운 좋음</div>
+            <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">오늘의 운세</div>
+            <div style="font-size:10px;color:#065F46;font-weight:700;text-align:center;line-height:1.3">자세히 보러가기 ›</div>
+            <div id="v21FortuneSub" style="display:none">大吉</div>
           </div>
 
           <!-- ⓓ 건강 운동 · 핑크 -->
-          <div onclick="try{_v21OpenExercise()}catch(e){}" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
-            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <!-- 스트레칭 하는 사람 -->
-              <svg width="52" height="56" viewBox="0 0 120 130" fill="none">
-                <!-- 머리 -->
+          <div onclick="try{_v21OpenExercise()}catch(e){}" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="32" height="34" viewBox="0 0 120 130" fill="none">
                 <circle cx="60" cy="24" r="10" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
-                <!-- 몸통 -->
                 <path d="M46 44 L 46 82 C 46 88, 50 90, 60 90 C 70 90, 74 88, 74 82 L 74 44 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
-                <!-- 양팔 위로 -->
                 <path d="M46 46 C 32 34, 22 20, 24 12" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
                 <path d="M74 46 C 88 34, 98 20, 96 12" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
                 <circle cx="24" cy="12" r="3.5" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
                 <circle cx="96" cy="12" r="3.5" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
-                <!-- 양다리 -->
                 <path d="M52 88 L 44 118" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>
                 <path d="M68 88 L 76 118" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>
-                <!-- 하이라이트 (활력) -->
                 <circle cx="15" cy="30" r="1.5" fill="#FBBF24"/>
                 <circle cx="105" cy="30" r="1.5" fill="#FBBF24"/>
-                <circle cx="12" cy="55" r="1.2" fill="#FBBF24"/>
               </svg>
             </div>
-            <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25">건강 운동</div>
-            <div style="font-size:10.5px;color:#991B1B;font-weight:600;text-align:center;line-height:1.4">간단 스트레칭 · 1분</div>
+            <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">건강 운동</div>
+            <div style="font-size:10px;color:#991B1B;font-weight:700;text-align:center;line-height:1.3">자세히 보러가기 ›</div>
           </div>
 
         </div>
@@ -2514,7 +2523,7 @@ window.appIcon = function(name, size){
               <svg width="30" height="30" viewBox="0 0 64 64" fill="none"><path d="M18 22c0-8 6.3-14 14-14s14 6 14 14" stroke="#17243A" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M14 22h36l-2 32a4 4 0 0 1-4 3.6H20a4 4 0 0 1-4-3.6L14 22Z" fill="#E9F0FA" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><path d="M14 38h36l-1.8 16a4 4 0 0 1-4 3.6H19.8a4 4 0 0 1-4-3.6L14 38Z" fill="#3D73F5" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><rect x="22" y="32" width="20" height="4" rx="2" fill="#22C55E"/></svg>
             </div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:15px;font-weight:700;color:#233D68;letter-spacing:-.3px;line-height:1.3;margin-bottom:3px">내 몸에 맞는 건강 관리 시작하기</div>
+              <div style="font-size:12.5px;font-weight:800;color:#233D68;letter-spacing:-.3px;line-height:1.3;margin-bottom:3px">내 몸에 맞는 건강 관리 시작하기</div>
               <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#52698F;font-weight:500;line-height:1.5">건강어때 스토어<span style="background:#F7F9FF;color:#2E61C4;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.3px">공식</span></div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg>
@@ -5570,11 +5579,20 @@ function showScreen(id) {
   document.body.classList.toggle('home-active', id === 'screenHome');
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
   // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯 + 스트릭·체크인
-  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} }
+  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시 + 프로필 배너 렌더링
   if (id === 'screenCapture') { maybeShowCaptureTip(); try { renderCaptureProfileBanner(); } catch(e){} }
-  // 식단 사진 화면 진입 시 프로필 배너 렌더링
-  if (id === 'screenFoodCapture') { try { renderCaptureProfileBanner(); } catch(e){} }
+  // 식단 사진 화면 진입 시 프로필 배너 + 촬영 각도 가이드 시작
+  if (id === 'screenFoodCapture') {
+    try { renderCaptureProfileBanner(); } catch(e){}
+    try { _v22StartTiltGuide('foodHumanBlock'); } catch(e){}
+  } else {
+    try { _v22StopTiltGuide(); } catch(e){}
+  }
+  // 소변검사 촬영·원재료 촬영 · 각도 가이드
+  if (id === 'screenCapture' || id === 'screenIngredient') {
+    try { _v22StartTiltGuide(id); } catch(e){}
+  }
   // 성분 분석 화면: 촬영 가이드는 HTML에 정적으로 표시 (JS 로직 제거)
   // 인체 신청 폼 진입 시 저장된 프로필 배너로 자동 표시
   if (id === 'screenHumanForm') { try { renderHumanProfileBanner(); } catch(e){} }
@@ -8339,6 +8357,431 @@ function _v20RenderBodySignal(shortages) {
   }
 }
 
+// ══════════════════════════════════════════════════════════
+// ═══ v22 · 모션·센서 통합 · 5 기능 ═══
+// 1. 앉아있음 감지 → 목 스트레칭 유도 (25분)
+// 2. 걷기 감지 → 활동량 카운터
+// 3. 촬영 각도 가이드 (자이로)
+// 4. 밤 22시+ → 복식 호흡 유도
+// 5. 20분 스크린 → 눈 피로 마사지 유도
+// ══════════════════════════════════════════════════════════
+const _v22Motion = {
+  enabled: false,
+  requested: false,
+  lastMotionTime: Date.now(),
+  stepCount: parseInt(localStorage.getItem('v22StepsToday') || '0', 10),
+  stepDate: localStorage.getItem('v22StepDate') || new Date().toDateString(),
+  lastStepTime: 0,
+  screenTimeStart: Date.now(),
+  sedentaryShown: 0,
+  eyeShown: 0,
+  nightShown: 0
+};
+// 날짜 바뀌면 걸음 리셋
+(function _v22CheckStepReset(){
+  const today = new Date().toDateString();
+  if (_v22Motion.stepDate !== today) {
+    _v22Motion.stepCount = 0;
+    _v22Motion.stepDate = today;
+    try { localStorage.setItem('v22StepsToday', '0'); localStorage.setItem('v22StepDate', today); } catch(e){}
+  }
+})();
+
+async function _v22RequestMotion() {
+  if (_v22Motion.requested) return _v22Motion.enabled;
+  _v22Motion.requested = true;
+  // iOS 12.2+ · 명시적 허가 필요
+  try {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      const p = await DeviceMotionEvent.requestPermission();
+      if (p !== 'granted') return false;
+    }
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try { await DeviceOrientationEvent.requestPermission(); } catch(e){}
+    }
+    _v22EnableMotion();
+    return true;
+  } catch(e) {
+    console.warn('[motion permission]', e);
+    return false;
+  }
+}
+
+function _v22EnableMotion() {
+  if (_v22Motion.enabled) return;
+  _v22Motion.enabled = true;
+  _v22Motion.lastMotionTime = Date.now();
+  _v22Motion.screenTimeStart = Date.now();
+  window.addEventListener('devicemotion', _v22OnMotion, { passive: true });
+  // 25분 앉아있음 체크 · 매 30초
+  setInterval(_v22CheckSedentary, 30 * 1000);
+  // 20분 스크린 체크 · 매 1분
+  setInterval(_v22CheckScreenTime, 60 * 1000);
+  // 밤 시간 체크 · 매 5분
+  setInterval(_v22CheckNight, 5 * 60 * 1000);
+  // 화면 숨김 시 스크린 타이머 리셋
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) _v22Motion.screenTimeStart = 0;
+    else _v22Motion.screenTimeStart = Date.now();
+  });
+}
+
+// 마지막 accel · Low-pass 필터로 step 감지
+let _v22PrevAccel = 0;
+let _v22PeakThreshold = 1.2;
+function _v22OnMotion(e) {
+  const a = e.acceleration || e.accelerationIncludingGravity;
+  if (!a || a.x == null) return;
+  const total = Math.sqrt((a.x||0)*(a.x||0) + (a.y||0)*(a.y||0) + (a.z||0)*(a.z||0));
+  const now = Date.now();
+  // 걸음 감지 · peak 기반 (0.3초 이상 간격)
+  if (total > _v22PeakThreshold && _v22PrevAccel < _v22PeakThreshold && (now - _v22Motion.lastStepTime > 300)) {
+    _v22Motion.stepCount++;
+    _v22Motion.lastStepTime = now;
+    _v22UpdateStepUI();
+    try { localStorage.setItem('v22StepsToday', String(_v22Motion.stepCount)); } catch(e){}
+  }
+  _v22PrevAccel = total;
+  // 움직임 감지 (앉아있음 체크용)
+  if (total > 0.15) _v22Motion.lastMotionTime = now;
+}
+
+function _v22UpdateStepUI() {
+  const el = document.getElementById('v22StepCount');
+  if (el) el.textContent = _v22Motion.stepCount.toLocaleString() + ' 걸음';
+}
+
+// 걸음 수 상세 시트
+function _v22ShowStepInfo() {
+  const old = document.getElementById('v22StepSheet');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.id = 'v22StepSheet';
+  b.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  b.onclick = e => { if (e.target === b) b.remove(); };
+  const steps = _v22Motion.stepCount;
+  const kcal = Math.round(steps * 0.04);
+  const km = (steps * 0.0007).toFixed(2);
+  const goal = 8000;
+  const pct = Math.min(100, Math.round(steps / goal * 100));
+  b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:70vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:18px;font-weight:800;color:#1D3762;letter-spacing:-.5px">오늘의 활동</div>
+      <button onclick="document.getElementById('v22StepSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer">×</button>
+    </div>
+    <div style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border-radius:20px;padding:24px 20px;text-align:center;margin-bottom:14px">
+      <div style="font-size:40px;margin-bottom:6px">🚶</div>
+      <div style="font-size:36px;font-weight:900;color:#78350F;letter-spacing:-1px;line-height:1">${steps.toLocaleString()}</div>
+      <div style="font-size:12px;color:#78654B;font-weight:700;margin-top:4px">걸음 · 목표 ${goal.toLocaleString()}</div>
+      <div style="height:8px;background:rgba(255,255,255,.5);border-radius:99px;overflow:hidden;margin-top:12px"><div style="width:${pct}%;height:100%;background:#F59E0B;border-radius:99px;transition:width .4s"></div></div>
+      <div style="font-size:11px;color:#78654B;font-weight:600;margin-top:6px">${pct}% 달성</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:#FFF;border-radius:16px;padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:#1D3762">${km}<span style="font-size:12px;color:#5D7597;font-weight:600;margin-left:2px">km</span></div><div style="font-size:10.5px;color:#5D7597;font-weight:600;margin-top:2px">이동 거리</div></div>
+      <div style="background:#FFF;border-radius:16px;padding:14px;text-align:center"><div style="font-size:22px;font-weight:800;color:#1D3762">${kcal}<span style="font-size:12px;color:#5D7597;font-weight:600;margin-left:2px">kcal</span></div><div style="font-size:10.5px;color:#5D7597;font-weight:600;margin-top:2px">소모 칼로리</div></div>
+    </div>
+    <div style="background:#DBEAFE;border-radius:14px;padding:12px 14px;margin-top:12px;font-size:11.5px;color:#1E40AF;font-weight:600;line-height:1.5">💡 앱이 켜져있는 동안 · 폰을 손에 들고 있을 때 측정돼요.</div>
+  </div>
+  <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(b);
+}
+
+// ═══ 앉아있음 체크 · 25분 이상 무움직임 ═══
+function _v22CheckSedentary() {
+  const now = Date.now();
+  const mins = (now - _v22Motion.lastMotionTime) / 60000;
+  const sinceLast = (now - _v22Motion.sedentaryShown) / 60000;
+  if (mins >= 25 && sinceLast >= 30 && !document.hidden) {
+    _v22Motion.sedentaryShown = now;
+    _v22ShowToast('25분 앉아계셨어요', '목 스트레칭 어때요?', '💆', 'neck');
+  }
+}
+// ═══ 스크린 타임 · 20분 연속 사용 ═══
+function _v22CheckScreenTime() {
+  if (!_v22Motion.screenTimeStart) return;
+  const secs = (Date.now() - _v22Motion.screenTimeStart) / 1000;
+  const sinceLast = (Date.now() - _v22Motion.eyeShown) / 60000;
+  if (secs >= 20 * 60 && sinceLast >= 30 && !document.hidden) {
+    _v22Motion.eyeShown = Date.now();
+    _v22ShowToast('20분 화면 봤어요', '눈 피로 마사지 30초', '👁', 'eye');
+  }
+}
+// ═══ 밤 시간 · 22시 이후 복식 호흡 유도 ═══
+function _v22CheckNight() {
+  const h = new Date().getHours();
+  const today = new Date().toDateString();
+  const shownToday = localStorage.getItem('v22NightPromptDate') === today;
+  if (h >= 22 && !shownToday && !document.hidden) {
+    try { localStorage.setItem('v22NightPromptDate', today); } catch(e){}
+    _v22Motion.nightShown = Date.now();
+    _v22ShowToast('잠들기 전', '복식 호흡 1분 어때요?', '🌬', 'breath');
+  }
+}
+
+// ═══ Toast · 상단 슬라이드 알림 ═══
+function _v22ShowToast(title, msg, emoji, exId) {
+  const old = document.getElementById('v22Toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.id = 'v22Toast';
+  t.style.cssText = 'position:fixed;top:-100px;left:14px;right:14px;background:#264A8A;color:#FFF;padding:14px 16px;border-radius:16px;z-index:99999;box-shadow:0 8px 24px rgba(38,74,138,.35);display:flex;align-items:center;gap:12px;transition:top .35s cubic-bezier(.16,.84,.44,1);font-family:inherit;max-width:420px;margin:0 auto;cursor:pointer';
+  t.innerHTML = `
+    <div style="width:40px;height:40px;background:#FBBF24;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${emoji}</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12px;font-weight:800;color:#FBBF24;letter-spacing:.3px;margin-bottom:2px">${_v20Esc(title)}</div>
+      <div style="font-size:13px;font-weight:600;color:#FFF;line-height:1.35">${_v20Esc(msg)}</div>
+    </div>
+    <button onclick="event.stopPropagation();document.getElementById('v22Toast').remove()" style="background:transparent;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;padding:4px 6px;flex-shrink:0">×</button>
+  `;
+  t.onclick = () => {
+    t.remove();
+    try { _v21OpenExerciseDetail(exId); } catch(e){}
+  };
+  document.body.appendChild(t);
+  requestAnimationFrame(() => { t.style.top = '14px'; });
+  // 자동 사라짐 · 10초
+  setTimeout(() => { if (t.parentNode) { t.style.top = '-100px'; setTimeout(() => t.remove(), 400); } }, 10000);
+}
+
+// ═══ 촬영 각도 가이드 · 자이로 실시간 표시 ═══
+// 사용: _v22StartTiltGuide('elementId') → 촬영 화면에서 호출
+let _v22TiltHandler = null;
+let _v22TiltUiEl = null;
+function _v22StartTiltGuide(targetElId) {
+  _v22StopTiltGuide();
+  const parent = document.getElementById(targetElId);
+  if (!parent) return;
+  // 오버레이 UI
+  const el = document.createElement('div');
+  el.id = 'v22TiltGuide';
+  el.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:5';
+  el.innerHTML = `
+    <div style="width:120px;height:120px;border:2.5px solid rgba(255,255,255,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.15);backdrop-filter:blur(6px)">
+      <div id="v22TiltDot" style="width:20px;height:20px;background:#FBBF24;border-radius:50%;box-shadow:0 0 12px rgba(251,191,36,.6);transition:transform .1s"></div>
+    </div>
+    <div id="v22TiltHint" style="text-align:center;margin-top:8px;color:#FFF;font-size:12px;font-weight:700;background:rgba(15,23,42,.7);padding:4px 10px;border-radius:99px;display:inline-block;left:50%;position:relative;transform:translateX(-50%)">기울여서 정면으로</div>
+  `;
+  parent.style.position = 'relative';
+  parent.appendChild(el);
+  _v22TiltUiEl = el;
+  _v22TiltHandler = (e) => {
+    const beta = e.beta || 0;   // 앞뒤 (0 = 위 향함 · 90 = 세움)
+    const gamma = e.gamma || 0; // 좌우
+    // 정면 촬영 · 위에서 아래로 볼 때 · beta 근처 (음식은 15~35 · 문서는 5~15)
+    const targetBeta = 20;
+    const dx = Math.max(-24, Math.min(24, gamma));
+    const dy = Math.max(-24, Math.min(24, beta - targetBeta));
+    const dot = document.getElementById('v22TiltDot');
+    if (dot) dot.style.transform = `translate(${dx * 1.5}px, ${dy * 1.5}px)`;
+    const good = Math.abs(dx) < 6 && Math.abs(dy) < 8;
+    const hint = document.getElementById('v22TiltHint');
+    if (hint) {
+      hint.textContent = good ? '✓ 완벽해요!' : (Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? '← 왼쪽으로' : '→ 오른쪽으로') : (dy > 0 ? '↑ 위로' : '↓ 아래로'));
+      hint.style.background = good ? 'rgba(16,185,129,.9)' : 'rgba(15,23,42,.7)';
+    }
+    if (dot) dot.style.background = good ? '#10B981' : '#FBBF24';
+  };
+  // iOS 허가 이미 얻은 상태에서 리스너 붙임
+  window.addEventListener('deviceorientation', _v22TiltHandler);
+}
+function _v22StopTiltGuide() {
+  if (_v22TiltHandler) {
+    window.removeEventListener('deviceorientation', _v22TiltHandler);
+    _v22TiltHandler = null;
+  }
+  if (_v22TiltUiEl && _v22TiltUiEl.parentNode) _v22TiltUiEl.remove();
+  _v22TiltUiEl = null;
+}
+
+// ══════════════════════════════════════════════════════════
+// ═══ v22 · 푸시 알림 (식사·수면·소변검사 리마인더) ═══
+// ══════════════════════════════════════════════════════════
+const V22_PUSH_SCHEDULE = [
+  { hour:8, minute:0, id:'breakfast', title:'🍚 아침 뭐 드셨어요?', body:'사진 한 장이면 영양 분석 완료!' },
+  { hour:12, minute:30, id:'lunch', title:'🍱 점심 먹었어요?', body:'식단 촬영하고 오늘 밸런스 체크' },
+  { hour:18, minute:30, id:'dinner', title:'🍽 저녁 뭐 드셨어요?', body:'하루 마무리 · 식단 촬영' },
+  { hour:7, minute:30, id:'sleep_am', title:'☀️ 잘 주무셨어요?', body:'수면 체크 1분 · 5문항' },
+  { hour:22, minute:30, id:'sleep_pm', title:'🌙 이제 주무셔야 해요', body:'잠 잘 오는 법 · 복식 호흡 1분' }
+];
+
+async function _v22EnableNotifications() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') { _v22ScheduleAll(); return true; }
+  if (Notification.permission === 'denied') return false;
+  try {
+    const p = await Notification.requestPermission();
+    if (p === 'granted') { _v22ScheduleAll(); return true; }
+  } catch(e){}
+  return false;
+}
+
+function _v22ScheduleAll() {
+  const now = new Date();
+  V22_PUSH_SCHEDULE.forEach(item => {
+    let target = new Date(); target.setHours(item.hour, item.minute, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const delay = target - now;
+    // 하루 이내만 예약 (앱이 오늘 하루 켜져있어야 발동 · PWA 백그라운드 한계)
+    if (delay < 24 * 3600 * 1000) {
+      setTimeout(() => _v22FireNotification(item), delay);
+    }
+  });
+}
+
+function _v22FireNotification(item) {
+  try {
+    if (Notification.permission !== 'granted') return;
+    // 오늘 같은 항목 이미 발동됐으면 skip
+    const key = 'v22NotifDone_' + item.id + '_' + new Date().toDateString();
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+    // 관련 데이터 이미 완료됐으면 skip (식단·수면)
+    if (item.id.startsWith('breakfast') || item.id.startsWith('lunch') || item.id.startsWith('dinner')) {
+      try {
+        const fh = _getFoodHistory ? _getFoodHistory() : [];
+        const today = new Date().toDateString();
+        const range = { breakfast:[5,10], lunch:[11,14], dinner:[17,22] }[item.id];
+        if (fh.some(f => { const d = new Date(f.date); return d.toDateString() === today && d.getHours() >= range[0] && d.getHours() <= range[1]; })) return;
+      } catch(e){}
+    }
+    if (item.id === 'sleep_am') {
+      try {
+        const sl = JSON.parse(localStorage.getItem('sleepCheckHistory')||'[]');
+        if (sl && sl[0] && new Date(sl[0].date).toDateString() === new Date().toDateString()) return;
+      } catch(e){}
+    }
+    const n = new Notification(item.title, {
+      body: item.body,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      tag: item.id,
+      renotify: false
+    });
+    n.onclick = () => {
+      window.focus();
+      try {
+        if (item.id === 'sleep_am' && typeof enterSleepCheck === 'function') enterSleepCheck();
+        else if (item.id === 'sleep_pm' && typeof _v21OpenExerciseDetail === 'function') _v21OpenExerciseDetail('breath');
+        else if (typeof enterFood === 'function') enterFood('human');
+      } catch(e){}
+      n.close();
+    };
+    // 다음 날 같은 시간 재예약
+    setTimeout(() => _v22FireNotification(item), 24 * 3600 * 1000 - 1000);
+  } catch(e) { console.warn('[notif]', e); }
+}
+
+// 홈 첫 진입 시 · 알림 허가 요청 (한 번만)
+(function _v22InitPushOnFirstHome() {
+  const done = localStorage.getItem('v22NotifPromptAsked');
+  if (done) { if (Notification.permission === 'granted') _v22EnableNotifications(); return; }
+  // 사용자 첫 터치 후 요청
+  const trigger = () => {
+    document.removeEventListener('click', trigger, true);
+    localStorage.setItem('v22NotifPromptAsked', '1');
+    setTimeout(() => _v22EnableNotifications(), 2000);
+  };
+  document.addEventListener('click', trigger, { once: true, capture: true });
+})();
+
+// ══════════════════════════════════════════════════════════
+// ═══ v22 · 스마트 리마인더 · 시간대별 자동 유도 ═══
+// - 아침 (6~10시) · 아침 식단 촬영 + 수면 체크
+// - 점심 (11~14시) · 점심 식단 촬영
+// - 저녁 (17~21시) · 저녁 식단 촬영
+// - 밤 (22시+) · 취침 준비 + 잠 잘 오는 법
+// - 소변검사 · 30일 이상 지남
+// ══════════════════════════════════════════════════════════
+function _v22CheckSmartReminders() {
+  try {
+    const now = new Date();
+    const h = now.getHours();
+    const todayKey = now.toDateString();
+    const container = document.getElementById('v22SmartReminderStack');
+    if (!container) return;
+    const cards = [];
+    // 식단 · 오늘 이 시간대에 이미 기록했는지 체크
+    const foodHistory = (typeof _getFoodHistory === 'function') ? _getFoodHistory() : [];
+    const todayMeals = foodHistory.filter(f => f.date && new Date(f.date).toDateString() === todayKey);
+    const hasBreakfast = todayMeals.some(m => { const mh = new Date(m.date).getHours(); return mh >= 5 && mh <= 10; });
+    const hasLunch = todayMeals.some(m => { const mh = new Date(m.date).getHours(); return mh >= 11 && mh <= 14; });
+    const hasDinner = todayMeals.some(m => { const mh = new Date(m.date).getHours(); return mh >= 17 && mh <= 22; });
+
+    // 아침 식단 (6~10시)
+    if (h >= 6 && h <= 10 && !hasBreakfast) {
+      cards.push({ id:'meal_bf', emoji:'🍚', title:'아침 뭐 드셨어요?', sub:'사진 한 장이면 영양 분석 완료', action:"if(typeof enterFood==='function')enterFood('human')", color:'#FEF3C7', textColor:'#78350F' });
+    }
+    // 점심 (11~14시)
+    if (h >= 11 && h <= 14 && !hasLunch) {
+      cards.push({ id:'meal_lc', emoji:'🍱', title:'점심 뭐 드셨어요?', sub:'식단 촬영으로 오늘 밸런스 체크', action:"if(typeof enterFood==='function')enterFood('human')", color:'#DBEAFE', textColor:'#1E40AF' });
+    }
+    // 저녁 (17~21시)
+    if (h >= 17 && h <= 21 && !hasDinner) {
+      cards.push({ id:'meal_dn', emoji:'🍽', title:'저녁 뭐 드셨어요?', sub:'하루 마무리 · 식단 촬영', action:"if(typeof enterFood==='function')enterFood('human')", color:'#FED7AA', textColor:'#9A3412' });
+    }
+    // 아침 · 수면 체크 (6~10시)
+    if (h >= 6 && h <= 10) {
+      let lastSleep = null;
+      try { const sl = JSON.parse(localStorage.getItem('sleepCheckHistory')||'[]'); lastSleep = sl && sl[0]; } catch(e){}
+      const sleepDone = lastSleep && new Date(lastSleep.date).toDateString() === todayKey;
+      if (!sleepDone) {
+        cards.push({ id:'sleep_am', emoji:'☀️', title:'잘 주무셨어요?', sub:'수면 체크 1분 · 5문항', action:'if(typeof enterSleepCheck==="function")enterSleepCheck()', color:'#FEF9E7', textColor:'#78350F' });
+      }
+    }
+    // 밤 (22시~새벽 2시) · 취침 준비
+    if (h >= 22 || h <= 1) {
+      const shownNight = localStorage.getItem('v22NightReminderDate') === todayKey;
+      if (!shownNight) {
+        cards.push({ id:'sleep_pm', emoji:'🌙', title:'이제 주무셔야 해요', sub:'잠 잘 오는 법 · 복식 호흡 1분', action:"try{_v21OpenExerciseDetail('breath')}catch(e){};try{localStorage.setItem('v22NightReminderDate','"+todayKey+"')}catch(e){}", color:'#E9D5FF', textColor:'#5B21B6' });
+      }
+    }
+    // 소변검사 · 30일 이상
+    try {
+      const urineHistory = JSON.parse(localStorage.getItem('urineHistoryV2')||'[]');
+      if (urineHistory.length > 0) {
+        const last = urineHistory[0];
+        const daysSince = Math.floor((Date.now() - new Date(last.date).getTime()) / (1000*60*60*24));
+        const dismissedUntil = parseInt(localStorage.getItem('reminderDismissedUntil')||'0', 10);
+        if (daysSince >= 30 && Date.now() > dismissedUntil) {
+          cards.push({ id:'urine', emoji:'🧪', title:`소변검사 후 ${daysSince}일 지났어요`, sub:'한 달 지났어요 · 재검사 어때요?', action:'if(typeof enterHuman==="function")enterHuman()', color:'#DCFCE7', textColor:'#065F46' });
+        }
+      }
+    } catch(e){}
+    // 렌더링 · 카드 만들기
+    if (cards.length === 0) { container.innerHTML = ''; return; }
+    container.innerHTML = cards.map(c => `
+      <div style="background:${c.color};border:0;border-radius:16px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="${c.action}">
+        <div style="width:38px;height:38px;background:rgba(255,255,255,.6);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${c.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:${c.textColor};letter-spacing:-.2px;line-height:1.3;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(c.title)}</div>
+          <div style="font-size:11px;color:${c.textColor};opacity:.75;font-weight:500;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(c.sub)}</div>
+        </div>
+        <button onclick="event.stopPropagation();this.parentNode.style.display='none'" style="background:transparent;border:none;color:${c.textColor};opacity:.5;font-size:16px;cursor:pointer;padding:4px 6px;flex-shrink:0">×</button>
+      </div>
+    `).join('');
+  } catch(e) { console.warn('[smart reminder]', e); }
+}
+
+// ═══ 최초 활성화 트리거 (사용자 첫 터치 후 자동) ═══
+(function _v22AutoInitOnFirstTap() {
+  const handler = async () => {
+    document.removeEventListener('click', handler, true);
+    document.removeEventListener('touchstart', handler, true);
+    try {
+      // iOS 아닌 경우 (혹은 이미 허가)
+      if (typeof DeviceMotionEvent === 'undefined' || typeof DeviceMotionEvent.requestPermission !== 'function') {
+        _v22EnableMotion();
+      } else {
+        // iOS는 사용자가 명시적으로 활성화 (설정에서)
+        // 여기서 자동 요청 시도 (실패해도 무해)
+        await _v22RequestMotion();
+      }
+    } catch(e){}
+  };
+  document.addEventListener('click', handler, { once: true, capture: true });
+  document.addEventListener('touchstart', handler, { once: true, capture: true });
+})();
+
 // ═══ v22 · 음식 → 카테고리 SVG 일러 매핑 (Hero용) ═══
 // 카테고리별 SVG 반환 · 나중에 PNG로 교체 가능
 const _FOOD_ILLUST_SVG = {
@@ -8759,7 +9202,16 @@ function _v21RenderHero() {
       if (whyEl && shortages && shortages.length) {
         const labels = shortages.slice(0, 2).map(s => s.label).join('·');
         const josa = _v21Josa(shortages.slice(0,2).slice(-1)[0].label, '를', '을');
-        whyEl.innerHTML = `최근 식사에서 부족했던 <b style="color:#FBBF24;font-weight:700">${_v20Esc(labels)}</b>${josa} 함께 채울 수 있어요.`;
+        // 부족 영양소 상위 2개 + 음식이 함께 제공하는 관련 영양소 ("과 XX·XX도")
+        const primary = shortages.slice(0, 2).map(s => s.label).join('·');
+        const primJosa = _v21Josa(shortages.slice(0,2).slice(-1)[0].label, '를', '을');
+        // 음식 관련 추가 영양소 (관련 있는 영양소 2개 더 제안)
+        const bonusMap = { protein:['비타민B','아연'], fiber:['칼륨','마그네슘'], calcium:['비타민D','인'], iron:['비타민C','엽산'], magnesium:['비타민B6','칼륨'], vitA:['루테인','베타카로틴'], vitC:['비타민E','플라보노이드'], vitD:['칼슘','비타민K'], omega3:['비타민D','EPA·DHA'], sodium:['칼륨','수분'] };
+        let bonus = [];
+        try { const b = bonusMap[shortages[0]?.key]; if (b) bonus = b; } catch(e){}
+        const bonusFmt = bonus.length ? `<b style="color:#FBBF24;font-weight:700">${bonus.filter(Boolean).join('·')}</b>` : '';
+        const bonusText = bonus.length ? `<br>${bonusFmt}까지 챙길 수 있어요.` : '';
+        whyEl.innerHTML = `부족했던 <b style="color:#FBBF24;font-weight:700">${_v20Esc(primary)}</b>${primJosa} 채우고${bonusText}`;
         whyEl.style.display = 'block';
       }
     } catch(e){}
