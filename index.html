@@ -2368,33 +2368,26 @@ window.appIcon = function(name, size){
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · 산뜻한 블루 hero -->
-        <div style="background:#3D63D9;border-radius:24px;padding:20px 20px 4px;box-shadow:none;margin-bottom:14px;margin-top:4px;overflow:hidden">
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
-            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#E8EEFB;display:flex;align-items:center;justify-content:center">
-              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
-                <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#3D63D9" stroke="#17243A" stroke-width=".9"/>
-                <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
-                <circle cx="20" cy="22" r="5.5" fill="#DBEAFE" stroke="#17243A" stroke-width="1"/>
-                <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#17243A" stroke-width="1"/>
-                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#3D63D9" stroke="#17243A" stroke-width=".9"/>
-              </svg>
-            </div>
-            <div style="flex:1;min-width:0">
-              <div id="v21HeroTitle" style="font-size:15px;font-weight:700;color:#FFF;letter-spacing:-.3px;line-height:1.3">
-                오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>, <span id="v21RecName" style="font-weight:800;color:#FFF">고등어구이</span> 어때?
-              </div>
-              <div id="v21RecWhy" style="font-size:11px;color:#DAE5F8;font-weight:500;line-height:1.5;margin-top:3px">최근 식사에서 부족했던 단백질을 채울 수 있어요.</div>
-            </div>
+        <!-- ① 다음 한 끼 추천 · 큰 hero + 일러스트 -->
+        <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 4px;box-shadow:none;margin-bottom:12px;margin-top:4px;overflow:hidden;position:relative;min-height:340px;display:flex;flex-direction:column">
+          <!-- 노란 halo -->
+          <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(251,191,36,.24) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
+          <!-- Title · 큰 타이포 + 노란 형광펜 (참고 이미지 스타일) -->
+          <div id="v21HeroTitle" style="font-size:28px;font-weight:900;color:#FFF;letter-spacing:-1px;line-height:1.15;margin-top:6px;margin-bottom:12px;position:relative;z-index:2;max-width:65%">
+            오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 4px">고등어구이</span> 어때
           </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-left:56px">
-            <div id="v21HeroChips" style="display:flex;gap:6px;flex-wrap:nowrap;overflow:hidden;flex:1;justify-content:flex-start"></div>
-            <div id="v21HeroKcal" style="font-size:11px;color:#C4D4F0;font-weight:500;flex-shrink:0;white-space:nowrap;text-align:right">— kcal</div>
+          <!-- Why · 영양소 노란색 -->
+          <div id="v21RecWhy" style="font-size:12.5px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.6;margin-bottom:14px;position:relative;z-index:2;max-width:60%">부족했던 <b style="color:#FBBF24;font-weight:700">오메가3</b>와 <b style="color:#FBBF24;font-weight:700">단백질</b>을<br>한 접시로 채울 수 있어요.</div>
+          <!-- 우측 중앙 · 음식 일러스트 (kcal와 겹침 방지) -->
+          <div id="v21HeroIllust" style="position:absolute;top:44%;right:-4px;transform:translateY(-50%);width:140px;height:120px;pointer-events:none;z-index:1"></div>
+          <!-- 히든 · chips 참조 유지 -->
+          <div id="v21HeroChips" style="display:none"></div>
+          <!-- Kcal -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;position:relative;z-index:2;margin-top:auto">
+            <div id="v21HeroKcal" style="font-size:11px;color:#C4D4F0;font-weight:500;flex-shrink:0;white-space:nowrap">— kcal</div>
           </div>
-          <div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.2)">
+          <!-- Buttons -->
+          <div style="display:flex;gap:0;border-top:1px solid rgba(255,255,255,.2);position:relative;z-index:2">
             <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:transparent;border:none;padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">↻ 다른 음식</button>
             <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid rgba(255,255,255,.2);padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">🗺 내 주변</button>
             <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:transparent;border:none;border-left:1px solid rgba(255,255,255,.2);padding:6px 0;font-size:12px;font-weight:600;color:#FFF;font-family:inherit;cursor:pointer;min-height:36px">자세히 ›</button>
@@ -2402,9 +2395,6 @@ window.appIcon = function(name, size){
           <!-- 레거시 · JS 참조 유지 -->
           <div style="display:none">
             <div id="v21GapCard"><div id="v21GapMain"></div><div id="v21GapAct"></div></div>
-          </div>
-          <!-- 레거시 · JS 참조 유지 (히든) -->
-          <div style="display:none">
             <span id="v21RecJosa">을</span>
             <div id="v21HeroPhoto"></div>
             <span id="v20HeroHeadline"></span>
@@ -2417,82 +2407,104 @@ window.appIcon = function(name, size){
           </div>
         </div>
 
-        <!-- ⓐ 오늘 실천할 한 가지 · 삭제됨 (내 몸 신호가 자리 대체) · JS 참조 유지 위해 히든 -->
+        <!-- 실천 카드 (히든) -->
         <div id="v21PracticeCard" style="display:none">
-          <div style="display:flex;gap:14px;align-items:flex-start">
-            <div style="flex-shrink:0;width:54px;height:54px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(37,99,235,.08)">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 3 C7 3 4 6 4 10 C4 14 8 18 12 21 C16 18 20 14 20 10 C20 6 17 3 12 3 Z" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="10" r="3" fill="#2563EB"/></svg>
-            </div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:11px;color:#3454C4;font-weight:800;letter-spacing:.3px">오늘 실천할 한 가지</div>
-              <div id="v21PracticeMain" style="font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.4;margin-top:4px">저녁 반찬으로 시금치나물 어때?</div>
-              <div id="v21PracticeWhy" style="font-size:12px;color:#5A6371;font-weight:500;line-height:1.65;margin-top:8px">부족한 식이섬유와 엽산을 한 접시로 채울 수 있어요.</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px">
-            <button type="button" onclick="event.stopPropagation();try{_v21NextPractice()}catch(e){}" style="flex:1;background:#fff;border:none;padding:12px;border-radius:99px;font-size:12.5px;font-weight:700;color:#475569;font-family:inherit;cursor:pointer">다른 제안</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21MarkPractice()}catch(e){}" style="flex:1;background:#10B981;color:#fff;border:none;padding:12px;border-radius:99px;font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 6px 14px rgba(16,185,129,.28)">해봤어요</button>
-          </div>
+          <div id="v21PracticeMain"></div>
+          <div id="v21PracticeWhy"></div>
         </div>
 
-        <!-- ⓑ 내 몸 신호 · 실천 자리 대체 -->
-        <div id="v20BodySignalCard" style="background:#FEF3C7;border-radius:24px;padding:20px 20px 16px;border:0;box-shadow:none;margin-bottom:14px">
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
-            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#FFFFFF;display:flex;align-items:center;justify-content:center">
-              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
-                <circle cx="15" cy="11" r="5" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
-                <path d="M6 34 C6 25 10 19 15 19 C20 19 24 25 24 34 Z" fill="#FFF" stroke="#17243A" stroke-width="1.3" stroke-linejoin="round"/>
-                <path d="M11 27 L14 30 L19 24" stroke="#3D73F5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                <path d="M31 8 L27 20 L30 20 L27 32 L35 18 L32 18 L35 8 Z" fill="#FBBF24" stroke="#17243A" stroke-width="1.1" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div style="flex:1;min-width:0">
-              <div id="v20BodySignalTitle" style="font-size:15px;font-weight:700;color:#1D3762;line-height:1.3;letter-spacing:-.3px">요즘 배변이 개운하지 않다면?</div>
-              <div id="v20BodySignalDesc" style="font-size:11px;color:#78654B;font-weight:500;line-height:1.5;margin-top:3px">식이섬유·수분 부족과 관련될 수 있어요.</div>
-            </div>
-          </div>
-          <div id="v20BodySignalIcon" style="display:none"></div>
-          <div id="v20BodySignalChips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
-          <div id="v20BodySignalMedical" style="display:none;background:#FEF3C7;border:1px solid #FDE68A;border-radius:10px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#92400E;font-weight:700;line-height:1.5"></div>
-          <div style="border-top:1px solid #FDE68A;padding-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <span id="v20BodySignalDisclaimer" style="font-size:11px;color:#78654B;font-weight:500;flex:1">가능성 중 하나 · 지속되면 진료</span>
-            <button type="button" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:transparent;border:none;font-size:11.5px;color:#B45309;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
-          </div>
-        </div>
+        <!-- ② 2×2 vibrant 그리드 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
 
-        <!-- ② 최근 식사 · 풀 폭 (3×2 파스텔 셀) -->
-        <div id="v20RecentMealCard" style="background:#FFFFFF;border-radius:24px;padding:20px 20px 16px;border:1px solid #E2EAF9;box-shadow:0 2px 10px rgba(30,58,138,.04);margin-bottom:14px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px">
-            <div style="flex-shrink:0;width:44px;height:44px;border-radius:15px;background:#F7F9FF;display:flex;align-items:center;justify-content:center">
-              <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
-                <rect x="4.5" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="6.8" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="9.1" y="7" width="1.4" height="9" rx=".7" fill="#FFF" stroke="#17243A" stroke-width=".9"/>
-                <rect x="6" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
-                <circle cx="20" cy="22" r="9" fill="#FFF" stroke="#17243A" stroke-width="1.3"/>
-                <circle cx="20" cy="16.5" r=".7" fill="#17243A"/>
-                <circle cx="20" cy="27.5" r=".7" fill="#17243A"/>
-                <circle cx="14.5" cy="22" r=".7" fill="#17243A"/>
-                <circle cx="25.5" cy="22" r=".7" fill="#17243A"/>
-                <line x1="20" y1="22" x2="20" y2="17.5" stroke="#17243A" stroke-width="1.3" stroke-linecap="round"/>
-                <line x1="20" y1="22" x2="23.5" y2="24" stroke="#17243A" stroke-width="1.3" stroke-linecap="round"/>
-                <circle cx="20" cy="22" r="1.2" fill="#FBBF24"/>
-                <ellipse cx="30.5" cy="11" rx="3" ry="4" fill="#FFF" stroke="#17243A" stroke-width="1"/>
-                <rect x="29" y="14" width="3" height="17" rx="1.5" fill="#3D73F5" stroke="#17243A" stroke-width=".9"/>
+          <!-- ⓐ 내 몸의 신호 · 노란 -->
+          <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
+            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="50" height="56" viewBox="0 0 120 130" fill="none">
+                <circle cx="45" cy="30" r="14" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
+                <path d="M14 116 C 14 76, 26 60, 45 60 C 64 60, 76 76, 76 116 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
+                <path d="M32 84 L 40 92 L 54 74" stroke="#3D63D9" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M96 24 L 82 62 L 92 62 L 78 106 L 108 56 L 96 56 L 108 24 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
               </svg>
             </div>
-            <div style="flex:1;min-width:0">
-              <div id="v20RecentMealName" style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px;line-height:1.3">오늘 하루 진행</div>
-              <div style="font-size:11px;color:#60759A;font-weight:500;line-height:1.5;margin-top:3px">일일 권장량 대비 · 6대 영양소</div>
+            <div id="v20BodySignalTitle" style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">내 몸의 신호</div>
+            <div id="v20BodySignalDesc" style="font-size:10.5px;color:#78654B;font-weight:600;text-align:center;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식이섬유 부족</div>
+            <!-- 히든 · JS 참조 유지 -->
+            <div id="v20BodySignalIcon" style="display:none"></div>
+            <div id="v20BodySignalChips" style="display:none"></div>
+            <div id="v20BodySignalMedical" style="display:none"></div>
+            <span id="v20BodySignalDisclaimer" style="display:none">가능성 중 하나 · 지속되면 진료</span>
+          </div>
+
+          <!-- ⓑ 식사 기록 · 파란 -->
+          <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:linear-gradient(135deg,#EEF2FF 0%,#DBEAFE 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
+            <span id="v21RecentScore" style="display:none">—점</span>
+            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="58" height="56" viewBox="0 0 130 130" fill="none">
+                <rect x="8" y="46" width="114" height="70" rx="10" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
+                <rect x="12" y="50" width="106" height="6" rx="3" fill="#F1F5F9"/>
+                <path d="M20 68 C 20 82, 25 88, 35 88 C 45 88, 50 82, 50 68 L 20 68 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
+                <ellipse cx="35" cy="68" rx="15" ry="3" fill="#FCD34D" stroke="#0F172A" stroke-width="2"/>
+                <path d="M72 66 C 72 82, 78 88, 88 88 C 98 88, 104 82, 104 66 L 72 66 Z" fill="#78350F" stroke="#0F172A" stroke-width="2"/>
+                <ellipse cx="88" cy="66" rx="16" ry="3" fill="#DC2626"/>
+                <circle cx="28" cy="100" r="6" fill="#22C55E" stroke="#0F172A" stroke-width="1.6"/>
+                <circle cx="52" cy="100" r="6" fill="#F97316" stroke="#0F172A" stroke-width="1.6"/>
+                <circle cx="88" cy="100" r="6" fill="#DC2626" stroke="#0F172A" stroke-width="1.6"/>
+              </svg>
             </div>
-            <div id="v21RecentScore" style="font-size:11px;font-weight:700;color:#31558D;background:#D5E2F8;padding:4px 10px;border-radius:8px;flex-shrink:0">—점</div>
+            <div id="v20RecentMealName" style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식사 기록</div>
+            <div style="font-size:10.5px;color:#5D7597;font-weight:600;text-align:center;line-height:1.4">오늘 0끼 기록</div>
+            <!-- 히든 · JS 참조 유지 -->
+            <div id="v21RecentHex" style="display:none"></div>
+            <div id="v20RecentMealComment" style="display:none"><span></span><button id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()"></button></div>
+            <div id="v20RecentMealChips" style="display:none"></div>
           </div>
-          <div id="v21RecentHex"></div>
-          <div id="v20RecentMealComment" style="background:transparent;color:#5D7597;font-size:11px;font-weight:500;line-height:1.5;padding:10px 0 0;border-top:1px solid #E8EDF4;border-radius:0;margin-top:11px;display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <span>사진 한 장이면 AI가 영양을 분석해드려요.</span>
-            <button type="button" id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()" style="background:transparent;border:none;padding:0;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">자세히 ›</button>
+
+          <!-- ⓒ 오늘의 운세 · 초록 -->
+          <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
+            <span id="v21FortuneBadge" style="display:none">吉</span>
+            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <svg width="56" height="56" viewBox="0 0 130 130" fill="none">
+                <circle cx="65" cy="60" r="46" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
+                <circle cx="65" cy="60" r="40" fill="none" stroke="#0F172A" stroke-width="1.2" opacity=".3" stroke-dasharray="3 3"/>
+                <path d="M65 22 L 74 46 L 100 47 L 80 63 L 87 88 L 65 74 L 43 88 L 50 63 L 30 47 L 56 46 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M65 22 L 74 46 L 100 47 L 80 63 L 65 22 Z" fill="#F59E0B"/>
+              </svg>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25">오늘의 운세</div>
+            <div id="v21FortuneSub" style="font-size:10.5px;color:#065F46;font-weight:600;text-align:center;line-height:1.4">大吉 · 건강운 좋음</div>
           </div>
-          <div id="v20RecentMealChips" style="display:none"></div>
+
+          <!-- ⓓ 건강 운동 · 핑크 -->
+          <div onclick="try{_v21OpenExercise()}catch(e){}" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:18px;padding:12px 12px 14px;box-shadow:none;position:relative;overflow:hidden;min-height:150px;cursor:pointer">
+            <div style="width:56px;height:56px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center;position:relative">
+              <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:40px;height:5px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
+              <!-- 스트레칭 하는 사람 -->
+              <svg width="52" height="56" viewBox="0 0 120 130" fill="none">
+                <!-- 머리 -->
+                <circle cx="60" cy="24" r="10" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
+                <!-- 몸통 -->
+                <path d="M46 44 L 46 82 C 46 88, 50 90, 60 90 C 70 90, 74 88, 74 82 L 74 44 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
+                <!-- 양팔 위로 -->
+                <path d="M46 46 C 32 34, 22 20, 24 12" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+                <path d="M74 46 C 88 34, 98 20, 96 12" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+                <circle cx="24" cy="12" r="3.5" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
+                <circle cx="96" cy="12" r="3.5" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
+                <!-- 양다리 -->
+                <path d="M52 88 L 44 118" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>
+                <path d="M68 88 L 76 118" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>
+                <!-- 하이라이트 (활력) -->
+                <circle cx="15" cy="30" r="1.5" fill="#FBBF24"/>
+                <circle cx="105" cy="30" r="1.5" fill="#FBBF24"/>
+                <circle cx="12" cy="55" r="1.2" fill="#FBBF24"/>
+              </svg>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:2px;line-height:1.25">건강 운동</div>
+            <div style="font-size:10.5px;color:#991B1B;font-weight:600;text-align:center;line-height:1.4">간단 스트레칭 · 1분</div>
+          </div>
+
         </div>
 
         <!-- ⑤ 건강어때 스토어 · 헤드 + 4개 썸네일 스트립 -->
@@ -8002,6 +8014,7 @@ function _v20RenderRecentMeal() {
   const mealLabel = {'breakfast':'아침', 'lunch':'점심', 'dinner':'저녁', 'snack':'간식'}[mealTime] || '';
   const displayName = mealLabel ? `${mealLabel} · ${foodName}` : foodName;
   if (nameEl) nameEl.textContent = displayName;
+  try { _v22UpdateHeroIllust(displayName); } catch(e){}
   // chip · nutrition 기반
   const nut = recent.nutrition || {};
   const chips = [];
@@ -8326,7 +8339,266 @@ function _v20RenderBodySignal(shortages) {
   }
 }
 
-// ═══ 하단 3카드 · 실제 데이터로 채움 ═══
+// ═══ v22 · 음식 → 카테고리 SVG 일러 매핑 (Hero용) ═══
+// 카테고리별 SVG 반환 · 나중에 PNG로 교체 가능
+const _FOOD_ILLUST_SVG = {
+  grill: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 58 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 58 L 14 58 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="58" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="56" rx="42" ry="7" fill="#FCD34D"/><ellipse cx="60" cy="54" rx="42" ry="7" fill="#FBBF24"/><ellipse cx="60" cy="45" rx="38" ry="9" fill="#57534E" stroke="#0F172A" stroke-width="1.8"/><ellipse cx="60" cy="43" rx="32" ry="5" fill="#78716C"/><path d="M92 45 L 103 39 L 103 51 Z" fill="#57534E" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="34" cy="43" r="1.8" fill="#0F172A"/><ellipse cx="35" cy="34" rx="6" ry="3.5" fill="#22C55E" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="85" cy="33" rx="5" ry="3" fill="#16A34A" stroke="#0F172A" stroke-width="1.4"/></svg>`,
+  soup: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M18 50 C 18 88, 34 100, 60 100 C 86 100, 102 88, 102 50 L 18 50 Z" fill="#78350F" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="50" rx="42" ry="9" fill="#92400E" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="48" rx="38" ry="7" fill="#DC2626"/><ellipse cx="45" cy="45" rx="6" ry="3" fill="#22C55E" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="72" cy="44" rx="7" ry="3.5" fill="#FBBF24" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="60" cy="42" rx="5" ry="2.5" fill="#F87171" stroke="#0F172A" stroke-width="1.2"/><path d="M50 30 Q 47 24 50 20" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M60 26 Q 63 22 60 16" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M70 30 Q 67 24 70 20" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+  bowl: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 55 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 55 L 14 55 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="55" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="53" rx="40" ry="7" fill="#FCD34D"/><ellipse cx="60" cy="52" rx="40" ry="6" fill="#FEF3C7"/><ellipse cx="40" cy="48" rx="7" ry="3.5" fill="#22C55E" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="55" cy="46" rx="6" ry="3" fill="#F97316" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="70" cy="47" rx="6.5" ry="3.5" fill="#DC2626" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="82" cy="48" rx="5" ry="2.5" fill="#7C3AED" stroke="#0F172A" stroke-width="1.2"/><circle cx="60" cy="40" r="5" fill="#FBBF24" stroke="#0F172A" stroke-width="1.4"/></svg>`,
+  noodle: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 55 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 55 L 14 55 Z" fill="#0C4A6E" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="55" rx="46" ry="9" fill="#075985" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="53" rx="42" ry="7" fill="#FEF3C7"/><path d="M25 48 Q 40 42 60 48 T 95 48" stroke="#FEF3C7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M25 44 Q 40 38 60 44 T 95 44" stroke="#FCD34D" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="45" cy="44" r="5" fill="#FFF" stroke="#0F172A" stroke-width="1.4"/><circle cx="45" cy="44" r="3" fill="#FBBF24"/><ellipse cx="75" cy="42" rx="6" ry="3" fill="#22C55E" stroke="#0F172A" stroke-width="1.2"/></svg>`,
+  kimbap: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><ellipse cx="60" cy="82" rx="46" ry="10" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><circle cx="30" cy="70" r="12" fill="#0F172A"/><circle cx="30" cy="70" r="8" fill="#FFF"/><circle cx="26" cy="68" r="1.5" fill="#22C55E"/><circle cx="33" cy="70" r="1.5" fill="#F97316"/><circle cx="29" cy="73" r="1.5" fill="#FBBF24"/><circle cx="55" cy="65" r="14" fill="#0F172A"/><circle cx="55" cy="65" r="10" fill="#FFF"/><circle cx="50" cy="63" r="2" fill="#22C55E"/><circle cx="60" cy="65" r="2" fill="#F97316"/><circle cx="55" cy="70" r="2" fill="#FBBF24"/><circle cx="80" cy="66" r="13" fill="#0F172A"/><circle cx="80" cy="66" r="9" fill="#FFF"/><circle cx="76" cy="64" r="1.8" fill="#22C55E"/><circle cx="84" cy="66" r="1.8" fill="#F97316"/><circle cx="80" cy="70" r="1.8" fill="#FBBF24"/></svg>`,
+  fruit: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="34" ry="5" fill="rgba(15,23,42,.2)"/><path d="M35 45 L 32 92 C 32 96 34 98 38 98 L 82 98 C 86 98, 88 96, 88 92 L 85 45 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M30 45 L 90 45 L 88 50 L 32 50 Z" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M34 50 L 36 62 L 84 62 L 86 50 Z" fill="#FEF3C7"/><path d="M52 32 C 48 32, 44 36, 46 44 C 50 50, 60 50, 64 44 C 66 36, 62 32, 58 32 Z" fill="#DC2626" stroke="#0F172A" stroke-width="1.6"/><path d="M50 30 L 52 24 L 56 30 L 58 24 L 60 30 Z" fill="#22C55E" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/><circle cx="70" cy="40" r="4" fill="#5B21B6" stroke="#0F172A" stroke-width="1.4"/><circle cx="76" cy="44" r="3.5" fill="#7C3AED" stroke="#0F172A" stroke-width="1.4"/></svg>`,
+  nuts: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="40" ry="6" fill="rgba(15,23,42,.2)"/><path d="M18 58 C 18 84, 32 96, 60 96 C 88 96, 102 84, 102 58 L 18 58 Z" fill="#92400E" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="58" rx="42" ry="8" fill="#B45309" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="42" cy="50" rx="6" ry="4" fill="#D97706" stroke="#0F172A" stroke-width="1.4" transform="rotate(-15 42 50)"/><ellipse cx="55" cy="48" rx="7" ry="5" fill="#F59E0B" stroke="#0F172A" stroke-width="1.4"/><circle cx="70" cy="49" r="5" fill="#B45309" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="82" cy="50" rx="6" ry="4" fill="#D97706" stroke="#0F172A" stroke-width="1.4" transform="rotate(20 82 50)"/><circle cx="48" cy="42" r="4" fill="#F59E0B" stroke="#0F172A" stroke-width="1.4"/></svg>`,
+  egg: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><ellipse cx="60" cy="82" rx="48" ry="12" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="80" rx="42" ry="9" fill="#F1F5F9"/><path d="M25 78 Q 25 62, 40 62 Q 55 62, 55 78 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/><circle cx="40" cy="72" r="7" fill="#FBBF24" stroke="#0F172A" stroke-width="1.6"/><path d="M52 78 Q 52 60, 70 60 Q 88 60, 88 78 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/><circle cx="70" cy="70" r="8" fill="#FBBF24" stroke="#0F172A" stroke-width="1.6"/></svg>`
+};
+// 음식 이름 → 카테고리 (Hero 일러 매핑용)
+function _getFoodIllustCategory(name) {
+  if (!name) return 'bowl';
+  const n = String(name).replace(/\s+/g, '');
+  // 견과 · 단독 우선 매치
+  if (/견과|아몬드|호두|피스타치오|땅콩/.test(n)) return 'nuts';
+  // 계란
+  if (/계란|달걀/.test(n)) return 'egg';
+  // 과일·요거트
+  if (/요거트|바나나|사과|귤|블루베리|딸기|과일|오렌지|키위|치즈|우유|두유/.test(n)) return 'fruit';
+  // 국·찌개·탕
+  if (/찌개|국|탕|해장/.test(n)) return 'soup';
+  // 회·구이·삼겹·회덮밥(회 우선)
+  if (/회$|사시미|초밥|생선구이|고등어구이|연어|삼겹|갈비|스테이크|장어구이|아구찜|알탕/.test(n)) return 'grill';
+  // 면요리
+  if (/면$|국수|파스타|우동|칼국수|냉면|막국수|짜장|짬뽕|짜파|쌀국수/.test(n)) return 'noodle';
+  // 김밥·샌드위치
+  if (/김밥|샌드위치|햄버거|피자|토스트|와플/.test(n)) return 'kimbap';
+  // 밥·덮밥·비빔밥·볶음밥 (default bowl)
+  return 'bowl';
+}
+function _v22UpdateHeroIllust(foodName) {
+  const el = document.getElementById('v21HeroIllust');
+  if (!el) return;
+  const cat = _getFoodIllustCategory(foodName);
+  el.innerHTML = _FOOD_ILLUST_SVG[cat] || _FOOD_ILLUST_SVG.bowl;
+}
+
+// ═══ v22 · 오늘의 운세 (Saju hint 기반 · 심플 시트) ═══
+function _v21OpenFortune() {
+  const old = document.getElementById('v21FortuneSheet');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.id = 'v21FortuneSheet';
+  b.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  b.onclick = e => { if (e.target === b) b.remove(); };
+  let hint = null;
+  try { if (typeof _getSajuHint === 'function') hint = _getSajuHint(); } catch(e){}
+  const level = hint && hint.level ? hint.level : '中吉';
+  const advice = hint && hint.advice ? hint.advice : '따뜻한 음식과 규칙적인 식사로 체력을 챙기면 좋아요.';
+  const foods = hint && hint.foods ? hint.foods.join(' · ') : '따뜻한 국물 요리 · 뿌리채소';
+  b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:70vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:#1D3762">✨ 오늘의 운세</div>
+      <button onclick="document.getElementById('v21FortuneSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer">×</button>
+    </div>
+    <div style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border-radius:20px;padding:22px;text-align:center;margin-bottom:16px">
+      <svg width="80" height="80" viewBox="0 0 130 130" fill="none" style="margin-bottom:8px"><circle cx="65" cy="60" r="46" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/><path d="M65 22 L 74 46 L 100 47 L 80 63 L 87 88 L 65 74 L 43 88 L 50 63 L 30 47 L 56 46 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M65 22 L 74 46 L 100 47 L 80 63 L 65 22 Z" fill="#F59E0B"/></svg>
+      <div style="font-size:26px;font-weight:900;color:#065F46;letter-spacing:-1px;margin-bottom:4px">${_v20Esc(level)}</div>
+      <div style="font-size:12px;color:#166534;font-weight:600">건강운 · 오늘의 흐름</div>
+    </div>
+    <div style="background:#FFF;border-radius:16px;padding:14px 16px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;color:#94A3B8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">오늘의 조언</div>
+      <div style="font-size:12.5px;color:#1D3762;font-weight:500;line-height:1.6">${_v20Esc(advice)}</div>
+    </div>
+    <div style="background:#FFF;border-radius:16px;padding:14px 16px">
+      <div style="font-size:11px;font-weight:800;color:#94A3B8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">추천 음식</div>
+      <div style="font-size:12.5px;color:#1D3762;font-weight:600;line-height:1.6">${_v20Esc(foods)}</div>
+    </div>
+  </div>
+  <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(b);
+}
+
+// ═══ v22 · 건강 운동 · 간단 스트레칭 데이터 (부위별 · 상황별) ═══
+const HEALTH_EXERCISES = [
+  {
+    id:'eye', emoji:'👁', title:'눈 피로 마사지', duration:'30초', tag:'눈 침침·컴퓨터 피로', color:'#DBEAFE',
+    when:'모니터 오래 봤을 때 · 눈이 뻑뻑할 때',
+    steps:[
+      '눈을 감고 5초 편안하게',
+      '검지로 눈 위 뼈(눈썹 아래)를 살살 문지르기 · 안구는 X',
+      '눈꼬리 옆 관자놀이 지그시 눌러주기 3초씩 3번',
+      '창밖 · 멀리 있는 것 20초 바라보기 (20-20-20 법칙)'
+    ]
+  },
+  {
+    id:'neck', emoji:'💆', title:'목 스트레칭', duration:'1분', tag:'목 뻐근·두통', color:'#FEF3C7',
+    when:'앉아서 오래 있었을 때 · 어깨 결림',
+    steps:[
+      '고개를 천천히 오른쪽으로 기울여 10초',
+      '왼쪽으로 기울여 10초',
+      '앞으로 숙여 뒷목 늘리기 10초',
+      '뒤로 살짝 젖혀 10초',
+      '천천히 원 그리듯 돌리기 3바퀴 (각 방향)'
+    ]
+  },
+  {
+    id:'shoulder', emoji:'🙆', title:'어깨 돌리기', duration:'30초', tag:'어깨 뭉침·긴장', color:'#E9D5FF',
+    when:'하루 종일 앉아있을 때',
+    steps:[
+      '양 어깨를 앞으로 크게 돌리기 5번',
+      '뒤로 크게 돌리기 5번',
+      '양 어깨를 귀 쪽으로 올렸다 내리기 5번',
+      '깊게 숨 마시며 가슴 활짝 열기'
+    ]
+  },
+  {
+    id:'finger', emoji:'✋', title:'손가락 스트레칭', duration:'30초', tag:'손 저림·타이핑 피로', color:'#DCFCE7',
+    when:'키보드·마우스 오래 사용',
+    steps:[
+      '주먹 꽉 쥐고 10초 유지',
+      '손가락 활짝 펴고 10초',
+      '손가락 하나씩 반대손으로 뒤로 살살 젖히기',
+      '손목 좌우로 돌리기 5번씩'
+    ]
+  },
+  {
+    id:'toe', emoji:'🦶', title:'발끝 박수', duration:'1분', tag:'다리 부종·순환', color:'#FED7AA',
+    when:'앉아서 오래 있을 때 · 다리가 무거울 때',
+    steps:[
+      '의자에 앉아 발을 어깨 넓이로',
+      '양쪽 발끝을 부딪히기 (박수치듯)',
+      '1초에 1번 · 30번 반복',
+      '발등이 뻐근하면 잠시 쉬고 반복'
+    ]
+  },
+  {
+    id:'waist', emoji:'🌀', title:'허리 트위스트', duration:'40초', tag:'허리 뻐근·옆구리', color:'#FCE7F3',
+    when:'앉아있다 일어날 때 · 허리 뻐근',
+    steps:[
+      '양손을 옆구리에',
+      '허리를 오른쪽으로 천천히 트위스트 10초 유지',
+      '정면으로 · 왼쪽으로 트위스트 10초',
+      '3번 반복 · 척추 소리 나도 자연스러워요'
+    ]
+  },
+  {
+    id:'leg', emoji:'🦵', title:'종아리 스트레칭', duration:'40초', tag:'다리 부기·저림', color:'#DBEAFE',
+    when:'자기 전 · 오래 걸었을 때',
+    steps:[
+      '벽 앞에서 한쪽 발 뒤로 · 무릎 펴고 뒤꿈치 바닥',
+      '앞 다리 무릎 살짝 굽히기 · 종아리 늘어남',
+      '15초 유지 · 반대쪽 반복',
+      '3세트씩'
+    ]
+  },
+  {
+    id:'breath', emoji:'🌬', title:'복식 호흡', duration:'1분', tag:'긴장·스트레스', color:'#D1FAE5',
+    when:'긴장될 때 · 자기 전',
+    steps:[
+      '허리 펴고 편안히 앉기',
+      '코로 4초 마시기 · 배가 나오게',
+      '숨 참고 4초',
+      '입으로 6초 천천히 내쉬기',
+      '5회 반복'
+    ]
+  }
+];
+
+function _v21OpenExercise() {
+  const old = document.getElementById('v21ExerciseSheet');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.id = 'v21ExerciseSheet';
+  b.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  b.onclick = e => { if (e.target === b) b.remove(); };
+  const listHtml = HEALTH_EXERCISES.map(ex => `
+    <div onclick="_v21OpenExerciseDetail('${ex.id}')" style="background:${ex.color};border-radius:16px;padding:14px;cursor:pointer;transition:transform .15s">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:36px;height:36px;background:#FFF;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${ex.emoji}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;line-height:1.25">${_v20Esc(ex.title)}</div>
+          <div style="font-size:10.5px;color:#5D7597;font-weight:600;margin-top:1px">⏱ ${ex.duration}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#52698F;font-weight:500;line-height:1.4">${_v20Esc(ex.tag)}</div>
+    </div>`).join('');
+  b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:82vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:18px;font-weight:800;color:#1D3762;letter-spacing:-.5px">건강 운동</div>
+      <button onclick="document.getElementById('v21ExerciseSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer">×</button>
+    </div>
+    <div style="font-size:11.5px;color:#5D7597;font-weight:500;margin-bottom:16px;line-height:1.5">어디가 뻐근한지 골라보세요 · 대부분 1분 이내</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${listHtml}</div>
+  </div>
+  <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(b);
+}
+
+function _v21OpenExerciseDetail(id) {
+  const ex = HEALTH_EXERCISES.find(e => e.id === id);
+  if (!ex) return;
+  const old = document.getElementById('v21ExerciseDetailSheet');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.id = 'v21ExerciseDetailSheet';
+  b.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:10000;display:flex;align-items:flex-end;font-family:inherit';
+  b.onclick = e => { if (e.target === b) b.remove(); };
+  const stepsHtml = ex.steps.map((s, i) => `
+    <div style="display:flex;gap:12px;padding:12px 0;border-top:${i === 0 ? '0' : '1px solid #E8EDF4'}">
+      <div style="flex-shrink:0;width:28px;height:28px;background:#264A8A;color:#FBBF24;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">${i + 1}</div>
+      <div style="flex:1;font-size:13px;color:#1D3762;font-weight:500;line-height:1.6;padding-top:4px">${_v20Esc(s)}</div>
+    </div>`).join('');
+  b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:88vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <button onclick="document.getElementById('v21ExerciseDetailSheet').remove();_v21OpenExercise()" style="background:transparent;border:none;font-size:14px;color:#5D7597;cursor:pointer;font-weight:600;padding:0">‹ 목록</button>
+      <button onclick="document.getElementById('v21ExerciseDetailSheet').remove();document.getElementById('v21ExerciseSheet')&&document.getElementById('v21ExerciseSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer">×</button>
+    </div>
+    <div style="background:${ex.color};border-radius:20px;padding:22px 20px;margin-bottom:16px;text-align:center">
+      <div style="font-size:44px;margin-bottom:6px">${ex.emoji}</div>
+      <div style="font-size:20px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-bottom:4px">${_v20Esc(ex.title)}</div>
+      <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);color:#1D3762;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;backdrop-filter:blur(4px)">⏱ ${ex.duration}</div>
+    </div>
+    <div style="background:#FEF9E7;border-left:3px solid #FBBF24;padding:10px 14px;border-radius:0 12px 12px 0;margin-bottom:16px">
+      <div style="font-size:10.5px;font-weight:700;color:#78350F;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💡 이럴 때</div>
+      <div style="font-size:12px;color:#78654B;font-weight:500;line-height:1.5">${_v20Esc(ex.when)}</div>
+    </div>
+    <div style="background:#FFF;border:1px solid #E8EDF4;border-radius:16px;padding:6px 16px;margin-bottom:12px">
+      ${stepsHtml}
+    </div>
+    <button onclick="document.getElementById('v21ExerciseDetailSheet').remove();document.getElementById('v21ExerciseSheet')&&document.getElementById('v21ExerciseSheet').remove()" style="width:100%;background:#264A8A;color:#FBBF24;border:none;border-radius:14px;padding:14px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(38,74,138,.2)">해봤어요 ✓</button>
+  </div>
+  <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(b);
+}
+
+// ═══ v22 · 건강어때란? 소개 시트 (남겨둠 · 다른 곳에서 참조 가능) ═══
+function _v21OpenAbout() {
+  const old = document.getElementById('v21AboutSheet');
+  if (old) old.remove();
+  const b = document.createElement('div');
+  b.id = 'v21AboutSheet';
+  b.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  b.onclick = e => { if (e.target === b) b.remove(); };
+  b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:82vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:800;color:#1D3762">건강어때란?</div>
+      <button onclick="document.getElementById('v21AboutSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer">×</button>
+    </div>
+    <div style="background:linear-gradient(135deg,#3D63D9 0%,#1E3A8A 100%);border-radius:20px;padding:22px;color:#FFF;margin-bottom:14px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30%;right:-15%;width:60%;height:60%;background:radial-gradient(circle,rgba(251,191,36,.24) 0%,transparent 65%);pointer-events:none"></div>
+      <div style="font-size:11px;font-weight:800;color:#FBBF24;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;position:relative">건강 습관의 시작</div>
+      <div style="font-size:20px;font-weight:900;letter-spacing:-.5px;line-height:1.3;margin-bottom:6px;position:relative">먹은 것부터<br>바꾸면 몸이 바뀌어요</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.6;position:relative">사진 한 장으로 오늘 먹은 것 · 부족한 영양 · 다음 한 끼를 한 번에 알 수 있어요.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:#FFF;border-radius:14px;padding:14px"><div style="font-size:22px;margin-bottom:6px">🍽</div><div style="font-size:12px;font-weight:800;color:#1D3762;margin-bottom:3px">식사 AI 분석</div><div style="font-size:10.5px;color:#5D7597;font-weight:500;line-height:1.4">사진 → 재료·kcal·영양소 자동</div></div>
+      <div style="background:#FFF;border-radius:14px;padding:14px"><div style="font-size:22px;margin-bottom:6px">💡</div><div style="font-size:12px;font-weight:800;color:#1D3762;margin-bottom:3px">부족 영양소</div><div style="font-size:10.5px;color:#5D7597;font-weight:500;line-height:1.4">뭘 더 챙겨야 할지 자동 안내</div></div>
+      <div style="background:#FFF;border-radius:14px;padding:14px"><div style="font-size:22px;margin-bottom:6px">🌟</div><div style="font-size:12px;font-weight:800;color:#1D3762;margin-bottom:3px">맞춤 추천</div><div style="font-size:10.5px;color:#5D7597;font-weight:500;line-height:1.4">시간대·상황별 다음 한 끼</div></div>
+      <div style="background:#FFF;border-radius:14px;padding:14px"><div style="font-size:22px;margin-bottom:6px">📊</div><div style="font-size:12px;font-weight:800;color:#1D3762;margin-bottom:3px">주간 리포트</div><div style="font-size:10.5px;color:#5D7597;font-weight:500;line-height:1.4">한 주 흐름 · 밸런스 변화</div></div>
+    </div>
+    <div style="background:#FEF3C7;border-left:3px solid #FBBF24;padding:12px 14px;border-radius:0 12px 12px 0"><b style="color:#1D3762;font-weight:800">먼저 음식,</b> <span style="color:#78654B;font-weight:500">부족할 때만 영양제로</span></div>
+  </div>
+  <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(b);
+}
+
 // ═══ v21 · 히어로 카드 (오늘의 추천 음식) ═══
 function _v21RenderHero() {
   try {
@@ -8394,7 +8666,7 @@ function _v21RenderHero() {
       const titleEl = document.getElementById('v21HeroTitle');
       const nameEl = document.getElementById('v21RecName');
       if (titleEl) titleEl.innerHTML = '먼저 <span style="color:#DAE7FF">음식을 찍어주세요</span>';
-      if (nameEl) { nameEl.textContent = '맞춤 추천 대기 중'; nameEl.style.color = '#C4D4F0'; nameEl.style.fontSize = '15px'; nameEl.style.fontWeight = '700'; }
+      if (nameEl) { nameEl.textContent = '맞춤 추천 대기 중'; nameEl.style.color = '#C4D4F0'; nameEl.style.background = 'none'; }
       if (kcalEl) { kcalEl.textContent = '기록이 쌓이면 부족 영양을 채우는 음식을 알려드려요'; kcalEl.style.color = '#C4D4F0'; }
       if (chipsEl) chipsEl.innerHTML = '';
       // 버튼 숨김
@@ -8428,7 +8700,7 @@ function _v21RenderHero() {
     const chipsEl = document.getElementById('v21HeroChips');
     if (slotEl) slotEl.textContent = mealSlot;
     // 이름 스타일 리셋 (empty state에서 바뀐 색·크기 복원)
-    if (nameEl) { nameEl.style.color = '#FFF'; nameEl.style.fontSize = '15px'; nameEl.style.fontWeight = '800'; }
+    if (nameEl) { nameEl.style.color = '#FFF'; nameEl.style.background = 'linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%)'; nameEl.style.padding = '0 4px'; nameEl.style.display = 'inline-block'; }
     if (!rec) {
       if (nameEl) nameEl.textContent = '오늘의 추천';
       if (kcalEl) kcalEl.textContent = '— kcal';
@@ -8446,6 +8718,7 @@ function _v21RenderHero() {
     let displayName = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name;
     if (!displayName || !String(displayName).trim()) displayName = rec.name || '오늘의 추천';
     if (nameEl) nameEl.textContent = displayName;
+  try { _v22UpdateHeroIllust(displayName); } catch(e){}
     // 을/를 조사 자동 (고구마→를, 삼계탕→을)
     const josaEl = document.getElementById('v21RecJosa');
     if (josaEl) josaEl.textContent = _v21Josa(displayName, '를', '을');
@@ -8455,7 +8728,7 @@ function _v21RenderHero() {
       if (whyEl && shortages && shortages.length) {
         const labels = shortages.slice(0, 2).map(s => s.label).join('·');
         const josa = _v21Josa(shortages.slice(0,2).slice(-1)[0].label, '를', '을');
-        whyEl.innerHTML = `최근 식사에서 부족했던 <b style="color:#FFF;font-weight:600">${_v20Esc(labels)}</b>${josa} 함께 채울 수 있어요.`;
+        whyEl.innerHTML = `최근 식사에서 부족했던 <b style="color:#FBBF24;font-weight:700">${_v20Esc(labels)}</b>${josa} 함께 채울 수 있어요.`;
         whyEl.style.display = 'block';
       }
     } catch(e){}
@@ -8628,6 +8901,7 @@ function _v21RenderHeroWithRec(rec) {
     let displayName = (typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(rec.name) : rec.name;
     if (!displayName || !String(displayName).trim()) displayName = rec.name || '오늘의 추천';
     if (nameEl) nameEl.textContent = displayName;
+  try { _v22UpdateHeroIllust(displayName); } catch(e){}
     const josaEl = document.getElementById('v21RecJosa');
     if (josaEl) josaEl.textContent = _v21Josa(displayName, '를', '을');
     // 사진 X · 데코 원만 유지
