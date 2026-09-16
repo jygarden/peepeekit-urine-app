@@ -12601,23 +12601,30 @@ function _v20RecRenderNutrients() {
     return;
   }
   const priorityLabels = ['우선순위 1','우선순위 2','우선순위 3'];
+  // 카드 색상 로테이션 · 트렌디 다양성
+  const cardThemes = [
+    { bg:'#FEF3C7', border:'#F59E0B', codeC:'#B45309', text:'#78350F', sub:'#92400E', badgeBg:'#FDE68A', badgeText:'#78350F', chipBg:'#FFFDF5' },
+    { bg:'#DBEAFE', border:'#3D63D9', codeC:'#264A8A', text:'#1D3762', sub:'#31558D', badgeBg:'#BFDBFE', badgeText:'#1E40AF', chipBg:'#F5F8FE' },
+    { bg:'#D1FAE5', border:'#059669', codeC:'#065F46', text:'#064E3B', sub:'#166534', badgeBg:'#A7F3D0', badgeText:'#065F46', chipBg:'#F0FDF4' }
+  ];
   let html = '';
   shortages.forEach((s, idx) => {
     const k = NUTRIENT_KNOWLEDGE[s.key];
     if (!k) return;
+    const t = cardThemes[idx % 3];
     const foods = NUTRIENT_QUICK_FOODS[s.key] || [];
     const tag = NUTRIENT_TAGLINE[s.key] || '';
-    html += `<div style="background:#EAF0FC;border:0;border-radius:24px;padding:20px;margin-bottom:14px">
+    html += `<div style="background:${t.bg};border:0;border-radius:24px;padding:20px;margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-        <div style="width:28px;height:28px;background:transparent;border:1.5px solid #3D63D9;border-radius:50%;color:#3D63D9;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${k.code}</div>
-        <span style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">${k.label}</span>
-        <span style="font-size:10px;background:#D5E2F8;color:#31558D;padding:3px 9px;border-radius:8px;font-weight:700;margin-left:auto">${priorityLabels[idx]}</span>
+        <div style="width:28px;height:28px;background:transparent;border:1.5px solid ${t.border};border-radius:50%;color:${t.codeC};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${k.code}</div>
+        <span style="font-size:15px;font-weight:700;color:${t.text};letter-spacing:-.3px">${k.label}</span>
+        <span style="font-size:10px;background:${t.badgeBg};color:${t.badgeText};padding:3px 9px;border-radius:8px;font-weight:700;margin-left:auto">${priorityLabels[idx]}</span>
       </div>
-      <div style="font-size:11px;color:#52698F;font-weight:500;margin-bottom:12px">${_v20Esc(tag)}</div>
+      <div style="font-size:11px;color:${t.sub};font-weight:500;margin-bottom:12px">${_v20Esc(tag)}</div>
       <div style="display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap">
-        ${foods.map(f => `<span style="background:#F7F9FF;color:#2C4979;padding:6px 10px;border-radius:99px;font-size:11px;font-weight:600">${_v20Esc(f)}</span>`).join('')}
+        ${foods.map(f => `<span style="background:${t.chipBg};color:${t.text};padding:6px 10px;border-radius:99px;font-size:11px;font-weight:600">${_v20Esc(f)}</span>`).join('')}
       </div>
-      <button type="button" onclick="_v20ToggleNutrientDetail('${s.key}')" id="nutDetailBtn_${s.key}" style="width:100%;background:transparent;border:none;padding:0;font-size:11.5px;color:#2E61C4;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:3px;min-height:44px">자세히 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <button type="button" onclick="_v20ToggleNutrientDetail('${s.key}')" id="nutDetailBtn_${s.key}" style="width:100%;background:transparent;border:none;padding:0;font-size:11.5px;color:${t.codeC};font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:3px;min-height:44px">자세히 보기 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div id="nutDetail_${s.key}" style="display:none;padding-top:14px;margin-top:8px;border-top:1px solid #CFDCF1">
         <div style="display:grid;grid-template-columns:1fr;gap:10px">
           <div><div style="font-size:11px;color:#52698F;font-weight:700;margin-bottom:4px">? 왜 필요한가</div><div style="font-size:11px;color:#1D3762;line-height:1.6;font-weight:500">${_v20Esc(k.why_needed)}</div></div>
