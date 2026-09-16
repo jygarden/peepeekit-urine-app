@@ -8416,6 +8416,7 @@ function _v21OpenFortune() {
 }
 
 // ═══ v22 · 건강 운동 · 간단 스트레칭 데이터 (부위별 · 상황별) ═══
+// videoId · YouTube 비디오 ID (예: dQw4w9WgXcQ) · 있으면 임베드 재생 · 없으면 검색 링크
 const HEALTH_EXERCISES = [
   {
     id:'eye', emoji:'👁', title:'눈 피로 마사지', duration:'30초', tag:'눈 침침·컴퓨터 피로', color:'#DBEAFE',
@@ -8425,7 +8426,8 @@ const HEALTH_EXERCISES = [
       '검지로 눈 위 뼈(눈썹 아래)를 살살 문지르기 · 안구는 X',
       '눈꼬리 옆 관자놀이 지그시 눌러주기 3초씩 3번',
       '창밖 · 멀리 있는 것 20초 바라보기 (20-20-20 법칙)'
-    ]
+    ],
+    videoId:'', searchQuery:'눈 피로 마사지 방법'
   },
   {
     id:'neck', emoji:'💆', title:'목 스트레칭', duration:'1분', tag:'목 뻐근·두통', color:'#FEF3C7',
@@ -8436,7 +8438,8 @@ const HEALTH_EXERCISES = [
       '앞으로 숙여 뒷목 늘리기 10초',
       '뒤로 살짝 젖혀 10초',
       '천천히 원 그리듯 돌리기 3바퀴 (각 방향)'
-    ]
+    ],
+    videoId:'', searchQuery:'목 스트레칭 1분'
   },
   {
     id:'shoulder', emoji:'🙆', title:'어깨 돌리기', duration:'30초', tag:'어깨 뭉침·긴장', color:'#E9D5FF',
@@ -8446,7 +8449,8 @@ const HEALTH_EXERCISES = [
       '뒤로 크게 돌리기 5번',
       '양 어깨를 귀 쪽으로 올렸다 내리기 5번',
       '깊게 숨 마시며 가슴 활짝 열기'
-    ]
+    ],
+    videoId:'', searchQuery:'어깨 스트레칭 사무실'
   },
   {
     id:'finger', emoji:'✋', title:'손가락 스트레칭', duration:'30초', tag:'손 저림·타이핑 피로', color:'#DCFCE7',
@@ -8456,7 +8460,8 @@ const HEALTH_EXERCISES = [
       '손가락 활짝 펴고 10초',
       '손가락 하나씩 반대손으로 뒤로 살살 젖히기',
       '손목 좌우로 돌리기 5번씩'
-    ]
+    ],
+    videoId:'', searchQuery:'손가락 스트레칭'
   },
   {
     id:'toe', emoji:'🦶', title:'발끝 박수', duration:'1분', tag:'다리 부종·순환', color:'#FED7AA',
@@ -8466,7 +8471,8 @@ const HEALTH_EXERCISES = [
       '양쪽 발끝을 부딪히기 (박수치듯)',
       '1초에 1번 · 30번 반복',
       '발등이 뻐근하면 잠시 쉬고 반복'
-    ]
+    ],
+    videoId:'', searchQuery:'발끝 박수 운동'
   },
   {
     id:'waist', emoji:'🌀', title:'허리 트위스트', duration:'40초', tag:'허리 뻐근·옆구리', color:'#FCE7F3',
@@ -8476,7 +8482,8 @@ const HEALTH_EXERCISES = [
       '허리를 오른쪽으로 천천히 트위스트 10초 유지',
       '정면으로 · 왼쪽으로 트위스트 10초',
       '3번 반복 · 척추 소리 나도 자연스러워요'
-    ]
+    ],
+    videoId:'', searchQuery:'허리 트위스트 스트레칭'
   },
   {
     id:'leg', emoji:'🦵', title:'종아리 스트레칭', duration:'40초', tag:'다리 부기·저림', color:'#DBEAFE',
@@ -8486,7 +8493,8 @@ const HEALTH_EXERCISES = [
       '앞 다리 무릎 살짝 굽히기 · 종아리 늘어남',
       '15초 유지 · 반대쪽 반복',
       '3세트씩'
-    ]
+    ],
+    videoId:'', searchQuery:'종아리 스트레칭'
   },
   {
     id:'breath', emoji:'🌬', title:'복식 호흡', duration:'1분', tag:'긴장·스트레스', color:'#D1FAE5',
@@ -8497,7 +8505,8 @@ const HEALTH_EXERCISES = [
       '숨 참고 4초',
       '입으로 6초 천천히 내쉬기',
       '5회 반복'
-    ]
+    ],
+    videoId:'', searchQuery:'복식 호흡 방법'
   }
 ];
 
@@ -8545,6 +8554,27 @@ function _v21OpenExerciseDetail(id) {
       <div style="flex-shrink:0;width:28px;height:28px;background:#264A8A;color:#FBBF24;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">${i + 1}</div>
       <div style="flex:1;font-size:13px;color:#1D3762;font-weight:500;line-height:1.6;padding-top:4px">${_v20Esc(s)}</div>
     </div>`).join('');
+  // 영상 섹션 · videoId 있으면 임베드 · 없으면 YouTube 검색 링크
+  let videoHtml = '';
+  if (ex.videoId && ex.videoId.trim()) {
+    videoHtml = `
+      <div style="background:#000;border-radius:16px;overflow:hidden;margin-bottom:16px;aspect-ratio:16/9">
+        <iframe src="https://www.youtube.com/embed/${_v20Esc(ex.videoId)}?rel=0" style="width:100%;height:100%;border:0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>
+      </div>`;
+  } else {
+    const q = encodeURIComponent(ex.searchQuery || ex.title);
+    videoHtml = `
+      <a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;background:#FEE2E2;border-radius:16px;padding:14px 16px;margin-bottom:16px;text-decoration:none;color:inherit">
+        <div style="flex-shrink:0;width:42px;height:42px;background:#DC2626;border-radius:12px;display:flex;align-items:center;justify-content:center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#FFF"><path d="M23 12l-10 6V6z"/><path d="M23 6.4v11.2c0 1.3-1 2.4-2.4 2.4H3.4C2.1 20 1 19 1 17.6V6.4C1 5.1 2 4 3.4 4h17.2C21.9 4 23 5 23 6.4z" fill="none" stroke="#FFF" stroke-width="1.5"/></svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:800;color:#991B1B;letter-spacing:-.3px;margin-bottom:2px">YouTube에서 영상 보기</div>
+          <div style="font-size:10.5px;color:#991B1B;font-weight:500">"${_v20Esc(ex.searchQuery || ex.title)}"</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#991B1B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>`;
+  }
   b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:88vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <button onclick="document.getElementById('v21ExerciseDetailSheet').remove();_v21OpenExercise()" style="background:transparent;border:none;font-size:14px;color:#5D7597;cursor:pointer;font-weight:600;padding:0">‹ 목록</button>
@@ -8555,6 +8585,7 @@ function _v21OpenExerciseDetail(id) {
       <div style="font-size:20px;font-weight:800;color:#1D3762;letter-spacing:-.5px;margin-bottom:4px">${_v20Esc(ex.title)}</div>
       <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);color:#1D3762;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;backdrop-filter:blur(4px)">⏱ ${ex.duration}</div>
     </div>
+    ${videoHtml}
     <div style="background:#FEF9E7;border-left:3px solid #FBBF24;padding:10px 14px;border-radius:0 12px 12px 0;margin-bottom:16px">
       <div style="font-size:10.5px;font-weight:700;color:#78350F;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">💡 이럴 때</div>
       <div style="font-size:12px;color:#78654B;font-weight:500;line-height:1.5">${_v20Esc(ex.when)}</div>
