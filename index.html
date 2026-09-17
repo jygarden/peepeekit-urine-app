@@ -5630,17 +5630,11 @@ function showScreen(id) {
   if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시 + 프로필 배너 렌더링
   if (id === 'screenCapture') { maybeShowCaptureTip(); try { renderCaptureProfileBanner(); } catch(e){} }
-  // 식단 사진 화면 진입 시 프로필 배너 + 촬영 각도 가이드 시작
+  // 식단 사진 화면 진입 시 프로필 배너 (기울기 가이드 오버레이는 제거됨)
   if (id === 'screenFoodCapture') {
     try { renderCaptureProfileBanner(); } catch(e){}
-    try { _v22StartTiltGuide('foodHumanBlock'); } catch(e){}
-  } else {
-    try { _v22StopTiltGuide(); } catch(e){}
   }
-  // 소변검사 촬영·원재료 촬영 · 각도 가이드
-  if (id === 'screenCapture' || id === 'screenIngredient') {
-    try { _v22StartTiltGuide(id); } catch(e){}
-  }
+  try { _v22StopTiltGuide(); } catch(e){}
   // 성분 분석 화면: 촬영 가이드는 HTML에 정적으로 표시 (JS 로직 제거)
   // 인체 신청 폼 진입 시 저장된 프로필 배너로 자동 표시
   if (id === 'screenHumanForm') { try { renderHumanProfileBanner(); } catch(e){} }
@@ -16011,13 +16005,36 @@ async function _v22StoreDoSearch(q) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    const data = await r.json();
-    if (!r.ok || data.error) throw new Error(data.error || '검색 실패');
+    let data;
+    try { data = await r.json(); } catch(e) { data = { error: '응답 파싱 실패' }; }
+
+    if (!r.ok || data.error) {
+      // API 자체 오류 (credential 미설정 등) - 사용자에게 안내
+      const errMsg = data.error || `HTTP ${r.status}`;
+      const hint = data.hint || data.detail || '';
+      console.error('[naver-local] fail:', errMsg, hint);
+      dd.innerHTML = `
+        <div style="padding:14px;font-size:11px;color:#DC2626;font-weight:600;text-align:left;background:#FEF2F2;border-radius:8px;margin:6px">
+          <div style="font-weight:800;margin-bottom:4px">⚠️ ${_v22Esc(errMsg)}</div>
+          ${hint ? `<div style="color:#991B1B;font-weight:500;font-size:10px;line-height:1.5">${_v22Esc(hint)}</div>` : ''}
+          <div style="margin-top:6px;padding-top:6px;border-top:1px solid #FCA5A5;color:#7F1D1D;font-size:10px;font-weight:600">직접 입력해도 분석은 진행됩니다.</div>
+        </div>`;
+      const btn = document.getElementById('v22StoreMapBtn');
+      if (btn) btn.style.display = 'none';
+      return;
+    }
+
     _v22StoreCandidates = data.items || [];
+    if (!_v22StoreCandidates.length) {
+      dd.innerHTML = `<div style="padding:14px;font-size:11.5px;color:#94A3B8;font-weight:600;text-align:center">"${_v22Esc(q)}" 검색 결과가 없어요.<br>더 정확한 상호명으로 시도해보세요.</div>`;
+      const btn = document.getElementById('v22StoreMapBtn');
+      if (btn) btn.style.display = 'none';
+      return;
+    }
     _v22RenderDropdown(_v22StoreCandidates);
   } catch (e) {
-    dd.innerHTML = `<div style="padding:14px;font-size:11.5px;color:#94A3B8;font-weight:600;text-align:center">검색 결과가 없어요. 직접 입력하셔도 돼요.</div>`;
-    // 지도 버튼은 굳이 노출 안 함
+    console.error('[naver-local] network fail:', e);
+    dd.innerHTML = `<div style="padding:14px;font-size:11.5px;color:#DC2626;font-weight:600;text-align:center">네트워크 오류 · 직접 입력해주세요</div>`;
     const btn = document.getElementById('v22StoreMapBtn');
     if (btn) btn.style.display = 'none';
   }
