@@ -16009,15 +16009,19 @@ async function _v22StoreDoSearch(q) {
     try { data = await r.json(); } catch(e) { data = { error: '응답 파싱 실패' }; }
 
     if (!r.ok || data.error) {
-      // API 자체 오류 (credential 미설정 등) - 사용자에게 안내
+      // API 자체 오류 (credential 미설정 등) - 사용자에게 안내 + 진단 정보
       const errMsg = data.error || `HTTP ${r.status}`;
-      const hint = data.hint || data.detail || '';
-      console.error('[naver-local] fail:', errMsg, hint);
+      const hint = data.hint || '';
+      const detail = data.detail || '';
+      const tried = Array.isArray(data.tried) ? data.tried.join(' · ') : '';
+      console.error('[naver-local] fail:', errMsg, hint, detail, 'tried:', tried);
       dd.innerHTML = `
-        <div style="padding:14px;font-size:11px;color:#DC2626;font-weight:600;text-align:left;background:#FEF2F2;border-radius:8px;margin:6px">
+        <div style="padding:12px;font-size:11px;color:#DC2626;font-weight:600;text-align:left;background:#FEF2F2;border-radius:8px;margin:6px">
           <div style="font-weight:800;margin-bottom:4px">⚠️ ${_v22Esc(errMsg)}</div>
-          ${hint ? `<div style="color:#991B1B;font-weight:500;font-size:10px;line-height:1.5">${_v22Esc(hint)}</div>` : ''}
-          <div style="margin-top:6px;padding-top:6px;border-top:1px solid #FCA5A5;color:#7F1D1D;font-size:10px;font-weight:600">직접 입력해도 분석은 진행됩니다.</div>
+          ${hint ? `<div style="color:#991B1B;font-weight:500;font-size:10px;line-height:1.5;margin-bottom:6px">${_v22Esc(hint)}</div>` : ''}
+          ${tried ? `<div style="background:#FEE2E2;padding:6px 8px;border-radius:6px;margin-bottom:6px;font-size:9.5px;color:#7F1D1D;font-weight:700;font-family:monospace">시도한 URL: ${_v22Esc(tried)}</div>` : ''}
+          ${detail ? `<details style="margin-bottom:6px"><summary style="font-size:10px;color:#7F1D1D;font-weight:700;cursor:pointer">상세 응답</summary><div style="background:#FEE2E2;padding:6px 8px;border-radius:6px;margin-top:4px;font-size:9px;color:#7F1D1D;font-family:monospace;word-break:break-all;max-height:80px;overflow:auto">${_v22Esc(detail)}</div></details>` : ''}
+          <div style="padding-top:6px;border-top:1px solid #FCA5A5;color:#7F1D1D;font-size:10px;font-weight:600">직접 입력해도 분석은 진행됩니다.</div>
         </div>`;
       const btn = document.getElementById('v22StoreMapBtn');
       if (btn) btn.style.display = 'none';
