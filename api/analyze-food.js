@@ -24,17 +24,23 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
 
   try {
-    const { mode = 'detect', imageB64, target = 'human', confirmedFoods, mealTime, userProfile, todayMeals, userMemo } = req.body;
+    const { mode = 'detect', imageB64, target = 'human', confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store } = req.body;
     const memo = String(userMemo || '').trim().slice(0, 200); // 최대 200자 안전 컷
+    // 🏪 매장 태그 (선택) · 있으면 블로그 검색 정확도 UP
+    const storeInfo = store && store.title ? {
+      title: String(store.title).slice(0, 60),
+      category: String(store.category || '').slice(0, 40),
+      address: String(store.address || '').slice(0, 80)
+    } : null;
 
     if (mode === 'detect') {
       if (!imageB64) return res.status(400).json({ error: '이미지 데이터가 없습니다.' });
-      return await runDetect({ apiKey, imageB64, target, userMemo: memo, res });
+      return await runDetect({ apiKey, imageB64, target, userMemo: memo, store: storeInfo, res });
     }
 
     if (mode === 'analyze') {
       if (!confirmedFoods || !confirmedFoods.length) return res.status(400).json({ error: '확정된 음식 리스트가 없습니다.' });
-      return await runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo: memo, res });
+      return await runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo: memo, store: storeInfo, res });
     }
 
     return res.status(400).json({ error: `알 수 없는 mode: ${mode}` });
@@ -82,41 +88,124 @@ async function fetchCrowdHints(brand, foodName) {
 async function fetchNaverBlogHints(query) {
   const keyId = process.env.NCP_API_KEY_ID;
   const key = process.env.NCP_API_KEY;
-  if (!keyId || !key || !query) return null;
+  const navId = process.env.NAVER_CLIENT_ID;
+  const navSecret = process.env.NAVER_CLIENT_SECRET;
+  if (!query) return null;
+  const useNcp = !!(keyId && key);
+  const useNav = !!(navId && navSecret);
+  if (!useNcp && !useNav) return null;
   try {
-    const url = `https://naveropenapi.apigw.ntruss.com/search/v1/blog?query=${encodeURIComponent(query)}&display=5&sort=sim`;
-    const r = await fetch(url, {
-      headers: {
-        'X-NCP-APIGW-API-KEY-ID': keyId,
-        'X-NCP-APIGW-API-KEY': key
-      }
-    });
+    const url = useNcp
+      ? `https://naveropenapi.apigw.ntruss.com/search/v1/blog?query=${encodeURIComponent(query)}&display=5&sort=sim`
+      : `https://openapi.naver.com/v1/search/blog.json?query=${encodeURIComponent(query)}&display=5&sort=sim`;
+    const headers = useNcp
+      ? { 'X-NCP-APIGW-API-KEY-ID': keyId, 'X-NCP-APIGW-API-KEY': key }
+      : { 'X-Naver-Client-Id': navId, 'X-Naver-Client-Secret': navSecret };
+    const r = await fetch(url, { headers });
     if (!r.ok) return null;
     const data = await r.json();
     if (!data.items || !data.items.length) return null;
-    // HTML 태그 제거 · 상위 5개 리뷰 요약
-    return data.items.map(it => ({
-      t: (it.title || '').replace(/<[^>]+>/g, '').slice(0, 80),
-      d: (it.description || '').replace(/<[^>]+>/g, '').slice(0, 200)
-    }));
+    // HTML 태그 제거 · 최근 2년 필터 · 상위 5개
+    const twoYearsAgo = Number(new Date().getFullYear()) - 2;
+    return data.items
+      .filter(it => {
+        // postdate: YYYYMMDD 형식
+        const y = it.postdate ? Number(String(it.postdate).slice(0, 4)) : null;
+        return !y || y >= twoYearsAgo;
+      })
+      .map(it => ({
+        t: (it.title || '').replace(/<[^>]+>/g, '').slice(0, 80),
+        d: (it.description || '').replace(/<[^>]+>/g, '').slice(0, 220)
+      }));
   } catch (e) {
     console.error('naver hint fetch fail', e.message);
     return null;
   }
 }
 
-// ═══ DETECT MODE · 음식 인식 + 양 추정 (+ 브랜드 시 네이버 · 크라우드 힌트) ═══
-async function runDetect({ apiKey, imageB64, target, userMemo, res }) {
+// ═══ 블로그 리뷰에서 영양 주장 크로스체크 ═══
+// 저칼로리·저염·저지방·저당·고단백·양많음 등 검증 가능한 클레임만 추출
+function extractNutritionClaims(hints) {
+  if (!hints || !hints.length) return [];
+  const claims = { low_kcal: 0, low_sodium: 0, low_fat: 0, low_sugar: 0, high_protein: 0, high_fiber: 0, big_portion: 0, small_portion: 0 };
+  const patterns = {
+    low_kcal: /저\s*칼로리|저칼/,
+    low_sodium: /저\s*염|나트륨\s*(적|낮|없)|싱거/,
+    low_fat: /저\s*지방|기름\s*(적|없)|담백/,
+    low_sugar: /저\s*당|무\s*설탕/,
+    high_protein: /고\s*단백|단백질\s*(많|풍부)/,
+    high_fiber: /(식이섬유|섬유질).{0,5}(많|풍부)/,
+    big_portion: /양\s*(많|푸짐|넉넉)|(1\.5|1\.3|두\s*배|2인)/,
+    small_portion: /양\s*(적|부족|아쉬)/
+  };
+  hints.forEach(h => {
+    const text = (h.t || '') + ' ' + (h.d || '');
+    for (const k in patterns) {
+      if (patterns[k].test(text)) claims[k]++;
+    }
+  });
+  const out = [];
+  for (const k in claims) {
+    if (claims[k] >= 2) out.push({ claim: k, count: claims[k] });
+  }
+  return out;
+}
+
+// ═══ 근거(evidence) 뱃지 데이터 생성 ═══
+// 결과 페이지 "✨ 정확도 근거" 카드에 표시할 사유 목록
+function buildEvidence({ naverHints, crowdHints, storeInfo, claims }) {
+  const evidence = [];
+  if (storeInfo) {
+    evidence.push({ type: 'store', chip: storeInfo.category || '매장', text: `매장 태그 반영: <b>${storeInfo.title}</b>` });
+  }
+  if (crowdHints && crowdHints.topIngredients && crowdHints.topIngredients.length) {
+    const names = crowdHints.topIngredients.slice(0, 3).map(t => t.name).join('·');
+    evidence.push({ type: 'ing', chip: '재료', text: `이전 사용자 <b>${crowdHints.confidence}명</b> 확인 재료 반영: <b>${names}</b>` });
+  }
+  if (naverHints && naverHints.length) {
+    const ingWords = ['참치','마요','우엉','단무지','들기름','참기름','고춧가루','다시마','멸치','사골','대파','당근','양파','마늘','청양고추','간장','고추장','된장','두부','계란','치즈','베이컨'];
+    const foundIngs = new Set();
+    naverHints.forEach(h => {
+      const text = (h.t || '') + ' ' + (h.d || '');
+      ingWords.forEach(w => { if (text.includes(w)) foundIngs.add(w); });
+    });
+    if (foundIngs.size >= 2) {
+      const list = [...foundIngs].slice(0, 4).join('·');
+      evidence.push({ type: 'ing', chip: `블로그 ${naverHints.length}건`, text: `블로그에서 확인된 재료 반영: <b>${list}</b>` });
+    }
+  }
+  (claims || []).forEach(c => {
+    const map = {
+      low_kcal: { chip: '저칼로리', chipClass: 'g', dir: 'down', text: `리뷰 <b>${c.count}건</b> 저칼로리 언급 → 칼로리 하향 조정` },
+      low_sodium: { chip: '저염', chipClass: 'g', dir: 'down', text: `리뷰 <b>${c.count}건</b> 저염 언급 → 나트륨 하향 조정` },
+      low_fat: { chip: '저지방', chipClass: 'g', dir: 'down', text: `리뷰 <b>${c.count}건</b> 저지방 언급 → 지방 하향 조정` },
+      low_sugar: { chip: '저당', chipClass: 'g', dir: 'down', text: `리뷰 <b>${c.count}건</b> 저당 언급 → 당 하향 조정` },
+      high_protein: { chip: '고단백', chipClass: 'y', dir: 'up', text: `리뷰 <b>${c.count}건</b> 고단백 언급 → 단백질 상향` },
+      high_fiber: { chip: '고섬유', chipClass: 'g', dir: 'up', text: `리뷰 <b>${c.count}건</b> 식이섬유 풍부 언급 → 섬유질 상향` },
+      big_portion: { chip: '양많음', chipClass: 'y', dir: 'up', text: `리뷰 <b>${c.count}건</b> 양많음 언급 → 1인분 상향 (1.3배)` },
+      small_portion: { chip: '양적음', chipClass: 'y', dir: 'down', text: `리뷰 <b>${c.count}건</b> 양적음 언급 → 1인분 하향 (0.8배)` }
+    };
+    if (map[c.claim]) evidence.push({ type: 'claim', dir: map[c.claim].dir, chip: map[c.claim].chip, chipClass: map[c.claim].chipClass, text: map[c.claim].text });
+  });
+  return evidence;
+}
+
+// ═══ DETECT MODE · 음식 인식 + 양 추정 (+ 매장·브랜드 시 네이버 · 크라우드 힌트) ═══
+async function runDetect({ apiKey, imageB64, target, userMemo, store, res }) {
+  // 매장 태그가 있으면 매장 상호명 우선, 없으면 memo 사용
+  const searchQuery = store ? store.title : userMemo;
   // 브랜드·메뉴 힌트가 있으면 병렬로 네이버 블로그 + 크라우드 조회
   let naverHints = null, crowdHints = null;
-  if (userMemo && userMemo.length >= 2 && target !== 'pet') {
+  if (searchQuery && searchQuery.length >= 2 && target !== 'pet') {
     [naverHints, crowdHints] = await Promise.all([
-      fetchNaverBlogHints(userMemo),
-      fetchCrowdHints(userMemo, userMemo) // 초기에는 memo를 brand+name 둘 다로 검색
+      fetchNaverBlogHints(searchQuery),
+      fetchCrowdHints(searchQuery, searchQuery)
     ]);
   }
+  const claims = extractNutritionClaims(naverHints);
+  const evidence = buildEvidence({ naverHints, crowdHints, storeInfo: store, claims });
 
-  const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints);
+  const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints, store, claims);
 
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -143,14 +232,29 @@ async function runDetect({ apiKey, imageB64, target, userMemo, res }) {
   if (!parsed) return res.status(500).json({ error: '응답 파싱 실패' });
   if (parsed.error) return res.status(400).json({ error: parsed.error });
 
+  // 매장 태그·근거 뱃지 데이터 첨부 (프론트 결과 페이지가 활용)
+  if (store) parsed.storeTag = store;
+  if (evidence && evidence.length) parsed.evidence = evidence;
   return res.status(200).json(parsed);
 }
 
 // ═══ ANALYZE MODE · 확정 음식 → 코칭 텍스트 ═══
-async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo, res }) {
+async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, res }) {
+  // analyze 단계에서도 매장 있으면 블로그 크로스체크 → evidence 재생성
+  const searchQuery = store ? store.title : userMemo;
+  let naverHints = null, crowdHints = null, claims = [];
+  if (searchQuery && searchQuery.length >= 2 && target !== 'pet') {
+    [naverHints, crowdHints] = await Promise.all([
+      fetchNaverBlogHints(searchQuery),
+      fetchCrowdHints(searchQuery, searchQuery)
+    ]);
+    claims = extractNutritionClaims(naverHints);
+  }
+  const evidence = buildEvidence({ naverHints, crowdHints, storeInfo: store, claims });
+
   const prompt = target === 'pet'
     ? buildPetFoodAnalyzePrompt({ confirmedFoods, userProfile, todayMeals })
-    : buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo });
+    : buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, claims });
 
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -179,11 +283,44 @@ async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfil
   parsed.disclaimer = parsed.disclaimer ||
     '이 결과는 참고용이며 진단이 아닙니다. 지속되는 이상 증상은 전문가와 상담하세요.';
 
+  // 매장 태그·근거 뱃지 데이터 첨부
+  if (store) parsed.storeTag = store;
+  if (evidence && evidence.length) parsed.evidence = evidence;
+
   return res.status(200).json(parsed);
 }
 
 // ═══ HUMAN · DETECT PROMPT ═══
-function buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints) {
+function buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints, store, claims) {
+  // 🏪 매장 태그 (선택) · 카테고리·주소로 조리 스타일 힌트
+  const storeBlock = store ? `
+
+【확정된 매장 정보 · 최우선 신뢰】
+- 매장: ${store.title}
+- 카테고리: ${store.category || '-'}
+- 주소: ${store.address || '-'}
+
+⚠️ 이 매장의 실제 메뉴 특성(양·조리법·재료)을 name·portion 추정에 반영하라.
+   카테고리가 '분식'이면 국물 요리·양 표준, '한식>국밥'이면 밥·국물 세팅 등.
+` : '';
+
+  // 📊 블로그 크로스체크 · 검증 가능한 영양 주장만
+  const claimsBlock = (claims && claims.length) ? `
+
+【블로그 다수 언급 · 영양 주장 (${claims.length}건 검증)】
+${claims.map(c => {
+  const map = {
+    low_kcal: '저칼로리', low_sodium: '저염', low_fat: '저지방', low_sugar: '저당',
+    high_protein: '고단백', high_fiber: '고섬유', big_portion: '양많음(1.3배)', small_portion: '양적음(0.8배)'
+  };
+  return `- "${map[c.claim] || c.claim}" (${c.count}건 언급)`;
+}).join('\n')}
+
+⚠️ 위 주장은 여러 리뷰가 공통으로 언급한 것이라 신뢰도 있음.
+   재료·portion 추정에 반영하되, "담백한·건강한·부담없는" 같은 감상어는 무시.
+   사진과 명백히 모순되면 사진 우선.
+` : '';
+
   // 네이버 블로그 검색 힌트가 있으면 프롬프트에 컨텍스트 추가
   const naverBlock = (naverHints && naverHints.length) ? `
 
@@ -227,7 +364,7 @@ ${crowdHints.topIngredients.map(t => `- ${t.name} (${t.count}명이 확인)`).jo
 
   return `너는 한식 이미지 인식 전문가다. 사진 속 음식을 식별하고 1인분 대비 양을 추정한다.
 JSON 하나만 응답한다. 마크다운 코드블록 금지.
-${memoBlock}${naverBlock}${crowdBlock}
+${storeBlock}${memoBlock}${naverBlock}${crowdBlock}${claimsBlock}
 【역할 · 절대 규칙】
 1. 너는 음식 인식과 양 추정만 담당한다.
 2. 칼로리·단백질·나트륨 같은 영양소 숫자는 절대 생성하지 않는다 (내가 별도 DB에서 조회함).
@@ -283,7 +420,14 @@ ${memoBlock}${naverBlock}${crowdBlock}
 }
 
 // ═══ HUMAN · ANALYZE PROMPT ═══
-function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo }) {
+function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, claims }) {
+  // 매장 힌트는 이미 detect에서 반영됐지만 analyze에서도 카테고리 컨텍스트 유지
+  const storeAnalyzeBlock = store ? `\n【매장】${store.title} · ${store.category || ''}` : '';
+  const claimsAnalyzeBlock = (claims && claims.length) ? `\n【블로그 크로스체크】${claims.map(c => {
+    const m = { low_kcal:'저칼로리', low_sodium:'저염', low_fat:'저지방', low_sugar:'저당', high_protein:'고단백', high_fiber:'고섬유', big_portion:'양많음', small_portion:'양적음' };
+    return m[c.claim] || c.claim;
+  }).join('·')} 반영` : '';
+  const _analyzeHintTail = storeAnalyzeBlock + claimsAnalyzeBlock;
   const p = userProfile || {};
   const profileLine = [
     p.gender === 'male' ? '남성' : p.gender === 'female' ? '여성' : '',
