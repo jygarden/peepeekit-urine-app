@@ -8605,13 +8605,14 @@ const V22_PUSH_SCHEDULE = [
 ];
 
 async function _v22EnableNotifications() {
-  if (!('Notification' in window)) return false;
-  if (Notification.permission === 'granted') { _v22ScheduleAll(); return true; }
-  if (Notification.permission === 'denied') return false;
   try {
+    if (typeof Notification === 'undefined') return false;
+    if (!('Notification' in window)) return false;
+    if (Notification.permission === 'granted') { _v22ScheduleAll(); return true; }
+    if (Notification.permission === 'denied') return false;
     const p = await Notification.requestPermission();
     if (p === 'granted') { _v22ScheduleAll(); return true; }
-  } catch(e){}
+  } catch(e){ console.warn('[notif enable]', e); }
   return false;
 }
 
@@ -8630,6 +8631,7 @@ function _v22ScheduleAll() {
 
 function _v22FireNotification(item) {
   try {
+    if (typeof Notification === 'undefined') return;
     if (Notification.permission !== 'granted') return;
     // 오늘 같은 항목 이미 발동됐으면 skip
     const key = 'v22NotifDone_' + item.id + '_' + new Date().toDateString();
@@ -8671,17 +8673,19 @@ function _v22FireNotification(item) {
   } catch(e) { console.warn('[notif]', e); }
 }
 
-// 홈 첫 진입 시 · 알림 허가 요청 (한 번만)
+// 홈 첫 진입 시 · 알림 허가 요청 (한 번만) · Notification API 미지원 환경(iOS 웹뷰) 가드
 (function _v22InitPushOnFirstHome() {
-  const done = localStorage.getItem('v22NotifPromptAsked');
-  if (done) { if (Notification.permission === 'granted') _v22EnableNotifications(); return; }
-  // 사용자 첫 터치 후 요청
-  const trigger = () => {
-    document.removeEventListener('click', trigger, true);
-    localStorage.setItem('v22NotifPromptAsked', '1');
-    setTimeout(() => _v22EnableNotifications(), 2000);
-  };
-  document.addEventListener('click', trigger, { once: true, capture: true });
+  try {
+    if (typeof Notification === 'undefined') return; // iOS Flutter/PWA · 미지원 환경
+    const done = localStorage.getItem('v22NotifPromptAsked');
+    if (done) { if (Notification.permission === 'granted') _v22EnableNotifications(); return; }
+    const trigger = () => {
+      document.removeEventListener('click', trigger, true);
+      try { localStorage.setItem('v22NotifPromptAsked', '1'); } catch(e){}
+      setTimeout(() => { try { _v22EnableNotifications(); } catch(e){} }, 2000);
+    };
+    document.addEventListener('click', trigger, { once: true, capture: true });
+  } catch(e) { console.warn('[notif init]', e); }
 })();
 
 // ══════════════════════════════════════════════════════════
