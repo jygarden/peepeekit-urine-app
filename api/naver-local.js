@@ -1,14 +1,15 @@
 // 🗺 NAVER 지역 검색 API (매장 자동완성)
 // 상호명 → 매장 후보 리스트 (주소·카테고리·좌표·전화)
 //
-// ⚠️ 중요: NCP API HUB는 "지역(Local) 검색"을 제공하지 않습니다.
-//   지역 검색은 반드시 Naver Developers (openapi.naver.com) 앱에 등록해야 합니다.
-//   https://developers.naver.com → Application 등록 → 지역 API 선택
-//   그 후 Vercel 환경변수에 NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 추가.
+// 📌 2026-06-29 이관 안내: Naver Developers의 Search API가 NCP NAVER API HUB로 이관됨.
+//   기존 NCP_API_KEY_ID / NCP_API_KEY 그대로 사용 가능.
+//   ⚠️ 단, NCP 콘솔에서 "지역(Local) 검색" 서비스를 개별 이용 신청해야 함.
+//   (블로그만 신청돼 있으면 지역은 안 됨)
 //
-// 이 파일은 두 방식 다 시도합니다:
-//   1순위: Naver Developers (openapi.naver.com) — 표준 지역 검색
-//   2순위 (폴백): NCP APIGW — 혹시 지원되는 계정을 위해
+// 폴백 순서:
+//   1. NCP APIGW (신규 URL: naveropenapi.apigw.ntruss.com/search/v1/local)
+//   2. NCP APIGW (레거시 URL 후보)
+//   3. Naver Developers (openapi.naver.com) — 기존 앱이 있는 경우
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,31 +32,41 @@ module.exports = async function handler(req, res) {
   if (!navId && !ncpId) {
     return res.status(500).json({
       error: 'API 자격증명 미설정',
-      detail: 'Vercel 환경변수에 NAVER_CLIENT_ID + NAVER_CLIENT_SECRET을 추가하세요. (지역 검색은 NCP가 아닌 Naver Developers 앱 필요)'
+      detail: 'Vercel 환경변수에 NCP_API_KEY_ID + NCP_API_KEY (기존 블로그와 동일) 를 추가하고, NCP 콘솔에서 "지역(Local) 검색" 이용 신청도 해야 합니다.'
     });
   }
 
-  // 시도 순서
+  const qs = `query=${encodeURIComponent(q)}&display=${Math.min(5, display)}&sort=${sort}`;
+
+  // 시도 순서 · NCP 여러 URL + 트래디셔널 (구 앱 남아있는 경우)
   const attempts = [];
-  if (navId && navSecret) {
-    attempts.push({
-      name: 'naver-developers',
-      url: `https://openapi.naver.com/v1/search/local.json?query=${encodeURIComponent(q)}&display=${Math.min(5, display)}&sort=${sort}`,
-      headers: { 'X-Naver-Client-Id': navId, 'X-Naver-Client-Secret': navSecret }
+  if (ncpId && ncpKey) {
+    const ncpHeaders = { 'X-NCP-APIGW-API-KEY-ID': ncpId, 'X-NCP-APIGW-API-KEY': ncpKey };
+    // 이관 후 가능한 URL들 (모두 시도)
+    [
+      `https://naveropenapi.apigw.ntruss.com/search/v1/local?${qs}`,
+      `https://naveropenapi.apigw.ntruss.com/search/v1/local.json?${qs}`,
+      `https://naversearchapi.apigw.ntruss.com/search/v1/local?${qs}`,
+      `https://naveropenapi.apigw.gov-ntruss.com/search/v1/local?${qs}`
+    ].forEach((url, i) => {
+      attempts.push({ name: `ncp-${i+1}`, url, headers: ncpHeaders });
     });
   }
-  if (ncpId && ncpKey) {
+  if (navId && navSecret) {
+    // 구 앱 (2026-06-29 이관 이전에 등록된 앱)이 남아있는 경우
     attempts.push({
-      name: 'ncp',
-      url: `https://naveropenapi.apigw.ntruss.com/search/v1/local?query=${encodeURIComponent(q)}&display=${Math.min(5, display)}&sort=${sort}`,
-      headers: { 'X-NCP-APIGW-API-KEY-ID': ncpId, 'X-NCP-APIGW-API-KEY': ncpKey }
+      name: 'naver-developers',
+      url: `https://openapi.naver.com/v1/search/local.json?${qs}`,
+      headers: { 'X-Naver-Client-Id': navId, 'X-Naver-Client-Secret': navSecret }
     });
   }
 
   let lastErr = null;
+  const tried = [];
   for (const a of attempts) {
     try {
       const r = await fetch(a.url, { headers: a.headers });
+      tried.push(`${a.name}:${r.status}`);
       if (r.ok) {
         const data = await r.json();
         const items = (data.items || []).map(it => normalizeItem(it, lat, lng));
@@ -69,6 +80,7 @@ module.exports = async function handler(req, res) {
       console.error(`naver-local ${a.name} failed:`, r.status, txt.slice(0, 200));
     } catch (err) {
       lastErr = { status: 500, detail: err.message, source: a.name };
+      tried.push(`${a.name}:err`);
       console.error(`naver-local ${a.name} exception:`, err.message);
     }
   }
@@ -76,7 +88,8 @@ module.exports = async function handler(req, res) {
   return res.status(500).json({
     error: '네이버 지역 검색 실패',
     detail: lastErr ? `${lastErr.source}(${lastErr.status}): ${lastErr.detail}` : '알 수 없는 오류',
-    hint: (navId ? '' : 'NAVER_CLIENT_ID/NAVER_CLIENT_SECRET 등록 필요. Naver Developers에서 "지역" API 사용신청 후 발급.')
+    tried,
+    hint: 'NCP 콘솔에서 "지역(Local) 검색" 서비스를 별도 이용신청 하셨는지 확인해주세요. (기존 블로그 신청과 별개)'
   });
 };
 
