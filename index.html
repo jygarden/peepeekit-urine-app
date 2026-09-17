@@ -3456,14 +3456,62 @@ window.appIcon = function(name, size){
       </button>
     </div>
 
-    <!-- 브랜드·가게 입력 · 촬영 전에 알려주면 정확도 ↑ -->
-    <div id="foodBrandPreCard" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:12px">
+    <!-- 🏪 매장 태그 · 하이브리드 (자동완성 + 지도 옵션) -->
+    <div id="foodBrandPreCard" style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;margin-bottom:12px;position:relative">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-        <span style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.2px">🏪 브랜드 · 가게명</span>
+        <span style="font-size:13px;font-weight:800;color:#0F172A;letter-spacing:-.2px">🏪 어디서 드셨어요?</span>
         <span style="font-size:10px;color:#94A3B8;font-weight:700;background:#F1F5F9;padding:2px 7px;border-radius:99px">선택 · 정확도 ↑</span>
       </div>
-      <input type="text" id="foodUserMemoInputPre" placeholder="예) 김밥천국, 서브웨이, 백종원 제육" style="width:100%;padding:11px 13px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box" oninput="try{const t=document.getElementById('foodUserMemoInput');if(t)t.value=this.value;if(typeof _foodMemoOnInput==='function')_foodMemoOnInput();}catch(e){}" onfocus="this.style.borderColor='#2563EB'" onblur="this.style.borderColor='#E5E7EB'" />
-      <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:7px;line-height:1.5">브랜드 알려주시면 <b style="color:#2563EB">그 매장 메뉴 데이터</b>를 참고해서 훨씬 정확하게 분석해요.</div>
+
+      <!-- 선택된 매장 칩 (기본 숨김) -->
+      <div id="v22StoreChip" style="display:none;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:10px 12px;margin-bottom:8px;align-items:center;gap:9px">
+        <div style="width:26px;height:26px;background:#3D63D9;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FBBF24;font-size:12px;flex-shrink:0">📍</div>
+        <div style="flex:1;min-width:0">
+          <div id="v22StoreChipName" style="font-size:12px;font-weight:800;color:#1E3A8A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+          <div id="v22StoreChipAddr" style="font-size:10px;color:#5D7597;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        </div>
+        <button onclick="_v22ClearStore()" aria-label="선택 해제" style="background:transparent;border:0;color:#94A3B8;font-size:18px;font-weight:700;padding:0 4px;cursor:pointer">×</button>
+      </div>
+
+      <!-- 상호명 입력 + 자동완성 -->
+      <div id="v22StoreInputWrap" style="position:relative">
+        <input type="text" id="foodUserMemoInputPre" placeholder="예) 김밥천국 강남역점, 서브웨이"
+          style="width:100%;padding:11px 13px 11px 36px;border:1.5px solid #E5E7EB;border-radius:11px;font-size:13px;font-family:inherit;color:#0F172A;outline:none;box-sizing:border-box"
+          oninput="_v22StoreOnInput(this.value)"
+          onfocus="this.style.borderColor='#2563EB';_v22StoreFocus()"
+          onblur="setTimeout(()=>{this.style.borderColor='#E5E7EB';_v22StoreBlur()},200)" />
+        <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);pointer-events:none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+
+        <!-- 자동완성 드롭다운 -->
+        <div id="v22StoreDropdown" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 4px);background:#FFF;border-radius:12px;box-shadow:0 12px 30px rgba(15,23,42,.15);z-index:20;overflow:hidden;border:1px solid #E5E7EB;max-height:280px;overflow-y:auto"></div>
+      </div>
+
+      <!-- 지도 확인 버튼 -->
+      <button id="v22StoreMapBtn" onclick="_v22OpenMapSheet()" style="display:none;width:100%;margin-top:8px;background:#F5F8FE;border:1px dashed #C7D2FE;color:#3D63D9;padding:9px;border-radius:10px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;align-items:center;justify-content:center;gap:5px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3D63D9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        지도에서 위치 확인하기
+      </button>
+
+      <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:7px;line-height:1.5">정확한 매장 태그하면 <b style="color:#2563EB">그 매장 실제 재료·조리법</b>을 반영해 분석 정확도가 올라가요.</div>
+    </div>
+
+    <!-- 🗺 지도 시트 (기본 숨김) -->
+    <div id="v22MapSheet" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;flex-direction:column;justify-content:flex-end">
+      <div style="background:#FAFBFF;border-radius:24px 24px 0 0;max-height:88vh;display:flex;flex-direction:column;overflow:hidden">
+        <div style="width:36px;height:4px;background:#CBD5E1;border-radius:99px;margin:12px auto"></div>
+        <div style="padding:0 16px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #E8EDF4">
+          <div style="flex:1;background:#F5F8FE;border-radius:10px;padding:10px 14px 10px 34px;position:relative">
+            <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5D7597" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span id="v22MapSheetQuery" style="font-size:12.5px;font-weight:700;color:#1D3762"></span>
+          </div>
+          <button onclick="_v22CloseMapSheet()" aria-label="닫기" style="width:32px;height:32px;background:#F5F8FE;border:0;border-radius:10px;font-size:16px;color:#5D7597;font-weight:700;cursor:pointer">✕</button>
+        </div>
+        <div id="v22MapSheetMap" style="min-height:220px;background:#EDF2F7;position:relative;overflow:hidden;flex-shrink:0"></div>
+        <div id="v22MapSheetList" style="background:#FFF;flex:1;overflow-y:auto;max-height:240px"></div>
+        <div style="padding:12px 16px;background:#FFF;border-top:1px solid #E8EDF4">
+          <button id="v22MapSheetConfirm" onclick="_v22ConfirmMapSelection()" style="width:100%;background:#264A8A;color:#FBBF24;padding:13px;border-radius:12px;font-size:13px;font-weight:800;border:0;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(38,74,138,.2);opacity:.5" disabled>매장을 선택해주세요</button>
+        </div>
+      </div>
     </div>
 
     <!-- 사람 · 촬영 / 갤러리 (기존) -->
@@ -15888,6 +15936,334 @@ function _foodMemoAppend(txt) {
   el.focus();
 }
 
+// ═══════════════════════════════════════════════════════════
+// 🏪 v22 · 매장 태그 모듈 (하이브리드: 자동완성 + 지도 시트)
+// ═══════════════════════════════════════════════════════════
+let _v22SelectedStore = null;         // 확정된 매장 {title, address, category, lat, lng, ...}
+let _v22StoreCandidates = [];         // 최근 검색 결과
+let _v22StorePendingSelection = null; // 지도 시트에서 임시 선택된 매장
+let _v22StoreSearchTimer = null;
+let _v22GpsCoords = null;             // {lat, lng} · 있으면 거리 정렬
+
+// GPS 한 번 시도 (사용자가 매장 태그를 열 때 시작)
+function _v22EnsureGps() {
+  if (_v22GpsCoords || !navigator.geolocation) return;
+  try {
+    navigator.geolocation.getCurrentPosition(
+      p => { _v22GpsCoords = { lat: p.coords.latitude, lng: p.coords.longitude }; },
+      () => {},
+      { timeout: 4000, maximumAge: 300000, enableHighAccuracy: false }
+    );
+  } catch (e) {}
+}
+
+function _v22StoreFocus() { _v22EnsureGps(); }
+function _v22StoreBlur() {
+  // blur는 200ms 딜레이 후 (드롭다운 클릭 대응)
+  const dd = document.getElementById('v22StoreDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+// 상호명 입력 · 디바운스 검색
+function _v22StoreOnInput(value) {
+  const v = String(value || '').trim();
+  // 레거시 호환: foodUserMemo도 동시에 세팅
+  try {
+    const legacy = document.getElementById('foodUserMemoInput');
+    if (legacy) legacy.value = v;
+    if (typeof _foodMemoOnInput === 'function') _foodMemoOnInput();
+  } catch(e) {}
+
+  // 매장 확정 상태에서 다시 타이핑 → 확정 해제
+  if (_v22SelectedStore && v !== _v22SelectedStore.title) {
+    _v22ClearStore(false);
+  }
+
+  clearTimeout(_v22StoreSearchTimer);
+  const dd = document.getElementById('v22StoreDropdown');
+  const btn = document.getElementById('v22StoreMapBtn');
+
+  if (v.length < 2) {
+    if (dd) dd.style.display = 'none';
+    if (btn) btn.style.display = 'none';
+    return;
+  }
+
+  _v22StoreSearchTimer = setTimeout(() => _v22StoreDoSearch(v), 300);
+}
+
+async function _v22StoreDoSearch(q) {
+  const dd = document.getElementById('v22StoreDropdown');
+  if (!dd) return;
+  dd.style.display = 'block';
+  dd.innerHTML = `
+    <div style="padding:14px;font-size:11.5px;color:#94A3B8;font-weight:600;text-align:center">
+      <span style="display:inline-block;width:12px;height:12px;border:2px solid #E5E7EB;border-top-color:#3D63D9;border-radius:50%;animation:v22spin .8s linear infinite;vertical-align:middle;margin-right:6px"></span>
+      네이버 지도에서 매장 찾는 중…
+    </div>
+    <style>@keyframes v22spin{to{transform:rotate(360deg)}}</style>`;
+
+  try {
+    const body = { query: q, display: 5, sort: 'random' };
+    if (_v22GpsCoords) { body.lat = _v22GpsCoords.lat; body.lng = _v22GpsCoords.lng; }
+    const r = await fetch('/api/naver-local', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await r.json();
+    if (!r.ok || data.error) throw new Error(data.error || '검색 실패');
+    _v22StoreCandidates = data.items || [];
+    _v22RenderDropdown(_v22StoreCandidates);
+  } catch (e) {
+    dd.innerHTML = `<div style="padding:14px;font-size:11.5px;color:#94A3B8;font-weight:600;text-align:center">검색 결과가 없어요. 직접 입력하셔도 돼요.</div>`;
+    // 지도 버튼은 굳이 노출 안 함
+    const btn = document.getElementById('v22StoreMapBtn');
+    if (btn) btn.style.display = 'none';
+  }
+}
+
+function _v22RenderDropdown(items) {
+  const dd = document.getElementById('v22StoreDropdown');
+  const btn = document.getElementById('v22StoreMapBtn');
+  if (!dd) return;
+  if (!items || !items.length) {
+    dd.innerHTML = `<div style="padding:14px;font-size:11.5px;color:#94A3B8;font-weight:600;text-align:center">검색 결과가 없어요. 직접 입력하셔도 돼요.</div>`;
+    if (btn) btn.style.display = 'none';
+    return;
+  }
+  const rows = items.slice(0, 5).map((it, i) => {
+    const distTxt = (it.distance != null)
+      ? (it.distance < 1000 ? `${it.distance}m` : `${(it.distance/1000).toFixed(1)}km`)
+      : '';
+    const distColor = (it.distance != null && it.distance < 500) ? '#059669;background:#D1FAE5'
+                    : (it.distance != null && it.distance < 1500) ? '#B45309;background:#FEF3C7'
+                    : '#5D7597;background:#F1F5F9';
+    const chip = distTxt
+      ? `<span style="font-size:9.5px;font-weight:700;color:${distColor};padding:1px 6px;border-radius:99px;margin-left:auto;flex-shrink:0">${distTxt}</span>`
+      : '';
+    return `
+      <div class="v22-dd-item" data-idx="${i}" onmousedown="event.preventDefault();_v22PickCandidate(${i})"
+        style="padding:10px 12px;display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid #F1F5F9;cursor:pointer">
+        <div style="width:26px;height:26px;background:#DBEAFE;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px">🏪</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:800;color:#1D3762;display:flex;align-items:center;gap:5px">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v22Esc(it.title)}</span>
+            ${chip}
+          </div>
+          <div style="font-size:10.5px;color:#5D7597;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px">${_v22Esc(it.roadAddress || it.address || '')}</div>
+          ${it.category ? `<div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-top:1px">${_v22Esc(it.category)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  dd.innerHTML = `
+    <div style="padding:8px 12px;background:#F5F8FE;font-size:10px;font-weight:800;color:#5D7597;letter-spacing:.4px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E8EDF4">
+      <span>매장 후보 · ${_v22GpsCoords ? '가까운 순' : '유사도 순'}</span>
+      <span style="background:#03C75A;color:#FFF;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:900">NAVER</span>
+    </div>${rows}`;
+  if (btn) btn.style.display = 'flex';
+}
+
+function _v22Esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function _v22PickCandidate(i) {
+  const it = _v22StoreCandidates[i];
+  if (!it) return;
+  _v22SetStore(it);
+  const dd = document.getElementById('v22StoreDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+function _v22SetStore(store) {
+  _v22SelectedStore = store;
+  // UI 갱신
+  const chip = document.getElementById('v22StoreChip');
+  const chipName = document.getElementById('v22StoreChipName');
+  const chipAddr = document.getElementById('v22StoreChipAddr');
+  const input = document.getElementById('foodUserMemoInputPre');
+  const wrap = document.getElementById('v22StoreInputWrap');
+  const btn = document.getElementById('v22StoreMapBtn');
+
+  if (chipName) chipName.textContent = store.title;
+  if (chipAddr) chipAddr.textContent = [store.category, store.roadAddress || store.address].filter(Boolean).join(' · ');
+  if (chip) chip.style.display = 'flex';
+  if (wrap) wrap.style.display = 'none';
+  if (btn) btn.style.display = 'none';
+
+  // 레거시 memo에도 반영
+  if (input) input.value = store.title;
+  foodUserMemo = store.title;
+  try {
+    const legacy = document.getElementById('foodUserMemoInput');
+    if (legacy) legacy.value = store.title;
+  } catch(e) {}
+}
+
+function _v22ClearStore(showInput) {
+  _v22SelectedStore = null;
+  const chip = document.getElementById('v22StoreChip');
+  const wrap = document.getElementById('v22StoreInputWrap');
+  const input = document.getElementById('foodUserMemoInputPre');
+  const btn = document.getElementById('v22StoreMapBtn');
+  if (chip) chip.style.display = 'none';
+  if (wrap) wrap.style.display = 'block';
+  if (btn) btn.style.display = 'none';
+  if (showInput !== false && input) {
+    input.value = '';
+    foodUserMemo = '';
+    input.focus();
+  }
+}
+
+// ═══ 지도 시트 (임시 선택 → 확정 버튼) ═══
+function _v22OpenMapSheet() {
+  if (!_v22StoreCandidates.length) return;
+  const sheet = document.getElementById('v22MapSheet');
+  const query = document.getElementById('v22StoreInputWrap')?.querySelector('input')?.value || '';
+  document.getElementById('v22MapSheetQuery').textContent = query;
+  _v22StorePendingSelection = _v22StoreCandidates[0];
+  _v22RenderMapSheet();
+  if (sheet) sheet.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function _v22CloseMapSheet() {
+  const sheet = document.getElementById('v22MapSheet');
+  if (sheet) sheet.style.display = 'none';
+  document.body.style.overflow = '';
+  _v22StorePendingSelection = null;
+}
+
+function _v22RenderMapSheet() {
+  _v22RenderMapArea();
+  _v22RenderMapList();
+  _v22UpdateMapConfirmBtn();
+}
+
+// 정적 지도 대신 좌표 기반 시각화 (핀 상대 위치)
+function _v22RenderMapArea() {
+  const el = document.getElementById('v22MapSheetMap');
+  if (!el) return;
+  const items = _v22StoreCandidates.slice(0, 5).filter(x => x.lat && x.lng);
+  if (!items.length) {
+    el.innerHTML = `<div style="padding:40px 20px;text-align:center;color:#94A3B8;font-size:12px;font-weight:600">좌표 정보가 없어 지도를 표시할 수 없어요.<br>아래 리스트에서 선택해주세요.</div>`;
+    return;
+  }
+  // 좌표 범위 계산 (핀들이 뷰포트에 다 보이게)
+  const lats = items.map(x => x.lat), lngs = items.map(x => x.lng);
+  if (_v22GpsCoords) { lats.push(_v22GpsCoords.lat); lngs.push(_v22GpsCoords.lng); }
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  const padLat = Math.max((maxLat - minLat) * 0.2, 0.001);
+  const padLng = Math.max((maxLng - minLng) * 0.2, 0.001);
+  const bL = minLat - padLat, tL = maxLat + padLat, bLng = minLng - padLng, tLng = maxLng + padLng;
+
+  const pos = (lat, lng) => ({
+    left: ((lng - bLng) / (tLng - bLng)) * 100,
+    top: (1 - (lat - bL) / (tL - bL)) * 100
+  });
+
+  const roadGrid = `
+    <div style="position:absolute;inset:0;background:
+      linear-gradient(rgba(255,255,255,.6),rgba(255,255,255,.6)),
+      repeating-linear-gradient(0deg,#D1D9E5 0,#D1D9E5 1px,transparent 1px,transparent 40px),
+      repeating-linear-gradient(90deg,#D1D9E5 0,#D1D9E5 1px,transparent 1px,transparent 40px),
+      #E8EEF5"></div>`;
+
+  const mePin = _v22GpsCoords ? (() => {
+    const p = pos(_v22GpsCoords.lat, _v22GpsCoords.lng);
+    return `
+      <div style="position:absolute;left:${p.left}%;top:${p.top}%;transform:translate(-50%,-50%);width:60px;height:60px;background:rgba(61,99,217,.15);border-radius:50%;animation:v22mepulse 2s ease infinite;z-index:2"></div>
+      <div style="position:absolute;left:${p.left}%;top:${p.top}%;transform:translate(-50%,-50%);width:16px;height:16px;background:#3D63D9;border:3px solid #FFF;border-radius:50%;box-shadow:0 0 0 3px rgba(61,99,217,.3),0 2px 6px rgba(0,0,0,.2);z-index:3"></div>
+      <style>@keyframes v22mepulse{0%{transform:translate(-50%,-50%) scale(.4);opacity:.7}100%{transform:translate(-50%,-50%) scale(1.2);opacity:0}}</style>`;
+  })() : '';
+
+  const pins = items.map((it, i) => {
+    const p = pos(it.lat, it.lng);
+    const isSel = _v22StorePendingSelection && _v22StorePendingSelection.title === it.title && _v22StorePendingSelection.address === it.address;
+    const bg = isSel ? '#FBBF24' : '#EF4444';
+    const color = isSel ? '#78350F' : '#FFF';
+    const distTxt = (it.distance != null)
+      ? (it.distance < 1000 ? `${it.distance}m` : `${(it.distance/1000).toFixed(1)}km`) : '';
+    return `
+      <div onclick="_v22MapPickIdx(${i})" style="position:absolute;left:${p.left}%;top:${p.top}%;transform:translate(-50%,-100%);z-index:${isSel?5:4};cursor:pointer">
+        ${distTxt ? `<div style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:${isSel?'#FBBF24':'#1E3A8A'};color:${isSel?'#78350F':'#FFF'};font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2)">${distTxt}</div>` : ''}
+        <div style="width:32px;height:38px;background:${bg};border-radius:16px 16px 16px 4px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px ${isSel?'rgba(251,191,36,.55)':'rgba(239,68,68,.4)'}${isSel?',0 0 0 4px rgba(251,191,36,.25)':''}">
+          <span style="transform:rotate(45deg);color:${color};font-size:13px;font-weight:900">${i+1}</span>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    ${roadGrid}
+    ${mePin}
+    ${pins}
+    <div style="position:absolute;bottom:6px;left:8px;background:rgba(255,255,255,.9);padding:2px 6px;border-radius:4px;font-size:8px;font-weight:900;color:#03C75A;letter-spacing:.5px">NAVER</div>`;
+}
+
+function _v22MapPickIdx(i) {
+  _v22StorePendingSelection = _v22StoreCandidates[i];
+  _v22RenderMapSheet();
+}
+
+function _v22RenderMapList() {
+  const el = document.getElementById('v22MapSheetList');
+  if (!el) return;
+  const items = _v22StoreCandidates.slice(0, 5);
+  el.innerHTML = items.map((it, i) => {
+    const isSel = _v22StorePendingSelection && _v22StorePendingSelection.title === it.title && _v22StorePendingSelection.address === it.address;
+    const distTxt = (it.distance != null)
+      ? (it.distance < 1000 ? `${it.distance}m` : `${(it.distance/1000).toFixed(1)}km`) : '';
+    return `
+      <div onclick="_v22MapPickIdx(${i})" style="padding:11px 16px;display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid #F1F5F9;cursor:pointer;${isSel?'background:#FEF9E7;border-left:3px solid #FBBF24':''}">
+        <div style="width:22px;height:22px;background:${isSel?'#FBBF24':'#EF4444'};color:${isSel?'#78350F':'#FFF'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:800;color:#1D3762;display:flex;align-items:center;gap:6px">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v22Esc(it.title)}</span>
+            ${distTxt ? `<span style="font-size:9.5px;color:#059669;font-weight:700;background:#D1FAE5;padding:1px 5px;border-radius:99px;margin-left:auto">${distTxt}</span>` : ''}
+          </div>
+          <div style="font-size:10.5px;color:#5D7597;font-weight:500;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v22Esc(it.roadAddress || it.address || '')} ${it.category ? ' · '+_v22Esc(it.category) : ''}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function _v22UpdateMapConfirmBtn() {
+  const btn = document.getElementById('v22MapSheetConfirm');
+  if (!btn) return;
+  if (_v22StorePendingSelection) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = `${_v22StorePendingSelection.title} · 여기 맞아요`;
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '.5';
+    btn.textContent = '매장을 선택해주세요';
+  }
+}
+
+function _v22ConfirmMapSelection() {
+  if (!_v22StorePendingSelection) return;
+  _v22SetStore(_v22StorePendingSelection);
+  _v22CloseMapSheet();
+}
+
+// 분석 요청 시 서버에 넘길 매장 정보
+function _v22GetStorePayload() {
+  if (!_v22SelectedStore) return null;
+  const s = _v22SelectedStore;
+  return {
+    title: s.title,
+    category: s.category || '',
+    address: s.roadAddress || s.address || '',
+    lat: s.lat || null,
+    lng: s.lng || null,
+    telephone: s.telephone || ''
+  };
+}
+
 async function analyzeFood() {
   if (!foodImageB64) return;
   _foodMemoOnInput(); // 최신 메모 반영
@@ -15900,7 +16276,11 @@ async function analyzeFood() {
     const res = await fetch('/api/analyze-food', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageB64: foodImageB64, target: foodTarget, mode: 'detect', userMemo: foodUserMemo })
+      body: JSON.stringify({
+        imageB64: foodImageB64, target: foodTarget, mode: 'detect',
+        userMemo: foodUserMemo,
+        store: (typeof _v22GetStorePayload === 'function') ? _v22GetStorePayload() : null
+      })
     });
     // 응답이 JSON인지 안전하게 확인
     const txt = await res.text();
@@ -16162,7 +16542,8 @@ async function confirmAndAnalyze() {
           mealTime: selectedMealTime, userProfile,
           target: foodTarget, mode: 'analyze',
           confirmedFoods: detectedFoodsData,
-          todayMeals, userMemo: foodUserMemo
+          todayMeals, userMemo: foodUserMemo,
+          store: (typeof _v22GetStorePayload === 'function') ? _v22GetStorePayload() : null
         }),
         signal: ctrl.signal,
         cache: 'no-store' // Service Worker 캐시 무시
@@ -16962,7 +17343,57 @@ function renderFoodResult(r) {
         ${items}
       </div>`;
   }
-  heroWrap.innerHTML = charHero + scoreCard + predictedCard;
+  // 🏪 매장 태그 칩 + ✨ 정확도 근거 뱃지 카드 (v22)
+  let storeChipHtml = '', evidenceCardHtml = '';
+  try {
+    const st = r.storeTag;
+    if (st && st.title) {
+      const meta = [st.category, st.address].filter(Boolean).join(' · ');
+      storeChipHtml = `
+        <div style="margin:0 0 10px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:9px">
+          <div style="width:26px;height:26px;background:#3D63D9;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FBBF24;font-size:12px;flex-shrink:0">📍</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:800;color:#1E3A8A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(st.title||'').replace(/</g,'&lt;')}</div>
+            <div style="font-size:10px;color:#5D7597;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(meta||'').replace(/</g,'&lt;')}</div>
+          </div>
+          <span style="background:linear-gradient(135deg,#3D63D9,#8B5CF6);color:#FFF;font-size:9px;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:.3px">매장 반영</span>
+        </div>`;
+    }
+    const ev = Array.isArray(r.evidence) ? r.evidence : [];
+    if (ev.length) {
+      const iconOf = (t, dir) => {
+        if (t === 'store') return { bg: '#8B5CF6', txt: '🏪' };
+        if (t === 'ing') return { bg: '#3D63D9', txt: '＋' };
+        if (dir === 'down') return { bg: '#10B981', txt: '↓' };
+        if (dir === 'up') return { bg: '#F59E0B', txt: '↑' };
+        return { bg: '#64748B', txt: '·' };
+      };
+      const chipClass = (c) => c === 'g' ? 'background:#D1FAE5;color:#065F46' : c === 'y' ? 'background:#FEF3C7;color:#B45309' : 'background:#F5F8FE;color:#2E61C4';
+      const items = ev.map(e => {
+        const ic = iconOf(e.type, e.dir);
+        const chipHtml = e.chip ? `<span style="${chipClass(e.chipClass)};font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:99px;margin:0 2px;display:inline-block">${(e.chip||'').replace(/</g,'&lt;')}</span>` : '';
+        return `
+          <div style="padding:8px 0;display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#5D7597;font-weight:500;line-height:1.5;border-top:1px dashed #E8EDF4">
+            <div style="width:18px;height:18px;background:${ic.bg};color:#FFF;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900">${ic.txt}</div>
+            <div style="flex:1">${chipHtml}${e.text || ''}</div>
+          </div>`;
+      }).join('');
+      evidenceCardHtml = `
+        <div style="margin:10px 0 0;background:#FFF;border:1px solid #E8EDF4;border-radius:16px;padding:12px 14px 8px;box-shadow:0 2px 10px rgba(30,58,138,.04)">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="background:linear-gradient(135deg,#3D63D9,#8B5CF6);color:#FFF;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:.3px">✨ 정확도 근거</span>
+            <span style="font-size:12px;font-weight:800;color:#1D3762">이렇게 계산했어요</span>
+          </div>
+          ${items}
+          <div style="margin-top:8px;padding:6px 10px;background:#F5F8FE;border-radius:8px;font-size:9.5px;color:#5D7597;font-weight:600;display:flex;align-items:center;gap:5px">
+            <span style="width:6px;height:6px;background:#03C75A;border-radius:50%"></span>
+            네이버 지역·블로그 API · 최근 2년 리뷰 반영
+          </div>
+        </div>`;
+    }
+  } catch(e) { console.error('evidence render fail', e); }
+
+  heroWrap.innerHTML = storeChipHtml + charHero + scoreCard + evidenceCardHtml + predictedCard;
   // 호환용 (PDF에서도 보이게 옛 데이터 유지)
   document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
   document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
