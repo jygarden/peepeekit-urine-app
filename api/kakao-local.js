@@ -52,15 +52,34 @@ module.exports = async function handler(req, res) {
     const r = await fetch(url, {
       headers: { 'Authorization': `KakaoAK ${key}` }
     });
-    const data = await r.json();
+    // 원문 본문 항상 보관 (JSON 파싱 실패 대비)
+    const rawText = await r.text();
+    let data = null;
+    try { data = JSON.parse(rawText); } catch(e) {}
+
     if (!r.ok) {
-      console.error('kakao-local error', r.status, data);
+      const kakaoMsg = data && (data.message || data.msg) ? (data.message || data.msg) : '';
+      const kakaoType = data && data.errorType ? data.errorType : '';
+      const kakaoCode = data && (data.code != null) ? String(data.code) : '';
+      const summary = [kakaoType, kakaoCode, kakaoMsg].filter(Boolean).join(' · ') || rawText.slice(0, 300) || `HTTP ${r.status}`;
+      const keyPreview = key ? `${key.slice(0, 4)}…${key.slice(-4)} (${key.length}자)` : '(없음)';
+      console.error('[kakao-local]', r.status, 'summary:', summary, 'raw:', rawText.slice(0, 500));
+
+      let hint = '';
+      if (r.status === 401) hint = 'REST API 키가 잘못됨. 카카오 개발자센터 → 앱 → 앱 키 → REST API 키를 다시 복사해주세요.';
+      else if (r.status === 403) {
+        if (kakaoType && kakaoType.includes('Auth')) hint = 'REST API 키 인증 실패. 다른 종류의 키(JavaScript, Native)를 넣으면 이렇게 나옵니다.';
+        else if (kakaoType && kakaoType.includes('Access')) hint = '앱에 Web 플랫폼이 등록 안 됨. 카카오 개발자센터 → 앱 → 플랫폼 → Web 플랫폼 등록 → 배포 도메인 추가.';
+        else hint = 'REST API 키 확인 + 플랫폼(Web) 등록 확인. 앱이 삭제됐거나 비활성 상태일 수도.';
+      }
+      else if (r.status === 429) hint = '초당 30회 제한 초과.';
+
       return res.status(r.status).json({
         error: '카카오 로컬 검색 실패',
-        detail: (data && (data.msg || data.errorType || JSON.stringify(data))) || `HTTP ${r.status}`,
-        hint: r.status === 401 ? 'REST API 키가 잘못됐거나 만료됨.' :
-              r.status === 403 ? 'IP 제한 또는 사용량 초과. 카카오 개발자센터에서 확인.' :
-              r.status === 429 ? '초당 요청 제한 초과 (30 rps).' : ''
+        detail: summary,
+        raw: rawText.slice(0, 500),
+        hint,
+        keyPreview
       });
     }
 
