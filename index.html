@@ -8480,22 +8480,63 @@ function _v22EnableMotion() {
 
 // 마지막 accel · Low-pass 필터로 step 감지
 let _v22PrevAccel = 0;
-let _v22PeakThreshold = 1.2;
+let _v22PeakThreshold = 2.8;      // 걷기 감지 최소 임계 (m/s²) · 기존 1.2 → 2.8 (갤럭시 과감지 방지)
+let _v22StepCadence = [];         // 최근 걸음 간격 (ms)
+let _v22PendingSteps = 0;         // 리듬 검증 전 후보 걸음
 function _v22OnMotion(e) {
-  const a = e.acceleration || e.accelerationIncludingGravity;
-  if (!a || a.x == null) return;
-  const total = Math.sqrt((a.x||0)*(a.x||0) + (a.y||0)*(a.y||0) + (a.z||0)*(a.z||0));
+  // e.acceleration은 중력 제외 (더 정확) · 없으면 중력 포함 - 9.8 근사
+  const a = e.acceleration;
+  const ag = e.accelerationIncludingGravity;
+  let magnitude;
+  if (a && a.x != null) {
+    magnitude = Math.sqrt((a.x||0)**2 + (a.y||0)**2 + (a.z||0)**2);
+  } else if (ag && ag.x != null) {
+    const total = Math.sqrt((ag.x||0)**2 + (ag.y||0)**2 + (ag.z||0)**2);
+    magnitude = Math.abs(total - 9.8);  // 중력 성분 제거
+  } else return;
+
   const now = Date.now();
-  // 걸음 감지 · peak 기반 (0.3초 이상 간격)
-  if (total > _v22PeakThreshold && _v22PrevAccel < _v22PeakThreshold && (now - _v22Motion.lastStepTime > 300)) {
-    _v22Motion.stepCount++;
+  const dt = now - _v22Motion.lastStepTime;
+  // 걷기 리듬: 걸음당 350~1200ms (분당 50~170걸음)
+  const MIN_INTERVAL = 350;
+  const MAX_INTERVAL = 2000;
+  const RHYTHM_MIN = 350, RHYTHM_MAX = 1200;
+
+  // Peak detection · 임계 초과 & 이전 샘플은 임계 이하 & 최소 간격 확보
+  if (magnitude > _v22PeakThreshold && _v22PrevAccel <= _v22PeakThreshold && dt > MIN_INTERVAL) {
+    if (dt < MAX_INTERVAL) {
+      _v22StepCadence.push(dt);
+      if (_v22StepCadence.length > 5) _v22StepCadence.shift();
+    } else {
+      // 오래된 걸음과 무관한 새 시작 · 리듬 리셋
+      _v22StepCadence = [dt];
+      _v22PendingSteps = 0;
+    }
+
+    // 리듬 검증: 최근 간격들이 걷기 범위 안에 안정적으로 있는지
+    const rhythmic = _v22StepCadence.length >= 3 &&
+                     _v22StepCadence.slice(-3).every(x => x >= RHYTHM_MIN && x <= RHYTHM_MAX);
+
+    if (rhythmic) {
+      // 첫 리듬 검증 시 pending 3개도 함께 카운트
+      if (_v22PendingSteps > 0) {
+        _v22Motion.stepCount += _v22PendingSteps;
+        _v22PendingSteps = 0;
+      }
+      _v22Motion.stepCount++;
+      _v22UpdateStepUI();
+      try { localStorage.setItem('v22StepsToday', String(_v22Motion.stepCount)); } catch(e){}
+    } else {
+      // 아직 리듬 안 잡힘 · 후보로 저장만
+      _v22PendingSteps = Math.min(_v22PendingSteps + 1, 3);
+    }
     _v22Motion.lastStepTime = now;
-    _v22UpdateStepUI();
-    try { localStorage.setItem('v22StepsToday', String(_v22Motion.stepCount)); } catch(e){}
   }
-  _v22PrevAccel = total;
-  // 움직임 감지 (앉아있음 체크용)
-  if (total > 0.15) _v22Motion.lastMotionTime = now;
+  _v22PrevAccel = magnitude;
+
+  // 움직임 감지 (앉아있음 체크용) · 원본 크기 (중력 포함)
+  const rawTotal = ag ? Math.sqrt((ag.x||0)**2 + (ag.y||0)**2 + (ag.z||0)**2) : magnitude;
+  if (Math.abs(rawTotal - 9.8) > 0.3) _v22Motion.lastMotionTime = now;
 }
 
 function _v22UpdateStepUI() {
