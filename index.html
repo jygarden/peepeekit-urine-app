@@ -17418,8 +17418,9 @@ function renderFoodResult(r) {
   try { r = enrichWithPairings(r); } catch(e) { console.error('enrichWithPairings 에러:', e); }
   // 🧬 맞춤 분석 카드 렌더링
   try { renderPersonalAnalysis(r); } catch(e) { console.error('맞춤 분석 에러:', e); }
-  // 💧 물 섭취 위젯
-  try { renderWaterWidget(); } catch(e) { console.error('물 위젯 에러:', e); }
+  // 💧 물 섭취 위젯 · 결과 페이지에서 제거 (요청) · 홈에는 유지
+  const _waterEl = document.getElementById('waterWidget');
+  if (_waterEl) _waterEl.style.display = 'none';
   // 게임화된 Hero (영양사 캐릭터 + 점수 원형)
   const score = r.balanceScore || 0;
   const grade = r.balanceGrade || 'B';
@@ -17561,7 +17562,8 @@ function renderFoodResult(r) {
     }
   } catch(e) { console.error('evidence render fail', e); }
 
-  heroWrap.innerHTML = storeChipHtml + charHero + scoreCard + evidenceCardHtml + predictedCard;
+  // 점수 카드 (14점·F) 제거 · 요청에 따라 scoreCard 빼고 렌더
+  heroWrap.innerHTML = storeChipHtml + charHero + evidenceCardHtml + predictedCard;
   // 호환용 (PDF에서도 보이게 옛 데이터 유지)
   document.getElementById('foodMealTimeLabel').textContent = `${selectedMealTime} · 분석 결과`;
   document.getElementById('foodTotalCal').textContent = (r.totalCalories || 0).toLocaleString();
