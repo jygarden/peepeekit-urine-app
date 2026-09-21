@@ -1559,20 +1559,20 @@ window.appIcon = function(name, size){
     .home-water-btn.small{padding:5px 7px}
     /* 🧬 맞춤 분석 카드 — 솔리드 흰색 */
     .personal-empty{background:#fff;border:1.5px dashed var(--gray-300);border-radius:var(--r-md);padding:18px;text-align:center}
-    .personal-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r-md);padding:18px;box-shadow:var(--shadow-xs)}
-    .personal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .personal-card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--r-md);padding:14px;box-shadow:var(--shadow-xs)}
+    .personal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
     .personal-edit-btn{background:#fff;border:1px solid var(--gray-200);color:var(--gray-700);font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;cursor:pointer;transition:all .15s ease}
     .personal-edit-btn:hover{border-color:var(--primary);color:var(--primary)}
-    .personal-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
-    .pstat{background:var(--gray-50);border-radius:var(--r-sm);padding:11px 8px;text-align:center;border:1px solid var(--gray-100)}
-    .pstat-v{font-size:20px;font-weight:800;color:var(--gray-900);line-height:1.1;letter-spacing:-.5px}
-    .pstat-l{font-size:10.5px;color:var(--gray-500);margin-top:4px;font-weight:600}
-    .personal-section{background:var(--gray-50);border-radius:var(--r-sm);padding:13px;margin-top:10px;border:1px solid var(--gray-100)}
+    .personal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+    .pstat{background:var(--gray-50);border-radius:8px;padding:8px 4px;text-align:center;border:1px solid var(--gray-100)}
+    .pstat-v{font-size:14px;font-weight:800;color:var(--gray-900);line-height:1.1;letter-spacing:-.4px}
+    .pstat-l{font-size:9px;color:var(--gray-500);margin-top:3px;font-weight:600;line-height:1.2}
+    .personal-section{background:var(--gray-50);border-radius:10px;padding:10px 12px;margin-top:8px;border:1px solid var(--gray-100)}
     .personal-section.sasang{background:var(--primary-pale);border-color:var(--primary-light)}
     .personal-section.saju{background:var(--gray-50);border-color:var(--gray-200)}
-    .psect-title{font-size:12.5px;font-weight:800;color:var(--gray-800);margin-bottom:6px;letter-spacing:-.2px}
-    .psect-tip{font-size:11.5px;color:var(--gray-600);line-height:1.6;margin-bottom:8px}
-    .psect-row{font-size:11.5px;color:var(--gray-600);padding:3px 0;line-height:1.55}
+    .psect-title{font-size:11.5px;font-weight:800;color:var(--gray-800);margin-bottom:4px;letter-spacing:-.2px}
+    .psect-tip{font-size:11px;color:var(--gray-600);line-height:1.5;margin-bottom:6px}
+    .psect-row{font-size:11px;color:var(--gray-600);padding:2px 0;line-height:1.5}
     .psect-row strong{margin-right:4px}
     .psect-reason{font-size:10.5px;color:var(--gray-500);padding:6px 10px;background:#fff;border-radius:6px;margin-bottom:8px;font-weight:600;border:1px solid var(--gray-100)}
     /* 📊 리포트 버튼 + 모달 */
@@ -18269,30 +18269,31 @@ function renderFoodResult(r) {
       .v22-problems-head .em{font-size:15px}
       .v22-problems-head .ttl{font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px}
       .v22-problems-head .cnt{font-size:10.5px;color:#94A3B8;font-weight:800;background:#F5F8FE;padding:2px 8px;border-radius:99px;margin-left:auto}
-      .v22-problem-card{background:#FFF;border:2px solid;border-radius:18px;padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
+      .v22-problems-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+      .v22-problem-card{background:#FFF;border:1.5px solid;border-radius:14px;padding:10px 12px;position:relative;overflow:hidden}
       .v22-problem-card.low{border-color:#FCA5A5;background:linear-gradient(135deg,#FFF 0%,#FEF2F2 100%)}
       .v22-problem-card.high{border-color:#F59E0B;background:linear-gradient(135deg,#FFF 0%,#FEF9E7 100%)}
-      .v22-problem-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-      .v22-problem-ring{position:relative;width:60px;height:60px;flex-shrink:0}
+      .v22-problem-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+      .v22-problem-ring{position:relative;width:42px;height:42px;flex-shrink:0}
       .v22-problem-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
       .v22-problem-ring .track{fill:none;stroke:#F1F5F9;stroke-width:5}
       .v22-problem-ring .fill{fill:none;stroke-width:5;stroke-linecap:round}
       .v22-problem-card.low .v22-problem-ring .fill{stroke:#EF4444}
       .v22-problem-card.high .v22-problem-ring .fill{stroke:#F59E0B}
       .v22-problem-ring .inner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
-      .v22-problem-ring .inner .pct{font-size:13px;font-weight:900;line-height:1}
+      .v22-problem-ring .inner .pct{font-size:10.5px;font-weight:900;line-height:1}
       .v22-problem-card.low .v22-problem-ring .inner .pct{color:#DC2626}
       .v22-problem-card.high .v22-problem-ring .inner .pct{color:#B45309}
       .v22-problem-body{flex:1;min-width:0}
-      .v22-problem-name{font-size:15px;font-weight:900;letter-spacing:-.3px;line-height:1.1;margin-bottom:3px}
+      .v22-problem-name{font-size:12px;font-weight:900;letter-spacing:-.3px;line-height:1.1;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .v22-problem-card.low .v22-problem-name{color:#DC2626}
       .v22-problem-card.high .v22-problem-name{color:#B45309}
-      .v22-problem-state{font-size:10.5px;color:#94A3B8;font-weight:700}
+      .v22-problem-state{font-size:9.5px;color:#94A3B8;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       .v22-problem-state .arrow{font-weight:900;margin-right:2px}
       .v22-problem-card.low .v22-problem-state .arrow{color:#DC2626}
       .v22-problem-card.high .v22-problem-state .arrow{color:#B45309}
-      .v22-problem-measure{font-size:10.5px;color:#5D7597;font-weight:600;margin-top:1px}
-      .v22-problem-tip{font-size:11px;color:#5D7597;font-weight:600;line-height:1.4;padding:8px 10px;background:rgba(255,255,255,.7);border-radius:8px}
+      .v22-problem-measure{display:none}
+      .v22-problem-tip{font-size:10px;color:#5D7597;font-weight:600;line-height:1.4;padding:6px 8px;background:rgba(255,255,255,.7);border-radius:6px}
       .v22-problem-tip b{color:#1D3762;font-weight:800}
       .v22-normal-toggle{width:100%;background:#FFF;border:1px solid #E8EDF4;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;color:#5D7597;font-size:12.5px;font-weight:700;margin-bottom:10px;transition:all .2s}
       .v22-normal-toggle:hover{background:#F5F8FE}
@@ -18325,7 +18326,7 @@ function renderFoodResult(r) {
         <span class="ttl">오늘 짚을 것</span>
         <span class="cnt">${problems.length}개</span>
       </div>
-      ${problems.map(_v22ProblemCard).join('')}
+      <div class="v22-problems-grid">${problems.map(_v22ProblemCard).join('')}</div>
     ` : `
       <div class="v22-normal-toggle open" style="cursor:default">
         <div class="check">✓</div>
@@ -26435,11 +26436,13 @@ function renderPersonalAnalysis(foodResult) {
     </div>` : '';
 
   const sajuHtml = sajuAdvice ? `
-    <div class="personal-section saju">
-      <div class="psect-title">사주 ${sajuAdvice.name} 영양 조언</div>
-      <div class="psect-tip">${sajuAdvice.focus}</div>
-      <div class="psect-row"><strong style="color:#1E40AF">✓ 권장</strong> ${sajuAdvice.good.join(', ')}</div>
-    </div>` : '';
+    <details class="personal-section saju" style="cursor:pointer">
+      <summary style="list-style:none;font-size:11px;font-weight:800;color:var(--gray-700);letter-spacing:-.2px">🎋 사주 ${sajuAdvice.name} 영양 조언 <span style="color:#94A3B8;font-weight:600">· 자세히</span></summary>
+      <div style="margin-top:6px">
+        <div class="psect-tip">${sajuAdvice.focus}</div>
+        <div class="psect-row"><strong style="color:#1E40AF">✓ 권장</strong> ${sajuAdvice.good.join(', ')}</div>
+      </div>
+    </details>` : '';
 
   card.innerHTML = `
     <div class="personal-card">
