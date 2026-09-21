@@ -144,7 +144,7 @@ async function build() {
             '_v22SelectedStore', '_v22StoreCandidates', '_v22StorePendingSelection',
             '_v22StoreSearchTimer', '_v22GpsCoords', '_v22GpsAccuracy', '_v22GpsRequesting',
             '_v22EnsureGps', '_v22ShowGpsWarn', '_v22ShowGpsPermHint',
-            '_v22StoreFocus', '_v22StoreBlur',
+            '_v22StoreFocus', '_v22StoreBlur', '_v22CloseKeyboard',
             '_v22StoreOnInput', '_v22StoreDoSearch', '_v22RenderDropdown', '_v22Esc',
             '_v22PickCandidate', '_v22SetStore', '_v22ClearStore',
             '_v22OpenMapSheet', '_v22CloseMapSheet', '_v22RenderMapSheet',
