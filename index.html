@@ -16067,6 +16067,8 @@ function _v22ShowGpsPermHint() {
 function _v22StoreFocus() { _v22EnsureGps(); }
 function _v22StoreBlur() {
   // blur는 200ms 딜레이 후 (드롭다운 클릭 대응)
+  // 단, 자동 키보드 닫기로 인한 blur는 무시 (드롭다운 유지)
+  if (_v22SkipBlurClose) return;
   const dd = document.getElementById('v22StoreDropdown');
   if (dd) dd.style.display = 'none';
 }
@@ -16208,23 +16210,26 @@ function _v22RenderDropdown(items) {
   dd.innerHTML = `
     <div style="padding:8px 12px;background:#F5F8FE;font-size:10px;font-weight:800;color:#5D7597;letter-spacing:.4px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E8EDF4">
       <span>매장 후보 · ${sortLabel}</span>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button onmousedown="event.preventDefault();_v22CloseKeyboard()" style="background:#FFF;border:1px solid #E5E7EB;color:#5D7597;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;cursor:pointer">⌨ 닫기</button>
-        <span style="background:#FEE500;color:#3C1E1E;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:900">KAKAO</span>
-      </div>
+      <span style="background:#FEE500;color:#3C1E1E;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:900">KAKAO</span>
     </div>
-    <div style="padding:6px 12px;background:#FEFCE8;font-size:10px;color:#78654B;font-weight:600;border-bottom:1px solid #FDE68A">💡 위 목록 스크롤 · 키보드 가리면 <b>⌨ 닫기</b></div>
     ${rows}`;
   if (btn) btn.style.display = 'flex';
+
+  // 🎯 결과 나오면 키보드 자동 닫기 · 사용자가 리스트 볼 수 있게
+  // 빈 결과가 아니라 진짜 매장 있을 때만
+  if (items && items.length > 0) {
+    _v22CloseKeyboard();
+  }
 }
 
 // 키보드 닫기 · 드롭다운은 유지
+let _v22SkipBlurClose = false;
 function _v22CloseKeyboard() {
   const input = document.getElementById('foodUserMemoInputPre');
-  if (input) input.blur();
-  // blur 이벤트에 걸린 200ms 후 dropdown 닫힘을 취소 · 드롭다운 유지
-  const dd = document.getElementById('v22StoreDropdown');
-  setTimeout(() => { if (dd && _v22StoreCandidates.length) dd.style.display = 'block'; }, 250);
+  if (!input) return;
+  _v22SkipBlurClose = true;  // blur handler가 드롭다운 닫는 걸 방지
+  input.blur();
+  setTimeout(() => { _v22SkipBlurClose = false; }, 400);
 }
 
 function _v22Esc(s) {
