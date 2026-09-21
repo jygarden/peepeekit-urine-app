@@ -3390,13 +3390,25 @@ window.appIcon = function(name, size){
       </div>
     </div>
 
+    <!-- 사람 · 촬영 / 갤러리 · 매장 태그 바로 아래로 이동 (기존 하단에서 위로) -->
+    <div id="foodHumanCta" style="display:flex;gap:8px;margin-bottom:14px">
+      <button onclick="safeCameraClick('foodCameraInput')" style="flex:2;background:#17243A;color:#FFF;border:none;border-radius:12px;padding:14px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="foodCameraBtnLabel">식사 촬영하기</span>
+      </button>
+      <button onclick="openFileInput('foodGalleryInput')" style="flex:1;background:#FFF;color:#17243A;border:0.5px solid #D9DEDC;border-radius:12px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        갤러리
+      </button>
+    </div>
+
     <!-- 사람 식단 블록 (예시 사진 + 3서브카드 + 힌트) -->
     <div id="foodHumanBlock">
     <!-- 예시 사진 · 코너 마커 -->
     <div style="background:#FFF;border:0.5px solid #D9DEDC;border-radius:16px;padding:12px;margin-bottom:12px;position:relative">
       <div id="foodPhotoChip" style="position:absolute;top:22px;left:22px;background:#17243A;color:#FFF;font-size:10px;font-weight:600;padding:5px 10px;border-radius:99px;z-index:2">접시 전체가 보이게</div>
       <div style="position:relative;border-radius:12px;overflow:hidden">
-        <img id="foodGuideImg" src="assets/guide/food-tray.jpg" alt="식단 촬영 예시" style="width:100%;display:block">
+        <img id="foodGuideImg" src="assets/guide/food-tray.jpg" alt="식단 촬영 예시" style="width:100%;display:block;max-height:150px;object-fit:cover;object-position:center">
         <!-- 코너 마커 -->
         <svg style="position:absolute;top:8px;left:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 8V2h6" stroke="#3454C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <svg style="position:absolute;top:8px;right:8px;pointer-events:none" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16 2h6v6" stroke="#3454C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -3511,18 +3523,6 @@ window.appIcon = function(name, size){
       <button onclick="document.getElementById('petMultiInput').click()" style="width:100%;background:#FFF;color:#17243A;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
         갤러리에서 여러 장 한 번에 선택
-      </button>
-    </div>
-
-    <!-- 사람 · 촬영 / 갤러리 (기존) -->
-    <div id="foodHumanCta" style="display:flex;gap:8px;margin-bottom:12px">
-      <button onclick="safeCameraClick('foodCameraInput')" style="flex:2;background:#17243A;color:#FFF;border:none;border-radius:12px;padding:14px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.2px;display:flex;align-items:center;justify-content:center;gap:8px">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span id="foodCameraBtnLabel">식사 촬영하기</span>
-      </button>
-      <button onclick="openFileInput('foodGalleryInput')" style="flex:1;background:#FFF;color:#17243A;border:0.5px solid #D9DEDC;border-radius:12px;padding:14px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#17243A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-        갤러리
       </button>
     </div>
 
@@ -12794,6 +12794,11 @@ function selectFoodTarget(target) {
   const petBlock = document.getElementById('foodPetBlock');
   if (humanBlock) humanBlock.style.display = isPet ? 'none' : 'block';
   if (petBlock)   petBlock.style.display   = isPet ? 'block' : 'none';
+  // 🏪 매장 태그는 사람 식단에만 해당 · 반려동물 사료엔 숨김
+  const brandCard = document.getElementById('foodBrandPreCard');
+  if (brandCard) brandCard.style.display = isPet ? 'none' : 'block';
+  const mapSheet = document.getElementById('v22MapSheet');
+  if (mapSheet && isPet) mapSheet.style.display = 'none';
   // CTA 토글
   const humanCta = document.getElementById('foodHumanCta');
   const petCta = document.getElementById('foodPetCta');
