@@ -18119,40 +18119,227 @@ function renderFoodResult(r) {
     }
   };
 
-  // 그룹별 HTML — 깔끔한 라인 디자인
-  const renderStatRow = (k, info, src) => {
-    const val = Math.round((src[k] || 0) * 10) / 10;
-    const rawPct = (val / info.target) * 100;
-    const pct = Math.min(100, Math.round(rawPct));
-    const isBad = !!info.bad;
-    let barColor, statusColor;
+  // ═══ v22 · 영양소 리디자인 v6 · 문제 우선 + 정상 접힘 ═══
+  // 항목별 상태 계산
+  const _v22StatusOf = (val, target, isBad) => {
+    const pct = target > 0 ? (val / target) * 100 : 0;
     if (isBad) {
-      if (rawPct >= 110) { barColor = '#EF4444'; statusColor = '#EF4444'; }
-      else if (rawPct >= 70) { barColor = '#F59E0B'; statusColor = '#F59E0B'; }
-      else { barColor = '#10B981'; statusColor = '#10B981'; }
-    } else {
-      if (rawPct >= 80) { barColor = '#10B981'; statusColor = '#10B981'; }
-      else if (rawPct >= 50) { barColor = '#94A3B8'; statusColor = '#64748B'; }
-      else { barColor = '#EF4444'; statusColor = '#EF4444'; }
+      // 나트륨류: 초과 위험 · > 100% = 과다
+      if (pct > 110) return { state: 'high', pct: Math.round(pct) };
+      return { state: 'ok', pct: Math.round(pct) };
     }
-    return `<div class="game-stat-row">
-      <div class="game-stat-head">
-        <span class="game-stat-name">${info.label}</span>
-        <span class="game-stat-value"><span style="color:${statusColor};font-weight:800">${val}${info.unit}</span> <span style="color:#94A3B8;font-weight:500">/ ${info.target}${info.unit}</span></span>
-      </div>
-      <div class="game-stat-bar-wrap">
-        <div class="game-stat-bar" style="width:${pct}%;background-color:${barColor}"></div>
-      </div>
+    if (pct < 60) return { state: 'low', pct: Math.round(pct) };
+    if (pct > 120) return { state: 'high', pct: Math.round(pct) };
+    return { state: 'ok', pct: Math.round(pct) };
+  };
+
+  // 팁 사전 (부족·과다 시 자동 표시)
+  const _v22TipMap = {
+    fiber: { low: '💡 <b>나물 · 잡곡밥 · 사과 반개</b>로 채워보세요.' },
+    calcium: { low: '💡 <b>우유 · 요거트 · 두부</b>로 뼈 튼튼.' },
+    iron: { low: '💡 <b>붉은 살코기 · 시금치 · 검은콩</b> 추천.' },
+    magnesium: { low: '💡 <b>견과류 · 통곡물 · 다크초콜릿</b> 좋아요.' },
+    zinc: { low: '💡 <b>굴 · 소고기 · 호박씨</b> 챙기기.' },
+    potassium: { low: '💡 <b>바나나 · 감자 · 시금치</b>로 보충.' },
+    vitA: { low: '💡 <b>당근 · 시금치 · 계란 노른자</b>.' },
+    vitC: { low: '💡 <b>키위 · 파프리카 · 딸기</b> 하루 1회.' },
+    vitD: { low: '☀️ <b>햇빛 20분</b> · 연어 · 표고버섯 · 계란 노른자.' },
+    vitE: { low: '💡 <b>아몬드 · 해바라기씨 · 아보카도</b>.' },
+    vitK: { low: '💡 <b>브로콜리 · 케일 · 낫토</b>.' },
+    vitB1: { low: '💡 <b>돼지고기 · 통곡물 · 콩류</b>.' },
+    vitB2: { low: '💡 <b>우유 · 계란 · 시금치</b>.' },
+    vitB6: { low: '💡 <b>바나나 · 닭가슴살 · 연어</b>.' },
+    vitB12: { low: '💡 <b>고등어 · 조개 · 소고기</b>.' },
+    folate: { low: '💡 <b>브로콜리 · 시금치 · 아보카도</b> 추천.' },
+    omega3: { low: '💡 <b>연어 · 고등어 · 견과류</b>.' },
+    sodium: { high: '💡 <b>국물 반만</b> · 김치 반찬 적당히 · 물 자주.' }
+  };
+
+  // 그룹→소그룹 색상 매핑 (정상 셀 도트용)
+  const _v22GroupColor = { macro:'#B45309', vitamin:'#3D63D9', mineral:'#8B5CF6', fat:'#F97316' };
+  const _v22GroupIcon  = { macro:'🌾', vitamin:'🍊', mineral:'💎', fat:'🥑' };
+
+  // 3대 영양소는 항상 상단에 가로 바로 표시 (탄단지)
+  const macroThree = ['carbs','protein','fat'];
+  const macroInfo = STAT_GROUPS.macro.items;
+  const macroSrc = STAT_GROUPS.macro.src;
+  const _v22MacroBar = (k) => {
+    const info = macroInfo[k];
+    const val = Math.round((macroSrc[k] || 0) * 10) / 10;
+    const st = _v22StatusOf(val, info.target, !!info.bad);
+    const w = Math.min(100, st.pct);
+    const barClass = st.state === 'low' ? 'low' : st.state === 'high' ? 'high' : '';
+    const valClass = st.state === 'low' ? 'low' : st.state === 'high' ? 'high' : '';
+    return `<div class="v22-macro-row">
+      <div class="v22-macro-name">${info.label}</div>
+      <div class="v22-macro-track"><div class="v22-macro-fill ${barClass}" style="width:${w}%"></div></div>
+      <div class="v22-macro-val ${valClass}">${st.pct}%</div>
+      <div class="v22-macro-sub">${val}${info.unit}</div>
     </div>`;
   };
 
-  const nutriHtml = Object.values(STAT_GROUPS).map(grp => {
-    const rows = Object.entries(grp.items).map(([k, info]) => renderStatRow(k, info, grp.src)).join('');
-    return `<div class="stat-group">
-      <div class="stat-group-title">${grp.title}</div>
-      ${rows}
+  // 전 항목 순회 · 문제/정상 분류
+  const problems = [], normals = { macro:[], vitamin:[], mineral:[], fat:[] };
+  Object.entries(STAT_GROUPS).forEach(([grpKey, grp]) => {
+    Object.entries(grp.items).forEach(([k, info]) => {
+      // 3대 영양소는 이미 위에서 처리
+      if (grpKey === 'macro' && macroThree.includes(k)) return;
+      // kcal도 별도 (히어로에 노출) · 여기선 스킵
+      if (k === 'kcal') return;
+      const val = (grp.src[k] || 0);
+      const st = _v22StatusOf(val, info.target, !!info.bad);
+      const entry = { key:k, info, val, ...st, grp:grpKey };
+      if (st.state === 'low' || st.state === 'high') problems.push(entry);
+      else normals[grpKey].push(entry);
+    });
+  });
+
+  // 문제 카드 렌더
+  const _v22ProblemCard = (e) => {
+    const isLow = e.state === 'low';
+    const arrow = isLow ? '▼' : '▲';
+    const stateWord = isLow ? '부족' : '과다';
+    const diff = Math.round(e.info.target - e.val);
+    const measureLine = isLow
+      ? `${Math.round(e.val*10)/10}${e.info.unit} / ${e.info.target}${e.info.unit}`
+      : `${Math.round(e.val)}${e.info.unit} / ${e.info.target}${e.info.unit} (상한)`;
+    const needLine = isLow
+      ? `-${Math.abs(diff)}${e.info.unit} 더 필요해요`
+      : `+${Math.abs(diff)}${e.info.unit} 초과했어요`;
+    // 링 offset (0 = 100% 채워짐 · 100 = 텅)
+    const ringPct = Math.min(100, e.pct);
+    const ringOffset = Math.max(0, 100 - ringPct);
+    const tip = (_v22TipMap[e.key] && _v22TipMap[e.key][e.state]) || '';
+    return `<div class="v22-problem-card ${e.state}">
+      <div class="v22-problem-head">
+        <div class="v22-problem-ring">
+          <svg viewBox="0 0 40 40"><circle class="track" cx="20" cy="20" r="16"/><circle class="fill" cx="20" cy="20" r="16" stroke-dasharray="100.5" stroke-dashoffset="${ringOffset}" pathLength="100"/></svg>
+          <div class="inner"><div class="pct">${e.pct}%</div></div>
+        </div>
+        <div class="v22-problem-body">
+          <div class="v22-problem-name">${e.info.label}</div>
+          <div class="v22-problem-state"><span class="arrow">${arrow}</span>${stateWord} · ${measureLine}</div>
+          <div class="v22-problem-measure">${needLine}</div>
+        </div>
+      </div>
+      ${tip ? `<div class="v22-problem-tip">${tip}</div>` : ''}
     </div>`;
-  }).join('');
+  };
+
+  // 정상 셀 렌더
+  const _v22NormalCell = (e) => `
+    <div class="v22-normal-cell">
+      <div class="n">${e.info.label.replace('비타민 ','').replace('마그네슘','Mg')}</div>
+      <div class="p">${e.pct}%</div>
+    </div>`;
+
+  const normalGroupHtml = Object.entries(normals)
+    .filter(([_, arr]) => arr.length > 0)
+    .map(([grpKey, arr]) => {
+      const grpLabel = STAT_GROUPS[grpKey].title;
+      const color = _v22GroupColor[grpKey] || '#94A3B8';
+      return `<div class="v22-normal-subgroup">
+        <div class="v22-normal-subgroup-label"><span class="dot" style="background:${color}"></span>${grpLabel} ${arr.length}종</div>
+        <div class="v22-normal-list">${arr.map(_v22NormalCell).join('')}</div>
+      </div>`;
+    }).join('');
+
+  const normalTotal = Object.values(normals).reduce((s, a) => s + a.length, 0);
+
+  const nutriHtml = `
+    <style>
+      .v22-macros-card{background:#FFF;border:1px solid #E8EDF4;border-radius:16px;padding:14px 16px;margin-bottom:10px;box-shadow:0 2px 10px rgba(30,58,138,.04)}
+      .v22-macros-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+      .v22-macros-icon{width:24px;height:24px;background:#FEF3C7;color:#B45309;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px}
+      .v22-macros-title{font-size:12.5px;font-weight:800;color:#1D3762}
+      .v22-macro-list{display:flex;flex-direction:column;gap:9px}
+      .v22-macro-row{display:flex;align-items:center;gap:10px}
+      .v22-macro-name{font-size:11.5px;font-weight:700;color:#1D3762;min-width:56px}
+      .v22-macro-track{flex:1;height:8px;background:#F1F5F9;border-radius:99px;overflow:hidden}
+      .v22-macro-fill{height:100%;border-radius:99px;background:#94A3B8}
+      .v22-macro-fill.low{background:#EF4444}
+      .v22-macro-fill.high{background:#F59E0B}
+      .v22-macro-val{font-size:11px;font-weight:800;color:#5D7597;min-width:38px;text-align:right}
+      .v22-macro-val.low{color:#DC2626}
+      .v22-macro-val.high{color:#B45309}
+      .v22-macro-sub{font-size:9.5px;color:#94A3B8;font-weight:600;min-width:44px}
+      .v22-problems-head{display:flex;align-items:center;gap:6px;margin:0 4px 10px}
+      .v22-problems-head .em{font-size:15px}
+      .v22-problems-head .ttl{font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px}
+      .v22-problems-head .cnt{font-size:10.5px;color:#94A3B8;font-weight:800;background:#F5F8FE;padding:2px 8px;border-radius:99px;margin-left:auto}
+      .v22-problem-card{background:#FFF;border:2px solid;border-radius:18px;padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
+      .v22-problem-card.low{border-color:#FCA5A5;background:linear-gradient(135deg,#FFF 0%,#FEF2F2 100%)}
+      .v22-problem-card.high{border-color:#F59E0B;background:linear-gradient(135deg,#FFF 0%,#FEF9E7 100%)}
+      .v22-problem-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+      .v22-problem-ring{position:relative;width:60px;height:60px;flex-shrink:0}
+      .v22-problem-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+      .v22-problem-ring .track{fill:none;stroke:#F1F5F9;stroke-width:5}
+      .v22-problem-ring .fill{fill:none;stroke-width:5;stroke-linecap:round}
+      .v22-problem-card.low .v22-problem-ring .fill{stroke:#EF4444}
+      .v22-problem-card.high .v22-problem-ring .fill{stroke:#F59E0B}
+      .v22-problem-ring .inner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+      .v22-problem-ring .inner .pct{font-size:13px;font-weight:900;line-height:1}
+      .v22-problem-card.low .v22-problem-ring .inner .pct{color:#DC2626}
+      .v22-problem-card.high .v22-problem-ring .inner .pct{color:#B45309}
+      .v22-problem-body{flex:1;min-width:0}
+      .v22-problem-name{font-size:15px;font-weight:900;letter-spacing:-.3px;line-height:1.1;margin-bottom:3px}
+      .v22-problem-card.low .v22-problem-name{color:#DC2626}
+      .v22-problem-card.high .v22-problem-name{color:#B45309}
+      .v22-problem-state{font-size:10.5px;color:#94A3B8;font-weight:700}
+      .v22-problem-state .arrow{font-weight:900;margin-right:2px}
+      .v22-problem-card.low .v22-problem-state .arrow{color:#DC2626}
+      .v22-problem-card.high .v22-problem-state .arrow{color:#B45309}
+      .v22-problem-measure{font-size:10.5px;color:#5D7597;font-weight:600;margin-top:1px}
+      .v22-problem-tip{font-size:11px;color:#5D7597;font-weight:600;line-height:1.4;padding:8px 10px;background:rgba(255,255,255,.7);border-radius:8px}
+      .v22-problem-tip b{color:#1D3762;font-weight:800}
+      .v22-normal-toggle{width:100%;background:#FFF;border:1px solid #E8EDF4;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;color:#5D7597;font-size:12.5px;font-weight:700;margin-bottom:10px;transition:all .2s}
+      .v22-normal-toggle:hover{background:#F5F8FE}
+      .v22-normal-toggle .check{width:24px;height:24px;background:#D1FAE5;color:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0}
+      .v22-normal-toggle .txt{flex:1;text-align:left}
+      .v22-normal-toggle .num{color:#059669;font-weight:900}
+      .v22-normal-toggle .arr{color:#94A3B8;font-size:11px;font-weight:900;transition:transform .2s}
+      .v22-normal-toggle.open .arr{transform:rotate(180deg)}
+      .v22-normal-panel{display:none;background:#FFF;border:1px solid #E8EDF4;border-radius:14px;padding:14px 16px;margin-bottom:10px}
+      .v22-normal-panel.open{display:block}
+      .v22-normal-subgroup{margin-bottom:12px}
+      .v22-normal-subgroup:last-child{margin-bottom:0}
+      .v22-normal-subgroup-label{font-size:10px;font-weight:800;color:#94A3B8;letter-spacing:.5px;margin:0 2px 6px;display:flex;align-items:center;gap:5px}
+      .v22-normal-subgroup-label .dot{width:6px;height:6px;border-radius:50%}
+      .v22-normal-list{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+      .v22-normal-cell{background:#F5F8FE;border-radius:8px;padding:8px 4px;text-align:center}
+      .v22-normal-cell .n{font-size:10px;font-weight:700;color:#5D7597;margin-bottom:2px}
+      .v22-normal-cell .p{font-size:12px;font-weight:800;color:#1D3762;line-height:1}
+    </style>
+    <div class="v22-macros-card">
+      <div class="v22-macros-head">
+        <div class="v22-macros-icon">🌾</div>
+        <div class="v22-macros-title">3대 영양소</div>
+      </div>
+      <div class="v22-macro-list">${macroThree.map(_v22MacroBar).join('')}</div>
+    </div>
+    ${problems.length ? `
+      <div class="v22-problems-head">
+        <span class="em">🎯</span>
+        <span class="ttl">오늘 짚을 것</span>
+        <span class="cnt">${problems.length}개</span>
+      </div>
+      ${problems.map(_v22ProblemCard).join('')}
+    ` : `
+      <div class="v22-normal-toggle open" style="cursor:default">
+        <div class="check">✓</div>
+        <div class="txt">모든 영양소 <span class="num">정상 범위</span></div>
+      </div>
+    `}
+    ${normalTotal > 0 ? `
+      <button class="v22-normal-toggle" onclick="const p=document.getElementById('v22NormalPanel');const b=this;p.classList.toggle('open');b.classList.toggle('open')">
+        <div class="check">✓</div>
+        <div class="txt">나머지 <span class="num">${normalTotal}개 영양소</span> · 정상 범위</div>
+        <div class="arr">▼</div>
+      </button>
+      <div class="v22-normal-panel" id="v22NormalPanel">${normalGroupHtml}</div>
+    ` : ''}
+    <!-- 나트륨 + 식이섬유가 macro group에 포함돼있어서 아래 fiber/sodium은 위 loop에서 처리됨 -->
+  `;
 
   document.getElementById('foodNutriItems').innerHTML = nutriHtml;
   // 영양소 분석 박스를 게임 카드로 스타일 변경
