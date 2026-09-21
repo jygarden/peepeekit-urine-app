@@ -5630,9 +5630,10 @@ function showScreen(id) {
   if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시 + 프로필 배너 렌더링
   if (id === 'screenCapture') { maybeShowCaptureTip(); try { renderCaptureProfileBanner(); } catch(e){} }
-  // 식단 사진 화면 진입 시 프로필 배너 (기울기 가이드 오버레이는 제거됨)
+  // 식단 사진 화면 진입 시 프로필 배너 + GPS 미리 시작 (매장 태그 정렬용)
   if (id === 'screenFoodCapture') {
     try { renderCaptureProfileBanner(); } catch(e){}
+    try { _v22EnsureGps(true); } catch(e){}  // 진입 즉시 GPS 요청 (타이핑 전 획득)
   }
   try { _v22StopTiltGuide(); } catch(e){}
   // 성분 분석 화면: 촬영 가이드는 HTML에 정적으로 표시 (JS 로직 제거)
@@ -16037,9 +16038,19 @@ async function _v22StoreDoSearch(q) {
     </div>
     <style>@keyframes v22spin{to{transform:rotate(360deg)}}</style>`;
 
+  // GPS 획득 대기 · 최대 1.5초 (있으면 근처 매장 우선 정렬)
+  if (!_v22GpsCoords && _v22GpsRequesting) {
+    const start = Date.now();
+    while (_v22GpsRequesting && (Date.now() - start) < 1500) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+  }
+  // 그래도 GPS 없으면 한 번 더 요청 시작 (다음 검색에는 반영)
+  if (!_v22GpsCoords) _v22EnsureGps(true);
+
   try {
     const body = { query: q, display: 5, sort: 'random' };
-    if (_v22GpsCoords) { body.lat = _v22GpsCoords.lat; body.lng = _v22GpsCoords.lng; }
+    if (_v22GpsCoords) { body.lat = _v22GpsCoords.lat; body.lng = _v22GpsCoords.lng; body.radius = 20000; }
     const r = await fetch('/api/kakao-local', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -16121,12 +16132,27 @@ function _v22RenderDropdown(items) {
         </div>
       </div>`;
   }).join('');
+  const sortLabel = _v22GpsCoords ? `가까운 순 · GPS ±${_v22GpsAccuracy ? Math.round(_v22GpsAccuracy) + 'm' : '?'}` : '유사도 순 · GPS 없음';
   dd.innerHTML = `
     <div style="padding:8px 12px;background:#F5F8FE;font-size:10px;font-weight:800;color:#5D7597;letter-spacing:.4px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E8EDF4">
-      <span>매장 후보 · ${_v22GpsCoords ? '가까운 순' : '유사도 순'}</span>
-      <span style="background:#FEE500;color:#3C1E1E;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:900">KAKAO</span>
-    </div>${rows}`;
+      <span>매장 후보 · ${sortLabel}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onmousedown="event.preventDefault();_v22CloseKeyboard()" style="background:#FFF;border:1px solid #E5E7EB;color:#5D7597;font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;cursor:pointer">⌨ 닫기</button>
+        <span style="background:#FEE500;color:#3C1E1E;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:900">KAKAO</span>
+      </div>
+    </div>
+    <div style="padding:6px 12px;background:#FEFCE8;font-size:10px;color:#78654B;font-weight:600;border-bottom:1px solid #FDE68A">💡 위 목록 스크롤 · 키보드 가리면 <b>⌨ 닫기</b></div>
+    ${rows}`;
   if (btn) btn.style.display = 'flex';
+}
+
+// 키보드 닫기 · 드롭다운은 유지
+function _v22CloseKeyboard() {
+  const input = document.getElementById('foodUserMemoInputPre');
+  if (input) input.blur();
+  // blur 이벤트에 걸린 200ms 후 dropdown 닫힘을 취소 · 드롭다운 유지
+  const dd = document.getElementById('v22StoreDropdown');
+  setTimeout(() => { if (dd && _v22StoreCandidates.length) dd.style.display = 'block'; }, 250);
 }
 
 function _v22Esc(s) {
