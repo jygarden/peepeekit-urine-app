@@ -142,8 +142,9 @@ async function build() {
             '_v22EnableNotifications', '_v22ScheduleAll', '_v22FireNotification', 'V22_PUSH_SCHEDULE',
             // v22 · 매장 태그 (네이버 지역검색 하이브리드)
             '_v22SelectedStore', '_v22StoreCandidates', '_v22StorePendingSelection',
-            '_v22StoreSearchTimer', '_v22GpsCoords',
-            '_v22EnsureGps', '_v22StoreFocus', '_v22StoreBlur',
+            '_v22StoreSearchTimer', '_v22GpsCoords', '_v22GpsAccuracy', '_v22GpsRequesting',
+            '_v22EnsureGps', '_v22ShowGpsWarn', '_v22ShowGpsPermHint',
+            '_v22StoreFocus', '_v22StoreBlur',
             '_v22StoreOnInput', '_v22StoreDoSearch', '_v22RenderDropdown', '_v22Esc',
             '_v22PickCandidate', '_v22SetStore', '_v22ClearStore',
             '_v22OpenMapSheet', '_v22CloseMapSheet', '_v22RenderMapSheet',
