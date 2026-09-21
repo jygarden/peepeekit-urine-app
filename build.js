@@ -138,6 +138,7 @@ async function build() {
             '_v22UpdateStepUI', '_v22ShowStepInfo', '_v22CheckSedentary', '_v22CheckScreenTime',
             '_v22CheckNight', '_v22ShowToast', '_v22StartTiltGuide', '_v22StopTiltGuide',
             '_v22TiltHandler', '_v22TiltUiEl', '_v22PrevAccel', '_v22PeakThreshold',
+            '_v22StepCadence', '_v22PendingSteps',
             '_v22CheckSmartReminders',
             '_v22EnableNotifications', '_v22ScheduleAll', '_v22FireNotification', 'V22_PUSH_SCHEDULE',
             // v22 · 매장 태그 (네이버 지역검색 하이브리드)
