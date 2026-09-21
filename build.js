@@ -151,6 +151,9 @@ async function build() {
             '_v22OpenMapSheet', '_v22CloseMapSheet', '_v22RenderMapSheet',
             '_v22RenderMapArea', '_v22MapPickIdx', '_v22RenderMapList',
             '_v22UpdateMapConfirmBtn', '_v22ConfirmMapSelection', '_v22GetStorePayload',
+            // v22 · 영양소 리디자인 v6 (문제 우선)
+            '_v22StatusOf', '_v22TipMap', '_v22GroupColor', '_v22GroupIcon',
+            '_v22MacroBar', '_v22ProblemCard', '_v22NormalCell', 'v22NormalPanel',
             'markSupplementFromNotification', 'scheduleSupplementReminder', 'cancelSupplementReminder',
             // v20 · 수면 체크
             'SLEEP_QUESTIONS', 'SLEEP_VAL', 'calculateSleepPattern', 'getSleepLifestyleContext', 'buildSleepCoaching',
