@@ -8882,33 +8882,70 @@ function _v22CheckSmartReminders() {
 // ═══ v22 · 음식 → 카테고리 SVG 일러 매핑 (Hero용) ═══
 // 카테고리별 SVG 반환 · 나중에 PNG로 교체 가능
 const _FOOD_ILLUST_SVG = {
-  grill: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 58 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 58 L 14 58 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="58" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="56" rx="42" ry="7" fill="#FCD34D"/><ellipse cx="60" cy="54" rx="42" ry="7" fill="#FBBF24"/><ellipse cx="60" cy="45" rx="38" ry="9" fill="#57534E" stroke="#0F172A" stroke-width="1.8"/><ellipse cx="60" cy="43" rx="32" ry="5" fill="#78716C"/><path d="M92 45 L 103 39 L 103 51 Z" fill="#57534E" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/><circle cx="34" cy="43" r="1.8" fill="#0F172A"/><ellipse cx="35" cy="34" rx="6" ry="3.5" fill="#22C55E" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="85" cy="33" rx="5" ry="3" fill="#16A34A" stroke="#0F172A" stroke-width="1.4"/></svg>`,
+  // 🍖 구이 · 갈비 · 스테이크 (개선판 · 그릴 자국 추가)
+  grill: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 58 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 58 L 14 58 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="58" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="56" rx="42" ry="7" fill="#FCD34D"/><ellipse cx="60" cy="54" rx="42" ry="7" fill="#FBBF24"/><ellipse cx="60" cy="45" rx="38" ry="9" fill="#78350F" stroke="#0F172A" stroke-width="1.8"/><ellipse cx="60" cy="43" rx="32" ry="5" fill="#92400E"/><path d="M38 44 L 82 42" stroke="#451A03" stroke-width="1.8" stroke-linecap="round" opacity=".5"/><path d="M42 47 L 78 45" stroke="#451A03" stroke-width="1.8" stroke-linecap="round" opacity=".5"/><path d="M92 45 L 103 39 L 103 51 Z" fill="#57534E" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/><ellipse cx="35" cy="34" rx="6" ry="3.5" fill="#22C55E" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="85" cy="33" rx="5" ry="3" fill="#16A34A" stroke="#0F172A" stroke-width="1.4"/></svg>`,
   soup: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M18 50 C 18 88, 34 100, 60 100 C 86 100, 102 88, 102 50 L 18 50 Z" fill="#78350F" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="50" rx="42" ry="9" fill="#92400E" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="48" rx="38" ry="7" fill="#DC2626"/><ellipse cx="45" cy="45" rx="6" ry="3" fill="#22C55E" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="72" cy="44" rx="7" ry="3.5" fill="#FBBF24" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="60" cy="42" rx="5" ry="2.5" fill="#F87171" stroke="#0F172A" stroke-width="1.2"/><path d="M50 30 Q 47 24 50 20" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M60 26 Q 63 22 60 16" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M70 30 Q 67 24 70 20" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
   bowl: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 55 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 55 L 14 55 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="55" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="53" rx="40" ry="7" fill="#FCD34D"/><ellipse cx="60" cy="52" rx="40" ry="6" fill="#FEF3C7"/><ellipse cx="40" cy="48" rx="7" ry="3.5" fill="#22C55E" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="55" cy="46" rx="6" ry="3" fill="#F97316" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="70" cy="47" rx="6.5" ry="3.5" fill="#DC2626" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="82" cy="48" rx="5" ry="2.5" fill="#7C3AED" stroke="#0F172A" stroke-width="1.2"/><circle cx="60" cy="40" r="5" fill="#FBBF24" stroke="#0F172A" stroke-width="1.4"/></svg>`,
   noodle: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 55 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 55 L 14 55 Z" fill="#0C4A6E" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="55" rx="46" ry="9" fill="#075985" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="53" rx="42" ry="7" fill="#FEF3C7"/><path d="M25 48 Q 40 42 60 48 T 95 48" stroke="#FEF3C7" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M25 44 Q 40 38 60 44 T 95 44" stroke="#FCD34D" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="45" cy="44" r="5" fill="#FFF" stroke="#0F172A" stroke-width="1.4"/><circle cx="45" cy="44" r="3" fill="#FBBF24"/><ellipse cx="75" cy="42" rx="6" ry="3" fill="#22C55E" stroke="#0F172A" stroke-width="1.2"/></svg>`,
   kimbap: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><ellipse cx="60" cy="82" rx="46" ry="10" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><circle cx="30" cy="70" r="12" fill="#0F172A"/><circle cx="30" cy="70" r="8" fill="#FFF"/><circle cx="26" cy="68" r="1.5" fill="#22C55E"/><circle cx="33" cy="70" r="1.5" fill="#F97316"/><circle cx="29" cy="73" r="1.5" fill="#FBBF24"/><circle cx="55" cy="65" r="14" fill="#0F172A"/><circle cx="55" cy="65" r="10" fill="#FFF"/><circle cx="50" cy="63" r="2" fill="#22C55E"/><circle cx="60" cy="65" r="2" fill="#F97316"/><circle cx="55" cy="70" r="2" fill="#FBBF24"/><circle cx="80" cy="66" r="13" fill="#0F172A"/><circle cx="80" cy="66" r="9" fill="#FFF"/><circle cx="76" cy="64" r="1.8" fill="#22C55E"/><circle cx="84" cy="66" r="1.8" fill="#F97316"/><circle cx="80" cy="70" r="1.8" fill="#FBBF24"/></svg>`,
   fruit: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="34" ry="5" fill="rgba(15,23,42,.2)"/><path d="M35 45 L 32 92 C 32 96 34 98 38 98 L 82 98 C 86 98, 88 96, 88 92 L 85 45 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M30 45 L 90 45 L 88 50 L 32 50 Z" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M34 50 L 36 62 L 84 62 L 86 50 Z" fill="#FEF3C7"/><path d="M52 32 C 48 32, 44 36, 46 44 C 50 50, 60 50, 64 44 C 66 36, 62 32, 58 32 Z" fill="#DC2626" stroke="#0F172A" stroke-width="1.6"/><path d="M50 30 L 52 24 L 56 30 L 58 24 L 60 30 Z" fill="#22C55E" stroke="#0F172A" stroke-width="1.4" stroke-linejoin="round"/><circle cx="70" cy="40" r="4" fill="#5B21B6" stroke="#0F172A" stroke-width="1.4"/><circle cx="76" cy="44" r="3.5" fill="#7C3AED" stroke="#0F172A" stroke-width="1.4"/></svg>`,
   nuts: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="40" ry="6" fill="rgba(15,23,42,.2)"/><path d="M18 58 C 18 84, 32 96, 60 96 C 88 96, 102 84, 102 58 L 18 58 Z" fill="#92400E" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="58" rx="42" ry="8" fill="#B45309" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="42" cy="50" rx="6" ry="4" fill="#D97706" stroke="#0F172A" stroke-width="1.4" transform="rotate(-15 42 50)"/><ellipse cx="55" cy="48" rx="7" ry="5" fill="#F59E0B" stroke="#0F172A" stroke-width="1.4"/><circle cx="70" cy="49" r="5" fill="#B45309" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="82" cy="50" rx="6" ry="4" fill="#D97706" stroke="#0F172A" stroke-width="1.4" transform="rotate(20 82 50)"/><circle cx="48" cy="42" r="4" fill="#F59E0B" stroke="#0F172A" stroke-width="1.4"/></svg>`,
-  egg: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><ellipse cx="60" cy="82" rx="48" ry="12" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="80" rx="42" ry="9" fill="#F1F5F9"/><path d="M25 78 Q 25 62, 40 62 Q 55 62, 55 78 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/><circle cx="40" cy="72" r="7" fill="#FBBF24" stroke="#0F172A" stroke-width="1.6"/><path d="M52 78 Q 52 60, 70 60 Q 88 60, 88 78 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/><circle cx="70" cy="70" r="8" fill="#FBBF24" stroke="#0F172A" stroke-width="1.6"/></svg>`
+  egg: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><ellipse cx="60" cy="82" rx="48" ry="12" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="80" rx="42" ry="9" fill="#F1F5F9"/><path d="M25 78 Q 25 62, 40 62 Q 55 62, 55 78 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/><circle cx="40" cy="72" r="7" fill="#FBBF24" stroke="#0F172A" stroke-width="1.6"/><path d="M52 78 Q 52 60, 70 60 Q 88 60, 88 78 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/><circle cx="70" cy="70" r="8" fill="#FBBF24" stroke="#0F172A" stroke-width="1.6"/></svg>`,
+  // 🥗 샐러드 · 포케 (다양한 채소·토핑)
+  salad: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 55 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 55 L 14 55 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="55" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="53" rx="42" ry="7" fill="#D1FAE5"/><ellipse cx="30" cy="48" rx="9" ry="5" fill="#22C55E" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="45" cy="44" rx="7" ry="4" fill="#16A34A" stroke="#0F172A" stroke-width="1.4"/><circle cx="60" cy="46" r="5" fill="#DC2626" stroke="#0F172A" stroke-width="1.4"/><circle cx="65" cy="42" r="4" fill="#EF4444" stroke="#0F172A" stroke-width="1.2"/><ellipse cx="78" cy="45" rx="7" ry="4" fill="#F97316" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="90" cy="49" rx="6" ry="3.5" fill="#22C55E" stroke="#0F172A" stroke-width="1.4"/><circle cx="52" cy="50" r="2.5" fill="#7C3AED" stroke="#0F172A" stroke-width="1"/><circle cx="70" cy="50" r="2.5" fill="#7C3AED" stroke="#0F172A" stroke-width="1"/></svg>`,
+  // 🍗 치킨 · 프라이드 · 닭갈비
+  chicken: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 60 C 14 90, 32 100, 60 100 C 88 100, 106 90, 106 60 L 14 60 Z" fill="#78350F" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="60" rx="46" ry="9" fill="#92400E" stroke="#0F172A" stroke-width="2.2"/><path d="M28 55 C 24 42, 32 32, 42 34 C 46 26, 55 30, 55 40 C 60 42, 58 52, 50 54 Z" fill="#F59E0B" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/><path d="M32 46 L 26 30" stroke="#F5F5F4" stroke-width="3" stroke-linecap="round"/><path d="M32 46 L 26 30" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round"/><path d="M62 55 C 58 42, 68 32, 78 36 C 82 28, 90 32, 88 42 C 94 45, 90 55, 82 55 Z" fill="#F59E0B" stroke="#0F172A" stroke-width="1.8" stroke-linejoin="round"/><path d="M85 47 L 92 32" stroke="#F5F5F4" stroke-width="3" stroke-linecap="round"/><path d="M85 47 L 92 32" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round"/><circle cx="40" cy="42" r="1.5" fill="#78350F"/><circle cx="76" cy="42" r="1.5" fill="#78350F"/></svg>`,
+  // 🍕 피자
+  pizza: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M20 78 L 100 78 L 60 20 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/><path d="M28 74 L 92 74 L 60 30 Z" fill="#F97316"/><path d="M30 74 L 90 74" stroke="#78350F" stroke-width="3.5" stroke-linecap="round"/><circle cx="50" cy="58" r="4" fill="#DC2626" stroke="#0F172A" stroke-width="1.4"/><circle cx="70" cy="60" r="4.5" fill="#DC2626" stroke="#0F172A" stroke-width="1.4"/><circle cx="60" cy="45" r="3.5" fill="#DC2626" stroke="#0F172A" stroke-width="1.4"/><ellipse cx="42" cy="66" rx="3" ry="2" fill="#22C55E" stroke="#0F172A" stroke-width="1"/><ellipse cx="78" cy="68" rx="3" ry="2" fill="#22C55E" stroke="#0F172A" stroke-width="1"/><circle cx="55" cy="68" r="2" fill="#FEF3C7"/><circle cx="65" cy="52" r="2" fill="#FEF3C7"/></svg>`,
+  // 🍔 햄버거 · 버거
+  burger: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M20 45 C 20 25, 36 18, 60 18 C 84 18, 100 25, 100 45 Z" fill="#F59E0B" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><circle cx="45" cy="30" r="1.5" fill="#FFF"/><circle cx="60" cy="26" r="1.5" fill="#FFF"/><circle cx="75" cy="30" r="1.5" fill="#FFF"/><rect x="18" y="45" width="84" height="6" fill="#22C55E" stroke="#0F172A" stroke-width="2"/><path d="M18 45 Q 30 50 42 45 Q 54 50 66 45 Q 78 50 90 45 Q 96 47 102 45" stroke="#16A34A" stroke-width="1.4" fill="none"/><rect x="20" y="51" width="80" height="8" fill="#78350F" stroke="#0F172A" stroke-width="2"/><rect x="18" y="59" width="84" height="5" fill="#FCD34D" stroke="#0F172A" stroke-width="2"/><path d="M20 70 C 20 78, 30 82, 60 82 C 90 82, 100 78, 100 70 L 100 64 L 20 64 Z" fill="#F59E0B" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/></svg>`,
+  // 🥟 만두 · 딤섬
+  dumpling: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><ellipse cx="60" cy="85" rx="48" ry="8" fill="#78716C" stroke="#0F172A" stroke-width="2"/><ellipse cx="60" cy="82" rx="44" ry="6" fill="#A8A29E"/><ellipse cx="30" cy="70" rx="14" ry="12" fill="#FEF3C7" stroke="#0F172A" stroke-width="2"/><path d="M20 68 Q 24 62 28 66 Q 32 60 36 66 Q 40 62 44 68" stroke="#0F172A" stroke-width="1.6" fill="none" stroke-linejoin="round"/><ellipse cx="60" cy="65" rx="16" ry="14" fill="#FEF3C7" stroke="#0F172A" stroke-width="2"/><path d="M46 62 Q 51 55 55 60 Q 60 53 65 60 Q 70 55 74 62" stroke="#0F172A" stroke-width="1.6" fill="none" stroke-linejoin="round"/><circle cx="60" cy="70" r="3" fill="#F59E0B" opacity=".5"/><ellipse cx="90" cy="70" rx="14" ry="12" fill="#FEF3C7" stroke="#0F172A" stroke-width="2"/><path d="M80 68 Q 84 62 88 66 Q 92 60 96 66 Q 100 62 104 68" stroke="#0F172A" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg>`,
+  // 🍢 떡볶이 · 분식
+  tteokbokki: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M14 55 C 14 88, 32 100, 60 100 C 88 100, 106 88, 106 55 L 14 55 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="55" rx="46" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="53" rx="42" ry="7" fill="#DC2626"/><rect x="26" y="42" width="10" height="16" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.6"/><rect x="40" y="44" width="10" height="14" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.6"/><rect x="54" y="41" width="10" height="16" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.6"/><rect x="68" y="43" width="10" height="14" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.6"/><rect x="82" y="42" width="10" height="15" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.6"/><ellipse cx="45" cy="52" rx="4" ry="2" fill="#F97316" stroke="#0F172A" stroke-width="1"/><ellipse cx="72" cy="52" rx="4" ry="2" fill="#F97316" stroke="#0F172A" stroke-width="1"/></svg>`,
+  // 🍣 초밥 · 사시미
+  sushi: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><rect x="10" y="72" width="100" height="18" rx="3" fill="#0F172A" stroke="#0F172A" stroke-width="2"/><rect x="12" y="74" width="96" height="14" rx="2" fill="#78350F"/><g transform="translate(20,45)"><rect x="0" y="15" width="24" height="18" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.8"/><path d="M0 18 L 24 18" stroke="#F5F5F4" stroke-width="1"/><path d="M-1 13 L 25 13 L 24 20 L 0 20 Z" fill="#F97316" stroke="#0F172A" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 15 L 22 15" stroke="#FBBF24" stroke-width="0.8"/></g><g transform="translate(48,42)"><rect x="0" y="18" width="24" height="18" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.8"/><path d="M0 21 L 24 21" stroke="#F5F5F4" stroke-width="1"/><path d="M-1 16 L 25 16 L 24 23 L 0 23 Z" fill="#DC2626" stroke="#0F172A" stroke-width="1.6" stroke-linejoin="round"/></g><g transform="translate(76,45)"><rect x="0" y="15" width="24" height="18" rx="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.8"/><path d="M0 18 L 24 18" stroke="#F5F5F4" stroke-width="1"/><path d="M-1 13 L 25 13 L 24 20 L 0 20 Z" fill="#22C55E" stroke="#0F172A" stroke-width="1.6" stroke-linejoin="round"/></g></svg>`,
+  // 🥣 죽 · 미음
+  porridge: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="42" ry="6" fill="rgba(15,23,42,.2)"/><path d="M18 50 C 18 88, 34 100, 60 100 C 86 100, 102 88, 102 50 L 18 50 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="50" rx="42" ry="9" fill="#F1F5F9" stroke="#0F172A" stroke-width="2.2"/><ellipse cx="60" cy="48" rx="38" ry="7" fill="#FEF3C7"/><path d="M28 46 Q 42 42 60 46 T 92 46" stroke="#FCD34D" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="42" cy="46" r="1.5" fill="#78350F"/><circle cx="55" cy="45" r="1.5" fill="#78350F"/><circle cx="68" cy="46" r="1.5" fill="#78350F"/><circle cx="80" cy="45" r="1.5" fill="#78350F"/><path d="M50 32 Q 47 26 50 22" stroke="rgba(148,163,184,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M60 28 Q 63 24 60 18" stroke="rgba(148,163,184,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M70 32 Q 67 26 70 22" stroke="rgba(148,163,184,.6)" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`,
+  // ☕ 음료 · 커피 · 스무디
+  drink: `<svg viewBox="0 0 120 110" width="100%" height="100%" fill="none"><ellipse cx="60" cy="96" rx="30" ry="5" fill="rgba(15,23,42,.2)"/><path d="M38 30 L 42 92 C 42 96 44 98 48 98 L 72 98 C 76 98, 78 96, 78 92 L 82 30 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M40 42 L 80 42 L 78 92 C 78 94, 76 96, 74 96 L 46 96 C 44 96, 42 94, 42 92 Z" fill="#78350F"/><path d="M38 30 L 82 30" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/><path d="M40 42 L 80 42" stroke="#F5F5F4" stroke-width="2" opacity=".4"/><ellipse cx="60" cy="38" rx="20" ry="4" fill="#FEF3C7" stroke="#0F172A" stroke-width="1.6"/><rect x="55" y="14" width="4" height="28" fill="#EF4444" stroke="#0F172A" stroke-width="1.5"/><path d="M55 14 L 65 8" stroke="#EF4444" stroke-width="4" stroke-linecap="round"/><path d="M55 14 L 65 8" stroke="#0F172A" stroke-width="1.5" stroke-linecap="round"/></svg>`
 };
 // 음식 이름 → 카테고리 (Hero 일러 매핑용)
 function _getFoodIllustCategory(name) {
   if (!name) return 'bowl';
   const n = String(name).replace(/\s+/g, '');
-  // 견과 · 단독 우선 매치
-  if (/견과|아몬드|호두|피스타치오|땅콩/.test(n)) return 'nuts';
+  // 견과 · 단독 우선
+  if (/견과|아몬드|호두|피스타치오|땅콩|캐슈넛/.test(n)) return 'nuts';
+  // 음료 · 커피 · 스무디
+  if (/커피|카푸치노|라떼|아메리카노|스무디|주스|쉐이크|버블티|밀크티|음료|콜라|사이다|우유|두유/.test(n)) return 'drink';
   // 계란
-  if (/계란|달걀/.test(n)) return 'egg';
+  if (/계란|달걀|오믈렛|스크램블/.test(n)) return 'egg';
   // 과일·요거트
-  if (/요거트|바나나|사과|귤|블루베리|딸기|과일|오렌지|키위|치즈|우유|두유/.test(n)) return 'fruit';
+  if (/요거트|바나나|사과|귤|블루베리|딸기|과일|오렌지|키위|치즈|샐러드바|망고/.test(n)) return 'fruit';
+  // 초밥·사시미·회
+  if (/초밥|스시|사시미|회$|롤$/.test(n)) return 'sushi';
+  // 죽·미음·수프(soup 아닌 죽류)
+  if (/^죽|죽$|미음|포리지|오트밀|이유식/.test(n)) return 'porridge';
   // 국·찌개·탕
-  if (/찌개|국|탕|해장/.test(n)) return 'soup';
-  // 회·구이·삼겹·회덮밥(회 우선)
-  if (/회$|사시미|초밥|생선구이|고등어구이|연어|삼겹|갈비|스테이크|장어구이|아구찜|알탕/.test(n)) return 'grill';
+  if (/찌개|국$|탕$|해장|전골|샤브샤브/.test(n)) return 'soup';
+  // 떡볶이·분식
+  if (/떡볶이|떡꼬치|어묵|오뎅|순대|튀김/.test(n)) return 'tteokbokki';
+  // 만두·딤섬
+  if (/만두|딤섬|교자|샤오롱바오|찐빵/.test(n)) return 'dumpling';
+  // 피자
+  if (/피자/.test(n)) return 'pizza';
+  // 햄버거·버거
+  if (/버거|햄버거/.test(n)) return 'burger';
+  // 치킨 · 닭
+  if (/치킨|프라이드|양념치킨|후라이드|닭갈비|닭볶음|삼계|백숙/.test(n)) return 'chicken';
+  // 샐러드·포케·나물
+  if (/샐러드|포케|포키|포케볼|나물|월남쌈|샐러드볼/.test(n)) return 'salad';
+  // 구이·갈비·삼겹·스테이크
+  if (/생선구이|고등어구이|연어|삼겹|갈비|스테이크|장어구이|아구찜|알탕|목살|불고기|구이$/.test(n)) return 'grill';
   // 면요리
-  if (/면$|국수|파스타|우동|칼국수|냉면|막국수|짜장|짬뽕|짜파|쌀국수/.test(n)) return 'noodle';
-  // 김밥·샌드위치
-  if (/김밥|샌드위치|햄버거|피자|토스트|와플/.test(n)) return 'kimbap';
+  if (/면$|국수|파스타|우동|칼국수|냉면|막국수|짜장|짬뽕|짜파|쌀국수|라면|스파게티/.test(n)) return 'noodle';
+  // 김밥·샌드위치·토스트
+  if (/김밥|샌드위치|토스트|와플|랩$|타코|부리또/.test(n)) return 'kimbap';
   // 밥·덮밥·비빔밥·볶음밥 (default bowl)
   return 'bowl';
 }
@@ -8919,40 +8956,471 @@ function _v22UpdateHeroIllust(foodName) {
   el.innerHTML = _FOOD_ILLUST_SVG[cat] || _FOOD_ILLUST_SVG.bowl;
 }
 
-// ═══ v22 · 오늘의 운세 (Saju hint 기반 · 심플 시트) ═══
-function _v21OpenFortune() {
+// ═══ v22 · 오늘의 운세 (디테일 8섹션 · 날짜+사주 시드 기반) ═══
+// 날짜 시드 랜덤: 같은 날 다시 열어도 같은 결과
+function _v22FortuneRandom(seed) {
+  let x = seed;
+  return () => { x = (x * 1103515245 + 12345) & 0x7fffffff; return x / 0x7fffffff; };
+}
+function _v22GetFortuneData() {
+  const now = new Date();
+  const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
+  const dayKey = y * 10000 + mo * 100 + d;
+  // 프로필 birthYear 반영 (있으면 개인화)
+  let birthSeed = 0;
+  try {
+    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human') || {};
+    if (p.birthYear) birthSeed = parseInt(p.birthYear) * 100 + (parseInt(p.birthMonth) || 1);
+  } catch(e){}
+  const seed = dayKey + birthSeed;
+  const rand = _v22FortuneRandom(seed);
+
+  // 총운 레벨 (분포: 大吉 15% · 吉 30% · 中吉 30% · 小吉 15% · 平 10%)
+  const levels = ['大吉','吉','中吉','小吉','平'];
+  const levelLabels = ['기운 좋은 하루','산뜻한 흐름','무난한 하루','조심스러운 흐름','평온한 하루'];
+  const levelSummaries = [
+    '시작하기 좋은 날. 새로운 만남과 도전이 순조롭게 풀려요.',
+    '흐름을 타는 하루. 결정을 미루지 말고 실행에 옮겨보세요.',
+    '평범해 보여도 소소한 행운이 숨어있어요. 감사하는 마음으로.',
+    '무리는 금물. 오늘은 쉬어가면서 다음을 준비하기 좋은 날.',
+    '큰 변화보다 안정. 익숙한 것들 속에서 편안함을 찾으세요.'
+  ];
+  const lvIdx = rand() < 0.15 ? 0 : rand() < 0.5 ? 1 : rand() < 0.75 ? 2 : rand() < 0.9 ? 3 : 4;
+
+  // 6개 운 · 별점 (1-5)
+  const luckKeys = ['total','love','money','health','career','relation'];
+  const luckLabels = { total:'총운', love:'애정운', money:'금전운', health:'건강운', career:'직장운', relation:'대인운' };
+  const luckEmojis = { total:'🌟', love:'💕', money:'💰', health:'💪', career:'💼', relation:'🤝' };
+  const luckDescPools = {
+    total: ['전반적으로 좋은 기운 · 자신감 UP','평탄한 흐름 · 큰 변화 X','평범 속 소소한 행운','약간 지치는 날','조용히 가는 게 상책'],
+    love: ['따뜻한 대화가 깊은 관계로','서로 이해하는 하루','안정적인 흐름','오해 조심 · 대화 중요','솔직함이 최선'],
+    money: ['예상 밖 수입 기대','안정적인 흐름','평범 · 지출 조절','지출 조심 · 큰 결정 미루기','충동구매 주의'],
+    health: ['컨디션 회복 · 산책 추천','활력 넘치는 하루','평상시 컨디션','피로 누적 · 수면 챙기기','과로 조심 · 물 많이'],
+    career: ['인정받는 하루 · PT 굿','성과 나오는 흐름','평범한 업무','오해·실수 조심','조용히 마무리'],
+    relation: ['좋은 인연 만남','친밀함 돈독해짐','평범한 만남','경청이 필요 · 오해 조심','거리두기 필요']
+  };
+  const luckStars = {};
+  const luckDescs = {};
+  luckKeys.forEach(k => {
+    // 총운은 lvIdx 반영 · 나머지는 랜덤 + 편차
+    let s;
+    if (k === 'total') s = 5 - lvIdx;
+    else s = Math.max(1, Math.min(5, 5 - lvIdx + Math.floor(rand() * 3) - 1));
+    luckStars[k] = s;
+    // 별점 → desc pool 인덱스 (5=0, 1=4)
+    luckDescs[k] = luckDescPools[k][5 - s];
+  });
+
+  // 럭키 아이템
+  const colorList = [
+    { name:'빨강', hex:'#EF4444' },{ name:'주황', hex:'#F97316' },{ name:'노랑', hex:'#F59E0B' },
+    { name:'초록', hex:'#10B981' },{ name:'파랑', hex:'#3D63D9' },{ name:'보라', hex:'#8B5CF6' },
+    { name:'분홍', hex:'#EC4899' },{ name:'흰색', hex:'#F1F5F9' },{ name:'검정', hex:'#0F172A' }
+  ];
+  const lucky = {
+    color: colorList[Math.floor(rand() * colorList.length)],
+    number: 1 + Math.floor(rand() * 9),
+    direction: ['동쪽','서쪽','남쪽','북쪽','동남','서북','남동','북서'][Math.floor(rand() * 8)],
+    item: ['🔑','☕','📖','🎧','⌚','🌸','🍀','🕯','🌱','💎'][Math.floor(rand() * 10)]
+  };
+
+  // 시간 존 (좋은 시간 · 피할 시간)
+  const timeSlots = [
+    { good:'오전 6-9시', bad:'오후 10-11시', goodDesc:'맑은 정신 · 집중', badDesc:'과식 조심' },
+    { good:'오전 9-11시', bad:'오후 2-4시', goodDesc:'중요 결정·회의', badDesc:'졸음·실수' },
+    { good:'오전 11시-오후 1시', bad:'오후 5-7시', goodDesc:'식사·모임', badDesc:'감정 격해짐' },
+    { good:'오후 2-4시', bad:'저녁 8-10시', goodDesc:'창의적 작업', badDesc:'충동 결정' },
+    { good:'저녁 6-8시', bad:'새벽 1-3시', goodDesc:'가족·친구와', badDesc:'무리 금물' }
+  ];
+  const timeSlot = timeSlots[Math.floor(rand() * timeSlots.length)];
+
+  // 궁합 (12간지)
+  const zodiacs = [
+    {n:'쥐',e:'🐭'},{n:'소',e:'🐮'},{n:'호랑이',e:'🐯'},{n:'토끼',e:'🐰'},
+    {n:'용',e:'🐲'},{n:'뱀',e:'🐍'},{n:'말',e:'🐎'},{n:'양',e:'🐑'},
+    {n:'원숭이',e:'🐵'},{n:'닭',e:'🐔'},{n:'개',e:'🐕'},{n:'돼지',e:'🐷'}
+  ];
+  const zshuf = [...zodiacs].sort(() => rand() - 0.5);
+  const compat = { good: zshuf.slice(0, 2), avoid: zshuf.slice(2, 4) };
+
+  // 오늘의 한 마디
+  const quotes = [
+    '시작이 반이라는 말은 오늘을 위한 말입니다. 망설이지 말고 발을 내딛으세요.',
+    '오늘 하루도 나에게 관대하기. 완벽하지 않아도 괜찮아요.',
+    '작은 습관이 큰 변화를 만듭니다. 물 한 잔 · 산책 10분부터.',
+    '어제보다 조금만 나은 오늘이면 충분해요.',
+    '따뜻한 말 한마디가 하루를 바꿔요. 나에게, 그리고 옆 사람에게.',
+    '무리하지 마세요. 쉼도 성장의 일부입니다.',
+    '오늘의 감정은 오늘로 끝. 잠들기 전 마음 비우기.',
+    '작은 성취를 축하하는 사람이 큰일도 이뤄냅니다.',
+    '완벽한 하루보다 나다운 하루가 더 소중합니다.',
+    '지금 이 순간이 내일의 좋은 기억이 됩니다.'
+  ];
+  const quote = quotes[Math.floor(rand() * quotes.length)];
+
+  // 이번주 별점 (오늘 = 총운 반영)
+  const todayDow = now.getDay();
+  const weekDays = ['일','월','화','수','목','금','토'];
+  const weekStars = [];
+  for (let i = 0; i < 7; i++) {
+    const dayOffset = i - todayDow;
+    const dayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset);
+    const s = i === todayDow ? luckStars.total : 1 + Math.floor(rand() * 5);
+    weekStars.push({ dow: weekDays[i], day: dayDate.getDate(), stars: s, isToday: i === todayDow });
+  }
+
+  // 사주 음식 추천 (기존 함수 활용)
+  let sajuHint = null;
+  try { if (typeof _getSajuHint === 'function') sajuHint = _getSajuHint(); } catch(e){}
+  const recommendFood = sajuHint && sajuHint.foods ? sajuHint.foods.join(' · ') : '따뜻한 국물 · 뿌리채소 · 견과류';
+
+  return {
+    date: `${y}년 ${mo}월 ${d}일 · ${weekDays[todayDow]}요일`,
+    level: levels[lvIdx],
+    levelLabel: levelLabels[lvIdx],
+    levelSummary: levelSummaries[lvIdx],
+    luckStars, luckDescs, luckLabels, luckEmojis, luckKeys,
+    lucky, timeSlot, compat, quote, weekStars,
+    recommendFood,
+    healthTips: '물 8잔 · 아침 스트레칭 5분 · 야식 자제',
+    avoidTips: '과음 · 무리한 지출 · 감정적 언쟁'
+  };
+}
+
+// 캐시 · 오늘 날짜+생년월 키로 하루 한 번만 Gemini 호출
+async function _v22FetchFortune() {
+  const now = new Date();
+  const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
+  const dateStr = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const dowKr = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'][now.getDay()];
+
+  let birthYear, birthMonth, birthDay, gender;
+  try {
+    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human') || {};
+    birthYear = p.birthYear; birthMonth = p.birthMonth; birthDay = p.birthDay; gender = p.gender;
+  } catch(e){}
+  const birthKey = birthYear ? `${birthYear}-${birthMonth||0}-${birthDay||0}` : 'anon';
+  const cacheKey = `v22Fortune_${dateStr}_${birthKey}`;
+
+  // 캐시 확인
+  try {
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return JSON.parse(cached);
+  } catch(e){}
+
+  // API 호출
+  try {
+    const r = await fetch('/api/fortune-daily', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender })
+    });
+    const data = await r.json();
+    if (!r.ok || data.error) throw new Error(data.error || 'API 오류');
+    // 캐시 저장
+    try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
+    return data;
+  } catch (err) {
+    console.error('[fortune API]', err);
+    return null;
+  }
+}
+
+async function _v21OpenFortune() {
   const old = document.getElementById('v21FortuneSheet');
   if (old) old.remove();
+
+  // 로딩 화면 먼저 띄우기
+  const loadBox = document.createElement('div');
+  loadBox.id = 'v21FortuneSheet';
+  loadBox.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  loadBox.onclick = e => { if (e.target === loadBox) loadBox.remove(); };
+  loadBox.innerHTML = `
+    <div style="background:linear-gradient(180deg,#F2F5FC 0%,#FFF 100%);border-radius:24px 24px 0 0;width:100%;padding:60px 20px;text-align:center;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+      <div style="font-size:42px;margin-bottom:14px;animation:v22FortuneSpin 2s ease-in-out infinite">🔮</div>
+      <div style="font-size:14px;font-weight:800;color:#1D3762;margin-bottom:6px">오늘의 운세를 뽑는 중…</div>
+      <div style="font-size:11px;color:#5D7597;font-weight:600">사주와 오늘의 기운을 살피고 있어요</div>
+    </div>
+    <style>@keyframes v22FortuneSpin{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.1)}}</style>`;
+  document.body.appendChild(loadBox);
+
+  // 데이터 가져오기 (Gemini)
+  let f = await _v22FetchFortune();
+  // 실패 시 폴백 (기존 랜덤 데이터)
+  if (!f) f = _v22GetFortuneData();
+  else {
+    // API 응답을 기존 UI 데이터 형식으로 정규화
+    const now = new Date();
+    const weekDays = ['일','월','화','수','목','금','토'];
+    const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
+    f.date = f.date_display || `${y}년 ${mo}월 ${d}일 · ${weekDays[now.getDay()]}요일`;
+    f.levelSummary = f.summary;
+    // 6개 운 · 별점만 뽑기 (호환용)
+    f.luckKeys = ['total','love','money','health','career','relation'];
+    f.luckLabels = { total:'총운', love:'애정운', money:'금전운', health:'건강운', career:'직장운', relation:'대인운' };
+    f.luckEmojis = { total:'🌟', love:'💕', money:'💰', health:'💪', career:'💼', relation:'🤝' };
+    f.luckStars = {};
+    f.luckDescs = {};
+    f.luckKeys.forEach(k => {
+      f.luckStars[k] = (f.luck && f.luck[k] && f.luck[k].stars) || 3;
+      f.luckDescs[k] = (f.luck && f.luck[k] && f.luck[k].desc) || '';
+    });
+    // 이번주 별점 (총운 기준 랜덤)
+    const rand = _v22FortuneRandom(y * 10000 + mo * 100 + d);
+    f.weekStars = weekDays.map((dw, i) => {
+      const dayOffset = i - now.getDay();
+      const dayDate = new Date(y, now.getMonth(), d + dayOffset);
+      return {
+        dow: dw,
+        day: dayDate.getDate(),
+        stars: i === now.getDay() ? f.luckStars.total : 1 + Math.floor(rand() * 5),
+        isToday: i === now.getDay()
+      };
+    });
+    // 시간 존
+    f.timeSlot = {
+      good: (f.time && f.time.good && f.time.good.range) || '오전 9-11시',
+      goodDesc: (f.time && f.time.good && f.time.good.desc) || '중요 결정 · 집중력 UP',
+      bad: (f.time && f.time.bad && f.time.bad.range) || '오후 3-5시',
+      badDesc: (f.time && f.time.bad && f.time.bad.desc) || '피로 · 실수 조심'
+    };
+    // 궁합
+    f.compat = {
+      good: (f.compat && f.compat.good) || [],
+      avoid: (f.compat && f.compat.avoid) || []
+    };
+    if (f.compat.good.length === 0) f.compat.good = [{ zodiac:'토끼', emoji:'🐰' },{ zodiac:'개', emoji:'🐕' }];
+    if (f.compat.avoid.length === 0) f.compat.avoid = [{ zodiac:'말', emoji:'🐎' },{ zodiac:'닭', emoji:'🐔' }];
+    // 럭키
+    f.lucky = {
+      color: (f.lucky && f.lucky.color) || { name:'노랑', hex:'#FBBF24', why:'' },
+      number: (f.lucky && f.lucky.number && f.lucky.number.value) || 7,
+      direction: (f.lucky && f.lucky.direction && f.lucky.direction.value) || '동쪽',
+      item: (f.lucky && f.lucky.item) || { emoji:'🍀', name:'행운', why:'' }
+    };
+    f.recommendFood = (f.food && f.food.recommend) || '따뜻한 국물 · 뿌리채소';
+    f.healthTips = '물 8잔 · 아침 스트레칭';
+    f.avoidTips = (f.food && f.food.avoid) || '과음·야식';
+  }
+
+  // 로딩 제거하고 실제 시트 렌더
+  loadBox.remove();
+  const esc = (typeof _v20Esc === 'function') ? _v20Esc : (s => String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+  const starsHtml = n => '★'.repeat(n) + '☆'.repeat(5-n);
+
+  const luckIconClass = { total:'total', love:'love', money:'money', health:'health', career:'career', relation:'relation' };
+  const luckCards = f.luckKeys.map(k => `
+    <div class="v22-luck-card">
+      <div class="head"><div class="v22-luck-icon ${luckIconClass[k]}">${f.luckEmojis[k]}</div><div class="v22-luck-label">${f.luckLabels[k]}</div></div>
+      <div class="v22-luck-stars">${starsHtml(f.luckStars[k])}</div>
+      <div class="v22-luck-desc">${esc(f.luckDescs[k])}</div>
+    </div>`).join('');
+
+  const weekHtml = f.weekStars.map(d => `
+    <div class="v22-week-day ${d.isToday ? 'today' : ''}">
+      <div class="d">${d.dow}</div>
+      <div class="num">${d.day}</div>
+      <div class="stars">${'★'.repeat(d.stars)}</div>
+    </div>`).join('');
+
+  const compatGood = f.compat.good.map(z => `<span class="v22-compat-zodiac"><span class="em">${z.e}</span>${z.n}</span>`).join('');
+  const compatAvoid = f.compat.avoid.map(z => `<span class="v22-compat-zodiac"><span class="em">${z.e}</span>${z.n}</span>`).join('');
+
   const b = document.createElement('div');
   b.id = 'v21FortuneSheet';
   b.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
   b.onclick = e => { if (e.target === b) b.remove(); };
-  let hint = null;
-  try { if (typeof _getSajuHint === 'function') hint = _getSajuHint(); } catch(e){}
-  const level = hint && hint.level ? hint.level : '中吉';
-  const advice = hint && hint.advice ? hint.advice : '따뜻한 음식과 규칙적인 식사로 체력을 챙기면 좋아요.';
-  const foods = hint && hint.foods ? hint.foods.join(' · ') : '따뜻한 국물 요리 · 뿌리채소';
-  b.innerHTML = `<div style="background:#F2F5FC;border-radius:24px 24px 0 0;padding:22px 20px 34px;width:100%;max-height:70vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-size:15px;font-weight:800;color:#1D3762">✨ 오늘의 운세</div>
-      <button onclick="document.getElementById('v21FortuneSheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer">×</button>
-    </div>
-    <div style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border-radius:20px;padding:22px;text-align:center;margin-bottom:16px">
-      <svg width="80" height="80" viewBox="0 0 130 130" fill="none" style="margin-bottom:8px"><circle cx="65" cy="60" r="46" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/><path d="M65 22 L 74 46 L 100 47 L 80 63 L 87 88 L 65 74 L 43 88 L 50 63 L 30 47 L 56 46 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/><path d="M65 22 L 74 46 L 100 47 L 80 63 L 65 22 Z" fill="#F59E0B"/></svg>
-      <div style="font-size:26px;font-weight:900;color:#065F46;letter-spacing:-1px;margin-bottom:4px">${_v20Esc(level)}</div>
-      <div style="font-size:12px;color:#166534;font-weight:600">건강운 · 오늘의 흐름</div>
-    </div>
-    <div style="background:#FFF;border-radius:16px;padding:14px 16px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;color:#94A3B8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">오늘의 조언</div>
-      <div style="font-size:12.5px;color:#1D3762;font-weight:500;line-height:1.6">${_v20Esc(advice)}</div>
-    </div>
-    <div style="background:#FFF;border-radius:16px;padding:14px 16px">
-      <div style="font-size:11px;font-weight:800;color:#94A3B8;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px">추천 음식</div>
-      <div style="font-size:12.5px;color:#1D3762;font-weight:600;line-height:1.6">${_v20Esc(foods)}</div>
-    </div>
-  </div>
-  <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  // 티켓 카드 · 탭 · 오늘의 행운 (텍스트 통일) 스타일
+  const ticketHeadline = esc((f.ticket && f.ticket.headline) || f.levelLabel || '오늘의 흐름');
+  const ticketSub = esc((f.ticket && f.ticket.sub) || f.levelSummary || f.summary || '');
+  const ticketEmoji = (f.ticket && f.ticket.emoji) || '🍀';
+  const keywords = (f.ticket && f.ticket.keywords) || ['시작','흐름','기회'];
+  const keywordStr = keywords.slice(0,3).map(esc).join(' · ');
+
+  const tabConfig = [
+    { key:'total',    label:'전체' },
+    { key:'love',     label:'연애' },
+    { key:'money',    label:'돈' },
+    { key:'career',   label:'일' },
+    { key:'relation', label:'관계' },
+    { key:'health',   label:'건강' }
+  ];
+  const tabsHtml = tabConfig.map((t,i) => `<button class="v22t-tab${i===0?' active':''}" data-tab="${t.key}">${t.label}</button>`).join('');
+  const tabContents = tabConfig.map((t,i) => {
+    const luck = (f.luck && f.luck[t.key]) || {};
+    const headline = esc(luck.headline || luck.desc || ticketHeadline);
+    const body = esc(luck.body || luck.desc || ticketSub || '');
+    return `<div class="v22t-content${i===0?' active':''}" data-panel="${t.key}"><div class="v22t-headline">${headline}</div><div class="v22t-body">${body.replace(/\n/g,'<br>')}</div></div>`;
+  }).join('');
+
+  const colorMap = { '빨강':'red','빨간':'red','주황':'orange','노랑':'yellow','노란':'yellow','초록':'green','파랑':'blue','파란':'blue','보라':'purple','분홍':'pink','핑크':'pink','검정':'black','검은':'black','흰색':'white','하양':'white','금색':'yellow','은색':'gray' };
+  const colorName = (f.lucky.color && f.lucky.color.name) || '초록';
+  const colorClass = colorMap[colorName.replace(/색$/,'')] || colorMap[colorName] || '';
+  const luckyDirection = String(f.lucky.direction || '동남').replace(/쪽$/,'');
+  const luckyItem = (f.lucky.item && f.lucky.item.name) || (typeof f.lucky.item === 'string' ? f.lucky.item : '커피');
+
+  const now = new Date();
+  const y = now.getFullYear(), mo = String(now.getMonth()+1).padStart(2,'0'), da = String(now.getDate()).padStart(2,'0');
+  const dow = ['일','월','화','수','목','금','토'][now.getDay()] + '요일';
+  const dateStr = `${y}.${mo}.${da} · ${dow}`;
+
+  b.innerHTML = `
+    <style>
+      #v21FortuneSheet .v22t-wrap{background:#FFF;border-radius:24px 24px 0 0;width:100%;max-height:92vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1);padding-bottom:24px}
+      #v21FortuneSheet .v22t-top{padding:14px 20px 18px;display:flex;align-items:center;justify-content:space-between;position:relative}
+      #v21FortuneSheet .v22t-top .v22t-ttl{position:absolute;left:50%;transform:translateX(-50%);font-size:14px;font-weight:700;color:#0F172A;letter-spacing:-.2px}
+      #v21FortuneSheet .v22t-top .v22t-cls{background:transparent;border:0;color:#94A3B8;font-size:18px;cursor:pointer;padding:0;margin-left:auto;font-family:inherit}
+      #v21FortuneSheet .v22t-ticket-wrap{margin:0 20px 22px;position:relative}
+      #v21FortuneSheet .v22t-ticket-shadow{position:absolute;top:8px;left:-4px;right:-4px;bottom:-4px;background:#3D63D9;border-radius:18px;transform:rotate(-1.5deg);z-index:1;opacity:.5}
+      #v21FortuneSheet .v22t-ticket{background:#FFF;border:1.5px solid #3D63D9;border-radius:18px;padding:18px 20px 16px;position:relative;z-index:2;transform:rotate(.8deg);box-shadow:0 4px 12px rgba(61,99,217,.12)}
+      #v21FortuneSheet .v22t-ticket::before,#v21FortuneSheet .v22t-ticket::after{content:'';position:absolute;top:50%;transform:translateY(-50%);width:14px;height:14px;background:#FFF;border:1.5px solid #3D63D9;border-radius:50%}
+      #v21FortuneSheet .v22t-ticket::before{left:-9px}
+      #v21FortuneSheet .v22t-ticket::after{right:-9px}
+      #v21FortuneSheet .v22t-ticket-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+      #v21FortuneSheet .v22t-ticket-date{font-size:11px;color:#5D7597;font-weight:600;letter-spacing:.2px}
+      #v21FortuneSheet .v22t-ticket-body{display:flex;gap:12px;align-items:flex-start}
+      #v21FortuneSheet .v22t-ticket-text{flex:1;min-width:0}
+      #v21FortuneSheet .v22t-ticket-title{font-size:19px;font-weight:800;color:#0F172A;letter-spacing:-.5px;line-height:1.25;margin-bottom:8px}
+      #v21FortuneSheet .v22t-ticket-sub{font-size:11.5px;color:#5D7597;font-weight:500;line-height:1.5}
+      #v21FortuneSheet .v22t-ticket-emoji{width:62px;height:62px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:44px}
+      #v21FortuneSheet .v22t-ticket-divider{border-top:1.5px dashed #C7D2FE;margin:12px 0 10px}
+      #v21FortuneSheet .v22t-ticket-foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
+      #v21FortuneSheet .v22t-ticket-foot .lbl{font-size:10px;color:#94A3B8;font-weight:600}
+      #v21FortuneSheet .v22t-ticket-foot .keywords{font-size:11px;color:#3D63D9;font-weight:800;letter-spacing:-.1px;text-align:right}
+      #v21FortuneSheet .v22t-tabs{padding:0 20px;margin-bottom:16px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+      #v21FortuneSheet .v22t-tabs::-webkit-scrollbar{display:none}
+      #v21FortuneSheet .v22t-tab{flex-shrink:0;padding:7px 14px;background:transparent;border-radius:99px;font-size:12px;font-weight:700;color:#94A3B8;transition:all .15s;font-family:inherit;border:0;cursor:pointer}
+      #v21FortuneSheet .v22t-tab.active{background:#0F172A;color:#FFF}
+      #v21FortuneSheet .v22t-content{display:none;padding:0 20px 20px}
+      #v21FortuneSheet .v22t-content.active{display:block}
+      #v21FortuneSheet .v22t-headline{font-size:16px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.35;margin-bottom:8px}
+      #v21FortuneSheet .v22t-body{font-size:12.5px;color:#5D7597;font-weight:500;line-height:1.65}
+      #v21FortuneSheet .v22t-lucky{padding:0 20px 16px}
+      #v21FortuneSheet .v22t-lucky-title{font-size:13px;font-weight:800;color:#0F172A;margin-bottom:10px;letter-spacing:-.2px}
+      #v21FortuneSheet .v22t-lucky-grid{background:#F5F8FE;border-radius:14px;padding:16px 6px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+      #v21FortuneSheet .v22t-lucky-cell{text-align:center;padding:0 4px;position:relative}
+      #v21FortuneSheet .v22t-lucky-cell + .v22t-lucky-cell::before{content:'';position:absolute;left:0;top:18%;bottom:18%;border-left:1px solid #E2E8F0}
+      #v21FortuneSheet .v22t-lucky-cell .lbl{font-size:10px;color:#94A3B8;font-weight:600;margin-bottom:8px;letter-spacing:-.1px}
+      #v21FortuneSheet .v22t-lucky-cell .val{font-size:17px;font-weight:800;color:#0F172A;letter-spacing:-.3px;line-height:1.1}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-red{color:#EF4444}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-orange{color:#F97316}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-yellow{color:#F59E0B}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-green{color:#22C55E}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-blue{color:#3D63D9}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-purple{color:#8B5CF6}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-pink{color:#EC4899}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-black{color:#0F172A}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-white{color:#94A3B8}
+      #v21FortuneSheet .v22t-lucky-cell .val.c-gray{color:#94A3B8}
+      #v21FortuneSheet .v22t-links{padding:0 20px 20px}
+      #v21FortuneSheet .v22t-link-item{display:flex;align-items:center;gap:11px;padding:13px 4px;border-bottom:1px solid #F1F5F9;cursor:pointer;background:transparent;border-left:0;border-right:0;border-top:0;width:100%;font-family:inherit;text-align:left}
+      #v21FortuneSheet .v22t-link-item:last-child{border-bottom:0}
+      #v21FortuneSheet .v22t-link-item .ic{width:20px;height:20px;flex-shrink:0}
+      #v21FortuneSheet .v22t-link-item .txt{flex:1;font-size:12.5px;font-weight:700;color:#0F172A;letter-spacing:-.2px}
+      #v21FortuneSheet .v22t-link-item .arrow{color:#94A3B8;font-size:14px}
+      #v21FortuneSheet .v22t-cta-wrap{padding:0 20px}
+      #v21FortuneSheet .v22t-cta{width:100%;background:#3D63D9;color:#FFF;padding:14px;border-radius:12px;font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:-.2px;border:0;cursor:pointer;font-family:inherit}
+      #v21FortuneSheet .v22t-share{display:block;margin:12px auto 4px;background:transparent;color:#3D63D9;font-size:12.5px;font-weight:700;padding:4px;border:0;cursor:pointer;font-family:inherit}
+      #v21FortuneSheet .v22t-footer{text-align:center;font-size:10.5px;color:#94A3B8;font-weight:500;padding:2px 0 10px}
+      #v21FortuneSheet .v22t-detail{display:none;background:#F5F8FE;border-radius:12px;padding:12px;margin-bottom:8px}
+      #v21FortuneSheet .v22t-detail.open{display:block}
+      @keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    </style>
+    <div class="v22t-wrap">
+      <div class="v22t-top">
+        <div class="v22t-ttl">오늘의 운세</div>
+        <button class="v22t-cls" onclick="document.getElementById('v21FortuneSheet').remove()">✕</button>
+      </div>
+      <div class="v22t-ticket-wrap">
+        <div class="v22t-ticket-shadow"></div>
+        <div class="v22t-ticket">
+          <div class="v22t-ticket-top">
+            <div class="v22t-ticket-date">${dateStr}</div>
+          </div>
+          <div class="v22t-ticket-body">
+            <div class="v22t-ticket-text">
+              <div class="v22t-ticket-title">${ticketHeadline}</div>
+              <div class="v22t-ticket-sub">${ticketSub}</div>
+            </div>
+            <div class="v22t-ticket-emoji">${ticketEmoji}</div>
+          </div>
+          <div class="v22t-ticket-divider"></div>
+          <div class="v22t-ticket-foot">
+            <span class="lbl">오늘의 키워드</span>
+            <span class="keywords">${keywordStr}</span>
+          </div>
+        </div>
+      </div>
+      <div class="v22t-tabs">${tabsHtml}</div>
+      ${tabContents}
+      <div class="v22t-lucky">
+        <div class="v22t-lucky-title">오늘의 행운</div>
+        <div class="v22t-lucky-grid">
+          <div class="v22t-lucky-cell">
+            <div class="lbl">행운의 색</div>
+            <div class="val c-${colorClass}">${esc(colorName)}</div>
+          </div>
+          <div class="v22t-lucky-cell">
+            <div class="lbl">숫자</div>
+            <div class="val">${esc(String(f.lucky.number))}</div>
+          </div>
+          <div class="v22t-lucky-cell">
+            <div class="lbl">방향</div>
+            <div class="val">${esc(luckyDirection)}</div>
+          </div>
+          <div class="v22t-lucky-cell">
+            <div class="lbl">아이템</div>
+            <div class="val">${esc(luckyItem)}</div>
+          </div>
+        </div>
+      </div>
+      <div class="v22t-links">
+        <button class="v22t-link-item" onclick="const d=document.getElementById('v22tDetailTime');if(d)d.classList.toggle('open')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#5D7597" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="txt">시간대별 운세</div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="v22t-detail" id="v22tDetailTime">
+          <div style="font-size:11px;color:#5D7597;font-weight:600;line-height:1.6"><b style="color:#059669">✓ ${esc(f.timeSlot.good)}</b> · ${esc(f.timeSlot.goodDesc)}<br><b style="color:#DC2626">✕ ${esc(f.timeSlot.bad)}</b> · ${esc(f.timeSlot.badDesc)}</div>
+        </div>
+        <button class="v22t-link-item" onclick="const d=document.getElementById('v22tDetailCompat');if(d)d.classList.toggle('open')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#5D7597" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <div class="txt">오늘의 궁합 · 잘 맞는 띠</div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="v22t-detail" id="v22tDetailCompat">
+          <div style="font-size:11px;color:#5D7597;font-weight:600;line-height:1.6"><b style="color:#BE185D">💕 잘 맞는 띠</b> ${f.compat.good.map(z=>`${z.emoji||''}${esc(z.zodiac||z.n||'')}`).join(' · ')}<br><b style="color:#B91C1C">⚡ 조심할 띠</b> ${f.compat.avoid.map(z=>`${z.emoji||''}${esc(z.zodiac||z.n||'')}`).join(' · ')}</div>
+        </div>
+        <button class="v22t-link-item" onclick="const d=document.getElementById('v22tDetailWeek');if(d)d.classList.toggle('open')">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="#5D7597" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <div class="txt">이번주 운세 흐름</div>
+          <div class="arrow">›</div>
+        </button>
+        <div class="v22t-detail" id="v22tDetailWeek">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">${(f.weekStars||[]).map(d => `<div style="text-align:center;padding:6px 2px;border-radius:6px;background:${d.isToday?'#FEF3C7':'#FFF'};border:1px solid ${d.isToday?'#FBBF24':'#E5E7EB'}"><div style="font-size:9px;color:#5D7597;font-weight:700">${d.dow}</div><div style="font-size:10px;font-weight:800;color:#0F172A;margin:2px 0">${d.day}</div><div style="font-size:8.5px;color:#FBBF24">${'★'.repeat(d.stars)}</div></div>`).join('')}</div>
+        </div>
+      </div>
+      <div class="v22t-cta-wrap">
+        <button class="v22t-cta">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          오늘의 카드 저장하기
+        </button>
+        <button class="v22t-share">친구에게 공유</button>
+        <div class="v22t-footer">재미로 가볍게 즐겨주세요</div>
+      </div>
+    </div>`;
   document.body.appendChild(b);
+  // 탭 전환 이벤트 위임
+  b.querySelectorAll('.v22t-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const key = tab.getAttribute('data-tab');
+      b.querySelectorAll('.v22t-tab').forEach(t => t.classList.remove('active'));
+      b.querySelectorAll('.v22t-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      const panel = b.querySelector(`.v22t-content[data-panel="${key}"]`);
+      if (panel) panel.classList.add('active');
+    });
+  });
 }
 
 // ═══ v22 · 건강 운동 · 간단 스트레칭 데이터 (부위별 · 상황별) ═══
