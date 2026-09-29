@@ -2185,6 +2185,36 @@ window.appIcon = function(name, size){
     .supp-summary{background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:1px solid #BFDBFE;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#1E40AF;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;line-height:1.5}
     .supp-summary::before{content:"💡";font-size:18px;flex-shrink:0}
     .supp-summary strong{color:#1E3A8A;font-weight:800}
+
+    /* ═══ 🍚 오늘 뭐 먹지? · 추천 섹션 (Phase 7 · Navy 15/Yellow 5) ═══ */
+    .meal-rec-section{margin:12px 0 24px;background:#FFF;border-radius:20px;padding:20px 18px 18px;box-shadow:0 4px 16px rgba(46,97,196,.08);border:1px solid var(--gg-blue-soft)}
+    .mrs-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+    .mrs-eyebrow{font-size:11px;font-weight:700;color:var(--gg-muted);letter-spacing:.3px;text-transform:uppercase}
+    .mrs-question{font-size:20px;font-weight:800;color:var(--gg-ink);letter-spacing:-.6px}
+    .mrs-primary{width:100%;background:linear-gradient(135deg,var(--gg-blue) 0%,#1E4A9E 100%);border:none;border-radius:16px;padding:22px 20px;color:#FFF;text-align:left;cursor:pointer;font-family:inherit;position:relative;overflow:hidden;transition:transform .15s ease}
+    .mrs-primary:not(:disabled):hover{transform:translateY(-1px)}
+    .mrs-primary:disabled{opacity:.6;cursor:default}
+    .mrs-primary::before{content:"";position:absolute;top:0;right:-20px;width:120px;height:120px;background:radial-gradient(circle,var(--gg-yellow) 0%,transparent 70%);opacity:.25;pointer-events:none}
+    .mrs-primary-headline{font-size:13px;font-weight:700;color:var(--gg-yellow);letter-spacing:-.2px;margin-bottom:8px;position:relative;z-index:1}
+    .mrs-primary-name{font-size:28px;font-weight:900;letter-spacing:-.9px;line-height:1.15;position:relative;z-index:1}
+    .mrs-primary-reason{font-size:12.5px;color:rgba(255,255,255,.85);margin-top:10px;font-weight:500;line-height:1.4;position:relative;z-index:1}
+    .mrs-actions{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;margin-top:14px}
+    .mrs-btn{background:#FFF;border:1.5px solid #E4EAF3;color:var(--gg-ink);border-radius:12px;padding:12px 8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s ease;letter-spacing:-.2px}
+    .mrs-btn:not(:disabled):hover{border-color:var(--gg-blue);background:var(--gg-blue-soft)}
+    .mrs-btn:disabled{opacity:.4;cursor:default}
+    .mrs-btn-ate{background:var(--gg-yellow);border-color:var(--gg-yellow);color:#5C4A00}
+    .mrs-btn-ate:not(:disabled):hover{background:#F0CC3E;border-color:#F0CC3E}
+    .mrs-alts{margin-top:14px;display:none;flex-direction:column;gap:8px}
+    .mrs-alts.open{display:flex}
+    .mrs-alt{background:#F7F9FC;border:1px solid #E4EAF3;border-radius:12px;padding:12px 14px;text-align:left;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .mrs-alt:hover{background:var(--gg-blue-soft);border-color:var(--gg-blue)}
+    .mrs-alt-info{flex:1;min-width:0}
+    .mrs-alt-name{font-size:14.5px;font-weight:800;color:var(--gg-ink);letter-spacing:-.3px}
+    .mrs-alt-headline{font-size:11.5px;color:var(--gg-muted);margin-top:2px;font-weight:600}
+    .mrs-alt-arrow{color:var(--gg-blue);font-size:18px;font-weight:700;flex-shrink:0}
+    /* Loading skeleton */
+    .mrs-loading .mrs-primary-name{animation:mrsPulse 1.4s ease-in-out infinite}
+    @keyframes mrsPulse{0%,100%{opacity:.5}50%{opacity:1}}
   </style>
 </head>
 <body>
@@ -2848,6 +2878,26 @@ window.appIcon = function(name, size){
         <h1 id="homeGreeting">건강한 하루,<br>오늘도 응원해요</h1>
         <div class="sub" id="homeGreetingSub">검사·식단·성분까지, 건강어때AI가 챙겨드려요</div>
       </div>
+
+      <!-- ═══ 🍚 오늘 뭐 먹지? · Rule Engine + Gemini 추천 · Phase 7 ═══ -->
+      <div id="mealRecommendSection" class="meal-rec-section">
+        <div class="mrs-header">
+          <div class="mrs-eyebrow"><span id="mrsSlotLabel">지금</span> · AI 추천</div>
+          <div class="mrs-question">뭐 먹지?</div>
+        </div>
+        <button class="mrs-primary" id="mrsPrimaryCard" onclick="onMealPrimaryTap()" disabled>
+          <div class="mrs-primary-headline" id="mrsPrimaryHeadline">추천 준비 중...</div>
+          <div class="mrs-primary-name" id="mrsPrimaryName">·</div>
+          <div class="mrs-primary-reason" id="mrsPrimaryReason"></div>
+        </button>
+        <div class="mrs-actions">
+          <button class="mrs-btn mrs-btn-why"  onclick="onMealWhy()"  id="mrsBtnWhy"  disabled>왜?</button>
+          <button class="mrs-btn mrs-btn-swap" onclick="onMealSwap()" id="mrsBtnSwap" disabled>다른 거</button>
+          <button class="mrs-btn mrs-btn-ate"  onclick="onMealAte()"  id="mrsBtnAte"  disabled>먹었어요</button>
+        </div>
+        <div class="mrs-alts" id="mrsAlts"></div>
+      </div>
+      <!-- ═══════════════════════════════════════════════════════════════ -->
 
       <!-- 👨‍👩‍👧‍👦 다중 프로필 스위처 -->
       <div id="homeProfileSection"></div>
@@ -5636,7 +5686,7 @@ function showScreen(id) {
   document.body.classList.toggle('home-active', id === 'screenHome');
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
   // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯 + 스트릭·체크인
-  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} }
+  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} try{ mrsLoadRecommendation(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시 + 프로필 배너 렌더링
   if (id === 'screenCapture') { maybeShowCaptureTip(); try { renderCaptureProfileBanner(); } catch(e){} }
   // 식단 사진 화면 진입 시 프로필 배너 + GPS 미리 시작 (매장 태그 정렬용)
@@ -27683,6 +27733,229 @@ function updateGgTabbar(screenId) {
     const btn = bar.querySelector(`[data-tab="${active}"]`);
     if (btn) btn.classList.add('on');
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🍚 오늘 뭐 먹지? · Rule Engine + Gemini 추천 (Phase 7)
+// - /api/recommend-next 호출 · Top1 + 대안 2개 렌더
+// - 버튼: 왜? / 다른 거 / 먹었어요 → /api/recommend-feedback 로 로깅
+// ═══════════════════════════════════════════════════════════════
+window._mrsState = { current: null, cachedAt: 0, alternativesCache: [], swapIndex: 0 };
+const MRS_CACHE_TTL = 15 * 60 * 1000;  // 15분 · 같은 끼니 반복 호출 방지
+
+function mrsSlotFromHour(h) {
+  if (h >= 5 && h < 10) return { slot: 'breakfast', label: '오늘 아침' };
+  if (h >= 10 && h < 15) return { slot: 'lunch',    label: '오늘 점심' };
+  if (h >= 15 && h < 21) return { slot: 'dinner',   label: '오늘 저녁' };
+  return { slot: 'snack', label: '지금' };
+}
+
+async function mrsLoadRecommendation(forceRefresh) {
+  const section = document.getElementById('mealRecommendSection');
+  if (!section) return;
+  const now = Date.now();
+  // 캐시
+  if (!forceRefresh && window._mrsState.current && (now - window._mrsState.cachedAt) < MRS_CACHE_TTL) {
+    mrsRender(window._mrsState.current);
+    return;
+  }
+
+  const { slot, label } = mrsSlotFromHour(new Date().getHours());
+  const slotEl = document.getElementById('mrsSlotLabel');
+  if (slotEl) slotEl.textContent = label;
+
+  mrsSetLoading(true);
+
+  try {
+    const userId = (typeof getCurrentUserUuid === 'function') ? getCurrentUserUuid() : null;
+    const prefs  = mrsBuildPreferences();
+
+    const res = await fetch('/api/recommend-next', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        meal_slot: slot,
+        preferences: prefs.preferences,
+        allergens: prefs.allergens,
+        user_dislikes: prefs.user_dislikes,
+        dietary_restrictions: prefs.dietary_restrictions,
+        recent_meals: mrsBuildRecentMeals()
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    window._mrsState.current = data;
+    window._mrsState.cachedAt = now;
+    window._mrsState.swapIndex = 0;
+    mrsRender(data);
+  } catch (err) {
+    console.warn('[MRS] load failed', err);
+    mrsShowError();
+  } finally {
+    mrsSetLoading(false);
+  }
+}
+
+function mrsSetLoading(loading) {
+  const card = document.getElementById('mrsPrimaryCard');
+  const btns = ['mrsBtnWhy','mrsBtnSwap','mrsBtnAte'];
+  if (loading) {
+    card?.classList.add('mrs-loading');
+    card?.setAttribute('disabled', 'true');
+    btns.forEach(id => document.getElementById(id)?.setAttribute('disabled','true'));
+    const nameEl = document.getElementById('mrsPrimaryName');
+    if (nameEl) nameEl.textContent = '고르는 중...';
+    const hlEl = document.getElementById('mrsPrimaryHeadline');
+    if (hlEl) hlEl.textContent = 'AI가 고르는 중';
+    const rsEl = document.getElementById('mrsPrimaryReason');
+    if (rsEl) rsEl.textContent = '';
+  } else {
+    card?.classList.remove('mrs-loading');
+    card?.removeAttribute('disabled');
+    btns.forEach(id => document.getElementById(id)?.removeAttribute('disabled'));
+  }
+}
+
+function mrsShowError() {
+  const nameEl = document.getElementById('mrsPrimaryName');
+  const hlEl   = document.getElementById('mrsPrimaryHeadline');
+  const rsEl   = document.getElementById('mrsPrimaryReason');
+  if (nameEl) nameEl.textContent = '다시 시도해줘';
+  if (hlEl)   hlEl.textContent = '잠깐 오류';
+  if (rsEl)   rsEl.textContent = '탭하면 다시 불러올게';
+  const card = document.getElementById('mrsPrimaryCard');
+  card?.removeAttribute('disabled');
+  card && (card.onclick = () => mrsLoadRecommendation(true));
+}
+
+function mrsRender(data) {
+  if (!data || !data.primary) { mrsShowError(); return; }
+  document.getElementById('mrsPrimaryHeadline').textContent = data.primary.headline || '오늘 이거 어때';
+  document.getElementById('mrsPrimaryName').textContent = data.primary.name;
+  document.getElementById('mrsPrimaryReason').textContent = data.primary.reason || '';
+  const card = document.getElementById('mrsPrimaryCard');
+  if (card) card.onclick = onMealPrimaryTap;
+
+  // 대안 캐시 (다른 거 버튼용)
+  window._mrsState.alternativesCache = data.alternatives || [];
+
+  // 대안 카드 자동 렌더 X · [다른 거] 버튼 눌러야 표시
+  const altsBox = document.getElementById('mrsAlts');
+  if (altsBox) { altsBox.classList.remove('open'); altsBox.innerHTML = ''; }
+}
+
+function mrsBuildPreferences() {
+  const profile = (typeof getUserProfile === 'function') ? (getUserProfile() || {}) : {};
+  const allergens = Array.isArray(profile.allergens) ? profile.allergens : [];
+  const dietary = Array.isArray(profile.dietary_restrictions) ? profile.dietary_restrictions : [];
+  let user_dislikes = [];
+  try {
+    const d = JSON.parse(localStorage.getItem('mrs_dislikes') || '[]');
+    if (Array.isArray(d)) user_dislikes = d;
+  } catch (_) {}
+  return {
+    preferences: {
+      liked_categories: Array.isArray(profile.liked_categories) ? profile.liked_categories : [],
+      liked_methods:    Array.isArray(profile.liked_methods) ? profile.liked_methods : [],
+      frequently_eaten: Array.isArray(profile.frequently_eaten) ? profile.frequently_eaten : []
+    },
+    allergens,
+    user_dislikes,
+    dietary_restrictions: dietary
+  };
+}
+
+function mrsBuildRecentMeals() {
+  try {
+    const logs = JSON.parse(localStorage.getItem('foodLogs') || localStorage.getItem('ggFoodLogs') || '[]');
+    if (!Array.isArray(logs)) return [];
+    const cutoff = Date.now() - 3 * 24 * 60 * 60 * 1000;  // 최근 3일
+    return logs
+      .filter(l => l && l.timestamp && new Date(l.timestamp).getTime() > cutoff)
+      .slice(-20)
+      .map(l => ({ food_id: l.food_id || null, name: l.name || l.food || '', timestamp: l.timestamp }));
+  } catch (_) { return []; }
+}
+
+// 카드 탭 · 아무거나 · 로딩 후엔 [먹었어요]로 유도 · 우선은 아무 동작 X
+function onMealPrimaryTap() {
+  const primary = window._mrsState.current?.primary;
+  if (!primary) return;
+  // TODO: 상세 시트 열기 (Phase 8) · 지금은 [왜?]로 유도
+  onMealWhy();
+}
+
+// 왜? · reason 확대 표시 (alert 로 간단히 · Phase 8에서 시트로)
+function onMealWhy() {
+  const p = window._mrsState.current?.primary;
+  if (!p) return;
+  mrsFeedback('why');
+  const msg = `${p.name}\n\n${p.headline}\n${p.reason || '이유 준비 중'}`;
+  alert(msg);
+}
+
+// 다른 거 · 캐시된 alternatives 로테이션 · 다 소진되면 API 재호출
+function onMealSwap() {
+  mrsFeedback('skip');
+  const alts = window._mrsState.alternativesCache || [];
+  window._mrsState.swapIndex++;
+  if (window._mrsState.swapIndex < alts.length) {
+    const nextAlt = alts[window._mrsState.swapIndex];
+    // primary 자리에 대안 표시
+    document.getElementById('mrsPrimaryHeadline').textContent = nextAlt.headline || '이건 어때';
+    document.getElementById('mrsPrimaryName').textContent = nextAlt.name;
+    document.getElementById('mrsPrimaryReason').textContent = nextAlt.reason || '';
+    // current.primary도 갱신 (그다음 [먹었어요] 시 이걸 기록)
+    window._mrsState.current.primary = {
+      food_id: nextAlt.food_id,
+      name: nextAlt.name,
+      headline: nextAlt.headline,
+      reason: nextAlt.reason
+    };
+  } else {
+    // 다 봤으면 새 추천 요청
+    mrsLoadRecommendation(true);
+  }
+}
+
+// 먹었어요 · consumed 피드백 + 식단 기록 유도
+function onMealAte() {
+  const p = window._mrsState.current?.primary;
+  if (!p) return;
+  mrsFeedback('consumed');
+  // TODO: food_history에 기록 · Phase 8 (지금은 알림만)
+  const btn = document.getElementById('mrsBtnAte');
+  if (btn) {
+    const old = btn.textContent;
+    btn.textContent = '기록됨 ✓';
+    btn.setAttribute('disabled', 'true');
+    setTimeout(() => {
+      btn.textContent = old;
+      // 15분 뒤 새 추천
+      mrsLoadRecommendation(true);
+    }, 2000);
+  }
+}
+
+// 피드백 서버 전송 · 실패해도 UX 안 막음
+async function mrsFeedback(action) {
+  try {
+    const recId = window._mrsState.current?.recommendation_id;
+    const foodId = window._mrsState.current?.primary?.food_id;
+    const userId = (typeof getCurrentUserUuid === 'function') ? getCurrentUserUuid() : null;
+    if (!recId || !userId) return;  // 로그 없으면 스킵
+    await fetch('/api/recommend-feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        recommendation_id: recId,
+        food_id: foodId,
+        action: action
+      })
+    });
+  } catch (err) { console.warn('[MRS] feedback failed', err); }
 }
 </script>
 <!-- ════════════ 📄 리포트 화면 (v20) ════════════ -->
