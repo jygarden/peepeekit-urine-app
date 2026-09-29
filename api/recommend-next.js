@@ -1,10 +1,11 @@
-// 🎯 추천 엔진 · Rule Engine · v0.1
+// 🎯 추천 엔진 · Rule Engine + Gemini 설명 · v0.1
 // 참조: RECOMMEND_ENGINE.md · BRAIN.md · SECURITY.md
 //
 // 원칙:
-// - Rule Engine이 결정 · Gemini는 설명만 (Gemini는 아직 미연결)
+// - Rule Engine이 결정 · Gemini는 문구만 생성
 // - 서버 전용 · 절대 클라이언트에 이 코드 X
 // - 8개 함수 분리 · 튜닝·A/B 쉽게
+// - 프롬프트는 server/prompts/*.txt 파일에서 로드 (하드코딩 X)
 
 const path = require('path');
 const fs = require('fs');
@@ -17,7 +18,7 @@ try { _createClient = require('@supabase/supabase-js').createClient; } catch (_)
 // ═══════════════════════════════════════════════════════════
 const ENGINE_VERSION = '0.1.0';
 const MENU_VERSION   = '2026-09-v1-seed';
-const PROMPT_VERSION = 'recommend-copy-v0';  // Gemini 미연결 상태
+const PROMPT_VERSION = 'recommend-copy-v1';  // server/prompts/recommend-copy-v1.txt
 
 const SCORING_MAX = {
   nutrition:  45,
@@ -424,9 +425,101 @@ function recommend(ctx, injectedFoodMenu = null) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// Gemini · 추천 문구 생성 (Rule Engine 결과에 자연스러운 표현 붙이기)
+// ═══════════════════════════════════════════════════════════
+let _promptCache = null;
+function loadPromptTemplate() {
+  if (_promptCache) return _promptCache;
+  try {
+    const p = path.join(__dirname, '..', 'server', 'prompts', 'recommend-copy-v1.txt');
+    _promptCache = fs.readFileSync(p, 'utf8');
+    return _promptCache;
+  } catch (err) {
+    console.warn('[recommend-next] prompt load failed', err.message);
+    return null;
+  }
+}
+
+function buildPrompt(food, meal_slot, reason_codes) {
+  const template = loadPromptTemplate();
+  if (!template) return null;
+  // SYSTEM 섹션 + 채워진 USER 섹션
+  const system = template.split('=============================================================')[2] || '';
+  const user = `음식: ${food.name}
+분류: ${food.category} / ${food.method || 'none'}
+시간대: ${meal_slot}
+추천 이유 코드: ${JSON.stringify(reason_codes)}
+
+이 음식에 어울리는 headline·reason을 JSON으로 만들어.`;
+  return { system: system.trim(), user };
+}
+
+async function callGeminiForCopy(food, meal_slot, reason_codes) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  const prompt = buildPrompt(food, meal_slot, reason_codes);
+  if (!prompt) return null;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const body = {
+      systemInstruction: { parts: [{ text: prompt.system }] },
+      contents: [{ role: 'user', parts: [{ text: prompt.user }] }],
+      generationConfig: {
+        temperature: 0.8,
+        maxOutputTokens: 200,
+        responseMimeType: 'application/json'
+      }
+    };
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!res.ok) {
+      console.warn('[recommend-next] Gemini HTTP', res.status);
+      return null;
+    }
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) return null;
+    const parsed = JSON.parse(text);
+    if (!parsed.headline || !parsed.reason) return null;
+    // 안전장치 · 너무 긴 문구 자르기
+    return {
+      headline: String(parsed.headline).slice(0, 20),
+      reason:   String(parsed.reason).slice(0, 40)
+    };
+  } catch (err) {
+    console.warn('[recommend-next] Gemini failed', err.message);
+    return null;
+  }
+}
+
+function fallbackCopy(food, meal_slot) {
+  const slotLabel = meal_slot === 'breakfast' ? '오늘 아침'
+                  : meal_slot === 'lunch' ? '오늘 점심'
+                  : meal_slot === 'dinner' ? '오늘 저녁' : '지금';
+  return {
+    headline: `${slotLabel}, ${food.name} 어때요?`,
+    reason: ''
+  };
+}
+
+async function withGeminiCopy(item, meal_slot) {
+  const gemini = await callGeminiForCopy(item.food, meal_slot, item.reason_codes);
+  if (gemini) return { ...gemini, from: 'gemini' };
+  return { ...fallbackCopy(item.food, meal_slot), from: 'fallback' };
+}
+
+// ═══════════════════════════════════════════════════════════
 // Vercel serverless handler
 // ═══════════════════════════════════════════════════════════
-async function insertRecommendationLog(supabase, userId, result) {
+async function insertRecommendationLog(supabase, userId, result, primaryCopy) {
   if (!supabase || !userId || !result.top[0]) return null;
   try {
     const primary = result.top[0];
@@ -435,14 +528,14 @@ async function insertRecommendationLog(supabase, userId, result) {
       .insert({
         user_id: userId,
         primary_food_id: primary.food.id,
-        headline: `${primary.food.name} 어때요?`,
-        reason: primary.reason_codes[0] || '',
+        headline: primaryCopy?.headline || `${primary.food.name} 어때요?`,
+        reason:   primaryCopy?.reason   || primary.reason_codes[0] || '',
         reason_codes: primary.reason_codes,
         score_breakdown: primary.breakdown,
         meal_slot: result.meal_slot,
         engine_version: result.engine_version,
         menu_version: result.menu_version,
-        prompt_version: result.prompt_version || 'recommend-copy-v0'
+        prompt_version: result.prompt_version || PROMPT_VERSION
       })
       .select('id')
       .single();
@@ -480,8 +573,13 @@ module.exports = async function handler(req, res) {
     const foodMenu = await loadFoodMenuAsync();
     const result = recommend(req.body || {}, foodMenu);
 
-    // recommendation_log · 서버에서만 INSERT
-    const logId = await insertRecommendationLog(supabase, userId, result);
+    // Gemini 문구 생성 · Top3 병렬 호출 (실패 시 fallback)
+    const copies = await Promise.all(
+      result.top.map(item => withGeminiCopy(item, result.meal_slot))
+    );
+
+    // recommendation_log · 서버에서만 INSERT (primary 문구 포함)
+    const logId = await insertRecommendationLog(supabase, userId, result, copies[0]);
 
     // 🔒 클라이언트에 넘길 것: 완성된 결과만
     // score_breakdown·reason_codes·deficits는 서버 로그에만 · 클라이언트 X
@@ -494,15 +592,14 @@ module.exports = async function handler(req, res) {
       primary: result.top[0] ? {
         food_id: result.top[0].food.id,
         name: result.top[0].food.name,
-        // Gemini 연결 전 · 임시 문구
-        headline: `${result.meal_slot === 'breakfast' ? '오늘 아침' : result.meal_slot === 'lunch' ? '오늘 점심' : result.meal_slot === 'dinner' ? '오늘 저녁' : '지금'}, ${result.top[0].food.name} 어때요?`,
-        reason: result.top[0].reason_codes[0] || ''
+        headline: copies[0].headline,
+        reason: copies[0].reason
       } : null,
-      alternatives: result.top.slice(1).map(t => ({
+      alternatives: result.top.slice(1).map((t, i) => ({
         food_id: t.food.id,
         name: t.food.name,
-        headline: `${t.food.name} 어때요?`,
-        reason: t.reason_codes[0] || ''
+        headline: copies[i + 1].headline,
+        reason: copies[i + 1].reason
       }))
     };
 
