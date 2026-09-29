@@ -8,6 +8,9 @@
 
 const path = require('path');
 const fs = require('fs');
+// Supabase는 서버(prod)에서만 로드 · 테스트/CLI에서는 없어도 동작
+let _createClient = null;
+try { _createClient = require('@supabase/supabase-js').createClient; } catch (_) { /* dev · optional */ }
 
 // ═══════════════════════════════════════════════════════════
 // 상수 · 서버 전용
@@ -46,14 +49,49 @@ const RDA_3DAYS = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 데이터 로드 · (Phase 4에서 Supabase로 교체)
+// 데이터 로드
+// - 프로덕션: Supabase food_menu_v2 (secret key 필요)
+// - 로컬 테스트: data/food_menu_v2.json (fallback)
 // ═══════════════════════════════════════════════════════════
 let _foodMenuCache = null;
+let _foodMenuCacheAt = 0;
+const FOOD_MENU_CACHE_TTL = 5 * 60 * 1000;  // 5분
+
 function loadFoodMenu() {
+  // 동기 · 로컬 JSON (테스트·fallback)
   if (_foodMenuCache) return _foodMenuCache;
   const jsonPath = path.join(__dirname, '..', 'data', 'food_menu_v2.json');
   _foodMenuCache = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
   return _foodMenuCache;
+}
+
+function getSupabaseAdmin() {
+  if (!_createClient) return null;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  return _createClient(url, key, { auth: { persistSession: false } });
+}
+
+async function loadFoodMenuAsync() {
+  // 5분 캐시
+  if (_foodMenuCache && (Date.now() - _foodMenuCacheAt) < FOOD_MENU_CACHE_TTL) {
+    return _foodMenuCache;
+  }
+  const supabase = getSupabaseAdmin();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('food_menu_v2')
+      .select('*')
+      .eq('is_active', true);
+    if (!error && data && data.length > 0) {
+      _foodMenuCache = data;
+      _foodMenuCacheAt = Date.now();
+      return data;
+    }
+    console.warn('[recommend-next] Supabase load failed · JSON fallback', error?.message);
+  }
+  return loadFoodMenu();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -307,8 +345,8 @@ function selectTop3(scoredCandidates) {
 // ═══════════════════════════════════════════════════════════
 // 메인 · 추천 실행
 // ═══════════════════════════════════════════════════════════
-function recommend(ctx) {
-  const foodMenu = loadFoodMenu();
+function recommend(ctx, injectedFoodMenu = null) {
+  const foodMenu = injectedFoodMenu || loadFoodMenu();
 
   // 컨텍스트 정규화
   const meal_slot = ctx.meal_slot || decideMealSlot(ctx.current_time || new Date());
@@ -388,19 +426,67 @@ function recommend(ctx) {
 // ═══════════════════════════════════════════════════════════
 // Vercel serverless handler
 // ═══════════════════════════════════════════════════════════
+async function insertRecommendationLog(supabase, userId, result) {
+  if (!supabase || !userId || !result.top[0]) return null;
+  try {
+    const primary = result.top[0];
+    const { data, error } = await supabase
+      .from('recommendation_log')
+      .insert({
+        user_id: userId,
+        primary_food_id: primary.food.id,
+        headline: `${primary.food.name} 어때요?`,
+        reason: primary.reason_codes[0] || '',
+        reason_codes: primary.reason_codes,
+        score_breakdown: primary.breakdown,
+        meal_slot: result.meal_slot,
+        engine_version: result.engine_version,
+        menu_version: result.menu_version,
+        prompt_version: result.prompt_version || 'recommend-copy-v0'
+      })
+      .select('id')
+      .single();
+    if (error) {
+      console.warn('[recommend-next] log insert failed', error.message);
+      return null;
+    }
+    return data.id;
+  } catch (err) {
+    console.warn('[recommend-next] log exception', err.message);
+    return null;
+  }
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
   try {
-    const result = recommend(req.body || {});
+    const supabase = getSupabaseAdmin();
+
+    // 사용자 식별 · Authorization Bearer <access_token> · 클라이언트 세션 토큰
+    let userId = null;
+    if (supabase && req.headers.authorization) {
+      const token = req.headers.authorization.replace(/^Bearer\s+/i, '');
+      const { data: { user } } = await supabase.auth.getUser(token);
+      userId = user?.id || null;
+    }
+    // dev · 요청 바디에 user_id 있으면 사용
+    if (!userId && req.body?.user_id) userId = req.body.user_id;
+
+    const foodMenu = await loadFoodMenuAsync();
+    const result = recommend(req.body || {}, foodMenu);
+
+    // recommendation_log · 서버에서만 INSERT
+    const logId = await insertRecommendationLog(supabase, userId, result);
 
     // 🔒 클라이언트에 넘길 것: 완성된 결과만
     // score_breakdown·reason_codes·deficits는 서버 로그에만 · 클라이언트 X
     const clientResponse = {
+      recommendation_id: logId,  // 피드백 시 이걸로 매칭
       engine_version: result.engine_version,
       menu_version: result.menu_version,
       meal_slot: result.meal_slot,
@@ -419,8 +505,6 @@ module.exports = async function handler(req, res) {
         reason: t.reason_codes[0] || ''
       }))
     };
-
-    // TODO Phase 4: recommendation_log에 result 전체 저장 (서버 로그)
 
     return res.status(200).json(clientResponse);
   } catch (err) {
