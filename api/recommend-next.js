@@ -454,12 +454,20 @@ function buildPrompt(food, meal_slot, reason_codes) {
   if (!template) return null;
   // SYSTEM 섹션 + 채워진 USER 섹션
   const system = template.split('=============================================================')[2] || '';
+  const strengths = Array.isArray(food.strengths) ? food.strengths.join('·') : '';
+  const keywords  = Array.isArray(food.keywords)  ? food.keywords.join('·')  : '';
+  const proteinSource = food.protein_source && food.protein_source !== 'none' ? food.protein_source : '';
   const user = `음식: ${food.name}
 분류: ${food.category} / ${food.method || 'none'}
 시간대: ${meal_slot}
+음식 강점 (영양 특징): ${strengths || '없음'}
+키워드: ${keywords || '없음'}
+단백질 원천: ${proteinSource || '없음'}
 추천 이유 코드: ${JSON.stringify(reason_codes)}
 
-이 음식에 어울리는 headline·reason을 JSON으로 만들어.`;
+이 음식에 어울리는 headline·reason을 JSON으로 만들어.
+reason은 반드시 이 음식의 강점(영양·키워드) 중 하나를 구체적으로 언급해야 해.
+"오랜만에"는 이유가 정말로 다른 것 없을 때만.`;
   return { system: system.trim(), user };
 }
 
