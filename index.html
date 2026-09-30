@@ -2186,8 +2186,10 @@ window.appIcon = function(name, size){
     .supp-summary::before{content:"💡";font-size:18px;flex-shrink:0}
     .supp-summary strong{color:#1E3A8A;font-weight:800}
 
-    /* ═══ 🍚 오늘 뭐 먹지? · 추천 섹션 (Phase 7 · Navy 15/Yellow 5) ═══ */
-    .meal-rec-section{margin:12px 0 24px;background:#FFF;border-radius:20px;padding:20px 18px 18px;box-shadow:0 4px 16px rgba(46,97,196,.08);border:1px solid var(--gg-blue-soft)}
+    /* ═══ 🍚 뭐 먹지? · v21Hero에 통합됨 · 이 스타일들은 미사용 (참조용 유지) ═══ */
+    .meal-rec-section{display:none !important}
+    /* legacy · 원본 stylesheet ↓ */
+    .meal-rec-section-legacy{margin:12px 0 24px;background:#FFF;border-radius:20px;padding:20px 18px 18px;box-shadow:0 4px 16px rgba(46,97,196,.08);border:1px solid var(--gg-blue-soft)}
     .mrs-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
     .mrs-eyebrow{font-size:11px;font-weight:700;color:var(--gg-muted);letter-spacing:.3px;text-transform:uppercase}
     .mrs-question{font-size:20px;font-weight:800;color:var(--gg-ink);letter-spacing:-.6px}
@@ -2408,10 +2410,10 @@ window.appIcon = function(name, size){
             <div style="flex:1;min-width:0">
               <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
               <div id="v21HeroTitle" style="font-size:24px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.2;margin-top:2px;margin-bottom:12px">
-                오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 3px">삼계탕</span> 어때?
+                오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 3px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
               </div>
-              <!-- Why · 영양소 노란색 · 디테일 · 2줄 허용 -->
-              <div id="v21RecWhy" style="font-size:11.5px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal">부족했던 <b style="color:#FBBF24;font-weight:700">단백질·비타민B</b>를 채우고<br><b style="color:#FBBF24;font-weight:700">아연·마그네슘</b>까지 챙길 수 있어요.</div>
+              <!-- Why · Gemini reason 들어감 -->
+              <div id="v21RecWhy" style="font-size:11.5px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal">지금 이 시간에 딱 맞는 한 끼 · 잠시만요</div>
             </div>
             <!-- 우측 · 일러 + kcal (그림 바로 밑) -->
             <div style="flex-shrink:0;width:110px;display:flex;flex-direction:column;align-items:center;gap:3px;margin-right:-8px">
@@ -2879,25 +2881,7 @@ window.appIcon = function(name, size){
         <div class="sub" id="homeGreetingSub">검사·식단·성분까지, 건강어때AI가 챙겨드려요</div>
       </div>
 
-      <!-- ═══ 🍚 오늘 뭐 먹지? · Rule Engine + Gemini 추천 · Phase 7 ═══ -->
-      <div id="mealRecommendSection" class="meal-rec-section">
-        <div class="mrs-header">
-          <div class="mrs-eyebrow"><span id="mrsSlotLabel">지금</span> · AI 추천</div>
-          <div class="mrs-question">뭐 먹지?</div>
-        </div>
-        <button class="mrs-primary" id="mrsPrimaryCard" onclick="onMealPrimaryTap()" disabled>
-          <div class="mrs-primary-headline" id="mrsPrimaryHeadline">추천 준비 중...</div>
-          <div class="mrs-primary-name" id="mrsPrimaryName">·</div>
-          <div class="mrs-primary-reason" id="mrsPrimaryReason"></div>
-        </button>
-        <div class="mrs-actions">
-          <button class="mrs-btn mrs-btn-why"  onclick="onMealWhy()"  id="mrsBtnWhy"  disabled>왜?</button>
-          <button class="mrs-btn mrs-btn-swap" onclick="onMealSwap()" id="mrsBtnSwap" disabled>다른 거</button>
-          <button class="mrs-btn mrs-btn-ate"  onclick="onMealAte()"  id="mrsBtnAte"  disabled>먹었어요</button>
-        </div>
-        <div class="mrs-alts" id="mrsAlts"></div>
-      </div>
-      <!-- ═══════════════════════════════════════════════════════════════ -->
+      <!-- ═══ 🍚 오늘 뭐 먹지? · v21Hero UI에 통합됨 (Phase 7.5) · 카드 제거 · JS만 남김 ═══ -->
 
       <!-- 👨‍👩‍👧‍👦 다중 프로필 스위처 -->
       <div id="homeProfileSection"></div>
@@ -5686,7 +5670,7 @@ function showScreen(id) {
   document.body.classList.toggle('home-active', id === 'screenHome');
   document.body.classList.toggle('welcome-active', id === 'screenWelcome');
   // 홈 진입 시 카드 정보·최근 기록 갱신 + 리마인더 체크 + 물 위젯 + 스트릭·체크인
-  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} try{ mrsLoadRecommendation(); }catch(e){} }
+  if (id === 'screenHome') { updateHomeStats(); refreshPointsBadge(); checkReminder(); try{ renderHomeWaterWidget(); }catch(e){} try{ initDailyCheckin(); }catch(e){} try{ _v22UpdateStepUI(); }catch(e){} try{ _v22CheckSmartReminders(); }catch(e){} }
   // 촬영 화면 첫 진입 시 팁 표시 + 프로필 배너 렌더링
   if (id === 'screenCapture') { maybeShowCaptureTip(); try { renderCaptureProfileBanner(); } catch(e){} }
   // 식단 사진 화면 진입 시 프로필 배너 + GPS 미리 시작 (매장 태그 정렬용)
@@ -6129,7 +6113,7 @@ const KOREAN_FOOD_DB = {
   '만두국':       { kcal:480, protein:22, carbs:65, fat:15, fiber:3,  sodium:1500,calcium:80,  iron:3.0, magnesium:45,  vitA:100, vitC:8,  vitD:0.4, omega3:150, tags:['단백질','탄수'] },
   '순두부백반':   { kcal:320, protein:20, carbs:15, fat:20, fiber:3,  sodium:1400,calcium:200, iron:3.0, magnesium:70,  vitA:80,  vitC:8,  vitD:0.5, omega3:120, tags:['단백질','칼슘'] },
   // ── 분식·간편식 (신규) ──
-  '떡볶이':       { kcal:520, protein:12, carbs:95, fat:12, fiber:3,  sodium:1600,calcium:60,  iron:2.0, magnesium:35,  vitA:100, vitC:14, vitD:0.2, omega3:80,  tags:['탄수화물','매콤'] },
+  '떡볶이':       { kcal:280, protein:6,  carbs:55, fat:5,  fiber:2,  sodium:900, calcium:40,  iron:1.2, magnesium:20,  vitA:60,  vitC:8,  vitD:0.1, omega3:40,  tags:['탄수화물','매콤'] },
   '순대':         { kcal:340, protein:12, carbs:38, fat:16, fiber:2,  sodium:1000,calcium:40,  iron:3.5, magnesium:30,  vitA:20,  vitC:2,  vitD:0.3, omega3:100, tags:['철분'] },
   '튀김모듬':     { kcal:420, protein:10, carbs:48, fat:22, fiber:3,  sodium:800, calcium:40,  iron:1.5, magnesium:30,  vitA:100, vitC:8,  vitD:0.2, omega3:120, tags:['탄수화물'] },
   '김치전':       { kcal:380, protein:10, carbs:48, fat:18, fiber:4,  sodium:1400,calcium:60,  iron:2.0, magnesium:35,  vitA:180, vitC:14, vitD:0.2, omega3:120, tags:['간편'] },
@@ -9689,7 +9673,129 @@ function _v21OpenAbout() {
 }
 
 // ═══ v21 · 히어로 카드 (오늘의 추천 음식) ═══
-function _v21RenderHero() {
+// ═══════════════════════════════════════════════════════════
+// 🎯 새 추천 엔진 통합 (Rule Engine + Gemini)
+// - v21Hero UI에 /api/recommend-next 결과 주입
+// - 실패 시 기존 로컬 로직으로 fallback
+// ═══════════════════════════════════════════════════════════
+window._v21NewApi = { data: null, cachedAt: 0, altIdx: 0 };
+const V21_API_CACHE_TTL = 15 * 60 * 1000;
+
+async function _v21FetchFromNewApi(force) {
+  const now = Date.now();
+  if (!force && window._v21NewApi.data && (now - window._v21NewApi.cachedAt) < V21_API_CACHE_TTL) {
+    return window._v21NewApi.data;
+  }
+  try {
+    const userId = (typeof getCurrentUserUuid === 'function') ? getCurrentUserUuid() : null;
+    const profile = (typeof getUserProfile === 'function') ? (getUserProfile() || {}) : {};
+    const hour = new Date().getHours();
+    const slot = hour >= 5 && hour < 10 ? 'breakfast'
+               : hour >= 10 && hour < 15 ? 'lunch'
+               : hour >= 15 && hour < 21 ? 'dinner'
+               : 'snack';
+    let dislikes = [];
+    try { dislikes = JSON.parse(localStorage.getItem('mrs_dislikes') || '[]'); if (!Array.isArray(dislikes)) dislikes = []; } catch(_){}
+    let recentMeals = [];
+    try {
+      const logs = JSON.parse(localStorage.getItem('foodLogs') || localStorage.getItem('ggFoodLogs') || '[]');
+      if (Array.isArray(logs)) {
+        const cutoff = Date.now() - 3*24*3600*1000;
+        recentMeals = logs.filter(l => l && l.timestamp && new Date(l.timestamp).getTime() > cutoff)
+          .slice(-20).map(l => ({ food_id: l.food_id || null, name: l.name || l.food || '', timestamp: l.timestamp }));
+      }
+    } catch(_){}
+    const res = await fetch('/api/recommend-next', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        meal_slot: slot,
+        preferences: {
+          liked_categories: Array.isArray(profile.liked_categories) ? profile.liked_categories : [],
+          liked_methods:    Array.isArray(profile.liked_methods) ? profile.liked_methods : [],
+          frequently_eaten: Array.isArray(profile.frequently_eaten) ? profile.frequently_eaten : []
+        },
+        allergens: Array.isArray(profile.allergens) ? profile.allergens : [],
+        user_dislikes: dislikes,
+        dietary_restrictions: Array.isArray(profile.dietary_restrictions) ? profile.dietary_restrictions : [],
+        recent_meals: recentMeals
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    window._v21NewApi.data = data;
+    window._v21NewApi.cachedAt = now;
+    window._v21NewApi.altIdx = 0;
+    return data;
+  } catch (err) {
+    console.warn('[v21] new API failed', err);
+    return null;
+  }
+}
+
+function _v21ApplyToHero(primary, meal_slot) {
+  const slotLabel = meal_slot === 'breakfast' ? '아침'
+                  : meal_slot === 'lunch' ? '점심'
+                  : meal_slot === 'dinner' ? '저녁' : '간식';
+  const nameEl  = document.getElementById('v21RecName');
+  const slotEl  = document.getElementById('v21MealSlot');
+  const kcalEl  = document.getElementById('v21HeroKcal');
+  const whyEl   = document.getElementById('v21RecWhy');
+  const chipsEl = document.getElementById('v21HeroChips');
+  if (slotEl) slotEl.textContent = slotLabel;
+  if (nameEl) {
+    nameEl.textContent = primary.name;
+    nameEl.style.color = '#FFF';
+    nameEl.style.background = 'linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%)';
+    nameEl.style.padding = '0 4px';
+    nameEl.style.display = 'inline-block';
+  }
+  // Gemini reason만 표시 (headline은 큰 제목과 중복이라 스킵)
+  if (whyEl) {
+    const reason = (primary.reason || '').trim();
+    if (reason) {
+      whyEl.textContent = reason;
+    } else {
+      whyEl.textContent = '지금 이 끼니에 잘 맞아요';
+    }
+    whyEl.style.display = 'block';
+  }
+  // kcal · food_menu_v2에서 매칭
+  if (kcalEl) {
+    let kcal = '—';
+    try {
+      const db = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(primary.name) : null;
+      if (db && db.kcal) kcal = db.kcal;
+    } catch(_){}
+    kcalEl.textContent = kcal + ' kcal';
+    kcalEl.style.color = '#C4D4F0';
+  }
+  if (chipsEl) chipsEl.innerHTML = '';
+  try { _v22UpdateHeroIllust(primary.name); } catch(_){}
+  // 을/를 조사
+  try {
+    const josaEl = document.getElementById('v21RecJosa');
+    if (josaEl) josaEl.textContent = _v21Josa(primary.name, '를', '을');
+  } catch(_){}
+  // 버튼 표시
+  const heroBtnRow = document.querySelector('#v21HeroChips + div');
+  if (heroBtnRow) heroBtnRow.style.display = 'flex';
+  // 신규 유저 empty carousel 중지
+  try { _v21StopEmptyCarousel(); } catch(_){}
+}
+
+async function _v21RenderHero() {
+  try {
+    // 1. 새 API 시도
+    const apiData = await _v21FetchFromNewApi(false);
+    if (apiData && apiData.primary) {
+      _v21ApplyToHero(apiData.primary, apiData.meal_slot);
+      return;
+    }
+  } catch(err) { console.warn('[v21] new API render failed', err); }
+
+  // 2. 실패 시 기존 로직 fallback
   try {
     const shortages = (typeof getShortageTop === 'function') ? getShortageTop(3) : [];
     // 상단 코치 헤드라인 · "요즘 XX가 조금 부족해요!"
@@ -9938,7 +10044,36 @@ function _findIngredientGroup(name) {
   return null;
 }
 
-function _v21RerollHero() {
+async function _v21RerollHero() {
+  // 🎯 새 API 사용 · 대안 로테이션 후 소진되면 재요청
+  try {
+    const state = window._v21NewApi;
+    if (state && state.data && state.data.alternatives && state.data.alternatives.length) {
+      state.altIdx = (state.altIdx || 0) + 1;
+      // 대안 순환
+      if (state.altIdx <= state.data.alternatives.length) {
+        const alt = state.data.alternatives[state.altIdx - 1];
+        // primary 자리에 대안 표시 · 다음 [자세히] 눌러도 이 음식 기준
+        state.data.primary = {
+          food_id: alt.food_id,
+          name: alt.name,
+          headline: alt.headline,
+          reason: alt.reason
+        };
+        _v21ApplyToHero(state.data.primary, state.data.meal_slot);
+        return;
+      }
+      // 대안 다 봤으면 새 추천 요청
+    }
+    // 새 추천 요청 (force refresh)
+    const fresh = await _v21FetchFromNewApi(true);
+    if (fresh && fresh.primary) {
+      _v21ApplyToHero(fresh.primary, fresh.meal_slot);
+      return;
+    }
+  } catch(err) { console.warn('[v21] reroll new API failed', err); }
+
+  // 실패 시 기존 로컬 로직 fallback
   try {
     // 기록 확인 · 3중 폴백
     let hasHistory = false;
@@ -10429,6 +10564,31 @@ function _v21OpenDeliverySheet() {
 
 function _v21OpenRecReason() {
   try {
+    // 🎯 새 API의 Gemini reason 우선 사용
+    const state = window._v21NewApi;
+    if (state && state.data && state.data.primary) {
+      const p = state.data.primary;
+      const msg = (p.headline ? p.headline + '\n\n' : '') + (p.reason || '이 끼니에 맞춰 골랐어요.');
+      alert(p.name + '\n\n' + msg);
+      // 피드백 로깅
+      try {
+        const userId = (typeof getCurrentUserUuid === 'function') ? getCurrentUserUuid() : null;
+        if (userId && state.data.recommendation_id) {
+          fetch('/api/recommend-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_id: userId,
+              recommendation_id: state.data.recommendation_id,
+              food_id: p.food_id,
+              action: 'why'
+            })
+          });
+        }
+      } catch(_){}
+      return;
+    }
+    // fallback · 기존 로컬 이유 시트
     const cat = (_v21CurrentRec && _v21CurrentRec.name)
       ? ((typeof _v21GetCategoryName === 'function') ? _v21GetCategoryName(_v21CurrentRec.name) : _v21CurrentRec.name)
       : null;
