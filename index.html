@@ -2405,21 +2405,17 @@ window.appIcon = function(name, size){
         <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 6px;box-shadow:none;margin-bottom:12px;margin-top:4px;overflow:hidden;position:relative;min-height:230px">
           <!-- 노란 halo -->
           <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(251,191,36,.24) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
-          <!-- 본문 · 좌측 텍스트 + 우측 일러(kcal 밑에 붙음) -->
-          <div style="display:flex;gap:12px;align-items:flex-start;position:relative;z-index:2;margin-bottom:36px">
-            <div style="flex:1;min-width:0">
-              <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
-              <div id="v21HeroTitle" style="font-size:24px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.2;margin-top:2px;margin-bottom:12px">
-                오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 3px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
-              </div>
-              <!-- Why · Gemini reason 들어감 -->
-              <div id="v21RecWhy" style="font-size:11.5px;color:rgba(255,255,255,.85);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal">지금 이 시간에 딱 맞는 한 끼 · 잠시만요</div>
+          <!-- 본문 · 텍스트만 가운데 정렬 · 일러스트/kcal 제거 (Phase 7.5.1) -->
+          <div style="position:relative;z-index:2;margin-bottom:32px;text-align:center;padding:8px 12px 0">
+            <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
+            <div id="v21HeroTitle" style="font-size:26px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.25;margin-top:2px;margin-bottom:14px">
+              오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 4px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
             </div>
-            <!-- 우측 · 일러 + kcal (그림 바로 밑) -->
-            <div style="flex-shrink:0;width:110px;display:flex;flex-direction:column;align-items:center;gap:3px;margin-right:-8px">
-              <div id="v21HeroIllust" style="width:110px;height:100px;pointer-events:none"></div>
-              <div id="v21HeroKcal" style="font-size:11.5px;color:#FBBF24;font-weight:700;text-align:center;white-space:nowrap">— kcal</div>
-            </div>
+            <!-- Why · Gemini reason 들어감 -->
+            <div id="v21RecWhy" style="font-size:12.5px;color:rgba(255,255,255,.88);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal;max-width:280px;margin:0 auto">지금 이 시간에 딱 맞는 한 끼 · 잠시만요</div>
+            <!-- 히든 · JS 참조 유지 (제거 대신 숨김) -->
+            <div id="v21HeroIllust" style="display:none"></div>
+            <div id="v21HeroKcal" style="display:none">— kcal</div>
           </div>
           <!-- 히든 · chips 참조 유지 -->
           <div id="v21HeroChips" style="display:none"></div>
