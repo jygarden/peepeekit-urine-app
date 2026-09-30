@@ -99,18 +99,28 @@ async function loadFoodMenuAsync() {
 // 부족 영양소 계산 · 최근 식사 → 부족량
 // ═══════════════════════════════════════════════════════════
 function estimateDeficits(recentMeals, foodMenu) {
-  // recentMeals: [{food_id, name, timestamp}]
+  // 🔴 BUG-A fix · 신규 유저(기록 부족)는 "3일 굶은 사람"으로 오판되면 안 됨
+  // 최소 3끼 이상 기록이 있어야 부족량 판정 가능 · 아니면 빈 배열 반환
+  if (!Array.isArray(recentMeals) || recentMeals.length < 3) {
+    return [];
+  }
+
+  // 매칭된 실제 식사 수 · 못 찾은 항목은 계산에서 제외
   const totals = { protein: 0, fiber: 0, vitD: 0, vitC: 0, calcium: 0, iron: 0, omega3: 0 };
+  let matched = 0;
 
   for (const meal of recentMeals) {
-    // food_id 매칭
     const food = foodMenu.find(f => f.id === meal.food_id || f.name === meal.name);
     if (!food) continue;
+    matched++;
     const n = food.nutrients_per_serving || {};
     for (const k of Object.keys(totals)) {
       totals[k] += (n[k] || 0);
     }
   }
+
+  // 매칭된 식사가 너무 적으면(< 3) 판단 불가 → 스킵
+  if (matched < 3) return [];
 
   const deficits = [];
   for (const [nutrient, threshold] of Object.entries(DEFICIT_THRESHOLDS)) {
@@ -118,13 +128,12 @@ function estimateDeficits(recentMeals, foodMenu) {
     const got = totals[nutrient] || 0;
     const fillRate = got / rda;
     if (fillRate < threshold) {
-      const amount_needed = rda - got;  // 부족량 (mg/μg/g)
-      const severity = 1 - fillRate;    // 0-1
+      const amount_needed = rda - got;
+      const severity = 1 - fillRate;
       deficits.push({ nutrient, amount_needed, severity, fillRate });
     }
   }
 
-  // severity 높은 순
   deficits.sort((a, b) => b.severity - a.severity);
   return deficits;
 }
@@ -467,8 +476,17 @@ async function callGeminiForCopy(food, meal_slot, reason_codes) {
       contents: [{ role: 'user', parts: [{ text: prompt.user }] }],
       generationConfig: {
         temperature: 0.8,
-        maxOutputTokens: 200,
-        responseMimeType: 'application/json'
+        maxOutputTokens: 800,
+        thinkingConfig: { thinkingBudget: 0 },  // Gemini 2.5 Flash · thinking 끄기
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            headline: { type: 'STRING' },
+            reason:   { type: 'STRING' }
+          },
+          required: ['headline', 'reason']
+        }
       }
     };
     const controller = new AbortController();
@@ -486,9 +504,16 @@ async function callGeminiForCopy(food, meal_slot, reason_codes) {
     }
     const data = await res.json();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return null;
-    const parsed = JSON.parse(text);
-    if (!parsed.headline || !parsed.reason) return null;
+    const finishReason = data.candidates?.[0]?.finishReason;
+    if (!text) { console.warn('[recommend-next] Gemini empty text · finish:', finishReason, JSON.stringify(data).slice(0,200)); return null; }
+    console.log('[recommend-next] Gemini raw · finish:', finishReason, '·', text.length, 'chars ·', text.slice(0, 200));
+    // JSON 추출 · 앞뒤 잡소리 제거 (예: "Here is the JSON: {...}")
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) { console.warn('[recommend-next] no JSON in text'); return null; }
+    let parsed;
+    try { parsed = JSON.parse(jsonMatch[0]); }
+    catch (e) { console.warn('[recommend-next] JSON parse fail:', e.message, jsonMatch[0].slice(0,150)); return null; }
+    if (!parsed.headline || !parsed.reason) { console.warn('[recommend-next] missing fields:', JSON.stringify(parsed)); return null; }
     // 안전장치 · 너무 긴 문구 자르기
     return {
       headline: String(parsed.headline).slice(0, 20),
