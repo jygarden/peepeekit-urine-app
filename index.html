@@ -10528,7 +10528,48 @@ function _v21RetryNearby() {
   _v21FetchNearby(q);
 }
 
-function _v21FetchNearby(foodNameRaw) {
+// 수동 지역 입력 · GPS 안 될 때 fallback
+async function _v21ManualRegion() {
+  const q = window._v21NearbyLastQuery;
+  if (!q) return;
+  const region = prompt('지역명을 입력하세요 (예: 강남, 홍대, 송파구 잠실동)', '');
+  if (!region) return;
+  _v21ShowNearbyMapSheet(q, 'loading', null);
+  // 지역명 + 음식명 결합 검색 (좌표 없이)
+  const combined = region.trim() + ' ' + q;
+  try {
+    const r = await fetch('/api/kakao-local', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: combined, display: 15 })
+    });
+    const data = r.ok ? await r.json() : null;
+    if (!data || !data.items || data.items.length === 0) {
+      _v21ShowNearbyMapSheet(q, 'empty', null);
+    } else {
+      window._v21NearbyGpsStatus = 'manual';
+      window._v21ManualRegionName = region;
+      _v21ShowNearbyMapSheet(q, 'ok', data.items);
+    }
+  } catch(e) {
+    console.error('[manual region]', e);
+    _v21ShowNearbyMapSheet(q, 'error', null);
+  }
+}
+
+// Permissions API로 위치 권한 상태 미리 체크 (진단용)
+async function _v21CheckGpsPermission() {
+  try {
+    if (!('permissions' in navigator)) return 'unknown';
+    const status = await navigator.permissions.query({ name: 'geolocation' });
+    return status.state;  // 'granted' | 'denied' | 'prompt'
+  } catch(e) { return 'unknown'; }
+}
+
+async function _v21FetchNearby(foodNameRaw) {
+  // 수동 지역 사용 중이면 리셋
+  window._v21ManualRegionName = null;
+
   const searchWithGps = (lat, lng) => {
     const body = { query: foodNameRaw, display: 15 };
     if (lat && lng) { body.lat = lat; body.lng = lng; body.radius = 10000; }
@@ -10546,7 +10587,7 @@ function _v21FetchNearby(foodNameRaw) {
       }
     })
     .catch(err => {
-      console.error('[nearby]', err);
+      console.error('[nearby] API err:', err);
       _v21ShowNearbyMapSheet(foodNameRaw, 'error', null);
     });
   };
@@ -10557,20 +10598,31 @@ function _v21FetchNearby(foodNameRaw) {
     searchWithGps(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
     return;
   }
-  // 2. GPS 요청 · 10초 넉넉히 (iOS는 첫 요청 느림)
+  // 2. geolocation API 체크
   if (!navigator.geolocation) {
     window._v21NearbyGpsStatus = 'unsupported';
     searchWithGps(null, null);
     return;
   }
+  // 3. Permissions API로 권한 상태 미리 체크 (Chrome/Edge · Safari는 미지원)
+  const permState = await _v21CheckGpsPermission();
+  console.log('[nearby] permission state:', permState);
+  if (permState === 'denied') {
+    // 명시적으로 거부된 상태 · getCurrentPosition 호출해봤자 바로 에러
+    window._v21NearbyGpsStatus = 'denied';
+    searchWithGps(null, null);
+    return;
+  }
+  // 4. GPS 요청 · 12초 (iOS 첫 요청은 매우 느릴 수 있음)
   let done = false;
   const to = setTimeout(() => {
     if (!done) {
       done = true;
       window._v21NearbyGpsStatus = 'timeout';
+      console.warn('[nearby] GPS timeout · 12s elapsed');
       searchWithGps(null, null);
     }
-  }, 10000);
+  }, 12000);
   navigator.geolocation.getCurrentPosition(
     p => {
       if (done) return; done = true; clearTimeout(to);
@@ -10578,17 +10630,17 @@ function _v21FetchNearby(foodNameRaw) {
       window._v22GpsCoords = { lat, lng };
       window._v22GpsAccuracy = p.coords.accuracy || null;
       window._v21NearbyGpsStatus = 'ok';
+      console.log('[nearby] GPS ok:', lat, lng, 'acc:', p.coords.accuracy);
       searchWithGps(lat, lng);
     },
     err => {
       if (done) return; done = true; clearTimeout(to);
-      // 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
       const codeMap = { 1: 'denied', 2: 'unavailable', 3: 'timeout' };
       window._v21NearbyGpsStatus = codeMap[err.code] || 'unknown';
-      console.warn('[nearby] GPS err:', err.code, err.message);
+      console.warn('[nearby] GPS err code:', err.code, 'msg:', err.message);
       searchWithGps(null, null);
     },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
   );
 }
 
@@ -10638,23 +10690,42 @@ function _v21ShowNearbyMapSheet(query, status, items) {
     }).join('');
   }
 
-  // GPS 상태 뱃지 + 재시도 버튼
+  // GPS 상태 뱃지 + 재시도 / 수동 지역 입력 버튼
   const gpsStatus = window._v21NearbyGpsStatus || 'unknown';
   const hasGps = window._v22GpsCoords && window._v22GpsCoords.lat;
+  const manualRegion = window._v21ManualRegionName;
   let gpsBanner = '';
-  if (status === 'ok' && !hasGps) {
-    const reasonMap = {
-      'denied': '위치 권한을 거부하셨어요 · 전국 검색 결과',
-      'unavailable': '위치 정보를 사용할 수 없어요 · 전국 검색 결과',
-      'timeout': 'GPS 응답이 느려요 · 전국 검색 결과',
-      'unsupported': '이 기기는 위치 지원 X · 전국 검색 결과',
-      'unknown': '위치 정보 없음 · 전국 검색 결과'
-    };
+
+  if (status === 'ok' && manualRegion) {
+    // 수동 지역 사용 중 · 녹색 뱃지
     gpsBanner = `
-      <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
-        <div style="font-size:18px;flex-shrink:0">⚠️</div>
-        <div style="flex:1;font-size:11.5px;color:#92400E;font-weight:600;line-height:1.4">${reasonMap[gpsStatus] || reasonMap.unknown}</div>
-        <button onclick="_v21RetryNearby()" style="background:#F59E0B;color:#FFF;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">위치 다시 받기</button>
+      <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:18px;flex-shrink:0">📍</div>
+        <div style="flex:1;font-size:11.5px;color:#166534;font-weight:700;line-height:1.4">"${_v20Esc(manualRegion)}" 지역 결과</div>
+        <button onclick="_v21RetryNearby()" style="background:#16A34A;color:#FFF;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">GPS 다시</button>
+      </div>`;
+  } else if (status === 'ok' && !hasGps) {
+    const reasonMap = {
+      'denied': { msg:'위치 권한이 거부됐어요', help:'설정 → Safari → 위치 → 허용 (또는 PWA 지우고 재설치)' },
+      'unavailable':{ msg:'위치 정보를 사용할 수 없어요', help:'설정 → 개인정보 보호 → 위치 서비스 ON' },
+      'timeout': { msg:'GPS 응답이 너무 느려요', help:'실내 깊은 곳이면 창가로 이동해 다시 시도' },
+      'unsupported':{ msg:'이 기기는 위치 지원 X', help:'수동으로 지역 입력하세요' },
+      'unknown':  { msg:'위치 정보가 없어요', help:'권한 허용 후 다시 받기 or 수동 입력' }
+    };
+    const info = reasonMap[gpsStatus] || reasonMap.unknown;
+    gpsBanner = `
+      <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:12px;margin-bottom:12px">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+          <div style="font-size:20px;flex-shrink:0;line-height:1">⚠️</div>
+          <div style="flex:1">
+            <div style="font-size:12.5px;color:#92400E;font-weight:800;letter-spacing:-.2px;margin-bottom:3px">${info.msg} · 전국 검색 결과예요</div>
+            <div style="font-size:11px;color:#B45309;font-weight:600;line-height:1.5">💡 ${info.help}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="_v21RetryNearby()" style="flex:1;background:#F59E0B;color:#FFF;border:none;border-radius:8px;padding:9px 10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">🔄 위치 다시 받기</button>
+          <button onclick="_v21ManualRegion()" style="flex:1;background:#FFF;color:#92400E;border:1.5px solid #F59E0B;border-radius:8px;padding:9px 10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">✏️ 지역 직접 입력</button>
+        </div>
       </div>`;
   }
 
