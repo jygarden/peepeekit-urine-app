@@ -3647,69 +3647,85 @@ window.appIcon = function(name, size){
       </button>
     </div>
     <div id="foodResultCapture">
-      <!-- 총 칼로리 Hero -->
-      <div class="calorie-hero">
-        <div class="calorie-label" id="foodMealTimeLabel">점심 · 분석 결과</div>
-        <div class="calorie-num"><span id="foodTotalCal">0</span><span class="calorie-unit">kcal</span></div>
-        <div class="calorie-sub" id="foodGradeLabel">영양 균형: 양호 (B)</div>
-      </div>
-      <!-- 📊 일주일/한달 리포트 버튼 (점수 바로 아래) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 10px">
-        <button class="report-btn" onclick="showFoodReport('week')">일주일 리포트</button>
-        <button class="report-btn" onclick="showFoodReport('month')">한달 리포트</button>
-      </div>
-      <!-- 🧬 맞춤 분석 카드 -->
-      <div id="personalAnalysisCard" style="margin-bottom:14px"></div>
-      <!-- 💧 물 섭취 위젯 (결과 페이지) -->
-      <div id="waterWidget" style="margin-bottom:14px"></div>
-      <!-- 인식된 음식 -->
-      <div class="food-list">
-        <div class="nutri-title">🍴 인식된 음식</div>
-        <div id="foodItemsList"></div>
-      </div>
-      <!-- 영양소 막대 -->
-      <div class="nutri-grid">
-        <div class="nutri-title">📊 영양소 분석</div>
-        <div id="foodNutriItems"></div>
-      </div>
-      <!-- 종합 평가 -->
-      <div class="card" style="background:#FAFCFF">
-        <div class="nutri-title">💬 영양사 코멘트</div>
-        <div id="foodSummary" style="font-size:13px;color:#475569;line-height:1.7"></div>
-      </div>
-      <!-- 잘된 점/주의점 -->
-      <div id="foodHighlights" style="margin-bottom:14px"></div>
-      <!-- 부족/과다 -->
-      <div class="env-health-box" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fbbf24" id="foodMissingBox">
-        <div class="etitle" style="color:var(--gray-700)">영양소 균형</div>
-        <div class="env-health-item" id="foodMissingItem" style="display:none">
-          <div class="elabel" style="color:var(--gray-600)">더 필요한 영양소</div>
-          <div id="foodMissingText"></div>
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <!-- 🎯 새 요약 블록 · 한눈에 핵심 전달 (Phase 8 UX 재설계)   -->
+      <!-- renderFoodResult에서 자동 채워짐                         -->
+      <!-- ═══════════════════════════════════════════════════════ -->
+      <div id="foodResultSummary"></div>
+
+      <!-- 기존 섹션 · 자세히 보기로 접힘 (사용자가 원할 때만) -->
+      <details id="foodResultDetails" style="margin:16px 0 0;background:#F8FAFC;border-radius:14px;overflow:hidden;border:1px solid #E2E8F0">
+        <summary style="padding:14px 16px;font-size:13px;font-weight:800;color:#334155;cursor:pointer;display:flex;align-items:center;gap:8px;list-style:none;user-select:none">
+          <span style="font-size:16px">📋</span>
+          <span>자세한 분석 보기</span>
+          <span style="margin-left:auto;color:#94A3B8;font-size:11px;font-weight:600" id="foodDetailsHint">아래로 펼치기</span>
+        </summary>
+        <div style="padding:4px 14px 20px">
+          <!-- 총 칼로리 Hero (기존) -->
+          <div class="calorie-hero" style="margin-top:10px">
+            <div class="calorie-label" id="foodMealTimeLabel">점심 · 분석 결과</div>
+            <div class="calorie-num"><span id="foodTotalCal">0</span><span class="calorie-unit">kcal</span></div>
+            <div class="calorie-sub" id="foodGradeLabel">영양 균형: 양호 (B)</div>
+          </div>
+          <!-- 📊 일주일/한달 리포트 버튼 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 10px">
+            <button class="report-btn" onclick="showFoodReport('week')">일주일 리포트</button>
+            <button class="report-btn" onclick="showFoodReport('month')">한달 리포트</button>
+          </div>
+          <!-- 🧬 맞춤 분석 카드 -->
+          <div id="personalAnalysisCard" style="margin-bottom:14px"></div>
+          <!-- 💧 물 섭취 위젯 -->
+          <div id="waterWidget" style="margin-bottom:14px"></div>
+          <!-- 인식된 음식 -->
+          <div class="food-list">
+            <div class="nutri-title">🍴 인식된 음식</div>
+            <div id="foodItemsList"></div>
+          </div>
+          <!-- 영양소 막대 -->
+          <div class="nutri-grid">
+            <div class="nutri-title">📊 영양소 분석</div>
+            <div id="foodNutriItems"></div>
+          </div>
+          <!-- 종합 평가 -->
+          <div class="card" style="background:#FAFCFF">
+            <div class="nutri-title">💬 영양사 코멘트</div>
+            <div id="foodSummary" style="font-size:13px;color:#475569;line-height:1.7"></div>
+          </div>
+          <!-- 잘된 점/주의점 -->
+          <div id="foodHighlights" style="margin-bottom:14px"></div>
+          <!-- 부족/과다 -->
+          <div class="env-health-box" style="background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#fbbf24" id="foodMissingBox">
+            <div class="etitle" style="color:var(--gray-700)">영양소 균형</div>
+            <div class="env-health-item" id="foodMissingItem" style="display:none">
+              <div class="elabel" style="color:var(--gray-600)">더 필요한 영양소</div>
+              <div id="foodMissingText"></div>
+            </div>
+            <div class="env-health-item" id="foodExcessiveItem" style="display:none">
+              <div class="elabel" style="color:#9F1239">과다 섭취</div>
+              <div id="foodExcessiveText"></div>
+            </div>
+          </div>
+          <!-- 다음 식사 -->
+          <div class="saju-box" id="foodNextMealBox" style="display:none">
+            <div class="stitle">다음 식사 추천</div>
+            <div id="foodNextMeal" style="font-size:13px;color:#1E40AF;line-height:1.7"></div>
+          </div>
+          <!-- 추천 영양제 -->
+          <div class="reco-section" id="foodSuppSection" style="display:none">
+            <div class="reco-header">
+              <span class="reco-icon">💊</span>
+              <span class="reco-title">이 식단에 추가 권장 영양제</span>
+            </div>
+            <div id="foodSuppList"></div>
+          </div>
+          <!-- 팁 -->
+          <div class="tips-box" id="foodTipsBox" style="display:none">
+            <div class="ttitle">💡 관리 팁</div>
+            <div id="foodTipsList"></div>
+          </div>
+          <img id="foodResultImg" src="" alt="식단 이미지" style="display:none"/>
         </div>
-        <div class="env-health-item" id="foodExcessiveItem" style="display:none">
-          <div class="elabel" style="color:#9F1239">과다 섭취</div>
-          <div id="foodExcessiveText"></div>
-        </div>
-      </div>
-      <!-- 다음 식사 -->
-      <div class="saju-box" id="foodNextMealBox" style="display:none">
-        <div class="stitle">다음 식사 추천</div>
-        <div id="foodNextMeal" style="font-size:13px;color:#1E40AF;line-height:1.7"></div>
-      </div>
-      <!-- 추천 영양제 -->
-      <div class="reco-section" id="foodSuppSection" style="display:none">
-        <div class="reco-header">
-          <span class="reco-icon">💊</span>
-          <span class="reco-title">이 식단에 추가 권장 영양제</span>
-        </div>
-        <div id="foodSuppList"></div>
-      </div>
-      <!-- 팁 -->
-      <div class="tips-box" id="foodTipsBox" style="display:none">
-        <div class="ttitle">💡 관리 팁</div>
-        <div id="foodTipsList"></div>
-      </div>
-      <img id="foodResultImg" src="" alt="식단 이미지" style="display:none"/>
+      </details>
     </div>
     <div style="margin-top:14px">
       <button onclick="shareFoodStory()" style="width:100%;margin-bottom:8px;padding:15px;border:none;border-radius:14px;background:#264A8A;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(38,74,138,.25)">📸 인스타 스토리로 공유</button>
@@ -18431,11 +18447,161 @@ function enrichWithPairings(r) {
   return r;
 }
 
+// ═══════════════════════════════════════════════════════════
+// 🎯 식사 분석 결과 · 한눈 요약 블록 (Phase 8 UX)
+// 핵심 4가지만: 등급 · 영양 바 · 부족 영양 · 다음 끼 추천
+// ═══════════════════════════════════════════════════════════
+function _renderFoodSummaryBlock(r) {
+  const container = document.getElementById('foodResultSummary');
+  if (!container) return;
+
+  const tot = r.totals || {};
+  const score = r.balanceScore || 0;
+  const grade = r.balanceGrade || 'B';
+  const label = r.balanceLabel || '양호';
+  const kcal = Math.round(tot.kcal || tot.calories || 0);
+  const foods = Array.isArray(r.foods) ? r.foods : [];
+  const foodNames = foods.map(f => f.name || f.food || '').filter(Boolean);
+  const foodTitle = foodNames.length === 0 ? '식사 분석'
+    : foodNames.length === 1 ? foodNames[0]
+    : `${foodNames[0]} 외 ${foodNames.length - 1}가지`;
+
+  // 등급 색상
+  const gradeColor = score >= 85 ? '#15803D' : score >= 70 ? '#B45309' : '#B91C1C';
+  const gradeBg    = score >= 85 ? '#DCFCE7' : score >= 70 ? '#FEF3C7' : '#FEE2E2';
+
+  // 6대 영양소 바 데이터 · 1끼 기준 % 충족
+  const rda = (typeof RDA_ADULT !== 'undefined') ? RDA_ADULT : {};
+  const perMealTarget = {
+    carbs: 100, protein: 20, fat: 20, fiber: 8,
+    calcium: 266, iron: 4, vitC: 33, vitD: 3.3, vitA: 233, omega3: 500
+  };
+  const bars = [
+    { key:'carbs',   name:'탄수화물', val: tot.carbs||0,   max: perMealTarget.carbs,   unit:'g' },
+    { key:'protein', name:'단백질',   val: tot.protein||0, max: perMealTarget.protein, unit:'g' },
+    { key:'fat',     name:'지방',     val: tot.fat||0,     max: perMealTarget.fat,     unit:'g' },
+    { key:'fiber',   name:'식이섬유', val: tot.fiber||0,   max: perMealTarget.fiber,   unit:'g' }
+  ];
+  const barsHtml = bars.map(b => {
+    const pct = Math.min(100, Math.round((b.val / b.max) * 100));
+    const barColor = pct >= 80 ? '#22C55E' : pct >= 50 ? '#F59E0B' : '#EF4444';
+    const statusIcon = pct >= 80 ? '✓' : pct >= 50 ? '·' : '!';
+    return `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-size:12px;font-weight:700;color:#1D3762">${b.name}</div>
+          <div style="font-size:11px;font-weight:800;color:${barColor}">${statusIcon} ${pct}%</div>
+        </div>
+        <div style="height:8px;background:#F1F5F9;border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${barColor};border-radius:99px;transition:width .4s ease"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // 부족 영양소 추출 · 50% 미만
+  const deficits = bars.filter(b => (b.val / b.max) < 0.5).map(b => b.name);
+  // 추가로 비타민·미네랄 체크
+  if ((tot.vitC||0) / (rda.vitC||100) < 0.3) deficits.push('비타민C');
+  if ((tot.vitD||0) / (rda.vitD||10) < 0.3) deficits.push('비타민D');
+  if ((tot.calcium||0) / (rda.calcium||800) < 0.3) deficits.push('칼슘');
+  if ((tot.iron||0) / (rda.iron||12) < 0.3) deficits.push('철분');
+  if ((tot.omega3||0) / (rda.omega3||1500) < 0.3) deficits.push('오메가3');
+  const uniqueDeficits = [...new Set(deficits)].slice(0, 4);
+
+  // 다음 끼 추천 음식 (부족 영양소 기반)
+  const nutrientToFoods = {
+    '단백질': ['연어구이', '닭가슴살', '두부부침', '삶은계란'],
+    '식이섬유': ['나물비빔밥', '시금치나물', '현미밥', '샐러드'],
+    '칼슘': ['우유', '그릭요거트', '멸치볶음', '두부요리'],
+    '철분': ['시금치나물', '소고기미역국', '간', '조개'],
+    '비타민C': ['귤', '딸기', '파프리카', '브로콜리'],
+    '비타민D': ['연어구이', '고등어구이', '계란노른자', '우유'],
+    '오메가3': ['연어구이', '고등어구이', '정어리', '아마씨'],
+    '탄수화물': ['잡곡밥', '현미밥', '고구마', '통밀빵'],
+    '지방': ['아보카도', '견과류', '올리브오일', '연어']
+  };
+  const recommendFoods = [];
+  for (const d of uniqueDeficits) {
+    const list = nutrientToFoods[d];
+    if (list) {
+      recommendFoods.push({ nutrient: d, foods: list.slice(0, 2) });
+    }
+    if (recommendFoods.length >= 3) break;
+  }
+
+  // ━━━━ UI 조립 ━━━━
+  container.innerHTML = `
+    <style>
+      .fsum-card{background:#FFF;border-radius:18px;padding:18px 18px 16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(29,55,98,.06);border:1px solid #E4EAF3}
+      .fsum-title{font-size:11px;font-weight:800;color:#2E61C4;letter-spacing:.3px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    </style>
+
+    <!-- 1. HERO · 음식명 + 등급 (한 눈) -->
+    <div class="fsum-card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-20%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(251,191,36,.2),transparent 70%);pointer-events:none"></div>
+      <div style="position:relative;z-index:1;display:flex;align-items:center;gap:14px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">${(window.selectedMealTime || '식사')} · 분석 완료</div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.5px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(foodTitle)}</div>
+          <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin-top:4px;font-weight:600">${kcal}kcal · ${label}</div>
+        </div>
+        <div style="flex-shrink:0;text-align:center;background:rgba(255,255,255,.15);border-radius:16px;padding:10px 14px;min-width:70px">
+          <div style="font-size:28px;font-weight:900;color:#FBBF24;letter-spacing:-1px;line-height:1">${score}</div>
+          <div style="font-size:10px;color:#DAE7FF;font-weight:700;letter-spacing:.5px;margin-top:3px">${grade}등급</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 6대 영양 바 그래프 · 색코딩 -->
+    <div class="fsum-card">
+      <div class="fsum-title"><span>📊</span><span>이 식사의 영양 (1끼 기준 %)</span></div>
+      ${barsHtml}
+      <div style="margin-top:4px;padding-top:10px;border-top:1px dashed #E4EAF3;display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:#64748B;font-weight:600">
+        <span><span style="color:#22C55E">■</span> 충분 (80%+)</span>
+        <span><span style="color:#F59E0B">■</span> 보통 (50-79%)</span>
+        <span><span style="color:#EF4444">■</span> 부족 (50%-)</span>
+      </div>
+    </div>
+
+    ${uniqueDeficits.length > 0 ? `
+    <!-- 3. 부족한 영양소 · 명확히 -->
+    <div class="fsum-card" style="background:#FFF7ED;border-color:#FDBA74">
+      <div class="fsum-title" style="color:#C2410C"><span>⚠️</span><span>이 끼로 부족한 영양</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${uniqueDeficits.map(d => `<span style="background:#FED7AA;color:#9A3412;padding:5px 11px;border-radius:99px;font-size:12.5px;font-weight:800">${_v20Esc(d)}</span>`).join('')}
+      </div>
+    </div>
+    ` : `
+    <div class="fsum-card" style="background:#DCFCE7;border-color:#86EFAC">
+      <div class="fsum-title" style="color:#166534"><span>✅</span><span>영양 균형 좋아요!</span></div>
+      <div style="font-size:12.5px;color:#15803D;font-weight:700">이 끼니로 필요한 영양을 잘 챙기셨어요.</div>
+    </div>
+    `}
+
+    ${recommendFoods.length > 0 ? `
+    <!-- 4. 다음 끼 추천 음식 · 부족 영양 → 음식 매핑 -->
+    <div class="fsum-card" style="background:#F0F9FF;border-color:#7DD3FC">
+      <div class="fsum-title" style="color:#0C4A6E"><span>🍽</span><span>다음 끼엔 이거 어때요?</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${recommendFoods.map(rf => `
+          <div style="display:flex;align-items:center;gap:10px;background:#FFF;border-radius:12px;padding:10px 12px;border:1px solid #BAE6FD">
+            <div style="flex-shrink:0;background:#0369A1;color:#FFF;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:99px;letter-spacing:-.2px">${_v20Esc(rf.nutrient)} ⬆️</div>
+            <div style="flex:1;font-size:12.5px;font-weight:700;color:#0C4A6E;letter-spacing:-.2px">${rf.foods.map(f => _v20Esc(f)).join(' · ')}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    ` : ''}
+  `;
+}
+
 function renderFoodResult(r) {
   // 🍱 궁합·상극이 비어있으면 사전에서 자동 채우기 (AI 보완용)
   try { r = enrichWithPairings(r); } catch(e) { console.error('enrichWithPairings 에러:', e); }
   // 🧬 맞춤 분석 카드 렌더링
   try { renderPersonalAnalysis(r); } catch(e) { console.error('맞춤 분석 에러:', e); }
+  // 🎯 새 요약 블록 렌더링 (한눈에 핵심 전달)
+  try { _renderFoodSummaryBlock(r); } catch(e) { console.error('summary block 에러:', e); }
   // 💧 물 섭취 위젯 · 결과 페이지에서 제거 (요청) · 홈에는 유지
   const _waterEl = document.getElementById('waterWidget');
   if (_waterEl) _waterEl.style.display = 'none';
