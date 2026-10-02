@@ -8120,7 +8120,7 @@ function _v20RenderRecentMeal() {
     recent = fh[0];
   } catch(e) { recent = null; }
   if (!recent) {
-    if (nameEl) nameEl.textContent = '부족한 영양 확인하러 가기';
+    if (nameEl) nameEl.textContent = '나의 영양 확인하기';
     if (chipsEl) chipsEl.innerHTML = '';
     if (commentEl) commentEl.innerHTML = '음식을 찍으면 6대 영양 밸런스와 부족한 영양소를 이 자리에 보여드려요.';
     if (moreEl) moreEl.style.display = 'none';
@@ -8129,13 +8129,13 @@ function _v20RenderRecentMeal() {
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background = '#F1F5F9'; scoreEl.style.color = '#94A3B8'; }
     return;
   }
-  // 🎯 사용자 요청: 기록이 있어도 음식명 표시 X · 항상 "부족한 영양 확인하러 가기"
+  // 🎯 사용자 요청: 기록이 있어도 음식명 표시 X · 항상 "나의 영양 확인하기"
   const firstFood = _foodsFromEntry(recent)[0];
   const foodName = (firstFood && firstFood.name) || recent.foods || '식사';
   const mealTime = recent.mealTime || '';
   const mealLabel = {'breakfast':'아침', 'lunch':'점심', 'dinner':'저녁', 'snack':'간식'}[mealTime] || '';
   const displayName = mealLabel ? `${mealLabel} · ${foodName}` : foodName;
-  if (nameEl) nameEl.textContent = '부족한 영양 확인하러 가기';
+  if (nameEl) nameEl.textContent = '나의 영양 확인하기';
   try { _v22UpdateHeroIllust(displayName); } catch(e){}
   // chip · nutrition 기반
   const nut = recent.nutrition || {};
@@ -8190,105 +8190,105 @@ function _v20RenderRecentMeal() {
 // 각 카드: {id, nutrients:[매칭키], icon, bg, title, desc, chips, disclaimer, medical(선택)}
 const BODY_SIGNAL_CARDS = [
   { id:'fiber_gut', nutrients:['fiber'], icon:'🌿', bg:'#F0FDF4',
-    title:'요즘 배변이 개운하지 않다면?',
+    title:'식이섬유 부족 · 장이 느려져요',
     desc:'식이섬유·수분이 부족하면 장 활동이 느려져요. 하루 채소 3접시·물 6~8잔만 챙겨도 3일 안에 변화가 옵니다.',
     chips:[{emoji:'🥬',label:'채소'},{emoji:'🍎',label:'과일'},{emoji:'💧',label:'물'}],
     disclaimer:'가능성 중 하나 · 3일 이상 지속되면 진료' },
   { id:'protein_fatigue', nutrients:['protein'], icon:'💪', bg:'#FEF2F2',
-    title:'오후에 쉽게 피곤한가요?',
+    title:'단백질 부족 · 쉽게 피곤해져요',
     desc:'단백질이 부족하면 근육·혈당·집중력이 함께 떨어져요. 매끼 손바닥 크기 단백질을 챙기면 오후 무기력이 눈에 띄게 줄어듭니다.',
     chips:[{emoji:'🥚',label:'달걀'},{emoji:'🍗',label:'닭가슴살'},{emoji:'🐟',label:'생선'}],
     disclaimer:'가능성 중 하나 · 수면·운동도 함께 점검하세요' },
   { id:'iron_dizzy', nutrients:['iron'], icon:'🩸', bg:'#FEF2F2',
-    title:'앉았다 일어날 때 자주 어지럽나요?',
+    title:'철분 부족 · 자주 어지러워져요',
     desc:'철분 부족이면 산소 운반이 느려져 순간적으로 어지러워요. 붉은 살코기와 시금치를 비타민C 과일과 함께 먹으면 흡수율이 3배까지 올라갑니다.',
     chips:[{emoji:'🥩',label:'붉은살코기'},{emoji:'🥬',label:'시금치'},{emoji:'🍊',label:'비타민C'}],
     disclaimer:'심하거나 자주 반복되면 내과 검진 권장',
     medical:'심한 어지러움·기절이 반복되면 내과 진료를 먼저 권해요.' },
   { id:'calcium_bones', nutrients:['calcium'], icon:'🦴', bg:'#EFF6FF',
-    title:'뼈 · 치아가 신경 쓰이나요?',
+    title:'칼슘 부족 · 뼈·치아가 약해져요',
     desc:'칼슘과 비타민D는 짝꿍이에요. 우유·유제품에 하루 10분 햇볕까지 더하면 흡수가 잘 됩니다. 두부·멸치도 좋은 대안이에요.',
     chips:[{emoji:'🥛',label:'우유'},{emoji:'🧀',label:'두부'},{emoji:'🐟',label:'멸치'}],
     disclaimer:'가능성 중 하나 · 골밀도가 걱정되면 검진' },
   { id:'mg_sleep', nutrients:['magnesium'], icon:'😴', bg:'#FAF5FF',
-    title:'요즘 쉽게 잠들지 못하나요?',
+    title:'마그네슘 부족 · 잠들기 어려워져요',
     desc:'마그네슘이 낮으면 근육·신경이 못 이완돼요. 저녁 커피 끊고 견과류 한 줌 · 미지근한 우유 한 잔으로 자연스럽게 잠들 수 있습니다.',
     chips:[{emoji:'🌰',label:'견과류'},{emoji:'🥑',label:'아보카도'},{emoji:'☕',label:'카페인관리'}],
     disclaimer:'2주 이상 불면이면 수면클리닉 권장' },
   { id:'mg_eye_twitch', nutrients:['magnesium'], icon:'👁', bg:'#FAF5FF',
-    title:'요즘 눈 밑이 떨리나요?',
+    title:'마그네슘 부족 · 눈 밑 떨림이 와요',
     desc:'스트레스와 카페인이 마그네슘을 태워서 그래요. 견과류·아보카도로 채우면 며칠 안에 잦아드는 경우가 많아요.',
     chips:[{emoji:'🌰',label:'견과류'},{emoji:'🥑',label:'아보카도'},{emoji:'☕',label:'카페인관리'}],
     disclaimer:'가능성 중 하나 · 3일 이상 지속되면 진료' },
   { id:'mg_leg_cramp', nutrients:['magnesium','potassium'], icon:'🦵', bg:'#FEF2F2',
-    title:'밤에 다리에 쥐가 자주 나나요?',
+    title:'마그네슘·칼륨 부족 · 다리에 쥐가 나요',
     desc:'마그네슘·칼륨·수분이 함께 부족할 때 잘 나타나요. 자기 전 바나나 반개와 물 반 컵만으로도 상당히 줄어듭니다.',
     chips:[{emoji:'🍌',label:'바나나'},{emoji:'🌰',label:'견과류'},{emoji:'💧',label:'수분'}],
     disclaimer:'가능성 중 하나 · 자주 반복되면 진료' },
   { id:'vitD_lowmood', nutrients:['vitD'], icon:'☀️', bg:'#F0F9FF',
-    title:'컨디션이 쉽게 처지나요?',
+    title:'비타민 D 부족 · 컨디션이 처져요',
     desc:'비타민D가 낮으면 기분·면역이 함께 무너져요. 점심 산책 10분 + 등푸른 생선 주 2회면 두 주 안에 변화가 옵니다.',
     chips:[{emoji:'☀️',label:'햇볕'},{emoji:'🐟',label:'연어'},{emoji:'🥚',label:'노른자'}],
     disclaimer:'2주 이상 무기력·우울감은 전문가 상담 권장' },
   { id:'omega3_focus', nutrients:['omega3'], icon:'🧠', bg:'#ECFEFF',
-    title:'오후 집중력이 확 떨어지나요?',
+    title:'오메가3 부족 · 집중력이 떨어져요',
     desc:'점심에 정제 탄수만 있으면 혈당이 급락해 뇌가 늘어져요. 단백질과 복합 탄수를 섞으면 저녁까지 집중이 유지됩니다.',
     chips:[{emoji:'🥚',label:'삶은계란'},{emoji:'🍠',label:'고구마'},{emoji:'🚶',label:'산책'}],
     disclaimer:'패턴이 반복되면 저녁 식단도 점검' },
   { id:'vitC_immune', nutrients:['vitC'], icon:'🍊', bg:'#FFFBEB',
-    title:'감기·피부 트러블이 잦은가요?',
+    title:'비타민 C 부족 · 면역·피부가 약해져요',
     desc:'비타민C는 매일 새로 채워야 해요. 귤·딸기·파프리카 중 하나만 하루에 챙겨도 면역·피부 회복 속도가 달라집니다.',
     chips:[{emoji:'🍊',label:'귤'},{emoji:'🍓',label:'딸기'},{emoji:'🫑',label:'파프리카'}],
     disclaimer:'가능성 중 하나 · 수면·스트레스도 확인' },
   { id:'b12_hand_numb', nutrients:['vitB12','vitB'], icon:'✋', bg:'#FEF2F2',
-    title:'손 저림이 자주 있나요?',
+    title:'비타민 B12 부족 · 손 저림이 와요',
     desc:'B12 부족일 수도, 자세·경추 문제일 수도 있어요. 지속되거나 한쪽만 저리면 병원을 먼저 확인해 주세요.',
     chips:[{emoji:'🥚',label:'노른자'},{emoji:'🐟',label:'생선'},{emoji:'🥛',label:'유제품'}],
     disclaimer:'식이 문제 아닐 가능성이 커요 · 진료 우선',
     medical:'한쪽만 저리거나 지속되면 정형외과·신경과 진료를 먼저 권해요.' },
   { id:'sodium_swell', nutrients:['sodium'], icon:'💧', bg:'#EFF6FF',
-    title:'아침에 얼굴이 잘 붓나요?',
+    title:'나트륨 과다 · 얼굴이 잘 부어요',
     desc:'전날 저녁 나트륨이 높으면 몸이 물을 붙잡아요. 국물은 반만·오이·수박 같은 칼륨 식품이 부기 배출을 도와줍니다.',
     chips:[{emoji:'🥒',label:'오이'},{emoji:'🍌',label:'바나나'},{emoji:'🍜',label:'국물반만'}],
     disclaimer:'매일 심하게 붓거나 다리도 부으면 신장 검진' },
   { id:'protein_hair', nutrients:['protein','iron','zinc'], icon:'💇', bg:'#FEF2F2',
-    title:'요즘 머리카락이 잘 빠지나요?',
+    title:'단백질·철분·아연 부족 · 머리카락이 약해져요',
     desc:'머리카락은 단백질 덩어리라 부족하면 바로 신호가 옵니다. 철분·아연도 함께 챙기면 3개월 뒤 두께가 달라져요.',
     chips:[{emoji:'🥚',label:'달걀'},{emoji:'🥩',label:'살코기'},{emoji:'🌰',label:'견과류'}],
     disclaimer:'급격한 탈모는 피부과 진료 권장' },
   { id:'biotin_nails', nutrients:['protein','vitB'], icon:'💅', bg:'#FFFBEB',
-    title:'손톱이 잘 갈라지나요?',
+    title:'비오틴·단백질 부족 · 손톱이 갈라져요',
     desc:'비오틴·단백질이 손톱 강도를 결정해요. 달걀·연어·아보카도를 꾸준히 먹으면 2~3주 뒤부터 표면이 매끈해집니다.',
     chips:[{emoji:'🥚',label:'노른자'},{emoji:'🥑',label:'아보카도'},{emoji:'🐟',label:'연어'}],
     disclaimer:'가능성 중 하나 · 갑상선 이상도 원인 가능' },
   { id:'omega3_skin', nutrients:['omega3'], icon:'🧴', bg:'#ECFEFF',
-    title:'피부가 유난히 건조한가요?',
+    title:'오메가3·수분 부족 · 피부가 건조해요',
     desc:'세라마이드 재료가 오메가3와 수분이에요. 등푸른 생선·아보카도와 물 2L만으로 피부 장벽이 확 회복됩니다.',
     chips:[{emoji:'🐟',label:'생선'},{emoji:'🥑',label:'아보카도'},{emoji:'💧',label:'수분'}],
     disclaimer:'만성 피부 트러블은 피부과 상담' },
   { id:'vitB_lips', nutrients:['vitB'], icon:'👄', bg:'#FFFBEB',
-    title:'입술이 자주 갈라지나요?',
+    title:'비타민 B 부족 · 입술이 갈라져요',
     desc:'비타민B2·B3·수분 부족이 겹치면 입술이 잘 갈라져요. 달걀·녹색채소를 챙기면 며칠 안에 부드러워집니다.',
     chips:[{emoji:'🐟',label:'생선'},{emoji:'🥬',label:'녹색채소'},{emoji:'💧',label:'수분'}],
     disclaimer:'입 주위 통증·물집은 진료 권장' },
   { id:'vitC_gums', nutrients:['vitC'], icon:'😬', bg:'#FFFBEB',
-    title:'잇몸이 자주 붓거나 피가 나나요?',
+    title:'비타민 C 부족 · 잇몸이 약해져요',
     desc:'비타민C는 콜라겐·잇몸 조직 유지에 필수입니다. 감귤·베리를 매일 먹고 치실을 병행하면 눈에 띄게 좋아져요.',
     chips:[{emoji:'🍊',label:'귤'},{emoji:'🍓',label:'딸기'},{emoji:'🫑',label:'파프리카'}],
     disclaimer:'치과 정기 검진을 함께 권장' },
   { id:'fiber_digest', nutrients:['fiber'], icon:'🍽', bg:'#F0FDF4',
-    title:'식후에 소화가 잘 안 되나요?',
+    title:'식이섬유 부족 · 소화가 느려져요',
     desc:'식이섬유가 부족하고 빨리 먹으면 위에 부담이 쌓여요. 식전 채소·30번 씹기·요거트만으로도 확 달라집니다.',
     chips:[{emoji:'🥬',label:'식전채소'},{emoji:'🍚',label:'천천히'},{emoji:'🥛',label:'요거트'}],
     disclaimer:'만성 소화불량은 위·장 검진 권장' },
   { id:'omega3_inflame', nutrients:['omega3'], icon:'🔥', bg:'#FEF2F2',
-    title:'요즘 온몸이 쑤시나요?',
+    title:'오메가3 부족 · 온몸이 쑤셔요',
     desc:'수면·수분·오메가3가 함께 부족하면 만성 염증이 올라와요. 물 2L·7시간 수면·등푸른 생선 조합이 회복의 기본입니다.',
     chips:[{emoji:'🐟',label:'생선'},{emoji:'💧',label:'수분'},{emoji:'😴',label:'수면'}],
     disclaimer:'특정 부위 통증이 지속되면 진료',
     medical:'한 부위가 계속 아프거나 열이 나면 진료를 먼저 권해요.' },
   { id:'mg_bcomplex_anxiety', nutrients:['magnesium','vitB'], icon:'😰', bg:'#FAF5FF',
-    title:'요즘 스트레스·불안이 자주 오나요?',
+    title:'마그네슘·비타민 B 부족 · 스트레스에 민감해져요',
     desc:'스트레스가 마그네슘·B비타민을 태워요. 견과류·녹색채소를 챙기고 낮에 15분만 걸어도 자율신경이 안정됩니다.',
     chips:[{emoji:'🌰',label:'견과류'},{emoji:'🥬',label:'녹색채소'},{emoji:'🚶',label:'산책'}],
     disclaimer:'2주 이상 지속되면 전문가 상담 권장' }
@@ -11098,7 +11098,7 @@ function _v21RenderRecentHex() {
   if (!todayNut) {
     el.innerHTML = _v21NutrientBars([0,0,0,0,0,0], true, 'grid');
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background='#F1F5F9'; scoreEl.style.color='#64748B'; }
-    if (nameEl) nameEl.textContent = '부족한 영양 확인하러 가기';
+    if (nameEl) nameEl.textContent = '나의 영양 확인하기';
     return;
   }
   // 오늘 하루 진행률 · 6축 대비 %
@@ -11112,8 +11112,8 @@ function _v21RenderRecentHex() {
     Math.min(100, (todayNut.fiber||0)/rda.fiber*100),
     vitScore, minScore
   ];
-  // 🎯 사용자 요청 · 항상 "부족한 영양 확인하러 가기"로 통일
-  if (nameEl) nameEl.textContent = '부족한 영양 확인하러 가기';
+  // 🎯 사용자 요청 · 항상 "나의 영양 확인하기"로 통일
+  if (nameEl) nameEl.textContent = '나의 영양 확인하기';
   el.innerHTML = _v21NutrientBars(values, false, 'grid');
   // score badge (평균)
   if (scoreEl) {
