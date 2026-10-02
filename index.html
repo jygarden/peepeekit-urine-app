@@ -28466,23 +28466,57 @@ function _showFoodReportImpl(period) {
 
   const ringPct = (val, target) => target > 0 ? Math.min(100, Math.round((val / target) * 100)) : 0;
 
-  // 이번 주 실천 가이드 자동 생성
+  // 🎯 기간별 실천 가이드 자동 생성 (하루/일주일/한달 완전 다른 스케일)
   const actionGuides = (() => {
+    const d1 = topDeficient[0];
+    const d2 = topDeficient[1];
+    const d3 = topDeficient[2];
+
+    // ━━━ 오늘 플랜 · 즉각적 · 다음 끼니 중심 ━━━
+    if (period === 'today') {
+      if (topDeficient.length === 0) {
+        return [
+          { text: '남은 끼니도 균형 있게 챙기기', btn: '추천 보기' },
+          { text: '물 500ml 더 마시기', btn: '물 기록' },
+          { text: '간식은 과일·견과류로', btn: '간식 추천' }
+        ];
+      }
+      const guides = [];
+      if (d1) guides.push({ text: `지금 바로 · ${d1.foods[0]} 간식으로 ${d1.label} 보충`, btn: '지금 먹기' });
+      if (d2) guides.push({ text: `다음 끼니에 · ${d2.foods[0]} 추가하기`, btn: '메뉴 추천' });
+      if (guides.length < 3) guides.push({ text: '물 1잔 더 · 지금 바로', btn: '물 기록' });
+      return guides.slice(0, 3);
+    }
+
+    // ━━━ 일주일 플랜 · 식습관 수정 · 반복 가능한 액션 ━━━
+    if (period === 'week') {
+      if (topDeficient.length === 0) {
+        return [
+          { text: '이 리듬으로 7일 유지하기', btn: '유지 확인' },
+          { text: '주 2회 새로운 음식 시도', btn: '추천 보기' },
+          { text: '야식·과자 주 2회 이내', btn: '간식 추천' }
+        ];
+      }
+      const guides = [];
+      if (d1) guides.push({ text: `주 ${Math.max(3, Math.ceil((100-d1.pct)/15))}회 · ${d1.foods.slice(0,2).join('·')} 식단에 포함`, btn: `${d1.label} 음식` });
+      if (d2) guides.push({ text: `주 ${Math.max(2, Math.ceil((100-d2.pct)/20))}회 · ${d2.foods.slice(0,2).join('·')} 챙기기`, btn: `${d2.label} 음식` });
+      if (guides.length < 3) guides.push({ text: '매 끼 채소 반찬 1종류 이상', btn: '채소 추천' });
+      return guides.slice(0, 3);
+    }
+
+    // ━━━ 한달 플랜 · 장기 습관 · 몸 변화 중심 ━━━
     if (topDeficient.length === 0) {
       return [
-        { text: '지금 식단 균형 유지하기', btn: '식단 보기' },
-        { text: '매 끼 채소 반찬 1종류 이상', btn: '채소 추천' },
-        { text: '물 하루 1.5L 꾸준히', btn: '물 기록' }
+        { text: '한 달째 균형 유지 · 몸 변화 리뷰', btn: '한 달 비교' },
+        { text: '다음 달 목표 1가지 새로 설정', btn: '목표 설정' },
+        { text: '잘 챙긴 음식 2가지 식단 고정화', btn: '내 식단' }
       ];
     }
     const guides = [];
-    const d1 = topDeficient[0];
-    if (d1) guides.push({ text: `${d1.label} 보충 - ${d1.foods.slice(0,2).join('·')} 챙기기`, btn: `${d1.label} 음식` });
-    const d2 = topDeficient[1];
-    if (d2) guides.push({ text: `${d2.label} 보충 - ${d2.foods.slice(0,2).join('·')} 챙기기`, btn: `${d2.label} 음식` });
-    if (guides.length < 3) {
-      guides.push({ text: '매 끼 채소 반찬 1종류 이상', btn: '채소 추천' });
-    }
+    if (d1) guides.push({ text: `한 달 집중 · ${d1.label} 매일 ${d1.foods[0]} 챙기기`, btn: `${d1.label} 플랜` });
+    if (d2) guides.push({ text: `${d2.label} 보충 식품 2가지 식단 고정 (예: ${d2.foods.slice(0,2).join(', ')})`, btn: `${d2.label} 플랜` });
+    if (d3) guides.push({ text: `${d3.label} 보충 음식 주간 1회 이상 (${d3.foods[0]} 등)`, btn: `${d3.label} 플랜` });
+    if (guides.length < 3) guides.push({ text: '한 달 뒤 건강 신호 변화 체크', btn: '내 신호' });
     return guides.slice(0, 3);
   })();
 
@@ -28671,10 +28705,12 @@ function _showFoodReportImpl(period) {
       </div>
     </div>` : ''}
 
-    <!-- ${periodTxt2} 실천 가이드 (v3) -->
+    <!-- 기간별 실천 가이드 (v3) -->
     <div class="rpt-v3-card">
-      <div class="rpt-v3-ctitle" style="margin-bottom:4px"><span>${periodTxt2} 실천 가이드</span></div>
-      <div class="rpt-v3-csub">아래 3가지만 실천해도 균형 잡힌 식단에 가까워져요.</div>
+      <div class="rpt-v3-ctitle" style="margin-bottom:4px">
+        <span>${period === 'today' ? '지금 바로 할 일' : period === 'week' ? '이번 주 실천 가이드' : '한 달 집중 플랜'}</span>
+      </div>
+      <div class="rpt-v3-csub">${period === 'today' ? '다음 끼니에 바로 챙길 수 있는 액션이에요.' : period === 'week' ? '아래 3가지만 실천해도 균형 잡힌 식단에 가까워져요.' : '한 달 안에 몸 변화가 나타나는 큰 그림이에요.'}</div>
       <div>
         ${actionGuides.map((g, i) => `
           <div class="rpt-v3-guide-row">
