@@ -18577,133 +18577,126 @@ function _renderFoodSummaryBlock(r) {
 
     <div class="fsum">
 
-      <!-- 1. 한눈에 분석 Hero (영양사 캐릭터 + 요약) -->
-      <div class="fsum-card" style="background:linear-gradient(135deg,#FEF9E7,#FEF3C7);border-color:#FBBF24;padding:16px 16px 14px">
-        <div style="font-size:11px;font-weight:800;color:#78350F;letter-spacing:.3px;margin-bottom:8px;display:flex;align-items:center;gap:5px">
-          <span style="font-size:14px">✨</span><span>한눈에 분석</span>
-        </div>
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          <div style="flex:1;min-width:0">
-            <div style="font-size:16.5px;font-weight:900;color:#1D3762;letter-spacing:-.4px;line-height:1.4">
-              <span style="color:#1D3762">${_v20Esc(insightLine.good)},</span><br>
-              <span style="color:#C2410C;background:linear-gradient(180deg,transparent 60%,#FDE68A 60%);padding:0 2px">${_v20Esc(insightLine.need)}</span>
-            </div>
-            ${foodNames.length ? `
-            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:12px">
-              ${foodNames.slice(0, 4).map(n => `<span class="fsum-chip" style="background:#FFF;color:#78350F;border:1px solid #FBBF24;font-size:10.5px">🍽 ${_v20Esc(n)}</span>`).join('')}
-            </div>` : ''}
-          </div>
-          <div style="flex-shrink:0;position:relative">
-            <div style="font-size:52px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.1))">👩‍⚕️</div>
-            <div style="position:absolute;top:-8px;right:60px;background:#FFF;border:1.5px solid #FBBF24;border-radius:12px;padding:7px 10px;font-size:10.5px;color:#1D3762;font-weight:700;line-height:1.4;width:140px;white-space:normal;letter-spacing:-.2px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
-              ${_v20Esc(aiComment.length > 42 ? aiComment.slice(0, 42)+'…' : aiComment)}
-              <div style="position:absolute;right:-7px;top:14px;width:0;height:0;border-left:7px solid #FFF;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
-            </div>
+      <!-- 1. 핵심 요약 Hero (등급·점수 X · 이모지 X · 깔끔) -->
+      <div class="fsum-card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none;padding:16px 16px 14px">
+        <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">${(window.selectedMealTime || '식사')} · 분석 완료</div>
+        <div style="font-size:21px;font-weight:900;letter-spacing:-.5px;line-height:1.25">${_v20Esc(foodTitle)}</div>
+        <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin-top:5px;font-weight:600">${kcal} kcal</div>
+        <div style="margin-top:14px;padding:11px 13px;background:rgba(255,255,255,.12);border-radius:10px">
+          <div style="font-size:13.5px;font-weight:800;letter-spacing:-.3px;line-height:1.5">
+            <span>${_v20Esc(insightLine.good)},</span><br>
+            <span style="color:#FBBF24">${_v20Esc(insightLine.need)}</span>
           </div>
         </div>
       </div>
 
-      <!-- 2. 잘한 점 · 보충 필요 (2분할) -->
+      <!-- 2. 잘한 점 · 보충 필요 (2분할 · 이모지 X · 색상 점만) -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="fsum-card" style="background:#F0FDF4;border-color:#86EFAC">
-          <div style="font-size:11.5px;font-weight:800;color:#166534;letter-spacing:-.2px;margin-bottom:8px;display:flex;align-items:center;gap:5px">
-            <span style="width:16px;height:16px;background:#16A34A;color:#FFF;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px">✓</span>
+          <div style="font-size:11px;font-weight:800;color:#166534;letter-spacing:.2px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="width:7px;height:7px;background:#22C55E;border-radius:50%;flex-shrink:0"></span>
             <span>잘한 점</span>
           </div>
           ${good.length === 0 ? `<div style="font-size:11px;color:#166534;font-weight:600;line-height:1.5">조금 더 챙겨보세요</div>`
-            : good.slice(0, 2).map(g => `<span class="fsum-chip" style="background:#DCFCE7;color:#166534;margin:0 4px 4px 0">💪 ${_v20Esc(g.name)} 충분</span>`).join('')
+            : `<div style="display:flex;flex-wrap:wrap;gap:4px">${good.slice(0, 2).map(g => `<span class="fsum-chip" style="background:#DCFCE7;color:#166534">${_v20Esc(g.name)} 충분</span>`).join('')}</div>`
           }
         </div>
         <div class="fsum-card" style="background:#FEF2F2;border-color:#FCA5A5">
-          <div style="font-size:11.5px;font-weight:800;color:#991B1B;letter-spacing:-.2px;margin-bottom:8px;display:flex;align-items:center;gap:5px">
-            <span style="width:16px;height:16px;background:#DC2626;color:#FFF;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px">!</span>
+          <div style="font-size:11px;font-weight:800;color:#991B1B;letter-spacing:.2px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span style="width:7px;height:7px;background:#EF4444;border-radius:50%;flex-shrink:0"></span>
             <span>보충 필요</span>
           </div>
-          ${topDeficits.length === 0 ? `<div style="font-size:11px;color:#991B1B;font-weight:600;line-height:1.5">없어요!</div>`
-            : topDeficits.slice(0, 3).map(d => `<span class="fsum-chip" style="background:#FEE2E2;color:#991B1B;margin:0 4px 4px 0">${_v20Esc(d.name)}</span>`).join('')
+          ${topDeficits.length === 0 ? `<div style="font-size:11px;color:#991B1B;font-weight:600;line-height:1.5">없어요</div>`
+            : `<div style="display:flex;flex-wrap:wrap;gap:4px">${topDeficits.slice(0, 3).map(d => `<span class="fsum-chip" style="background:#FEE2E2;color:#991B1B">${_v20Esc(d.name)}</span>`).join('')}</div>`
           }
         </div>
       </div>
 
-      <!-- 3. 3대 영양소 섭취량 (바 그래프) -->
+      <!-- 3. 3대 영양소 섭취량 (바 그래프 · 이모지 X) -->
       <div class="fsum-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="fsum-cardtitle" style="margin-bottom:0"><span>📊</span><span>3대 영양소 섭취량</span></div>
-          <div style="font-size:10px;color:#94A3B8;font-weight:700;background:#F8FAFC;padding:3px 8px;border-radius:99px">1끼 권장 대비</div>
+          <div class="fsum-cardtitle" style="margin-bottom:0;display:flex;align-items:center;gap:8px">
+            <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
+            <span>3대 영양소 섭취량</span>
+          </div>
+          <div style="font-size:9.5px;color:#64748B;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">1끼 권장 대비</div>
         </div>
         ${withPct.slice(0, 3).map(n => {
           const color = n.pct >= 80 ? '#22C55E' : n.pct >= 50 ? '#F59E0B' : '#EF4444';
           const needed = Math.round(n.max);
           return `
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <div style="width:30px;font-size:20px;text-align:center;flex-shrink:0">${n.emoji}</div>
-            <div style="flex:1;min-width:0">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                <div style="font-size:12px;font-weight:700;color:#1D3762">${n.name}</div>
-                <div style="font-size:11px;font-weight:800;color:${color}">${n.pct}% · <span style="color:#64748B;font-weight:600">${Math.round(n.val)}${n.unit} / ${needed}${n.unit}</span></div>
-              </div>
-              <div class="fsum-pbar"><div class="fsum-pbar-fill" style="width:${n.pct}%;background:${color}"></div></div>
+          <div style="margin-bottom:11px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <div style="font-size:12px;font-weight:700;color:#1D3762">${n.name}</div>
+              <div style="font-size:11px;font-weight:800;color:${color}">${n.pct}% · <span style="color:#64748B;font-weight:600">${Math.round(n.val)}${n.unit} / ${needed}${n.unit}</span></div>
             </div>
+            <div class="fsum-pbar"><div class="fsum-pbar-fill" style="width:${n.pct}%;background:${color}"></div></div>
           </div>`;
         }).join('')}
       </div>
 
       ${topDeficits.length > 0 ? `
-      <!-- 4. 부족한 영양소 TOP 4 (2x2 grid) -->
+      <!-- 4. 부족한 영양소 TOP 4 (2x2 grid · 이모지 X) -->
       <div class="fsum-card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="fsum-cardtitle" style="margin-bottom:0"><span>🎯</span><span>부족한 영양소 TOP ${topDeficits.length}</span></div>
-          <button onclick="document.getElementById('foodResultDetails').open=true;setTimeout(()=>document.getElementById('foodResultDetails').scrollIntoView({behavior:'smooth'}),100)" style="background:#FEF3C7;color:#78350F;border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit">전체 보기 ›</button>
+          <div class="fsum-cardtitle" style="margin-bottom:0;display:flex;align-items:center;gap:8px">
+            <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
+            <span>부족한 영양소 TOP ${topDeficits.length}</span>
+          </div>
+          <button onclick="document.getElementById('foodResultDetails').open=true;setTimeout(()=>document.getElementById('foodResultDetails').scrollIntoView({behavior:'smooth'}),100)" style="background:#F1F5F9;color:#334155;border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit">전체 보기 ›</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           ${topDeficits.map(d => {
             const sev = severityLabel(d.pct);
             const foodData = nf(d.name);
-            const emojiStrip = foodData.emojis.slice(0, 3).join(' ');
             const foodsText = foodData.foods.slice(0, 3).join(' · ');
             return `
-            <div style="background:#FFF7ED;border:1px solid #FDBA74;border-radius:12px;padding:10px">
+            <div style="background:#F8FAFC;border:1px solid #E4EAF3;border-radius:12px;padding:11px">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-                <div style="display:flex;align-items:center;gap:5px">
-                  <span style="font-size:16px">${d.emoji}</span>
-                  <span style="font-size:12px;font-weight:800;color:#1D3762">${d.name}</span>
-                </div>
+                <span style="font-size:12px;font-weight:800;color:#1D3762;letter-spacing:-.2px">${d.name}</span>
                 <span class="fsum-sev" style="background:${sev.bg};color:${sev.color}">${sev.txt}</span>
               </div>
               <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:7px">
-                <div style="font-size:18px;font-weight:900;color:#C2410C;letter-spacing:-.5px">${d.pct}%</div>
-                <div style="font-size:9.5px;color:#78350F;font-weight:600">${Math.round(d.val*10)/10}${d.unit}/${Math.round(d.max)}${d.unit}</div>
+                <div style="font-size:18px;font-weight:900;color:${sev.color};letter-spacing:-.5px">${d.pct}%</div>
+                <div style="font-size:9.5px;color:#64748B;font-weight:600">${Math.round(d.val*10)/10}${d.unit}/${Math.round(d.max)}${d.unit}</div>
               </div>
-              <div style="display:flex;align-items:center;gap:6px;background:#FFF;padding:5px 7px;border-radius:8px">
-                <div style="font-size:14px;letter-spacing:1px;flex-shrink:0">${emojiStrip}</div>
-                <div style="font-size:9.5px;color:#78350F;font-weight:700;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(foodsText)}</div>
-              </div>
+              <div style="font-size:10.5px;color:#334155;font-weight:700;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(foodsText)}</div>
             </div>`;
           }).join('')}
         </div>
       </div>` : ''}
 
-      <!-- 5. 그래서 다음에 뭐 먹지? (3 cards horizontal) -->
+      <!-- 5. 그래서 다음에 뭐 먹지? (이모지 X · 음식명 뱃지) -->
       <div class="fsum-card" style="background:#FEF9E7;border-color:#FBBF24">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="fsum-cardtitle" style="margin-bottom:0;color:#78350F"><span>🍴</span><span>그래서 다음에 뭐 먹지?</span></div>
+          <div class="fsum-cardtitle" style="margin-bottom:0;color:#78350F;display:flex;align-items:center;gap:8px">
+            <span style="width:3px;height:14px;background:#78350F;border-radius:2px"></span>
+            <span>그래서 다음에 뭐 먹지?</span>
+          </div>
           <button onclick="try{if(typeof ggGoTab==='function')ggGoTab('home');}catch(e){}" style="background:#FBBF24;color:#78350F;border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit">홈에서 추천 ›</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="display:flex;flex-direction:column;gap:7px">
           ${nextMeals.map(m => `
-            <div class="fsum-rec-card">
-              <div class="fsum-rec-emoji">${m.emoji}</div>
-              <div class="fsum-rec-name">${_v20Esc(m.name)}</div>
-              <div class="fsum-rec-tags">${m.tags.map(t=>`<span class="fsum-rec-tag">${_v20Esc(t)}</span>`).join('')}</div>
-              <div class="fsum-rec-desc">${_v20Esc(m.desc)}</div>
+            <div style="display:flex;align-items:center;gap:11px;background:#FFF;border:1px solid #FDE68A;border-radius:12px;padding:11px 13px">
+              <div style="width:36px;height:36px;border-radius:10px;background:#FEF9E7;border:1px solid #FBBF24;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:900;color:#78350F;letter-spacing:-.3px;text-align:center;padding:4px">${_v20Esc(m.name.slice(0, 2))}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px">${_v20Esc(m.name)}</div>
+                <div style="display:flex;gap:4px;margin-top:3px">
+                  ${m.tags.map(t=>`<span style="font-size:9.5px;font-weight:700;color:#1E40AF;background:#DBEAFE;padding:2px 7px;border-radius:99px">${_v20Esc(t)}</span>`).join('')}
+                </div>
+                <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:3px">${_v20Esc(m.desc)}</div>
+              </div>
             </div>`).join('')}
         </div>
       </div>
 
       ${topDeficits.length > 0 ? `
-      <!-- 6. 핵심 영양소 한눈에 정리 (테이블) -->
+      <!-- 6. 핵심 영양소 한눈에 정리 (테이블 · 이모지 X) -->
       <div class="fsum-card">
-        <div class="fsum-cardtitle"><span>📋</span><span>핵심 영양소 한눈에 정리</span></div>
+        <div class="fsum-cardtitle" style="display:flex;align-items:center;gap:8px">
+          <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
+          <span>핵심 영양소 한눈에 정리</span>
+        </div>
         <table class="fsum-table">
           <thead>
             <tr>
@@ -18733,13 +18726,13 @@ function _renderFoodSummaryBlock(r) {
         </table>
       </div>` : ''}
 
-      <!-- 7. 건강어때 AI 코멘트 (bottom banner) -->
-      <div class="fsum-card" style="background:#F0FDF4;border-color:#86EFAC;padding:12px 14px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:36px;height:36px;background:#DCFCE7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🤖</div>
+      <!-- 7. 건강어때 AI 코멘트 (이모지 X · 깔끔) -->
+      <div class="fsum-card" style="background:#F0F7FF;border-color:#BFDBFE;padding:14px">
+        <div style="display:flex;align-items:center;gap:11px">
+          <div style="width:36px;height:36px;background:#DBEAFE;color:#1E40AF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:-.3px;border:1.5px solid #93C5FD">AI</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:10.5px;font-weight:800;color:#166534;letter-spacing:-.2px;margin-bottom:2px">건강어때 AI</div>
-            <div style="font-size:12px;color:#15803D;font-weight:700;line-height:1.5;letter-spacing:-.2px">${_v20Esc(aiComment)} 💚</div>
+            <div style="font-size:10px;font-weight:800;color:#1E40AF;letter-spacing:.3px;margin-bottom:2px">건강어때 AI</div>
+            <div style="font-size:12.5px;color:#1D3762;font-weight:700;line-height:1.5;letter-spacing:-.2px">${_v20Esc(aiComment)}</div>
           </div>
         </div>
       </div>
@@ -28361,58 +28354,66 @@ function _showFoodReportImpl(period) {
       .rpt-week-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#2E61C4;color:#FFF;border-radius:50%;font-size:11px;font-weight:900;letter-spacing:-.2px}
       .rpt-week-title{font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px}
       .rpt-week-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:11.5px;color:#334155;font-weight:600;line-height:1.5}
-      .rpt-week-item::before{content:'□';color:#94A3B8;font-size:14px;line-height:1;flex-shrink:0;margin-top:1px}
     </style>
 
     <h2 style="font-size:18px;margin:0 0 4px;color:#1F2937">📊 ${periodLabel} 리포트</h2>
     <div style="font-size:12px;color:#64748B;margin-bottom:12px">${scoreMsg}</div>
 
-    <!-- 1. 핵심 요약 Hero -->
+    <!-- 1. 핵심 요약 Hero (점수 X) -->
     <div class="rpt-sum-card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none">
       <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">${periodLabel} 핵심 분석</div>
-      <div style="font-size:15px;font-weight:900;letter-spacing:-.3px;line-height:1.4;margin-bottom:12px">
+      <div style="font-size:16px;font-weight:900;letter-spacing:-.3px;line-height:1.45;margin-bottom:12px">
         ${_v20Esc(insightMsg)}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px;text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${filtered.length}</div>
-          <div style="font-size:9.5px;color:#DAE7FF;font-weight:700;margin-top:2px">끼 분석</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
+          <div style="font-size:21px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${filtered.length}</div>
+          <div style="font-size:10px;color:#DAE7FF;font-weight:700;margin-top:3px">분석 끼수</div>
         </div>
-        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px;text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${avgScore}</div>
-          <div style="font-size:9.5px;color:#DAE7FF;font-weight:700;margin-top:2px">평균 점수</div>
-        </div>
-        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:8px;text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${avgCal}</div>
-          <div style="font-size:9.5px;color:#DAE7FF;font-weight:700;margin-top:2px">평균 kcal</div>
+        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
+          <div style="font-size:21px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${avgCal.toLocaleString()}</div>
+          <div style="font-size:10px;color:#DAE7FF;font-weight:700;margin-top:3px">평균 kcal</div>
         </div>
       </div>
     </div>
 
-    <!-- 2. 가장 많이 먹은 음식 TOP 3 -->
+    <!-- 2. 가장 많이 먹은 음식 TOP 3 (이모지 X · 순위 뱃지) -->
     ${topFoodsPreview.length > 0 ? `
     <div class="rpt-sum-card">
-      <div class="rpt-sum-title"><span>🍽</span><span>${periodTxt2} 가장 많이 먹은 음식</span></div>
-      <div style="display:flex;gap:8px">
-        ${topFoodsPreview.map(([name, count], i) => `
-          <div style="flex:1;background:#F8FAFC;border-radius:10px;padding:10px;text-align:center;position:relative">
-            <div style="position:absolute;top:4px;left:6px;font-size:9px;font-weight:900;color:${['#F59E0B','#94A3B8','#D97706'][i]||'#94A3B8'}">#${i+1}</div>
-            <div style="font-size:22px;line-height:1;margin:4px 0 6px">🍚</div>
-            <div style="font-size:11.5px;font-weight:800;color:#1D3762;letter-spacing:-.2px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(name)}</div>
-            <div style="font-size:10px;color:#64748B;font-weight:700;margin-top:2px">${count}회</div>
-          </div>
-        `).join('')}
+      <div class="rpt-sum-title" style="display:flex;align-items:center;gap:8px">
+        <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
+        <span>${periodTxt2} 가장 많이 먹은 음식</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        ${topFoodsPreview.map(([name, count], i) => {
+          const rankBg = i === 0 ? '#FBBF24' : i === 1 ? '#CBD5E1' : '#D97706';
+          const rankColor = i === 1 ? '#334155' : (i === 0 ? '#78350F' : '#FFF');
+          const maxCount = topFoodsPreview[0][1] || 1;
+          const barW = Math.round((count / maxCount) * 100);
+          return `
+          <div style="display:flex;align-items:center;gap:11px;background:#F8FAFC;border-radius:10px;padding:10px 12px">
+            <div style="width:28px;height:28px;background:${rankBg};color:${rankColor};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:900;flex-shrink:0;letter-spacing:-.3px">${i+1}위</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(name)}</div>
+              <div style="height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden;margin-top:5px"><div style="width:${barW}%;height:100%;background:${rankBg}"></div></div>
+            </div>
+            <div style="font-size:11px;color:#64748B;font-weight:800;flex-shrink:0">${count}회</div>
+          </div>`;
+        }).join('')}
       </div>
     </div>` : ''}
 
     ${topDeficient.length > 0 ? `
-    <!-- 3. 부족 영양소 상세표 -->
+    <!-- 3. 부족 영양소 상세표 (이모지 X) -->
     <div class="rpt-sum-card">
-      <div class="rpt-sum-title"><span>⚠️</span><span>${periodTxt2} 부족 영양소 · 보충 음식</span></div>
+      <div class="rpt-sum-title" style="display:flex;align-items:center;gap:8px">
+        <span style="width:3px;height:14px;background:#EF4444;border-radius:2px"></span>
+        <span>${periodTxt2} 부족 영양소 · 보충 음식</span>
+      </div>
       <table class="rpt-def-table">
         <thead>
           <tr>
-            <th style="width:28%">영양소</th>
+            <th style="width:32%">영양소</th>
             <th style="width:30%">섭취율</th>
             <th>보충 음식</th>
           </tr>
@@ -28424,18 +28425,15 @@ function _showFoodReportImpl(period) {
             return `
             <tr>
               <td>
-                <div style="display:flex;align-items:center;gap:5px">
-                  <span style="font-size:14px">${d.emoji}</span>
-                  <span style="font-weight:800;font-size:11.5px">${d.label}</span>
-                </div>
+                <div style="font-weight:800;font-size:11.5px">${d.label}</div>
                 <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-top:2px">${d.current}/${d.target}${d.unit}</div>
               </td>
               <td>
-                <div style="display:flex;align-items:center;gap:5px">
-                  <div style="width:50px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:${Math.max(5, d.pct)}%;height:100%;background:${barColor};border-radius:99px"></div></div>
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+                  <div style="width:40px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:${Math.max(5, d.pct)}%;height:100%;background:${barColor};border-radius:99px"></div></div>
                   <span class="rpt-def-sev" style="background:${sev.bg};color:${sev.color}">${sev.txt}</span>
                 </div>
-                <div style="font-size:10.5px;font-weight:800;color:${sev.color};margin-top:3px">${d.pct}%</div>
+                <div style="font-size:10.5px;font-weight:800;color:${sev.color}">${d.pct}%</div>
               </td>
               <td>
                 <div class="rpt-def-foods">${d.foods.join(' · ')}</div>
@@ -28444,27 +28442,33 @@ function _showFoodReportImpl(period) {
           }).join('')}
         </tbody>
       </table>
-      <div style="margin-top:10px;padding:8px 10px;background:#FEF3C7;border-radius:8px;font-size:10.5px;color:#78350F;font-weight:600;line-height:1.5">
-        💡 가장 부족한 ${topDeficient.slice(0,2).map(d=>d.label).join('과 ')}부터 집중 보충해보세요.
+      <div style="margin-top:10px;padding:10px 12px;background:#FEF3C7;border-radius:8px;font-size:10.5px;color:#78350F;font-weight:700;line-height:1.5">
+        가장 부족한 <b style="color:#92400E">${topDeficient.slice(0,2).map(d=>d.label).join('과 ')}</b>부터 집중 보충해보세요.
       </div>
     </div>` : ''}
 
-    <!-- 4. 4주 실천 플랜 -->
+    <!-- 4. 4주 실천 플랜 (이모지 X · 체크박스 깔끔) -->
     <div class="rpt-sum-card" style="background:#F0FDF4;border-color:#86EFAC">
-      <div class="rpt-sum-title" style="color:#166534"><span>📅</span><span>한 달 실천 플랜</span></div>
+      <div class="rpt-sum-title" style="color:#166534;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="width:3px;height:14px;background:#16A34A;border-radius:2px"></span>
+          <span>한 달 실천 플랜</span>
+        </div>
+        <span style="font-size:9.5px;color:#16A34A;font-weight:800;background:#DCFCE7;padding:3px 8px;border-radius:99px;letter-spacing:-.1px">주 1목표</span>
+      </div>
       <div style="font-size:10.5px;color:#15803D;font-weight:700;margin-bottom:10px;line-height:1.5">
         ${topDeficient.length > 0
-          ? `부족 영양소 기반 4주 플랜이에요. 한 주씩 체크하면서 챙겨봐요.`
+          ? `부족 영양소 기반 4주 플랜 · 한 주씩 체크하면서 챙겨봐요.`
           : `지금 균형 좋으니 유지 플랜으로 가봐요.`}
       </div>
       ${weeklyPlan.map(w => `
         <div class="rpt-week-card" style="border-color:#86EFAC">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
             <span class="rpt-week-num">${w.week}</span>
             <span class="rpt-week-title">${w.week}주차 · ${_v20Esc(w.title)}</span>
           </div>
           <div>
-            ${w.items.map(it => `<div class="rpt-week-item">${_v20Esc(it)}</div>`).join('')}
+            ${w.items.map(it => `<div class="rpt-week-item"><span style="width:14px;height:14px;border:1.5px solid #CBD5E1;border-radius:4px;flex-shrink:0;margin-top:2px;background:#FFF"></span><span>${_v20Esc(it)}</span></div>`).join('')}
           </div>
         </div>
       `).join('')}
