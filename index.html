@@ -8433,7 +8433,7 @@ function _v20RenderBodySignal(shortages) {
   let hasHistory = false;
   try { const fh = _getFoodHistory(); hasHistory = fh && fh.length > 0; } catch(e){}
   if (!hasHistory) {
-    titleEl.textContent = '신호 분석 대기 중';
+    titleEl.textContent = '부족한 영양으로 인한 내 몸상태';
     descEl.innerHTML = '음식을 며칠 기록하면 부족한 영양과 관련된 몸 신호를 이 자리에 알려드려요.';
     if (chipsEl) chipsEl.innerHTML = '';
     if (medEl) { medEl.style.display = 'none'; medEl.innerHTML = ''; }
@@ -8446,8 +8446,11 @@ function _v20RenderBodySignal(shortages) {
     iconEl.style.background = sig.bg;
     iconEl.innerHTML = `<span style="font-size:24px">${sig.icon}</span>`;
   }
-  titleEl.textContent = sig.title;
-  descEl.innerHTML = sig.desc;
+  // 🎯 사용자 요청 · 제목은 "부족한 영양으로 인한 내 몸상태"로 고정
+  //    실제 선택된 신호(단백질 부족·머리카락 약해져요)는 desc 상단에 작게 표시
+  titleEl.textContent = '부족한 영양으로 인한 내 몸상태';
+  const sigTitle = sig.title ? `<div style="font-size:12px;color:#92400E;font-weight:800;margin-bottom:4px;letter-spacing:-.2px">${sig.title}</div>` : '';
+  if (descEl) descEl.innerHTML = sigTitle + (sig.desc || '');
   chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="color:#64748B;padding:1px 2px;font-size:9.5px;font-weight:700;display:inline-flex;align-items:center">#${c.label}</span>`).join('');
   if (discEl) discEl.textContent = sig.disclaimer || '가능성 중 하나 · 지속되면 진료';
   if (medEl) {
@@ -28788,7 +28791,14 @@ function ggGoTab(tab) {
     try { window.scrollTo(0, 0); } catch(e){}
   }
   else if (tab === 'report') {
-    // v20 · 리포트 탭 · 7일 트렌드·기록 요약
+    // 🎯 새 영양 분석 모달 열기 (3탭: 오늘/이번 주/이번 달)
+    try {
+      if (typeof showFoodReport === 'function') {
+        showFoodReport('today');
+        return;
+      }
+    } catch(e){ console.error('showFoodReport', e); }
+    // fallback · 레거시 screenReport
     try { renderV20Report(); } catch(e){ console.error('renderV20Report', e); }
     showScreen('screenReport');
     try { window.scrollTo(0, 0); } catch(e){}
