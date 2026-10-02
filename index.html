@@ -10508,12 +10508,53 @@ function _v21OpenNearbyMap() {
       return;
     }
     const q = encodeURIComponent(String(foodName).trim());
-    const url = `https://m.map.naver.com/search2/search.naver?query=${q}`;
-    // 📱 PWA/모바일 호환 · window.open 실패 시 location.href fallback
-    const win = window.open(url, '_blank', 'noopener');
-    if (!win || win.closed || typeof win.closed === 'undefined') {
-      // 팝업 차단되면 현재 창에서 이동
-      window.location.href = url;
+    // 🗺 카카오 지도 사용 · 네이버보다 맛집 커버리지 넓음
+    // GPS 좌표 있으면 그 위치 중심 · 없으면 카카오가 자동으로 "내 위치" 요청 or 기본 서울
+    const openKakaoMap = (lat, lng) => {
+      let url;
+      if (lat && lng) {
+        // 좌표 기반 검색 · 사용자 현재 위치 중심
+        url = `https://map.kakao.com/?q=${q}&urlX=${lng}&urlY=${lat}&urlLevel=4`;
+      } else {
+        // 좌표 없으면 일반 검색 · 카카오가 GPS 권한 요청하거나 기본 지역
+        url = `https://map.kakao.com/?q=${q}`;
+      }
+      const win = window.open(url, '_blank', 'noopener');
+      if (!win || win.closed || typeof win.closed === 'undefined') {
+        window.location.href = url;
+      }
+    };
+
+    // 1. 캐시된 GPS 있으면 바로 사용
+    if (window._v22GpsCoords && window._v22GpsCoords.lat && window._v22GpsCoords.lng) {
+      openKakaoMap(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
+      return;
+    }
+    // 2. GPS 요청 · 2초 타임아웃 · 안 되면 좌표 없이 열기
+    if (navigator.geolocation) {
+      let done = false;
+      const timeout = setTimeout(() => {
+        if (!done) { done = true; openKakaoMap(null, null); }
+      }, 2500);
+      navigator.geolocation.getCurrentPosition(
+        p => {
+          if (done) return;
+          done = true;
+          clearTimeout(timeout);
+          const lat = p.coords.latitude, lng = p.coords.longitude;
+          window._v22GpsCoords = { lat, lng };
+          openKakaoMap(lat, lng);
+        },
+        () => {
+          if (done) return;
+          done = true;
+          clearTimeout(timeout);
+          openKakaoMap(null, null);
+        },
+        { enableHighAccuracy: false, timeout: 2000, maximumAge: 300000 }
+      );
+    } else {
+      openKakaoMap(null, null);
     }
   } catch(e) {
     console.error('_v21OpenNearbyMap', e);
@@ -16835,7 +16876,8 @@ async function _v22StoreDoSearch(q) {
   if (!_v22GpsCoords) _v22EnsureGps(true);
 
   try {
-    const body = { query: q, display: 5, sort: 'random' };
+    // 검색 결과 더 많이 받기 (15개) · 사용자가 원하는 곳이 상위 5개에 없는 문제 해결
+    const body = { query: q, display: 15 };
     if (_v22GpsCoords) { body.lat = _v22GpsCoords.lat; body.lng = _v22GpsCoords.lng; body.radius = 20000; }
     const r = await fetch('/api/kakao-local', {
       method: 'POST',
