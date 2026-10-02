@@ -10528,15 +10528,22 @@ function _v21RetryNearby() {
   _v21FetchNearby(q);
 }
 
-// 수동 지역 입력 · GPS 안 될 때 fallback
+// 수동 지역 입력 · GPS 안 될 때 fallback · 저장 옵션 포함
 async function _v21ManualRegion() {
   const q = window._v21NearbyLastQuery;
   if (!q) return;
-  const region = prompt('지역명을 입력하세요 (예: 강남, 홍대, 송파구 잠실동)', '');
+  const current = localStorage.getItem('v21DefaultRegion') || '';
+  const region = prompt(
+    '내 지역을 입력하세요 (예: 강남, 홍대, 송파구 잠실동)\n한 번 입력하면 다음부터 자동으로 사용돼요.',
+    current
+  );
   if (!region) return;
+  const regionTrim = region.trim();
+  if (!regionTrim) return;
+  // 저장 (다음부터 자동 사용)
+  localStorage.setItem('v21DefaultRegion', regionTrim);
   _v21ShowNearbyMapSheet(q, 'loading', null);
-  // 지역명 + 음식명 결합 검색 (좌표 없이)
-  const combined = region.trim() + ' ' + q;
+  const combined = regionTrim + ' ' + q;
   try {
     const r = await fetch('/api/kakao-local', {
       method: 'POST',
@@ -10548,12 +10555,34 @@ async function _v21ManualRegion() {
       _v21ShowNearbyMapSheet(q, 'empty', null);
     } else {
       window._v21NearbyGpsStatus = 'manual';
-      window._v21ManualRegionName = region;
+      window._v21ManualRegionName = regionTrim;
       _v21ShowNearbyMapSheet(q, 'ok', data.items);
     }
   } catch(e) {
     console.error('[manual region]', e);
     _v21ShowNearbyMapSheet(q, 'error', null);
+  }
+}
+
+// IP 기반 위치 추정 (GPS fallback · 시 단위 정확도)
+async function _v21TryIpGeolocation() {
+  try {
+    // 무료 공개 서비스 · 하루 1000회 제한 · HTTPS
+    const r = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+      return {
+        lat: data.latitude,
+        lng: data.longitude,
+        city: data.city || data.region || '',
+        source: 'ip'
+      };
+    }
+    return null;
+  } catch(e) {
+    console.warn('[ip-geo] failed:', e.message);
+    return null;
   }
 }
 
@@ -10567,11 +10596,11 @@ async function _v21CheckGpsPermission() {
 }
 
 async function _v21FetchNearby(foodNameRaw) {
-  // 수동 지역 사용 중이면 리셋
   window._v21ManualRegionName = null;
 
-  const searchWithGps = (lat, lng) => {
-    const body = { query: foodNameRaw, display: 15 };
+  const searchWithCoords = (lat, lng, extraQuery) => {
+    const q = extraQuery ? (extraQuery + ' ' + foodNameRaw) : foodNameRaw;
+    const body = { query: q, display: 15 };
     if (lat && lng) { body.lat = lat; body.lng = lng; body.radius = 10000; }
     fetch('/api/kakao-local', {
       method: 'POST',
@@ -10592,35 +10621,42 @@ async function _v21FetchNearby(foodNameRaw) {
     });
   };
 
-  // 1. 캐시된 GPS 있으면 바로 사용
+  // ━━━━ 우선순위 ━━━━
+  // 1. 캐시된 정확한 GPS → 사용
   if (window._v22GpsCoords && window._v22GpsCoords.lat && window._v22GpsCoords.lng) {
     window._v21NearbyGpsStatus = 'ok';
-    searchWithGps(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
+    searchWithCoords(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
     return;
   }
-  // 2. geolocation API 체크
+  // 2. 저장된 수동 지역 있으면 바로 사용 (사용자가 전에 입력)
+  const savedRegion = localStorage.getItem('v21DefaultRegion');
+  if (savedRegion && savedRegion.trim()) {
+    window._v21NearbyGpsStatus = 'saved';
+    window._v21ManualRegionName = savedRegion.trim();
+    searchWithCoords(null, null, savedRegion.trim());
+    return;
+  }
+  // 3. GPS 시도 · 안 되면 IP → 최후 전국
   if (!navigator.geolocation) {
     window._v21NearbyGpsStatus = 'unsupported';
-    searchWithGps(null, null);
+    tryIpThenAll();
     return;
   }
-  // 3. Permissions API로 권한 상태 미리 체크 (Chrome/Edge · Safari는 미지원)
   const permState = await _v21CheckGpsPermission();
   console.log('[nearby] permission state:', permState);
   if (permState === 'denied') {
-    // 명시적으로 거부된 상태 · getCurrentPosition 호출해봤자 바로 에러
     window._v21NearbyGpsStatus = 'denied';
-    searchWithGps(null, null);
+    tryIpThenAll();
     return;
   }
-  // 4. GPS 요청 · 12초 (iOS 첫 요청은 매우 느릴 수 있음)
+
   let done = false;
   const to = setTimeout(() => {
     if (!done) {
       done = true;
       window._v21NearbyGpsStatus = 'timeout';
       console.warn('[nearby] GPS timeout · 12s elapsed');
-      searchWithGps(null, null);
+      tryIpThenAll();
     }
   }, 12000);
   navigator.geolocation.getCurrentPosition(
@@ -10631,17 +10667,31 @@ async function _v21FetchNearby(foodNameRaw) {
       window._v22GpsAccuracy = p.coords.accuracy || null;
       window._v21NearbyGpsStatus = 'ok';
       console.log('[nearby] GPS ok:', lat, lng, 'acc:', p.coords.accuracy);
-      searchWithGps(lat, lng);
+      searchWithCoords(lat, lng);
     },
     err => {
       if (done) return; done = true; clearTimeout(to);
       const codeMap = { 1: 'denied', 2: 'unavailable', 3: 'timeout' };
       window._v21NearbyGpsStatus = codeMap[err.code] || 'unknown';
       console.warn('[nearby] GPS err code:', err.code, 'msg:', err.message);
-      searchWithGps(null, null);
+      tryIpThenAll();
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
   );
+
+  // GPS 실패 → IP 위치 시도 → 그래도 안 되면 전국
+  async function tryIpThenAll() {
+    const ipLoc = await _v21TryIpGeolocation();
+    if (ipLoc && ipLoc.lat && ipLoc.lng) {
+      window._v22GpsCoords = { lat: ipLoc.lat, lng: ipLoc.lng };
+      window._v21NearbyGpsStatus = 'ip';  // IP 기반 (대략적)
+      window._v21IpCity = ipLoc.city || '';
+      console.log('[nearby] IP geolocation:', ipLoc.city, ipLoc.lat, ipLoc.lng);
+      searchWithCoords(ipLoc.lat, ipLoc.lng);
+    } else {
+      searchWithCoords(null, null);
+    }
+  }
 }
 
 // 바텀시트 · 내 주변 매장 결과 표시
@@ -10694,15 +10744,29 @@ function _v21ShowNearbyMapSheet(query, status, items) {
   const gpsStatus = window._v21NearbyGpsStatus || 'unknown';
   const hasGps = window._v22GpsCoords && window._v22GpsCoords.lat;
   const manualRegion = window._v21ManualRegionName;
+  const ipCity = window._v21IpCity || '';
   let gpsBanner = '';
 
   if (status === 'ok' && manualRegion) {
-    // 수동 지역 사용 중 · 녹색 뱃지
+    // 수동 지역 사용 중 · 녹색 뱃지 (저장돼서 다음에도 자동)
     gpsBanner = `
-      <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <div style="background:#DCFCE7;border:1px solid #86EFAC;border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
         <div style="font-size:18px;flex-shrink:0">📍</div>
-        <div style="flex:1;font-size:11.5px;color:#166534;font-weight:700;line-height:1.4">"${_v20Esc(manualRegion)}" 지역 결과</div>
-        <button onclick="_v21RetryNearby()" style="background:#16A34A;color:#FFF;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">GPS 다시</button>
+        <div style="flex:1;font-size:11.5px;color:#166534;font-weight:700;line-height:1.4">"${_v20Esc(manualRegion)}" 지역 · 저장됨</div>
+        <button onclick="_v21ManualRegion()" style="background:#FFF;color:#166534;border:1.5px solid #16A34A;border-radius:8px;padding:5px 9px;font-size:10.5px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">지역 바꾸기</button>
+      </div>`;
+  } else if (status === 'ok' && gpsStatus === 'ip') {
+    // IP 기반 대략 위치 · 파란 뱃지
+    gpsBanner = `
+      <div style="background:#DBEAFE;border:1px solid #93C5FD;border-radius:12px;padding:10px 12px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="font-size:18px;flex-shrink:0">🌐</div>
+          <div style="flex:1;font-size:11.5px;color:#1E40AF;font-weight:700;line-height:1.4">IP 기반 대략 위치${ipCity ? ' · ' + _v20Esc(ipCity) : ''}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="_v21RetryNearby()" style="flex:1;background:#2563EB;color:#FFF;border:none;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">📍 GPS 다시</button>
+          <button onclick="_v21ManualRegion()" style="flex:1;background:#FFF;color:#1E40AF;border:1.5px solid #2563EB;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">✏️ 지역 설정</button>
+        </div>
       </div>`;
   } else if (status === 'ok' && !hasGps) {
     const reasonMap = {
