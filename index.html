@@ -18448,9 +18448,33 @@ function enrichWithPairings(r) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🎯 식사 분석 결과 · 한눈 요약 블록 v2 (Phase 8 UX)
-// 7개 섹션: 영양사 Hero · 잘한점/보충필요 · 3대 영양 바 ·
-//           부족 TOP4 · 다음 끼 3추천 · 핵심 테이블 · AI 코멘트
+// 🎯 공통 · SVG 원형 프로그레스 (v3)
+// pct: 0-100, size: px, 반환: SVG 문자열
+// ═══════════════════════════════════════════════════════════
+function _renderNutritionRing(pct, color, size) {
+  const sz = size || 90;
+  const r = 38;
+  const circ = 2 * Math.PI * r;  // ~239
+  const p = Math.max(0, Math.min(100, pct));
+  const offset = circ * (1 - p / 100);
+  const fontSize = sz > 80 ? 18 : 16;
+  return `
+    <svg viewBox="0 0 90 90" width="100%" height="auto" style="max-width:${sz}px;display:block;margin:0 auto">
+      <circle cx="45" cy="45" r="${r}" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+      <circle cx="45" cy="45" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+              stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
+              stroke-linecap="round" transform="rotate(-90 45 45)"
+              style="transition:stroke-dashoffset .5s ease"/>
+      <text x="45" y="52" text-anchor="middle" font-size="${fontSize}" font-weight="900" fill="${color}" letter-spacing="-.5">${p}%</text>
+    </svg>`;
+}
+function _ringColor(pct) {
+  return pct >= 80 ? '#22C55E' : pct >= 50 ? '#F59E0B' : '#EF4444';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🎯 식사 분석 결과 · 한눈 요약 블록 v3 (Phase 8 UX)
+// Blue Hero + 원형 프로그레스 4개 + 부족 영양소 + 다음 끼 가이드 + CTA
 // ═══════════════════════════════════════════════════════════
 function _renderFoodSummaryBlock(r) {
   const container = document.getElementById('foodResultSummary');
@@ -18461,6 +18485,10 @@ function _renderFoodSummaryBlock(r) {
   const kcal = Math.round(tot.kcal || tot.calories || 0);
   const foods = Array.isArray(r.foods) ? r.foods : [];
   const foodNames = foods.map(f => f.name || f.food || '').filter(Boolean);
+  // Hero 음식명 (여러 개면 "X 외 N가지")
+  const foodTitle = foodNames.length === 0 ? '식사 분석'
+    : foodNames.length === 1 ? foodNames[0]
+    : `${foodNames[0]} 외 ${foodNames.length - 1}가지`;
 
   const rda = (typeof RDA_ADULT !== 'undefined') ? RDA_ADULT : {
     carbs:300, protein:60, fat:55, fiber:25,
@@ -18553,191 +18581,108 @@ function _renderFoodSummaryBlock(r) {
                                : pct < 80 ? { txt:'보통',     color:'#B45309', bg:'#FEF3C7' }
                                           : { txt:'충분',     color:'#15803D', bg:'#DCFCE7' };
 
-  // ━━━━ UI 조립 ━━━━
+  // ━━━━ v3 UI 조립 (Blue Hero + Ring Progress + 부족 영양소 + 가이드 + CTA) ━━━━
+  // 다음 끼 가이드 (3개 액션 아이템 형태로)
+  const nextGuides = nextMeals.slice(0, 3).map(m => ({
+    text: `${m.name}로 ${m.tags.join('·')} 보충`,
+    cta: '자세히'
+  }));
+
   container.innerHTML = `
     <style>
-      .fsum{display:flex;flex-direction:column;gap:12px}
-      .fsum-card{background:#FFF;border-radius:16px;padding:16px;border:1px solid #E4EAF3}
-      .fsum-cardtitle{font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-      .fsum-pbar{height:9px;background:#F1F5F9;border-radius:99px;overflow:hidden;flex:1}
-      .fsum-pbar-fill{height:100%;border-radius:99px;transition:width .5s ease}
-      .fsum-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:800;letter-spacing:-.2px}
-      .fsum-sev{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:-.2px}
-      .fsum-rec-card{background:#FFF;border:1px solid #E4EAF3;border-radius:14px;padding:12px;text-align:center}
-      .fsum-rec-emoji{font-size:36px;line-height:1;margin-bottom:6px}
-      .fsum-rec-name{font-size:12.5px;font-weight:800;color:#1D3762;margin-bottom:5px;letter-spacing:-.3px}
-      .fsum-rec-tags{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-bottom:5px}
-      .fsum-rec-tag{background:#DBEAFE;color:#1E40AF;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:-.2px}
-      .fsum-rec-desc{font-size:10px;color:#64748B;font-weight:600;line-height:1.4}
-      .fsum-table{width:100%;border-collapse:collapse;font-size:11.5px}
-      .fsum-table th{text-align:left;padding:8px 4px;border-bottom:1px solid #E4EAF3;font-size:10.5px;font-weight:800;color:#64748B;letter-spacing:-.1px}
-      .fsum-table td{padding:9px 4px;border-bottom:1px solid #F1F5F9;font-weight:600;color:#1D3762}
-      .fsum-table tr:last-child td{border-bottom:none}
+      .v3-card{background:#FFF;border-radius:18px;padding:18px;margin-bottom:12px;border:1px solid #E4EAF3}
+      .v3-ctitle{font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+      .v3-csub{font-size:11px;color:#5D7597;font-weight:600;margin-bottom:14px;line-height:1.5}
+      .v3-ring-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-top:14px}
+      .v3-ring-item{text-align:center}
+      .v3-ring-label{font-size:11.5px;font-weight:800;color:#1D3762;letter-spacing:-.2px;margin-top:6px}
+      .v3-ring-val{font-size:10px;color:#5D7597;font-weight:600;margin-top:2px}
+      .v3-def-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #F1F5F9}
+      .v3-def-row:last-child{border-bottom:none}
+      .v3-def-name{font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;flex-shrink:0;min-width:60px}
+      .v3-def-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;flex-shrink:0;letter-spacing:-.2px}
+      .v3-def-foods{flex:1;min-width:0;font-size:11.5px;color:#475569;font-weight:600;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .v3-def-arrow{font-size:16px;color:#CBD5E1;font-weight:400;flex-shrink:0}
+      .v3-guide-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #F1F5F9}
+      .v3-guide-row:last-child{border-bottom:none}
+      .v3-guide-num{width:28px;height:28px;background:#EFF4FF;color:#2E61C4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:-.3px}
+      .v3-guide-text{flex:1;min-width:0;font-size:12.5px;color:#1D3762;font-weight:700;letter-spacing:-.3px;line-height:1.4}
+      .v3-guide-cta{background:#F1F5F9;color:#334155;border:none;border-radius:10px;padding:6px 10px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+      .v3-big-cta{width:100%;background:#1D3762;color:#FFF;border:none;border-radius:14px;padding:16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(29,55,98,.25);margin-top:4px}
     </style>
 
-    <div class="fsum">
-
-      <!-- 1. 핵심 요약 Hero (등급·점수 X · 이모지 X · 깔끔) -->
-      <div class="fsum-card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none;padding:16px 16px 14px">
-        <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">${(window.selectedMealTime || '식사')} · 분석 완료</div>
-        <div style="font-size:21px;font-weight:900;letter-spacing:-.5px;line-height:1.25">${_v20Esc(foodTitle)}</div>
-        <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin-top:5px;font-weight:600">${kcal} kcal</div>
-        <div style="margin-top:14px;padding:11px 13px;background:rgba(255,255,255,.12);border-radius:10px">
-          <div style="font-size:13.5px;font-weight:800;letter-spacing:-.3px;line-height:1.5">
-            <span>${_v20Esc(insightLine.good)},</span><br>
-            <span style="color:#FBBF24">${_v20Esc(insightLine.need)}</span>
-          </div>
+    <!-- 🔵 블루 Hero -->
+    <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border-radius:18px;padding:18px;margin-bottom:12px">
+      <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:6px">${_v20Esc(window.selectedMealTime || '식사')} · 분석 완료</div>
+      <div style="font-size:19px;font-weight:900;letter-spacing:-.5px;line-height:1.25">${_v20Esc(foodTitle)}</div>
+      <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin:6px 0 14px;font-weight:600">${kcal} kcal</div>
+      <div style="padding:12px 14px;background:rgba(255,255,255,.12);border-radius:10px">
+        <div style="font-size:13.5px;font-weight:800;letter-spacing:-.3px;line-height:1.5">
+          ${_v20Esc(insightLine.good)},<br><b style="color:#FBBF24;font-weight:900">${_v20Esc(insightLine.need)}</b>
         </div>
       </div>
+    </div>
 
-      <!-- 2. 잘한 점 · 보충 필요 (2분할 · 이모지 X · 색상 점만) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fsum-card" style="background:#F0FDF4;border-color:#86EFAC">
-          <div style="font-size:11px;font-weight:800;color:#166534;letter-spacing:.2px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
-            <span style="width:7px;height:7px;background:#22C55E;border-radius:50%;flex-shrink:0"></span>
-            <span>잘한 점</span>
-          </div>
-          ${good.length === 0 ? `<div style="font-size:11px;color:#166534;font-weight:600;line-height:1.5">조금 더 챙겨보세요</div>`
-            : `<div style="display:flex;flex-wrap:wrap;gap:4px">${good.slice(0, 2).map(g => `<span class="fsum-chip" style="background:#DCFCE7;color:#166534">${_v20Esc(g.name)} 충분</span>`).join('')}</div>`
-          }
-        </div>
-        <div class="fsum-card" style="background:#FEF2F2;border-color:#FCA5A5">
-          <div style="font-size:11px;font-weight:800;color:#991B1B;letter-spacing:.2px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
-            <span style="width:7px;height:7px;background:#EF4444;border-radius:50%;flex-shrink:0"></span>
-            <span>보충 필요</span>
-          </div>
-          ${topDeficits.length === 0 ? `<div style="font-size:11px;color:#991B1B;font-weight:600;line-height:1.5">없어요</div>`
-            : `<div style="display:flex;flex-wrap:wrap;gap:4px">${topDeficits.slice(0, 3).map(d => `<span class="fsum-chip" style="background:#FEE2E2;color:#991B1B">${_v20Esc(d.name)}</span>`).join('')}</div>`
-          }
-        </div>
+    <!-- 이 끼니 영양소 (원형 프로그레스 4개) -->
+    <div class="v3-card">
+      <div class="v3-ctitle">
+        <span>이 끼니 영양소</span>
+        <span style="font-size:10px;color:#5D7597;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">1끼 권장 대비</span>
       </div>
+      <div class="v3-ring-grid">
+        ${withPct.slice(0, 4).map(n => `
+          <div class="v3-ring-item">
+            ${_renderNutritionRing(n.pct, _ringColor(n.pct), 80)}
+            <div class="v3-ring-label">${n.name}</div>
+            <div class="v3-ring-val">${Math.round(n.val*10)/10}/${Math.round(n.max)}${n.unit}</div>
+          </div>`).join('')}
+      </div>
+    </div>
 
-      <!-- 3. 3대 영양소 섭취량 (바 그래프 · 이모지 X) -->
-      <div class="fsum-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="fsum-cardtitle" style="margin-bottom:0;display:flex;align-items:center;gap:8px">
-            <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
-            <span>3대 영양소 섭취량</span>
-          </div>
-          <div style="font-size:9.5px;color:#64748B;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">1끼 권장 대비</div>
-        </div>
-        ${withPct.slice(0, 3).map(n => {
-          const color = n.pct >= 80 ? '#22C55E' : n.pct >= 50 ? '#F59E0B' : '#EF4444';
-          const needed = Math.round(n.max);
+    ${topDeficits.length > 0 ? `
+    <!-- 이 끼니로 부족한 영양소 -->
+    <div class="v3-card">
+      <div class="v3-ctitle" style="margin-bottom:4px"><span>이 끼니로 부족한 영양소</span></div>
+      <div class="v3-csub">다음 끼엔 아래 영양소가 많은 음식을 추가해봐요.</div>
+      <div>
+        ${topDeficits.map(d => {
+          const sev = severityLabel(d.pct);
+          const foodsText = nf(d.name).foods.slice(0, 4).join(', ');
           return `
-          <div style="margin-bottom:11px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-              <div style="font-size:12px;font-weight:700;color:#1D3762">${n.name}</div>
-              <div style="font-size:11px;font-weight:800;color:${color}">${n.pct}% · <span style="color:#64748B;font-weight:600">${Math.round(n.val)}${n.unit} / ${needed}${n.unit}</span></div>
-            </div>
-            <div class="fsum-pbar"><div class="fsum-pbar-fill" style="width:${n.pct}%;background:${color}"></div></div>
+          <div class="v3-def-row">
+            <span class="v3-def-name">${_v20Esc(d.name)}</span>
+            <span class="v3-def-badge" style="background:${sev.bg};color:${sev.color}">${d.pct}%</span>
+            <span class="v3-def-foods">${_v20Esc(foodsText)}</span>
+            <span class="v3-def-arrow">›</span>
           </div>`;
         }).join('')}
       </div>
-
-      ${topDeficits.length > 0 ? `
-      <!-- 4. 부족한 영양소 TOP 4 (2x2 grid · 이모지 X) -->
-      <div class="fsum-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="fsum-cardtitle" style="margin-bottom:0;display:flex;align-items:center;gap:8px">
-            <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
-            <span>부족한 영양소 TOP ${topDeficits.length}</span>
-          </div>
-          <button onclick="document.getElementById('foodResultDetails').open=true;setTimeout(()=>document.getElementById('foodResultDetails').scrollIntoView({behavior:'smooth'}),100)" style="background:#F1F5F9;color:#334155;border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit">전체 보기 ›</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          ${topDeficits.map(d => {
-            const sev = severityLabel(d.pct);
-            const foodData = nf(d.name);
-            const foodsText = foodData.foods.slice(0, 3).join(' · ');
-            return `
-            <div style="background:#F8FAFC;border:1px solid #E4EAF3;border-radius:12px;padding:11px">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-                <span style="font-size:12px;font-weight:800;color:#1D3762;letter-spacing:-.2px">${d.name}</span>
-                <span class="fsum-sev" style="background:${sev.bg};color:${sev.color}">${sev.txt}</span>
-              </div>
-              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:7px">
-                <div style="font-size:18px;font-weight:900;color:${sev.color};letter-spacing:-.5px">${d.pct}%</div>
-                <div style="font-size:9.5px;color:#64748B;font-weight:600">${Math.round(d.val*10)/10}${d.unit}/${Math.round(d.max)}${d.unit}</div>
-              </div>
-              <div style="font-size:10.5px;color:#334155;font-weight:700;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(foodsText)}</div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>` : ''}
-
-      <!-- 5. 그래서 다음에 뭐 먹지? (이모지 X · 음식명 뱃지) -->
-      <div class="fsum-card" style="background:#FEF9E7;border-color:#FBBF24">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="fsum-cardtitle" style="margin-bottom:0;color:#78350F;display:flex;align-items:center;gap:8px">
-            <span style="width:3px;height:14px;background:#78350F;border-radius:2px"></span>
-            <span>그래서 다음에 뭐 먹지?</span>
-          </div>
-          <button onclick="try{if(typeof ggGoTab==='function')ggGoTab('home');}catch(e){}" style="background:#FBBF24;color:#78350F;border:none;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit">홈에서 추천 ›</button>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:7px">
-          ${nextMeals.map(m => `
-            <div style="display:flex;align-items:center;gap:11px;background:#FFF;border:1px solid #FDE68A;border-radius:12px;padding:11px 13px">
-              <div style="width:36px;height:36px;border-radius:10px;background:#FEF9E7;border:1px solid #FBBF24;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:900;color:#78350F;letter-spacing:-.3px;text-align:center;padding:4px">${_v20Esc(m.name.slice(0, 2))}</div>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px">${_v20Esc(m.name)}</div>
-                <div style="display:flex;gap:4px;margin-top:3px">
-                  ${m.tags.map(t=>`<span style="font-size:9.5px;font-weight:700;color:#1E40AF;background:#DBEAFE;padding:2px 7px;border-radius:99px">${_v20Esc(t)}</span>`).join('')}
-                </div>
-                <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:3px">${_v20Esc(m.desc)}</div>
-              </div>
-            </div>`).join('')}
-        </div>
-      </div>
-
-      ${topDeficits.length > 0 ? `
-      <!-- 6. 핵심 영양소 한눈에 정리 (테이블 · 이모지 X) -->
-      <div class="fsum-card">
-        <div class="fsum-cardtitle" style="display:flex;align-items:center;gap:8px">
-          <span style="width:3px;height:14px;background:#2E61C4;border-radius:2px"></span>
-          <span>핵심 영양소 한눈에 정리</span>
-        </div>
-        <table class="fsum-table">
-          <thead>
-            <tr>
-              <th style="width:25%">영양소</th>
-              <th style="width:40%">현재 상태</th>
-              <th>추천 음식</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${topDeficits.map(d => {
-              const sev = severityLabel(d.pct);
-              const barColor = d.pct < 20 ? '#EF4444' : d.pct < 50 ? '#F59E0B' : '#22C55E';
-              const foodsText = nf(d.name).foods.slice(0, 3).join(', ');
-              return `
-              <tr>
-                <td style="font-weight:800">${d.name}</td>
-                <td>
-                  <div style="display:flex;align-items:center;gap:6px">
-                    <div style="width:40px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden;flex-shrink:0"><div style="width:${Math.max(5, d.pct)}%;height:100%;background:${barColor};border-radius:99px"></div></div>
-                    <span style="color:${sev.color};font-weight:700;font-size:10.5px">${sev.txt} (${d.pct}%)</span>
-                  </div>
-                </td>
-                <td style="color:#475569;font-size:10.5px">${_v20Esc(foodsText)}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
-      </div>` : ''}
-
-      <!-- 7. 건강어때 AI 코멘트 (이모지 X · 깔끔) -->
-      <div class="fsum-card" style="background:#F0F7FF;border-color:#BFDBFE;padding:14px">
-        <div style="display:flex;align-items:center;gap:11px">
-          <div style="width:36px;height:36px;background:#DBEAFE;color:#1E40AF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:-.3px;border:1.5px solid #93C5FD">AI</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:10px;font-weight:800;color:#1E40AF;letter-spacing:.3px;margin-bottom:2px">건강어때 AI</div>
-            <div style="font-size:12.5px;color:#1D3762;font-weight:700;line-height:1.5;letter-spacing:-.2px">${_v20Esc(aiComment)}</div>
-          </div>
-        </div>
-      </div>
-
     </div>
+    ` : `
+    <div class="v3-card" style="background:#F0FDF4;border-color:#86EFAC">
+      <div class="v3-ctitle" style="color:#166534"><span>영양 균형 좋아요</span></div>
+      <div style="font-size:12.5px;color:#15803D;font-weight:700;line-height:1.5">이 끼니로 필요한 영양을 잘 챙기셨어요. 지금처럼 유지!</div>
+    </div>
+    `}
+
+    <!-- 다음 끼니 가이드 -->
+    <div class="v3-card">
+      <div class="v3-ctitle" style="margin-bottom:4px"><span>다음 끼니 가이드</span></div>
+      <div class="v3-csub">부족한 영양을 채우는 추천 조합이에요.</div>
+      <div>
+        ${nextGuides.map((g, i) => `
+          <div class="v3-guide-row">
+            <div class="v3-guide-num">${i+1}</div>
+            <div class="v3-guide-text">${_v20Esc(g.text)}</div>
+            <button class="v3-guide-cta" onclick="document.getElementById('foodResultDetails').open=true;setTimeout(()=>document.getElementById('foodResultDetails').scrollIntoView({behavior:'smooth'}),100)">자세히 ›</button>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <button class="v3-big-cta" onclick="try{if(typeof ggGoTab==='function')ggGoTab('home');else if(typeof goHome==='function')goHome();}catch(e){}">
+      <span>다음 끼니 추천 받기</span><span>›</span>
+    </button>
   `;
 }
 
@@ -28339,40 +28284,133 @@ function _showFoodReportImpl(period) {
   };
   const weeklyPlan = makeWeeklyPlan();
 
-  // ━━━━━━ UI 조립 ━━━━━━
+  // v3 영양소 섭취율 데이터 (6개 그리드)
+  // 하루 평균 섭취량 vs 하루 권장량 비교
+  const dailyAvgOf = (k, src) => {
+    const v = src[k] || 0;
+    return nutCount > 0 ? (v / nutCount * dailyAvgCount) : 0;
+  };
+  const rptRings = [
+    { key:'carbs',   name:'탄수화물', unit:'g', val: dailyAvgOf('carbs', nutSum),   target: RDA_DAILY.carbs },
+    { key:'protein', name:'단백질',   unit:'g', val: dailyAvgOf('protein', nutSum), target: RDA_DAILY.protein },
+    { key:'fat',     name:'지방',     unit:'g', val: dailyAvgOf('fat', nutSum),     target: RDA_DAILY.fat },
+    { key:'fiber',   name:'식이섬유', unit:'g', val: dailyAvgOf('fiber', nutSum),   target: RDA_DAILY.fiber }
+  ];
+  // 비타민·미네랄 종합 점수 (몇 종 중 몇 종 70%+ 챙겼나)
+  const vitKeys = ['vitaminA','vitaminC','vitaminD','vitaminE','vitaminB','folate'];
+  const minKeys = ['calcium','iron','magnesium','zinc','potassium'];
+  const covered = (keys) => {
+    let count = 0;
+    keys.forEach(k => {
+      const avg = dailyAvgOf(k, microSum);
+      const t = RDA_DAILY[k] || 1;
+      if (avg / t >= 0.7) count++;
+    });
+    return count;
+  };
+  const vitCov = covered(vitKeys);
+  const minCov = covered(minKeys);
+  const vitPct = Math.round((vitCov / vitKeys.length) * 100);
+  const minPct = Math.round((minCov / minKeys.length) * 100);
+
+  const ringPct = (val, target) => target > 0 ? Math.min(100, Math.round((val / target) * 100)) : 0;
+
+  // 이번 주 실천 가이드 자동 생성
+  const actionGuides = (() => {
+    if (topDeficient.length === 0) {
+      return [
+        { text: '지금 식단 균형 유지하기', btn: '식단 보기' },
+        { text: '매 끼 채소 반찬 1종류 이상', btn: '채소 추천' },
+        { text: '물 하루 1.5L 꾸준히', btn: '물 기록' }
+      ];
+    }
+    const guides = [];
+    const d1 = topDeficient[0];
+    if (d1) guides.push({ text: `${d1.label} 보충 - ${d1.foods.slice(0,2).join('·')} 챙기기`, btn: `${d1.label} 음식` });
+    const d2 = topDeficient[1];
+    if (d2) guides.push({ text: `${d2.label} 보충 - ${d2.foods.slice(0,2).join('·')} 챙기기`, btn: `${d2.label} 음식` });
+    if (guides.length < 3) {
+      guides.push({ text: '매 끼 채소 반찬 1종류 이상', btn: '채소 추천' });
+    }
+    return guides.slice(0, 3);
+  })();
+
+  // ━━━━━━ v3 UI 조립 ━━━━━━
   content.innerHTML = `
     <style>
-      .rpt-sum-card{background:#FFF;border-radius:16px;padding:14px 16px;margin-bottom:12px;border:1px solid #E4EAF3}
-      .rpt-sum-title{font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-      .rpt-def-table{width:100%;border-collapse:collapse;font-size:12px}
-      .rpt-def-table th{text-align:left;padding:8px 6px;background:#F8FAFC;font-size:10.5px;font-weight:800;color:#64748B;letter-spacing:-.1px;border-bottom:1px solid #E4EAF3}
-      .rpt-def-table td{padding:9px 6px;border-bottom:1px solid #F1F5F9;font-size:11.5px;color:#1D3762;vertical-align:middle}
-      .rpt-def-table tr:last-child td{border-bottom:none}
-      .rpt-def-sev{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:-.2px;white-space:nowrap}
-      .rpt-def-foods{font-size:10.5px;color:#64748B;font-weight:600;line-height:1.4}
+      .rpt-v3-card{background:#FFF;border-radius:18px;padding:18px;margin-bottom:12px;border:1px solid #E4EAF3}
+      .rpt-v3-ctitle{font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+      .rpt-v3-csub{font-size:11px;color:#5D7597;font-weight:600;margin-bottom:14px;line-height:1.5}
+      .rpt-v3-ring-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
+      .rpt-v3-ring-item{text-align:center}
+      .rpt-v3-ring-label{font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.2px;margin-top:6px}
+      .rpt-v3-ring-val{font-size:10px;color:#5D7597;font-weight:600;margin-top:2px}
+      .rpt-v3-def-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #F1F5F9}
+      .rpt-v3-def-row:last-child{border-bottom:none}
+      .rpt-v3-def-name{font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px;flex-shrink:0;min-width:60px}
+      .rpt-v3-def-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;flex-shrink:0;letter-spacing:-.2px}
+      .rpt-v3-def-foods{flex:1;min-width:0;font-size:11.5px;color:#475569;font-weight:600;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .rpt-v3-def-arrow{font-size:16px;color:#CBD5E1;font-weight:400;flex-shrink:0}
+      .rpt-v3-guide-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #F1F5F9}
+      .rpt-v3-guide-row:last-child{border-bottom:none}
+      .rpt-v3-guide-num{width:28px;height:28px;background:#EFF4FF;color:#2E61C4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:-.3px}
+      .rpt-v3-guide-text{flex:1;min-width:0;font-size:12.5px;color:#1D3762;font-weight:700;letter-spacing:-.3px;line-height:1.4}
+      .rpt-v3-guide-cta{background:#F1F5F9;color:#334155;border:none;border-radius:10px;padding:6px 10px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0}
+      .rpt-v3-big-cta{width:100%;background:#1D3762;color:#FFF;border:none;border-radius:14px;padding:16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(29,55,98,.25);margin-top:4px;margin-bottom:14px}
       .rpt-week-card{background:#FFF;border:1px solid #E4EAF3;border-radius:12px;padding:12px;margin-bottom:8px}
       .rpt-week-num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:#2E61C4;color:#FFF;border-radius:50%;font-size:11px;font-weight:900;letter-spacing:-.2px}
       .rpt-week-title{font-size:13px;font-weight:800;color:#1D3762;letter-spacing:-.3px}
       .rpt-week-item{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:11.5px;color:#334155;font-weight:600;line-height:1.5}
+      .rpt-def-foods{font-size:10.5px;color:#64748B;font-weight:600;line-height:1.4}
+      .rpt-def-sev{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:99px;letter-spacing:-.2px;white-space:nowrap}
+      .rpt-def-table{width:100%;border-collapse:collapse;font-size:12px}
+      .rpt-def-table th{text-align:left;padding:8px 6px;background:#F8FAFC;font-size:10.5px;font-weight:800;color:#64748B;letter-spacing:-.1px;border-bottom:1px solid #E4EAF3}
+      .rpt-def-table td{padding:9px 6px;border-bottom:1px solid #F1F5F9;font-size:11.5px;color:#1D3762;vertical-align:middle}
+      .rpt-def-table tr:last-child td{border-bottom:none}
+      .rpt-sum-card{background:#FFF;border-radius:18px;padding:18px;margin-bottom:12px;border:1px solid #E4EAF3}
+      .rpt-sum-title{font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
     </style>
 
-    <h2 style="font-size:18px;margin:0 0 4px;color:#1F2937">📊 ${periodLabel} 리포트</h2>
-    <div style="font-size:12px;color:#64748B;margin-bottom:12px">${scoreMsg}</div>
+    <h2 style="font-size:18px;margin:0 0 10px;color:#1F2937">${periodLabel} 리포트</h2>
 
-    <!-- 1. 핵심 요약 Hero (점수 X) -->
-    <div class="rpt-sum-card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none">
-      <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">${periodLabel} 핵심 분석</div>
-      <div style="font-size:16px;font-weight:900;letter-spacing:-.3px;line-height:1.45;margin-bottom:12px">
+    <!-- 🔵 블루 Hero (v3) -->
+    <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border-radius:18px;padding:18px;margin-bottom:12px">
+      <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:6px">${periodLabel} 식단 분석</div>
+      <div style="font-size:17px;font-weight:900;letter-spacing:-.4px;line-height:1.4;margin-bottom:4px">
         ${_v20Esc(insightMsg)}
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:21px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${filtered.length}</div>
-          <div style="font-size:10px;color:#DAE7FF;font-weight:700;margin-top:3px">분석 끼수</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.78);font-weight:600;line-height:1.5;margin-top:8px">
+        ${topDeficient.length > 0 ? '지금처럼 유지하고, 부족한 영양소를 채워보세요.' : '지금 균형 아주 좋아요. 이대로 꾸준히!'}
+      </div>
+    </div>
+
+    <!-- 주요 영양소 섭취율 (원형 프로그레스 6개) -->
+    <div class="rpt-v3-card">
+      <div class="rpt-v3-ctitle">
+        <span>주요 영양소 섭취율</span>
+        <span style="font-size:10px;color:#5D7597;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">${periodTxt2} 평균</span>
+      </div>
+      <div class="rpt-v3-ring-grid">
+        ${rptRings.map(n => {
+          const pct = ringPct(n.val, n.target);
+          return `
+          <div class="rpt-v3-ring-item">
+            ${_renderNutritionRing(pct, _ringColor(pct), 80)}
+            <div class="rpt-v3-ring-label">${n.name}</div>
+            <div class="rpt-v3-ring-val">${Math.round(n.val)}g / ${n.target}g</div>
+          </div>`;
+        }).join('')}
+        <!-- 비타민 종합 -->
+        <div class="rpt-v3-ring-item">
+          ${_renderNutritionRing(vitPct, _ringColor(vitPct), 80)}
+          <div class="rpt-v3-ring-label">비타민</div>
+          <div class="rpt-v3-ring-val">${vitCov}종 / ${vitKeys.length}종</div>
         </div>
-        <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:21px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">${avgCal.toLocaleString()}</div>
-          <div style="font-size:10px;color:#DAE7FF;font-weight:700;margin-top:3px">평균 kcal</div>
+        <!-- 미네랄 종합 -->
+        <div class="rpt-v3-ring-item">
+          ${_renderNutritionRing(minPct, _ringColor(minPct), 80)}
+          <div class="rpt-v3-ring-label">미네랄</div>
+          <div class="rpt-v3-ring-val">${minCov}종 / ${minKeys.length}종</div>
         </div>
       </div>
     </div>
@@ -28404,75 +28442,65 @@ function _showFoodReportImpl(period) {
     </div>` : ''}
 
     ${topDeficient.length > 0 ? `
-    <!-- 3. 부족 영양소 상세표 (이모지 X) -->
-    <div class="rpt-sum-card">
-      <div class="rpt-sum-title" style="display:flex;align-items:center;gap:8px">
-        <span style="width:3px;height:14px;background:#EF4444;border-radius:2px"></span>
-        <span>${periodTxt2} 부족 영양소 · 보충 음식</span>
-      </div>
-      <table class="rpt-def-table">
-        <thead>
-          <tr>
-            <th style="width:32%">영양소</th>
-            <th style="width:30%">섭취율</th>
-            <th>보충 음식</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${topDeficient.map(d => {
-            const sev = sevOf(d.pct);
-            const barColor = d.pct < 30 ? '#EF4444' : d.pct < 50 ? '#F59E0B' : '#FBBF24';
-            return `
-            <tr>
-              <td>
-                <div style="font-weight:800;font-size:11.5px">${d.label}</div>
-                <div style="font-size:9.5px;color:#94A3B8;font-weight:600;margin-top:2px">${d.current}/${d.target}${d.unit}</div>
-              </td>
-              <td>
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-                  <div style="width:40px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:${Math.max(5, d.pct)}%;height:100%;background:${barColor};border-radius:99px"></div></div>
-                  <span class="rpt-def-sev" style="background:${sev.bg};color:${sev.color}">${sev.txt}</span>
-                </div>
-                <div style="font-size:10.5px;font-weight:800;color:${sev.color}">${d.pct}%</div>
-              </td>
-              <td>
-                <div class="rpt-def-foods">${d.foods.join(' · ')}</div>
-              </td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-      <div style="margin-top:10px;padding:10px 12px;background:#FEF3C7;border-radius:8px;font-size:10.5px;color:#78350F;font-weight:700;line-height:1.5">
-        가장 부족한 <b style="color:#92400E">${topDeficient.slice(0,2).map(d=>d.label).join('과 ')}</b>부터 집중 보충해보세요.
+    <!-- 부족한 영양소 (v3 리스트) -->
+    <div class="rpt-v3-card">
+      <div class="rpt-v3-ctitle" style="margin-bottom:4px"><span>부족한 영양소</span></div>
+      <div class="rpt-v3-csub">지금은 아래 영양소를 조금 더 챙겨보세요.</div>
+      <div>
+        ${topDeficient.map(d => {
+          const sev = sevOf(d.pct);
+          return `
+          <div class="rpt-v3-def-row">
+            <span class="rpt-v3-def-name">${_v20Esc(d.label)}</span>
+            <span class="rpt-v3-def-badge" style="background:${sev.bg};color:${sev.color}">${d.pct}%</span>
+            <span class="rpt-v3-def-foods">${_v20Esc(d.foods.join(', '))}</span>
+            <span class="rpt-v3-def-arrow">›</span>
+          </div>`;
+        }).join('')}
       </div>
     </div>` : ''}
 
-    <!-- 4. 4주 실천 플랜 (이모지 X · 체크박스 깔끔) -->
-    <div class="rpt-sum-card" style="background:#F0FDF4;border-color:#86EFAC">
-      <div class="rpt-sum-title" style="color:#166534;display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="width:3px;height:14px;background:#16A34A;border-radius:2px"></span>
-          <span>한 달 실천 플랜</span>
-        </div>
-        <span style="font-size:9.5px;color:#16A34A;font-weight:800;background:#DCFCE7;padding:3px 8px;border-radius:99px;letter-spacing:-.1px">주 1목표</span>
+    <!-- ${periodTxt2} 실천 가이드 (v3) -->
+    <div class="rpt-v3-card">
+      <div class="rpt-v3-ctitle" style="margin-bottom:4px"><span>${periodTxt2} 실천 가이드</span></div>
+      <div class="rpt-v3-csub">아래 3가지만 실천해도 균형 잡힌 식단에 가까워져요.</div>
+      <div>
+        ${actionGuides.map((g, i) => `
+          <div class="rpt-v3-guide-row">
+            <div class="rpt-v3-guide-num">${i+1}</div>
+            <div class="rpt-v3-guide-text">${_v20Esc(g.text)}</div>
+            <button class="rpt-v3-guide-cta">${_v20Esc(g.btn)} ›</button>
+          </div>`).join('')}
       </div>
-      <div style="font-size:10.5px;color:#15803D;font-weight:700;margin-bottom:10px;line-height:1.5">
-        ${topDeficient.length > 0
-          ? `부족 영양소 기반 4주 플랜 · 한 주씩 체크하면서 챙겨봐요.`
-          : `지금 균형 좋으니 유지 플랜으로 가봐요.`}
-      </div>
-      ${weeklyPlan.map(w => `
-        <div class="rpt-week-card" style="border-color:#86EFAC">
-          <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
-            <span class="rpt-week-num">${w.week}</span>
-            <span class="rpt-week-title">${w.week}주차 · ${_v20Esc(w.title)}</span>
-          </div>
-          <div>
-            ${w.items.map(it => `<div class="rpt-week-item"><span style="width:14px;height:14px;border:1.5px solid #CBD5E1;border-radius:4px;flex-shrink:0;margin-top:2px;background:#FFF"></span><span>${_v20Esc(it)}</span></div>`).join('')}
-          </div>
-        </div>
-      `).join('')}
     </div>
+
+    <!-- 다음 끼니 추천 받기 CTA -->
+    <button class="rpt-v3-big-cta" onclick="closeFoodReport();try{if(typeof ggGoTab==='function')ggGoTab('home');else if(typeof goHome==='function')goHome();}catch(e){}">
+      <span>다음 끼니 추천 받기</span><span>›</span>
+    </button>
+
+    ${period === 'month' && weeklyPlan ? `
+    <!-- 4주 실천 플랜 (한 달 리포트에만 · 접힌 상태) -->
+    <details class="rpt-sum-card" style="background:#F0FDF4;border-color:#86EFAC">
+      <summary style="font-size:14px;font-weight:800;color:#166534;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">
+        <span>한 달 실천 플랜 (4주 상세)</span>
+        <span style="font-size:11px;color:#15803D">펼치기 ›</span>
+      </summary>
+      <div style="margin-top:14px">
+        ${weeklyPlan.map(w => `
+          <div class="rpt-week-card" style="border-color:#86EFAC">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+              <span class="rpt-week-num">${w.week}</span>
+              <span class="rpt-week-title">${w.week}주차 · ${_v20Esc(w.title)}</span>
+            </div>
+            <div>
+              ${w.items.map(it => `<div class="rpt-week-item"><span style="width:14px;height:14px;border:1.5px solid #CBD5E1;border-radius:4px;flex-shrink:0;margin-top:2px;background:#FFF"></span><span>${_v20Esc(it)}</span></div>`).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </details>
+    ` : ''}
 
     ${coachHtml}
 
