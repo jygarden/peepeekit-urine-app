@@ -10493,9 +10493,10 @@ function _v21MarkPractice() {
   } catch(e){}
 }
 
+// 🗺 내 주변 매장 · 앱 안에서 결과 표시 (외부 브라우저 X)
+// 카카오 로컬 API로 검색 → 바텀시트로 리스트 보여주기 → 탭하면 그 매장만 지도로
 function _v21OpenNearbyMap() {
   try {
-    // 🎯 새 API 우선 · fallback으로 레거시 _v21CurrentRec
     let foodName = null;
     const state = window._v21NewApi;
     if (state && state.data && state.data.primary && state.data.primary.name) {
@@ -10507,58 +10508,130 @@ function _v21OpenNearbyMap() {
       alert('추천 음식 로딩 중이에요 · 잠시 후 다시 시도');
       return;
     }
-    const q = encodeURIComponent(String(foodName).trim());
-    // 🗺 카카오 지도 사용 · 네이버보다 맛집 커버리지 넓음
-    // GPS 좌표 있으면 그 위치 중심 · 없으면 카카오가 자동으로 "내 위치" 요청 or 기본 서울
-    const openKakaoMap = (lat, lng) => {
-      let url;
-      if (lat && lng) {
-        // 좌표 기반 검색 · 사용자 현재 위치 중심
-        url = `https://map.kakao.com/?q=${q}&urlX=${lng}&urlY=${lat}&urlLevel=4`;
-      } else {
-        // 좌표 없으면 일반 검색 · 카카오가 GPS 권한 요청하거나 기본 지역
-        url = `https://map.kakao.com/?q=${q}`;
-      }
-      const win = window.open(url, '_blank', 'noopener');
-      if (!win || win.closed || typeof win.closed === 'undefined') {
-        window.location.href = url;
-      }
+    const foodNameRaw = String(foodName).trim();
+
+    // 바텀시트 먼저 열고 로딩 표시
+    _v21ShowNearbyMapSheet(foodNameRaw, 'loading', null);
+
+    // GPS 확보 (캐시 → 요청) → 카카오 로컬 API 호출
+    const searchWithGps = (lat, lng) => {
+      const body = { query: foodNameRaw, display: 15 };
+      if (lat && lng) { body.lat = lat; body.lng = lng; body.radius = 10000; }
+      fetch('/api/kakao-local', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => {
+        if (!data.items || data.items.length === 0) {
+          _v21ShowNearbyMapSheet(foodNameRaw, 'empty', null);
+        } else {
+          _v21ShowNearbyMapSheet(foodNameRaw, 'ok', data.items);
+        }
+      })
+      .catch(err => {
+        console.error('[nearby]', err);
+        _v21ShowNearbyMapSheet(foodNameRaw, 'error', null);
+      });
     };
 
-    // 1. 캐시된 GPS 있으면 바로 사용
     if (window._v22GpsCoords && window._v22GpsCoords.lat && window._v22GpsCoords.lng) {
-      openKakaoMap(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
-      return;
-    }
-    // 2. GPS 요청 · 2초 타임아웃 · 안 되면 좌표 없이 열기
-    if (navigator.geolocation) {
+      searchWithGps(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
+    } else if (navigator.geolocation) {
       let done = false;
-      const timeout = setTimeout(() => {
-        if (!done) { done = true; openKakaoMap(null, null); }
-      }, 2500);
+      const to = setTimeout(() => { if (!done) { done = true; searchWithGps(null, null); } }, 3000);
       navigator.geolocation.getCurrentPosition(
         p => {
-          if (done) return;
-          done = true;
-          clearTimeout(timeout);
+          if (done) return; done = true; clearTimeout(to);
           const lat = p.coords.latitude, lng = p.coords.longitude;
           window._v22GpsCoords = { lat, lng };
-          openKakaoMap(lat, lng);
+          searchWithGps(lat, lng);
         },
-        () => {
-          if (done) return;
-          done = true;
-          clearTimeout(timeout);
-          openKakaoMap(null, null);
-        },
-        { enableHighAccuracy: false, timeout: 2000, maximumAge: 300000 }
+        () => { if (done) return; done = true; clearTimeout(to); searchWithGps(null, null); },
+        { enableHighAccuracy: false, timeout: 2500, maximumAge: 300000 }
       );
     } else {
-      openKakaoMap(null, null);
+      searchWithGps(null, null);
     }
+  } catch(e) { console.error('_v21OpenNearbyMap', e); }
+}
+
+// 바텀시트 · 내 주변 매장 결과 표시
+function _v21ShowNearbyMapSheet(query, status, items) {
+  const old = document.getElementById('v21NearbySheet');
+  if (old) old.remove();
+  const backdrop = document.createElement('div');
+  backdrop.id = 'v21NearbySheet';
+  backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
+  backdrop.onclick = (e) => { if (e.target === backdrop) backdrop.remove(); };
+
+  let bodyHtml = '';
+  if (status === 'loading') {
+    bodyHtml = `<div style="padding:28px 14px;text-align:center;color:#64748B;font-size:13px;font-weight:600">
+      <div style="display:inline-block;width:18px;height:18px;border:2.5px solid #E5E7EB;border-top-color:#2E61C4;border-radius:50%;animation:v21spin .8s linear infinite;margin-bottom:10px"></div>
+      <div>근처 매장 찾는 중...</div>
+    </div>
+    <style>@keyframes v21spin{to{transform:rotate(360deg)}}</style>`;
+  } else if (status === 'empty') {
+    bodyHtml = `<div style="padding:24px 14px;text-align:center;color:#64748B;font-size:12.5px;font-weight:600;line-height:1.6">
+      "${_v20Esc(query)}" 관련 매장을 못 찾았어요.<br>
+      <span style="color:#94A3B8">검색 범위를 넓히거나 다른 음식을 시도해보세요.</span>
+    </div>`;
+  } else if (status === 'error') {
+    bodyHtml = `<div style="padding:24px 14px;text-align:center;color:#DC2626;font-size:12.5px;font-weight:600;line-height:1.6">
+      검색 중 오류가 발생했어요.<br>
+      <span style="color:#94A3B8">네트워크 상태를 확인하고 다시 시도해주세요.</span>
+    </div>`;
+  } else if (status === 'ok' && items) {
+    bodyHtml = items.map(it => {
+      const distTxt = it.distance != null
+        ? (it.distance < 1000 ? `${it.distance}m` : `${(it.distance/1000).toFixed(1)}km`)
+        : '';
+      const addr = it.roadAddress || it.address || '';
+      return `
+        <div onclick="_v21OpenKakaoPlace('${_v20Esc(it.link)}','${_v20Esc(it.title)}')"
+             style="padding:12px 14px;background:#F8FAFC;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:background .15s">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px">
+            <div style="font-size:14px;font-weight:800;color:#0F172A;letter-spacing:-.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_v20Esc(it.title)}</div>
+            ${distTxt ? `<div style="font-size:11px;font-weight:700;color:#2E61C4;background:#DBEAFE;padding:2px 8px;border-radius:99px;flex-shrink:0">${distTxt}</div>` : ''}
+          </div>
+          ${it.category ? `<div style="font-size:11px;color:#64748B;font-weight:600;margin-bottom:3px">${_v20Esc(it.category)}</div>` : ''}
+          ${addr ? `<div style="font-size:11.5px;color:#475569;font-weight:500;line-height:1.4">${_v20Esc(addr)}</div>` : ''}
+          ${it.telephone ? `<div style="font-size:11px;color:#2E61C4;font-weight:700;margin-top:4px">📞 ${_v20Esc(it.telephone)}</div>` : ''}
+        </div>`;
+    }).join('');
+  }
+
+  backdrop.innerHTML = `
+    <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 34px;width:100%;max-height:80vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;color:#2E61C4;font-weight:800;letter-spacing:.3px;margin-bottom:2px">📍 내 주변 ${window._v22GpsCoords ? '' : '(위치 불명)'}</div>
+          <div style="font-size:18px;font-weight:900;color:#0F172A;letter-spacing:-.4px">"${_v20Esc(query)}" ${status === 'ok' && items ? `· ${items.length}곳` : ''}</div>
+        </div>
+        <button onclick="document.getElementById('v21NearbySheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:4px 8px;font-family:inherit">×</button>
+      </div>
+      ${bodyHtml}
+    </div>
+    <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(backdrop);
+}
+
+// 특정 매장을 카카오맵에서 열기 · 외부 브라우저 (PWA 유지)
+function _v21OpenKakaoPlace(placeUrl, placeName) {
+  try {
+    if (!placeUrl) return;
+    const a = document.createElement('a');
+    a.href = placeUrl;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { try { a.remove(); } catch(_){} }, 100);
+    // 바텀시트는 유지 · 사용자가 다른 매장도 볼 수 있게
   } catch(e) {
-    console.error('_v21OpenNearbyMap', e);
-    try { alert('지도를 열 수 없어요 · ' + (e.message || '')); } catch(_){}
+    console.error('_v21OpenKakaoPlace', e);
   }
 }
 
