@@ -10494,7 +10494,9 @@ function _v21MarkPractice() {
 }
 
 // 🗺 내 주변 매장 · 앱 안에서 결과 표시 (외부 브라우저 X)
-// 카카오 로컬 API로 검색 → 바텀시트로 리스트 보여주기 → 탭하면 그 매장만 지도로
+window._v21NearbyLastQuery = null;
+window._v21NearbyGpsStatus = 'unknown';  // 'ok'|'denied'|'unavailable'|'timeout'|'unsupported'
+
 function _v21OpenNearbyMap() {
   try {
     let foodName = null;
@@ -10509,52 +10511,85 @@ function _v21OpenNearbyMap() {
       return;
     }
     const foodNameRaw = String(foodName).trim();
+    window._v21NearbyLastQuery = foodNameRaw;
 
-    // 바텀시트 먼저 열고 로딩 표시
     _v21ShowNearbyMapSheet(foodNameRaw, 'loading', null);
+    _v21FetchNearby(foodNameRaw);
+  } catch(e) { console.error('_v21OpenNearbyMap', e); }
+}
 
-    // GPS 확보 (캐시 → 요청) → 카카오 로컬 API 호출
-    const searchWithGps = (lat, lng) => {
-      const body = { query: foodNameRaw, display: 15 };
-      if (lat && lng) { body.lat = lat; body.lng = lng; body.radius = 10000; }
-      fetch('/api/kakao-local', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
-      .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(data => {
-        if (!data.items || data.items.length === 0) {
-          _v21ShowNearbyMapSheet(foodNameRaw, 'empty', null);
-        } else {
-          _v21ShowNearbyMapSheet(foodNameRaw, 'ok', data.items);
-        }
-      })
-      .catch(err => {
-        console.error('[nearby]', err);
-        _v21ShowNearbyMapSheet(foodNameRaw, 'error', null);
-      });
-    };
+// 재시도용 · GPS 다시 요청 + 재검색
+function _v21RetryNearby() {
+  const q = window._v21NearbyLastQuery;
+  if (!q) return;
+  // 캐시 무효화 · 다시 GPS 요청
+  window._v22GpsCoords = null;
+  _v21ShowNearbyMapSheet(q, 'loading', null);
+  _v21FetchNearby(q);
+}
 
-    if (window._v22GpsCoords && window._v22GpsCoords.lat && window._v22GpsCoords.lng) {
-      searchWithGps(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
-    } else if (navigator.geolocation) {
-      let done = false;
-      const to = setTimeout(() => { if (!done) { done = true; searchWithGps(null, null); } }, 3000);
-      navigator.geolocation.getCurrentPosition(
-        p => {
-          if (done) return; done = true; clearTimeout(to);
-          const lat = p.coords.latitude, lng = p.coords.longitude;
-          window._v22GpsCoords = { lat, lng };
-          searchWithGps(lat, lng);
-        },
-        () => { if (done) return; done = true; clearTimeout(to); searchWithGps(null, null); },
-        { enableHighAccuracy: false, timeout: 2500, maximumAge: 300000 }
-      );
-    } else {
+function _v21FetchNearby(foodNameRaw) {
+  const searchWithGps = (lat, lng) => {
+    const body = { query: foodNameRaw, display: 15 };
+    if (lat && lng) { body.lat = lat; body.lng = lng; body.radius = 10000; }
+    fetch('/api/kakao-local', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(data => {
+      if (!data.items || data.items.length === 0) {
+        _v21ShowNearbyMapSheet(foodNameRaw, 'empty', null);
+      } else {
+        _v21ShowNearbyMapSheet(foodNameRaw, 'ok', data.items);
+      }
+    })
+    .catch(err => {
+      console.error('[nearby]', err);
+      _v21ShowNearbyMapSheet(foodNameRaw, 'error', null);
+    });
+  };
+
+  // 1. 캐시된 GPS 있으면 바로 사용
+  if (window._v22GpsCoords && window._v22GpsCoords.lat && window._v22GpsCoords.lng) {
+    window._v21NearbyGpsStatus = 'ok';
+    searchWithGps(window._v22GpsCoords.lat, window._v22GpsCoords.lng);
+    return;
+  }
+  // 2. GPS 요청 · 10초 넉넉히 (iOS는 첫 요청 느림)
+  if (!navigator.geolocation) {
+    window._v21NearbyGpsStatus = 'unsupported';
+    searchWithGps(null, null);
+    return;
+  }
+  let done = false;
+  const to = setTimeout(() => {
+    if (!done) {
+      done = true;
+      window._v21NearbyGpsStatus = 'timeout';
       searchWithGps(null, null);
     }
-  } catch(e) { console.error('_v21OpenNearbyMap', e); }
+  }, 10000);
+  navigator.geolocation.getCurrentPosition(
+    p => {
+      if (done) return; done = true; clearTimeout(to);
+      const lat = p.coords.latitude, lng = p.coords.longitude;
+      window._v22GpsCoords = { lat, lng };
+      window._v22GpsAccuracy = p.coords.accuracy || null;
+      window._v21NearbyGpsStatus = 'ok';
+      searchWithGps(lat, lng);
+    },
+    err => {
+      if (done) return; done = true; clearTimeout(to);
+      // 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+      const codeMap = { 1: 'denied', 2: 'unavailable', 3: 'timeout' };
+      window._v21NearbyGpsStatus = codeMap[err.code] || 'unknown';
+      console.warn('[nearby] GPS err:', err.code, err.message);
+      searchWithGps(null, null);
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+  );
 }
 
 // 바텀시트 · 내 주변 매장 결과 표시
@@ -10603,15 +10638,36 @@ function _v21ShowNearbyMapSheet(query, status, items) {
     }).join('');
   }
 
+  // GPS 상태 뱃지 + 재시도 버튼
+  const gpsStatus = window._v21NearbyGpsStatus || 'unknown';
+  const hasGps = window._v22GpsCoords && window._v22GpsCoords.lat;
+  let gpsBanner = '';
+  if (status === 'ok' && !hasGps) {
+    const reasonMap = {
+      'denied': '위치 권한을 거부하셨어요 · 전국 검색 결과',
+      'unavailable': '위치 정보를 사용할 수 없어요 · 전국 검색 결과',
+      'timeout': 'GPS 응답이 느려요 · 전국 검색 결과',
+      'unsupported': '이 기기는 위치 지원 X · 전국 검색 결과',
+      'unknown': '위치 정보 없음 · 전국 검색 결과'
+    };
+    gpsBanner = `
+      <div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:18px;flex-shrink:0">⚠️</div>
+        <div style="flex:1;font-size:11.5px;color:#92400E;font-weight:600;line-height:1.4">${reasonMap[gpsStatus] || reasonMap.unknown}</div>
+        <button onclick="_v21RetryNearby()" style="background:#F59E0B;color:#FFF;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">위치 다시 받기</button>
+      </div>`;
+  }
+
   backdrop.innerHTML = `
     <div style="background:#fff;border-radius:22px 22px 0 0;padding:20px 20px 34px;width:100%;max-height:80vh;overflow-y:auto;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <div>
-          <div style="font-size:11px;color:#2E61C4;font-weight:800;letter-spacing:.3px;margin-bottom:2px">📍 내 주변 ${window._v22GpsCoords ? '' : '(위치 불명)'}</div>
+          <div style="font-size:11px;color:#2E61C4;font-weight:800;letter-spacing:.3px;margin-bottom:2px">📍 내 주변 ${hasGps ? '' : '(위치 불명)'}</div>
           <div style="font-size:18px;font-weight:900;color:#0F172A;letter-spacing:-.4px">"${_v20Esc(query)}" ${status === 'ok' && items ? `· ${items.length}곳` : ''}</div>
         </div>
         <button onclick="document.getElementById('v21NearbySheet').remove()" style="background:transparent;border:none;font-size:22px;color:#94A3B8;cursor:pointer;padding:4px 8px;font-family:inherit">×</button>
       </div>
+      ${gpsBanner}
       ${bodyHtml}
     </div>
     <style>@keyframes v21SheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
