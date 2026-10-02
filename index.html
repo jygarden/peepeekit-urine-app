@@ -18679,9 +18679,15 @@ function _renderFoodSummaryBlock(r) {
       </div>
     </div>
 
-    <!-- CTA -->
+    <!-- CTA · 다음 끼니 추천 받기 -->
     <button class="v3-big-cta" onclick="try{if(typeof ggGoTab==='function')ggGoTab('home');else if(typeof goHome==='function')goHome();}catch(e){}">
       <span>다음 끼니 추천 받기</span><span>›</span>
+    </button>
+
+    <!-- 보조 CTA · 이번 주 리포트 보기 -->
+    <button onclick="try{if(typeof showFoodReport==='function')showFoodReport('week');}catch(e){}"
+      style="width:100%;background:#FFF;color:#1D3762;border:1.5px solid #E4EAF3;border-radius:14px;padding:14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:-.3px;margin-top:8px">
+      <span>이번 주 리포트도 보기</span><span style="color:#94A3B8">›</span>
     </button>
   `;
 }
@@ -28371,7 +28377,25 @@ function _showFoodReportImpl(period) {
       .rpt-sum-title{font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
     </style>
 
-    <h2 style="font-size:18px;margin:0 0 10px;color:#1F2937">${periodLabel} 리포트</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:0 0 10px">
+      <h2 style="font-size:18px;color:#1F2937;margin:0">${periodLabel} 리포트</h2>
+      ${(function(){
+        // 오늘 식사 기록 있으면 "오늘 다시 보기" 링크
+        try {
+          const todayKey = new Date().toISOString().split('T')[0];
+          const hasToday = filtered.some(h => {
+            try {
+              const dt = new Date(h.date || h.timestamp || 0);
+              return dt.toISOString().split('T')[0] === todayKey;
+            } catch(e) { return false; }
+          });
+          if (hasToday) {
+            return `<button onclick="closeFoodReport();try{if(typeof _v20OpenRecentMealResult==='function')_v20OpenRecentMealResult();}catch(e){}" style="background:none;border:none;color:#2E61C4;font-size:12px;font-weight:800;cursor:pointer;padding:4px 8px;font-family:inherit;letter-spacing:-.2px">오늘 식사 다시 보기 ›</button>`;
+          }
+        } catch(e) {}
+        return '';
+      })()}
+    </div>
 
     <!-- 🔵 블루 Hero (v3) -->
     <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border-radius:18px;padding:18px;margin-bottom:12px">
