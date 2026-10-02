@@ -9298,11 +9298,17 @@ async function _v21OpenFortune() {
     { key:'health',   label:'건강' }
   ];
   const tabsHtml = tabConfig.map((t,i) => `<button class="v22t-tab${i===0?' active':''}" data-tab="${t.key}">${t.label}</button>`).join('');
+  // 🔑 탭별 데이터 매핑 · luckStars + luckDescs + luckLabels 활용 (f.luck 대신)
   const tabContents = tabConfig.map((t,i) => {
-    const luck = (f.luck && f.luck[t.key]) || {};
-    const headline = esc(luck.headline || luck.desc || ticketHeadline);
-    const body = esc(luck.body || luck.desc || ticketSub || '');
-    return `<div class="v22t-content${i===0?' active':''}" data-panel="${t.key}"><div class="v22t-headline">${headline}</div><div class="v22t-body">${body.replace(/\n/g,'<br>')}</div></div>`;
+    const luckObj = (f.luck && f.luck[t.key]) || {};
+    const stars = (f.luckStars && typeof f.luckStars[t.key] === 'number') ? f.luckStars[t.key] : (luckObj.stars || 3);
+    const desc = luckObj.body || luckObj.desc || (f.luckDescs && f.luckDescs[t.key]) || ticketSub;
+    const label = (f.luckLabels && f.luckLabels[t.key]) || t.label;
+    const emoji = (f.luckEmojis && f.luckEmojis[t.key]) || '';
+    const starStr = '★'.repeat(Math.max(0, stars)) + '☆'.repeat(Math.max(0, 5 - stars));
+    const headline = luckObj.headline || `${emoji ? emoji + ' ' : ''}${label} · ${starStr}`;
+    const body = desc;
+    return `<div class="v22t-content${i===0?' active':''}" data-panel="${t.key}"><div class="v22t-headline">${esc(headline)}</div><div class="v22t-body">${esc(body).replace(/\n/g,'<br>')}</div></div>`;
   }).join('');
 
   const colorMap = { '빨강':'red','빨간':'red','주황':'orange','노랑':'yellow','노란':'yellow','초록':'green','파랑':'blue','파란':'blue','보라':'purple','분홍':'pink','핑크':'pink','검정':'black','검은':'black','흰색':'white','하양':'white','금색':'yellow','은색':'gray' };
