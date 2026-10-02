@@ -18448,7 +18448,76 @@ function enrichWithPairings(r) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🎯 공통 · SVG 원형 프로그레스 (v3)
+// 🎯 공통 · SVG 영양소 종합 휠 차트 (v4)
+// items: [{name, pct, color}] · totalPct: 중앙 표시용 종합값
+// ═══════════════════════════════════════════════════════════
+function _renderNutritionWheel(items, totalPct) {
+  if (!items || !items.length) return '';
+  const cx = 200, cy = 200;
+  const innerR = 72;      // 중앙 원 반경
+  const maxR = 160;       // 바깥 최대 반경
+  const minExtent = 10;   // 0%여도 최소 보이게
+  const total = items.length;
+  const angleEach = 360 / total;
+  const gap = 1.5;        // 슬라이스 간 간격 (deg)
+
+  const slices = items.map((it, i) => {
+    const startDeg = i * angleEach - 90 + gap/2;
+    const endDeg   = (i + 1) * angleEach - 90 - gap/2;
+    const startRad = startDeg * Math.PI / 180;
+    const endRad   = endDeg * Math.PI / 180;
+    const midDeg = (startDeg + endDeg) / 2;
+    const midRad = midDeg * Math.PI / 180;
+
+    const pct = Math.max(0, Math.min(100, it.pct || 0));
+    const outerR = innerR + minExtent + (pct / 100) * (maxR - innerR - minExtent);
+
+    // Slice path
+    const x1 = cx + innerR * Math.cos(startRad);
+    const y1 = cy + innerR * Math.sin(startRad);
+    const x2 = cx + outerR * Math.cos(startRad);
+    const y2 = cy + outerR * Math.sin(startRad);
+    const x3 = cx + outerR * Math.cos(endRad);
+    const y3 = cy + outerR * Math.sin(endRad);
+    const x4 = cx + innerR * Math.cos(endRad);
+    const y4 = cy + innerR * Math.sin(endRad);
+    const largeArc = (endDeg - startDeg) > 180 ? 1 : 0;
+    const path = `M ${x1.toFixed(1)} ${y1.toFixed(1)} L ${x2.toFixed(1)} ${y2.toFixed(1)} A ${outerR.toFixed(1)} ${outerR.toFixed(1)} 0 ${largeArc} 1 ${x3.toFixed(1)} ${y3.toFixed(1)} L ${x4.toFixed(1)} ${y4.toFixed(1)} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x1.toFixed(1)} ${y1.toFixed(1)} Z`;
+
+    // Background (max 100% light slice)
+    const bgOuterR = maxR;
+    const bx2 = cx + bgOuterR * Math.cos(startRad);
+    const by2 = cy + bgOuterR * Math.sin(startRad);
+    const bx3 = cx + bgOuterR * Math.cos(endRad);
+    const by3 = cy + bgOuterR * Math.sin(endRad);
+    const bgPath = `M ${x1.toFixed(1)} ${y1.toFixed(1)} L ${bx2.toFixed(1)} ${by2.toFixed(1)} A ${bgOuterR} ${bgOuterR} 0 ${largeArc} 1 ${bx3.toFixed(1)} ${by3.toFixed(1)} L ${x4.toFixed(1)} ${y4.toFixed(1)} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x1.toFixed(1)} ${y1.toFixed(1)} Z`;
+
+    // Label position
+    const labelR = maxR + 24;
+    const labelX = cx + labelR * Math.cos(midRad);
+    const labelY = cy + labelR * Math.sin(midRad);
+
+    return { path, bgPath, color: it.color, bgColor: it.bgColor || '#F8FAFC', name: it.name, pct, labelX, labelY };
+  });
+
+  return `
+    <svg viewBox="-10 -10 420 420" style="width:100%;max-width:360px;display:block;margin:0 auto">
+      ${slices.map(s => `<path d="${s.bgPath}" fill="${s.bgColor}"/>`).join('')}
+      ${slices.map(s => `<path d="${s.path}" fill="${s.color}"/>`).join('')}
+      <circle cx="${cx}" cy="${cy}" r="${innerR - 2}" fill="#FFF" stroke="#E4EAF3" stroke-width="1.5"/>
+      <text x="${cx}" y="${cy - 10}" text-anchor="middle" font-size="12" font-weight="700" fill="#5D7597" letter-spacing="-.3">종합 섭취율</text>
+      <text x="${cx}" y="${cy + 20}" text-anchor="middle" font-size="32" font-weight="900" fill="#1D3762" letter-spacing="-1.2">${totalPct}%</text>
+      <text x="${cx}" y="${cy + 40}" text-anchor="middle" font-size="10" font-weight="600" fill="#94A3B8" letter-spacing="-.2">권장량 대비</text>
+      ${slices.map(s => `
+        <text x="${s.labelX.toFixed(1)}" y="${(s.labelY - 7).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#1D3762" letter-spacing="-.3">${s.name}</text>
+        <text x="${s.labelX.toFixed(1)}" y="${(s.labelY + 10).toFixed(1)}" text-anchor="middle" font-size="13.5" font-weight="900" fill="${s.color}" letter-spacing="-.3">${s.pct}%</text>
+      `).join('')}
+    </svg>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🎯 공통 · SVG 원형 프로그레스 (v3 · 식사 분석용 유지)
 // pct: 0-100, size: px, 반환: SVG 문자열
 // ═══════════════════════════════════════════════════════════
 function _renderNutritionRing(pct, color, size) {
@@ -28417,46 +28486,96 @@ function _showFoodReportImpl(period) {
       })()}
     </div>
 
-    <!-- 🔵 블루 Hero (v3) -->
-    <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border-radius:18px;padding:18px;margin-bottom:12px">
-      <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:6px">${periodLabel} 식단 분석</div>
-      <div style="font-size:17px;font-weight:900;letter-spacing:-.4px;line-height:1.4;margin-bottom:4px">
+    <!-- 1. 인사이트 Hero (회색 톤 · 깔끔) -->
+    <div style="background:#F3F4F6;border-radius:18px;padding:18px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;color:#64748B;letter-spacing:.3px;margin-bottom:6px">${periodLabel} 식단은</div>
+      <div style="font-size:17px;font-weight:900;color:#1D3762;letter-spacing:-.4px;line-height:1.45;margin-bottom:8px">
         ${_v20Esc(insightMsg)}
       </div>
-      <div style="font-size:12px;color:rgba(255,255,255,.78);font-weight:600;line-height:1.5;margin-top:8px">
+      <div style="font-size:12px;color:#64748B;font-weight:600;line-height:1.5">
         ${topDeficient.length > 0 ? '지금처럼 유지하고, 부족한 영양소를 채워보세요.' : '지금 균형 아주 좋아요. 이대로 꾸준히!'}
       </div>
     </div>
 
-    <!-- 주요 영양소 섭취율 (원형 프로그레스 6개) -->
+    <!-- 2. 영양소 섭취 현황 · 원형 휠 차트 -->
     <div class="rpt-v3-card">
       <div class="rpt-v3-ctitle">
-        <span>주요 영양소 섭취율</span>
+        <span>영양소 섭취 현황</span>
         <span style="font-size:10px;color:#5D7597;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">${periodTxt2} 평균</span>
       </div>
-      <div class="rpt-v3-ring-grid">
-        ${rptRings.map(n => {
+      ${(() => {
+        // 9개 영양소 데이터 조립
+        const wheelItems = [];
+        // 매크로 4개
+        rptRings.forEach(n => {
           const pct = ringPct(n.val, n.target);
-          return `
-          <div class="rpt-v3-ring-item">
-            ${_renderNutritionRing(pct, _ringColor(pct), 80)}
-            <div class="rpt-v3-ring-label">${n.name}</div>
-            <div class="rpt-v3-ring-val">${Math.round(n.val)}g / ${n.target}g</div>
-          </div>`;
-        }).join('')}
-        <!-- 비타민 종합 -->
-        <div class="rpt-v3-ring-item">
-          ${_renderNutritionRing(vitPct, _ringColor(vitPct), 80)}
-          <div class="rpt-v3-ring-label">비타민</div>
-          <div class="rpt-v3-ring-val">${vitCov}종 / ${vitKeys.length}종</div>
-        </div>
-        <!-- 미네랄 종합 -->
-        <div class="rpt-v3-ring-item">
-          ${_renderNutritionRing(minPct, _ringColor(minPct), 80)}
-          <div class="rpt-v3-ring-label">미네랄</div>
-          <div class="rpt-v3-ring-val">${minCov}종 / ${minKeys.length}종</div>
-        </div>
-      </div>
+          const color = pct >= 80 ? '#22C55E' : pct >= 50 ? '#F59E0B' : '#EF4444';
+          const bgColor = pct >= 80 ? '#DCFCE7' : pct >= 50 ? '#FFEDD5' : '#FEE2E2';
+          wheelItems.push({ name: n.name, pct, color, bgColor });
+        });
+        // 비타민·미네랄 종합
+        wheelItems.push({
+          name: '비타민', pct: vitPct,
+          color: vitPct >= 80 ? '#22C55E' : vitPct >= 50 ? '#F59E0B' : '#EF4444',
+          bgColor: vitPct >= 80 ? '#DCFCE7' : vitPct >= 50 ? '#FFEDD5' : '#FEE2E2'
+        });
+        wheelItems.push({
+          name: '미네랄', pct: minPct,
+          color: minPct >= 80 ? '#22C55E' : minPct >= 50 ? '#F59E0B' : '#EF4444',
+          bgColor: minPct >= 80 ? '#DCFCE7' : minPct >= 50 ? '#FFEDD5' : '#FEE2E2'
+        });
+        // 주요 미세영양 3개 (칼슘·철분·오메가3)
+        const extras = [
+          { name:'칼슘',   src:microSum, key:'calcium',  target:RDA_DAILY.calcium },
+          { name:'철분',   src:microSum, key:'iron',     target:RDA_DAILY.iron },
+          { name:'오메가3', src:nutSum, altKey:'omega3', target:1500 }
+        ];
+        extras.forEach(e => {
+          const v = (e.src && (e.src[e.key] != null ? e.src[e.key] : 0)) || 0;
+          const dailyAvg = nutCount > 0 ? (v / nutCount * dailyAvgCount) : 0;
+          const pct = e.target > 0 ? Math.min(100, Math.round((dailyAvg / e.target) * 100)) : 0;
+          wheelItems.push({
+            name: e.name, pct,
+            color: pct >= 80 ? '#22C55E' : pct >= 50 ? '#F59E0B' : '#EF4444',
+            bgColor: pct >= 80 ? '#DCFCE7' : pct >= 50 ? '#FFEDD5' : '#FEE2E2'
+          });
+        });
+        // 종합 % = 평균
+        const totalPct = Math.round(wheelItems.reduce((s, x) => s + x.pct, 0) / wheelItems.length);
+        return _renderNutritionWheel(wheelItems, totalPct);
+      })()}
+
+      <!-- 상태 요약 2줄 -->
+      ${(() => {
+        const allItems = [];
+        rptRings.forEach(n => {
+          const pct = ringPct(n.val, n.target);
+          allItems.push({ name: n.name, pct });
+        });
+        allItems.push({ name:'비타민', pct: vitPct });
+        allItems.push({ name:'미네랄', pct: minPct });
+        const goodItems = allItems.filter(x => x.pct >= 80).map(x => x.name);
+        const needItems = allItems.filter(x => x.pct < 50).map(x => x.name);
+        return `
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:flex-start;gap:11px;padding:12px 14px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px">
+              <div style="width:24px;height:24px;background:#16A34A;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0">✓</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12.5px;font-weight:800;color:#166534;letter-spacing:-.3px;margin-bottom:3px">잘 채워지고 있어요</div>
+                <div style="font-size:11px;color:#15803D;font-weight:600;line-height:1.5">${goodItems.length ? _v20Esc(goodItems.join(', ')) + '은(는) 잘 섭취하고 있어요.' : '조금 더 챙겨봐요.'}</div>
+              </div>
+            </div>
+            ${needItems.length ? `
+            <div style="display:flex;align-items:flex-start;gap:11px;padding:12px 14px;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:12px">
+              <div style="width:24px;height:24px;background:#DC2626;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0">!</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12.5px;font-weight:800;color:#991B1B;letter-spacing:-.3px;margin-bottom:3px">조금 더 챙겨야 해요</div>
+                <div style="font-size:11px;color:#B91C1C;font-weight:600;line-height:1.5">${_v20Esc(needItems.join(', '))}이(가) 부족해요.</div>
+              </div>
+            </div>` : ''}
+          </div>
+        `;
+      })()}
     </div>
 
     <!-- 2. 가장 많이 먹은 음식 TOP 3 (이모지 X · 순위 뱃지) -->
