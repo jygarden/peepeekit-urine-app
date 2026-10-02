@@ -23,13 +23,13 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const { query, display = 5, lat, lng, radius } = req.body || {};
+  const { query, display = 15, lat, lng, radius } = req.body || {};
   if (!query || !String(query).trim()) {
     return res.status(400).json({ error: 'query required' });
   }
   const q = String(query).trim();
 
-  // 카카오 로컬 키워드 검색
+  // 카카오 로컬 키워드 검색 · 최대 15개 (API 한계)
   const params = new URLSearchParams();
   params.append('query', q);
   params.append('size', String(Math.min(15, Math.max(5, display))));
@@ -84,19 +84,22 @@ module.exports = async function handler(req, res) {
     }
 
     const docs = data.documents || [];
-    // 음식점·카페 먼저, 그다음 나머지 (같은 이름의 병원·은행 등이 앞에 나오는 걸 방지)
-    const priority = { 'FD6': 0, 'CE7': 1 };
+    // 음식 관련 카테고리 우선 (FD6=음식점, CE7=카페, MT1=대형마트, CS2=편의점)
+    // 명백히 무관한 카테고리만 뒤로 (BK9=은행, HP8=병원, PM9=약국, PO3=공공기관)
+    const foodPriority = { 'FD6': 0, 'CE7': 1, 'MT1': 2, 'CS2': 2 };
+    const nonFoodPenalty = { 'BK9': 9, 'HP8': 9, 'PM9': 9, 'PO3': 9, 'SC4': 9, 'AC5': 9 };
     docs.sort((a, b) => {
-      const pa = priority[a.category_group_code] ?? 2;
-      const pb = priority[b.category_group_code] ?? 2;
+      const pa = foodPriority[a.category_group_code] ?? (nonFoodPenalty[a.category_group_code] ?? 3);
+      const pb = foodPriority[b.category_group_code] ?? (nonFoodPenalty[b.category_group_code] ?? 3);
       if (pa !== pb) return pa - pb;
-      // 같은 우선순위 안에서는 GPS 있으면 거리 순 (이미 sort=distance지만 재정렬 위해)
+      // 같은 우선순위 안에서는 GPS 있으면 거리 순
       const da = a.distance ? Number(a.distance) : 1e9;
       const db = b.distance ? Number(b.distance) : 1e9;
       return da - db;
     });
 
-    const items = docs.slice(0, Math.min(5, display)).map(d => ({
+    // 사용자가 원하는 만큼 리턴 (기본 15 · 최대 15)
+    const items = docs.slice(0, Math.min(15, display)).map(d => ({
       title: d.place_name || '',
       category: (d.category_name || '').split('>').slice(-2).map(s => s.trim()).filter(Boolean).join(' > ') || d.category_group_name || '',
       categoryGroup: d.category_group_name || '',
