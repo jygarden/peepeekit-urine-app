@@ -18576,7 +18576,8 @@ function _renderFoodSummaryBlock(r) {
   };
 
   const score = r.balanceScore || 0;
-  const kcal = Math.round(get(['kcal','calories']) || n.kcal || tot.calories || 0);
+  // 🔑 kcal · r.totalCalories가 메인 소스 · fallback 체인
+  const kcal = Math.round(r.totalCalories || get(['kcal','calories']) || n.kcal || tot.calories || 0);
   const foods = Array.isArray(r.foods) ? r.foods : [];
   const foodNames = foods.map(f => f.name || f.food || '').filter(Boolean);
   // Hero 음식명 (여러 개면 "X 외 N가지")
@@ -18652,12 +18653,18 @@ function _renderFoodSummaryBlock(r) {
   // 최대 3개
   const nextMeals = nextMealCards.slice(0, 3);
 
-  // 요약 메시지 (한눈에 분석 Hero)
+  // 요약 메시지 (한눈에 분석 Hero · 조사 자동 선택 · 받침 있으면 은, 없으면 는)
+  const _josa = (word, hasJongseong, noJongseong) => {
+    if (!word) return noJongseong;
+    const c = word.charCodeAt(word.length - 1);
+    if (c >= 0xAC00 && c <= 0xD7A3) return ((c - 0xAC00) % 28 === 0) ? noJongseong : hasJongseong;
+    return noJongseong;
+  };
   const insightLine = (() => {
     if (topDeficits.length === 0) return { good:'전체적으로 균형 좋아요', need:'유지만 하면 완벽!' };
     const needed = topDeficits.slice(0, 2).map(d => d.name).join('·');
     const goodName = good[0] ? good[0].name : '칼로리';
-    return { good: `${goodName}은(는) 괜찮고`, need: `${needed} 보충이 필요해요.` };
+    return { good: `${goodName}${_josa(goodName, '은', '는')} 괜찮고`, need: `${needed} 보충이 필요해요.` };
   })();
 
   // AI 코멘트 (한 줄)
@@ -18718,11 +18725,11 @@ function _renderFoodSummaryBlock(r) {
       </div>
     </div>
 
-    <!-- 이 끼니 영양소 (원형 프로그레스 4개) -->
+    <!-- 이 끼니 영양소 (원형 프로그레스 4개 · 반응형 레이아웃) -->
     <div class="v3-card">
-      <div class="v3-ctitle">
-        <span>이 끼니 영양소</span>
-        <span style="font-size:10px;color:#5D7597;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">1끼 권장 대비</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <span style="font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;flex-shrink:0">이 끼니 영양소</span>
+        <span style="font-size:10px;color:#5D7597;font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px;flex-shrink:0;white-space:nowrap">1끼 권장 대비</span>
       </div>
       <div class="v3-ring-grid">
         ${withPct.slice(0, 4).map(n => `
@@ -18737,7 +18744,7 @@ function _renderFoodSummaryBlock(r) {
     ${topDeficits.length > 0 ? `
     <!-- 이 끼니로 부족한 영양소 -->
     <div class="v3-card">
-      <div class="v3-ctitle" style="margin-bottom:4px"><span>이 끼니로 부족한 영양소</span></div>
+      <div style="font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:4px">이 끼니로 부족한 영양소</div>
       <div class="v3-csub">다음 끼엔 아래 영양소가 많은 음식을 추가해봐요.</div>
       <div>
         ${topDeficits.map(d => {
@@ -18762,7 +18769,7 @@ function _renderFoodSummaryBlock(r) {
 
     <!-- 다음 끼니 가이드 -->
     <div class="v3-card">
-      <div class="v3-ctitle" style="margin-bottom:4px"><span>다음 끼니 가이드</span></div>
+      <div style="font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:4px">다음 끼니 가이드</div>
       <div class="v3-csub">부족한 영양을 채우는 추천 조합이에요.</div>
       <div>
         ${nextGuides.map((g, i) => `
