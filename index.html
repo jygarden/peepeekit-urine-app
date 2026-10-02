@@ -27856,8 +27856,11 @@ function showFoodReport(period) {
   }
 }
 function _showFoodReportImpl(period) {
-  const days = period === 'week' ? 7 : 30;
-  const periodLabel = period === 'week' ? '주간 (최근 7일)' : '월간 (최근 30일)';
+  // 'today' | 'week' | 'month' 지원
+  const days = period === 'today' ? 1 : period === 'week' ? 7 : 30;
+  const periodLabel = period === 'today' ? '오늘 먹은 음식'
+                    : period === 'week'  ? '이번 주 요약'
+                                         : '이번 달 요약';
 
   let history = [];
   try { history = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]'); } catch(e) { history = []; }
@@ -27873,11 +27876,22 @@ function _showFoodReportImpl(period) {
   const content = document.getElementById('foodReportContent');
 
   if (filtered.length === 0) {
+    const emptyMsg = period === 'today' ? '오늘 아직 분석한 식단이 없어요.<br>지금 바로 사진 찍어볼까요?'
+                    : period === 'week' ? '이번 주 분석한 식단이 없어요.<br>식단을 분석해보세요.'
+                    : '이번 달 분석한 식단이 없어요.<br>식단을 분석해보세요.';
     content.innerHTML = `
-      <h2 style="font-size:18px;margin:0 0 14px;color:#1F2937">📊 ${periodLabel} 리포트</h2>
-      <div style="text-align:center;padding:50px 20px;color:#94A3B8">
-        <div style="font-size:54px;margin-bottom:14px">📭</div>
-        <div style="font-size:13px;line-height:1.6">이 기간엔 분석한 식단이 없어요.<br>식단을 더 많이 분석하면<br>풍부한 리포트가 만들어져요!</div>
+      <div style="display:flex;align-items:center;margin:0 0 14px">
+        <h2 style="font-size:18px;color:#1F2937;margin:0;flex:1;letter-spacing:-.4px">영양 분석</h2>
+      </div>
+      <div style="display:flex;background:#F1F5F9;border-radius:14px;padding:4px;margin-bottom:16px;gap:2px">
+        <button onclick="showFoodReport('today')" style="flex:1;background:${period==='today'?'#FFF':'transparent'};border:none;padding:10px 6px;font-size:12.5px;font-weight:${period==='today'?'800':'700'};color:${period==='today'?'#1D3762':'#64748B'};cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;box-shadow:${period==='today'?'0 2px 6px rgba(29,55,98,.08)':'none'}">오늘 먹은 음식</button>
+        <button onclick="showFoodReport('week')" style="flex:1;background:${period==='week'?'#FFF':'transparent'};border:none;padding:10px 6px;font-size:12.5px;font-weight:${period==='week'?'800':'700'};color:${period==='week'?'#1D3762':'#64748B'};cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;box-shadow:${period==='week'?'0 2px 6px rgba(29,55,98,.08)':'none'}">이번 주 요약</button>
+        <button onclick="showFoodReport('month')" style="flex:1;background:${period==='month'?'#FFF':'transparent'};border:none;padding:10px 6px;font-size:12.5px;font-weight:${period==='month'?'800':'700'};color:${period==='month'?'#1D3762':'#64748B'};cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;box-shadow:${period==='month'?'0 2px 6px rgba(29,55,98,.08)':'none'}">이번 달 요약</button>
+      </div>
+      <div style="text-align:center;padding:40px 20px;color:#94A3B8;background:#F8FAFC;border-radius:14px">
+        <div style="font-size:48px;margin-bottom:14px">○</div>
+        <div style="font-size:13px;line-height:1.6;color:#64748B;font-weight:600">${emptyMsg}</div>
+        <button onclick="closeFoodReport();try{if(typeof enterFood==='function')enterFood('human');}catch(e){}" style="margin-top:18px;background:#1D3762;color:#FFF;border:none;border-radius:10px;padding:11px 20px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px">음식 찍기 ›</button>
       </div>`;
     modal.style.display = 'block';
     return;
@@ -28089,7 +28103,7 @@ function _showFoodReportImpl(period) {
   excessItems.sort((a, b) => b.pct - a.pct);
 
   // 🎪 좋은 점 위주 + 위트 있는 코멘트 (실제 먹은 음식 언급)
-  const periodTxt2 = period === 'month' ? '이번 달' : '이번 주';
+  const periodTxt2 = period === 'today' ? '오늘' : period === 'month' ? '이번 달' : '이번 주';
   let coachMsg = '', coachClass = '';
   // records가 아니라 rawRecords에서 최근 먹은 것 뽑기
   let recentRecords = [];
@@ -28472,29 +28486,21 @@ function _showFoodReportImpl(period) {
       .rpt-sum-title{font-size:14px;font-weight:800;color:#1D3762;letter-spacing:-.3px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
     </style>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin:0 0 10px">
-      <h2 style="font-size:18px;color:#1F2937;margin:0">${periodLabel} 리포트</h2>
-      ${(function(){
-        // 오늘 식사 기록 있으면 "오늘 다시 보기" 링크
-        try {
-          const todayKey = new Date().toISOString().split('T')[0];
-          const hasToday = filtered.some(h => {
-            try {
-              const dt = new Date(h.date || h.timestamp || 0);
-              return dt.toISOString().split('T')[0] === todayKey;
-            } catch(e) { return false; }
-          });
-          if (hasToday) {
-            return `<button onclick="closeFoodReport();try{if(typeof _v20OpenRecentMealResult==='function')_v20OpenRecentMealResult();}catch(e){}" style="background:none;border:none;color:#2E61C4;font-size:12px;font-weight:800;cursor:pointer;padding:4px 8px;font-family:inherit;letter-spacing:-.2px">오늘 식사 다시 보기 ›</button>`;
-          }
-        } catch(e) {}
-        return '';
-      })()}
+    <!-- 상단 헤더 · 영양 분석 타이틀 -->
+    <div style="display:flex;align-items:center;margin:0 0 14px;gap:8px">
+      <h2 style="font-size:18px;color:#1F2937;margin:0;flex:1;letter-spacing:-.4px">영양 분석</h2>
+    </div>
+
+    <!-- 🎯 3탭 바 (오늘 / 이번 주 / 이번 달) -->
+    <div style="display:flex;background:#F1F5F9;border-radius:14px;padding:4px;margin-bottom:16px;gap:2px">
+      <button onclick="showFoodReport('today')" style="flex:1;background:${period==='today'?'#FFF':'transparent'};border:none;padding:10px 6px;font-size:12.5px;font-weight:${period==='today'?'800':'700'};color:${period==='today'?'#1D3762':'#64748B'};cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;transition:all .15s;box-shadow:${period==='today'?'0 2px 6px rgba(29,55,98,.08)':'none'}">오늘 먹은 음식</button>
+      <button onclick="showFoodReport('week')" style="flex:1;background:${period==='week'?'#FFF':'transparent'};border:none;padding:10px 6px;font-size:12.5px;font-weight:${period==='week'?'800':'700'};color:${period==='week'?'#1D3762':'#64748B'};cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;transition:all .15s;box-shadow:${period==='week'?'0 2px 6px rgba(29,55,98,.08)':'none'}">이번 주 요약</button>
+      <button onclick="showFoodReport('month')" style="flex:1;background:${period==='month'?'#FFF':'transparent'};border:none;padding:10px 6px;font-size:12.5px;font-weight:${period==='month'?'800':'700'};color:${period==='month'?'#1D3762':'#64748B'};cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;transition:all .15s;box-shadow:${period==='month'?'0 2px 6px rgba(29,55,98,.08)':'none'}">이번 달 요약</button>
     </div>
 
     <!-- 1. 인사이트 Hero (회색 톤 · 깔끔) -->
     <div style="background:#F3F4F6;border-radius:18px;padding:18px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;color:#64748B;letter-spacing:.3px;margin-bottom:6px">${periodLabel} 식단은</div>
+      <div style="font-size:11px;font-weight:800;color:#64748B;letter-spacing:.3px;margin-bottom:6px">${periodTxt2} 식단은</div>
       <div style="font-size:17px;font-weight:900;color:#1D3762;letter-spacing:-.4px;line-height:1.45;margin-bottom:8px">
         ${_v20Esc(insightMsg)}
       </div>
