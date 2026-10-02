@@ -18716,14 +18716,14 @@ function _renderFoodSummaryBlock(r) {
       .v3-big-cta{width:100%;background:#1D3762;color:#FFF;border:none;border-radius:14px;padding:16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(29,55,98,.25);margin-top:4px}
     </style>
 
-    <!-- 🔵 블루 Hero -->
-    <div style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border-radius:18px;padding:18px;margin-bottom:12px">
-      <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:6px">${_v20Esc(window.selectedMealTime || '식사')} · 분석 완료</div>
-      <div style="font-size:19px;font-weight:900;letter-spacing:-.5px;line-height:1.25">${_v20Esc(foodTitle)}</div>
-      <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin:6px 0 14px;font-weight:600">${kcal} kcal</div>
-      <div style="padding:12px 14px;background:rgba(255,255,255,.12);border-radius:10px">
-        <div style="font-size:13.5px;font-weight:800;letter-spacing:-.3px;line-height:1.5">
-          ${_v20Esc(insightLine.good)},<br><b style="color:#FBBF24;font-weight:900">${_v20Esc(insightLine.need)}</b>
+    <!-- Hero · 민트/크림 톤 (덜 무거운 색) -->
+    <div style="background:linear-gradient(135deg,#FEF9E7 0%,#FFF3B0 100%);border:1px solid #F5D94F;color:#5C4A00;border-radius:18px;padding:18px;margin-bottom:12px">
+      <div style="font-size:10.5px;font-weight:800;color:#A07800;letter-spacing:.3px;margin-bottom:6px">${_v20Esc(window.selectedMealTime || '식사')} · 분석 완료</div>
+      <div style="font-size:19px;font-weight:900;color:#3D2E00;letter-spacing:-.5px;line-height:1.25">${_v20Esc(foodTitle)}</div>
+      <div style="font-size:12.5px;color:#A07800;margin:6px 0 14px;font-weight:700">${kcal} kcal</div>
+      <div style="padding:12px 14px;background:#FFF;border-radius:10px">
+        <div style="font-size:13.5px;font-weight:800;color:#3D2E00;letter-spacing:-.3px;line-height:1.5">
+          ${_v20Esc(insightLine.good)},<br><b style="color:#D97706;font-weight:900">${_v20Esc(insightLine.need)}</b>
         </div>
       </div>
     </div>
@@ -27874,13 +27874,23 @@ function _showFoodReportImpl(period) {
 
   let history = [];
   try { history = JSON.parse(localStorage.getItem('foodHistoryV1') || '[]'); } catch(e) { history = []; }
+  console.log('[Report]', period, '· 전체 기록:', history.length, '건');
 
   const now = Date.now();
-  const cutoff = now - days * 86400000;
+  // 'today' = 오늘 00:00부터, 'week' = 최근 7일, 'month' = 최근 30일
+  let cutoff;
+  if (period === 'today') {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    cutoff = todayStart.getTime();
+  } else {
+    cutoff = now - days * 86400000;
+  }
   const filtered = history.filter(h => {
     const t = new Date(h.date || h.timestamp || 0).getTime();
-    return t >= cutoff;
+    return t >= cutoff && t <= now + 60000;  // 60초 미래 허용 (시계 차이)
   });
+  console.log('[Report]', period, '· 필터 후:', filtered.length, '건', '· cutoff:', new Date(cutoff).toLocaleString());
 
   const modal = document.getElementById('foodReportModal');
   const content = document.getElementById('foodReportContent');
@@ -27901,6 +27911,7 @@ function _showFoodReportImpl(period) {
       <div style="text-align:center;padding:40px 20px;color:#94A3B8;background:#F8FAFC;border-radius:14px">
         <div style="font-size:48px;margin-bottom:14px">○</div>
         <div style="font-size:13px;line-height:1.6;color:#64748B;font-weight:600">${emptyMsg}</div>
+        ${history.length > 0 ? `<div style="margin-top:12px;padding:10px 14px;background:#FEF3C7;border-radius:10px;font-size:11px;color:#92400E;font-weight:700;line-height:1.5">전체 기록 ${history.length}건 있지만 이 기간에 해당하는 식단 없음.<br>다른 탭을 확인해보세요.</div>` : ''}
         <button onclick="closeFoodReport();try{if(typeof enterFood==='function')enterFood('human');}catch(e){}" style="margin-top:18px;background:#1D3762;color:#FFF;border:none;border-radius:10px;padding:11px 20px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-.3px">음식 찍기 ›</button>
       </div>`;
     modal.style.display = 'block';
