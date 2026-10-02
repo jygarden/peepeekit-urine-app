@@ -2363,9 +2363,14 @@ window.appIcon = function(name, size){
   <div class="screen" id="screenHome">
     <div class="home-wrap">
 
-      <!-- Legacy · JS 참조 유지 (스마트 리마인더로 대체됨) -->
-      <div class="reminder-banner" id="reminderBanner" style="display:none !important">
-        <span id="reminderDays">0</span>
+      <!-- 소변검사 리마인더 배너 · 30일+ 미검사 시 자동 표시 -->
+      <div class="reminder-banner" id="reminderBanner" style="display:none;background:#FFF4E6;border:1px solid #FED7AA;border-radius:14px;padding:12px 14px;margin:12px 0 0;align-items:center;gap:10px">
+        <div style="font-size:22px;flex-shrink:0">⏰</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:800;color:#9A3412;letter-spacing:-.2px">마지막 검사 후 <span id="reminderDays">0</span>일 지났어요!</div>
+          <div style="font-size:11.5px;color:#C2410C;font-weight:600;margin-top:2px">정기적인 검사로 건강 변화를 체크하세요.</div>
+        </div>
+        <button onclick="dismissReminder()" style="background:none;border:none;color:#C2410C;font-size:20px;cursor:pointer;padding:4px 8px;font-family:inherit;flex-shrink:0" aria-label="닫기">×</button>
       </div>
       <!-- 상단 행: 포인트 + 설정 (오른쪽 정렬) -->
       <div class="home-top-bar">
@@ -2391,9 +2396,9 @@ window.appIcon = function(name, size){
         <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
         <div style="padding:14px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:8px">
           <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:700">재율님</b></div>
-          <!-- 걸음 수 뱃지 · 실시간 -->
-          <div id="v22StepBadge" onclick="try{_v22ShowStepInfo()}catch(e){}" style="flex-shrink:0;display:flex;align-items:center;gap:5px;background:#FEF3C7;color:#78350F;font-size:11px;font-weight:700;padding:5px 10px;border-radius:99px;cursor:pointer">
-            🚶 <span id="v22StepCount">0 걸음</span>
+          <!-- 걸음 수 뱃지 · 제거됨 (만보기 기능 없음) · JS 참조 유지 위해 hidden -->
+          <div id="v22StepBadge" style="display:none">
+            <span id="v22StepCount">0 걸음</span>
           </div>
         </div>
         <!-- 스마트 리마인더 · 화면 표시 X · 푸시 알림으로 전환 (JS 참조 유지) -->
@@ -8108,12 +8113,13 @@ function _v20RenderRecentMeal() {
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background = '#F1F5F9'; scoreEl.style.color = '#94A3B8'; }
     return;
   }
+  // 🎯 사용자 요청: 기록이 있어도 음식명 표시 X · 항상 "부족한 영양 확인하러 가기"
   const firstFood = _foodsFromEntry(recent)[0];
   const foodName = (firstFood && firstFood.name) || recent.foods || '식사';
   const mealTime = recent.mealTime || '';
   const mealLabel = {'breakfast':'아침', 'lunch':'점심', 'dinner':'저녁', 'snack':'간식'}[mealTime] || '';
   const displayName = mealLabel ? `${mealLabel} · ${foodName}` : foodName;
-  if (nameEl) nameEl.textContent = displayName;
+  if (nameEl) nameEl.textContent = '부족한 영양 확인하러 가기';
   try { _v22UpdateHeroIllust(displayName); } catch(e){}
   // chip · nutrition 기반
   const nut = recent.nutrition || {};
@@ -10497,11 +10503,22 @@ function _v21OpenNearbyMap() {
     } else if (_v21CurrentRec && _v21CurrentRec.name) {
       foodName = _v21CurrentRec.name;
     }
-    if (!foodName) return;
+    if (!foodName) {
+      alert('추천 음식 로딩 중이에요 · 잠시 후 다시 시도');
+      return;
+    }
     const q = encodeURIComponent(String(foodName).trim());
-    // 네이버 지도 · 앱 있으면 자동으로 앱 실행됨 (Universal Link)
-    window.open(`https://m.map.naver.com/search2/search.naver?query=${q}`, '_blank', 'noopener');
-  } catch(e) { console.error('_v21OpenNearbyMap', e); }
+    const url = `https://m.map.naver.com/search2/search.naver?query=${q}`;
+    // 📱 PWA/모바일 호환 · window.open 실패 시 location.href fallback
+    const win = window.open(url, '_blank', 'noopener');
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      // 팝업 차단되면 현재 창에서 이동
+      window.location.href = url;
+    }
+  } catch(e) {
+    console.error('_v21OpenNearbyMap', e);
+    try { alert('지도를 열 수 없어요 · ' + (e.message || '')); } catch(_){}
+  }
 }
 
 // ═══ (레거시) 배달·근처 시트 · 사용 안 함 · 향후 파트너십 시 부활 ═══
@@ -10768,8 +10785,8 @@ function _v21RenderRecentHex() {
     Math.min(100, (todayNut.fiber||0)/rda.fiber*100),
     vitScore, minScore
   ];
-  // 카드 제목 · "오늘 하루 진행"
-  if (nameEl) nameEl.textContent = '오늘 하루 진행';
+  // 🎯 사용자 요청 · 항상 "부족한 영양 확인하러 가기"로 통일
+  if (nameEl) nameEl.textContent = '부족한 영양 확인하러 가기';
   el.innerHTML = _v21NutrientBars(values, false, 'grid');
   // score badge (평균)
   if (scoreEl) {
