@@ -18480,9 +18480,28 @@ function _renderFoodSummaryBlock(r) {
   const container = document.getElementById('foodResultSummary');
   if (!container) return;
 
+  // 🔑 실제 데이터 소스 · r.nutrition (매크로) + r.micronutrients (미세)
+  const n = r.nutrition || {};
+  let m = r.micronutrients || {};
+  // micronutrients 비어있으면 음식 기반 추정
+  if (!m || typeof m !== 'object' || Object.keys(m).filter(k => Number(m[k]) > 0).length < 3) {
+    try { m = (typeof estimateMicronutrients === 'function') ? estimateMicronutrients(r.foods || []) : {}; }
+    catch(e) { m = {}; }
+  }
+  // totals는 레거시 호환 (일부 분석에선 totals에 있음)
   const tot = r.totals || {};
+  // 통합 접근자 · n 우선, m 다음, tot 마지막
+  const get = (keys) => {
+    for (const k of keys) {
+      if (n[k] != null && Number(n[k]) > 0) return Number(n[k]);
+      if (m[k] != null && Number(m[k]) > 0) return Number(m[k]);
+      if (tot[k] != null && Number(tot[k]) > 0) return Number(tot[k]);
+    }
+    return 0;
+  };
+
   const score = r.balanceScore || 0;
-  const kcal = Math.round(tot.kcal || tot.calories || 0);
+  const kcal = Math.round(get(['kcal','calories']) || n.kcal || tot.calories || 0);
   const foods = Array.isArray(r.foods) ? r.foods : [];
   const foodNames = foods.map(f => f.name || f.food || '').filter(Boolean);
   // Hero 음식명 (여러 개면 "X 외 N가지")
@@ -18492,22 +18511,23 @@ function _renderFoodSummaryBlock(r) {
 
   const rda = (typeof RDA_ADULT !== 'undefined') ? RDA_ADULT : {
     carbs:300, protein:60, fat:55, fiber:25,
-    vitC:100, vitD:10, calcium:800, iron:12, omega3:1500, vitA:700, magnesium:320
+    vitaminC:100, vitaminD:10, vitaminA:700, vitaminE:12, vitaminB:5, folate:400,
+    calcium:800, iron:12, magnesium:320, zinc:9, potassium:3500, omega3:1500
   };
   // 1끼 기준 = 하루 RDA의 1/3
-  const perMealOf = (k, dayVal) => (dayVal || 0) / 3;
+  const perMeal = (dayVal) => (dayVal || 0) / 3;
 
-  // 영양소 데이터 (3대 + 미세 영양)
+  // 영양소 데이터 (3대 + 미세 영양) · 키명 다양하게 체크 (vitC/vitaminC 양쪽)
   const nutrientInfo = [
-    { key:'carbs',   name:'탄수화물', val: tot.carbs||0,   max: perMealOf('carbs', rda.carbs),   unit:'g',  emoji:'🌾' },
-    { key:'protein', name:'단백질',   val: tot.protein||0, max: perMealOf('protein', rda.protein), unit:'g', emoji:'🥩' },
-    { key:'fat',     name:'지방',     val: tot.fat||0,     max: perMealOf('fat', rda.fat),     unit:'g',  emoji:'🥑' },
-    { key:'fiber',   name:'식이섬유', val: tot.fiber||0,   max: perMealOf('fiber', rda.fiber), unit:'g',  emoji:'🥦' },
-    { key:'vitC',    name:'비타민 C', val: tot.vitC||0,    max: perMealOf('vitC', rda.vitC),   unit:'mg', emoji:'🍊' },
-    { key:'vitD',    name:'비타민 D', val: tot.vitD||0,    max: perMealOf('vitD', rda.vitD),   unit:'μg', emoji:'☀️' },
-    { key:'calcium', name:'칼슘',     val: tot.calcium||0, max: perMealOf('calcium', rda.calcium), unit:'mg', emoji:'🥛' },
-    { key:'iron',    name:'철분',     val: tot.iron||0,    max: perMealOf('iron', rda.iron),   unit:'mg', emoji:'🥬' },
-    { key:'omega3',  name:'오메가3',  val: tot.omega3||0,  max: perMealOf('omega3', rda.omega3), unit:'mg', emoji:'🐟' }
+    { key:'carbs',   name:'탄수화물', val: get(['carbs']),                       max: perMeal(rda.carbs),    unit:'g'  },
+    { key:'protein', name:'단백질',   val: get(['protein']),                     max: perMeal(rda.protein),  unit:'g'  },
+    { key:'fat',     name:'지방',     val: get(['fat']),                         max: perMeal(rda.fat),      unit:'g'  },
+    { key:'fiber',   name:'식이섬유', val: get(['fiber']),                       max: perMeal(rda.fiber),    unit:'g'  },
+    { key:'vitC',    name:'비타민 C', val: get(['vitaminC','vitC']),             max: perMeal(rda.vitaminC || rda.vitC || 100), unit:'mg' },
+    { key:'vitD',    name:'비타민 D', val: get(['vitaminD','vitD']),             max: perMeal(rda.vitaminD || rda.vitD || 10),  unit:'μg' },
+    { key:'calcium', name:'칼슘',     val: get(['calcium']),                     max: perMeal(rda.calcium || 800),  unit:'mg' },
+    { key:'iron',    name:'철분',     val: get(['iron']),                        max: perMeal(rda.iron || 12),      unit:'mg' },
+    { key:'omega3',  name:'오메가3',  val: get(['omega3']),                      max: perMeal(rda.omega3 || 1500),  unit:'mg' }
   ];
   const withPct = nutrientInfo.map(n => ({
     ...n,
@@ -18679,8 +18699,8 @@ function _renderFoodSummaryBlock(r) {
       </div>
     </div>
 
-    <!-- CTA · 다음 끼니 추천 받기 -->
-    <button class="v3-big-cta" onclick="try{if(typeof ggGoTab==='function')ggGoTab('home');else if(typeof goHome==='function')goHome();}catch(e){}">
+    <!-- CTA · 다음 끼니 추천 받기 (홈에서 Rule Engine 추천 보기) -->
+    <button class="v3-big-cta" onclick="try{if(typeof goHome==='function')goHome();else if(typeof ggGoTab==='function')ggGoTab('today');}catch(e){}">
       <span>다음 끼니 추천 받기</span><span>›</span>
     </button>
 
@@ -28499,7 +28519,7 @@ function _showFoodReportImpl(period) {
     </div>
 
     <!-- 다음 끼니 추천 받기 CTA -->
-    <button class="rpt-v3-big-cta" onclick="closeFoodReport();try{if(typeof ggGoTab==='function')ggGoTab('home');else if(typeof goHome==='function')goHome();}catch(e){}">
+    <button class="rpt-v3-big-cta" onclick="closeFoodReport();try{if(typeof goHome==='function')goHome();else if(typeof ggGoTab==='function')ggGoTab('today');}catch(e){}">
       <span>다음 끼니 추천 받기</span><span>›</span>
     </button>
 
