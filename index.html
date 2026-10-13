@@ -9843,6 +9843,7 @@ function _v21ApplyToHero(primary, meal_slot) {
     try {
       const db = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(primary.name) : null;
       if (db && db.kcal) kcal = db.kcal;
+      else if (primary.kcal) kcal = primary.kcal;   // 새 메뉴는 서버 값
     } catch(_){}
     kcalEl.textContent = kcal + ' kcal';
     kcalEl.style.color = '#C4D4F0';
