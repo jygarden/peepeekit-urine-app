@@ -17,7 +17,7 @@ try { _createClient = require('@supabase/supabase-js').createClient; } catch (_)
 // 상수 · 서버 전용
 // ═══════════════════════════════════════════════════════════
 const ENGINE_VERSION = '0.1.0';
-const MENU_VERSION   = '2026-09-v1-seed';
+const MENU_VERSION   = '2026-10-v2-expand';   // 123 → 347개
 const PROMPT_VERSION = 'recommend-copy-v1';  // server/prompts/recommend-copy-v1.txt
 
 const SCORING_MAX = {
@@ -166,6 +166,8 @@ function filterCandidates(foodMenu, ctx) {
 
   return foodMenu.filter(food => {
     if (!food.is_active) return false;
+    // 밥·김치·반찬 같은 재료는 기록용 · 추천 X
+    if (food.recommendable === false) return false;
 
     // 시간대 매칭
     if (!food.slots || !food.slots.includes(meal_slot)) return false;
@@ -355,6 +357,12 @@ function selectTop3(scoredCandidates) {
 // ═══════════════════════════════════════════════════════════
 // 메인 · 추천 실행
 // ═══════════════════════════════════════════════════════════
+function seededUnit(s) {   // 문자열 → 0~1 (같은 입력이면 같은 값)
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 10000) / 10000;
+}
+
 function recommend(ctx, injectedFoodMenu = null) {
   const foodMenu = injectedFoodMenu || loadFoodMenu();
 
@@ -383,7 +391,13 @@ function recommend(ctx, injectedFoodMenu = null) {
   };
 
   // 1. 필터
-  const candidates = filterCandidates(foodMenu, filterCtx);
+  let candidates = filterCandidates(foodMenu, filterCtx);
+  // 최근 며칠 추천했던 메뉴는 쉬기 (남는 후보가 3개 미만이면 무시)
+  const rest = Array.isArray(ctx.recent_reco_ids) ? ctx.recent_reco_ids : [];
+  if (rest.length) {
+    const rested = candidates.filter(f => !rest.includes(f.id));
+    if (rested.length >= 3) candidates = rested;
+  }
 
   // 후보 부족 시 · fallback
   if (candidates.length === 0) {
@@ -411,7 +425,9 @@ function recommend(ctx, injectedFoodMenu = null) {
       diversity:  div.score,
       timeslot:   time.score
     };
-    const total_score = breakdown.nutrition + breakdown.preference + breakdown.diversity + breakdown.timeslot;
+    // 다양성 흔들기 · 점수 비슷한 메뉴끼리 순서를 사람·날짜·끼니마다 다르게 (같은 날엔 고정) · 최대 ctx.variety 점
+    const jitter = ctx.variety && ctx.variety_seed != null ? ctx.variety * seededUnit(ctx.variety_seed + '|' + food.id) : 0;
+    const total_score = breakdown.nutrition + breakdown.preference + breakdown.diversity + breakdown.timeslot + jitter;
 
     const reason_codes = generateReasonCodes(nut.reason_codes, pref.reason_codes, div.reason_codes, time.reason_codes);
 
@@ -552,6 +568,27 @@ async function withGeminiCopy(item, meal_slot) {
 // ═══════════════════════════════════════════════════════════
 // Vercel serverless handler
 // ═══════════════════════════════════════════════════════════
+// 한국 날짜 (YYYY-MM-DD)
+function kstDay(d = new Date()) { return new Date(d.getTime() + 9 * 3600e3).toISOString().slice(0, 10); }
+
+// 최근 3일(오늘 제외) 메인으로 추천했던 메뉴 · 오늘 것은 빼야 새로고침해도 결과가 안 바뀜
+async function recentRecoIds(supabase, userId) {
+  if (!supabase || !userId) return [];
+  try {
+    const todayStartUtc = new Date(Date.parse(kstDay() + 'T00:00:00+09:00'));
+    const from = new Date(todayStartUtc.getTime() - 3 * 864e5);
+    const { data, error } = await supabase
+      .from('recommendation_log')
+      .select('primary_food_id')
+      .eq('user_id', userId)
+      .gte('created_at', from.toISOString())
+      .lt('created_at', todayStartUtc.toISOString())
+      .limit(50);
+    if (error) return [];
+    return [...new Set((data || []).map(r => r.primary_food_id).filter(Boolean))];
+  } catch (_) { return []; }
+}
+
 async function insertRecommendationLog(supabase, userId, result, primaryCopy) {
   if (!supabase || !userId || !result.top[0]) return null;
   try {
@@ -604,7 +641,14 @@ module.exports = async function handler(req, res) {
     if (!userId && req.body?.user_id) userId = req.body.user_id;
 
     const foodMenu = await loadFoodMenuAsync();
-    const result = recommend(req.body || {}, foodMenu);
+    const body = req.body || {};
+    const ctx = Object.assign({}, body, {
+      // 사람·날짜·끼니마다 다른 추천 (클라이언트가 못 바꾸게 서버에서 정함)
+      variety: 8,
+      variety_seed: `${userId || 'anon'}|${kstDay()}|${body.meal_slot || ''}`,
+      recent_reco_ids: await recentRecoIds(supabase, userId)
+    });
+    const result = recommend(ctx, foodMenu);
 
     // Gemini 문구 생성 · Top3 병렬 호출 (실패 시 fallback)
     const copies = await Promise.all(
@@ -625,12 +669,14 @@ module.exports = async function handler(req, res) {
       primary: result.top[0] ? {
         food_id: result.top[0].food.id,
         name: result.top[0].food.name,
+        kcal: Math.round((result.top[0].food.nutrients_per_serving || {}).kcal || 0) || null,
         headline: copies[0].headline,
         reason: copies[0].reason
       } : null,
       alternatives: result.top.slice(1).map((t, i) => ({
         food_id: t.food.id,
         name: t.food.name,
+        kcal: Math.round((t.food.nutrients_per_serving || {}).kcal || 0) || null,
         headline: copies[i + 1].headline,
         reason: copies[i + 1].reason
       }))
@@ -653,6 +699,7 @@ module.exports.scoreTimeSlot = scoreTimeSlot;
 module.exports.applySimilarityPenalty = applySimilarityPenalty;
 module.exports.generateReasonCodes = generateReasonCodes;
 module.exports.selectTop3 = selectTop3;
+module.exports.seededUnit = seededUnit;
 module.exports.estimateDeficits = estimateDeficits;
 module.exports.decideMealSlot = decideMealSlot;
 module.exports.ENGINE_VERSION = ENGINE_VERSION;
