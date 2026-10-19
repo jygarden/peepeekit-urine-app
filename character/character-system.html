@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건강어때 · 캐릭터 파츠 시스템 v0.1</title>
+<style>
+  :root{
+    --ink:#1D3762;
+    --muted:#5D7597;
+    --line:#1A1A1A;
+    --bg:#FAFBFF;
+    --card:#FFF;
+    --yellow:#F5D94F;
+    --yellow-soft:#FEF9E7;
+    --stroke:2.2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;letter-spacing:-.2px}
+  body{background:var(--bg);color:var(--ink);padding:40px 32px 80px;max-width:1200px;margin:0 auto}
+  header{margin-bottom:48px;border-bottom:1px solid #E4EAF3;padding-bottom:24px}
+  h1{font-size:32px;font-weight:900;letter-spacing:-1px}
+  .subtitle{color:var(--muted);font-size:14px;margin-top:6px;font-weight:500}
+  .principles{margin-top:18px;padding:14px 16px;background:var(--yellow-soft);border-radius:12px;border:1px solid var(--yellow);font-size:13px;line-height:1.7;color:#5C4A00}
+  .principles b{color:#3D2E00;font-weight:800}
+
+  section{margin-bottom:56px}
+  h2{font-size:22px;font-weight:800;margin-bottom:6px}
+  .sec-sub{color:var(--muted);font-size:13px;margin-bottom:20px;font-weight:500}
+
+  /* 파츠 그리드 */
+  .grid{display:grid;gap:14px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g5{grid-template-columns:repeat(5,1fr)}
+  .g6{grid-template-columns:repeat(6,1fr)}
+  .g7{grid-template-columns:repeat(7,1fr)}
+  .g8{grid-template-columns:repeat(8,1fr)}
+  .g10{grid-template-columns:repeat(10,1fr)}
+  .g12{grid-template-columns:repeat(12,1fr)}
+  @media (max-width:900px){
+    .g8,.g10,.g12{grid-template-columns:repeat(6,1fr)}
+    .g6,.g7{grid-template-columns:repeat(4,1fr)}
+  }
+  @media (max-width:600px){
+    .g4,.g5,.g6,.g7,.g8,.g10,.g12{grid-template-columns:repeat(3,1fr)}
+  }
+  .cell{background:var(--card);border:1px solid #E4EAF3;border-radius:14px;padding:12px 8px;text-align:center;transition:all .15s ease;cursor:default}
+  .cell:hover{border-color:var(--yellow);background:var(--yellow-soft)}
+  .cell svg{width:100%;height:auto;display:block;margin-bottom:8px}
+  .cell .label{font-size:11px;color:var(--muted);font-weight:600}
+  .cell .id{font-size:9px;color:#B0BCD1;font-family:'SF Mono',Monaco,monospace;margin-top:2px}
+
+  /* 색상 swatch */
+  .swatch{width:100%;aspect-ratio:1;border-radius:12px;border:2px solid #E4EAF3;margin-bottom:8px}
+
+  /* 프리셋 큰 카드 */
+  .preset-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+  @media (max-width:900px){.preset-grid{grid-template-columns:repeat(4,1fr)}}
+  @media (max-width:600px){.preset-grid{grid-template-columns:repeat(2,1fr)}}
+  .preset{background:var(--card);border:1.5px solid #E4EAF3;border-radius:18px;padding:18px 12px 14px;text-align:center;position:relative}
+  .preset:hover{border-color:var(--yellow)}
+  .preset svg{width:100%;height:auto;display:block;margin-bottom:10px}
+  .preset .name{font-size:12.5px;font-weight:700;color:var(--ink)}
+  .preset .idx{position:absolute;top:8px;left:10px;font-size:10px;color:#B0BCD1;font-weight:800;font-family:'SF Mono',Monaco,monospace}
+
+  /* 파츠명 라벨 */
+  .parts-tag{display:inline-block;background:var(--ink);color:#FFF;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;margin-right:6px;letter-spacing:.3px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>건강어때 · 캐릭터 파츠 시스템 <span style="font-size:14px;color:var(--muted);font-weight:600;margin-left:8px">v0.1 draft</span></h1>
+  <div class="subtitle">얼굴/머리 중심 · 손그림 톤 · 조합 개성 강조 · 홈에서는 원형 얼굴 + 말풍선으로만 사용</div>
+  <div class="principles">
+    <b>디자인 원칙</b> · 얇은 검정 라인(2.2px, round cap) · 완벽 대칭 X · 유아틱 X · 웃긴 조합 OK · 20+ 얼굴형·피부톤·헤어·눈코입눈썹·액세서리 조합 가능 · 앱 메인 UI보다 절대 튀지 X
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SVG 심볼 정의 · 모든 파츠는 여기서 정의하고 <use>로 재사용     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <!-- ────── 얼굴형 7종 (viewBox 200x220 · 각 얼굴형은 fill='currentColor'로 피부톤 적용) ────── -->
+  <symbol id="face-round" viewBox="0 0 200 220">
+    <path d="M 100 42 C 62 44 44 72 43 112 C 42 150 62 180 100 188 C 138 180 158 150 157 112 C 156 72 138 44 100 42 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="face-square" viewBox="0 0 200 220">
+    <path d="M 62 52 Q 60 50 63 50 L 137 50 Q 141 50 141 55 L 152 90 L 154 140 L 141 178 Q 140 182 135 182 L 66 182 Q 61 182 60 178 L 47 140 L 49 90 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="face-long" viewBox="0 0 200 220">
+    <path d="M 100 38 C 66 38 55 78 55 122 C 56 172 76 198 100 198 C 124 199 145 172 145 122 C 145 78 134 38 100 38 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="face-wide" viewBox="0 0 200 220">
+    <path d="M 100 50 C 55 48 30 82 30 118 C 31 154 66 184 100 184 C 135 184 170 154 170 118 C 170 82 145 48 100 50 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="face-triangle" viewBox="0 0 200 220">
+    <path d="M 56 58 Q 66 46 100 42 Q 134 46 144 58 L 152 92 L 141 133 Q 128 176 100 194 Q 72 176 59 133 L 48 92 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="face-chubby" viewBox="0 0 200 220">
+    <path d="M 100 46 C 54 50 34 90 39 130 C 44 178 76 196 100 195 C 124 196 156 178 161 130 C 166 90 146 50 100 46 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="face-rect" viewBox="0 0 200 220">
+    <path d="M 61 50 Q 55 49 55 60 L 55 174 Q 55 184 66 184 L 134 184 Q 145 184 145 174 L 145 60 Q 145 49 139 50 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <!-- 귀 · 모든 얼굴형에 공통 · 얼굴 뒤에 렌더 -->
+  <symbol id="ears" viewBox="0 0 200 220">
+    <path d="M 44 108 Q 32 110 32 122 Q 33 135 43 138" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M 156 108 Q 168 110 168 122 Q 167 135 157 138" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- ────── 헤어 12종 ────── -->
+  <symbol id="hair-short" viewBox="0 0 200 220">
+    <path d="M 55 78 Q 58 40 100 34 Q 142 40 145 78 Q 140 62 122 58 Q 108 55 100 65 Q 92 55 78 58 Q 60 62 55 78 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="hair-side-part" viewBox="0 0 200 220">
+    <path d="M 55 78 Q 58 40 100 34 Q 145 40 148 78 Q 142 60 125 58 Q 106 56 93 68 Q 80 78 66 70 Q 58 66 55 78 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="hair-buzz" viewBox="0 0 200 220">
+    <path d="M 58 82 Q 60 52 100 46 Q 140 52 142 82" fill="none" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.5 3.5"/>
+  </symbol>
+  <symbol id="hair-bald" viewBox="0 0 200 220">
+    <!-- 삭발 · 작은 반짝임만 -->
+    <path d="M 88 55 Q 90 48 96 50" fill="none" stroke="var(--line)" stroke-width="1.8" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="hair-long-straight" viewBox="0 0 200 220">
+    <path d="M 45 75 Q 48 34 100 30 Q 152 34 155 75 L 158 195 Q 146 200 138 195 L 137 130 Q 130 100 100 96 Q 70 100 63 130 L 62 195 Q 54 200 42 195 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="hair-long-curly" viewBox="0 0 200 220">
+    <path d="M 38 82 Q 42 32 100 26 Q 158 32 162 82 Q 168 122 158 200 Q 148 205 140 200 Q 145 170 138 140 Q 128 110 100 108 Q 72 110 62 140 Q 55 170 60 200 Q 52 205 42 200 Q 32 122 38 82 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M 55 130 q 4 5 -2 12 M 148 132 q -3 5 2 12 M 62 165 q 5 4 -2 10 M 140 168 q -4 5 3 10" fill="none" stroke="var(--line)" stroke-width="1.6" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="hair-bob" viewBox="0 0 200 220">
+    <path d="M 50 78 Q 54 34 100 30 Q 148 34 152 78 L 154 138 Q 148 148 138 145 L 136 100 Q 128 88 100 88 Q 72 88 64 100 L 62 145 Q 52 148 46 138 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="hair-wavy-bob" viewBox="0 0 200 220">
+    <path d="M 50 78 Q 54 34 100 30 Q 148 34 152 78 Q 156 118 148 144 Q 142 152 132 148 Q 138 122 130 105 Q 120 92 100 92 Q 80 92 70 105 Q 62 122 68 148 Q 58 152 52 144 Q 44 118 50 78 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M 60 120 q 5 4 0 8 M 140 120 q -5 4 0 8" fill="none" stroke="var(--line)" stroke-width="1.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="hair-afro" viewBox="0 0 200 220">
+    <path d="M 45 80 Q 38 30 100 22 Q 162 30 155 80 Q 172 92 165 118 Q 148 130 148 108 Q 130 118 100 118 Q 70 118 52 108 Q 52 130 35 118 Q 28 92 45 80 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 곱슬 텍스처 -->
+    <circle cx="70" cy="55" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.4"/>
+    <circle cx="100" cy="42" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.4"/>
+    <circle cx="130" cy="55" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.4"/>
+    <circle cx="55" cy="90" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.4"/>
+    <circle cx="145" cy="90" r="3.5" fill="none" stroke="var(--line)" stroke-width="1.4"/>
+  </symbol>
+  <symbol id="hair-pigtails" viewBox="0 0 200 220">
+    <path d="M 55 78 Q 58 38 100 34 Q 142 38 145 78 Q 140 62 100 62 Q 60 62 55 78 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 왼쪽 양갈래 -->
+    <path d="M 42 100 Q 22 130 28 165 Q 32 178 40 178 Q 48 178 50 165 Q 52 138 48 100 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 오른쪽 양갈래 -->
+    <path d="M 158 100 Q 178 130 172 165 Q 168 178 160 178 Q 152 178 150 165 Q 148 138 152 100 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="hair-bun" viewBox="0 0 200 220">
+    <path d="M 55 78 Q 58 40 100 32 Q 142 40 145 78 Q 140 62 100 62 Q 60 62 55 78 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 위쪽 번 -->
+    <ellipse cx="100" cy="24" rx="18" ry="14" fill="currentColor" stroke="var(--line)" stroke-width="2.2"/>
+    <path d="M 92 22 q 4 -3 8 0 M 96 30 q 3 -2 6 0" fill="none" stroke="var(--line)" stroke-width="1.3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="hair-ponytail" viewBox="0 0 200 220">
+    <path d="M 55 78 Q 58 38 100 32 Q 142 38 145 78 Q 140 62 100 62 Q 60 62 55 78 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+    <!-- 뒤로 넘긴 포니테일 (오른쪽으로 흘러내림) -->
+    <path d="M 145 82 Q 172 105 175 140 Q 174 158 168 168 Q 162 165 162 155 Q 165 130 152 108 Z" fill="currentColor" stroke="var(--line)" stroke-width="2.2" stroke-linejoin="round"/>
+  </symbol>
+
+  <!-- ────── 눈 8종 (얼굴 기준 좌표계 · viewBox 200x220 · 눈 중심 y≈100) ────── -->
+  <symbol id="eyes-dot" viewBox="0 0 200 220">
+    <circle cx="78" cy="102" r="3.5" fill="var(--line)"/>
+    <circle cx="122" cy="102" r="3.5" fill="var(--line)"/>
+  </symbol>
+  <symbol id="eyes-round" viewBox="0 0 200 220">
+    <ellipse cx="78" cy="102" rx="6.5" ry="7" fill="#FFF" stroke="var(--line)" stroke-width="2"/>
+    <ellipse cx="122" cy="102" rx="6.5" ry="7" fill="#FFF" stroke="var(--line)" stroke-width="2"/>
+    <circle cx="78" cy="103" r="3" fill="var(--line)"/>
+    <circle cx="122" cy="103" r="3" fill="var(--line)"/>
+  </symbol>
+  <symbol id="eyes-big" viewBox="0 0 200 220">
+    <ellipse cx="75" cy="103" rx="10" ry="9" fill="#FFF" stroke="var(--line)" stroke-width="2"/>
+    <ellipse cx="125" cy="103" rx="10" ry="9" fill="#FFF" stroke="var(--line)" stroke-width="2"/>
+    <circle cx="76" cy="105" r="4.5" fill="var(--line)"/>
+    <circle cx="126" cy="105" r="4.5" fill="var(--line)"/>
+    <circle cx="78" cy="103" r="1.5" fill="#FFF"/>
+    <circle cx="128" cy="103" r="1.5" fill="#FFF"/>
+  </symbol>
+  <symbol id="eyes-happy" viewBox="0 0 200 220">
+    <!-- ^__^ 반달 웃음 -->
+    <path d="M 70 103 Q 78 96 86 103" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M 114 103 Q 122 96 130 103" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="eyes-closed" viewBox="0 0 200 220">
+    <!-- ㅡ ㅡ 감은 눈 -->
+    <path d="M 70 103 L 86 103" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M 114 103 L 130 103" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="eyes-droopy" viewBox="0 0 200 220">
+    <!-- 처진 눈 -->
+    <path d="M 68 100 Q 78 106 88 104" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M 112 104 Q 122 106 132 100" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="78" cy="103" r="1.8" fill="var(--line)"/>
+    <circle cx="122" cy="103" r="1.8" fill="var(--line)"/>
+  </symbol>
+  <symbol id="eyes-sharp" viewBox="0 0 200 220">
+    <!-- 올라간 눈 -->
+    <path d="M 68 104 Q 78 98 88 100" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M 112 100 Q 122 98 132 104" fill="none" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="78" cy="102" r="1.8" fill="var(--line)"/>
+    <circle cx="122" cy="102" r="1.8" fill="var(--line)"/>
+  </symbol>
+  <symbol id="eyes-sparkle" viewBox="0 0 200 220">
+    <ellipse cx="78" cy="102" rx="7" ry="8" fill="#FFF" stroke="var(--line)" stroke-width="2"/>
+    <ellipse cx="122" cy="102" rx="7" ry="8" fill="#FFF" stroke="var(--line)" stroke-width="2"/>
+    <circle cx="78" cy="104" r="4" fill="var(--line)"/>
+    <circle cx="122" cy="104" r="4" fill="var(--line)"/>
+    <!-- 별 반짝 -->
+    <path d="M 75 100 l 1 -3 l 1 3 l 3 1 l -3 1 l -1 3 l -1 -3 l -3 -1 z" fill="#FFF"/>
+    <path d="M 119 100 l 1 -3 l 1 3 l 3 1 l -3 1 l -1 3 l -1 -3 l -3 -1 z" fill="#FFF"/>
+  </symbol>
+
+  <!-- ────── 코 5종 (중심 y≈122) ────── -->
+  <symbol id="nose-dot" viewBox="0 0 200 220">
+    <circle cx="100" cy="122" r="1.8" fill="var(--line)"/>
+  </symbol>
+  <symbol id="nose-l-short" viewBox="0 0 200 220">
+    <path d="M 98 116 L 98 124 Q 98 127 102 127" fill="none" stroke="var(--line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="nose-l-long" viewBox="0 0 200 220">
+    <path d="M 98 112 L 98 128 Q 98 132 104 132" fill="none" stroke="var(--line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="nose-curve" viewBox="0 0 200 220">
+    <path d="M 97 116 Q 95 124 100 128 Q 105 130 106 126" fill="none" stroke="var(--line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="nose-nostrils" viewBox="0 0 200 220">
+    <ellipse cx="95" cy="124" rx="2.2" ry="1.5" fill="var(--line)"/>
+    <ellipse cx="105" cy="124" rx="2.2" ry="1.5" fill="var(--line)"/>
+    <path d="M 98 115 Q 100 118 98 122 M 102 115 Q 100 118 102 122" fill="none" stroke="var(--line)" stroke-width="1.4" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- ────── 입 8종 (중심 y≈145) ────── -->
+  <symbol id="mouth-smile" viewBox="0 0 200 220">
+    <path d="M 88 143 Q 100 152 112 143" fill="none" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="mouth-grin" viewBox="0 0 200 220">
+    <path d="M 82 142 Q 100 158 118 142 Q 100 148 82 142 Z" fill="var(--line)" stroke="var(--line)" stroke-width="1.8" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="mouth-dot" viewBox="0 0 200 220">
+    <circle cx="100" cy="146" r="2.2" fill="var(--line)"/>
+  </symbol>
+  <symbol id="mouth-o" viewBox="0 0 200 220">
+    <ellipse cx="100" cy="146" rx="4.5" ry="6" fill="#4B2A2A" stroke="var(--line)" stroke-width="2"/>
+  </symbol>
+  <symbol id="mouth-frown" viewBox="0 0 200 220">
+    <path d="M 88 149 Q 100 140 112 149" fill="none" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="mouth-zigzag" viewBox="0 0 200 220">
+    <path d="M 86 146 L 92 141 L 98 146 L 104 141 L 110 146 L 116 141" fill="none" stroke="var(--line)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="mouth-surprised" viewBox="0 0 200 220">
+    <circle cx="100" cy="146" r="6" fill="#4B2A2A" stroke="var(--line)" stroke-width="2"/>
+  </symbol>
+  <symbol id="mouth-tooth" viewBox="0 0 200 220">
+    <path d="M 84 142 Q 100 156 116 142" fill="#4B2A2A" stroke="var(--line)" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="96" y="142" width="8" height="6" fill="#FFF" stroke="var(--line)" stroke-width="1.6"/>
+  </symbol>
+
+  <!-- ────── 눈썹 6종 (중심 y≈88) ────── -->
+  <symbol id="brows-thin" viewBox="0 0 200 220">
+    <path d="M 68 88 L 88 87" stroke="var(--line)" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M 112 87 L 132 88" stroke="var(--line)" stroke-width="1.8" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="brows-thick" viewBox="0 0 200 220">
+    <path d="M 66 88 Q 78 82 90 88 Q 78 86 66 88 Z" fill="var(--line)"/>
+    <path d="M 110 88 Q 122 82 134 88 Q 122 86 110 88 Z" fill="var(--line)"/>
+  </symbol>
+  <symbol id="brows-sad" viewBox="0 0 200 220">
+    <!-- \  / -->
+    <path d="M 68 84 L 88 90" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M 112 90 L 132 84" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="brows-angry" viewBox="0 0 200 220">
+    <!-- /  \ -->
+    <path d="M 68 92 L 88 84" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M 112 84 L 132 92" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="brows-arch" viewBox="0 0 200 220">
+    <path d="M 66 90 Q 78 82 88 88" fill="none" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+    <path d="M 112 88 Q 122 82 134 90" fill="none" stroke="var(--line)" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="brows-single" viewBox="0 0 200 220">
+    <!-- 붓 한 획 · 짧고 굵음 -->
+    <path d="M 72 86 Q 82 86 88 89 Q 80 88 72 86 Z" fill="var(--line)"/>
+    <path d="M 112 89 Q 118 86 128 86 Q 120 88 112 89 Z" fill="var(--line)"/>
+  </symbol>
+
+  <!-- ────── 액세서리 10종 ────── -->
+  <symbol id="acc-glasses-round" viewBox="0 0 200 220">
+    <circle cx="78" cy="103" r="12" fill="none" stroke="var(--line)" stroke-width="2.2"/>
+    <circle cx="122" cy="103" r="12" fill="none" stroke="var(--line)" stroke-width="2.2"/>
+    <path d="M 90 103 L 110 103" stroke="var(--line)" stroke-width="2"/>
+    <path d="M 66 103 L 55 100 M 134 103 L 145 100" stroke="var(--line)" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="acc-glasses-square" viewBox="0 0 200 220">
+    <rect x="65" y="93" width="26" height="20" rx="3" fill="none" stroke="var(--line)" stroke-width="2.2"/>
+    <rect x="109" y="93" width="26" height="20" rx="3" fill="none" stroke="var(--line)" stroke-width="2.2"/>
+    <path d="M 91 103 L 109 103" stroke="var(--line)" stroke-width="2"/>
+    <path d="M 65 100 L 55 98 M 135 100 L 145 98" stroke="var(--line)" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="acc-sunglasses" viewBox="0 0 200 220">
+    <path d="M 64 92 L 92 92 L 92 108 Q 88 114 78 114 Q 65 114 64 108 Z" fill="var(--line)"/>
+    <path d="M 108 92 L 136 92 L 136 108 Q 132 114 122 114 Q 109 114 108 108 Z" fill="var(--line)"/>
+    <path d="M 92 100 L 108 100" stroke="var(--line)" stroke-width="2"/>
+  </symbol>
+  <symbol id="acc-freckles" viewBox="0 0 200 220">
+    <circle cx="75" cy="130" r="1.3" fill="#8B4513"/>
+    <circle cx="82" cy="134" r="1.3" fill="#8B4513"/>
+    <circle cx="72" cy="138" r="1.3" fill="#8B4513"/>
+    <circle cx="125" cy="130" r="1.3" fill="#8B4513"/>
+    <circle cx="128" cy="138" r="1.3" fill="#8B4513"/>
+    <circle cx="118" cy="134" r="1.3" fill="#8B4513"/>
+  </symbol>
+  <symbol id="acc-mole" viewBox="0 0 200 220">
+    <circle cx="88" cy="158" r="2" fill="var(--line)"/>
+  </symbol>
+  <symbol id="acc-blush" viewBox="0 0 200 220">
+    <ellipse cx="70" cy="132" rx="10" ry="5" fill="#FF9999" opacity=".65"/>
+    <ellipse cx="130" cy="132" rx="10" ry="5" fill="#FF9999" opacity=".65"/>
+  </symbol>
+  <symbol id="acc-darkcircle" viewBox="0 0 200 220">
+    <path d="M 68 113 Q 78 118 88 113" fill="none" stroke="#5D4A4A" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+    <path d="M 112 113 Q 122 118 132 113" fill="none" stroke="#5D4A4A" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+  </symbol>
+  <symbol id="acc-mustache" viewBox="0 0 200 220">
+    <path d="M 82 138 Q 92 134 100 137 Q 108 134 118 138 Q 108 142 100 140 Q 92 142 82 138 Z" fill="var(--line)"/>
+  </symbol>
+  <symbol id="acc-bandage" viewBox="0 0 200 220">
+    <rect x="112" y="128" width="18" height="6" rx="1" fill="#FFE0B3" stroke="var(--line)" stroke-width="1.6" transform="rotate(20 121 131)"/>
+    <line x1="115" y1="131" x2="127" y2="135" stroke="var(--line)" stroke-width="0.8" transform="rotate(20 121 131)"/>
+  </symbol>
+  <symbol id="acc-earring" viewBox="0 0 200 220">
+    <circle cx="41" cy="140" r="2.5" fill="var(--yellow)" stroke="var(--line)" stroke-width="1.4"/>
+    <circle cx="159" cy="140" r="2.5" fill="var(--yellow)" stroke="var(--line)" stroke-width="1.4"/>
+  </symbol>
+</defs>
+</svg>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 0 · 20 프리셋 조합 (인사말)                          -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>0 · 프리셋 20종 <span style="font-size:13px;color:var(--muted);font-weight:600;margin-left:8px">파츠 조합 예시</span></h2>
+  <div class="sec-sub">얼굴형 × 피부톤 × 헤어 × 눈/코/입/눈썹 × 액세서리로 만든 조합. 개성이 서로 안 겹치도록 의도적 다양화.</div>
+  <div class="preset-grid" id="preset-grid"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 · 얼굴형 7종                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · 얼굴형 <span class="parts-tag">FACE</span></h2>
+  <div class="sec-sub">7종 · 각 얼굴형은 눈코입 위치 anchor 좌표를 유지 (호환성)</div>
+  <div class="grid g7" id="grid-faces"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 · 피부톤 7종                                       -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · 피부톤 <span class="parts-tag">SKIN</span></h2>
+  <div class="sec-sub">아주 밝음 → 아주 짙음 · 7단계 · WCAG 대비 확인 위해 각 톤에 라인 검정색 유지</div>
+  <div class="grid g7" id="grid-skins"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 · 헤어 12종 (색상 X · 형태만)                      -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · 헤어 형태 <span class="parts-tag">HAIR</span></h2>
+  <div class="sec-sub">12종 · 색상 12종 분리 · 조합 12×12 = 144</div>
+  <div class="grid g6" id="grid-hair"></div>
+  <h3 style="margin-top:24px;font-size:14px;color:var(--muted);font-weight:700">헤어 색상 12종</h3>
+  <div class="grid g12" id="grid-hair-colors" style="margin-top:12px"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 4 · 눈 8종                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · 눈 <span class="parts-tag">EYES</span></h2>
+  <div class="sec-sub">8종 · 향후 위치·크기 조정 가능 구조 (translate·scale)</div>
+  <div class="grid g8" id="grid-eyes"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 5 · 코 5종                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · 코 <span class="parts-tag">NOSE</span></h2>
+  <div class="sec-sub">5종 · 점부터 콧구멍까지</div>
+  <div class="grid g5" id="grid-nose"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 6 · 입 8종                                           -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · 입 <span class="parts-tag">MOUTH</span></h2>
+  <div class="sec-sub">8종 · 감정 표현 폭 넓게</div>
+  <div class="grid g8" id="grid-mouth"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 7 · 눈썹 6종                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · 눈썹 <span class="parts-tag">BROWS</span></h2>
+  <div class="sec-sub">6종 · 감정 축 (평온/화남/슬픔/놀람)</div>
+  <div class="grid g6" id="grid-brows"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 8 · 액세서리 10종                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>8 · 액세서리·포인트 <span class="parts-tag">ACC</span></h2>
+  <div class="sec-sub">10종 · 여러 개 동시 적용 가능 (안경 + 주근깨 + 홍조 = OK)</div>
+  <div class="grid g5" id="grid-acc"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SECTION 9 · 홈 사용 예시 (원형 얼굴 + 말풍선)                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<section>
+  <h2>9 · 홈 사용 예시 <span class="parts-tag">HOME</span></h2>
+  <div class="sec-sub">홈에서는 원형 크롭 얼굴 + 말풍선 · 캐릭터가 메인 UI보다 튀면 안 됨</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px" id="home-examples"></div>
+</section>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// 팔레트 정의
+// ═══════════════════════════════════════════════════════════
+const SKIN_TONES = [
+  { id:'skin-01', name:'아주 밝음', hex:'#FDE7C7' },
+  { id:'skin-02', name:'밝음',     hex:'#F5D0A9' },
+  { id:'skin-03', name:'중간 밝음', hex:'#E8B98A' },
+  { id:'skin-04', name:'중간',     hex:'#C89870' },
+  { id:'skin-05', name:'중간 짙음', hex:'#A57548' },
+  { id:'skin-06', name:'짙음',     hex:'#7A5030' },
+  { id:'skin-07', name:'아주 짙음', hex:'#4E3020' }
+];
+
+const HAIR_COLORS = [
+  { id:'hc-01', name:'검정',      hex:'#1A1A1A' },
+  { id:'hc-02', name:'진갈색',    hex:'#3D2814' },
+  { id:'hc-03', name:'갈색',      hex:'#7B4A28' },
+  { id:'hc-04', name:'밝은갈색',  hex:'#B5854E' },
+  { id:'hc-05', name:'금발',      hex:'#E8C877' },
+  { id:'hc-06', name:'플래티넘',  hex:'#EFE7D3' },
+  { id:'hc-07', name:'회색',      hex:'#8E8E8E' },
+  { id:'hc-08', name:'은발',      hex:'#C8C8CE' },
+  { id:'hc-09', name:'빨강',      hex:'#D9455F' },
+  { id:'hc-10', name:'핑크',      hex:'#F09FBA' },
+  { id:'hc-11', name:'파랑',      hex:'#4F7DDB' },
+  { id:'hc-12', name:'보라',      hex:'#9967C9' }
+];
+
+const FACES = [
+  { id:'face-round',    name:'둥근형' },
+  { id:'face-square',   name:'각진형' },
+  { id:'face-long',     name:'긴형' },
+  { id:'face-wide',     name:'넓은형' },
+  { id:'face-triangle', name:'역삼각형' },
+  { id:'face-chubby',   name:'통통형' },
+  { id:'face-rect',     name:'네모형' }
+];
+
+const HAIRS = [
+  { id:'hair-short',        name:'짧은머리' },
+  { id:'hair-side-part',    name:'옆가르마' },
+  { id:'hair-buzz',         name:'스포츠컷' },
+  { id:'hair-bald',         name:'삭발' },
+  { id:'hair-long-straight',name:'긴 직모' },
+  { id:'hair-long-curly',   name:'긴 곱슬' },
+  { id:'hair-bob',          name:'단발' },
+  { id:'hair-wavy-bob',     name:'웨이브 단발' },
+  { id:'hair-afro',         name:'아프로' },
+  { id:'hair-pigtails',     name:'양갈래' },
+  { id:'hair-bun',          name:'번헤어' },
+  { id:'hair-ponytail',     name:'포니테일' }
+];
+
+const EYES = [
+  { id:'eyes-dot',     name:'점' },
+  { id:'eyes-round',   name:'동그란' },
+  { id:'eyes-big',     name:'큰 눈' },
+  { id:'eyes-happy',   name:'웃는 눈' },
+  { id:'eyes-closed',  name:'감은 눈' },
+  { id:'eyes-droopy',  name:'처진 눈' },
+  { id:'eyes-sharp',   name:'올라간 눈' },
+  { id:'eyes-sparkle', name:'반짝이' }
+];
+
+const NOSES = [
+  { id:'nose-dot',      name:'점' },
+  { id:'nose-l-short',  name:'짧은 L' },
+  { id:'nose-l-long',   name:'긴 L' },
+  { id:'nose-curve',    name:'곡선' },
+  { id:'nose-nostrils', name:'콧구멍' }
+];
+
+const MOUTHS = [
+  { id:'mouth-smile',     name:'미소' },
+  { id:'mouth-grin',      name:'크게 웃음' },
+  { id:'mouth-dot',       name:'점' },
+  { id:'mouth-o',         name:'오' },
+  { id:'mouth-frown',     name:'삐침' },
+  { id:'mouth-zigzag',    name:'지그재그' },
+  { id:'mouth-surprised', name:'놀람' },
+  { id:'mouth-tooth',     name:'이빨' }
+];
+
+const BROWS = [
+  { id:'brows-thin',   name:'얇은 직선' },
+  { id:'brows-thick',  name:'두꺼운' },
+  { id:'brows-sad',    name:'처진 (슬픔)' },
+  { id:'brows-angry',  name:'올라간 (화남)' },
+  { id:'brows-arch',   name:'아치 (놀람)' },
+  { id:'brows-single', name:'붓 한 획' }
+];
+
+const ACCS = [
+  { id:'acc-glasses-round',  name:'동그란 안경' },
+  { id:'acc-glasses-square', name:'사각 안경' },
+  { id:'acc-sunglasses',     name:'선글라스' },
+  { id:'acc-freckles',       name:'주근깨' },
+  { id:'acc-mole',           name:'점' },
+  { id:'acc-blush',          name:'홍조' },
+  { id:'acc-darkcircle',     name:'다크서클' },
+  { id:'acc-mustache',       name:'콧수염' },
+  { id:'acc-bandage',        name:'밴드' },
+  { id:'acc-earring',        name:'귀걸이' }
+];
+
+// ═══════════════════════════════════════════════════════════
+// 캐릭터 렌더링 함수
+// - config: { face, skin, hair, hairColor, eyes, nose, mouth, brows, accs:[] }
+// ═══════════════════════════════════════════════════════════
+function renderChar(cfg, size = 120) {
+  const s = size;
+  const skinHex = SKIN_TONES.find(x => x.id === cfg.skin)?.hex || '#F5D0A9';
+  const hairHex = HAIR_COLORS.find(x => x.id === cfg.hairColor)?.hex || '#1A1A1A';
+  const accs = cfg.accs || [];
+  // 안경류가 있으면 눈 위 z-index로 그려야 함 · 안경/선글라스 이후 렌더
+  // 순서: 귀(skin) → 얼굴(skin) → 헤어(hairColor) → 눈썹 → 눈 → 코 → 입 → 액세서리
+  return `
+    <svg viewBox="0 0 200 220" width="${s}" height="${s * 220/200}" xmlns="http://www.w3.org/2000/svg">
+      <g style="color:${skinHex}"><use href="#ears"/></g>
+      <g style="color:${skinHex}"><use href="#${cfg.face}"/></g>
+      ${cfg.hair && cfg.hair !== 'hair-bald' ? `<g style="color:${hairHex}"><use href="#${cfg.hair}"/></g>` : ''}
+      ${cfg.hair === 'hair-bald' ? `<use href="#hair-bald"/>` : ''}
+      ${cfg.brows ? `<use href="#${cfg.brows}"/>` : ''}
+      ${cfg.eyes ? `<use href="#${cfg.eyes}"/>` : ''}
+      ${cfg.nose ? `<use href="#${cfg.nose}"/>` : ''}
+      ${cfg.mouth ? `<use href="#${cfg.mouth}"/>` : ''}
+      ${accs.map(a => `<use href="#${a}"/>`).join('')}
+    </svg>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 프리셋 20종 (다양성 · 조합 개성 강조)
+// ═══════════════════════════════════════════════════════════
+const PRESETS = [
+  { name:'01 · 밝은 아침',    cfg:{face:'face-round',   skin:'skin-01',hair:'hair-short',       hairColor:'hc-02',eyes:'eyes-happy',   nose:'nose-dot',   mouth:'mouth-smile', brows:'brows-thin',  accs:[]} },
+  { name:'02 · 커피가 필요해', cfg:{face:'face-long',    skin:'skin-02',hair:'hair-bob',         hairColor:'hc-01',eyes:'eyes-droopy',  nose:'nose-l-short',mouth:'mouth-dot',   brows:'brows-sad',   accs:['acc-darkcircle']} },
+  { name:'03 · 회사원',       cfg:{face:'face-square',  skin:'skin-03',hair:'hair-side-part',   hairColor:'hc-01',eyes:'eyes-dot',     nose:'nose-l-short',mouth:'mouth-smile', brows:'brows-thin',  accs:['acc-glasses-square']} },
+  { name:'04 · 신나는 러너',   cfg:{face:'face-triangle',skin:'skin-04',hair:'hair-ponytail',    hairColor:'hc-03',eyes:'eyes-sparkle', nose:'nose-dot',   mouth:'mouth-grin',  brows:'brows-arch',  accs:['acc-blush']} },
+  { name:'05 · 학교 가는 길',  cfg:{face:'face-round',   skin:'skin-02',hair:'hair-pigtails',    hairColor:'hc-02',eyes:'eyes-big',     nose:'nose-dot',   mouth:'mouth-smile', brows:'brows-thin',  accs:['acc-freckles']} },
+  { name:'06 · 조용한 밤',    cfg:{face:'face-wide',    skin:'skin-05',hair:'hair-buzz',        hairColor:'hc-01',eyes:'eyes-closed',  nose:'nose-curve', mouth:'mouth-dot',   brows:'brows-thin',  accs:[]} },
+  { name:'07 · 지쳤어',       cfg:{face:'face-chubby',  skin:'skin-01',hair:'hair-wavy-bob',    hairColor:'hc-04',eyes:'eyes-droopy',  nose:'nose-l-long',mouth:'mouth-frown', brows:'brows-sad',   accs:['acc-darkcircle','acc-blush']} },
+  { name:'08 · 놀랐잖아',     cfg:{face:'face-rect',    skin:'skin-03',hair:'hair-short',       hairColor:'hc-05',eyes:'eyes-big',     nose:'nose-dot',   mouth:'mouth-o',     brows:'brows-arch',  accs:[]} },
+  { name:'09 · 화이팅',       cfg:{face:'face-triangle',skin:'skin-06',hair:'hair-afro',        hairColor:'hc-01',eyes:'eyes-sharp',   nose:'nose-nostrils',mouth:'mouth-grin',brows:'brows-thick', accs:['acc-earring']} },
+  { name:'10 · 시적인 사람',   cfg:{face:'face-long',    skin:'skin-02',hair:'hair-long-straight',hairColor:'hc-01',eyes:'eyes-happy',   nose:'nose-l-short',mouth:'mouth-smile',brows:'brows-thin', accs:[]} },
+  { name:'11 · 이상해',       cfg:{face:'face-square',  skin:'skin-01',hair:'hair-bun',         hairColor:'hc-10',eyes:'eyes-sparkle', nose:'nose-dot',   mouth:'mouth-zigzag',brows:'brows-angry', accs:['acc-freckles']} },
+  { name:'12 · 근엄한 아저씨', cfg:{face:'face-wide',    skin:'skin-04',hair:'hair-side-part',   hairColor:'hc-07',eyes:'eyes-sharp',   nose:'nose-nostrils',mouth:'mouth-dot', brows:'brows-thick', accs:['acc-mustache','acc-glasses-round']} },
+  { name:'13 · 힙합 소년',    cfg:{face:'face-round',   skin:'skin-05',hair:'hair-buzz',        hairColor:'hc-01',eyes:'eyes-dot',     nose:'nose-l-short',mouth:'mouth-frown', brows:'brows-single',accs:['acc-sunglasses']} },
+  { name:'14 · 완벽주의',     cfg:{face:'face-long',    skin:'skin-03',hair:'hair-bob',         hairColor:'hc-01',eyes:'eyes-sharp',   nose:'nose-l-long',mouth:'mouth-dot',   brows:'brows-thin',  accs:['acc-glasses-square','acc-mole']} },
+  { name:'15 · 처음 뵈어요',  cfg:{face:'face-chubby',  skin:'skin-02',hair:'hair-long-curly',  hairColor:'hc-03',eyes:'eyes-round',   nose:'nose-dot',   mouth:'mouth-smile', brows:'brows-thin',  accs:['acc-blush']} },
+  { name:'16 · 대충 산다',    cfg:{face:'face-wide',    skin:'skin-01',hair:'hair-bald',        hairColor:'hc-01',eyes:'eyes-droopy',  nose:'nose-curve', mouth:'mouth-dot',   brows:'brows-sad',   accs:['acc-mustache','acc-bandage']} },
+  { name:'17 · 반짝반짝',     cfg:{face:'face-round',   skin:'skin-06',hair:'hair-afro',        hairColor:'hc-09',eyes:'eyes-sparkle', nose:'nose-dot',   mouth:'mouth-tooth', brows:'brows-arch',  accs:['acc-earring','acc-blush']} },
+  { name:'18 · 삐친 하루',    cfg:{face:'face-triangle',skin:'skin-02',hair:'hair-pigtails',    hairColor:'hc-11',eyes:'eyes-closed',  nose:'nose-l-short',mouth:'mouth-frown',brows:'brows-sad',  accs:['acc-freckles']} },
+  { name:'19 · 엄격한 선생',   cfg:{face:'face-rect',    skin:'skin-04',hair:'hair-side-part',   hairColor:'hc-06',eyes:'eyes-sharp',   nose:'nose-l-long',mouth:'mouth-dot',   brows:'brows-angry', accs:['acc-glasses-square']} },
+  { name:'20 · 웃긴 조합',    cfg:{face:'face-chubby',  skin:'skin-07',hair:'hair-bun',         hairColor:'hc-12',eyes:'eyes-big',     nose:'nose-nostrils',mouth:'mouth-tooth',brows:'brows-single',accs:['acc-glasses-round','acc-freckles','acc-mole']} }
+];
+
+// ═══════════════════════════════════════════════════════════
+// 렌더링
+// ═══════════════════════════════════════════════════════════
+function el(html) { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild; }
+
+// SECTION 0 · 프리셋
+const presetGrid = document.getElementById('preset-grid');
+PRESETS.forEach((p, i) => {
+  const card = el(`<div class="preset"><div class="idx">${String(i+1).padStart(2,'0')}</div>${renderChar(p.cfg, 130)}<div class="name">${p.name.replace(/^\d+\s·\s/,'')}</div></div>`);
+  presetGrid.appendChild(card);
+});
+
+// SECTION 1 · 얼굴형
+const gridFaces = document.getElementById('grid-faces');
+FACES.forEach(f => {
+  const svg = renderChar({face: f.id, skin:'skin-02', eyes:'eyes-dot', nose:'nose-l-short', mouth:'mouth-smile', brows:'brows-thin'}, 100);
+  gridFaces.appendChild(el(`<div class="cell">${svg}<div class="label">${f.name}</div><div class="id">${f.id}</div></div>`));
+});
+
+// SECTION 2 · 피부톤
+const gridSkins = document.getElementById('grid-skins');
+SKIN_TONES.forEach(s => {
+  const svg = renderChar({face:'face-round', skin:s.id, eyes:'eyes-dot', nose:'nose-l-short', mouth:'mouth-smile', brows:'brows-thin'}, 100);
+  gridSkins.appendChild(el(`<div class="cell">${svg}<div class="label">${s.name}</div><div class="id">${s.hex}</div></div>`));
+});
+
+// SECTION 3 · 헤어 형태
+const gridHair = document.getElementById('grid-hair');
+HAIRS.forEach(h => {
+  const svg = renderChar({face:'face-round', skin:'skin-02', hair:h.id, hairColor:'hc-01', eyes:'eyes-dot', nose:'nose-l-short', mouth:'mouth-smile', brows:'brows-thin'}, 100);
+  gridHair.appendChild(el(`<div class="cell">${svg}<div class="label">${h.name}</div><div class="id">${h.id}</div></div>`));
+});
+
+// SECTION 3b · 헤어 색상
+const gridHairColors = document.getElementById('grid-hair-colors');
+HAIR_COLORS.forEach(c => {
+  gridHairColors.appendChild(el(`<div class="cell"><div class="swatch" style="background:${c.hex}"></div><div class="label">${c.name}</div><div class="id">${c.hex}</div></div>`));
+});
+
+// SECTION 4 · 눈
+const gridEyes = document.getElementById('grid-eyes');
+EYES.forEach(e => {
+  const svg = renderChar({face:'face-round', skin:'skin-02', eyes:e.id, nose:'nose-l-short', mouth:'mouth-smile', brows:'brows-thin'}, 100);
+  gridEyes.appendChild(el(`<div class="cell">${svg}<div class="label">${e.name}</div><div class="id">${e.id}</div></div>`));
+});
+
+// SECTION 5 · 코
+const gridNose = document.getElementById('grid-nose');
+NOSES.forEach(n => {
+  const svg = renderChar({face:'face-round', skin:'skin-02', eyes:'eyes-dot', nose:n.id, mouth:'mouth-smile', brows:'brows-thin'}, 100);
+  gridNose.appendChild(el(`<div class="cell">${svg}<div class="label">${n.name}</div><div class="id">${n.id}</div></div>`));
+});
+
+// SECTION 6 · 입
+const gridMouth = document.getElementById('grid-mouth');
+MOUTHS.forEach(m => {
+  const svg = renderChar({face:'face-round', skin:'skin-02', eyes:'eyes-dot', nose:'nose-l-short', mouth:m.id, brows:'brows-thin'}, 100);
+  gridMouth.appendChild(el(`<div class="cell">${svg}<div class="label">${m.name}</div><div class="id">${m.id}</div></div>`));
+});
+
+// SECTION 7 · 눈썹
+const gridBrows = document.getElementById('grid-brows');
+BROWS.forEach(b => {
+  const svg = renderChar({face:'face-round', skin:'skin-02', eyes:'eyes-dot', nose:'nose-l-short', mouth:'mouth-smile', brows:b.id}, 100);
+  gridBrows.appendChild(el(`<div class="cell">${svg}<div class="label">${b.name}</div><div class="id">${b.id}</div></div>`));
+});
+
+// SECTION 8 · 액세서리
+const gridAcc = document.getElementById('grid-acc');
+ACCS.forEach(a => {
+  const svg = renderChar({face:'face-round', skin:'skin-02', hair:'hair-short', hairColor:'hc-02', eyes:'eyes-dot', nose:'nose-l-short', mouth:'mouth-smile', brows:'brows-thin', accs:[a.id]}, 100);
+  gridAcc.appendChild(el(`<div class="cell">${svg}<div class="label">${a.name}</div><div class="id">${a.id}</div></div>`));
+});
+
+// SECTION 9 · 홈 사용 예시
+const homeExamples = document.getElementById('home-examples');
+const HOME_CASES = [
+  { cfg: PRESETS[0].cfg,  msg: '오늘 저녁, 고등어구이 어때?', sub:'최근 생선이 조금 부족했어요.' },
+  { cfg: PRESETS[11].cfg, msg: '점심으로 비빔밥 어때요?',   sub:'요즘 채소가 좀 모자랐어.' },
+  { cfg: PRESETS[16].cfg, msg: '삼계탕으로 몸보신하자',      sub:'단백질 든든하게 챙기자!' }
+];
+HOME_CASES.forEach(h => {
+  homeExamples.appendChild(el(`
+    <div style="background:#FFF;border:1px solid #E4EAF3;border-radius:16px;padding:16px;display:flex;gap:14px;align-items:center">
+      <div style="width:64px;height:64px;border-radius:50%;background:#FEF9E7;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1.5px solid #F5D94F">
+        <div style="width:80px;height:88px;margin-top:14px">${renderChar(h.cfg, 80)}</div>
+      </div>
+      <div style="flex:1;background:#FFF;border:1.5px solid #E4EAF3;border-radius:12px;padding:10px 12px;position:relative">
+        <div style="position:absolute;left:-8px;top:16px;width:16px;height:16px;background:#FFF;border-left:1.5px solid #E4EAF3;border-bottom:1.5px solid #E4EAF3;transform:rotate(45deg)"></div>
+        <div style="font-size:13px;font-weight:700;color:#1D3762">${h.msg}</div>
+        <div style="font-size:11.5px;color:#5D7597;margin-top:3px">${h.sub}</div>
+      </div>
+    </div>
+  `));
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PEEPEE KIT · 스마트스토어 추가 이미지</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+  body{background:#CFE4F5;padding:30px;margin:0;font-family:'Pretendard Variable',Pretendard,sans-serif;color:#1E3A5F}
+  .wrap{max-width:860px;margin:0 auto}
+  .guide{background:#1E3A5F;color:#FFF;border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:13px;line-height:1.6}
+  .guide b{color:#FFD966}
+  .img-card{width:860px;height:860px;background:#CFE4F5;border-radius:0;margin:0 auto 30px;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(30,58,95,.15);display:flex;flex-direction:column;padding:60px;box-sizing:border-box}
+  .label{font-size:14px;color:#64748B;margin-bottom:10px;text-align:center;letter-spacing:1px}
+  .img-num{position:absolute;top:28px;right:30px;background:#1E3A5F;color:#FFF;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;font-family:'Nanum Pen Script',cursive;z-index:10}
+  .hand-draw{font-family:'Nanum Pen Script','yg-jalnan',cursive}
+  /* 공통 요소 */
+  .hero-title{font-size:52px;font-weight:900;color:#1E3A5F;letter-spacing:-2px;line-height:1.1;text-align:center;margin:0}
+  .hero-sub{font-size:22px;color:#4A6B8C;font-weight:600;text-align:center;margin:14px 0 0;letter-spacing:-.5px}
+
+  /* IMG 1 · 핵심 특징 4개 */
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:50px;flex:1}
+  .feature-item{background:#FFF;border:4px solid #1E3A5F;border-radius:28px;padding:40px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+  .feature-item::before{content:"";position:absolute;top:-8px;left:-8px;width:100%;height:100%;background:#FFD966;border-radius:28px;z-index:-1}
+  .feature-ico{width:88px;height:88px;background:#CFE4F5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;border:3px solid #1E3A5F}
+  .feature-ico svg{width:50px;height:50px;stroke:#1E3A5F;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .feature-num{font-size:40px;font-weight:900;color:#1E3A5F;line-height:1}
+  .feature-label{font-size:18px;font-weight:800;color:#1E3A5F;margin-top:6px;letter-spacing:-.3px}
+  .feature-desc{font-size:13px;color:#4A6B8C;margin-top:4px;font-weight:600}
+
+  /* IMG 2 · 사용 방법 */
+  .steps{display:flex;flex-direction:column;gap:22px;margin-top:40px;flex:1;justify-content:center}
+  .step{display:flex;align-items:center;gap:22px;background:#FFF;border:3px solid #1E3A5F;border-radius:24px;padding:24px 28px}
+  .step-num{width:68px;height:68px;background:#FFD966;border:3px solid #1E3A5F;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#1E3A5F;flex-shrink:0}
+  .step-main{flex:1}
+  .step-title{font-size:24px;font-weight:900;color:#1E3A5F;letter-spacing:-.5px}
+  .step-sub{font-size:15px;color:#4A6B8C;font-weight:600;margin-top:4px;letter-spacing:-.3px}
+  .step-ico{width:72px;height:72px;flex-shrink:0;background:#CFE4F5;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #1E3A5F}
+  .step-ico svg{width:40px;height:40px;stroke:#1E3A5F;stroke-width:2.5;fill:none}
+
+  /* IMG 3 · 검사 항목 10개 */
+  .items-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px;flex:1}
+  .item-row{background:#FFF;border:2.5px solid #1E3A5F;border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:14px}
+  .item-badge{background:#FFD966;border:2px solid #1E3A5F;border-radius:12px;padding:4px 10px;font-size:13px;font-weight:900;color:#1E3A5F;min-width:40px;text-align:center;flex-shrink:0}
+  .item-info{flex:1;min-width:0}
+  .item-name{font-size:17px;font-weight:900;color:#1E3A5F;letter-spacing:-.3px}
+  .item-desc{font-size:11.5px;color:#4A6B8C;font-weight:600;margin-top:2px}
+
+  /* IMG 4 · 이런 분께 추천 */
+  .target-list{display:flex;flex-direction:column;gap:16px;margin-top:30px;flex:1;justify-content:center}
+  .target{display:flex;align-items:center;gap:18px;background:#FFF;border:3px solid #1E3A5F;border-radius:22px;padding:20px 26px}
+  .target-chk{width:44px;height:44px;background:#FFD966;border:3px solid #1E3A5F;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;color:#1E3A5F;font-size:28px;line-height:1}
+  .target-text{font-size:19px;font-weight:800;color:#1E3A5F;letter-spacing:-.4px}
+
+  /* IMG 5 · 비교 */
+  .comp-wrap{margin-top:30px;flex:1}
+  .comp-table{width:100%;border-collapse:separate;border-spacing:0;background:#FFF;border:3px solid #1E3A5F;border-radius:24px;overflow:hidden}
+  .comp-table th{background:#1E3A5F;color:#FFF;padding:22px 14px;font-size:19px;font-weight:900;letter-spacing:-.3px}
+  .comp-table th.hl{background:#FFD966;color:#1E3A5F}
+  .comp-table td{padding:20px 16px;font-size:16px;font-weight:700;color:#1E3A5F;text-align:center;border-top:2px solid #CFE4F5;letter-spacing:-.3px}
+  .comp-table td.hl{background:#FFFBE8;color:#1E3A5F;font-weight:900}
+  .comp-table td.label{text-align:left;background:#F5F8FC;font-size:14px;color:#4A6B8C;font-weight:800}
+  .comp-cta{margin-top:20px;background:#1E3A5F;color:#FFF;border-radius:18px;padding:18px;text-align:center;font-size:18px;font-weight:900;letter-spacing:-.3px}
+
+  /* 캐릭터 간단 SVG · 손그림 */
+  .char{position:absolute;z-index:5}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="guide">
+  <b>PEEPEE KIT · 스마트스토어 추가 이미지 5장</b><br>
+  각 이미지는 860×860px · 브라우저에서 각 카드 스크린샷해서 사용 (Mac: Cmd+Shift+4로 드래그 캡처).<br>
+  <b>스타일:</b> 손그림 폰트 + 하늘색 배경 + 네이비·노랑 포인트 (박스와 통일)
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- IMG 1 · 핵심 특징 4개                          -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="label">IMAGE 1 · 핵심 특징</div>
+<div class="img-card">
+  <div class="img-num">1</div>
+  <div style="padding-top:20px">
+    <div class="hero-title">집에서 1분,<br>간편한 건강 체크</div>
+    <div class="hero-sub">병원 가지 않고도 10가지를 한번에</div>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="feature-ico">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </div>
+      <div class="feature-num">1분</div>
+      <div class="feature-label">완성</div>
+      <div class="feature-desc">기다림 X · 즉시 확인</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-ico">
+        <svg viewBox="0 0 24 24"><path d="M10 2v6l-4 10a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4L14 8V2z"/><path d="M8 2h8"/></svg>
+      </div>
+      <div class="feature-num">10종</div>
+      <div class="feature-label">한번에</div>
+      <div class="feature-desc">당·단백질·pH 등 10가지</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-ico">
+        <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="18" r="1" fill="#1E3A5F" stroke="none"/><path d="M9 6h6"/></svg>
+      </div>
+      <div class="feature-num">앱으로</div>
+      <div class="feature-label">자동 분석</div>
+      <div class="feature-desc">사진 찍으면 AI가 판독</div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-ico">
+        <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div class="feature-num">FDA</div>
+      <div class="feature-label">공식 등록</div>
+      <div class="feature-desc">안심하고 사용</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- IMG 2 · 사용 방법 3단계                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="label">IMAGE 2 · 사용 방법</div>
+<div class="img-card">
+  <div class="img-num">2</div>
+  <div style="padding-top:20px">
+    <div class="hero-title">이렇게 간단해요</div>
+    <div class="hero-sub">3단계면 끝 · 어렵지 않아요</div>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-main">
+        <div class="step-title">소변을 컵에 받기</div>
+        <div class="step-sub">동봉된 일회용 컵 사용 · 중간뇨 추천</div>
+      </div>
+      <div class="step-ico">
+        <svg viewBox="0 0 24 24"><path d="M6 4h12l-1 15a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3L6 4z"/><ellipse cx="12" cy="7" rx="4" ry="1" fill="#CFE4F5"/></svg>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-main">
+        <div class="step-title">검사지 1초 담그기</div>
+        <div class="step-sub">10개 패드가 색상으로 변해요</div>
+      </div>
+      <div class="step-ico">
+        <svg viewBox="0 0 24 24"><rect x="10" y="3" width="4" height="16" rx="1"/><rect x="10.5" y="5" width="3" height="2" fill="#FFD966" stroke="none"/><rect x="10.5" y="8" width="3" height="2" fill="#F97316" stroke="none"/><rect x="10.5" y="11" width="3" height="2" fill="#EF4444" stroke="none"/></svg>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-main">
+        <div class="step-title">앱으로 사진 찍기</div>
+        <div class="step-sub">AI가 즉시 분석 · 리포트 저장</div>
+      </div>
+      <div class="step-ico">
+        <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="4"/><path d="M8 7l1.5-3h5L16 7"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- IMG 3 · 검사 항목 10가지                       -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="label">IMAGE 3 · 검사 10종</div>
+<div class="img-card">
+  <div class="img-num">3</div>
+  <div style="padding-top:20px">
+    <div class="hero-title">이 10가지,<br>한번에 체크</div>
+    <div class="hero-sub">몸이 보내는 신호 · 소변이 알려줘요</div>
+  </div>
+  <div class="items-grid">
+    <div class="item-row">
+      <div class="item-badge">01</div>
+      <div class="item-info">
+        <div class="item-name">당 (Glucose)</div>
+        <div class="item-desc">당뇨 위험 신호</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">02</div>
+      <div class="item-info">
+        <div class="item-name">단백질</div>
+        <div class="item-desc">신장 상태 체크</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">03</div>
+      <div class="item-info">
+        <div class="item-name">백혈구</div>
+        <div class="item-desc">염증·감염 신호</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">04</div>
+      <div class="item-info">
+        <div class="item-name">적혈구</div>
+        <div class="item-desc">혈뇨 가능성</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">05</div>
+      <div class="item-info">
+        <div class="item-name">아질산염</div>
+        <div class="item-desc">요로감염 신호</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">06</div>
+      <div class="item-info">
+        <div class="item-name">케톤</div>
+        <div class="item-desc">대사·단식 체크</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">07</div>
+      <div class="item-info">
+        <div class="item-name">pH</div>
+        <div class="item-desc">산성·알칼리 균형</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">08</div>
+      <div class="item-info">
+        <div class="item-name">비중</div>
+        <div class="item-desc">수분·탈수 상태</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">09</div>
+      <div class="item-info">
+        <div class="item-name">빌리루빈</div>
+        <div class="item-desc">간 기능 신호</div>
+      </div>
+    </div>
+    <div class="item-row">
+      <div class="item-badge">10</div>
+      <div class="item-info">
+        <div class="item-name">유로빌리노겐</div>
+        <div class="item-desc">간·용혈 체크</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- IMG 4 · 이런 분께 추천                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="label">IMAGE 4 · 이런 분께 추천</div>
+<div class="img-card">
+  <div class="img-num">4</div>
+  <div style="padding-top:20px">
+    <div class="hero-title">이런 분께<br>특히 추천해요</div>
+    <div class="hero-sub">작은 신호도 놓치지 마세요</div>
+  </div>
+  <div class="target-list">
+    <div class="target">
+      <div class="target-chk">✓</div>
+      <div class="target-text">요즘 자주 피곤하고 입이 마르는 분</div>
+    </div>
+    <div class="target">
+      <div class="target-chk">✓</div>
+      <div class="target-text">당뇨·신장병 가족력이 있는 분</div>
+    </div>
+    <div class="target">
+      <div class="target-chk">✓</div>
+      <div class="target-text">소변 색·냄새가 신경 쓰이는 분</div>
+    </div>
+    <div class="target">
+      <div class="target-chk">✓</div>
+      <div class="target-text">다이어트·단식·운동 중이신 분</div>
+    </div>
+    <div class="target">
+      <div class="target-chk">✓</div>
+      <div class="target-text">건강검진 전후 체크하고 싶은 분</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- IMG 5 · 병원 vs 피피키트 비교                   -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="label">IMAGE 5 · 병원 vs 피피키트</div>
+<div class="img-card">
+  <div class="img-num">5</div>
+  <div style="padding-top:20px">
+    <div class="hero-title">같은 검사,<br>훨씬 간편하게</div>
+    <div class="hero-sub">병원 가는 수고 X · 집에서 1분</div>
+  </div>
+  <div class="comp-wrap">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th style="width:28%"></th>
+          <th>병원 검사</th>
+          <th class="hl">PEEPEE KIT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">소요 시간</td>
+          <td>2-3시간</td>
+          <td class="hl">1분</td>
+        </tr>
+        <tr>
+          <td class="label">비용</td>
+          <td>10,000원+</td>
+          <td class="hl">검사당 3,500원~</td>
+        </tr>
+        <tr>
+          <td class="label">장소</td>
+          <td>병원 방문</td>
+          <td class="hl">우리 집</td>
+        </tr>
+        <tr>
+          <td class="label">예약</td>
+          <td>필요</td>
+          <td class="hl">언제든</td>
+        </tr>
+        <tr>
+          <td class="label">결과 확인</td>
+          <td>며칠 뒤 전화</td>
+          <td class="hl">앱에서 즉시</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="comp-cta">
+      바쁜 현대인을 위한 똑똑한 건강 관리
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

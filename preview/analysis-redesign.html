@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건강어때 · 분석 결과 재디자인 미리보기 (이모지 X)</title>
+<style>
+  :root{
+    --ink:#1D3762;
+    --ink2:#2E61C4;
+    --muted:#5D7597;
+    --line:#E4EAF3;
+    --bg:#FAFBFF;
+    --card:#FFF;
+    --yellow:#F5D94F;
+    --yellow-soft:#FEF9E7;
+    --good:#15803D;
+    --good-bg:#DCFCE7;
+    --warn:#B45309;
+    --warn-bg:#FEF3C7;
+    --bad:#B91C1C;
+    --bad-bg:#FEE2E2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;letter-spacing:-.2px}
+  body{background:#F0F2F7;padding:30px 20px 80px}
+  .wrap{max-width:420px;margin:0 auto}
+  .guide{background:#1D3762;color:#FFF;border-radius:14px;padding:14px 18px;margin-bottom:20px;font-size:12.5px;line-height:1.6;font-weight:500}
+  .guide b{color:#F5D94F;font-weight:800}
+  .guide h3{font-size:14px;margin-bottom:6px;color:#FFF;font-weight:800}
+  .phone{background:#F8FAFF;border-radius:28px;padding:18px;box-shadow:0 10px 40px rgba(29,55,98,.12);margin-bottom:30px}
+  .page-tag{font-size:11px;font-weight:800;color:#2E61C4;background:#E8EEFB;padding:5px 12px;border-radius:99px;display:inline-block;margin-bottom:12px;letter-spacing:.3px}
+
+  /* 공통 카드 */
+  .card{background:#FFF;border-radius:16px;padding:16px;border:1px solid var(--line);margin-bottom:10px}
+  .card-title{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.3px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+  .card-title .lead{display:flex;align-items:center;gap:8px}
+  .card-title .lead::before{content:"";width:3px;height:14px;background:var(--ink2);border-radius:2px}
+  .pill{display:inline-block;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:99px;letter-spacing:-.1px}
+
+  /* 바 */
+  .pbar{height:7px;background:#F1F5F9;border-radius:99px;overflow:hidden}
+  .pbar-fill{height:100%;border-radius:99px}
+
+  /* 테이블 */
+  .tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+  .tbl th{text-align:left;padding:9px 6px;background:#F8FAFC;font-size:10.5px;font-weight:800;color:#64748B;letter-spacing:-.1px;border-bottom:1px solid var(--line)}
+  .tbl td{padding:11px 6px;border-bottom:1px solid #F1F5F9;font-size:11.5px;color:var(--ink);vertical-align:middle;font-weight:600}
+  .tbl tr:last-child td{border-bottom:none}
+
+  /* 뱃지 색 */
+  .b-good{background:var(--good-bg);color:var(--good)}
+  .b-warn{background:var(--warn-bg);color:var(--warn)}
+  .b-bad{background:var(--bad-bg);color:var(--bad)}
+  .b-mid{background:#F1F5F9;color:#64748B}
+
+  /* 점 색 */
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .d-good{background:#22C55E}
+  .d-warn{background:#F59E0B}
+  .d-bad{background:#EF4444}
+
+  /* 영양소 그리드 */
+  .n-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .n-card{background:#F8FAFC;border:1px solid var(--line);border-radius:12px;padding:11px}
+  .n-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .n-name{font-size:12px;font-weight:800;color:var(--ink);letter-spacing:-.2px}
+  .n-pct{font-size:17px;font-weight:900;letter-spacing:-.5px}
+  .n-stat{font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:99px;letter-spacing:-.1px}
+  .n-sub{font-size:10px;color:var(--muted);font-weight:600;margin-top:6px;letter-spacing:-.1px}
+  .n-foods{font-size:10.5px;color:#334155;font-weight:700;margin-top:6px;letter-spacing:-.2px}
+
+  /* 다음 끼 추천 */
+  .rec-list{display:flex;flex-direction:column;gap:7px}
+  .rec-row{display:flex;align-items:center;gap:10px;background:#FFF;border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .rec-icon{width:34px;height:34px;border-radius:10px;background:var(--yellow-soft);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:900;color:#78350F;letter-spacing:-.3px;border:1px solid var(--yellow)}
+  .rec-main{flex:1;min-width:0}
+  .rec-name{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.3px}
+  .rec-tags{display:flex;gap:4px;margin-top:3px}
+  .rec-tag{font-size:9.5px;font-weight:700;color:#1E40AF;background:#DBEAFE;padding:2px 7px;border-radius:99px;letter-spacing:-.1px}
+  .rec-desc{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:3px;letter-spacing:-.2px}
+
+  /* 플랜 */
+  .plan-week{background:#FFF;border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:8px}
+  .plan-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .plan-num{width:26px;height:26px;background:var(--ink2);color:#FFF;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+  .plan-title{font-size:12.5px;font-weight:800;color:var(--ink);letter-spacing:-.3px}
+  .plan-item{display:flex;align-items:flex-start;gap:9px;padding:5px 0;font-size:11.5px;color:#334155;font-weight:600;line-height:1.5}
+  .plan-chk{width:14px;height:14px;border:1.5px solid #CBD5E1;border-radius:4px;flex-shrink:0;margin-top:2px}
+
+  /* AI 코멘트 */
+  .ai-comment{background:#F0F7FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px 16px;display:flex;gap:11px;align-items:center}
+  .ai-avatar{width:36px;height:36px;border-radius:50%;background:#DBEAFE;color:#1E40AF;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:-.3px;border:1.5px solid #93C5FD}
+  .ai-text{flex:1;min-width:0}
+  .ai-label{font-size:10px;font-weight:800;color:#1E40AF;letter-spacing:.3px;margin-bottom:2px}
+  .ai-msg{font-size:12.5px;font-weight:700;color:var(--ink);line-height:1.5;letter-spacing:-.2px}
+
+  /* 핸드폰 상단바 */
+  .status{display:flex;justify-content:space-between;align-items:center;padding:4px 10px 8px;font-size:11px;font-weight:700;color:#334155}
+
+  h2{font-size:16px;color:#1D3762;margin:30px 0 14px;padding:0 4px;letter-spacing:-.4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="guide">
+  <h3>미리보기 안내</h3>
+  이모지 전면 제거 · <b>깔끔한 라인/점/숫자 중심</b>으로 재설계.<br>
+  확인 후 "이대로 적용" 또는 수정 사항 알려줘.
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE 1 · 식사 분석 결과 (단일 식사)              -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2>① 식사 분석 결과 (사진 1장 찍은 뒤)</h2>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>LTE 71%</span></div>
+  <div class="page-tag">음식 분석 결과</div>
+
+  <!-- 1. 핵심 요약 Hero (등급·점수 X) -->
+  <div class="card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none">
+    <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">오늘 점심 · 분석 완료</div>
+    <div style="font-size:21px;font-weight:900;letter-spacing:-.5px;line-height:1.25">소고기구이 외 3가지</div>
+    <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin-top:5px;font-weight:600">620 kcal</div>
+    <div style="margin-top:14px;padding:11px 13px;background:rgba(255,255,255,.12);border-radius:10px">
+      <div style="font-size:13.5px;font-weight:800;letter-spacing:-.3px;line-height:1.5">
+        단백질은 괜찮고,<br>
+        <span style="color:#FBBF24">비타민 C · 칼슘</span> 보충이 필요해요.
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 잘한 점 / 보충 필요 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div class="card" style="margin:0;background:#F0FDF4;border-color:#86EFAC;padding:12px">
+      <div style="font-size:10.5px;font-weight:800;color:var(--good);letter-spacing:.2px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span class="dot d-good"></span><span>잘한 점</span>
+      </div>
+      <div style="font-size:11.5px;font-weight:700;color:var(--good);line-height:1.6">
+        단백질 충분<br>포만감 좋아요
+      </div>
+    </div>
+    <div class="card" style="margin:0;background:#FEF2F2;border-color:#FCA5A5;padding:12px">
+      <div style="font-size:10.5px;font-weight:800;color:var(--bad);letter-spacing:.2px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+        <span class="dot d-bad"></span><span>보충 필요</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        <span class="pill" style="background:#FEE2E2;color:#991B1B">비타민C</span>
+        <span class="pill" style="background:#FEE2E2;color:#991B1B">칼슘</span>
+        <span class="pill" style="background:#FEE2E2;color:#991B1B">식이섬유</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 3대 영양소 -->
+  <div class="card">
+    <div class="card-title">
+      <div class="lead">3대 영양소 섭취량</div>
+      <span style="font-size:9.5px;color:var(--muted);font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">1끼 권장 대비</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="font-size:12px;font-weight:700;color:var(--ink)">탄수화물</div><div style="font-size:11px;font-weight:800;color:#F59E0B">35% · <span style="color:#64748B;font-weight:600">45g/130g</span></div></div>
+        <div class="pbar"><div class="pbar-fill" style="width:35%;background:#F59E0B"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="font-size:12px;font-weight:700;color:var(--ink)">단백질</div><div style="font-size:11px;font-weight:800;color:#22C55E">75% · <span style="color:#64748B;font-weight:600">15g/20g</span></div></div>
+        <div class="pbar"><div class="pbar-fill" style="width:75%;background:#22C55E"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:5px"><div style="font-size:12px;font-weight:700;color:var(--ink)">지방</div><div style="font-size:11px;font-weight:800;color:#F59E0B">55% · <span style="color:#64748B;font-weight:600">12g/22g</span></div></div>
+        <div class="pbar"><div class="pbar-fill" style="width:55%;background:#F59E0B"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 부족 영양소 TOP 4 -->
+  <div class="card">
+    <div class="card-title">
+      <div class="lead">부족한 영양소 TOP 4</div>
+      <span style="font-size:9.5px;color:var(--muted);font-weight:700">1끼 기준</span>
+    </div>
+    <div class="n-grid">
+      <div class="n-card">
+        <div class="n-head">
+          <div class="n-name">비타민 C</div>
+          <span class="n-stat b-bad">매우 부족</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:5px">
+          <span class="n-pct" style="color:#B91C1C">10%</span>
+          <span style="font-size:10px;color:var(--muted);font-weight:600">10/100mg</span>
+        </div>
+        <div class="n-foods">키위 · 파프리카 · 딸기</div>
+      </div>
+      <div class="n-card">
+        <div class="n-head">
+          <div class="n-name">칼슘</div>
+          <span class="n-stat b-bad">매우 부족</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:5px">
+          <span class="n-pct" style="color:#B91C1C">0%</span>
+          <span style="font-size:10px;color:var(--muted);font-weight:600">0/800mg</span>
+        </div>
+        <div class="n-foods">우유 · 요거트 · 두부</div>
+      </div>
+      <div class="n-card">
+        <div class="n-head">
+          <div class="n-name">식이섬유</div>
+          <span class="n-stat b-warn">부족</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:5px">
+          <span class="n-pct" style="color:#C2410C">38%</span>
+          <span style="font-size:10px;color:var(--muted);font-weight:600">3/8g</span>
+        </div>
+        <div class="n-foods">브로콜리 · 사과 · 고구마</div>
+      </div>
+      <div class="n-card">
+        <div class="n-head">
+          <div class="n-name">비타민 D</div>
+          <span class="n-stat b-warn">부족</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:5px">
+          <span class="n-pct" style="color:#C2410C">15%</span>
+          <span style="font-size:10px;color:var(--muted);font-weight:600">0.5/3.3μg</span>
+        </div>
+        <div class="n-foods">연어 · 계란 · 표고버섯</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 다음 끼 추천 -->
+  <div class="card" style="background:var(--yellow-soft);border-color:var(--yellow)">
+    <div class="card-title" style="color:#78350F">
+      <div class="lead">그래서 다음에 뭐 먹지?</div>
+    </div>
+    <div class="rec-list">
+      <div class="rec-row" style="background:#FFF">
+        <div class="rec-icon">연어</div>
+        <div class="rec-main">
+          <div class="rec-name">연어구이</div>
+          <div class="rec-tags">
+            <span class="rec-tag">비타민D</span><span class="rec-tag">오메가3</span>
+          </div>
+          <div class="rec-desc">부족한 영양을 한 번에 보충해요</div>
+        </div>
+      </div>
+      <div class="rec-row" style="background:#FFF">
+        <div class="rec-icon">샐러드</div>
+        <div class="rec-main">
+          <div class="rec-name">브로콜리 샐러드</div>
+          <div class="rec-tags">
+            <span class="rec-tag">식이섬유</span><span class="rec-tag">비타민C</span>
+          </div>
+          <div class="rec-desc">부족한 섬유와 비타민을 채워요</div>
+        </div>
+      </div>
+      <div class="rec-row" style="background:#FFF">
+        <div class="rec-icon">요거트</div>
+        <div class="rec-main">
+          <div class="rec-name">그릭요거트</div>
+          <div class="rec-tags">
+            <span class="rec-tag">칼슘</span><span class="rec-tag">단백질</span>
+          </div>
+          <div class="rec-desc">뼈 건강과 단백질을 함께 챙겨요</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 핵심 요약 테이블 -->
+  <div class="card">
+    <div class="card-title"><div class="lead">핵심 영양소 한눈에 정리</div></div>
+    <table class="tbl">
+      <thead>
+        <tr><th style="width:28%">영양소</th><th style="width:40%">현재 상태</th><th>추천 음식</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:800">비타민 C</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="width:40px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:10%;height:100%;background:#EF4444"></div></div>
+              <span style="color:#B91C1C;font-weight:800;font-size:10px">10%</span>
+            </div>
+          </td>
+          <td style="color:#475569;font-size:10.5px">키위, 파프리카, 딸기</td>
+        </tr>
+        <tr>
+          <td style="font-weight:800">칼슘</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="width:40px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:5%;height:100%;background:#EF4444"></div></div>
+              <span style="color:#B91C1C;font-weight:800;font-size:10px">0%</span>
+            </div>
+          </td>
+          <td style="color:#475569;font-size:10.5px">우유, 요거트, 두부</td>
+        </tr>
+        <tr>
+          <td style="font-weight:800">식이섬유</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="width:40px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:38%;height:100%;background:#F59E0B"></div></div>
+              <span style="color:#C2410C;font-weight:800;font-size:10px">38%</span>
+            </div>
+          </td>
+          <td style="color:#475569;font-size:10.5px">브로콜리, 사과, 고구마</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 7. AI 코멘트 -->
+  <div class="ai-comment">
+    <div class="ai-avatar">AI</div>
+    <div class="ai-text">
+      <div class="ai-label">건강어때 AI</div>
+      <div class="ai-msg">고기는 충분히 드셨어요. 다음 끼엔 채소와 과일을 꼭 더해보세요.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- PAGE 2 · 주간/월간 리포트                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<h2>② 주간/월간 리포트 (리포트 탭)</h2>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>LTE 71%</span></div>
+  <div class="page-tag">주간 리포트 · 최근 7일</div>
+
+  <!-- 1. 핵심 요약 Hero (점수 X) -->
+  <div class="card" style="background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border:none">
+    <div style="font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:4px">주간 핵심 분석</div>
+    <div style="font-size:16px;font-weight:900;letter-spacing:-.3px;line-height:1.45;margin-bottom:12px">
+      이번 주 가장 부족한 건<br>
+      <span style="color:#FBBF24">칼슘 · 비타민D · 식이섬유</span>예요.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:rgba(255,255,255,.14);border-radius:10px;padding:10px 8px;text-align:center">
+        <div style="font-size:21px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">21</div>
+        <div style="font-size:10px;color:#DAE7FF;font-weight:700;margin-top:3px">분석 끼수</div>
+      </div>
+      <div style="background:rgba(255,255,255,.14);border-radius:10px;padding:10px 8px;text-align:center">
+        <div style="font-size:21px;font-weight:900;color:#FBBF24;letter-spacing:-.5px">1,820</div>
+        <div style="font-size:10px;color:#DAE7FF;font-weight:700;margin-top:3px">일 평균 kcal</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 가장 많이 먹은 음식 TOP 3 -->
+  <div class="card">
+    <div class="card-title"><div class="lead">이번 주 가장 많이 먹은 음식</div></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:11px;background:#F8FAFC;border-radius:10px;padding:10px 12px">
+        <div style="width:28px;height:28px;background:#FBBF24;color:#78350F;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:-.3px">1위</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.3px">김치찌개</div>
+          <div class="pbar" style="margin-top:5px;height:5px"><div class="pbar-fill" style="width:100%;background:#FBBF24"></div></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-weight:800;flex-shrink:0">8회</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;background:#F8FAFC;border-radius:10px;padding:10px 12px">
+        <div style="width:28px;height:28px;background:#CBD5E1;color:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:-.3px">2위</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.3px">쌀밥</div>
+          <div class="pbar" style="margin-top:5px;height:5px"><div class="pbar-fill" style="width:75%;background:#CBD5E1"></div></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-weight:800;flex-shrink:0">6회</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;background:#F8FAFC;border-radius:10px;padding:10px 12px">
+        <div style="width:28px;height:28px;background:#D97706;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:-.3px">3위</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.3px">제육볶음</div>
+          <div class="pbar" style="margin-top:5px;height:5px"><div class="pbar-fill" style="width:50%;background:#D97706"></div></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-weight:800;flex-shrink:0">4회</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 부족 영양소 표 -->
+  <div class="card">
+    <div class="card-title"><div class="lead">이번 주 부족 영양소 · 보충 음식</div></div>
+    <table class="tbl">
+      <thead>
+        <tr><th style="width:32%">영양소</th><th style="width:30%">섭취율</th><th>보충 음식</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div style="font-weight:800;font-size:11.5px">칼슘</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-top:2px">340/800mg</div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="width:38px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:42%;height:100%;background:#F59E0B"></div></div>
+              <span class="n-stat b-warn">부족</span>
+            </div>
+            <div style="font-size:10.5px;font-weight:800;color:#C2410C">42%</div>
+          </td>
+          <td style="color:#475569;font-size:10.5px;line-height:1.4">우유 · 요거트 · 두부 · 멸치</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="font-weight:800;font-size:11.5px">비타민 D</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-top:2px">2.5/10μg</div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="width:38px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:25%;height:100%;background:#EF4444"></div></div>
+              <span class="n-stat b-bad">매우 부족</span>
+            </div>
+            <div style="font-size:10.5px;font-weight:800;color:#B91C1C">25%</div>
+          </td>
+          <td style="color:#475569;font-size:10.5px;line-height:1.4">연어 · 계란 · 버섯 · 참치</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="font-weight:800;font-size:11.5px">식이섬유</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-top:2px">14/25g</div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+              <div style="width:38px;height:5px;background:#F1F5F9;border-radius:99px;overflow:hidden"><div style="width:56%;height:100%;background:#F59E0B"></div></div>
+              <span class="n-stat b-warn">부족</span>
+            </div>
+            <div style="font-size:10.5px;font-weight:800;color:#C2410C">56%</div>
+          </td>
+          <td style="color:#475569;font-size:10.5px;line-height:1.4">나물 · 잡곡 · 브로콜리 · 사과</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;padding:10px 12px;background:var(--warn-bg);border-radius:10px;font-size:10.5px;color:#78350F;font-weight:700;line-height:1.5">
+      가장 부족한 <b style="color:#92400E">칼슘과 비타민 D</b>부터 집중 보충해봐요.
+    </div>
+  </div>
+
+  <!-- 4. 한 달 실천 플랜 -->
+  <div class="card" style="background:#F0FDF4;border-color:#86EFAC">
+    <div class="card-title" style="color:var(--good)">
+      <div class="lead" style="color:var(--good)">한 달 실천 플랜</div>
+      <span style="font-size:9.5px;color:var(--good);font-weight:700;background:#DCFCE7;padding:3px 8px;border-radius:99px">주 1목표</span>
+    </div>
+    <div style="font-size:10.5px;color:var(--good);font-weight:700;margin-bottom:10px;line-height:1.5">
+      부족 영양소 기반 4주 플랜 · 한 주씩 체크하면서 챙겨봐요.
+    </div>
+
+    <div class="plan-week">
+      <div class="plan-head">
+        <span class="plan-num">1</span>
+        <span class="plan-title">1주차 · 칼슘 집중 보충</span>
+      </div>
+      <div class="plan-item"><span class="plan-chk"></span><span>매일 우유 한 잔 or 요거트 1개 섭취</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>두부 반찬 주 3회</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>일주일 후 칼슘 섭취율 다시 확인</span></div>
+    </div>
+
+    <div class="plan-week">
+      <div class="plan-head">
+        <span class="plan-num">2</span>
+        <span class="plan-title">2주차 · 비타민 D 챙기기</span>
+      </div>
+      <div class="plan-item"><span class="plan-chk"></span><span>연어 or 고등어 주 2회 식단 포함</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>계란 반찬 매일 1회</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>칼슘 섭취 유지도 잊지 X</span></div>
+    </div>
+
+    <div class="plan-week">
+      <div class="plan-head">
+        <span class="plan-num">3</span>
+        <span class="plan-title">3주차 · 식이섬유 더하기</span>
+      </div>
+      <div class="plan-item"><span class="plan-chk"></span><span>매 끼 채소 반찬 1종류 이상</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>간식으로 사과 or 바나나</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>지난 2주 영양소도 유지</span></div>
+    </div>
+
+    <div class="plan-week">
+      <div class="plan-head">
+        <span class="plan-num">4</span>
+        <span class="plan-title">4주차 · 습관 완성</span>
+      </div>
+      <div class="plan-item"><span class="plan-chk"></span><span>한 달 리포트 다시 확인</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>칼슘·비타민D 섭취율 비교</span></div>
+      <div class="plan-item"><span class="plan-chk"></span><span>잘 챙긴 음식 2가지 → 다음 달도 유지</span></div>
+    </div>
+  </div>
+
+  <!-- 5. AI 코멘트 -->
+  <div class="ai-comment">
+    <div class="ai-avatar">AI</div>
+    <div class="ai-text">
+      <div class="ai-label">건강어때 AI</div>
+      <div class="ai-msg">이번 주 단백질은 잘 챙기셨어요. 칼슘·비타민 D만 더해지면 완벽해요.</div>
+    </div>
+  </div>
+</div>
+
+<div class="guide" style="margin-top:20px">
+  <h3>적용 전 확인</h3>
+  • 이모지 전부 제거 (단, AI 아이콘은 "AI" 텍스트로)<br>
+  • <b>라벨 중심 디자인</b> · 색상·바·숫자가 정보 전달<br>
+  • <b>테이블·카드 균형</b> · 한눈에 핵심 캐치<br>
+  • <b>톤·앤·매너 유지</b> · White 80 / Navy 15 / Yellow 5 · Red로 경고
+</div>
+
+</div>
+</body>
+</html>

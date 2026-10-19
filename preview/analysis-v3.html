@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>건강어때 · 영양 분석 재디자인 v3</title>
+<style>
+  :root{
+    --ink:#1D3762;
+    --ink2:#2E61C4;
+    --muted:#5D7597;
+    --line:#E4EAF3;
+    --bg:#F0F2F7;
+    --card:#FFF;
+    --yellow:#F5D94F;
+    --yellow-soft:#FEF9E7;
+    --good:#15803D;
+    --good-ring:#22C55E;
+    --warn:#B45309;
+    --warn-ring:#F59E0B;
+    --bad:#B91C1C;
+    --bad-ring:#EF4444;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;letter-spacing:-.2px}
+  body{background:var(--bg);padding:30px 20px 80px}
+  .wrap{max-width:420px;margin:0 auto}
+  .guide{background:#1D3762;color:#FFF;border-radius:14px;padding:14px 18px;margin-bottom:20px;font-size:12.5px;line-height:1.6;font-weight:500}
+  .guide b{color:#F5D94F;font-weight:800}
+  .guide h3{font-size:14px;margin-bottom:6px;color:#FFF;font-weight:800}
+  .phone{background:#FAFBFF;border-radius:28px;padding:0;box-shadow:0 10px 40px rgba(29,55,98,.12);margin-bottom:30px;overflow:hidden}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 6px;font-size:11.5px;font-weight:700;color:#334155}
+
+  /* 헤더 */
+  .page-header{display:flex;align-items:center;padding:8px 16px 10px;gap:4px}
+  .page-back{width:36px;height:36px;background:none;border:none;color:#1D3762;font-size:22px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .page-title{flex:1;text-align:center;font-size:17px;font-weight:800;color:#1D3762;letter-spacing:-.4px;margin-right:36px}
+
+  /* 탭 */
+  .tabs{display:flex;background:#F1F5F9;border-radius:14px;padding:4px;margin:4px 16px 16px;gap:2px}
+  .tab{flex:1;background:transparent;border:none;padding:10px 6px;font-size:12.5px;font-weight:700;color:#64748B;cursor:pointer;border-radius:10px;font-family:inherit;letter-spacing:-.2px;transition:all .15s}
+  .tab.active{background:#FFF;color:#1D3762;font-weight:800;box-shadow:0 2px 6px rgba(29,55,98,.08)}
+
+  /* 콘텐츠 영역 */
+  .content{padding:0 16px 32px}
+
+  /* 공통 카드 */
+  .card{background:#FFF;border-radius:18px;padding:18px;margin-bottom:12px;border:1px solid var(--line)}
+  .card-title{font-size:14px;font-weight:800;color:var(--ink);letter-spacing:-.3px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+
+  /* 🔵 블루 Hero (이거 유지) */
+  .blue-hero{background:linear-gradient(135deg,#1E3A8A 0%,#3D63D9 100%);color:#FFF;border-radius:18px;padding:18px;margin-bottom:14px;border:none}
+  .bh-tag{font-size:10.5px;font-weight:800;color:#DAE7FF;letter-spacing:.3px;margin-bottom:6px}
+  .bh-title{font-size:18px;font-weight:900;letter-spacing:-.4px;line-height:1.4;margin-bottom:8px}
+  .bh-title b{color:#FBBF24;font-weight:900}
+  .bh-sub{font-size:12px;color:rgba(255,255,255,.78);font-weight:600;letter-spacing:-.2px;line-height:1.5}
+
+  /* 원형 프로그레스 */
+  .ring-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px}
+  .ring-item{text-align:center}
+  .ring-svg{width:100%;max-width:80px;margin:0 auto;display:block}
+  .ring-label{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:-.2px;margin-top:6px}
+  .ring-val{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:2px}
+
+  /* 토글 (주/월) */
+  .sub-toggle{display:inline-flex;background:#F1F5F9;border-radius:99px;padding:3px}
+  .sub-toggle button{background:transparent;border:none;padding:5px 12px;font-size:11px;font-weight:700;color:#64748B;cursor:pointer;border-radius:99px;font-family:inherit;letter-spacing:-.2px}
+  .sub-toggle button.active{background:#FFF;color:var(--ink);font-weight:800;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+  /* 부족 영양소 리스트 */
+  .def-list-head{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:14px;line-height:1.5}
+  .def-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #F1F5F9}
+  .def-row:last-child{border-bottom:none}
+  .def-name{font-size:13.5px;font-weight:800;color:var(--ink);letter-spacing:-.3px;flex-shrink:0;min-width:60px}
+  .def-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;flex-shrink:0;letter-spacing:-.2px}
+  .def-foods{flex:1;min-width:0;font-size:12px;color:#475569;font-weight:600;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .def-arrow{font-size:16px;color:#CBD5E1;font-weight:400;flex-shrink:0}
+
+  /* 실천 가이드 */
+  .guide-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #F1F5F9}
+  .guide-row:last-child{border-bottom:none}
+  .guide-num{width:28px;height:28px;background:#EFF4FF;color:var(--ink2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;letter-spacing:-.3px}
+  .guide-text{flex:1;min-width:0;font-size:13px;color:var(--ink);font-weight:700;letter-spacing:-.3px;line-height:1.4}
+  .guide-cta{background:#F1F5F9;color:#334155;border:none;border-radius:10px;padding:6px 11px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;display:flex;align-items:center;gap:3px}
+
+  /* CTA 하단 */
+  .big-cta{width:100%;background:#1D3762;color:#FFF;border:none;border-radius:14px;padding:16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(29,55,98,.25)}
+
+  h2{font-size:16px;color:#1D3762;margin:30px 0 14px;padding:0 4px;letter-spacing:-.4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="guide">
+  <h3>v3 · 영양 분석 통합 페이지</h3>
+  3탭 (오늘 / 이번 주 / 이번 달) · 상단은 <b>블루 Hero (내가 만든 것)</b> 유지 · 가운데 원형 프로그레스 · 아래 부족 영양소 리스트 + 실천 가이드.
+</div>
+
+<h2>탭 1 · 이번 주 요약 (주간 리포트)</h2>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>LTE 71%</span></div>
+
+  <div class="page-header">
+    <button class="page-back">‹</button>
+    <div class="page-title">영양 분석</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab">오늘 먹은 음식</button>
+    <button class="tab active">이번 주 요약</button>
+    <button class="tab">이번 달 요약</button>
+  </div>
+
+  <div class="content">
+
+    <!-- 🔵 블루 Hero (내 디자인 유지) -->
+    <div class="blue-hero">
+      <div class="bh-tag">이번 주 식단 분석</div>
+      <div class="bh-title">단백질은 잘 챙겼지만,<br><b>채소·식이섬유</b>가 조금 부족해요.</div>
+      <div class="bh-sub">지금처럼 유지하고, 부족한 영양소를 채워보세요.</div>
+    </div>
+
+    <!-- 주요 영양소 섭취율 -->
+    <div class="card">
+      <div class="card-title">
+        <span>주요 영양소 섭취율</span>
+        <div class="sub-toggle">
+          <button class="active">이번 주</button>
+          <button>이번 달</button>
+        </div>
+      </div>
+
+      <div class="ring-grid">
+        <!-- 탄수화물 -->
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#22C55E" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="48" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="18" font-weight="900" fill="#22C55E" letter-spacing="-.5">80%</text>
+          </svg>
+          <div class="ring-label">탄수화물</div>
+          <div class="ring-val">220g / 275g</div>
+        </div>
+        <!-- 단백질 -->
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#22C55E" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="19" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="18" font-weight="900" fill="#22C55E" letter-spacing="-.5">92%</text>
+          </svg>
+          <div class="ring-label">단백질</div>
+          <div class="ring-val">68g / 74g</div>
+        </div>
+        <!-- 지방 -->
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F59E0B" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="100" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="18" font-weight="900" fill="#F59E0B" letter-spacing="-.5">58%</text>
+          </svg>
+          <div class="ring-label">지방</div>
+          <div class="ring-val">38g / 65g</div>
+        </div>
+        <!-- 식이섬유 -->
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#EF4444" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="139" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="18" font-weight="900" fill="#EF4444" letter-spacing="-.5">42%</text>
+          </svg>
+          <div class="ring-label">식이섬유</div>
+          <div class="ring-val">12g / 28g</div>
+        </div>
+        <!-- 비타민 -->
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F59E0B" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="108" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="18" font-weight="900" fill="#F59E0B" letter-spacing="-.5">55%</text>
+          </svg>
+          <div class="ring-label">비타민</div>
+          <div class="ring-val">5종 / 9종</div>
+        </div>
+        <!-- 미네랄 -->
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#22C55E" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="72" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="18" font-weight="900" fill="#22C55E" letter-spacing="-.5">70%</text>
+          </svg>
+          <div class="ring-label">미네랄</div>
+          <div class="ring-val">7종 / 10종</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 부족한 영양소 리스트 -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:4px">부족한 영양소</div>
+      <div class="def-list-head">지금은 아래 영양소를 조금 더 챙겨보세요.</div>
+      <div>
+        <div class="def-row">
+          <span class="def-name">식이섬유</span>
+          <span class="def-badge" style="background:#FEE2E2;color:#B91C1C">42%</span>
+          <span class="def-foods">채소, 과일, 통곡물, 콩류</span>
+          <span class="def-arrow">›</span>
+        </div>
+        <div class="def-row">
+          <span class="def-name">비타민 A</span>
+          <span class="def-badge" style="background:#FEF3C7;color:#B45309">55%</span>
+          <span class="def-foods">당근, 시금치, 달걀, 단호박</span>
+          <span class="def-arrow">›</span>
+        </div>
+        <div class="def-row">
+          <span class="def-name">칼슘</span>
+          <span class="def-badge" style="background:#FEF3C7;color:#B45309">60%</span>
+          <span class="def-foods">우유, 요거트, 두부, 멸치</span>
+          <span class="def-arrow">›</span>
+        </div>
+        <div class="def-row">
+          <span class="def-name">오메가3</span>
+          <span class="def-badge" style="background:#FEF3C7;color:#B45309">65%</span>
+          <span class="def-foods">연어, 고등어, 견과류, 들기름</span>
+          <span class="def-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 실천 가이드 -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:4px">이번 주 실천 가이드</div>
+      <div class="def-list-head">아래 3가지만 실천해도 균형 잡힌 식단에 가까워져요.</div>
+      <div>
+        <div class="guide-row">
+          <div class="guide-num">1</div>
+          <div class="guide-text">채소를 하루 2번 이상 먹기</div>
+          <button class="guide-cta">채소 추천 ›</button>
+        </div>
+        <div class="guide-row">
+          <div class="guide-num">2</div>
+          <div class="guide-text">칼슘이 풍부한 식품 1가지 추가하기</div>
+          <button class="guide-cta">칼슘 음식 ›</button>
+        </div>
+        <div class="guide-row">
+          <div class="guide-num">3</div>
+          <div class="guide-text">등푸른 생선이나 견과류 주 2회 먹기</div>
+          <button class="guide-cta">오메가3 ›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <button class="big-cta">다음 끼니 추천 받기 ›</button>
+
+  </div>
+</div>
+
+
+<h2>탭 2 · 오늘 먹은 음식 (단일 식사 분석)</h2>
+<div class="phone">
+  <div class="status"><span>9:41</span><span>LTE 71%</span></div>
+
+  <div class="page-header">
+    <button class="page-back">‹</button>
+    <div class="page-title">영양 분석</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active">오늘 먹은 음식</button>
+    <button class="tab">이번 주 요약</button>
+    <button class="tab">이번 달 요약</button>
+  </div>
+
+  <div class="content">
+
+    <!-- 🔵 블루 Hero (오늘) -->
+    <div class="blue-hero">
+      <div class="bh-tag">오늘 점심 · 분석 완료</div>
+      <div class="bh-title">소고기구이 외 3가지</div>
+      <div style="font-size:12.5px;color:rgba(255,255,255,.85);margin:5px 0 12px;font-weight:600">620 kcal</div>
+      <div style="padding:11px 13px;background:rgba(255,255,255,.12);border-radius:10px">
+        <div style="font-size:13.5px;font-weight:800;letter-spacing:-.3px;line-height:1.5">
+          단백질은 괜찮고,<br><b style="color:#FBBF24">비타민C · 칼슘</b> 보충이 필요해요.
+        </div>
+      </div>
+    </div>
+
+    <!-- 이 끼니 영양소 (1끼 기준) -->
+    <div class="card">
+      <div class="card-title">
+        <span>이 끼니 영양소</span>
+        <span style="font-size:10px;color:var(--muted);font-weight:700;background:#F1F5F9;padding:3px 8px;border-radius:99px">1끼 권장 대비</span>
+      </div>
+
+      <div class="ring-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F59E0B" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="155" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="17" font-weight="900" fill="#F59E0B" letter-spacing="-.5">35%</text>
+          </svg>
+          <div class="ring-label" style="font-size:11.5px">탄수화물</div>
+          <div class="ring-val" style="font-size:9.5px">45/130g</div>
+        </div>
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#22C55E" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="60" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="17" font-weight="900" fill="#22C55E" letter-spacing="-.5">75%</text>
+          </svg>
+          <div class="ring-label" style="font-size:11.5px">단백질</div>
+          <div class="ring-val" style="font-size:9.5px">15/20g</div>
+        </div>
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F59E0B" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="108" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="17" font-weight="900" fill="#F59E0B" letter-spacing="-.5">55%</text>
+          </svg>
+          <div class="ring-label" style="font-size:11.5px">지방</div>
+          <div class="ring-val" style="font-size:9.5px">12/22g</div>
+        </div>
+        <div class="ring-item">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#F1F5F9" stroke-width="7"/>
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#EF4444" stroke-width="7"
+                    stroke-dasharray="239" stroke-dashoffset="167" stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+            <text x="45" y="52" text-anchor="middle" font-size="17" font-weight="900" fill="#EF4444" letter-spacing="-.5">30%</text>
+          </svg>
+          <div class="ring-label" style="font-size:11.5px">식이섬유</div>
+          <div class="ring-val" style="font-size:9.5px">2.4/8g</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 이 끼니로 부족한 영양소 -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:4px">이 끼니로 부족한 영양소</div>
+      <div class="def-list-head">다음 끼엔 아래 영양소가 많은 음식을 추가해봐요.</div>
+      <div>
+        <div class="def-row">
+          <span class="def-name">비타민 C</span>
+          <span class="def-badge" style="background:#FEE2E2;color:#B91C1C">10%</span>
+          <span class="def-foods">키위, 파프리카, 딸기</span>
+          <span class="def-arrow">›</span>
+        </div>
+        <div class="def-row">
+          <span class="def-name">칼슘</span>
+          <span class="def-badge" style="background:#FEE2E2;color:#B91C1C">0%</span>
+          <span class="def-foods">우유, 요거트, 두부</span>
+          <span class="def-arrow">›</span>
+        </div>
+        <div class="def-row">
+          <span class="def-name">식이섬유</span>
+          <span class="def-badge" style="background:#FEF3C7;color:#B45309">30%</span>
+          <span class="def-foods">브로콜리, 사과, 고구마</span>
+          <span class="def-arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 다음 끼 가이드 -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:4px">다음 끼니 가이드</div>
+      <div class="def-list-head">부족한 영양을 채우는 추천 조합이에요.</div>
+      <div>
+        <div class="guide-row">
+          <div class="guide-num">1</div>
+          <div class="guide-text">연어구이로 비타민D·오메가3 보충</div>
+          <button class="guide-cta">자세히 ›</button>
+        </div>
+        <div class="guide-row">
+          <div class="guide-num">2</div>
+          <div class="guide-text">브로콜리 샐러드로 섬유·비타민C</div>
+          <button class="guide-cta">자세히 ›</button>
+        </div>
+        <div class="guide-row">
+          <div class="guide-num">3</div>
+          <div class="guide-text">그릭요거트로 칼슘·단백질</div>
+          <button class="guide-cta">자세히 ›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <button class="big-cta">다음 끼니 추천 받기 ›</button>
+
+  </div>
+</div>
+
+
+<div class="guide" style="margin-top:20px">
+  <h3>v3 디자인 핵심</h3>
+  • <b>원형 프로그레스</b>로 영양소 섭취율 (한눈에 인식)<br>
+  • <b>블루 Hero 유지</b> · 핵심 메시지 전달<br>
+  • <b>3탭 통합</b> · 오늘 / 주 / 달 한 화면<br>
+  • <b>부족 영양소 리스트</b> · 깔끔한 1줄 (영양소 + % + 음식)<br>
+  • <b>실천 가이드 1-2-3</b> · 체크하기 쉬운 액션 아이템<br>
+  • <b>하단 CTA</b> · "다음 끼니 추천 받기"
+</div>
+
+</div>
+</body>
+</html>
