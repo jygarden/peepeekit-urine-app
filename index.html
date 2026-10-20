@@ -5316,9 +5316,52 @@ window.appIcon = function(name, size){
     <div class="settings-divider"></div>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openProfileManager()">프로필 관리 (가족·반려동물)</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();goAllergyProfile()" style="background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border-color:#FCA5A5;color:#991B1B;font-weight:900">🚨 내 알레르기 관리</button>
+    <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openCoachShareSheet()" style="background:linear-gradient(135deg,#DBEAFE,#EEF2FF);border-color:#93C5FD;color:#1E40AF;font-weight:900">🏋️ 내 PT에게 공유하기</button>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
+  </div>
+</div>
+
+<!-- 🏋️ PT 코치 모드 · 공유 코드 바텀시트 -->
+<div id="coachShareSheet" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9800;align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeCoachShareSheet()">
+  <div style="background:#FFF;width:100%;max-width:500px;border-radius:20px 20px 0 0;padding:22px 20px 32px;max-height:88vh;overflow-y:auto;animation:slideUp .25s ease-out">
+    <div style="width:40px;height:4px;background:#E5E7EB;border-radius:2px;margin:0 auto 16px"></div>
+    <h3 style="margin:0 0 4px;font-size:18px;font-weight:900;color:#0F172A">🏋️ 내 PT에게 공유</h3>
+    <div style="font-size:12.5px;color:#64748B;margin-bottom:18px;line-height:1.5">공유 코드를 PT에게 전달하면, 그 PT만 내 식단을 볼 수 있어요. 언제든 끊을 수 있어요.</div>
+
+    <!-- 현재 활성 코드 -->
+    <div id="coachShareActiveBox" style="display:none;background:linear-gradient(135deg,#EFF6FF,#F0F9FF);border:1.5px solid #93C5FD;border-radius:14px;padding:16px;margin-bottom:14px">
+      <div style="font-size:11px;color:#1E40AF;font-weight:800;letter-spacing:.3px;margin-bottom:6px">내 공유 코드</div>
+      <div id="coachShareCodeText" style="font-size:28px;font-weight:900;color:#1E3A8A;letter-spacing:2px;font-family:ui-monospace,SFMono-Regular,monospace;margin-bottom:8px">HLT-------</div>
+      <div id="coachShareExpiry" style="font-size:11px;color:#64748B;margin-bottom:12px">유효기간 로딩 중…</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="copyCoachShareCode()" style="flex:1;background:#2563EB;color:#FFF;border:0;padding:11px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">📋 복사</button>
+        <button onclick="shareCoachShareCode()" style="flex:1;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;padding:11px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">💬 공유</button>
+      </div>
+    </div>
+
+    <!-- 코드 없을 때 발급 버튼 -->
+    <div id="coachShareIssueBox" style="display:none;margin-bottom:14px">
+      <button id="coachShareIssueBtn" onclick="issueCoachShareCode()" style="width:100%;background:linear-gradient(135deg,#2563EB,#1E40AF);color:#FFF;border:0;padding:14px;border-radius:12px;font-weight:900;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(37,99,235,.3)">+ 공유 코드 발급 (유효 7일)</button>
+    </div>
+
+    <!-- 코드 재발급 (활성 코드 있을 때) -->
+    <div id="coachShareReissueBox" style="display:none;margin-bottom:14px">
+      <button onclick="if(confirm('새 코드를 발급하면 기존 코드는 즉시 무효화됩니다. 계속할까요?'))issueCoachShareCode()" style="width:100%;background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;padding:10px;border-radius:10px;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">🔄 새 코드 발급</button>
+    </div>
+
+    <!-- 내 PT 목록 -->
+    <div style="margin-top:18px">
+      <div style="font-size:12px;color:#334155;font-weight:800;margin-bottom:8px">👥 등록된 PT (<span id="coachListCount">0</span>명)</div>
+      <div id="coachShareList" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div id="coachShareListEmpty" style="padding:20px 16px;background:#F8FAFC;border-radius:10px;color:#94A3B8;font-size:12px;text-align:center">아직 등록된 PT가 없어요.<br/>공유 코드를 PT에게 전달하면 여기 나타나요.</div>
+    </div>
+
+    <!-- 전체 해제 -->
+    <button onclick="if(confirm('모든 PT 접근을 해제하고 공유 코드를 폐기할까요?'))revokeAllCoaches()" style="width:100%;margin-top:18px;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;padding:10px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🚫 모든 공유 해제 + 코드 폐기</button>
+
+    <button onclick="closeCoachShareSheet()" style="width:100%;margin-top:10px;background:#FFF;color:#64748B;border:1px solid #E5E7EB;padding:11px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">닫기</button>
   </div>
 </div>
 
@@ -20017,6 +20060,37 @@ function saveFoodHistory(result) {
     }
   } catch(e) { console.warn('[SB] saveFood:', e); }
 
+  // 🏋️ PT 코치 모드 · meal_logs 테이블에도 저장 (PT가 열람하는 소스)
+  // 공유 코드를 PT에게 넘긴 이용자만 데이터가 노출됨 (coach_access 체크는 서버에서)
+  // 실패해도 로컬·food_records 저장은 영향 없음 (fire-and-forget)
+  try {
+    const n = result.nutrition || {};
+    fetch('/api/meal-log', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Id': getCurrentUserUuid()
+      },
+      body: JSON.stringify({
+        foods: result.foods || [],
+        totals: {
+          kcal: result.totalCalories || n.kcal || null,
+          protein_g: n.protein_g || null,
+          carbs_g: n.carbs_g || null,
+          fat_g: n.fat_g || null,
+          sodium_mg: n.sodium_mg || null,
+          fiber_g: n.fiber_g || null,
+          sugar_g: n.sugar_g || null,
+          balance_score: result.balanceScore || null
+        },
+        meal_time: selectedMealTime,
+        user_memo: foodUserMemo || null,
+        store_tag: result.storeTag || null,
+        evidence: result.evidence || null
+      })
+    }).catch(e => console.warn('[meal-log] fire-and-forget:', e.message));
+  } catch(e) { console.warn('[meal-log]', e); }
+
   try {
     const key = 'foodHistoryV1';
     const history = JSON.parse(localStorage.getItem(key) || '[]');
@@ -21899,6 +21973,137 @@ function getCurrentUserUuid() {
     localStorage.setItem('userUuid', uuid);
   }
   return uuid;
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🏋️ PT 코치 모드 · 공유 코드 바텀시트
+// ════════════════════════════════════════════════════════════════
+function openCoachShareSheet() {
+  const s = document.getElementById('coachShareSheet');
+  if (!s) return;
+  s.style.display = 'flex';
+  loadCoachShareState();
+}
+function closeCoachShareSheet() {
+  const s = document.getElementById('coachShareSheet');
+  if (s) s.style.display = 'none';
+}
+async function _coachApi(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Device-Id': getCurrentUserUuid() }
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  const t = await r.text();
+  let j; try { j = JSON.parse(t); } catch(e) { j = { error: t.slice(0,120) }; }
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+async function loadCoachShareState() {
+  try {
+    const [codeRes, coachesRes] = await Promise.all([
+      _coachApi('GET', '/api/user-share-code'),
+      _coachApi('GET', '/api/user-coaches')
+    ]);
+    _renderCoachShareBox(codeRes.active);
+    _renderCoachList(coachesRes.coaches || []);
+  } catch(e) {
+    alert('⚠️ 불러오기 실패: ' + e.message);
+  }
+}
+function _renderCoachShareBox(active) {
+  const activeBox = document.getElementById('coachShareActiveBox');
+  const issueBox = document.getElementById('coachShareIssueBox');
+  const reissueBox = document.getElementById('coachShareReissueBox');
+  if (!activeBox || !issueBox || !reissueBox) return;
+  if (active && active.code) {
+    activeBox.style.display = 'block';
+    issueBox.style.display = 'none';
+    reissueBox.style.display = 'block';
+    document.getElementById('coachShareCodeText').textContent = active.code;
+    const expMs = new Date(active.expires_at).getTime();
+    const days = Math.max(0, Math.ceil((expMs - Date.now()) / 86400000));
+    document.getElementById('coachShareExpiry').textContent = `유효기간 D-${days} · ${new Date(active.expires_at).toLocaleDateString('ko-KR')} 만료`;
+  } else {
+    activeBox.style.display = 'none';
+    reissueBox.style.display = 'none';
+    issueBox.style.display = 'block';
+  }
+}
+function _renderCoachList(coaches) {
+  const list = document.getElementById('coachShareList');
+  const empty = document.getElementById('coachShareListEmpty');
+  const count = document.getElementById('coachListCount');
+  if (count) count.textContent = coaches.length;
+  if (!list || !empty) return;
+  if (!coaches.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = coaches.map(c => {
+    const t = c.trainer || {};
+    const days = Math.floor((Date.now() - new Date(c.granted_at).getTime()) / 86400000);
+    const name = (t.name || '트레이너').replace(/[<>]/g,'');
+    const gym = t.gym_name ? ` · ${t.gym_name.replace(/[<>]/g,'')}` : '';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:800;font-size:13px;color:#0F172A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}${gym}</div>
+        <div style="font-size:10.5px;color:#64748B;margin-top:2px">등록 D+${days}</div>
+      </div>
+      <button onclick="revokeOneCoach('${t.id}')" style="background:#FFF;border:1px solid #FCA5A5;color:#B91C1C;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">해제</button>
+    </div>`;
+  }).join('');
+}
+async function issueCoachShareCode() {
+  const btn = document.getElementById('coachShareIssueBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '발급 중…'; }
+  try {
+    const r = await _coachApi('POST', '/api/user-share-code');
+    _renderCoachShareBox(r);
+    if (typeof showPointToast === 'function') showPointToast('✅ 공유 코드 발급됨');
+  } catch(e) {
+    alert('⚠️ 발급 실패: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '+ 공유 코드 발급 (유효 7일)'; }
+  }
+}
+async function copyCoachShareCode() {
+  const code = document.getElementById('coachShareCodeText')?.textContent?.trim();
+  if (!code || code.indexOf('-') < 0) return;
+  try {
+    await navigator.clipboard.writeText(code);
+    if (typeof showPointToast === 'function') showPointToast('📋 코드 복사됨');
+    else alert('복사됨: ' + code);
+  } catch(e) { alert('복사 실패 · 수동 선택해주세요'); }
+}
+async function shareCoachShareCode() {
+  const code = document.getElementById('coachShareCodeText')?.textContent?.trim();
+  if (!code) return;
+  const msg = `[건강어때] 제 식단 공유 코드예요: ${code}\n\n코치 로그인 후 "회원 추가"에서 입력하시면 제 식단을 볼 수 있어요. (유효 7일)`;
+  if (navigator.share) {
+    try { await navigator.share({ title: '건강어때 PT 공유 코드', text: msg }); return; } catch(e) {}
+  }
+  await navigator.clipboard.writeText(msg).catch(()=>{});
+  alert('메시지가 복사됐어요. 카톡/문자로 붙여넣어 보내세요:\n\n' + msg);
+}
+async function revokeOneCoach(trainerId) {
+  if (!trainerId) return;
+  if (!confirm('이 PT의 접근을 해제할까요? 즉시 내 식단을 볼 수 없게 됩니다.')) return;
+  try {
+    await _coachApi('DELETE', `/api/user-coaches?trainer_id=${encodeURIComponent(trainerId)}`);
+    await loadCoachShareState();
+    if (typeof showPointToast === 'function') showPointToast('✅ 해제됨');
+  } catch(e) { alert('⚠️ 해제 실패: ' + e.message); }
+}
+async function revokeAllCoaches() {
+  try {
+    const r = await _coachApi('DELETE', '/api/user-share-code');
+    await loadCoachShareState();
+    alert(`✅ ${r.revoked_coaches || 0}명의 PT 접근이 해제되고 공유 코드가 폐기됐어요.`);
+  } catch(e) { alert('⚠️ 해제 실패: ' + e.message); }
 }
 
 // 현재 사용자 프로필 가져오기 (통합)
