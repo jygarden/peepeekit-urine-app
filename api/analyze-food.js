@@ -84,8 +84,47 @@ async function fetchCrowdHints(brand, foodName) {
   }
 }
 
-// ═══ 네이버 블로그 검색 · 브랜드·메뉴 힌트 활용 ═══
+// ═══ 카카오 블로그 검색 · 메뉴 힌트 추출용 (주력) ═══
+// 2025년 네이버가 developers.naver.com에서 검색 API를 뺐음 → 카카오로 대체
+// 기존 KAKAO_REST_API_KEY 그대로 사용 (추가 가입 불필요)
+async function fetchKakaoBlogHints(query) {
+  const key = process.env.KAKAO_REST_API_KEY;
+  if (!query || !key) return null;
+  try {
+    const url = `https://dapi.kakao.com/v2/search/blog?query=${encodeURIComponent(query)}&size=10&sort=accuracy`;
+    const r = await fetch(url, {
+      headers: { 'Authorization': `KakaoAK ${key}` }
+    });
+    if (!r.ok) {
+      console.error('[kakao-blog]', r.status, (await r.text()).slice(0, 200));
+      return null;
+    }
+    const data = await r.json();
+    if (!data.documents || !data.documents.length) return null;
+    // 최근 2년 필터 · HTML 태그 제거 · 상위 10개
+    const twoYearsAgo = Number(new Date().getFullYear()) - 2;
+    return data.documents
+      .filter(it => {
+        const y = it.datetime ? Number(String(it.datetime).slice(0, 4)) : null;
+        return !y || y >= twoYearsAgo;
+      })
+      .map(it => ({
+        t: (it.title || '').replace(/<[^>]+>/g, '').slice(0, 80),
+        d: (it.contents || '').replace(/<[^>]+>/g, '').slice(0, 220)
+      }));
+  } catch (e) {
+    console.error('kakao blog hint fetch fail', e.message);
+    return null;
+  }
+}
+
+// ═══ 네이버 블로그 검색 (폴백 · developers.naver.com 복구 시 자동 사용) ═══
 async function fetchNaverBlogHints(query) {
+  // 1차: 카카오 블로그 검색 (주력, 2025년 기준)
+  const kakaoResult = await fetchKakaoBlogHints(query);
+  if (kakaoResult && kakaoResult.length) return kakaoResult;
+
+  // 2차 폴백: 네이버 (키 있을 때만 · 지금은 안 쓰이지만 유지)
   const keyId = process.env.NCP_API_KEY_ID;
   const key = process.env.NCP_API_KEY;
   const navId = process.env.NAVER_CLIENT_ID;
@@ -105,11 +144,9 @@ async function fetchNaverBlogHints(query) {
     if (!r.ok) return null;
     const data = await r.json();
     if (!data.items || !data.items.length) return null;
-    // HTML 태그 제거 · 최근 2년 필터 · 상위 5개
     const twoYearsAgo = Number(new Date().getFullYear()) - 2;
     return data.items
       .filter(it => {
-        // postdate: YYYYMMDD 형식
         const y = it.postdate ? Number(String(it.postdate).slice(0, 4)) : null;
         return !y || y >= twoYearsAgo;
       })
