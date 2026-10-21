@@ -161,13 +161,11 @@ async function fetchNaverBlogHints(query) {
 }
 
 // ═══ 블로그 후기에서 실제 메뉴명 추출 (매장별 메뉴 리스트) ═══
-// 음식 suffix 패턴 매칭으로 메뉴 이름 후보 뽑기
-function extractMenuCandidates(hints) {
+// 음식 suffix 패턴 매칭 + 매장 카테고리 교차 검증
+function extractMenuCandidates(hints, store) {
   if (!hints || !hints.length) return [];
   const menuMap = {};
-  // 한식·중식·일식·양식 공통 음식 suffix (뒤에 붙으면 메뉴일 확률 높음)
   const foodSuffixes = /(찌개|국밥|국수|냉면|짜장면|짬뽕|탕수육|우동|라면|파스타|피자|샐러드|버거|샌드위치|스테이크|리조또|타코|부리또|초밥|회덮밥|비빔밥|볶음밥|덮밥|도시락|한정식|정식|세트|콤보|메뉴|도리아|오므라이스|규동|가츠동|돈까스|포케|보울|플레이트|딤섬|쌀국수|마라탕|훠궈|족발|보쌈|곱창|막창|닭갈비|불고기|제육|삼겹살|목살|갈비|구이|볶음|조림|튀김|전|회|탕|죽|떡볶이|순대|어묵|김밥|토스트)/;
-  // 2-6자 음식명 추출 패턴
   const foodPattern = /([가-힣A-Za-z0-9&\s]{2,15}?(?:찌개|국밥|국수|냉면|짜장면|짬뽕|탕수육|우동|라면|파스타|피자|샐러드|버거|샌드위치|스테이크|리조또|타코|부리또|초밥|회덮밥|비빔밥|볶음밥|덮밥|도시락|정식|세트|콤보|도리아|오므라이스|규동|가츠동|돈까스|포케|보울|플레이트|딤섬|쌀국수|마라탕|훠궈|족발|보쌈|닭갈비|불고기|제육|삼겹살|목살|갈비|구이|볶음|조림|튀김|회|탕|죽|떡볶이|순대|어묵|김밥|토스트))/g;
 
   hints.forEach(h => {
@@ -180,12 +178,52 @@ function extractMenuCandidates(hints) {
       }
     });
   });
-  // 2회 이상 언급된 메뉴 (신뢰도) · 상위 8개
-  return Object.entries(menuMap)
-    .filter(([n, c]) => c >= 1)  // 1회 이상 (리뷰 적을 때 대비)
+
+  // 🎯 매장 카테고리로 교차 검증 (매장이 안 파는 음식 거절)
+  const cat = ((store && store.category) || '').toLowerCase();
+  const title = ((store && store.title) || '').toLowerCase();
+  const combinedTag = cat + ' ' + title;
+
+  // 카테고리 → 허용 음식 suffix 매핑
+  // (매장이 '갈매기살 전문점'이면 '순대국' 같은 다른 카테고리 음식 제외)
+  const categoryRules = [
+    { keywords:['갈매기','삼겹살','목살','항정살','구이','고기구이','숯불','화로','그릴','바베큐','스테이크'],
+      allow: /(갈매기|삼겹|목살|항정|구이|숯불|불고기|제육|갈비|스테이크|고기|냉면|된장|찌개|볶음|무침|쌈)/ },
+    { keywords:['닭','치킨','통닭','후라이드'],
+      allow: /(치킨|닭|후라이드|양념|파닭|순살|날개|다리|무|콜라)/ },
+    { keywords:['국밥','국수','칼국수','설렁탕','곰탕','해장','순대'],
+      allow: /(국밥|국수|칼국수|설렁|곰탕|해장|순대|탕|밥|찌개|볶음)/ },
+    { keywords:['분식','떡볶이','김밥','토스트','만두'],
+      allow: /(떡볶이|김밥|라면|우동|만두|튀김|순대|어묵|토스트|돈까스|오므라이스)/ },
+    { keywords:['카페','베이커리','디저트','브런치'],
+      allow: /(토스트|샌드위치|샐러드|파스타|피자|리조또|오믈렛|팬케이크|와플|브런치|스콘|머핀|케이크)/ },
+    { keywords:['중식','차이니즈','중화'],
+      allow: /(짜장면|짬뽕|탕수육|볶음밥|마라탕|훠궈|딤섬|양장피|기스면|우동)/ },
+    { keywords:['일식','스시','초밥','라멘','우동','돈카츠','돈까스','돈부리'],
+      allow: /(초밥|회덮밥|라멘|우동|규동|가츠동|돈까스|돈부리|사시미|회|튀김|덮밥)/ },
+    { keywords:['양식','파스타','피자','스테이크','햄버거','버거'],
+      allow: /(파스타|피자|스테이크|리조또|샐러드|버거|샌드위치|타코|부리또|스튜)/ },
+    { keywords:['회','횟집','사시미','조개','해물','해산물'],
+      allow: /(회|초밥|회덮밥|탕|조개|해물|조림|구이|튀김)/ },
+    { keywords:['포케','샐러드','건강'],
+      allow: /(포케|샐러드|보울|플레이트|샌드위치|도시락|덮밥|쌈)/ }
+  ];
+
+  // 매장 카테고리에 매칭되는 룰 찾기
+  const matchedRule = categoryRules.find(r =>
+    r.keywords.some(kw => combinedTag.includes(kw))
+  );
+
+  const filtered = Object.entries(menuMap)
+    .filter(([name, count]) => {
+      if (!matchedRule) return true;  // 룰 못 찾으면 필터 안 함 (허용)
+      return matchedRule.allow.test(name);
+    })
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([name, count]) => ({ name, count }));
+
+  return filtered;
 }
 
 // ═══ 블로그 리뷰에서 영양 주장 크로스체크 ═══
@@ -278,7 +316,7 @@ async function runDetect({ apiKey, imageB64, target, userMemo, store, res }) {
   const claims = extractNutritionClaims(naverHints);
   // 🎯 메뉴 후보 추출 (일반 후기 + 메뉴 전용 쿼리 결과 통합)
   const combinedHints = [...(naverHints || []), ...(menuHints || [])];
-  const menuCandidates = store ? extractMenuCandidates(combinedHints) : [];
+  const menuCandidates = store ? extractMenuCandidates(combinedHints, store) : [];
   const evidence = buildEvidence({ naverHints, crowdHints, storeInfo: store, claims, menuCandidates });
 
   const prompt = target === 'pet' ? buildPetFoodDetectPrompt() : buildHumanFoodDetectPrompt(userMemo, naverHints, crowdHints, store, claims, menuCandidates);
