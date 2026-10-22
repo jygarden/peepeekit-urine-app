@@ -135,7 +135,10 @@
     <!-- 회원 상세 -->
     <div id="viewMember" style="display:none">
       <button class="back-btn" onclick="showDashboard()">← 회원 목록</button>
-      <h2 id="memberHeader">회원</h2>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <h2 id="memberHeader" style="margin:0">회원</h2>
+        <button onclick="renameMember()" title="별명 수정" style="background:#F1F5F9;border:0;color:#64748B;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">✏️ 별명</button>
+      </div>
       <div class="sub" id="memberMeta"></div>
 
       <div class="card">
@@ -334,6 +337,17 @@ function _renderMeal(m){
       <button class="btn btn-sm" onclick="doAddMealMemo('${m.id}')">저장</button>
     </div>
   </div>`;
+}
+
+async function renameMember(){
+  if (!currentMemberId) return;
+  const cur = $('memberHeader').textContent;
+  const name = prompt(`"${cur}"의 별명을 입력하세요 (최대 40자):\n\n빈 칸으로 두면 이용자 닉네임으로 복귀`, cur);
+  if (name === null) return;
+  try{
+    const r = await api('PATCH','/api/coach-members',{user_id:currentMemberId,display_name:name});
+    $('memberHeader').textContent = r.display_name || cur;
+  }catch(e){ alert('⚠️ '+e.message); }
 }
 
 async function doAddMealMemo(mealId){

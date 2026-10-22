@@ -39,7 +39,12 @@ async function getOrCreateUser(sb, deviceId, opts = {}) {
   if (!deviceId || typeof deviceId !== 'string' || deviceId.length < 8 || deviceId.length > 100) {
     throw new Error('invalid device_id');
   }
-  const nickname = opts.nickname ? String(opts.nickname).trim().slice(0, 20) : null;
+  // 한글 nickname은 클라이언트가 encodeURIComponent로 보내므로 디코딩
+  let rawNick = opts.nickname ? String(opts.nickname) : null;
+  if (rawNick) {
+    try { rawNick = decodeURIComponent(rawNick); } catch(e) { /* 원문 유지 */ }
+  }
+  const nickname = rawNick ? rawNick.trim().slice(0, 20) : null;
   // 1차 조회
   let { data: user, error } = await sb
     .from('app_users')

@@ -12,8 +12,9 @@ async function handler(req, res) {
   applyCors(res);
   if (req.method === 'OPTIONS') return res.status(200).end();
   const sb = getServerClient();
-  if (req.method === 'GET')  return listMembers(sb, req, res);
-  if (req.method === 'POST') return addMember(sb, req, res);
+  if (req.method === 'GET')   return listMembers(sb, req, res);
+  if (req.method === 'POST')  return addMember(sb, req, res);
+  if (req.method === 'PATCH') return renameMember(sb, req, res);
   return sendError(res, 405, 'method not allowed');
 }
 
@@ -21,7 +22,7 @@ async function listMembers(sb, req, res) {
   const { data, error } = await sb
     .from('coach_access')
     .select(`
-      id, granted_at, scopes,
+      id, granted_at, scopes, display_name,
       user:app_users(id, nickname, last_active_at)
     `)
     .eq('trainer_id', req.trainer.trainerId)
@@ -29,7 +30,6 @@ async function listMembers(sb, req, res) {
     .order('granted_at', { ascending: false });
   if (error) return sendError(res, 500, error.message);
 
-  // 각 회원의 최근 식단 요약 (최근 7일 끼니 수 + 마지막 식단 시각)
   const members = await Promise.all((data || []).map(async row => {
     const u = row.user || {};
     const sevenAgo = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -46,7 +46,10 @@ async function listMembers(sb, req, res) {
       .limit(1);
     return {
       user_id: u.id,
-      nickname: u.nickname || '회원',
+      // 우선순위: PT 별명 > 이용자 닉네임 > '회원'
+      nickname: row.display_name || u.nickname || '회원',
+      user_nickname: u.nickname,          // 원본 (별명 입력 시 참고용)
+      display_name: row.display_name,
       last_active_at: u.last_active_at,
       granted_at: row.granted_at,
       scopes: row.scopes,
@@ -56,6 +59,28 @@ async function listMembers(sb, req, res) {
   }));
 
   return res.status(200).json({ members });
+}
+
+// PATCH /api/coach-members  { user_id, display_name }
+// PT가 특정 회원 별명 수정 (빈 문자열 → 삭제 = 이용자 닉네임으로 복귀)
+async function renameMember(sb, req, res) {
+  const { user_id, display_name } = req.body || {};
+  if (!user_id) return sendError(res, 400, 'user_id 필요');
+  const name = display_name == null ? null : String(display_name).trim().slice(0, 40);
+  if (name !== null && name.length === 0) {
+    // 빈 문자열 → null 처리
+  }
+  const patch = { display_name: (name && name.length) ? name : null };
+  const { data, error } = await sb
+    .from('coach_access')
+    .update(patch)
+    .eq('trainer_id', req.trainer.trainerId)
+    .eq('user_id', user_id)
+    .is('revoked_at', null)
+    .select('id, display_name');
+  if (error) return sendError(res, 500, error.message);
+  if (!data || !data.length) return sendError(res, 404, '회원 없음');
+  return res.status(200).json({ ok: true, display_name: data[0].display_name });
 }
 
 async function addMember(sb, req, res) {

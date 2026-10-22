@@ -20077,7 +20077,7 @@ function saveFoodHistory(result) {
     const n = result.nutrition || {};
     const _nick = (localStorage.getItem('userName') || '').trim();
     const _ml_headers = { 'Content-Type': 'application/json', 'X-Device-Id': getCurrentUserUuid() };
-    if (_nick) _ml_headers['X-Nickname'] = _nick;
+    if (_nick) _ml_headers['X-Nickname'] = encodeURIComponent(_nick);
     fetch('/api/meal-log', {
       method: 'POST',
       headers: _ml_headers,
@@ -22001,7 +22001,8 @@ function closeCoachShareSheet() {
 async function _coachApi(method, path, body) {
   const nick = (localStorage.getItem('userName') || '').trim();
   const headers = { 'Content-Type': 'application/json', 'X-Device-Id': getCurrentUserUuid() };
-  if (nick) headers['X-Nickname'] = nick;
+  // 한글 nickname은 HTTP 헤더에 못 들어가므로 URL 인코딩
+  if (nick) headers['X-Nickname'] = encodeURIComponent(nick);
   const opts = { method, headers };
   if (body !== undefined) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
