@@ -35,10 +35,11 @@ function getServerClient() {
  * device_id로 app_users 조회·생성 (idempotent)
  * @returns {object} { id, device_id, nickname, created_at, ... }
  */
-async function getOrCreateUser(sb, deviceId) {
+async function getOrCreateUser(sb, deviceId, opts = {}) {
   if (!deviceId || typeof deviceId !== 'string' || deviceId.length < 8 || deviceId.length > 100) {
     throw new Error('invalid device_id');
   }
+  const nickname = opts.nickname ? String(opts.nickname).trim().slice(0, 20) : null;
   // 1차 조회
   let { data: user, error } = await sb
     .from('app_users')
@@ -47,19 +48,20 @@ async function getOrCreateUser(sb, deviceId) {
     .maybeSingle();
   if (error) throw error;
   if (user) {
-    // 마지막 활동 갱신 (최근 1분 이상 지난 경우만)
+    // 닉네임 바뀌었거나 비어있으면 갱신 + last_active
+    const patch = { last_active_at: new Date().toISOString() };
+    if (nickname && nickname !== user.nickname) patch.nickname = nickname;
     const last = user.last_active_at ? new Date(user.last_active_at).getTime() : 0;
-    if (Date.now() - last > 60000) {
-      await sb.from('app_users')
-        .update({ last_active_at: new Date().toISOString() })
-        .eq('id', user.id);
+    if (patch.nickname || Date.now() - last > 60000) {
+      await sb.from('app_users').update(patch).eq('id', user.id);
+      if (patch.nickname) user.nickname = patch.nickname;
     }
     return user;
   }
   // 신규 생성
   const { data: created, error: insErr } = await sb
     .from('app_users')
-    .insert({ device_id: deviceId })
+    .insert({ device_id: deviceId, nickname })
     .select()
     .single();
   if (insErr) {

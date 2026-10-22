@@ -2598,6 +2598,16 @@ window.appIcon = function(name, size){
 
         </div>
 
+        <!-- ⑥ PT 코치 공유 · 설정보다 눈에 띄게 홈에 노출 -->
+        <div onclick="openCoachShareSheet()" style="background:linear-gradient(135deg,#EFF6FF,#F0F9FF);border:1.5px solid #BFDBFE;border-radius:22px;padding:16px 18px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:50px">
+          <div style="width:44px;height:44px;background:#DBEAFE;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px">🏋️</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12.5px;font-weight:800;color:#1E3A8A;letter-spacing:-.3px;line-height:1.3;margin-bottom:3px">내 PT에게 식단 공유하기</div>
+            <div style="font-size:11px;color:#3B5BA0;font-weight:600;line-height:1.5">공유 코드 발급 · PT가 원격으로 식단 확인</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2.5"><polyline points="9 6 15 12 9 18"/></svg>
+        </div>
+
         <!-- ⑤ 건강어때 스토어 · 헤드 + 4개 썸네일 스트립 -->
         <div style="background:#FFFFFF;border:1px solid #E2EAF9;border-radius:22px;padding:17px 18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(30,58,138,.04)">
           <a href="https://smartstore.naver.com/checkmyhealth" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:0;min-height:50px">
@@ -20065,12 +20075,12 @@ function saveFoodHistory(result) {
   // 실패해도 로컬·food_records 저장은 영향 없음 (fire-and-forget)
   try {
     const n = result.nutrition || {};
+    const _nick = (localStorage.getItem('userName') || '').trim();
+    const _ml_headers = { 'Content-Type': 'application/json', 'X-Device-Id': getCurrentUserUuid() };
+    if (_nick) _ml_headers['X-Nickname'] = _nick;
     fetch('/api/meal-log', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Device-Id': getCurrentUserUuid()
-      },
+      headers: _ml_headers,
       body: JSON.stringify({
         foods: result.foods || [],
         totals: {
@@ -21989,10 +21999,10 @@ function closeCoachShareSheet() {
   if (s) s.style.display = 'none';
 }
 async function _coachApi(method, path, body) {
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json', 'X-Device-Id': getCurrentUserUuid() }
-  };
+  const nick = (localStorage.getItem('userName') || '').trim();
+  const headers = { 'Content-Type': 'application/json', 'X-Device-Id': getCurrentUserUuid() };
+  if (nick) headers['X-Nickname'] = nick;
+  const opts = { method, headers };
   if (body !== undefined) opts.body = JSON.stringify(body);
   const r = await fetch(path, opts);
   const t = await r.text();

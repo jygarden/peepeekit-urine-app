@@ -21,10 +21,11 @@ module.exports = async function handler(req, res) {
   const deviceId = req.headers['x-device-id'];
   if (!deviceId) return sendError(res, 400, 'device_id 헤더 누락');
 
+  const nickname = req.headers['x-nickname'];
   let sb, user;
   try {
     sb = getServerClient();
-    user = await getOrCreateUser(sb, deviceId);
+    user = await getOrCreateUser(sb, deviceId, { nickname });
   } catch (e) {
     return sendError(res, 400, e.message);
   }
