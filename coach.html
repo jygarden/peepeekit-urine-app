@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
 <meta name="theme-color" content="#1E3A8A"/>
-<title>건강어때 PT 코치</title>
+<title>건강어때 · 식단 함께 보기</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
 <style>
@@ -63,9 +63,9 @@
 <!-- ═══ 로그인 / 가입 ═══ -->
 <div id="viewAuth" class="container" style="padding-top:60px">
   <div style="text-align:center;margin-bottom:28px">
-    <div style="font-size:30px;margin-bottom:6px">🏋️</div>
-    <h1>건강어때 PT 코치</h1>
-    <div class="sub">회원 식단을 원격으로 코칭하세요</div>
+    <div style="font-size:30px;margin-bottom:6px">🤝</div>
+    <h1>건강어때 · 식단 함께 보기</h1>
+    <div class="sub">친구·연인·가족·PT와 식단을 공유하고 코칭하세요</div>
   </div>
   <div class="card">
     <div class="tabs">
@@ -94,22 +94,22 @@
       <label class="label">비밀번호 (8자 이상)</label>
       <input id="signPassword" type="password" placeholder="영문·숫자 조합 추천" autocomplete="new-password"/>
       <div style="height:10px"></div>
-      <label class="label">소속 헬스장 (선택)</label>
-      <input id="signGym" type="text" placeholder="예: 스포애니 강남점" maxlength="60"/>
+      <label class="label">관계·소속 (선택)</label>
+      <input id="signGym" type="text" placeholder="예: 홍길동 PT · 친구 · 엄마" maxlength="60"/>
       <div style="height:14px"></div>
       <button class="btn" onclick="doSignup()">가입하고 시작</button>
       <div class="hint">* 가입 시 서비스 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다.</div>
     </div>
   </div>
   <div class="hint" style="text-align:center;margin-top:14px">
-    회원이 발급한 공유 코드로 접속하면<br/>그 회원의 식단을 원격 코칭할 수 있어요.
+    상대가 발급한 공유 코드를 입력하면<br/>그 사람 식단을 매일 확인하고 코멘트할 수 있어요.
   </div>
 </div>
 
 <!-- ═══ 메인 (로그인 후) ═══ -->
 <div id="viewApp" style="display:none">
   <div class="topbar">
-    <div class="logo">건강어때 <span>·</span> PT 코치</div>
+    <div class="logo">건강어때 <span>·</span> 식단 함께 보기</div>
     <div class="user">
       <span id="hdrName">—</span>
       <button class="logout" onclick="doLogout()">로그아웃</button>
@@ -117,11 +117,11 @@
   </div>
 
   <div class="container">
-    <!-- 대시보드 (회원 리스트) -->
+    <!-- 대시보드 · 내가 보는 사람들 -->
     <div id="viewDashboard">
-      <h2>👥 내 회원</h2>
+      <h2>👥 내가 보는 사람들</h2>
       <div class="card">
-        <label class="label">공유 코드로 회원 추가</label>
+        <label class="label">공유 코드로 추가 (친구·연인·회원 모두)</label>
         <div style="display:flex;gap:8px;align-items:stretch">
           <input id="addCodeInput" type="text" placeholder="HLT-A3K9XQ" maxlength="12" style="text-transform:uppercase;letter-spacing:1px"/>
           <button class="btn" style="width:auto;padding:11px 18px" onclick="doAddMember()">추가</button>
@@ -132,20 +132,20 @@
       <div id="membersList"></div>
     </div>
 
-    <!-- 회원 상세 -->
+    <!-- 상세 · 선택된 사람 -->
     <div id="viewMember" style="display:none">
-      <button class="back-btn" onclick="showDashboard()">← 회원 목록</button>
+      <button class="back-btn" onclick="showDashboard()">← 목록으로</button>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-        <h2 id="memberHeader" style="margin:0">회원</h2>
+        <h2 id="memberHeader" style="margin:0">—</h2>
         <button onclick="renameMember()" title="별명 수정" style="background:#F1F5F9;border:0;color:#64748B;padding:5px 9px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer">✏️ 별명</button>
       </div>
       <div class="sub" id="memberMeta"></div>
 
       <div class="card">
-        <h3>✍️ 전체 메모 (회원에게 보임)</h3>
-        <textarea id="generalMemoInput" placeholder="예: 저녁에 탄수화물 줄여보세요. 단백질 1.5배 ↑" maxlength="1000"></textarea>
+        <h3>✍️ 메시지 남기기 (상대방에게 보임)</h3>
+        <textarea id="generalMemoInput" placeholder="예: 오늘 단백질 좀 더 챙겨요~ · 저녁은 가볍게!" maxlength="1000"></textarea>
         <div style="height:8px"></div>
-        <button class="btn" onclick="doAddGeneralMemo()">메모 작성</button>
+        <button class="btn" onclick="doAddGeneralMemo()">메시지 보내기</button>
       </div>
 
       <h3 style="margin:14px 2px 10px">🍽 최근 식단 (최대 30개)</h3>
@@ -252,7 +252,7 @@ async function loadMembers(){
     const r=await api('GET','/api/coach-members');
     const members=r.members||[];
     if(!members.length){
-      list.innerHTML='<div class="empty">아직 등록된 회원이 없어요.<br/>회원이 발급한 공유 코드를 위에서 입력해주세요.</div>';
+      list.innerHTML='<div class="empty">아직 아무도 등록 안 됐어요.<br/>상대가 보내준 공유 코드를 위에서 입력해주세요.</div>';
       return;
     }
     list.innerHTML = members.map(m=>{
@@ -297,7 +297,7 @@ async function openMember(userId, nickname){
     const r=await api('GET',`/api/coach-member-meals?user_id=${encodeURIComponent(userId)}&limit=30`);
     const meals=r.meals||[];
     const gm=r.general_memos||[];
-    const gmHtml = gm.length ? ('<div class="card"><h3>이전 메모</h3>' + gm.slice(0,5).map(m=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px"><div style="color:var(--muted);font-size:10.5px;margin-bottom:2px">${new Date(m.created_at).toLocaleString('ko-KR')}${m.mine?' · 나':''}</div>${escapeHtml(m.text)}</div>`).join('')+'</div>') : '';
+    const gmHtml = gm.length ? ('<div class="card"><h3>이전 메시지</h3>' + gm.slice(0,5).map(m=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12.5px"><div style="color:var(--muted);font-size:10.5px;margin-bottom:2px">${new Date(m.created_at).toLocaleString('ko-KR')}${m.mine?' · 나':''}</div>${escapeHtml(m.text)}</div>`).join('')+'</div>') : '';
     if(!meals.length){
       $('memberMealsList').innerHTML = gmHtml;
       $('memberMealsEmpty').style.display='block';
