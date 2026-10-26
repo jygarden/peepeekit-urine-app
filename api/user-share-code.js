@@ -56,40 +56,52 @@ async function handleGet(sb, user, res) {
 }
 
 async function handlePost(sb, user, res) {
-  // 하루 3회 발급 제한
+  // 하루 발급 제한 체크 + 기존 코드 폐기를 병렬로 (대기 시간 단축)
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-  const { count } = await sb
-    .from('share_codes')
-    .select('code', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .gt('created_at', since);
-  if ((count || 0) >= DAILY_ISSUE_LIMIT) {
+  const expiresAt = new Date(Date.now() + SHARE_CODE_TTL_DAYS * 24 * 3600 * 1000).toISOString();
+  const code = generateUniqueShareCode();
+
+  // 1·2·3번 쿼리 병렬 실행
+  const [countRes, _revokeRes, insertRes] = await Promise.all([
+    sb.from('share_codes')
+      .select('code', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gt('created_at', since),
+    sb.from('share_codes')
+      .update({ revoked: true })
+      .eq('user_id', user.id)
+      .eq('revoked', false),
+    sb.from('share_codes')
+      .insert({ code, user_id: user.id, expires_at: expiresAt })
+      .select('code, expires_at, scopes')
+      .single()
+  ]);
+
+  // 하루 제한 초과면 방금 insert한 코드도 무효화 (낭비지만 낙관적 처리로 UX 우선)
+  if ((countRes.count || 0) >= DAILY_ISSUE_LIMIT) {
+    await sb.from('share_codes').update({ revoked: true }).eq('code', code);
     return sendError(res, 429, `하루 ${DAILY_ISSUE_LIMIT}회까지 발급 가능 · 24시간 후 다시 시도`);
   }
-
-  // 기존 유효 코드 폐기 (하나만 활성)
-  await sb.from('share_codes')
-    .update({ revoked: true })
-    .eq('user_id', user.id)
-    .eq('revoked', false);
-
-  // 새 코드 발급
-  let code;
-  try { code = await generateUniqueShareCode(sb); }
-  catch (e) { return sendError(res, 500, e.message); }
-
-  const expiresAt = new Date(Date.now() + SHARE_CODE_TTL_DAYS * 24 * 3600 * 1000).toISOString();
-  const { data, error } = await sb
-    .from('share_codes')
-    .insert({ code, user_id: user.id, expires_at: expiresAt })
-    .select('code, expires_at, scopes')
-    .single();
-  if (error) return sendError(res, 500, error.message);
+  if (insertRes.error) {
+    // 코드 충돌 시 1회 재시도
+    const retry = generateUniqueShareCode();
+    const r2 = await sb.from('share_codes')
+      .insert({ code: retry, user_id: user.id, expires_at: expiresAt })
+      .select('code, expires_at, scopes')
+      .single();
+    if (r2.error) return sendError(res, 500, r2.error.message);
+    return res.status(200).json({
+      code: r2.data.code,
+      expires_at: r2.data.expires_at,
+      scopes: r2.data.scopes,
+      ttl_days: SHARE_CODE_TTL_DAYS
+    });
+  }
 
   return res.status(200).json({
-    code: data.code,
-    expires_at: data.expires_at,
-    scopes: data.scopes,
+    code: insertRes.data.code,
+    expires_at: insertRes.data.expires_at,
+    scopes: insertRes.data.scopes,
     ttl_days: SHARE_CODE_TTL_DAYS
   });
 }

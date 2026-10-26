@@ -94,15 +94,10 @@ function generateShareCode() {
 }
 
 /**
- * 충돌 없는 코드 생성 (최대 5회 재시도)
+ * 코드 생성 (사전 조회 생략 · 32^6 = 10억 공간 · 충돌시 insert 에러로 처리)
  */
 async function generateUniqueShareCode(sb) {
-  for (let i = 0; i < 5; i++) {
-    const code = generateShareCode();
-    const { data } = await sb.from('share_codes').select('code').eq('code', code).maybeSingle();
-    if (!data) return code;
-  }
-  throw new Error('공유 코드 생성 실패 (충돌)');
+  return generateShareCode();
 }
 
 /**

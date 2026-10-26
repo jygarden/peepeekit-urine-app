@@ -11,10 +11,10 @@
   "ios": {
     "scheme": "건강어때",
     "contentInset": "always",
-    "backgroundColor": "#FFFFFF"
+    "backgroundColor": "#FFF8F0"
   },
   "android": {
-    "backgroundColor": "#FFFFFF",
+    "backgroundColor": "#FFF8F0",
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": false
@@ -22,13 +22,13 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 1500,
-      "backgroundColor": "#1E3A8A",
+      "backgroundColor": "#FF6B5B",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#FFF8F0"
     },
     "PushNotifications": {
       "presentationOptions": ["badge", "sound", "alert"]
