@@ -9313,6 +9313,16 @@ function _v22GetFortuneData() {
 }
 
 // 캐시 · 오늘 날짜+생년월 키로 하루 한 번만 Gemini 호출
+// 🚀 홈 진입 시 운세 백그라운드 프리페치 (사용자 모름 · 탭할 때 이미 캐시)
+let _fortunePrefetchTriggered = false;
+function _v22PrefetchFortune() {
+  if (_fortunePrefetchTriggered) return;
+  _fortunePrefetchTriggered = true;
+  // 하루 1번만 (캐시 있으면 fetch 안 함)
+  setTimeout(() => { _v22FetchFortune().catch(()=>{}); }, 800);
+}
+try { setTimeout(_v22PrefetchFortune, 2000); } catch(e){}
+
 async function _v22FetchFortune() {
   const now = new Date();
   const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
@@ -9361,12 +9371,37 @@ async function _v21OpenFortune() {
   loadBox.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:9999;display:flex;align-items:flex-end;font-family:inherit';
   loadBox.onclick = e => { if (e.target === loadBox) loadBox.remove(); };
   loadBox.innerHTML = `
-    <div style="background:linear-gradient(180deg,#F2F5FC 0%,#FFF 100%);border-radius:24px 24px 0 0;width:100%;padding:60px 20px;text-align:center;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
-      <div style="font-size:42px;margin-bottom:14px;animation:v22FortuneSpin 2s ease-in-out infinite">🔮</div>
-      <div style="font-size:14px;font-weight:800;color:#1D3762;margin-bottom:6px">오늘의 운세를 뽑는 중…</div>
-      <div style="font-size:11px;color:#5D7597;font-weight:600">사주와 오늘의 기운을 살피고 있어요</div>
+    <div style="background:linear-gradient(180deg,#FFF8F0 0%,#FFF 100%);border-radius:24px 24px 0 0;width:100%;padding:50px 20px 54px;text-align:center;animation:v21SheetUp .28s cubic-bezier(.16,.84,.44,1)">
+      <div style="margin:0 auto 18px;width:120px;height:170px;animation:tarotFlip 2.4s ease-in-out infinite">
+        <svg viewBox="0 0 120 170" width="120" height="170" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cardBg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#FF6B5B"/><stop offset="1" stop-color="#FF9F6B"/>
+            </linearGradient>
+            <radialGradient id="shine" cx=".5" cy=".3" r=".7">
+              <stop offset="0" stop-color="#FFF" stop-opacity=".3"/><stop offset="1" stop-color="#FFF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect x="4" y="4" width="112" height="162" rx="12" fill="url(#cardBg)" stroke="#E85744" stroke-width="1.5"/>
+          <rect x="8" y="8" width="104" height="154" rx="9" fill="none" stroke="#FEE4B8" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>
+          <rect x="4" y="4" width="112" height="162" rx="12" fill="url(#shine)"/>
+          <g transform="translate(60 70)">
+            <circle r="22" fill="#FEE4B8"/>
+            <path d="M-10 -4 L10 -4 L5 16 L-5 16 Z" fill="#F5A623"/>
+            <circle cx="0" cy="2" r="4" fill="#FFF"/>
+          </g>
+          <text x="60" y="118" font-family="serif" font-weight="900" font-size="12" fill="#FFF" text-anchor="middle" letter-spacing="2">오늘의 운세</text>
+          <g transform="translate(60 138)" opacity=".8">
+            <circle cx="-14" cy="0" r="2.3" fill="#FEE4B8"/>
+            <circle cx="0" cy="0" r="2.3" fill="#FEE4B8"/>
+            <circle cx="14" cy="0" r="2.3" fill="#FEE4B8"/>
+          </g>
+        </svg>
+      </div>
+      <div style="font-size:14.5px;font-weight:900;color:#3D2B20;margin-bottom:4px">오늘의 운세를 뽑는 중…</div>
+      <div style="font-size:11px;color:#8B7268;font-weight:600">사주와 오늘의 기운을 살피고 있어요</div>
     </div>
-    <style>@keyframes v22FortuneSpin{0%,100%{transform:rotate(-8deg) scale(1)}50%{transform:rotate(8deg) scale(1.1)}}</style>`;
+    <style>@keyframes tarotFlip{0%,100%{transform:rotateY(0deg) rotate(-3deg)}50%{transform:rotateY(180deg) rotate(3deg)}}</style>`;
   document.body.appendChild(loadBox);
 
   // 데이터 가져오기 (Gemini)
@@ -10986,6 +11021,14 @@ function _v21ShowNearbyMapSheet(query, status, items) {
           <button onclick="_v21RetryNearby()" style="flex:1;background:#F59E0B;color:#FFF;border:none;border-radius:8px;padding:9px 10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">🔄 위치 다시 받기</button>
           <button onclick="_v21ManualRegion()" style="flex:1;background:#FFF;color:#92400E;border:1.5px solid #F59E0B;border-radius:8px;padding:9px 10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">✏️ 지역 직접 입력</button>
         </div>
+      </div>`;
+  } else if (status === 'ok' && hasGps) {
+    // GPS 정상 · 작은 지역 바꾸기 배너
+    gpsBanner = `
+      <div style="background:#FFF8F0;border:1px solid #FBE8D7;border-radius:10px;padding:8px 11px;margin-bottom:11px;display:flex;align-items:center;gap:8px">
+        <div style="font-size:14px;flex-shrink:0">📍</div>
+        <div style="flex:1;font-size:11px;color:#8B7268;font-weight:700;line-height:1.4">현재 GPS 위치로 검색 중</div>
+        <button onclick="_v21ManualRegion()" style="background:#FFF;color:#D14938;border:1px solid #FF9F6B;border-radius:7px;padding:5px 9px;font-size:10.5px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">✏️ 지역 바꾸기</button>
       </div>`;
   }
 
