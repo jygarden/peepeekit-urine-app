@@ -9313,17 +9313,46 @@ function _v22GetFortuneData() {
 }
 
 // 캐시 · 오늘 날짜+생년월 키로 하루 한 번만 Gemini 호출
-// 🚀 홈 진입 시 운세 백그라운드 프리페치 (사용자 모름 · 탭할 때 이미 캐시)
-let _fortunePrefetchTriggered = false;
-function _v22PrefetchFortune() {
-  if (_fortunePrefetchTriggered) return;
-  _fortunePrefetchTriggered = true;
-  // 하루 1번만 (캐시 있으면 fetch 안 함)
-  setTimeout(() => { _v22FetchFortune().catch(()=>{}); }, 800);
+// ⚡ 운세 공유·저장
+async function _v22ShareFortune() {
+  const data = window._v22CurrentFortune || _v22GetFortuneData();
+  const dateStr = data.date || new Date().toLocaleDateString('ko-KR');
+  const level = data.levelLabel || '오늘의 운세';
+  const summary = data.levelSummary || data.summary || '';
+  const msg = `[건강어때 오늘의 운세] ${dateStr}\n${level}\n\n${summary}\n\n운세 보러가기: https://peepeekit-urine-app-5h3f.vercel.app`;
+  if (navigator.share) {
+    try { await navigator.share({ title: '오늘의 운세 · 건강어때', text: msg }); return; } catch(e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(msg);
+    if (typeof showPointToast === 'function') showPointToast('📋 운세 내용이 복사됐어요');
+    else alert('복사됨 · 붙여넣어 보내세요:\n\n' + msg);
+  } catch(e) { alert(msg); }
 }
-try { setTimeout(_v22PrefetchFortune, 2000); } catch(e){}
 
-async function _v22FetchFortune() {
+async function _v22SaveFortuneCard() {
+  const sheet = document.getElementById('v21FortuneSheet');
+  if (!sheet) return;
+  const card = sheet.querySelector('.v22t-card') || sheet.firstElementChild;
+  if (!card) { alert('저장할 카드를 찾을 수 없어요'); return; }
+  // 간단 폴백: Web Share API로 텍스트 공유 (이미지 캡처 라이브러리 없이)
+  const data = window._v22CurrentFortune || _v22GetFortuneData();
+  const dateStr = data.date || new Date().toLocaleDateString('ko-KR');
+  const msg = `[오늘의 운세 · ${dateStr}]\n${data.levelLabel || ''}\n${data.levelSummary || ''}\n\n#건강어때`;
+  if (navigator.share) {
+    try { await navigator.share({ title: '오늘의 운세', text: msg }); return; } catch(e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(msg);
+    if (typeof showPointToast === 'function') showPointToast('📋 운세 복사됨 · 사진 저장 기능은 준비 중');
+    else alert('운세 내용이 복사됐어요. 사진 저장 기능은 곧 추가될 예정입니다.\n\n' + msg);
+  } catch(e) { alert(msg); }
+}
+
+// 운세 API 제거 · 로컬 폴백만 사용 (0초 · 비용 0)
+async function _v22FetchFortune() { return null; }
+
+async function _v22FetchFortuneLegacy() {
   const now = new Date();
   const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
   const dateStr = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -9428,6 +9457,7 @@ async function _v21OpenFortune() {
   let f = await _v22FetchFortune();
   // 실패 시 폴백 (기존 랜덤 데이터)
   if (!f) f = _v22GetFortuneData();
+  window._v22CurrentFortune = f;
   else {
     // API 응답을 기존 UI 데이터 형식으로 정규화
     const now = new Date();
@@ -9687,11 +9717,11 @@ async function _v21OpenFortune() {
         </div>
       </div>
       <div class="v22t-cta-wrap">
-        <button class="v22t-cta">
+        <button class="v22t-cta" onclick="_v22SaveFortuneCard()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           오늘의 카드 저장하기
         </button>
-        <button class="v22t-share">친구에게 공유</button>
+        <button class="v22t-share" onclick="_v22ShareFortune()">친구에게 공유</button>
         <div class="v22t-footer">재미로 가볍게 즐겨주세요</div>
       </div>
     </div>`;
