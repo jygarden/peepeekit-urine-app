@@ -9460,7 +9460,6 @@ async function _v21OpenFortune() {
   let f = await _v22FetchFortune();
   // 실패 시 폴백 (기존 랜덤 데이터)
   if (!f) f = _v22GetFortuneData();
-  window._v22CurrentFortune = f;
   else {
     // API 응답을 기존 UI 데이터 형식으로 정규화
     const now = new Date();
@@ -9515,6 +9514,7 @@ async function _v21OpenFortune() {
     f.healthTips = '물 8잔 · 아침 스트레칭';
     f.avoidTips = (f.food && f.food.avoid) || '과음·야식';
   }
+  window._v22CurrentFortune = f;
 
   // 로딩 제거하고 실제 시트 렌더
   loadBox.remove();
