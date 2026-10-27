@@ -9325,8 +9325,8 @@ async function _v22ShareFortune() {
   }
   try {
     await navigator.clipboard.writeText(msg);
-    if (typeof showPointToast === 'function') showPointToast('📋 운세 내용이 복사됐어요');
-    else alert('복사됨 · 붙여넣어 보내세요:\n\n' + msg);
+    if (typeof showPointToast === 'function') { showPointToast('📋 운세 내용이 복사됐어요'); }
+    else { alert('복사됨 · 붙여넣어 보내세요:\n\n' + msg); }
   } catch(e) { alert(msg); }
 }
 
@@ -9344,8 +9344,8 @@ async function _v22SaveFortuneCard() {
   }
   try {
     await navigator.clipboard.writeText(msg);
-    if (typeof showPointToast === 'function') showPointToast('📋 운세 복사됨 · 사진 저장 기능은 준비 중');
-    else alert('운세 내용이 복사됐어요. 사진 저장 기능은 곧 추가될 예정입니다.\n\n' + msg);
+    if (typeof showPointToast === 'function') { showPointToast('📋 운세 복사됨 · 사진 저장 기능은 준비 중'); }
+    else { alert('운세 내용이 복사됐어요. 사진 저장 기능은 곧 추가될 예정입니다.\n\n' + msg); }
   } catch(e) { alert(msg); }
 }
 
