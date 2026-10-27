@@ -9349,10 +9349,34 @@ async function _v22SaveFortuneCard() {
   } catch(e) { alert(msg); }
 }
 
-// 운세 API 제거 · 로컬 폴백만 사용 (0초 · 비용 0)
-async function _v22FetchFortune() { return null; }
+// 백그라운드 프리페치 트리거
+let _fortunePrefetchTriggered = false;
+function _v22PrefetchFortune() {
+  if (_fortunePrefetchTriggered) return;
+  _fortunePrefetchTriggered = true;
+  // 2초 후 백그라운드로 AI 운세 가져와서 캐시 (사용자 모름)
+  setTimeout(() => { _v22FetchFortuneReal().catch(()=>{}); }, 2000);
+}
+try { setTimeout(_v22PrefetchFortune, 2000); } catch(e){}
 
-async function _v22FetchFortuneLegacy() {
+// 사용자가 운세 탭 클릭 시 호출 · 캐시만 체크 (API 호출 X · 즉시 반환)
+async function _v22FetchFortune() {
+  try {
+    const now = new Date();
+    const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
+    const dateStr = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const p = JSON.parse(localStorage.getItem('gg_profiles_v1') || '[]').find(x => x.type === 'human') || {};
+    const birthKey = p.birthYear ? `${p.birthYear}-${p.birthMonth||0}-${p.birthDay||0}` : 'anon';
+    const cached = localStorage.getItem(`v22Fortune_${dateStr}_${birthKey}`);
+    if (cached) return JSON.parse(cached);
+  } catch(e){}
+  // 캐시 없으면 null → 폴백 사용 · 동시에 백그라운드 호출 트리거
+  _v22PrefetchFortune();
+  return null;
+}
+
+// 실제 Gemini API 호출 (프리페치 전용)
+async function _v22FetchFortuneReal() {
   const now = new Date();
   const y = now.getFullYear(), mo = now.getMonth() + 1, d = now.getDate();
   const dateStr = `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -9366,46 +9390,25 @@ async function _v22FetchFortuneLegacy() {
   const birthKey = birthYear ? `${birthYear}-${birthMonth||0}-${birthDay||0}` : 'anon';
   const cacheKey = `v22Fortune_${dateStr}_${birthKey}`;
 
-  // 캐시 확인
+  // 캐시 확인 (이미 받은 거면 건너뜀)
   try {
     const cached = localStorage.getItem(cacheKey);
     if (cached) return JSON.parse(cached);
   } catch(e){}
 
-  // API 호출 (1.5초 안에 응답 없으면 폴백 사용)
+  // 백그라운드 API 호출 · 타임아웃 없음 (사용자 안 기다림)
   try {
-    const ctrl = new AbortController();
-    const timeoutId = setTimeout(() => ctrl.abort(), 1500);
     const r = await fetch('/api/fortune-daily', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender }),
-      signal: ctrl.signal
+      body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender })
     });
-    clearTimeout(timeoutId);
     const data = await r.json();
     if (!r.ok || data.error) throw new Error(data.error || 'API 오류');
-    // 캐시 저장
     try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
     return data;
   } catch (err) {
-    // 타임아웃 또는 에러 → 백그라운드로 재시도 (다음 접속에 캐시)
-    if (err.name === 'AbortError') {
-      // 백그라운드 재시도 (타임아웃 없이)
-      (async () => {
-        try {
-          const r2 = await fetch('/api/fortune-daily', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender })
-          });
-          const d2 = await r2.json();
-          if (r2.ok && !d2.error) localStorage.setItem(cacheKey, JSON.stringify(d2));
-        } catch(e){}
-      })();
-    } else {
-      console.error('[fortune API]', err);
-    }
+    console.warn('[fortune prefetch]', err.message);
     return null;
   }
 }
