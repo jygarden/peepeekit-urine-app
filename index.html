@@ -9343,20 +9343,40 @@ async function _v22FetchFortune() {
     if (cached) return JSON.parse(cached);
   } catch(e){}
 
-  // API 호출
+  // API 호출 (1.5초 안에 응답 없으면 폴백 사용)
   try {
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 1500);
     const r = await fetch('/api/fortune-daily', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender })
+      body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender }),
+      signal: ctrl.signal
     });
+    clearTimeout(timeoutId);
     const data = await r.json();
     if (!r.ok || data.error) throw new Error(data.error || 'API 오류');
     // 캐시 저장
     try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch(e){}
     return data;
   } catch (err) {
-    console.error('[fortune API]', err);
+    // 타임아웃 또는 에러 → 백그라운드로 재시도 (다음 접속에 캐시)
+    if (err.name === 'AbortError') {
+      // 백그라운드 재시도 (타임아웃 없이)
+      (async () => {
+        try {
+          const r2 = await fetch('/api/fortune-daily', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date: dateStr, dayOfWeek: dowKr, birthYear, birthMonth, birthDay, gender })
+          });
+          const d2 = await r2.json();
+          if (r2.ok && !d2.error) localStorage.setItem(cacheKey, JSON.stringify(d2));
+        } catch(e){}
+      })();
+    } else {
+      console.error('[fortune API]', err);
+    }
     return null;
   }
 }
