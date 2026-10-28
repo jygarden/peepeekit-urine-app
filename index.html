@@ -20323,15 +20323,17 @@ async function updateNutritionInsights(result) {
   const userUuid = getCurrentUserUuid();
   if (!userUuid) return;
 
-  // 1. 현재 인사이트 가져오기 (없으면 새로 시작)
+  // 1. 현재 인사이트 가져오기 (없으면 새로 시작) · 서버 프록시 경유
   let existing = null;
   try {
-    const res = await fetch(`${SB.url}/rest/v1/nutrition_insights?user_uuid=eq.${userUuid}&select=*`, {
-      headers: SB.headers()
+    const res = await fetch('/api/user-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Device-Id': userUuid },
+      body: JSON.stringify({ op: 'select', table: 'nutrition_insights', filter: { user_uuid: userUuid } })
     });
     if (res.ok) {
-      const data = await res.json();
-      existing = data && data[0] ? data[0] : null;
+      const j = await res.json();
+      existing = j && j.rows && j.rows[0] ? j.rows[0] : null;
     }
   } catch(e) {}
 
@@ -22084,60 +22086,38 @@ function resetAllData() {
 // ════════════════════════════════════════════════════════════════
 // 🗄 Supabase REST API (fetch 기반, CDN 의존성 0)
 // ════════════════════════════════════════════════════════════════
+// 🔒 서버 프록시를 통해서만 DB 접근 (RLS deny-all · service_role만 통과)
 const SB = {
-  url: window.SUPABASE_URL,
+  url: window.SUPABASE_URL,  // 호환성 유지 (일부 코드가 참조)
   key: window.SUPABASE_ANON_KEY,
-  ready: false,
-  headers() {
-    return {
-      apikey: this.key,
-      Authorization: 'Bearer ' + this.key,
-      'Content-Type': 'application/json'
-    };
+  ready: true,  // 항상 ready · 서버가 처리
+  async _proxyCall(op, table, data, filter, conflict) {
+    try {
+      const did = (typeof getCurrentUserUuid === 'function') ? getCurrentUserUuid() : (localStorage.getItem('userUuid') || '');
+      const res = await fetch('/api/user-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Device-Id': did },
+        body: JSON.stringify({ op, table, data, filter, conflict })
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        console.warn(`[SB] ${op} ${table} 실패:`, res.status, t.slice(0,120));
+        return false;
+      }
+      return true;
+    } catch(e) {
+      console.warn(`[SB] ${op} ${table} 오류:`, e.message);
+      return false;
+    }
   },
   async insert(table, body) {
-    try {
-      const res = await fetch(`${this.url}/rest/v1/${table}`, {
-        method: 'POST',
-        headers: { ...this.headers(), Prefer: 'return=minimal' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        console.warn(`[SB] insert ${table} 실패:`, res.status, errText);
-        // 첫 실패면 사용자에게 알림 (디버그용)
-        if (!window._sbErrorShown) {
-          window._sbErrorShown = true;
-          console.error(`🚨 Supabase 동기화 실패\n테이블: ${table}\n상태: ${res.status}\n에러: ${errText}`);
-        }
-      } else {
-        console.log(`[SB] ✅ insert ${table} 성공`);
-      }
-      return res.ok;
-    } catch(e) { console.warn(`[SB] insert ${table} 오류:`, e); return false; }
+    return this._proxyCall('insert', table, body);
   },
   async upsert(table, body, conflictCol) {
-    try {
-      const res = await fetch(`${this.url}/rest/v1/${table}?on_conflict=${conflictCol}`, {
-        method: 'POST',
-        headers: { ...this.headers(), Prefer: 'return=minimal,resolution=merge-duplicates' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        console.warn(`[SB] upsert ${table} 실패:`, res.status, errText);
-        if (!window._sbErrorShown) {
-          window._sbErrorShown = true;
-          console.error(`🚨 Supabase 동기화 실패\n테이블: ${table}\n상태: ${res.status}\n에러: ${errText}`);
-        }
-      } else {
-        console.log(`[SB] ✅ upsert ${table} 성공`);
-      }
-      return res.ok;
-    } catch(e) { console.warn(`[SB] upsert ${table} 오류:`, e); return false; }
+    return this._proxyCall('upsert', table, body, null, conflictCol);
   }
 };
-if (SB.url && SB.key) { SB.ready = true; console.log('[SB] REST API 준비됨'); }
+console.log('[SB] 프록시 모드 준비됨 (service_role 서버 경유)');
 
 // 현재 사용자 UUID 가져오기 (없으면 새로 생성)
 function getCurrentUserUuid() {
