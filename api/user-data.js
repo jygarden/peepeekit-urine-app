@@ -15,7 +15,8 @@ const { getServerClient, sendError, applyCors } = require('./_supabase');
 const ALLOWED_TABLES = new Set([
   'food_records', 'nutrition_insights', 'supplement_opportunities',
   'users', 'activity_logs', 'consent_logs', 'water_intake',
-  'pet_records'
+  'pet_records',    // 강아지 식단·건강 기록
+  'urine_tests'     // 인체 소변검사 결과
 ]);
 
 module.exports = async function handler(req, res) {
