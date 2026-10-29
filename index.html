@@ -22309,6 +22309,7 @@ function _mateRenderFollowing(mates) {
 }
 
 async function _mateOpenFeed(ownerId, nickname) {
+  window._mateCurrentOwner = ownerId;
   const modal = document.getElementById('mateFeedModal');
   const title = document.getElementById('mateFeedTitle');
   const body = document.getElementById('mateFeedBody');
@@ -22331,26 +22332,86 @@ async function _mateOpenFeed(ownerId, nickname) {
 }
 
 function _mateFmtMeal(m) {
-  const foods = (m.foods||[]).map(f => ((f.name||'음식').replace(/[<>]/g,'')) + (f.portion && f.portion !== 1 ? ` ×${f.portion}` : '')).join(' · ');
+  const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+  const foods = (m.foods||[]).map(f => esc(f.name||'음식') + (f.portion && f.portion !== 1 ? ` ×${f.portion}` : '')).join(' · ');
   const t = m.totals || {};
-  const nutr = [
-    t.kcal ? `${Math.round(t.kcal)} kcal` : null,
-    t.protein_g ? `단백질 ${Math.round(t.protein_g)}g` : null,
-    t.carbs_g ? `탄수 ${Math.round(t.carbs_g)}g` : null,
-    t.fat_g ? `지방 ${Math.round(t.fat_g)}g` : null
-  ].filter(Boolean).join(' · ');
   const mt = m.meal_time ? {breakfast:'아침',lunch:'점심',dinner:'저녁',snack:'간식'}[m.meal_time] : '';
+  const mtColor = {아침:'#F5A623',점심:'#FF6B5B',저녁:'#D14938',간식:'#87AF8E'}[mt] || '#8B7268';
   const when = new Date(m.consumed_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  const store = m.store_tag && m.store_tag.title ? `<div style="font-size:10.5px;color:#8B7268;margin-top:4px">📍 ${(m.store_tag.title||'').replace(/[<>]/g,'')}</div>` : '';
-  return `<div style="background:#FFF;border:1px solid #FBE8D7;border-radius:12px;padding:11px 13px;margin-bottom:9px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+  const store = m.store_tag && m.store_tag.title ? `<div style="font-size:11px;color:#8B7268;margin-top:6px">📍 ${esc(m.store_tag.title)}</div>` : '';
+
+  // 영양소 바 · 단백질/탄수/지방 비율 (총 g 기준)
+  const p = Math.max(0, Number(t.protein_g) || 0);
+  const c = Math.max(0, Number(t.carbs_g) || 0);
+  const fat = Math.max(0, Number(t.fat_g) || 0);
+  const total = p + c + fat;
+  const pPct = total ? (p * 100 / total) : 0;
+  const cPct = total ? (c * 100 / total) : 0;
+  const fPct = total ? (fat * 100 / total) : 0;
+  const kcal = t.kcal ? Math.round(t.kcal) : null;
+  const sodium = t.sodium_mg ? Math.round(t.sodium_mg) : null;
+  const fiber = t.fiber_g ? Math.round(t.fiber_g) : null;
+
+  const barHtml = total > 0 ? `
+    <div style="margin-top:9px">
+      <div style="display:flex;height:7px;border-radius:4px;overflow:hidden;background:#F5E6D3">
+        ${pPct > 0 ? `<div style="width:${pPct}%;background:#FF6B5B"></div>` : ''}
+        ${cPct > 0 ? `<div style="width:${cPct}%;background:#F5A623"></div>` : ''}
+        ${fPct > 0 ? `<div style="width:${fPct}%;background:#87AF8E"></div>` : ''}
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:#8B7268;font-weight:700">
+        <span><span style="color:#FF6B5B">●</span> 단백질 ${Math.round(p)}g</span>
+        <span><span style="color:#F5A623">●</span> 탄수 ${Math.round(c)}g</span>
+        <span><span style="color:#87AF8E">●</span> 지방 ${Math.round(fat)}g</span>
+      </div>
+    </div>` : '';
+
+  const metaHtml = (kcal || sodium || fiber) ? `
+    <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap">
+      ${kcal ? `<span style="background:#FFF3E6;color:#D14938;padding:3px 8px;border-radius:7px;font-size:10.5px;font-weight:800">⚡ ${kcal} kcal</span>` : ''}
+      ${sodium ? `<span style="background:#FEE4D6;color:#8B7268;padding:3px 8px;border-radius:7px;font-size:10.5px;font-weight:700">🧂 나트륨 ${sodium}mg</span>` : ''}
+      ${fiber ? `<span style="background:#F0F4EC;color:#5A7260;padding:3px 8px;border-radius:7px;font-size:10.5px;font-weight:700">🌾 섬유 ${fiber}g</span>` : ''}
+    </div>` : '';
+
+  // 메세지 쓰레드
+  const msgs = Array.isArray(m.messages) ? m.messages : [];
+  const msgsHtml = msgs.length ? `
+    <div style="margin-top:11px;padding-top:9px;border-top:1px dashed #FBE8D7">
+      ${msgs.map(x => `
+        <div style="display:flex;${x.mine?'justify-content:flex-end':''};margin-bottom:5px">
+          <div style="max-width:85%;background:${x.mine?'#FF6B5B':'#FFF8F0'};color:${x.mine?'#FFF':'#3D2B20'};border:1px solid ${x.mine?'#FF6B5B':'#FBE8D7'};padding:6px 10px;border-radius:12px;font-size:12px;line-height:1.4">${esc(x.text)}</div>
+        </div>`).join('')}
+    </div>` : '';
+
+  return `<div style="background:#FFF;border:1px solid #FBE8D7;border-radius:14px;padding:13px 15px;margin-bottom:11px;box-shadow:0 1px 4px rgba(255,107,91,.04)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
       <div style="font-size:10.5px;color:#8B7268;font-weight:700">${when}</div>
-      ${mt?`<span style="background:#FF6B5B;color:#FFF;padding:2px 7px;border-radius:4px;font-size:9.5px;font-weight:800">${mt}</span>`:''}
+      ${mt?`<span style="background:${mtColor};color:#FFF;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:900;letter-spacing:.3px">${mt}</span>`:''}
     </div>
-    <div style="font-size:13px;font-weight:800;color:#3D2B20;margin:3px 0">${foods||'음식 정보 없음'}</div>
-    ${nutr?`<div style="font-size:11px;color:#8B7268">${nutr}</div>`:''}
+    <div style="font-size:14px;font-weight:900;color:#3D2B20;margin:4px 0;line-height:1.3">${foods||'음식 정보 없음'}</div>
     ${store}
+    ${barHtml}
+    ${metaHtml}
+    ${msgsHtml}
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <input id="mi_${m.id}" placeholder="메세지 남기기..." maxlength="500" style="flex:1;font-size:12px;padding:7px 10px;border:1px solid #FBE8D7;border-radius:8px;outline:none;background:#FFF8F0;color:#3D2B20"/>
+      <button onclick="_mateSendMsg('${m.id}')" style="background:#FF6B5B;color:#FFF;border:0;padding:7px 13px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">전송</button>
+    </div>
   </div>`;
+}
+
+async function _mateSendMsg(mealId) {
+  const inp = document.getElementById('mi_' + mealId);
+  const text = (inp?.value || '').trim();
+  if (!text) return;
+  try {
+    await _coachApi('POST', '/api/mate', { action:'message', meal_log_id: mealId, text });
+    inp.value = '';
+    // 현재 열린 메이트 피드 재로드
+    const title = document.getElementById('mateFeedTitle')?.textContent || '';
+    const nick = title.replace('🍽 ', '').replace('의 식단','');
+    if (window._mateCurrentOwner) _mateOpenFeed(window._mateCurrentOwner, nick);
+  } catch(e) { alert('⚠️ ' + e.message); }
 }
 
 async function _mateRemove(ownerId) {

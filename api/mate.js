@@ -23,9 +23,13 @@ module.exports = async function handler(req, res) {
     return sendError(res, 400, e.message);
   }
 
-  // GET + action=meals → 식단 피드
+  // GET + action=meals → 식단 피드 (메세지 포함)
   if (req.method === 'GET' && req.query.action === 'meals') {
     return getMealFeed(sb, viewer, req, res);
+  }
+  // POST + action=message → 식단에 메세지 작성
+  if (req.method === 'POST' && req.body && req.body.action === 'message') {
+    return postMessage(sb, viewer, req, res);
   }
 
   if (req.method === 'GET')    return listMates(sb, viewer, res);
@@ -33,6 +37,46 @@ module.exports = async function handler(req, res) {
   if (req.method === 'DELETE') return removeMate(sb, viewer, req, res);
   return sendError(res, 405, 'method not allowed');
 };
+
+// POST /api/mate  { action:'message', meal_log_id, text }
+// viewer 또는 owner 둘 다 메세지 작성 가능 (해당 식단 접근 권한 확인)
+async function postMessage(sb, user, req, res) {
+  const { meal_log_id, text } = req.body;
+  if (!meal_log_id || !text) return sendError(res, 400, 'meal_log_id, text 필요');
+  if (String(text).length > 500) return sendError(res, 400, '500자 이내');
+
+  // 식단 소유자 조회
+  const { data: meal, error: mErr } = await sb
+    .from('meal_logs')
+    .select('user_id')
+    .eq('id', meal_log_id)
+    .maybeSingle();
+  if (mErr) return sendError(res, 500, mErr.message);
+  if (!meal) return sendError(res, 404, '식단 없음');
+
+  // 권한: 식단 주인 본인 또는 메이트 연결된 viewer
+  const isOwner = meal.user_id === user.id;
+  let authorized = isOwner;
+  if (!authorized) {
+    const { data: conn } = await sb
+      .from('mate_connections')
+      .select('id')
+      .eq('viewer_id', user.id)
+      .eq('owner_id', meal.user_id)
+      .is('revoked_at', null)
+      .maybeSingle();
+    authorized = !!conn;
+  }
+  if (!authorized) return sendError(res, 403, '접근 권한 없음');
+
+  const { data, error } = await sb
+    .from('mate_messages')
+    .insert({ meal_log_id, sender_id: user.id, text: String(text).trim() })
+    .select('id, created_at')
+    .single();
+  if (error) return sendError(res, 500, error.message);
+  return res.status(200).json({ ok: true, id: data.id, created_at: data.created_at });
+}
 
 async function listMates(sb, viewer, res) {
   const { data, error } = await sb
@@ -168,9 +212,27 @@ async function getMealFeed(sb, viewer, req, res) {
     .limit(limit);
   if (error) return sendError(res, 500, error.message);
 
+  const meals = data || [];
+  const mealIds = meals.map(m => m.id);
+
+  // 식단별 메세지 조회 (viewer, owner 양쪽 다 포함)
+  let msgsByMeal = {};
+  if (mealIds.length) {
+    const { data: msgs } = await sb
+      .from('mate_messages')
+      .select('id, meal_log_id, sender_id, text, created_at')
+      .in('meal_log_id', mealIds)
+      .order('created_at', { ascending: true });
+    (msgs || []).forEach(m => {
+      (msgsByMeal[m.meal_log_id] = msgsByMeal[m.meal_log_id] || [])
+        .push({ id: m.id, text: m.text, created_at: m.created_at, mine: m.sender_id === viewer.id });
+    });
+  }
+  meals.forEach(m => { m.messages = msgsByMeal[m.id] || []; });
+
   const { data: owner } = await sb.from('app_users').select('nickname').eq('id', ownerId).single();
   return res.status(200).json({
     nickname: owner?.nickname || '메이트',
-    meals: data || []
+    meals
   });
 }
