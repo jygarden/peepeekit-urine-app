@@ -367,7 +367,7 @@ window.appIcon = function(name, size){
   #screenReport.active{ position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; animation: none !important; transform: none !important; background: #FBFBFD; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   #screenReport > div{ padding-top: 20px !important; margin-top: 0 !important; }
   /* v12 · 홈은 오늘 상태만 · 나머지는 다른 탭으로 이관 */
-  #screenHome .home-top-bar,
+  /* NOTE: .home-top-bar는 설정 톱니바퀴 접근 위해 다시 보이게 유지 */
   #screenHome > .home-wrap > div[onclick*="openFortune"],
   #screenHome > .home-wrap > div[style*="fortuneSubText"],
   #screenHome .challenge-section,
@@ -380,6 +380,9 @@ window.appIcon = function(name, size){
   #screenHome .recent-activity-section,
   #screenHome .shop-card,
   #screenHome > .home-wrap > .gg-shop { display: none !important; }
+
+  /* 홈 상단바 · 설정 톱니바퀴 노출 */
+  #screenHome .home-top-bar { display: flex !important; }
   /* fortune/tip 슬림 2단 컨테이너 숨김 */
   #screenHome .home-wrap > div[style*="grid-template-columns:1fr 1fr"]:not(.home-cards) { display: none !important; }
   /* v10 스토리 원 · 피드 카드 스타일 */
@@ -2515,7 +2518,7 @@ window.appIcon = function(name, size){
           <!-- ⓐ 내 몸의 신호 · 노란 -->
           <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
-              <img src="assets/home-icons/nutrition-deficit.png" alt="부족 영양" style="width:72px;height:72px;object-fit:contain"/>
+              <img src="assets/home-icons/nutrition-deficit.png?v=2" alt="부족 영양" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div id="v20BodySignalTitle" style="font-size:10.5px;font-weight:800;color:#1D3762;letter-spacing:-.4px;text-align:center;margin-bottom:3px;line-height:1.3;word-break:keep-all;padding:0 2px">내 몸의 신호</div>
             <div style="font-size:10px;color:#B45309;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -2531,7 +2534,7 @@ window.appIcon = function(name, size){
           <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:linear-gradient(135deg,#EEF2FF 0%,#FFE4D6 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21RecentScore" style="display:none">—점</span>
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
-              <img src="assets/home-icons/nutrition-check.png" alt="영양 확인" style="width:72px;height:72px;object-fit:contain"/>
+              <img src="assets/home-icons/nutrition-check.png?v=2" alt="영양 확인" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div id="v20RecentMealName" style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식사 기록</div>
             <div style="font-size:10px;color:#2E61C4;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -2545,7 +2548,7 @@ window.appIcon = function(name, size){
           <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21FortuneBadge" style="display:none">吉</span>
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
-              <img src="assets/home-icons/fortune-ball.png" alt="운세" style="width:72px;height:72px;object-fit:contain"/>
+              <img src="assets/home-icons/fortune-ball.png?v=2" alt="운세" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">오늘의 운세</div>
             <div style="font-size:10px;color:#065F46;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -2555,7 +2558,7 @@ window.appIcon = function(name, size){
           <!-- ⓓ 건강 운동 · 핑크 -->
           <div onclick="try{_v21OpenExercise()}catch(e){}" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
-              <img src="assets/home-icons/exercise.png" alt="운동" style="width:72px;height:72px;object-fit:contain"/>
+              <img src="assets/home-icons/exercise.png?v=2" alt="운동" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">건강 운동</div>
             <div style="font-size:10px;color:#991B1B;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
