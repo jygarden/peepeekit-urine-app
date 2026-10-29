@@ -22408,14 +22408,58 @@ async function _mateSendMsg(mealId) {
   const inp = document.getElementById('mi_' + mealId);
   const text = (inp?.value || '').trim();
   if (!text) return;
-  try {
-    await _coachApi('POST', '/api/mate', { action:'message', meal_log_id: mealId, text });
+
+  // ⚡ 낙관적 UI · 메세지 즉시 화면에 추가
+  const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+  const card = inp.closest('div[style*="background:#FFF"]');
+  if (card) {
+    const tempId = 'tmp_' + Date.now();
+    let thread = card.querySelector('.mate-msg-thread');
+    if (!thread) {
+      // 쓰레드 없으면 생성 (입력창 위에)
+      thread = document.createElement('div');
+      thread.className = 'mate-msg-thread';
+      thread.style.cssText = 'margin-top:11px;padding-top:9px;border-top:1px dashed #FBE8D7';
+      const inputRow = inp.parentElement;
+      card.insertBefore(thread, inputRow);
+    }
+    const bubble = document.createElement('div');
+    bubble.id = tempId;
+    bubble.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:5px';
+    bubble.innerHTML = `<div style="max-width:85%;background:#FF6B5B;color:#FFF;border:1px solid #FF6B5B;padding:6px 10px;border-radius:12px;font-size:12px;line-height:1.4;opacity:.65">${esc(text)}</div>`;
+    thread.appendChild(bubble);
+    // 쓰레드 아래로 스크롤
+    const modalBody = document.getElementById('mateFeedBody');
+    if (modalBody) modalBody.scrollTop = modalBody.scrollHeight;
     inp.value = '';
-    // 현재 열린 메이트 피드 재로드
-    const title = document.getElementById('mateFeedTitle')?.textContent || '';
-    const nick = title.replace('🍽 ', '').replace('의 식단','');
-    if (window._mateCurrentOwner) _mateOpenFeed(window._mateCurrentOwner, nick);
-  } catch(e) { alert('⚠️ ' + e.message); }
+
+    // 서버 호출 (백그라운드)
+    _coachApi('POST', '/api/mate', { action:'message', meal_log_id: mealId, text })
+      .then(() => {
+        // 성공 → opacity 100%로 복구
+        const el = document.getElementById(tempId);
+        if (el) el.querySelector('div').style.opacity = '1';
+      })
+      .catch(e => {
+        // 실패 → 빨간색 + 재시도 안내
+        const el = document.getElementById(tempId);
+        if (el) {
+          el.querySelector('div').style.background = '#DC2626';
+          el.querySelector('div').style.opacity = '1';
+          el.querySelector('div').innerHTML += ' ⚠️ 실패';
+        }
+        console.warn('[mate msg] 실패:', e.message);
+      });
+  } else {
+    // 폴백 · 카드 못 찾으면 기존 방식
+    try {
+      await _coachApi('POST', '/api/mate', { action:'message', meal_log_id: mealId, text });
+      inp.value = '';
+      const title = document.getElementById('mateFeedTitle')?.textContent || '';
+      const nick = title.replace('🍽 ', '').replace('의 식단','');
+      if (window._mateCurrentOwner) _mateOpenFeed(window._mateCurrentOwner, nick);
+    } catch(e) { alert('⚠️ ' + e.message); }
+  }
 }
 
 async function _mateRemove(ownerId) {
