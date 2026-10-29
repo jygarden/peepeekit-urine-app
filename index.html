@@ -20249,12 +20249,16 @@ function saveFoodHistory(result) {
         foods: result.foods || [],
         totals: {
           kcal: result.totalCalories || n.kcal || null,
-          protein_g: n.protein_g || null,
-          carbs_g: n.carbs_g || null,
-          fat_g: n.fat_g || null,
-          sodium_mg: n.sodium_mg || null,
-          fiber_g: n.fiber_g || null,
-          sugar_g: n.sugar_g || null,
+          // nutrition 객체 키는 단위 접미사 없음 (protein, carbs, fat, ...)
+          protein_g: n.protein_g || n.protein || null,
+          carbs_g:   n.carbs_g   || n.carbs   || null,
+          fat_g:     n.fat_g     || n.fat     || null,
+          sodium_mg: n.sodium_mg || n.sodium  || null,
+          fiber_g:   n.fiber_g   || n.fiber   || null,
+          sugar_g:   n.sugar_g   || n.sugar   || null,
+          calcium_mg: n.calcium  || null,
+          iron_mg:    n.iron     || null,
+          vitC_mg:    n.vitC     || null,
           balance_score: result.balanceScore || null
         },
         meal_time: selectedMealTime,
