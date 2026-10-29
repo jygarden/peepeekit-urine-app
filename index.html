@@ -2514,14 +2514,8 @@ window.appIcon = function(name, size){
 
           <!-- ⓐ 내 몸의 신호 · 노란 -->
           <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
-            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="30" height="34" viewBox="0 0 120 130" fill="none">
-                <circle cx="45" cy="30" r="14" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
-                <path d="M14 116 C 14 76, 26 60, 45 60 C 64 60, 76 76, 76 116 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
-                <path d="M32 84 L 40 92 L 54 74" stroke="#3D63D9" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                <path d="M96 24 L 82 62 L 92 62 L 78 106 L 108 56 L 96 56 L 108 24 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
-              </svg>
+            <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
+              <img src="assets/home-icons/nutrition-deficit.png" alt="부족 영양" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div id="v20BodySignalTitle" style="font-size:10.5px;font-weight:800;color:#1D3762;letter-spacing:-.4px;text-align:center;margin-bottom:3px;line-height:1.3;word-break:keep-all;padding:0 2px">내 몸의 신호</div>
             <div style="font-size:10px;color:#B45309;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -2536,19 +2530,8 @@ window.appIcon = function(name, size){
           <!-- ⓑ 식사 기록 · 파란 -->
           <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:linear-gradient(135deg,#EEF2FF 0%,#FFE4D6 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21RecentScore" style="display:none">—점</span>
-            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="36" height="34" viewBox="0 0 130 130" fill="none">
-                <rect x="8" y="46" width="114" height="70" rx="10" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
-                <rect x="12" y="50" width="106" height="6" rx="3" fill="#F1F5F9"/>
-                <path d="M20 68 C 20 82, 25 88, 35 88 C 45 88, 50 82, 50 68 L 20 68 Z" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
-                <ellipse cx="35" cy="68" rx="15" ry="3" fill="#FCD34D" stroke="#0F172A" stroke-width="2"/>
-                <path d="M72 66 C 72 82, 78 88, 88 88 C 98 88, 104 82, 104 66 L 72 66 Z" fill="#78350F" stroke="#0F172A" stroke-width="2"/>
-                <ellipse cx="88" cy="66" rx="16" ry="3" fill="#DC2626"/>
-                <circle cx="28" cy="100" r="6" fill="#22C55E" stroke="#0F172A" stroke-width="1.6"/>
-                <circle cx="52" cy="100" r="6" fill="#F97316" stroke="#0F172A" stroke-width="1.6"/>
-                <circle cx="88" cy="100" r="6" fill="#DC2626" stroke="#0F172A" stroke-width="1.6"/>
-              </svg>
+            <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
+              <img src="assets/home-icons/nutrition-check.png" alt="영양 확인" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div id="v20RecentMealName" style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식사 기록</div>
             <div style="font-size:10px;color:#2E61C4;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -2561,14 +2544,8 @@ window.appIcon = function(name, size){
           <!-- ⓒ 오늘의 운세 · 초록 -->
           <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21FortuneBadge" style="display:none">吉</span>
-            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="34" height="34" viewBox="0 0 130 130" fill="none">
-                <circle cx="65" cy="60" r="46" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
-                <circle cx="65" cy="60" r="40" fill="none" stroke="#0F172A" stroke-width="1.2" opacity=".3" stroke-dasharray="3 3"/>
-                <path d="M65 22 L 74 46 L 100 47 L 80 63 L 87 88 L 65 74 L 43 88 L 50 63 L 30 47 L 56 46 Z" fill="#FBBF24" stroke="#0F172A" stroke-width="2.2" stroke-linejoin="round"/>
-                <path d="M65 22 L 74 46 L 100 47 L 80 63 L 65 22 Z" fill="#F59E0B"/>
-              </svg>
+            <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
+              <img src="assets/home-icons/fortune-ball.png" alt="운세" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">오늘의 운세</div>
             <div style="font-size:10px;color:#065F46;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -2577,20 +2554,8 @@ window.appIcon = function(name, size){
 
           <!-- ⓓ 건강 운동 · 핑크 -->
           <div onclick="try{_v21OpenExercise()}catch(e){}" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
-            <div style="width:36px;height:36px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center;position:relative">
-              <div style="position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:26px;height:4px;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 0%,transparent 60%);filter:blur(2px)"></div>
-              <svg width="32" height="34" viewBox="0 0 120 130" fill="none">
-                <circle cx="60" cy="24" r="10" fill="#FFF" stroke="#0F172A" stroke-width="2.4"/>
-                <path d="M46 44 L 46 82 C 46 88, 50 90, 60 90 C 70 90, 74 88, 74 82 L 74 44 Z" fill="#FFF" stroke="#0F172A" stroke-width="2.4" stroke-linejoin="round"/>
-                <path d="M46 46 C 32 34, 22 20, 24 12" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-                <path d="M74 46 C 88 34, 98 20, 96 12" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-                <circle cx="24" cy="12" r="3.5" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
-                <circle cx="96" cy="12" r="3.5" fill="#FFF" stroke="#0F172A" stroke-width="2"/>
-                <path d="M52 88 L 44 118" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>
-                <path d="M68 88 L 76 118" stroke="#0F172A" stroke-width="2.4" stroke-linecap="round"/>
-                <circle cx="15" cy="30" r="1.5" fill="#FBBF24"/>
-                <circle cx="105" cy="30" r="1.5" fill="#FBBF24"/>
-              </svg>
+            <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
+              <img src="assets/home-icons/exercise.png" alt="운동" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">건강 운동</div>
             <div style="font-size:10px;color:#991B1B;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -5397,7 +5362,24 @@ window.appIcon = function(name, size){
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openCoachShareSheet()" style="background:linear-gradient(135deg,#FFE4D6,#EEF2FF);border-color:#93C5FD;color:#D14938;font-weight:900">🤝 내 식단 공유하기</button>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
+    <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border-color:#FF9F6B;color:#D14938;font-weight:900">🎯 내 식단 목표 수정</button>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
+  </div>
+</div>
+
+<!-- 🎯 식단 목표 선택 모달 -->
+<div id="goalModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9950;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeGoalModal()">
+  <div style="background:#FFF8F0;border-radius:20px;padding:22px 20px 24px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:32px;margin-bottom:4px">🎯</div>
+      <div style="font-size:19px;font-weight:900;color:#3D2B20;letter-spacing:-.4px">내 식단 목표</div>
+      <div style="font-size:12px;color:#8B7268;margin-top:4px">목표에 맞는 음식·영양소를 추천해드려요</div>
+    </div>
+    <div id="goalOptions" style="display:flex;flex-direction:column;gap:9px"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="closeGoalModal()" style="flex:1;background:#FFF;color:#8B7268;border:1px solid #FBE8D7;padding:12px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>
+      <button id="goalSaveBtn" onclick="saveGoal()" style="flex:2;background:#FF6B5B;color:#FFF;border:0;padding:12px;border-radius:12px;font-size:13.5px;font-weight:900;cursor:pointer;font-family:inherit">저장하기</button>
+    </div>
   </div>
 </div>
 
@@ -22121,6 +22103,69 @@ const SB = {
     return this._proxyCall('upsert', table, body, null, conflictCol);
   }
 };
+
+// ═══ 🎯 식단 목표 선택 (6개 카테고리) ═══
+const GOAL_OPTIONS = [
+  { id:'weight_loss', emoji:'🏃‍♀️', title:'체중 감량', desc:'저칼로리·고단백 · 다이어트 중' },
+  { id:'muscle_gain', emoji:'💪', title:'근육 증량', desc:'고단백·충분한 칼로리 · 벌크업' },
+  { id:'balance',     emoji:'⚖️', title:'건강 유지', desc:'균형 잡힌 영양 · 체중 유지' },
+  { id:'nutrition',   emoji:'🌿', title:'영양소 보충', desc:'비타민·미네랄 결핍 해결' },
+  { id:'wellness',    emoji:'🧘', title:'웰빙 식단', desc:'장 건강·면역력 · 염증 ↓' },
+  { id:'disease_mgmt',emoji:'🩺', title:'질환 관리', desc:'저당·저염 · 당뇨·고혈압 예비' }
+];
+let _selectedGoal = null;
+function openGoalModal() {
+  _selectedGoal = localStorage.getItem('userGoal') || null;
+  _renderGoalOptions();
+  const m = document.getElementById('goalModal');
+  if (m) m.style.display = 'flex';
+}
+function closeGoalModal() {
+  const m = document.getElementById('goalModal');
+  if (m) m.style.display = 'none';
+}
+function _renderGoalOptions() {
+  const box = document.getElementById('goalOptions');
+  if (!box) return;
+  box.innerHTML = GOAL_OPTIONS.map(g => {
+    const active = _selectedGoal === g.id;
+    return `<div onclick="_selectGoal('${g.id}')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border:2px solid ${active?'#FF6B5B':'#FBE8D7'};background:${active?'#FFE4D6':'#FFF'};border-radius:13px;cursor:pointer;transition:all .15s">
+      <div style="font-size:26px;flex-shrink:0">${g.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:900;color:#3D2B20;letter-spacing:-.3px">${g.title}</div>
+        <div style="font-size:11.5px;color:#8B7268;font-weight:600;margin-top:2px">${g.desc}</div>
+      </div>
+      ${active?'<div style="width:22px;height:22px;background:#FF6B5B;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0">✓</div>':''}
+    </div>`;
+  }).join('');
+}
+function _selectGoal(id) { _selectedGoal = id; _renderGoalOptions(); }
+async function saveGoal() {
+  if (!_selectedGoal) { alert('목표를 선택해주세요'); return; }
+  const btn = document.getElementById('goalSaveBtn');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '저장 중...';
+  try {
+    const nick = (localStorage.getItem('userName') || '').trim();
+    const headers = { 'Content-Type':'application/json', 'X-Device-Id': getCurrentUserUuid() };
+    if (nick) headers['X-Nickname'] = encodeURIComponent(nick);
+    await fetch('/api/user-goal', { method:'POST', headers, body: JSON.stringify({ goal: _selectedGoal }) }).catch(()=>{});
+    localStorage.setItem('userGoal', _selectedGoal);
+    localStorage.setItem('userGoalAt', new Date().toISOString());
+    if (typeof showPointToast === 'function') showPointToast('🎯 목표 저장됨');
+    closeGoalModal();
+  } catch(e) { alert('⚠️ ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+}
+// 처음 접속 시 3초 뒤 자동 노출 (한 번만)
+try {
+  setTimeout(() => {
+    if (!localStorage.getItem('userGoal') && !localStorage.getItem('userGoalDismissed')) {
+      openGoalModal();
+      localStorage.setItem('userGoalDismissed','1');
+    }
+  }, 3000);
+} catch(e) {}
 console.log('[SB] 프록시 모드 준비됨 (service_role 서버 경유)');
 
 // 현재 사용자 UUID 가져오기 (없으면 새로 생성)
