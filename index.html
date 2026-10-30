@@ -383,6 +383,19 @@ window.appIcon = function(name, size){
 
   /* 홈 상단바 · 설정 톱니바퀴 노출 */
   #screenHome .home-top-bar { display: flex !important; }
+
+  /* 🧹 인체용 전환 · 반려동물 UI 완전 숨김 */
+  #screenPetForm,
+  #screenPetFood,
+  #screenPetFoodPreview,
+  #screenPetFoodResult,
+  #screenPetPantry,
+  [onclick*="enterPetFood"],
+  [onclick*="openPetPantry"],
+  [onclick*="goPetForm"],
+  [onclick*="switchToPet"],
+  .pet-only,
+  button[data-pet="true"] { display: none !important; }
   /* fortune/tip 슬림 2단 컨테이너 숨김 */
   #screenHome .home-wrap > div[style*="grid-template-columns:1fr 1fr"]:not(.home-cards) { display: none !important; }
   /* v10 스토리 원 · 피드 카드 스타일 */
@@ -14041,7 +14054,7 @@ async function sendChatMessage() {
 // ════════════════════════════════════════════════════════════════
 // 🐾 식단/사료 대상 선택
 // ════════════════════════════════════════════════════════════════
-let foodTarget = 'human';  // 'human' or 'pet'
+let foodTarget = 'human';  // 🧹 인체용 전용 · 'pet' 완전 비활성
 
 // v14: 반려동물 사료 · 4카드 각자 촬영
 window.petFoodShots = window.petFoodShots || {};
