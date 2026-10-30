@@ -22911,30 +22911,93 @@ function daysBetween(a, b) {
   return Math.round((db - da) / (1000*60*60*24));
 }
 
+// 🏆 스트릭 마일스톤 (연속일 → 보상)
+const STREAK_MILESTONES = [
+  { days:3,   points:30,  title:'3일 연속!',    emoji:'🌱', msg:'좋은 습관 시작됐어요' },
+  { days:7,   points:70,  title:'일주일 달성!', emoji:'🔥', msg:'일주일 꾸준히 · 멋있어요' },
+  { days:14,  points:150, title:'2주 연속!',    emoji:'💪', msg:'습관으로 자리 잡는 중' },
+  { days:30,  points:400, title:'한 달 달성!',  emoji:'🏆', msg:'진짜 꾸준한 사람이네요' },
+  { days:50,  points:700, title:'50일 돌파!',   emoji:'⭐', msg:'스토어 쿠폰 발급 가능' },
+  { days:100, points:1500,title:'100일 달성!',  emoji:'👑', msg:'건강어때 레전드!' },
+  { days:365, points:5000,title:'1년 연속!',    emoji:'🎉', msg:'이건 진짜 전설입니다' }
+];
+
+function _checkStreakMilestone(streakDays, prevStreak) {
+  // 이번에 처음 도달한 마일스톤 찾기
+  for (const m of STREAK_MILESTONES) {
+    if (streakDays >= m.days && (prevStreak < m.days)) return m;
+  }
+  return null;
+}
+
+function _grantStreakReward(milestone) {
+  try {
+    const pts = parseInt(localStorage.getItem('userPoints') || '0', 10);
+    localStorage.setItem('userPoints', String(pts + milestone.points));
+    // 홈 포인트 뱃지 갱신
+    const pNum = document.getElementById('homePointsNum');
+    if (pNum) pNum.textContent = String(pts + milestone.points);
+    // 마일스톤 기록
+    const log = JSON.parse(localStorage.getItem('streakMilestoneLog') || '[]');
+    log.push({ days: milestone.days, at: new Date().toISOString() });
+    localStorage.setItem('streakMilestoneLog', JSON.stringify(log));
+  } catch(e){}
+}
+
+function _showStreakMilestoneModal(milestone) {
+  const old = document.getElementById('streakMilestoneModal');
+  if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'streakMilestoneModal';
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.65);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .25s';
+  el.onclick = e => { if (e.target === el) el.remove(); };
+  el.innerHTML = `<div style="background:linear-gradient(135deg,#FFF8F0,#FFE4D6);border:2px solid #FF9F6B;border-radius:22px;padding:30px 24px;max-width:340px;width:100%;text-align:center;animation:popIn .35s cubic-bezier(.2,1.4,.4,1);box-shadow:0 20px 60px rgba(255,107,91,.4)">
+    <div style="font-size:62px;margin-bottom:12px;animation:bounce 1s ease-in-out infinite alternate">${milestone.emoji}</div>
+    <div style="font-size:11px;font-weight:900;color:#D14938;letter-spacing:1px;margin-bottom:4px">${milestone.days}일 연속 달성</div>
+    <div style="font-size:22px;font-weight:900;color:#3D2B20;margin-bottom:8px;letter-spacing:-.5px">${milestone.title}</div>
+    <div style="font-size:13px;color:#8B7268;font-weight:600;margin-bottom:18px;line-height:1.5">${milestone.msg}</div>
+    <div style="background:#FFF;border:1.5px dashed #FF9F6B;border-radius:12px;padding:12px;margin-bottom:16px">
+      <div style="font-size:11px;color:#8B7268;font-weight:700;margin-bottom:3px">보상</div>
+      <div style="font-size:20px;font-weight:900;color:#D14938">💎 ${milestone.points}P 지급</div>
+    </div>
+    <button onclick="document.getElementById('streakMilestoneModal').remove()" style="width:100%;background:linear-gradient(135deg,#FF6B5B,#FF9F6B);color:#FFF;border:0;padding:14px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit">받기</button>
+  </div>
+  <style>@keyframes popIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}@keyframes bounce{to{transform:translateY(-10px)}}@keyframes fadeIn{from{opacity:0}to{opacity:1}}</style>`;
+  document.body.appendChild(el);
+}
+
 function updateStreakOnAppOpen() {
   const data = getStreakData();
   const today = todayKey();
   if (data.lastVisit === today) return data; // 오늘 이미 갱신됨
 
+  const prevStreak = data.streak || 0;
+
   if (!data.lastVisit) {
-    // 첫 방문
     data.streak = 1;
     data.longestStreak = 1;
   } else {
     const gap = daysBetween(data.lastVisit, today);
     if (gap === 1) {
-      // 연속!
       data.streak = (data.streak || 0) + 1;
       if (data.streak > (data.longestStreak || 0)) data.longestStreak = data.streak;
     } else if (gap > 1) {
-      // 스트릭 끊김
-      data.streakBroken = data.streak || 0; // 잃은 스트릭
+      data.streakBroken = data.streak || 0;
       data.streak = 1;
     }
-    // gap === 0 은 위에서 리턴함
   }
   data.lastVisit = today;
   saveStreakData(data);
+
+  // 🏆 마일스톤 체크 + 보상
+  try {
+    const milestone = _checkStreakMilestone(data.streak, prevStreak);
+    if (milestone) {
+      _grantStreakReward(milestone);
+      setTimeout(() => _showStreakMilestoneModal(milestone), 1500);
+    }
+  } catch(e) { console.warn('[streak milestone]', e); }
+
   return data;
 }
 
