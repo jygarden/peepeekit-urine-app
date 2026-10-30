@@ -3874,10 +3874,10 @@ window.appIcon = function(name, size){
         <div style="font-size:11px;color:#52698F;font-weight:500">무엇을 분석할지 선택하세요</div>
       </div>
 
-      <!-- ═══ 상단 큰 세그먼트: 사람 / 반려동물 ═══ -->
-      <div style="background:#F5F8FE;border-radius:14px;padding:4px;display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:22px">
-        <button type="button" onclick="_v20SelectAnalyzeTarget('human')" data-tgt="human" class="v20-atgt-btn" style="background:#fff;color:#2E61C4;border:none;padding:12px;border-radius:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 2px 6px rgba(30,58,138,.08)">사람</button>
-        <button type="button" onclick="_v20SelectAnalyzeTarget('pet')" data-tgt="pet" class="v20-atgt-btn" style="background:transparent;color:#52698F;border:none;padding:12px;border-radius:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:-.3px">반려동물</button>
+      <!-- 🧹 사람/반려동물 세그먼트 숨김 (인체용 전용) -->
+      <div style="display:none">
+        <button type="button" data-tgt="human" class="v20-atgt-btn">사람</button>
+        <button type="button" data-tgt="pet" class="v20-atgt-btn">반려동물</button>
       </div>
 
       <!-- ═══ 사람 컨텐츠 · 4카드 ═══ -->
@@ -3928,8 +3928,8 @@ window.appIcon = function(name, size){
         </div>
       </div>
 
-      <!-- ═══ 반려동물 컨텐츠 · 3카드 (원재료 X) ═══ -->
-      <div id="v20AnalyzePetBlock" style="display:none">
+      <!-- 🧹 반려동물 컨텐츠 영구 숨김 (인체용 전용) -->
+      <div id="v20AnalyzePetBlock" style="display:none !important">
         <div style="display:flex;flex-direction:column;gap:11px">
           <button type="button" onclick="enterPet()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
             <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
