@@ -24,7 +24,7 @@ module.exports = async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: '서버에 API 키가 설정되지 않았습니다.' });
 
   try {
-    const { mode = 'detect', imageB64, target = 'human', confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store } = req.body;
+    const { mode = 'detect', imageB64, target = 'human', confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, userGoal } = req.body;
     const memo = String(userMemo || '').trim().slice(0, 200); // 최대 200자 안전 컷
     // 🏪 매장 태그 (선택) · 있으면 블로그 검색 정확도 UP
     const storeInfo = store && store.title ? {
@@ -40,7 +40,7 @@ module.exports = async function handler(req, res) {
 
     if (mode === 'analyze') {
       if (!confirmedFoods || !confirmedFoods.length) return res.status(400).json({ error: '확정된 음식 리스트가 없습니다.' });
-      return await runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo: memo, store: storeInfo, res });
+      return await runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo: memo, store: storeInfo, userGoal, res });
     }
 
     return res.status(400).json({ error: `알 수 없는 mode: ${mode}` });
@@ -353,7 +353,7 @@ async function runDetect({ apiKey, imageB64, target, userMemo, store, res }) {
 }
 
 // ═══ ANALYZE MODE · 확정 음식 → 코칭 텍스트 ═══
-async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, res }) {
+async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, userGoal, res }) {
   // analyze 단계에서도 매장 있으면 블로그 크로스체크 → evidence 재생성
   const searchQuery = store ? store.title : userMemo;
   let naverHints = null, crowdHints = null, claims = [];
@@ -368,7 +368,7 @@ async function runAnalyze({ apiKey, target, confirmedFoods, mealTime, userProfil
 
   const prompt = target === 'pet'
     ? buildPetFoodAnalyzePrompt({ confirmedFoods, userProfile, todayMeals })
-    : buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, claims });
+    : buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, claims, userGoal });
 
   const r = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -597,7 +597,27 @@ ${storeBlock}${storeNameHintBlock}${menuBlock}${memoBlock}${naverBlock}${crowdBl
 }
 
 // ═══ HUMAN · ANALYZE PROMPT ═══
-function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, claims }) {
+function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, todayMeals, userMemo, store, claims, userGoal }) {
+  // 🎯 사용자 목표 블록
+  const goalLabels = {
+    weight_loss: '체중 감량 (다이어트) · 저칼로리·고단백·저지방 중심 · 1일 TDEE-500',
+    muscle_gain: '근육 증량 (벌크업) · 고단백 (체중×1.6g 이상)·충분한 칼로리',
+    balance: '건강 유지 (밸런스) · 균형 잡힌 매크로',
+    nutrition: '영양소 보충 · 비타민·미네랄 결핍 해결 중심',
+    wellness: '웰빙 (장 건강·면역) · 저염·저당·식이섬유·발효식품',
+    disease_mgmt: '생활습관 질환 관리 · 저당(GI<55)·저염(2000mg↓)·저지방'
+  };
+  const goalBlock = userGoal && goalLabels[userGoal] ? `
+
+【이용자 목표 · 코멘트에 반드시 반영】
+"${goalLabels[userGoal]}"
+
+👉 지금 끼니가 이 목표에 **얼마나 맞는지**를 코멘트·조언에 **구체적으로** 언급해.
+   예 (체중감량): "오늘 끼니 kcal 좀 많아요. 밥 반 공기로 줄여볼까요?"
+   예 (근육증량): "단백질 25g · 좋아요. 근데 kcal 조금 더 올리면 좋을 듯."
+   예 (웰빙): "나트륨 1200mg · 조금 짭니다. 다음 끼니는 심심하게."
+` : '';
+
   // 매장 힌트는 이미 detect에서 반영됐지만 analyze에서도 카테고리 컨텍스트 유지
   const storeAnalyzeBlock = store ? `\n【매장】${store.title} · ${store.category || ''}` : '';
   const claimsAnalyzeBlock = (claims && claims.length) ? `\n【블로그 크로스체크】${claims.map(c => {
@@ -623,7 +643,7 @@ function buildHumanFoodAnalyzePrompt({ confirmedFoods, mealTime, userProfile, to
 
   return `너는 건강어때의 AI 영양 코치다. 이번 한 끼가 아니라 오늘 하루 식습관을 코칭한다.
 JSON 하나만 응답. 마크다운 금지.
-
+${goalBlock}
 【건강어때 3원칙 · 반드시 지킬 것】
 ① 영양제 언급 최소화. 자연 식품이 우선이다.
 ② 숫자를 나열하지 말고 행동을 알려준다. (예: X "칼슘 42%" · O "저녁에 우유 한 잔 어때요")

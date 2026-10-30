@@ -363,6 +363,83 @@ function seededUnit(s) {   // 문자열 → 0~1 (같은 입력이면 같은 값)
   return ((h >>> 0) % 10000) / 10000;
 }
 
+// 🎯 목표별 음식 점수 (goal 선택 시 추천 가중치)
+// goal: weight_loss | muscle_gain | balance | nutrition | wellness | disease_mgmt
+function scoreGoal(food, goal) {
+  if (!goal) return { score: 0, reason_codes: [] };
+  const n = food.nutrients_per_serving || {};
+  const kcal = Number(n.kcal) || 0;
+  const protein = Number(n.protein) || 0;
+  const carbs = Number(n.carbs) || 0;
+  const fat = Number(n.fat) || 0;
+  const sodium = Number(n.sodium) || 0;
+  const fiber = Number(n.fiber) || 0;
+  const sugar = Number(n.sugar) || 0;
+  const method = (food.method || '').toLowerCase();
+  const cat = (food.category || '').toLowerCase();
+  const strengths = Array.isArray(food.strengths) ? food.strengths : [];
+  const isHighProtein = strengths.includes('단백질') || protein >= 20;
+  const isLowKcal = kcal < 400;
+  const isFried = method === 'fry' || /튀김/.test(food.name || '');
+  const isSalad = cat === 'salad';
+  const isSoup = cat === 'soup' || cat === 'stew';
+  const hasFiber = strengths.includes('식이섬유') || fiber >= 5;
+
+  let score = 0;
+  const reasons = [];
+
+  if (goal === 'weight_loss') {
+    if (isLowKcal) { score += 25; reasons.push('GOAL_LOW_KCAL'); }
+    if (isHighProtein) { score += 20; reasons.push('GOAL_HIGH_PROTEIN'); }
+    if (kcal >= 700) { score -= 30; reasons.push('GOAL_TOO_MUCH_KCAL'); }
+    if (isFried) { score -= 40; reasons.push('GOAL_FRIED_AVOID'); }
+    if (isSalad) { score += 15; reasons.push('GOAL_SALAD_OK'); }
+    if (hasFiber) { score += 10; reasons.push('GOAL_FIBER_FULL'); }
+  }
+  else if (goal === 'muscle_gain') {
+    if (isHighProtein) { score += 40; reasons.push('GOAL_BULK_PROTEIN'); }
+    if (kcal >= 500) { score += 15; reasons.push('GOAL_BULK_CAL'); }
+    if (kcal < 300) { score -= 20; reasons.push('GOAL_BULK_TOO_LOW'); }
+    if (isSalad && protein < 15) { score -= 25; reasons.push('GOAL_BULK_NEED_MEAT'); }
+    if (protein >= 30) { score += 15; reasons.push('GOAL_BULK_PROTEIN_PLUS'); }
+  }
+  else if (goal === 'balance') {
+    // 균형: 극단적인 거 피하기
+    if (kcal >= 400 && kcal <= 700) { score += 15; reasons.push('GOAL_BAL_KCAL'); }
+    if (protein >= 15 && protein <= 40) { score += 10; reasons.push('GOAL_BAL_PROTEIN'); }
+    if (isFried) { score -= 15; reasons.push('GOAL_BAL_FRIED_SKIP'); }
+    if (hasFiber) { score += 10; reasons.push('GOAL_BAL_FIBER'); }
+  }
+  else if (goal === 'nutrition') {
+    // 영양소 보충: 비타민·미네랄 많은 거
+    if (strengths.length >= 3) { score += 25; reasons.push('GOAL_NUTR_RICH'); }
+    if (strengths.includes('비타민C') || strengths.includes('비타민D')) { score += 15; reasons.push('GOAL_NUTR_VIT'); }
+    if (strengths.includes('철분') || strengths.includes('칼슘') || strengths.includes('마그네슘')) { score += 15; reasons.push('GOAL_NUTR_MIN'); }
+    if (strengths.includes('오메가3')) { score += 15; reasons.push('GOAL_NUTR_OMEGA3'); }
+  }
+  else if (goal === 'wellness') {
+    // 웰빙: 저염·저당·식이섬유·발효
+    if (sodium < 500) { score += 20; reasons.push('GOAL_WELL_LOW_SALT'); }
+    if (sodium > 1200) { score -= 25; reasons.push('GOAL_WELL_HIGH_SALT'); }
+    if (sugar < 10) { score += 10; reasons.push('GOAL_WELL_LOW_SUGAR'); }
+    if (hasFiber) { score += 15; reasons.push('GOAL_WELL_FIBER'); }
+    if (/김치|요거트|된장|낫또|발효/.test(food.name || '')) { score += 15; reasons.push('GOAL_WELL_FERMENT'); }
+    if (isFried) { score -= 30; reasons.push('GOAL_WELL_FRIED_AVOID'); }
+  }
+  else if (goal === 'disease_mgmt') {
+    // 질환 관리: 저당·저염·저지방 중심
+    if (sodium < 500) { score += 20; reasons.push('GOAL_DIS_LOW_SALT'); }
+    if (sodium > 1000) { score -= 30; reasons.push('GOAL_DIS_SALT_WARN'); }
+    if (sugar < 10) { score += 20; reasons.push('GOAL_DIS_LOW_SUGAR'); }
+    if (sugar > 20) { score -= 25; reasons.push('GOAL_DIS_SUGAR_WARN'); }
+    if (fat > 30) { score -= 15; reasons.push('GOAL_DIS_HIGH_FAT'); }
+    if (isFried) { score -= 35; reasons.push('GOAL_DIS_FRIED_AVOID'); }
+    if (hasFiber) { score += 15; reasons.push('GOAL_DIS_FIBER'); }
+  }
+
+  return { score, reason_codes: reasons };
+}
+
 function recommend(ctx, injectedFoodMenu = null) {
   const foodMenu = injectedFoodMenu || loadFoodMenu();
 
@@ -412,24 +489,32 @@ function recommend(ctx, injectedFoodMenu = null) {
     };
   }
 
-  // 2. 점수화
+  // 2. 점수화 (목표 가중치 포함)
+  const goal = ctx.goal || null;
   const scored = candidates.map(food => {
     const nut  = scoreNutrition(food, deficits);
     const pref = scorePreference(food, ctx.preferences || {});
     const div  = scoreDiversity(food, { recent_categories, recent_protein_sources });
     const time = scoreTimeSlot(food, meal_slot);
+    const goa  = scoreGoal(food, goal);  // 🎯 목표 가중치
 
     const breakdown = {
       nutrition:  nut.score,
       preference: pref.score,
       diversity:  div.score,
-      timeslot:   time.score
+      timeslot:   time.score,
+      goal:       goa.score
     };
-    // 다양성 흔들기 · 점수 비슷한 메뉴끼리 순서를 사람·날짜·끼니마다 다르게 (같은 날엔 고정) · 최대 ctx.variety 점
     const jitter = ctx.variety && ctx.variety_seed != null ? ctx.variety * seededUnit(ctx.variety_seed + '|' + food.id) : 0;
-    const total_score = breakdown.nutrition + breakdown.preference + breakdown.diversity + breakdown.timeslot + jitter;
+    const total_score = breakdown.nutrition + breakdown.preference + breakdown.diversity + breakdown.timeslot + breakdown.goal + jitter;
 
-    const reason_codes = generateReasonCodes(nut.reason_codes, pref.reason_codes, div.reason_codes, time.reason_codes);
+    const reason_codes = [
+      ...(nut.reason_codes || []),
+      ...(pref.reason_codes || []),
+      ...(div.reason_codes || []),
+      ...(time.reason_codes || []),
+      ...(goa.reason_codes || [])
+    ];
 
     return { food, total_score, breakdown, reason_codes };
   });
