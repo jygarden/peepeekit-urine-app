@@ -2466,13 +2466,12 @@ window.appIcon = function(name, size){
             <span id="v22StepCount">0 걸음</span>
           </div>
         </div>
-        <!-- 🎯 식단 목표 칩 (상단바 아래 전체 폭) -->
-        <div id="homeGoalChipWrap" style="padding:4px 0 12px;margin-top:50px">
-          <button id="homeGoalChip" onclick="openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border:1px solid #FF9F6B;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:800;color:#D14938;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;width:100%;text-align:left">
-            <span style="font-size:16px;flex-shrink:0">🎯</span>
-            <span style="font-size:10.5px;font-weight:700;color:#8B7268;flex-shrink:0">내 목표</span>
-            <span id="homeGoalText" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#D14938">목표 설정하기</span>
-            <span style="color:#8B7268;font-weight:700;flex-shrink:0">›</span>
+        <!-- 🎯 식단 목표 칩 (작게 · 인사말 밑 왼쪽 정렬) -->
+        <div id="homeGoalChipWrap" style="padding:4px 0 10px">
+          <button id="homeGoalChip" onclick="openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border:1px solid #FF9F6B;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;color:#D14938;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;max-width:60%">
+            <span style="font-size:12px;flex-shrink:0">🎯</span>
+            <span id="homeGoalText" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">목표 설정하기</span>
+            <span style="color:#8B7268;font-weight:700;flex-shrink:0;font-size:11px">›</span>
           </button>
         </div>
         <script>
@@ -22040,7 +22039,7 @@ function openSettings() {
   document.getElementById('settingsCurrentName').textContent = currentName;
   document.getElementById('settingsNameInput').value = '';
   document.getElementById('settingsOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('settingsNameInput').focus(), 100);
+  // 자동 focus 제거 · 사용자가 직접 탭했을 때만 키보드 뜸 (갤럭시 가림 방지)
 }
 function closeSettings() {
   document.getElementById('settingsOverlay').classList.remove('show');

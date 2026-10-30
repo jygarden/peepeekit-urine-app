@@ -59,7 +59,7 @@ async function handlePost(sb, user, res) {
   // 하루 발급 제한 체크 + 기존 코드 폐기를 병렬로 (대기 시간 단축)
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const expiresAt = new Date(Date.now() + SHARE_CODE_TTL_DAYS * 24 * 3600 * 1000).toISOString();
-  const code = generateUniqueShareCode();
+  const code = await generateUniqueShareCode(sb);
 
   // 1·2·3번 쿼리 병렬 실행
   const [countRes, _revokeRes, insertRes] = await Promise.all([
@@ -84,7 +84,7 @@ async function handlePost(sb, user, res) {
   }
   if (insertRes.error) {
     // 코드 충돌 시 1회 재시도
-    const retry = generateUniqueShareCode();
+    const retry = await generateUniqueShareCode(sb);
     const r2 = await sb.from('share_codes')
       .insert({ code: retry, user_id: user.id, expires_at: expiresAt })
       .select('code, expires_at, scopes')
