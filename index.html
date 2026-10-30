@@ -719,7 +719,7 @@ window.appIcon = function(name, size){
     /* 상단 (타이틀 + 벨 버튼) */
     .home-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:32px}
     /* 🆕 새 홈 레이아웃 */
-    .home-top-bar{position:absolute;top:20px;right:26px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:5}
+    .home-top-bar{position:absolute;top:20px;right:16px;display:flex;flex-direction:row;align-items:center;gap:8px;z-index:5}
     .htb-row{display:flex;align-items:center;gap:8px}
     .home-hello{margin-bottom:22px;padding:0 2px}
     .home-hello h1{font-size:24px;font-weight:800;letter-spacing:-.7px;color:var(--gray-900);line-height:1.32;margin-bottom:12px;padding-right:150px}
@@ -2438,21 +2438,17 @@ window.appIcon = function(name, size){
         </div>
         <button onclick="dismissReminder()" style="background:none;border:none;color:#C2410C;font-size:20px;cursor:pointer;padding:4px 8px;font-family:inherit;flex-shrink:0" aria-label="닫기">×</button>
       </div>
-      <!-- 상단 행: 포인트 + 설정 (오른쪽 정렬) -->
+      <!-- 상단 행: streak + 포인트 + 설정 (가로 1줄 정렬) -->
       <div class="home-top-bar">
-        <div class="htb-row">
-          <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge" style="display:none">
-            <span style="font-size:12px">🔥</span> <span id="homeStreakNum">0</span>
-          </button>
-          <button class="settings-btn" onclick="openSettings()" aria-label="설정">
-            <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
-          </button>
-        </div>
-        <div class="htb-row">
-          <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
-            <span class="gem">💎</span> <span id="homePointsNum">0</span>P
-          </button>
-        </div>
+        <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge" style="display:none">
+          <span style="font-size:12px">🔥</span> <span id="homeStreakNum">0</span>
+        </button>
+        <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
+          <span class="gem">💎</span> <span id="homePointsNum">0</span>P
+        </button>
+        <button class="settings-btn" onclick="openSettings()" aria-label="설정">
+          <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
+        </button>
       </div>
 
 
@@ -2467,7 +2463,7 @@ window.appIcon = function(name, size){
           </div>
         </div>
         <!-- 🎯 식단 목표 칩 (작게 · 인사말 밑 왼쪽 정렬) -->
-        <div id="homeGoalChipWrap" style="padding:4px 0 10px">
+        <div id="homeGoalChipWrap" style="padding:6px 0 10px">
           <button id="homeGoalChip" onclick="openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border:1px solid #FF9F6B;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;color:#D14938;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;max-width:60%">
             <span style="font-size:12px;flex-shrink:0">🎯</span>
             <span id="homeGoalText" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">목표 설정하기</span>
