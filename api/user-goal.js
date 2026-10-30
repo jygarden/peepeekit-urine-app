@@ -37,13 +37,19 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const goal = req.body && req.body.goal;
-    if (goal !== null && !VALID_GOALS.has(goal)) {
-      return sendError(res, 400, '잘못된 목표');
+    const rawGoal = req.body && req.body.goal;
+    // CSV 형식 지원 ('weight_loss,wellness') · 각 요소 검증
+    let goalToSave = null;
+    if (rawGoal) {
+      const parts = String(rawGoal).split(',').map(s => s.trim()).filter(Boolean);
+      for (const p of parts) {
+        if (!VALID_GOALS.has(p)) return sendError(res, 400, `잘못된 목표: ${p}`);
+      }
+      goalToSave = parts.join(',');
     }
     const { data, error } = await sb
       .from('app_users')
-      .update({ goal, goal_updated_at: new Date().toISOString() })
+      .update({ goal: goalToSave, goal_updated_at: new Date().toISOString() })
       .eq('id', user.id)
       .select('goal, goal_updated_at')
       .single();

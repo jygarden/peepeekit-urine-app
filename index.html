@@ -2031,10 +2031,11 @@ window.appIcon = function(name, size){
     .feature-card.idcard .fc-title{color:#db2777}
     .feature-section-label{font-size:13px;font-weight:700;color:#334155;margin-bottom:8px}
     /* ── 설정 모달 ── */
-    .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px;animation:cmhFadeIn .2s ease-out}
+    /* 🧹 설정 모달 · 키보드 가림 방지 · align-items:flex-start + 스크롤 가능 */
+    .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;z-index:99999;padding:40px 20px 20px;animation:cmhFadeIn .2s ease-out;overflow-y:auto;-webkit-overflow-scrolling:touch}
     .settings-overlay.show{display:flex}
     @keyframes settingsSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .settings-modal{background:#fff;border-radius:20px;padding:24px 22px 18px;max-width:340px;width:100%;animation:settingsSlide .3s cubic-bezier(.2,.8,.2,1);font-family:inherit;position:relative}
+    .settings-modal{background:#fff;border-radius:20px;padding:24px 22px 18px;max-width:340px;width:100%;animation:settingsSlide .3s cubic-bezier(.2,.8,.2,1);font-family:inherit;position:relative;margin-bottom:60vh}
     .settings-modal h3{font-size:17px;font-weight:800;color:#1D1D1F;margin-bottom:6px;letter-spacing:-.4px}
     .settings-modal .settings-sub{font-size:12px;color:#6E6E73;margin-bottom:18px;letter-spacing:-.1px}
     .settings-modal .settings-current{display:flex;align-items:center;gap:10px;background:#F7F7F5;border-radius:12px;padding:12px 14px;margin-bottom:12px}
@@ -2461,11 +2462,34 @@ window.appIcon = function(name, size){
         <!-- 헤더 · 인사말 (카메라는 하단 탭바 중앙) -->
         <div style="padding:14px 0 4px;display:flex;justify-content:space-between;align-items:center;gap:8px">
           <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:700">재율님</b></div>
-          <!-- 걸음 수 뱃지 · 제거됨 (만보기 기능 없음) · JS 참조 유지 위해 hidden -->
           <div id="v22StepBadge" style="display:none">
             <span id="v22StepCount">0 걸음</span>
           </div>
         </div>
+        <!-- 🎯 식단 목표 칩 (클릭하면 목표 수정 모달) -->
+        <div id="homeGoalChipWrap" style="padding:0 0 10px">
+          <button id="homeGoalChip" onclick="openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border:1px solid #FF9F6B;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:800;color:#D14938;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;max-width:100%">
+            <span>🎯</span>
+            <span id="homeGoalText" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">목표 설정하기</span>
+            <span style="color:#8B7268;font-weight:700">›</span>
+          </button>
+        </div>
+        <script>
+          function _renderHomeGoalBadge(){
+            try {
+              const el = document.getElementById('homeGoalText');
+              if (!el) return;
+              const csv = localStorage.getItem('userGoal') || '';
+              const labels = { weight_loss:'다이어트', muscle_gain:'근육증량', balance:'건강유지', nutrition:'영양소보충', wellness:'웰빙', disease_mgmt:'질환관리' };
+              const ids = csv.split(',').map(s=>s.trim()).filter(Boolean);
+              if (!ids.length) { el.textContent = '목표 설정하기'; return; }
+              const names = ids.map(i => labels[i] || i).join(' · ');
+              el.textContent = names;
+            } catch(e){}
+          }
+          // 초기화 (1초 뒤)
+          setTimeout(_renderHomeGoalBadge, 1000);
+        </script>
         <!-- 스마트 리마인더 · 화면 표시 X · 푸시 알림으로 전환 (JS 참조 유지) -->
         <div id="v22SmartReminderStack" style="display:none"></div>
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
@@ -5378,7 +5402,6 @@ window.appIcon = function(name, size){
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openCoachShareSheet()" style="background:linear-gradient(135deg,#FFE4D6,#EEF2FF);border-color:#93C5FD;color:#D14938;font-weight:900">🤝 내 식단 공유하기</button>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
-    <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border-color:#FF9F6B;color:#D14938;font-weight:900">🎯 내 식단 목표 수정</button>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
   </div>
 </div>
@@ -5386,10 +5409,11 @@ window.appIcon = function(name, size){
 <!-- 🎯 식단 목표 선택 모달 -->
 <div id="goalModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9950;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeGoalModal()">
   <div style="background:#FFF8F0;border-radius:20px;padding:22px 20px 24px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-    <div style="text-align:center;margin-bottom:18px">
+    <div style="text-align:center;margin-bottom:14px">
       <div style="font-size:32px;margin-bottom:4px">🎯</div>
       <div style="font-size:19px;font-weight:900;color:#3D2B20;letter-spacing:-.4px">내 식단 목표</div>
       <div style="font-size:12px;color:#8B7268;margin-top:4px">목표에 맞는 음식·영양소를 추천해드려요</div>
+      <div id="goalSummary" style="font-size:11px;color:#D14938;font-weight:700;margin-top:8px;padding:5px 10px;background:#FFE4D6;border-radius:999px;display:inline-block">여러 개 선택 가능 (최소 1개)</div>
     </div>
     <div id="goalOptions" style="display:flex;flex-direction:column;gap:9px"></div>
     <div style="display:flex;gap:8px;margin-top:16px">
@@ -22131,9 +22155,14 @@ const GOAL_OPTIONS = [
   { id:'wellness',    emoji:'🧘', title:'웰빙 식단', desc:'장 건강·면역력 · 염증 ↓' },
   { id:'disease_mgmt',emoji:'🩺', title:'질환 관리', desc:'저당·저염 · 당뇨·고혈압 예비' }
 ];
-let _selectedGoal = null;
+// 복수 선택 가능 · 배열로 관리
+let _selectedGoals = [];
+function _parseGoals(s) {
+  if (!s) return [];
+  return String(s).split(',').map(x => x.trim()).filter(Boolean);
+}
 function openGoalModal() {
-  _selectedGoal = localStorage.getItem('userGoal') || null;
+  _selectedGoals = _parseGoals(localStorage.getItem('userGoal'));
   _renderGoalOptions();
   const m = document.getElementById('goalModal');
   if (m) m.style.display = 'flex';
@@ -22146,20 +22175,32 @@ function _renderGoalOptions() {
   const box = document.getElementById('goalOptions');
   if (!box) return;
   box.innerHTML = GOAL_OPTIONS.map(g => {
-    const active = _selectedGoal === g.id;
-    return `<div onclick="_selectGoal('${g.id}')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border:2px solid ${active?'#FF6B5B':'#FBE8D7'};background:${active?'#FFE4D6':'#FFF'};border-radius:13px;cursor:pointer;transition:all .15s">
+    const active = _selectedGoals.includes(g.id);
+    return `<div onclick="_toggleGoal('${g.id}')" style="display:flex;align-items:center;gap:12px;padding:13px 14px;border:2px solid ${active?'#FF6B5B':'#FBE8D7'};background:${active?'#FFE4D6':'#FFF'};border-radius:13px;cursor:pointer;transition:all .15s">
       <div style="font-size:26px;flex-shrink:0">${g.emoji}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:900;color:#3D2B20;letter-spacing:-.3px">${g.title}</div>
         <div style="font-size:11.5px;color:#8B7268;font-weight:600;margin-top:2px">${g.desc}</div>
       </div>
-      ${active?'<div style="width:22px;height:22px;background:#FF6B5B;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0">✓</div>':''}
+      <div style="width:22px;height:22px;border:2px solid ${active?'#FF6B5B':'#CBD5E1'};background:${active?'#FF6B5B':'#FFF'};color:#FFF;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0">${active?'✓':''}</div>
     </div>`;
   }).join('');
+  // 선택 요약
+  const summaryEl = document.getElementById('goalSummary');
+  if (summaryEl) {
+    summaryEl.textContent = _selectedGoals.length
+      ? `${_selectedGoals.length}개 선택 · 복수 선택 가능`
+      : '여러 개 선택 가능 (최소 1개)';
+  }
 }
-function _selectGoal(id) { _selectedGoal = id; _renderGoalOptions(); }
+function _toggleGoal(id) {
+  const i = _selectedGoals.indexOf(id);
+  if (i >= 0) _selectedGoals.splice(i, 1);
+  else _selectedGoals.push(id);
+  _renderGoalOptions();
+}
 async function saveGoal() {
-  if (!_selectedGoal) { alert('목표를 선택해주세요'); return; }
+  if (!_selectedGoals.length) { alert('목표를 1개 이상 선택해주세요'); return; }
   const btn = document.getElementById('goalSaveBtn');
   const orig = btn.textContent;
   btn.disabled = true; btn.textContent = '저장 중...';
@@ -22167,11 +22208,14 @@ async function saveGoal() {
     const nick = (localStorage.getItem('userName') || '').trim();
     const headers = { 'Content-Type':'application/json', 'X-Device-Id': getCurrentUserUuid() };
     if (nick) headers['X-Nickname'] = encodeURIComponent(nick);
-    await fetch('/api/user-goal', { method:'POST', headers, body: JSON.stringify({ goal: _selectedGoal }) }).catch(()=>{});
-    localStorage.setItem('userGoal', _selectedGoal);
+    const goalCsv = _selectedGoals.join(',');
+    await fetch('/api/user-goal', { method:'POST', headers, body: JSON.stringify({ goal: goalCsv }) }).catch(()=>{});
+    localStorage.setItem('userGoal', goalCsv);
     localStorage.setItem('userGoalAt', new Date().toISOString());
     if (typeof showPointToast === 'function') showPointToast('🎯 목표 저장됨');
     closeGoalModal();
+    // 홈 뱃지 갱신 (있으면)
+    try { if (typeof _renderHomeGoalBadge === 'function') _renderHomeGoalBadge(); } catch(e){}
   } catch(e) { alert('⚠️ ' + e.message); }
   finally { btn.disabled = false; btn.textContent = orig; }
 }

@@ -489,14 +489,22 @@ function recommend(ctx, injectedFoodMenu = null) {
     };
   }
 
-  // 2. 점수화 (목표 가중치 포함)
-  const goal = ctx.goal || null;
+  // 2. 점수화 (목표 가중치 포함 · 복수 목표 지원)
+  const goalCsv = ctx.goal || null;
+  const goals = goalCsv ? String(goalCsv).split(',').map(s => s.trim()).filter(Boolean) : [];
   const scored = candidates.map(food => {
     const nut  = scoreNutrition(food, deficits);
     const pref = scorePreference(food, ctx.preferences || {});
     const div  = scoreDiversity(food, { recent_categories, recent_protein_sources });
     const time = scoreTimeSlot(food, meal_slot);
-    const goa  = scoreGoal(food, goal);  // 🎯 목표 가중치
+    // 🎯 여러 목표 평균 (복수 선택 시 가중치가 서로 상쇄되지 않게)
+    let goalScore = 0, goalReasons = [];
+    if (goals.length) {
+      const perGoalScores = goals.map(g => scoreGoal(food, g));
+      goalScore = perGoalScores.reduce((s, g) => s + g.score, 0) / goals.length;
+      goalReasons = perGoalScores.flatMap(g => g.reason_codes);
+    }
+    const goa = { score: goalScore, reason_codes: goalReasons };
 
     const breakdown = {
       nutrition:  nut.score,
