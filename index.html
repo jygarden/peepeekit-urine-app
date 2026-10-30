@@ -2588,12 +2588,12 @@ window.appIcon = function(name, size){
             <div id="v21FortuneSub" style="display:none">大吉</div>
           </div>
 
-          <!-- ⓓ 인바디 추적 · 핑크 -->
-          <div onclick="openBodyGraphModal()" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+          <!-- ⓓ 운동 기록 · 핑크 -->
+          <div onclick="openWorkoutModal()" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
-              <img src="assets/home-icons/icon-exercise-v2.png" alt="인바디" style="width:72px;height:72px;object-fit:contain"/>
+              <img src="assets/home-icons/icon-exercise-v2.png" alt="운동" style="width:72px;height:72px;object-fit:contain"/>
             </div>
-            <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">📏 인바디 추적</div>
+            <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">💪 오늘 운동</div>
             <div style="font-size:10px;color:#991B1B;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
           </div>
 
@@ -3942,6 +3942,16 @@ window.appIcon = function(name, size){
             <div style="flex:1;min-width:0">
               <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">수면 체크</div>
               <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px"><span id="v21AnalyzeSleepValue">최근 3일 평균</span> · 5문항 30초</div>
+            </div>
+            <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
+          </button>
+
+          <!-- 📏 인바디 추적 (Phase F) -->
+          <button type="button" onclick="openBodyGraphModal()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
+            <div style="width:44px;height:44px;background:#FFE4D6;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px">📏</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:700;color:#1D3762;letter-spacing:-.3px">인바디 추적</div>
+              <div style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px">체중·체지방·근육량 그래프 · 사진으로 자동 입력</div>
             </div>
             <span style="color:#94A3B8;font-size:18px;font-weight:600">›</span>
           </button>
@@ -5420,6 +5430,47 @@ window.appIcon = function(name, size){
 </div>
 
 <!-- 🏋️ PT 코치 모드 · 공유 코드 바텀시트 -->
+<!-- 💪 운동 기록 모달 -->
+<div id="workoutModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9950;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target===this)closeWorkoutModal()">
+  <div style="background:#FFF8F0;border-radius:20px;padding:22px 20px 24px;max-width:460px;width:100%;margin-bottom:60vh">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:30px;margin-bottom:4px">💪</div>
+      <div style="font-size:19px;font-weight:900;color:#3D2B20">오늘의 운동</div>
+      <div style="font-size:11.5px;color:#8B7268;margin-top:3px">부위·운동·세트 기록해보세요</div>
+    </div>
+
+    <!-- 부위 선택 -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:#8B7268;font-weight:700;display:block;margin-bottom:6px">운동 부위</label>
+      <div id="workoutTypeChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+
+    <!-- 운동 리스트 -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:#8B7268;font-weight:700;display:block;margin-bottom:6px">운동 (+ 세트)</label>
+      <div id="workoutExercises"></div>
+      <button onclick="_addExercise()" style="width:100%;background:#FFF;border:1px dashed #FF9F6B;color:#D14938;padding:10px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:6px">+ 운동 추가</button>
+    </div>
+
+    <!-- 시간 + 메모 -->
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:9px;margin-bottom:14px">
+      <div>
+        <label style="font-size:11px;color:#8B7268;font-weight:700;display:block;margin-bottom:4px">총 시간 (분)</label>
+        <input id="workoutDuration" type="number" placeholder="60" style="width:100%;padding:11px;border:1px solid #FBE8D7;border-radius:10px;font-size:14px;background:#FFF;color:#3D2B20;outline:none;font-family:inherit"/>
+      </div>
+      <div>
+        <label style="font-size:11px;color:#8B7268;font-weight:700;display:block;margin-bottom:4px">메모 (선택)</label>
+        <input id="workoutMemo" type="text" maxlength="200" placeholder="컨디션·소감" style="width:100%;padding:11px;border:1px solid #FBE8D7;border-radius:10px;font-size:13px;background:#FFF;color:#3D2B20;outline:none;font-family:inherit"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button onclick="closeWorkoutModal()" style="flex:1;background:#FFF;color:#8B7268;border:1px solid #FBE8D7;padding:12px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">취소</button>
+      <button id="workoutSaveBtn" onclick="saveWorkout()" style="flex:2;background:#FF6B5B;color:#FFF;border:0;padding:12px;border-radius:11px;font-size:13.5px;font-weight:900;cursor:pointer;font-family:inherit">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- 📏 인바디 추적 모달 -->
 <div id="bodyLogModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9950;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target===this)closeBodyLogModal()">
   <div style="background:#FFF8F0;border-radius:20px;padding:22px 20px 24px;max-width:460px;width:100%;margin-bottom:60vh">
@@ -22483,6 +22534,101 @@ async function _deleteBodyLog(id) {
     await _bodyApi('DELETE', `/api/body-log?id=${encodeURIComponent(id)}`);
     _loadBodyGraph();
   } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 💪 운동 기록
+// ═══════════════════════════════════════════════════════════════
+const WORKOUT_TYPES = [
+  { id:'chest',    emoji:'💪', label:'가슴' },
+  { id:'back',     emoji:'🦾', label:'등' },
+  { id:'leg',      emoji:'🦵', label:'하체' },
+  { id:'shoulder', emoji:'🏋️', label:'어깨' },
+  { id:'arm',      emoji:'💪', label:'팔' },
+  { id:'core',     emoji:'🔥', label:'코어' },
+  { id:'cardio',   emoji:'🏃', label:'유산소' },
+  { id:'full',     emoji:'⭐', label:'전신' }
+];
+let _workoutType = null;
+let _workoutExercises = []; // [{name, sets:[{weight_kg, reps}]}]
+
+function openWorkoutModal() {
+  _workoutType = null;
+  _workoutExercises = [{ name: '', sets: [{ weight_kg: '', reps: '' }] }];
+  document.getElementById('workoutDuration').value = '';
+  document.getElementById('workoutMemo').value = '';
+  _renderWorkoutTypes();
+  _renderWorkoutExercises();
+  document.getElementById('workoutModal').style.display = 'flex';
+}
+function closeWorkoutModal() { document.getElementById('workoutModal').style.display = 'none'; }
+
+function _renderWorkoutTypes() {
+  const box = document.getElementById('workoutTypeChips');
+  if (!box) return;
+  box.innerHTML = WORKOUT_TYPES.map(t => {
+    const active = _workoutType === t.id;
+    return `<button onclick="_selectWorkoutType('${t.id}')" style="background:${active?'#FF6B5B':'#FFF'};color:${active?'#FFF':'#3D2B20'};border:1.5px solid ${active?'#FF6B5B':'#FBE8D7'};padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">${t.emoji} ${t.label}</button>`;
+  }).join('');
+}
+function _selectWorkoutType(id) { _workoutType = id; _renderWorkoutTypes(); }
+
+function _renderWorkoutExercises() {
+  const box = document.getElementById('workoutExercises');
+  if (!box) return;
+  box.innerHTML = _workoutExercises.map((e, ei) => `
+    <div style="background:#FFF;border:1px solid #FBE8D7;border-radius:12px;padding:10px 12px;margin-bottom:8px">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:7px">
+        <input oninput="_workoutExercises[${ei}].name=this.value" value="${(e.name||'').replace(/"/g,'&quot;')}" placeholder="운동명 (예: 벤치프레스)" style="flex:1;padding:8px 10px;border:1px solid #FBE8D7;border-radius:8px;font-size:13px;background:#FFF8F0;outline:none;font-family:inherit"/>
+        <button onclick="_removeExercise(${ei})" style="background:transparent;border:0;color:#DC2626;font-size:16px;cursor:pointer;padding:0 6px">×</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        ${e.sets.map((s, si) => `
+          <div style="display:flex;gap:5px;align-items:center;font-size:11.5px;color:#8B7268">
+            <span style="width:30px;font-weight:800">${si+1}세트</span>
+            <input type="number" step="0.5" oninput="_workoutExercises[${ei}].sets[${si}].weight_kg=this.value" value="${s.weight_kg||''}" placeholder="kg" style="width:60px;padding:6px 8px;border:1px solid #FBE8D7;border-radius:7px;font-size:12px;background:#FFF;color:#3D2B20;outline:none"/>
+            <span>×</span>
+            <input type="number" oninput="_workoutExercises[${ei}].sets[${si}].reps=this.value" value="${s.reps||''}" placeholder="회" style="width:50px;padding:6px 8px;border:1px solid #FBE8D7;border-radius:7px;font-size:12px;background:#FFF;color:#3D2B20;outline:none"/>
+            ${e.sets.length > 1 ? `<button onclick="_removeSet(${ei},${si})" style="background:transparent;border:0;color:#DC2626;font-size:12px;cursor:pointer">−</button>` : ''}
+          </div>
+        `).join('')}
+        <button onclick="_addSet(${ei})" style="background:transparent;border:0;color:#D14938;font-size:11px;font-weight:800;cursor:pointer;padding:4px;font-family:inherit;text-align:left">+ 세트 추가</button>
+      </div>
+    </div>
+  `).join('');
+}
+function _addExercise() { _workoutExercises.push({ name:'', sets:[{weight_kg:'', reps:''}] }); _renderWorkoutExercises(); }
+function _removeExercise(i) { _workoutExercises.splice(i,1); if(!_workoutExercises.length)_workoutExercises=[{name:'',sets:[{weight_kg:'',reps:''}]}]; _renderWorkoutExercises(); }
+function _addSet(i) { _workoutExercises[i].sets.push({weight_kg:'',reps:''}); _renderWorkoutExercises(); }
+function _removeSet(ei, si) { _workoutExercises[ei].sets.splice(si,1); _renderWorkoutExercises(); }
+
+async function saveWorkout() {
+  const exes = _workoutExercises
+    .filter(e => (e.name||'').trim())
+    .map(e => ({
+      name: e.name.trim(),
+      sets: e.sets.filter(s => s.weight_kg || s.reps).map(s => ({ weight_kg: parseFloat(s.weight_kg)||0, reps: parseInt(s.reps)||0 }))
+    }))
+    .filter(e => e.sets.length);
+  if (!exes.length) { alert('⚠️ 운동 1개 이상 입력'); return; }
+  const btn = document.getElementById('workoutSaveBtn');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '저장 중...';
+  try {
+    await _bodyApi('POST', '/api/workout-log', {
+      workout_type: _workoutType,
+      exercises: exes,
+      duration_min: parseInt(document.getElementById('workoutDuration').value) || null,
+      memo: document.getElementById('workoutMemo').value.trim()
+    });
+    if (typeof showPointToast === 'function') showPointToast('💪 운동 저장됨');
+    closeWorkoutModal();
+    // 운동 → 식단 추천 유도 (옵션)
+    if (_workoutType && confirm('운동 끝났으니 단백질 보충 식단 추천 받을까?')) {
+      try { ggGoTab && ggGoTab('today'); } catch(e){}
+    }
+  } catch(e) { alert('⚠️ ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 console.log('[SB] 프록시 모드 준비됨 (service_role 서버 경유)');
 
