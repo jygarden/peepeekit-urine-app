@@ -2462,12 +2462,17 @@ window.appIcon = function(name, size){
             <span id="v22StepCount">0 걸음</span>
           </div>
         </div>
-        <!-- 🎯 식단 목표 칩 (작게 · 인사말 밑 왼쪽 정렬) -->
-        <div id="homeGoalChipWrap" style="padding:6px 0 10px">
+        <!-- 🎯 식단 목표 + 챌린지 칩 (가로 2개) -->
+        <div id="homeGoalChipWrap" style="padding:6px 0 10px;display:flex;gap:6px;flex-wrap:wrap">
           <button id="homeGoalChip" onclick="openGoalModal()" style="background:linear-gradient(135deg,#FFE4D6,#FEE4B8);border:1px solid #FF9F6B;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;color:#D14938;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;max-width:60%">
             <span style="font-size:12px;flex-shrink:0">🎯</span>
             <span id="homeGoalText" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">목표 설정하기</span>
             <span style="color:#8B7268;font-weight:700;flex-shrink:0;font-size:11px">›</span>
+          </button>
+          <button onclick="openChallengeModal()" style="background:linear-gradient(135deg,#D1FAE5,#A7F3D0);border:1px solid #10B981;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;color:#065F46;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">
+            <span style="font-size:12px">🎯</span>
+            <span>오늘 챌린지</span>
+            <span style="color:#059669;font-weight:700;font-size:11px">›</span>
           </button>
         </div>
         <script>
@@ -5430,6 +5435,20 @@ window.appIcon = function(name, size){
 </div>
 
 <!-- 🏋️ PT 코치 모드 · 공유 코드 바텀시트 -->
+<!-- 🎯 일일 챌린지 모달 -->
+<div id="challengeModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9950;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target===this)closeChallengeModal()">
+  <div style="background:#FFF8F0;border-radius:20px;padding:22px 20px 24px;max-width:460px;width:100%">
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:30px;margin-bottom:4px">🎯</div>
+      <div style="font-size:19px;font-weight:900;color:#3D2B20">오늘의 챌린지</div>
+      <div style="font-size:11.5px;color:#8B7268;margin-top:3px">달성하면 포인트 지급 · 매일 자정 리셋</div>
+    </div>
+    <div id="challengeList" style="display:flex;flex-direction:column;gap:9px"></div>
+    <div id="challengeSummary" style="margin-top:14px;padding:10px;background:#FFE4D6;border-radius:10px;text-align:center;font-size:12px;color:#D14938;font-weight:800"></div>
+    <button onclick="closeChallengeModal()" style="width:100%;margin-top:12px;background:#FFF;color:#8B7268;border:1px solid #FBE8D7;padding:12px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">닫기</button>
+  </div>
+</div>
+
 <!-- 💪 운동 기록 모달 -->
 <div id="workoutModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9950;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target===this)closeWorkoutModal()">
   <div style="background:#FFF8F0;border-radius:20px;padding:22px 20px 24px;max-width:460px;width:100%;margin-bottom:60vh">
@@ -22601,6 +22620,101 @@ function _addExercise() { _workoutExercises.push({ name:'', sets:[{weight_kg:'',
 function _removeExercise(i) { _workoutExercises.splice(i,1); if(!_workoutExercises.length)_workoutExercises=[{name:'',sets:[{weight_kg:'',reps:''}]}]; _renderWorkoutExercises(); }
 function _addSet(i) { _workoutExercises[i].sets.push({weight_kg:'',reps:''}); _renderWorkoutExercises(); }
 function _removeSet(ei, si) { _workoutExercises[ei].sets.splice(si,1); _renderWorkoutExercises(); }
+
+// ═══════════════════════════════════════════════════════════════
+// 🎯 일일 챌린지 (매일 바뀜 · 포인트 지급)
+// ═══════════════════════════════════════════════════════════════
+const CHALLENGE_POOL = [
+  { id:'protein_80g',     emoji:'🥩', title:'단백질 80g 이상',  desc:'살코기·계란·두부·요거트', points:30 },
+  { id:'protein_100g',    emoji:'💪', title:'단백질 100g 도전', desc:'헬스족 추천 · +50P',       points:50 },
+  { id:'veg_3times',      emoji:'🥬', title:'야채 3번 먹기',    desc:'아침·점심·저녁 각각',      points:30 },
+  { id:'water_1_5L',      emoji:'💧', title:'물 1.5L 마시기',   desc:'물컵 7잔 정도',            points:20 },
+  { id:'water_2L',        emoji:'🌊', title:'물 2L 챌린지',     desc:'하루 종일 수분 보충',     points:30 },
+  { id:'no_sugar',        emoji:'🚫', title:'당분 0g',          desc:'설탕 음료·간식 금지',      points:40 },
+  { id:'no_fry',          emoji:'🥘', title:'튀김 금지',        desc:'찜·구이·삶기로',           points:30 },
+  { id:'low_sodium',      emoji:'🧂', title:'저염 식단',        desc:'찌개·국물 X',              points:30 },
+  { id:'walk_8000',       emoji:'🚶', title:'걷기 8000보',      desc:'엘리베이터 대신 계단',     points:25 },
+  { id:'walk_10000',      emoji:'🏃', title:'만보 달성',        desc:'하루 10000보',             points:40 },
+  { id:'workout_30min',   emoji:'🏋️', title:'30분 운동',        desc:'유산소 or 근력',           points:40 },
+  { id:'workout_60min',   emoji:'💪', title:'60분 집중 운동',   desc:'헬스장 PT 포함',           points:60 },
+  { id:'sleep_7h',        emoji:'😴', title:'7시간 수면',       desc:'잠 꼭 챙기기',             points:25 },
+  { id:'photo_3meals',    emoji:'📸', title:'3끼 사진 등록',    desc:'아침·점심·저녁',          points:35 },
+  { id:'no_night_snack',  emoji:'🌙', title:'야식 금지',        desc:'저녁 8시 이후 안 먹기',    points:30 },
+  { id:'fiber_rich',      emoji:'🌾', title:'식이섬유 챙기기',  desc:'잡곡밥·채소 꼭',           points:25 },
+  { id:'fruit_1serving',  emoji:'🍎', title:'과일 1인분',       desc:'비타민 보충',              points:20 }
+];
+
+function _getTodayChallenges() {
+  // 오늘 날짜 시드로 3개 선택 (매일 바뀜 · 하루 안에선 고정)
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate();
+  const shuffled = [...CHALLENGE_POOL].sort((a, b) => {
+    const ha = (seed + a.id.length * 7) % 100;
+    const hb = (seed + b.id.length * 7) % 100;
+    return ha - hb;
+  });
+  return shuffled.slice(0, 3);
+}
+
+let _todayCompletedIds = new Set();
+
+function openChallengeModal() {
+  document.getElementById('challengeModal').style.display = 'flex';
+  _loadChallenges();
+}
+function closeChallengeModal() { document.getElementById('challengeModal').style.display = 'none'; }
+
+async function _loadChallenges() {
+  const box = document.getElementById('challengeList');
+  const summary = document.getElementById('challengeSummary');
+  if (!box) return;
+  box.innerHTML = '<div style="padding:20px;text-align:center;color:#8B7268;font-size:13px">불러오는 중...</div>';
+  try {
+    const r = await _bodyApi('GET', '/api/challenge');
+    const completed = r.today || [];
+    _todayCompletedIds = new Set(completed.map(c => c.challenge_id));
+    const challenges = _getTodayChallenges();
+    _renderChallenges(challenges);
+    summary.textContent = `오늘 ${completed.length}/${challenges.length} 달성 · 이번 주 ${r.week_count || 0}회 성공`;
+  } catch(e) {
+    box.innerHTML = `<div style="padding:16px;background:#FEF2F2;color:#991B1B;border-radius:8px;font-size:12.5px">⚠️ ${e.message}</div>`;
+  }
+}
+
+function _renderChallenges(challenges) {
+  const box = document.getElementById('challengeList');
+  if (!box) return;
+  box.innerHTML = challenges.map(c => {
+    const done = _todayCompletedIds.has(c.id);
+    return `<div style="background:${done?'#F0FDF4':'#FFF'};border:2px solid ${done?'#86EFAC':'#FBE8D7'};border-radius:14px;padding:13px;display:flex;align-items:center;gap:12px;${done?'':'cursor:pointer'}" ${done?'':`onclick="_completeChallenge('${c.id}',${c.points})"`}>
+      <div style="font-size:28px;flex-shrink:0;${done?'opacity:.5':''}">${c.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:900;color:${done?'#059669':'#3D2B20'};letter-spacing:-.3px;${done?'text-decoration:line-through':''}">${c.title}</div>
+        <div style="font-size:11.5px;color:#8B7268;font-weight:600;margin-top:2px">${c.desc}</div>
+      </div>
+      <div style="flex-shrink:0;text-align:right">
+        ${done ? '<div style="width:28px;height:28px;background:#22C55E;color:#FFF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900">✓</div>' : `<div style="background:#FFE4D6;color:#D14938;padding:3px 8px;border-radius:999px;font-size:10.5px;font-weight:900">+${c.points}P</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function _completeChallenge(id, points) {
+  if (_todayCompletedIds.has(id)) return;
+  try {
+    const r = await _bodyApi('POST', '/api/challenge', { challenge_id: id, points });
+    _todayCompletedIds.add(id);
+    // 로컬 포인트도 증가
+    try {
+      const pts = parseInt(localStorage.getItem('userPoints') || '0', 10);
+      localStorage.setItem('userPoints', String(pts + points));
+      const pNum = document.getElementById('homePointsNum');
+      if (pNum) pNum.textContent = String(pts + points);
+    } catch(e){}
+    if (typeof showPointToast === 'function') showPointToast(`🎯 +${points}P 획득!`);
+    _loadChallenges();
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
 
 async function saveWorkout() {
   const exes = _workoutExercises
