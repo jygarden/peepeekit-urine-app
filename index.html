@@ -17246,6 +17246,7 @@ function stopUrineLoading() {
 // 👥 크라우드소싱 · 저장 helper (성공·실패 로깅 + 카운터)
 // stage: 'confirm' (확인 버튼) · 'final' (AI 최종 분석 후 · 정확도 UP) · 'edit' (수정)
 function _crowdSave(brand, foodName, ingredients, portion, stage) {
+  const _did = (typeof getCurrentUserUuid === 'function') ? getCurrentUserUuid() : (localStorage.getItem('userUuid') || '');
   if (!foodName || !String(foodName).trim()) return;
   // 재료 3개 미만 노이즈 (간장 홀로 저장 같은 것) 제외
   const ings = Array.isArray(ingredients) ? ingredients.filter(x => x && String(x).trim()) : [];
@@ -17259,7 +17260,7 @@ function _crowdSave(brand, foodName, ingredients, portion, stage) {
   } catch(e){}
   fetch('/api/crowd-save', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Device-Id': _did },
     body: JSON.stringify({
       brand: (brand || '').trim() || null,
       foodName: foodName.trim(),

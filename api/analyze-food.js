@@ -51,33 +51,54 @@ module.exports = async function handler(req, res) {
 };
 
 // ═══ 크라우드소싱 조회 · Supabase에서 이전 수정 데이터 힌트 ═══
+// 👥 크라우드 수정 데이터 조회 (service_role · RLS 우회)
+// 신뢰 기준: 같은 재료를 2명 이상이 수정한 경우만 노출 (악의적 1건 입력 무시)
 async function fetchCrowdHints(brand, foodName) {
   try {
     const url = process.env.SUPABASE_URL;
-    const anon = process.env.SUPABASE_ANON_KEY;
-    if (!url || !anon || !foodName) return null;
+    const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_ANON_KEY;
+    if (!url || !key || !foodName) return null;
     const { createClient } = require('@supabase/supabase-js');
-    const supabase = createClient(url, anon);
+    const supabase = createClient(url, key);
     let query = supabase
       .from('crowd_corrections')
-      .select('ingredients, portion')
+      .select('ingredients, portion, device_id')
       .ilike('food_name', `%${foodName.trim()}%`);
     if (brand && brand.trim()) {
       query = query.ilike('brand', `%${brand.trim()}%`);
     }
-    const { data, error } = await query.order('created_at', { ascending: false }).limit(50);
+    const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
     if (error || !data || data.length === 0) return null;
+
+    // 중복 디바이스 제거 (1명이 10번 저장 못 하게)
+    const seenDevices = new Set();
+    const unique = [];
+    for (const r of data) {
+      const d = r.device_id || `anon_${unique.length}`;
+      if (seenDevices.has(d)) continue;
+      seenDevices.add(d);
+      unique.push(r);
+    }
+
+    // 재료별 카운트
     const ingCount = {};
-    data.forEach(r => {
+    unique.forEach(r => {
       (r.ingredients || []).forEach(ing => {
         const name = typeof ing === 'string' ? ing : (ing.name || '');
         if (name) ingCount[name] = (ingCount[name] || 0) + 1;
       });
     });
-    const top = Object.entries(ingCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    // 2명 이상 합의된 재료만 (악의적 1건 입력 무시)
+    const trusted = Object.entries(ingCount)
+      .filter(([n, c]) => c >= 2)
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0, 8);
+
+    if (!trusted.length) return null;
+
     return {
-      confidence: data.length,
-      topIngredients: top.map(([n,c]) => ({ name: n, count: c }))
+      confidence: unique.length,
+      topIngredients: trusted.map(([n,c]) => ({ name: n, count: c }))
     };
   } catch (e) {
     return null;
@@ -530,8 +551,24 @@ ${crowdHints.topIngredients.map(t => `- ${t.name} (${t.count}명이 확인)`).jo
    - 사진이 다른 음식이면 → 사진 우선 (사이드 메뉴일 수 있음)
 ` : '';
 
+  // 🎯 레퍼런스 음식 리스트 (90개 한식 표준명) · DB 매칭 정확도 ↑
+  const REF_FOODS = ['잡곡밥','나물밥','비빔밥','영양밥','죽','고구마','감자','옥수수','메밀국수','콩국수','달걀요리','두부요리','콩요리','콩나물요리','청국장','된장찌개','생선구이','고등어구이','연어구이','삼치구이','갈치구이','조기구이','멸치볶음','굴비','북엇국','미역국','시금치나물','콩나물무침','나물','브로콜리','당근','토마토','피망','양배추','상추','버섯요리','김치','깍두기','총각김치','오이김치','요거트','우유','치즈','견과류','아몬드','호두','잣','사과','바나나','오렌지','키위','블루베리','딸기','토마토샐러드','그린샐러드','닭가슴살샐러드','연어샐러드','불고기','제육볶음','삼겹살','목살','갈비','스테이크','치킨','탕수육','짜장면','짬뽕','볶음밥','순두부찌개','김치찌개','부대찌개','된장국','미역국','콩나물국','육개장','설렁탕','곰탕','삼계탕','해장국','순대국','국밥','칼국수','잔치국수','쌀국수','우동','라면','떡볶이','김밥','만두','토스트','햄버거','피자','파스타','리조또','샌드위치','초밥','회','회덮밥'];
+
+  const refBlock = `
+【🎯 표준 메뉴 리스트 · 반드시 참고】
+${REF_FOODS.join(' · ')}
+
+규칙:
+1. 사진 속 음식이 위 리스트 중 하나와 명백히 같으면 → **리스트의 이름 그대로 사용** (name 필드)
+   예: "비빔밥"으로 보임 → name="비빔밥" (브랜드/변형 X)
+2. 리스트에 없는 음식이면 → 일반 한식 표기 (예: "두루치기", "파전")
+3. 이름 표기는 공백·조사 없이 간결하게 (잡곡밥 ○ / "잡곡밥 한 공기" X)
+4. 조리법은 strengths·ingredients에, 양은 portion에 분리 저장
+`;
+
   return `너는 한식 이미지 인식 전문가다. 사진 속 음식을 식별하고 1인분 대비 양을 추정한다.
 JSON 하나만 응답한다. 마크다운 코드블록 금지.
+${refBlock}
 ${storeBlock}${storeNameHintBlock}${menuBlock}${memoBlock}${naverBlock}${crowdBlock}${claimsBlock}
 【역할 · 절대 규칙】
 1. 너는 음식 인식과 양 추정만 담당한다.
