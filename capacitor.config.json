@@ -22,13 +22,13 @@
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 1500,
-      "backgroundColor": "#FF6B5B",
+      "backgroundColor": "#2563EB",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
     "StatusBar": {
       "style": "DARK",
-      "backgroundColor": "#FFF8F0"
+      "backgroundColor": "#F8FAFC"
     },
     "PushNotifications": {
       "presentationOptions": ["badge", "sound", "alert"]
