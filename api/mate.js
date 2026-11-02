@@ -27,6 +27,14 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET' && req.query.action === 'meals') {
     return getMealFeed(sb, viewer, req, res);
   }
+  // GET + action=workouts → 운동 피드
+  if (req.method === 'GET' && req.query.action === 'workouts') {
+    return getWorkoutFeed(sb, viewer, req, res);
+  }
+  // GET + action=summary → 종합 (영양 평균·부족 영양소·운동 통계)
+  if (req.method === 'GET' && req.query.action === 'summary') {
+    return getMateSummary(sb, viewer, req, res);
+  }
   // POST + action=message → 식단에 메세지 작성
   if (req.method === 'POST' && req.body && req.body.action === 'message') {
     return postMessage(sb, viewer, req, res);
@@ -37,6 +45,88 @@ module.exports = async function handler(req, res) {
   if (req.method === 'DELETE') return removeMate(sb, viewer, req, res);
   return sendError(res, 405, 'method not allowed');
 };
+
+// 운동 피드 (메이트의 운동 로그 조회)
+async function getWorkoutFeed(sb, viewer, req, res) {
+  const ownerId = req.query.owner_id;
+  if (!ownerId) return sendError(res, 400, 'owner_id 필요');
+  const { data: conn } = await sb.from('mate_connections')
+    .select('scopes').eq('viewer_id', viewer.id).eq('owner_id', ownerId)
+    .is('revoked_at', null).maybeSingle();
+  if (!conn) return sendError(res, 403, '권한 없음');
+
+  const limit = Math.min(50, parseInt(req.query.limit) || 20);
+  const { data, error } = await sb
+    .from('workout_logs')
+    .select('id, workout_date, workout_type, exercises, duration_min, total_volume_kg, memo')
+    .eq('user_id', ownerId)
+    .order('workout_date', { ascending: false })
+    .limit(limit);
+  if (error) return sendError(res, 500, error.message);
+
+  return res.status(200).json({ workouts: data || [] });
+}
+
+// 요약 (최근 7일 영양 평균 + 부족 영양소 · PT에게 디테일 제공)
+async function getMateSummary(sb, viewer, req, res) {
+  const ownerId = req.query.owner_id;
+  if (!ownerId) return sendError(res, 400, 'owner_id 필요');
+  const { data: conn } = await sb.from('mate_connections')
+    .select('scopes').eq('viewer_id', viewer.id).eq('owner_id', ownerId)
+    .is('revoked_at', null).maybeSingle();
+  if (!conn) return sendError(res, 403, '권한 없음');
+
+  const sevenAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+  const [mealsRes, workoutsRes, bodyRes] = await Promise.all([
+    sb.from('meal_logs').select('totals, consumed_at').eq('user_id', ownerId).gte('consumed_at', sevenAgo),
+    sb.from('workout_logs').select('workout_type, total_volume_kg, workout_date').eq('user_id', ownerId)
+      .gte('workout_date', sevenAgo.slice(0, 10)),
+    sb.from('body_logs').select('weight_kg, body_fat_pct, muscle_mass_kg, recorded_at')
+      .eq('user_id', ownerId).order('recorded_at', { ascending: false }).limit(5)
+  ]);
+
+  // 7일 식단 평균
+  const meals = mealsRes.data || [];
+  const avg = (key) => {
+    const vals = meals.map(m => m.totals && m.totals[key]).filter(v => v != null && v > 0);
+    if (!vals.length) return null;
+    return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  };
+  const daily_avg = {
+    meals_per_day: Math.round((meals.length / 7) * 10) / 10,
+    kcal: avg('kcal'),
+    protein_g: avg('protein_g'),
+    carbs_g: avg('carbs_g'),
+    fat_g: avg('fat_g'),
+    sodium_mg: avg('sodium_mg'),
+    fiber_g: avg('fiber_g')
+  };
+
+  // 운동 통계
+  const workouts = workoutsRes.data || [];
+  const type_count = {};
+  workouts.forEach(w => { if (w.workout_type) type_count[w.workout_type] = (type_count[w.workout_type] || 0) + 1; });
+  const workout_stats = {
+    sessions_7d: workouts.length,
+    total_volume_kg: Math.round(workouts.reduce((s, w) => s + (Number(w.total_volume_kg) || 0), 0)),
+    by_type: type_count
+  };
+
+  // 몸 변화
+  const body = (bodyRes.data || []);
+  const body_latest = body[0] || null;
+  const body_prev = body[1] || null;
+  const body_change = (body_latest && body_prev) ? {
+    weight: body_latest.weight_kg != null && body_prev.weight_kg != null
+      ? +(body_latest.weight_kg - body_prev.weight_kg).toFixed(1) : null,
+    body_fat: body_latest.body_fat_pct != null && body_prev.body_fat_pct != null
+      ? +(body_latest.body_fat_pct - body_prev.body_fat_pct).toFixed(1) : null,
+    muscle: body_latest.muscle_mass_kg != null && body_prev.muscle_mass_kg != null
+      ? +(body_latest.muscle_mass_kg - body_prev.muscle_mass_kg).toFixed(1) : null
+  } : null;
+
+  return res.status(200).json({ daily_avg, workout_stats, body_latest, body_change });
+}
 
 // POST /api/mate  { action:'message', meal_log_id, text }
 // viewer 또는 owner 둘 다 메세지 작성 가능 (해당 식단 접근 권한 확인)
