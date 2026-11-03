@@ -35,6 +35,14 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET' && req.query.action === 'summary') {
     return getMateSummary(sb, viewer, req, res);
   }
+  // GET + action=viewers → 내 식단을 보고 있는 사람 리스트 (owner_id=나)
+  if (req.method === 'GET' && req.query.action === 'viewers') {
+    return listViewers(sb, viewer, res);
+  }
+  // DELETE + action=remove_viewer → 특정 viewer 끊기 (owner 쪽에서)
+  if (req.method === 'DELETE' && req.query.action === 'remove_viewer') {
+    return removeViewer(sb, viewer, req, res);
+  }
   // POST + action=message → 식단에 메세지 작성
   if (req.method === 'POST' && req.body && req.body.action === 'message') {
     return postMessage(sb, viewer, req, res);
@@ -204,6 +212,46 @@ async function listMates(sb, viewer, res) {
   }));
 
   return res.status(200).json({ mates });
+}
+
+// 내 식단을 보고 있는 사람 리스트 (owner_id=나)
+async function listViewers(sb, owner, res) {
+  const { data, error } = await sb
+    .from('mate_connections')
+    .select(`
+      id, granted_at, scopes, granted_via_code,
+      viewer:app_users!mate_connections_viewer_id_fkey(id, nickname, last_active_at)
+    `)
+    .eq('owner_id', owner.id)
+    .is('revoked_at', null)
+    .order('granted_at', { ascending: false });
+  if (error) return sendError(res, 500, error.message);
+  const viewers = (data || []).map(row => {
+    const v = row.viewer || {};
+    const days = Math.floor((Date.now() - new Date(row.granted_at).getTime()) / 86400000);
+    return {
+      viewer_id: v.id,
+      nickname: v.nickname || '메이트',
+      granted_at: row.granted_at,
+      granted_via_code: row.granted_via_code,
+      days_since: days
+    };
+  });
+  return res.status(200).json({ viewers });
+}
+
+async function removeViewer(sb, owner, req, res) {
+  const viewerId = req.query && req.query.viewer_id;
+  if (!viewerId) return sendError(res, 400, 'viewer_id 필요');
+  const { data, error } = await sb
+    .from('mate_connections')
+    .update({ revoked_at: new Date().toISOString(), revoked_by: 'owner' })
+    .eq('owner_id', owner.id)
+    .eq('viewer_id', viewerId)
+    .is('revoked_at', null)
+    .select('id');
+  if (error) return sendError(res, 500, error.message);
+  return res.status(200).json({ ok: true, revoked: data?.length || 0 });
 }
 
 async function addMate(sb, viewer, req, res) {

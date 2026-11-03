@@ -23750,13 +23750,19 @@ async function renderMateScreen() {
 }
 async function loadMateScreen() {
   try {
-    const [codeRes, coachesRes, matesRes] = await Promise.all([
+    const [codeRes, coachesRes, matesRes, viewersRes] = await Promise.all([
       _coachApi('GET', '/api/user-share-code'),
       _coachApi('GET', '/api/user-coaches'),
-      _coachApi('GET', '/api/mate')
+      _coachApi('GET', '/api/mate'),
+      _coachApi('GET', '/api/mate?action=viewers')
     ]);
     _mateRenderCode(codeRes.active);
-    _mateRenderViewers(coachesRes.coaches || []);
+    // PT 코치 + 일반 메이트 통합 표시
+    const combined = [
+      ...(coachesRes.coaches || []).map(c => ({ _kind:'coach', ...c })),
+      ...(viewersRes.viewers || []).map(v => ({ _kind:'mate', ...v }))
+    ];
+    _mateRenderViewers(combined);
     _mateRenderFollowing(matesRes.mates || []);
   } catch(e) {
     console.warn('[mate] load fail', e.message);
@@ -23778,27 +23784,49 @@ function _mateRenderCode(active) {
     expEl.textContent = '아래 재발급 눌러서 코드 생성';
   }
 }
-function _mateRenderViewers(coaches) {
+function _mateRenderViewers(viewers) {
   const list = document.getElementById('mateViewerList');
   const empty = document.getElementById('mateViewerEmpty');
   const count = document.getElementById('mateViewerCount');
-  if (count) count.textContent = coaches.length;
+  if (count) count.textContent = viewers.length;
   if (!list || !empty) return;
-  if (!coaches.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
+  if (!viewers.length) { list.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
-  list.innerHTML = coaches.map(c => {
-    const t = c.trainer || {};
-    const days = Math.floor((Date.now() - new Date(c.granted_at).getTime()) / 86400000);
-    const name = (t.name || '').replace(/[<>]/g,'');
-    const gym = t.gym_name ? ` · ${t.gym_name.replace(/[<>]/g,'')}` : '';
+  const esc = s => String(s||'').replace(/[<>]/g,'');
+  list.innerHTML = viewers.map(v => {
+    // PT 코치 (c._kind === 'coach')
+    if (v._kind === 'coach' || v.trainer) {
+      const t = v.trainer || {};
+      const days = Math.floor((Date.now() - new Date(v.granted_at).getTime()) / 86400000);
+      const name = esc(t.name || '');
+      const gym = t.gym_name ? ` · ${esc(t.gym_name)}` : '';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;background:#FEF9E7;border:1px solid #FCD34D;border-radius:10px;padding:9px 11px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:800;font-size:12.5px;color:#78350F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🏋️ ${name}${gym} <span style="background:#F59E0B;color:#FFF;font-size:9px;padding:1px 5px;border-radius:4px;margin-left:3px">PT</span></div>
+          <div style="font-size:10.5px;color:#92400E;margin-top:1px">등록 D+${days}</div>
+        </div>
+        <button onclick="revokeOneCoach('${t.id}')" style="background:#FFF;border:1px solid #FCA5A5;color:#B91C1C;border-radius:7px;padding:5px 9px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">해제</button>
+      </div>`;
+    }
+    // 일반 메이트 (v._kind === 'mate')
+    const name = esc(v.nickname || '메이트');
     return `<div style="display:flex;align-items:center;justify-content:space-between;background:#F8FAFC;border:1px solid #E5E7EB;border-radius:10px;padding:9px 11px">
       <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:12.5px;color:#0F172A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}${gym}</div>
-        <div style="font-size:10.5px;color:#64748B;margin-top:1px">등록 D+${days}</div>
+        <div style="font-weight:800;font-size:12.5px;color:#0F172A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">👤 ${name}</div>
+        <div style="font-size:10.5px;color:#64748B;margin-top:1px">등록 D+${v.days_since || 0}</div>
       </div>
-      <button onclick="revokeOneCoach('${t.id}')" style="background:#FFF;border:1px solid #FCA5A5;color:#B91C1C;border-radius:7px;padding:5px 9px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">해제</button>
+      <button onclick="_mateRevokeViewer('${v.viewer_id}','${name.replace(/'/g,"\\'")}')" style="background:#FFF;border:1px solid #FCA5A5;color:#B91C1C;border-radius:7px;padding:5px 9px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit">해제</button>
     </div>`;
   }).join('');
+}
+
+async function _mateRevokeViewer(viewerId, name) {
+  if (!confirm(`${name}이(가) 내 식단 보는 걸 끊을까요?`)) return;
+  try {
+    await _coachApi('DELETE', `/api/mate?action=remove_viewer&viewer_id=${encodeURIComponent(viewerId)}`);
+    await loadMateScreen();
+    if (typeof showPointToast === 'function') showPointToast('🚫 메이트 해제됨');
+  } catch(e) { alert('⚠️ ' + e.message); }
 }
 
 async function revokeAllCoaches() {
