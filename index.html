@@ -2506,8 +2506,8 @@ window.appIcon = function(name, size){
           <!-- 본문 · 텍스트만 가운데 정렬 · 일러스트/kcal 제거 (Phase 7.5.1) -->
           <div style="position:relative;z-index:2;margin-bottom:32px;text-align:center;padding:8px 12px 0">
             <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
-            <div id="v21HeroTitle" style="font-size:26px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.25;margin-top:2px;margin-bottom:14px">
-              오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="display:inline-block;background:linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%);padding:0 4px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
+            <div id="v21HeroTitle" style="font-size:25px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.25;margin-top:2px;margin-bottom:14px">
+              오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="font-size:28px;font-weight:900;color:#FFF;letter-spacing:-.8px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
             </div>
             <!-- Why · Gemini reason 들어감 -->
             <div id="v21RecWhy" style="font-size:12.5px;color:rgba(255,255,255,.88);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal;max-width:280px;margin:0 auto">지금 이 시간에 딱 맞는 한 끼 · 잠시만요</div>
@@ -2547,8 +2547,10 @@ window.appIcon = function(name, size){
           </div>
         </div>
 
-        <!-- 말풍선 꼬리 ↓ (히어로에서 아래 카드로 가리킴) -->
-        <div style="width:0;height:0;margin:0 0 14px 48px;border-left:14px solid transparent;border-right:14px solid transparent;border-top:14px solid #3D63D9"></div>
+        <!-- 말풍선 꼬리 ↘ (로고와 동일한 오른쪽 아래 꼬리) -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+          <div style="width:0;height:0;margin-right:36px;border-left:14px solid transparent;border-right:14px solid transparent;border-top:16px solid #3D63D9"></div>
+        </div>
 
         <!-- 실천 카드 (히든) -->
         <div id="v21PracticeCard" style="display:none">
@@ -2602,7 +2604,7 @@ window.appIcon = function(name, size){
           <!-- ⓓ 운동 기록 · 흰 -->
           <div onclick="openWorkoutModal()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
-              <img src="assets/home-icons/icon-exercise-v2.png" alt="운동" style="width:72px;height:72px;object-fit:contain" onerror="this.src='assets/workout-icons/part-chest.png'"/>
+              <img src="assets/workout-icons/part-fullbody.png" alt="운동" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">💪 오늘 운동</div>
             <div style="font-size:10px;color:#2563EB;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
@@ -4437,11 +4439,29 @@ window.appIcon = function(name, size){
           <div id="mateFollowingEmpty" style="padding:16px 10px;color:#94A3B8;font-size:11.5px;text-align:center">위에 코드 입력해서 메이트 추가해보세요</div>
         </div>
 
-        <!-- Phase 2 예고 -->
-        <div style="background:#EFF6FF;border:1px dashed #CBD5E1;border-radius:14px;padding:16px;text-align:center;color:#64748B">
-          <div style="font-size:28px;margin-bottom:6px">🚧</div>
-          <div style="font-size:13px;font-weight:800;color:#0F172A;margin-bottom:4px">곧 추가될 기능</div>
-          <div style="font-size:11.5px;line-height:1.5">· 좋아요·댓글·챌린지<br/>· 메이트 식단 타임라인 피드</div>
+        <!-- 소셜 안내 -->
+        <div style="background:#EFF4FF;border:1px solid #DBEAFE;border-radius:14px;padding:14px;color:#1E40AF">
+          <div style="font-size:13px;font-weight:900;margin-bottom:5px">💬 메이트 상호작용</div>
+          <div style="font-size:11.5px;line-height:1.6;color:#334155">
+            · 메이트 식단·운동에 <b>❤️ 좋아요</b> 누르고 <b>💬 댓글</b> 달 수 있어요<br/>
+            · 메이트 운동 기록 하단 <b>"📥 이 루틴 가져오기"</b>로 내 루틴에 저장<br/>
+            · 저장한 루틴은 운동 모달 상단에서 바로 불러오기
+          </div>
+        </div>
+
+        <!-- 💬 댓글 바텀시트 (좋아요·댓글용) -->
+        <div id="socialCommentsSheet" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9970;align-items:flex-end;justify-content:center" onclick="if(event.target===this)_closeSocialComments()">
+          <div style="background:#FFF;width:100%;max-width:500px;max-height:75vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:14px 18px;border-bottom:1px solid #E5E7EB;display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:14.5px;font-weight:900;color:#0F172A">💬 댓글</div>
+              <button onclick="_closeSocialComments()" style="background:transparent;border:0;font-size:18px;color:#64748B;cursor:pointer">✕</button>
+            </div>
+            <div id="socialCommentsList" style="flex:1;overflow-y:auto;padding:14px 16px"></div>
+            <div style="padding:12px 14px;border-top:1px solid #E5E7EB;background:#F8FAFC;display:flex;gap:7px">
+              <input id="socialCommentInput" placeholder="댓글 남기기..." maxlength="500" onkeydown="if(event.key==='Enter')_sendSocialComment()" style="flex:1;padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:13px;background:#FFF;outline:none;font-family:inherit"/>
+              <button onclick="_sendSocialComment()" style="background:#2563EB;color:#FFF;border:0;padding:10px 15px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit">전송</button>
+            </div>
+          </div>
         </div>
 
         <!-- 메이트 상세 모달 · 식단/운동/요약 3탭 -->
@@ -22668,13 +22688,19 @@ function openWorkoutModal() {
 }
 function closeWorkoutModal() { document.getElementById('workoutModal').style.display = 'none'; }
 
-// 부위 칩
+// 부위 선택 그리드 (PNG 아이콘 + 라벨)
 function _renderWorkoutTypes() {
   const box = document.getElementById('workoutTypeChips');
   if (!box) return;
+  box.style.display = 'grid';
+  box.style.gridTemplateColumns = 'repeat(4, 1fr)';
+  box.style.gap = '7px';
   box.innerHTML = WORKOUT_TYPES.map(t => {
     const active = _workoutType === t.id;
-    return `<button onclick="_selectWorkoutType('${t.id}')" style="background:${active?'#2563EB':'#FFF'};color:${active?'#FFF':'#0F172A'};border:1.5px solid ${active?'#2563EB':'#E5E7EB'};padding:7px 11px;border-radius:999px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">${t.emoji} ${t.label}</button>`;
+    return `<button onclick="_selectWorkoutType('${t.id}')" style="background:${active?'#DBEAFE':'#FFF'};border:1.5px solid ${active?'#2563EB':'#EDEFF4'};padding:9px 4px 7px;border-radius:14px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px">
+      <img src="${t.iconPng}" alt="${t.label}" style="width:40px;height:40px;object-fit:contain" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span style=\\'font-size:28px;line-height:1\\'>${t.emoji}</span>')"/>
+      <span style="font-size:11px;font-weight:800;color:${active?'#1E40AF':'#0F172A'}">${t.label}</span>
+    </button>`;
   }).join('');
 }
 function _selectWorkoutType(id) {
@@ -22764,19 +22790,19 @@ function _renderWorkoutExercises() {
             <div style="font-size:13.5px;font-weight:900">🏃 ${e.name}</div>
             <button onclick="_removeExerciseByIdx(${ei})" style="background:transparent;border:0;color:#DC2626;font-size:16px;cursor:pointer;padding:0 6px">×</button>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-            <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px">
+          <div style="display:flex;gap:7px;align-items:stretch">
+            <div style="flex:1;min-width:0;background:#F8FAFC;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px">
               <div style="font-size:10.5px;color:#64748B;font-weight:800">거리</div>
               <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
-                <input type="number" step="0.1" oninput="_workoutExercises[${ei}].distance_km=this.value;_renderWorkoutExercises()" value="${e.distance_km||''}" placeholder="5.0" style="flex:1;background:transparent;border:0;font-size:16px;font-weight:900;color:#0F172A;outline:none;font-family:inherit;min-width:0;padding:0"/>
-                <span style="font-size:10.5px;color:#64748B;font-weight:800">km</span>
+                <input type="number" step="0.1" min="0" max="500" oninput="_workoutExercises[${ei}].distance_km=this.value;_renderWorkoutExercises()" value="${e.distance_km||''}" placeholder="5.0" style="flex:1;background:transparent;border:0;font-size:15px;font-weight:900;color:#0F172A;outline:none;font-family:inherit;min-width:0;padding:0;-moz-appearance:textfield" onwheel="this.blur()"/>
+                <span style="font-size:10.5px;color:#64748B;font-weight:800;flex-shrink:0">km</span>
               </div>
             </div>
-            <div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px">
+            <div style="flex:1;min-width:0;background:#F8FAFC;border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px">
               <div style="font-size:10.5px;color:#64748B;font-weight:800">시간</div>
               <div style="display:flex;align-items:center;gap:4px;margin-top:1px">
-                <input type="number" oninput="_workoutExercises[${ei}].duration_min=this.value;_renderWorkoutExercises()" value="${e.duration_min||''}" placeholder="30" style="flex:1;background:transparent;border:0;font-size:16px;font-weight:900;color:#0F172A;outline:none;font-family:inherit;min-width:0;padding:0"/>
-                <span style="font-size:10.5px;color:#64748B;font-weight:800">분</span>
+                <input type="number" min="0" max="600" oninput="_workoutExercises[${ei}].duration_min=this.value;_renderWorkoutExercises()" value="${e.duration_min||''}" placeholder="30" style="flex:1;background:transparent;border:0;font-size:15px;font-weight:900;color:#0F172A;outline:none;font-family:inherit;min-width:0;padding:0;-moz-appearance:textfield" onwheel="this.blur()"/>
+                <span style="font-size:10.5px;color:#64748B;font-weight:800;flex-shrink:0">분</span>
               </div>
             </div>
           </div>
@@ -22875,6 +22901,23 @@ function _manageRoutines() {
   routines.splice(idx, 1);
   _saveRoutines(routines);
   _renderRoutineBar();
+}
+
+// 메이트 운동을 내 루틴으로 복사
+function _copyMateWorkoutAsRoutine(encodedPayload) {
+  try {
+    const payload = JSON.parse(decodeURIComponent(encodedPayload));
+    const routines = _getRoutines();
+    routines.unshift({
+      name: payload.name.slice(0, 60),
+      type: payload.workout_type,
+      exercises: payload.exercises || [],
+      created: Date.now(),
+      copied_from_mate: true
+    });
+    _saveRoutines(routines.slice(0, 20));
+    alert('💾 내 루틴에 저장됨 · 운동 기록 모달에서 바로 사용 가능');
+  } catch(e) { alert('⚠️ ' + e.message); }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -23322,8 +23365,33 @@ async function _mateLoadWorkouts() {
       return;
     }
     const typeLabels = {chest:'가슴',back:'등',leg:'하체',shoulder:'어깨',arm:'팔',core:'코어',cardio:'유산소',full:'전신',other:'기타'};
+    const ownerId = window._mateCurrentOwner || '';
     body.innerHTML = workouts.map(w => {
       const exs = Array.isArray(w.exercises) ? w.exercises : [];
+      // 유산소 vs 근력 구분 렌더
+      const exHtml = exs.map(e => {
+        if (e.type === 'cardio' || e.distance_km || e.duration_min) {
+          const d = e.distance_km || 0, t = e.duration_min || 0;
+          const pace = (d && t) ? ((t / d) || 0) : 0;
+          const paceStr = pace ? `${Math.floor(pace)}'${String(Math.round((pace%1)*60)).padStart(2,'0')}"/km` : '';
+          return `<div style="padding:7px 0;border-top:1px dashed #E5E7EB;font-size:12.5px">
+            <div style="font-weight:800;color:#0F172A">🏃 ${(e.name||'').replace(/[<>&]/g,'')}</div>
+            <div style="font-size:11px;color:#64748B;margin-top:2px">${d}km · ${t}분${paceStr ? ' · ' + paceStr : ''}</div>
+          </div>`;
+        }
+        const setsStr = (e.sets || []).map((s, i) => `${s.weight_kg}×${s.reps}`).join(' / ');
+        const vol = (e.sets || []).reduce((sum, s) => sum + (Number(s.weight_kg) || 0) * (Number(s.reps) || 0), 0);
+        return `<div style="padding:7px 0;border-top:1px dashed #E5E7EB;font-size:12.5px">
+          <div style="font-weight:800;color:#0F172A">💪 ${(e.name||'').replace(/[<>&]/g,'')}</div>
+          <div style="font-size:11px;color:#64748B;margin-top:2px">${setsStr}${vol ? ` · 볼륨 ${vol}kg` : ''}</div>
+        </div>`;
+      }).join('');
+      // 루틴으로 저장 데이터
+      const routinePayload = encodeURIComponent(JSON.stringify({
+        name: `${window._mateCurrentNickname || '메이트'}의 ${typeLabels[w.workout_type] || '운동'} (${new Date(w.workout_date).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})})`,
+        workout_type: w.workout_type,
+        exercises: exs
+      }));
       return `<div style="background:#FFF;border:1px solid #E5E7EB;border-radius:12px;padding:13px;margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div style="font-size:12px;color:#64748B;font-weight:700">${new Date(w.workout_date).toLocaleDateString('ko-KR')}</div>
@@ -23332,16 +23400,11 @@ async function _mateLoadWorkouts() {
             ${w.duration_min ? `<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:800">${w.duration_min}분</span>` : ''}
           </div>
         </div>
-        ${exs.map(e => {
-          const setsStr = (e.sets || []).map((s, i) => `${s.weight_kg}×${s.reps}`).join(' / ');
-          const vol = (e.sets || []).reduce((sum, s) => sum + (Number(s.weight_kg) || 0) * (Number(s.reps) || 0), 0);
-          return `<div style="padding:7px 0;border-top:1px dashed #E5E7EB;font-size:12.5px">
-            <div style="font-weight:800;color:#0F172A">${(e.name||'').replace(/[<>&]/g,'')}</div>
-            <div style="font-size:11px;color:#64748B;margin-top:2px">${setsStr}${vol ? ` · 볼륨 ${vol}kg` : ''}</div>
-          </div>`;
-        }).join('')}
+        ${exHtml}
         ${w.total_volume_kg ? `<div style="margin-top:8px;padding:7px;background:#DBEAFE;border-radius:8px;text-align:center;font-size:11.5px;color:#1E40AF;font-weight:800">총 볼륨 ${Math.round(w.total_volume_kg).toLocaleString()}kg</div>` : ''}
         ${w.memo ? `<div style="margin-top:7px;font-size:11.5px;color:#64748B">💬 ${(w.memo||'').replace(/[<>&]/g,'')}</div>` : ''}
+        <button onclick="_copyMateWorkoutAsRoutine('${routinePayload}')" style="width:100%;margin-top:8px;background:#EFF4FF;color:#1E40AF;border:1px solid #DBEAFE;padding:7px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">📥 이 루틴 가져오기</button>
+        ${_socialBar('workout', w.id, ownerId)}
       </div>`;
     }).join('');
   } catch(e) {
@@ -23401,6 +23464,7 @@ function _mateFmtMeal(m) {
         </div>`).join('')}
     </div>` : '';
 
+  const ownerId = window._mateCurrentOwner || '';
   return `<div style="background:#FFF;border:1px solid #E5E7EB;border-radius:14px;padding:13px 15px;margin-bottom:11px;box-shadow:0 1px 4px rgba(255,107,91,.04)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
       <div style="font-size:10.5px;color:#64748B;font-weight:700">${when}</div>
@@ -23411,11 +23475,160 @@ function _mateFmtMeal(m) {
     ${barHtml}
     ${metaHtml}
     ${msgsHtml}
-    <div style="display:flex;gap:6px;margin-top:10px">
+    ${_socialBar('meal', m.id, ownerId)}
+    <div style="display:flex;gap:6px;margin-top:8px">
       <input id="mi_${m.id}" placeholder="메세지 남기기..." maxlength="500" style="flex:1;font-size:12px;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;outline:none;background:#F8FAFC;color:#0F172A"/>
       <button onclick="_mateSendMsg('${m.id}')" style="background:#2563EB;color:#FFF;border:0;padding:7px 13px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">전송</button>
     </div>
   </div>`;
+}
+
+// ═══ 소셜 바 (좋아요 · 댓글) · 식단/운동 공통 ═══
+function _socialBar(targetType, targetId, targetOwnerId) {
+  const uid = `sb_${targetType}_${targetId}`;
+  // 초기엔 플레이스홀더 · 마운트 후 _loadSocial 호출로 채움
+  setTimeout(() => _loadSocialCounts(uid, targetType, targetId), 50);
+  return `
+    <div id="${uid}" style="display:flex;align-items:center;gap:14px;margin-top:9px;padding-top:9px;border-top:1px solid #F0F1F5;font-size:12px;color:#64748B;font-weight:700">
+      <button onclick="_toggleSocialLike('${targetType}','${targetId}','${targetOwnerId}','${uid}')" style="background:transparent;border:0;cursor:pointer;display:flex;align-items:center;gap:4px;color:inherit;font-family:inherit;padding:2px 0" data-liked="0">
+        <span class="sb-heart" style="font-size:15px">♡</span>
+        <span class="sb-like-count">0</span>
+      </button>
+      <button onclick="_openSocialComments('${targetType}','${targetId}','${targetOwnerId}','${uid}')" style="background:transparent;border:0;cursor:pointer;display:flex;align-items:center;gap:4px;color:inherit;font-family:inherit;padding:2px 0">
+        <span style="font-size:14px">💬</span>
+        <span class="sb-comment-count">0</span>
+      </button>
+    </div>`;
+}
+
+async function _loadSocialCounts(uid, targetType, targetId) {
+  try {
+    const r = await _coachApi('GET', `/api/mate-social?target_type=${targetType}&target_id=${encodeURIComponent(targetId)}`);
+    const box = document.getElementById(uid);
+    if (!box) return;
+    const likeBtn = box.querySelector('button:first-child');
+    const heart = box.querySelector('.sb-heart');
+    const likeNum = box.querySelector('.sb-like-count');
+    const commNum = box.querySelector('.sb-comment-count');
+    if (likeNum) likeNum.textContent = r.likes || 0;
+    if (commNum) commNum.textContent = (r.comments || []).length || 0;
+    if (r.liked) { heart.textContent = '❤️'; likeBtn.dataset.liked = '1'; likeBtn.style.color = '#DC2626'; }
+  } catch(e) {}
+}
+
+async function _toggleSocialLike(targetType, targetId, ownerId, uid) {
+  const box = document.getElementById(uid);
+  if (!box) return;
+  const likeBtn = box.querySelector('button:first-child');
+  const heart = box.querySelector('.sb-heart');
+  const likeNum = box.querySelector('.sb-like-count');
+  const liked = likeBtn.dataset.liked === '1';
+  const curCount = parseInt(likeNum.textContent) || 0;
+  // 낙관적 UI
+  if (liked) {
+    heart.textContent = '♡'; likeBtn.dataset.liked = '0'; likeBtn.style.color = '';
+    likeNum.textContent = Math.max(0, curCount - 1);
+  } else {
+    heart.textContent = '❤️'; likeBtn.dataset.liked = '1'; likeBtn.style.color = '#DC2626';
+    likeNum.textContent = curCount + 1;
+  }
+  try {
+    await _coachApi('POST', '/api/mate-social', {
+      action: liked ? 'unlike' : 'like',
+      target_type: targetType, target_id: targetId, target_owner_id: ownerId
+    });
+  } catch(e) {
+    // 롤백
+    if (liked) { heart.textContent = '❤️'; likeBtn.dataset.liked = '1'; likeBtn.style.color = '#DC2626'; likeNum.textContent = curCount; }
+    else       { heart.textContent = '♡'; likeBtn.dataset.liked = '0'; likeBtn.style.color = ''; likeNum.textContent = curCount; }
+    alert('⚠️ ' + e.message);
+  }
+}
+
+async function _openSocialComments(targetType, targetId, ownerId, uid) {
+  const sheet = document.getElementById('socialCommentsSheet');
+  if (!sheet) return;
+  sheet.dataset.targetType = targetType;
+  sheet.dataset.targetId = targetId;
+  sheet.dataset.ownerId = ownerId;
+  sheet.dataset.callerUid = uid;
+  sheet.style.display = 'flex';
+  document.getElementById('socialCommentsList').innerHTML = '<div style="padding:20px;text-align:center;color:#64748B;font-size:12px">불러오는 중...</div>';
+  document.getElementById('socialCommentInput').value = '';
+  try {
+    const r = await _coachApi('GET', `/api/mate-social?target_type=${targetType}&target_id=${encodeURIComponent(targetId)}`);
+    _renderSocialComments(r.comments || []);
+  } catch(e) {
+    document.getElementById('socialCommentsList').innerHTML = `<div style="padding:20px;color:#991B1B;font-size:12px">⚠️ ${e.message}</div>`;
+  }
+}
+
+function _renderSocialComments(comments) {
+  const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+  const list = document.getElementById('socialCommentsList');
+  if (!list) return;
+  if (!comments.length) {
+    list.innerHTML = '<div style="padding:30px;text-align:center;color:#94A3B8;font-size:12.5px">첫 댓글을 남겨보세요 💬</div>';
+    return;
+  }
+  list.innerHTML = comments.map(c => {
+    const when = c.created_at ? new Date(c.created_at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+    return `<div style="padding:10px 12px;background:${c.is_mine?'#EFF4FF':'#F8FAFC'};border:1px solid ${c.is_mine?'#DBEAFE':'#EDEFF4'};border-radius:10px;margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px">
+        <div style="font-size:11.5px;font-weight:900;color:${c.is_mine?'#1E40AF':'#0F172A'}">${esc(c.author)}${c.is_mine?' (나)':''}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:10px;color:#94A3B8">${when}</span>
+          ${c.is_mine ? `<button onclick="_deleteSocialComment('${c.id}')" style="background:transparent;border:0;color:#DC2626;font-size:12px;cursor:pointer;padding:0">🗑</button>` : ''}
+        </div>
+      </div>
+      <div style="font-size:12.5px;color:#0F172A;line-height:1.45">${esc(c.content)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function _sendSocialComment() {
+  const sheet = document.getElementById('socialCommentsSheet');
+  const inp = document.getElementById('socialCommentInput');
+  const text = (inp.value || '').trim();
+  if (!text) return;
+  try {
+    await _coachApi('POST', '/api/mate-social', {
+      action:'comment',
+      target_type: sheet.dataset.targetType,
+      target_id: sheet.dataset.targetId,
+      target_owner_id: sheet.dataset.ownerId,
+      content: text
+    });
+    inp.value = '';
+    // 리로드
+    const r = await _coachApi('GET', `/api/mate-social?target_type=${sheet.dataset.targetType}&target_id=${encodeURIComponent(sheet.dataset.targetId)}`);
+    _renderSocialComments(r.comments || []);
+    // 호출한 카드의 댓글 수 업데이트
+    const callerUid = sheet.dataset.callerUid;
+    if (callerUid) {
+      const box = document.getElementById(callerUid);
+      if (box) box.querySelector('.sb-comment-count').textContent = (r.comments || []).length;
+    }
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+async function _deleteSocialComment(id) {
+  if (!confirm('이 댓글 삭제?')) return;
+  try {
+    await _coachApi('DELETE', `/api/mate-social?comment_id=${encodeURIComponent(id)}`);
+    const sheet = document.getElementById('socialCommentsSheet');
+    const r = await _coachApi('GET', `/api/mate-social?target_type=${sheet.dataset.targetType}&target_id=${encodeURIComponent(sheet.dataset.targetId)}`);
+    _renderSocialComments(r.comments || []);
+    const callerUid = sheet.dataset.callerUid;
+    if (callerUid) {
+      const box = document.getElementById(callerUid);
+      if (box) box.querySelector('.sb-comment-count').textContent = (r.comments || []).length;
+    }
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+function _closeSocialComments() {
+  document.getElementById('socialCommentsSheet').style.display = 'none';
 }
 
 async function _mateSendMsg(mealId) {
