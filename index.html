@@ -4428,7 +4428,7 @@ window.appIcon = function(name, size){
         <div style="background:#FFF;border:1px solid #E5E7EB;border-radius:16px;padding:14px 16px;margin-bottom:14px">
           <div style="font-size:13px;font-weight:900;color:#0F172A;margin-bottom:10px">👀 다른 사람 식단 보기</div>
           <div style="display:flex;gap:7px">
-            <input id="mateAddCodeInput" type="text" placeholder="HLT-A3K9XQ" maxlength="12" style="flex:1;font-family:ui-monospace,SFMono-Regular,monospace;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;padding:11px 13px;border:1px solid #E5E7EB;border-radius:10px;outline:none;background:#F8FAFC;color:#0F172A"/>
+            <input id="mateAddCodeInput" type="text" placeholder="HLT-A3K9XQ" maxlength="12" autocapitalize="characters" onfocus="_scrollInputIntoView(this)" style="flex:1;font-family:ui-monospace,SFMono-Regular,monospace;font-size:16px;letter-spacing:1.5px;text-transform:uppercase;padding:11px 13px;border:1px solid #E5E7EB;border-radius:10px;outline:none;background:#F8FAFC;color:#0F172A"/>
             <button id="mateAddBtn" onclick="_mateAddByCode(this)" style="background:#2563EB;color:#FFF;border:0;padding:11px 16px;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit">추가</button>
           </div>
           <div id="mateAddErr" style="display:none;background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;padding:7px 10px;border-radius:7px;font-size:11.5px;margin-top:8px"></div>
@@ -4460,7 +4460,7 @@ window.appIcon = function(name, size){
             </div>
             <div id="socialCommentsList" style="flex:1;overflow-y:auto;padding:14px 16px"></div>
             <div style="padding:12px 14px;border-top:1px solid #E5E7EB;background:#F8FAFC;display:flex;gap:7px">
-              <input id="socialCommentInput" placeholder="댓글 남기기..." maxlength="500" onkeydown="if(event.key==='Enter')_sendSocialComment()" style="flex:1;padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:13px;background:#FFF;outline:none;font-family:inherit"/>
+              <input id="socialCommentInput" placeholder="댓글 남기기..." maxlength="500" onfocus="_scrollInputIntoView(this)" onkeydown="if(event.key==='Enter')_sendSocialComment()" style="flex:1;padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:16px;background:#FFF;outline:none;font-family:inherit"/>
               <button onclick="_sendSocialComment()" style="background:#2563EB;color:#FFF;border:0;padding:10px 15px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit">전송</button>
             </div>
           </div>
@@ -23054,6 +23054,36 @@ async function saveWorkout() {
   finally { btn.disabled = false; btn.textContent = orig; }
 }
 console.log('[SB] 프록시 모드 준비됨 (service_role 서버 경유)');
+
+// ═══ 키보드 UX · input focus 시 자동 스크롤 (Galaxy/Android 대응) ═══
+function _scrollInputIntoView(el) {
+  if (!el) return;
+  // iOS는 알아서 처리 · Android는 수동 스크롤 필요
+  setTimeout(() => {
+    try {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // visualViewport 지원 시 키보드 높이만큼 추가 보정
+      if (window.visualViewport) {
+        const vh = window.visualViewport.height;
+        const rect = el.getBoundingClientRect();
+        const needScroll = (rect.bottom > vh - 20);
+        if (needScroll) {
+          window.scrollBy({ top: rect.bottom - vh + 60, behavior: 'smooth' });
+        }
+      }
+    } catch(e) {}
+  }, 300); // 키보드 올라오는 애니메이션 끝난 후
+}
+
+// visualViewport resize 감지 → 포커스된 input이 가려지면 스크롤
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const el = document.activeElement;
+    if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')) {
+      _scrollInputIntoView(el);
+    }
+  });
+}
 
 // 현재 사용자 UUID 가져오기 (없으면 새로 생성)
 function getCurrentUserUuid() {
