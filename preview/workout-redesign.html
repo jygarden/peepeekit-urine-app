@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>운동 기록 개선 미리보기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#F5F6FA; --b:#EDEFF4;
+    --t:#0F172A; --t2:#64748B; --t3:#94A3B8;
+    --good:#10B981; --warn:#F59E0B; --bad:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:16px;margin:24px 2px 10px;font-weight:800}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  @media (max-width:1000px){.cols{grid-template-columns:1fr 1fr}}
+  @media (max-width:720px){.cols{grid-template-columns:1fr}}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:720px;display:flex;flex-direction:column;position:relative}
+  .mhdr{padding:16px 18px 12px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;background:#FFF}
+  .mhdr .ttl{font-size:16px;font-weight:900}
+  .mhdr .x{font-size:20px;color:var(--t3);cursor:pointer}
+  .mbody{flex:1;overflow-y:auto;padding:16px;background:var(--bg)}
+
+  /* Step 1: 부위 */
+  .parts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+  .part{background:#FFF;border:1px solid var(--b);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer}
+  .part.on{background:var(--p);color:#FFF;border-color:var(--p)}
+  .part .pi{font-size:22px;line-height:1}
+  .part .pn{font-size:11px;font-weight:800;margin-top:4px}
+
+  /* Step 2: 운동 리스트 (칩 다중 선택) */
+  .ex-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .ex-chip{background:#FFF;border:1px solid var(--b);color:var(--t);padding:7px 11px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer}
+  .ex-chip.on{background:var(--pl);border-color:var(--p);color:var(--pd)}
+  .ex-chip.on::before{content:"✓ "}
+
+  /* 선택된 운동 세트 입력 */
+  .ex-item{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+  .ex-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+  .ex-name{font-size:13.5px;font-weight:900}
+  .ex-rm{color:var(--t3);font-size:16px;background:none;border:0;cursor:pointer}
+  .set-row{display:flex;gap:7px;align-items:center;margin-bottom:6px}
+  .set-row .n{font-size:11px;color:var(--t2);font-weight:800;width:36px}
+  .set-row input{flex:1;background:var(--bg);border:1px solid var(--b);border-radius:8px;padding:6px 8px;font-size:12.5px;font-weight:700;font-family:inherit;color:var(--t);text-align:center;min-width:0}
+  .set-row .u{font-size:10.5px;color:var(--t2);font-weight:700}
+  .set-add{width:100%;background:var(--plt);border:1px dashed var(--p);color:var(--p);padding:7px;border-radius:8px;font-size:11.5px;font-weight:800;cursor:pointer;margin-top:4px}
+
+  /* 유산소 */
+  .cardio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .cardio-row{background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:9px 11px}
+  .cardio-row .l{font-size:11px;color:var(--t2);font-weight:800}
+  .cardio-row input{width:100%;background:transparent;border:0;font-size:17px;font-weight:900;color:var(--t);font-family:inherit;margin-top:2px;outline:none}
+
+  /* 하단 저장 */
+  .bottom{padding:12px 14px 16px;background:#FFF;border-top:1px solid var(--b)}
+  .btn{width:100%;background:var(--p);color:#FFF;border:0;padding:13px;border-radius:12px;font-size:14px;font-weight:900}
+
+  /* 운동 데이터베이스 섹션 (아래) */
+  .db{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:16px 18px;margin-top:14px}
+  .db h3{font-size:14px;font-weight:900;margin-bottom:10px}
+  .db-row{padding:10px 0;border-top:1px solid #F0F1F5}
+  .db-row:first-of-type{border-top:0}
+  .db-ttl{font-size:12.5px;font-weight:900;color:var(--pd);margin-bottom:4px}
+  .db-list{font-size:11.5px;color:var(--t);line-height:1.65}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>💪 오늘의 운동 — 전면 개선</h1>
+<p class="sub">부위 선택 → 운동 다중 선택 → 세트 입력. 유산소는 거리·시간 입력. 아래에 운동 DB 전체 리스트.</p>
+
+<h2>📱 모달 플로우 (3단계)</h2>
+<div class="cols">
+
+  <!-- Step 1 -->
+  <div>
+    <div class="label">1단계 · 부위 선택</div>
+    <div class="phone">
+      <div class="mhdr"><div class="ttl">💪 오늘의 운동</div><div class="x">✕</div></div>
+      <div class="mbody">
+        <div style="font-size:12.5px;font-weight:800;color:var(--t2);margin-bottom:10px">어떤 부위 운동했어?</div>
+        <div class="parts">
+          <div class="part on"><div class="pi">💪</div><div class="pn">가슴</div></div>
+          <div class="part"><div class="pi">🦾</div><div class="pn">등</div></div>
+          <div class="part"><div class="pi">🏋️</div><div class="pn">하체</div></div>
+          <div class="part"><div class="pi">💥</div><div class="pn">어깨</div></div>
+          <div class="part"><div class="pi">💪</div><div class="pn">팔</div></div>
+          <div class="part"><div class="pi">🧘</div><div class="pn">코어</div></div>
+          <div class="part"><div class="pi">🏃</div><div class="pn">유산소</div></div>
+          <div class="part"><div class="pi">🧘‍♀️</div><div class="pn">전신</div></div>
+        </div>
+        <div style="background:#EFF4FF;border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--pd);font-weight:700;line-height:1.5">
+          💡 여러 부위 운동했으면 하나씩 다 선택해도 돼. 각 부위마다 운동 리스트가 나와.
+        </div>
+      </div>
+      <div class="bottom"><button class="btn">가슴 운동 선택하기 ›</button></div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div>
+    <div class="label">2단계 · 운동 선택 (중복 OK)</div>
+    <div class="phone">
+      <div class="mhdr"><div class="ttl">💪 가슴 운동</div><div class="x">✕</div></div>
+      <div class="mbody">
+        <div style="font-size:12.5px;font-weight:800;color:var(--t2);margin-bottom:10px">오늘 한 운동 모두 선택 (2개 선택됨)</div>
+        <div class="ex-chips">
+          <div class="ex-chip on">벤치프레스</div>
+          <div class="ex-chip">인클라인 벤치프레스</div>
+          <div class="ex-chip">디클라인 벤치프레스</div>
+          <div class="ex-chip">체스트프레스</div>
+          <div class="ex-chip on">덤벨 플라이</div>
+          <div class="ex-chip">인클라인 덤벨프레스</div>
+          <div class="ex-chip">케이블 크로스오버</div>
+          <div class="ex-chip">펙덱 플라이</div>
+          <div class="ex-chip">푸쉬업</div>
+          <div class="ex-chip">딥스</div>
+          <div class="ex-chip">덤벨 풀오버</div>
+          <div class="ex-chip" style="background:#F8FAFC;color:var(--t3);border-style:dashed">+ 직접 추가</div>
+        </div>
+        <div style="background:#EFF4FF;border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--pd);font-weight:700;line-height:1.5">
+          💡 다음 단계에서 각 운동마다 세트 입력
+        </div>
+      </div>
+      <div class="bottom"><button class="btn">선택 완료 (2) · 세트 입력 ›</button></div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div>
+    <div class="label">3단계 · 세트 입력</div>
+    <div class="phone">
+      <div class="mhdr"><div class="ttl">💪 세트 기록</div><div class="x">✕</div></div>
+      <div class="mbody">
+        <!-- 운동 1 -->
+        <div class="ex-item">
+          <div class="ex-top">
+            <div class="ex-name">💪 벤치프레스</div>
+            <button class="ex-rm">✕</button>
+          </div>
+          <div class="set-row">
+            <span class="n">1세트</span>
+            <input value="60"/><span class="u">kg</span>
+            <span style="color:var(--t3);font-weight:900">×</span>
+            <input value="10"/><span class="u">회</span>
+          </div>
+          <div class="set-row">
+            <span class="n">2세트</span>
+            <input value="65"/><span class="u">kg</span>
+            <span style="color:var(--t3);font-weight:900">×</span>
+            <input value="8"/><span class="u">회</span>
+          </div>
+          <div class="set-row">
+            <span class="n">3세트</span>
+            <input value="70"/><span class="u">kg</span>
+            <span style="color:var(--t3);font-weight:900">×</span>
+            <input value="6"/><span class="u">회</span>
+          </div>
+          <button class="set-add">+ 세트 추가</button>
+          <div style="margin-top:7px;padding:6px 9px;background:var(--pl);border-radius:7px;font-size:11px;color:var(--pd);font-weight:800;text-align:center">
+            볼륨 1,620 kg · 평균 8회
+          </div>
+        </div>
+
+        <!-- 운동 2 -->
+        <div class="ex-item">
+          <div class="ex-top">
+            <div class="ex-name">💪 덤벨 플라이</div>
+            <button class="ex-rm">✕</button>
+          </div>
+          <div class="set-row">
+            <span class="n">1세트</span>
+            <input value="15"/><span class="u">kg</span>
+            <span style="color:var(--t3);font-weight:900">×</span>
+            <input value="12"/><span class="u">회</span>
+          </div>
+          <div class="set-row">
+            <span class="n">2세트</span>
+            <input value="15"/><span class="u">kg</span>
+            <span style="color:var(--t3);font-weight:900">×</span>
+            <input value="12"/><span class="u">회</span>
+          </div>
+          <button class="set-add">+ 세트 추가</button>
+        </div>
+
+        <div style="margin-top:12px;padding:10px 12px;background:#FFF;border:1px solid var(--b);border-radius:10px;font-size:11.5px;color:var(--t2)">
+          ⏱ 총 시간 <input style="background:var(--bg);border:0;padding:4px 7px;border-radius:6px;width:50px;font-weight:800;text-align:center" value="45"/> 분 · 💬 메모 (선택)
+        </div>
+      </div>
+      <div class="bottom"><button class="btn">💾 저장 (볼륨 2,000kg)</button></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 유산소 전용 -->
+<h2>🏃 유산소 (별도 입력 폼)</h2>
+<div class="cols" style="grid-template-columns:1fr 1fr">
+  <div>
+    <div class="label">러닝 · 사이클 · 로잉 등</div>
+    <div class="phone" style="height:650px">
+      <div class="mhdr"><div class="ttl">🏃 유산소</div><div class="x">✕</div></div>
+      <div class="mbody">
+        <div style="font-size:12.5px;font-weight:800;color:var(--t2);margin-bottom:10px">어떤 유산소 했어?</div>
+        <div class="ex-chips">
+          <div class="ex-chip on">러닝(실외)</div>
+          <div class="ex-chip">트레드밀</div>
+          <div class="ex-chip">사이클</div>
+          <div class="ex-chip">실내 자전거</div>
+          <div class="ex-chip">로잉</div>
+          <div class="ex-chip">스테퍼</div>
+          <div class="ex-chip">일립티컬</div>
+          <div class="ex-chip">수영</div>
+          <div class="ex-chip">줄넘기</div>
+          <div class="ex-chip">걷기</div>
+          <div class="ex-chip">등산</div>
+        </div>
+
+        <div class="ex-item">
+          <div class="ex-top"><div class="ex-name">🏃 러닝(실외)</div><button class="ex-rm">✕</button></div>
+          <div class="cardio-grid">
+            <div class="cardio-row"><div class="l">거리</div><input value="5.2" style="background:transparent"/><span style="font-size:10.5px;color:var(--t2);font-weight:800">km</span></div>
+            <div class="cardio-row"><div class="l">시간</div><input value="32" style="background:transparent"/><span style="font-size:10.5px;color:var(--t2);font-weight:800">분</span></div>
+            <div class="cardio-row"><div class="l">평균 페이스</div><div style="font-size:17px;font-weight:900;margin-top:2px">6'09"<span style="font-size:10.5px;color:var(--t2);font-weight:800">/km</span></div></div>
+            <div class="cardio-row"><div class="l">예상 칼로리</div><div style="font-size:17px;font-weight:900;margin-top:2px">320<span style="font-size:10.5px;color:var(--t2);font-weight:800">kcal</span></div></div>
+          </div>
+        </div>
+
+        <div style="background:#FEF9E7;border:1px solid #FCD34D;border-radius:10px;padding:10px 12px;font-size:11.5px;color:#78350F;font-weight:700;line-height:1.5">
+          💡 <b>가이드:</b> 체중감량 목표면 30분 이상, 심폐지구력 향상이면 심박 70-85%<br/>
+          초보자: 걷기 30분부터 · 중급: 러닝 20-30분 · 고급: 인터벌 트레이닝
+        </div>
+      </div>
+      <div class="bottom"><button class="btn">💾 저장 · 5.2km · 32분</button></div>
+    </div>
+  </div>
+
+  <!-- 유산소 가이드 -->
+  <div>
+    <div class="label">유산소 가이드 (팁 자동 표시)</div>
+    <div style="background:#FFF;border:1px solid var(--b);border-radius:14px;padding:16px 18px">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:12px">목표별 추천</h3>
+
+      <div style="padding:10px 0;border-top:1px solid #F0F1F5">
+        <div style="font-size:12.5px;font-weight:900;color:var(--p)">🔥 체중 감량</div>
+        <div style="font-size:11.5px;color:var(--t);margin-top:4px;line-height:1.6">· 중강도 유산소 <b>30-60분</b><br/>· 주 4-5회<br/>· 공복/식전 효과 ↑<br/>· 러닝 · 사이클 · 수영</div>
+      </div>
+
+      <div style="padding:10px 0;border-top:1px solid #F0F1F5">
+        <div style="font-size:12.5px;font-weight:900;color:var(--p)">❤️ 심폐 지구력</div>
+        <div style="font-size:11.5px;color:var(--t);margin-top:4px;line-height:1.6">· 심박 <b>최대심박의 70-85%</b><br/>· 20-40분<br/>· 인터벌 HIIT 효과적<br/>· 러닝 · 로잉 · 사이클</div>
+      </div>
+
+      <div style="padding:10px 0;border-top:1px solid #F0F1F5">
+        <div style="font-size:12.5px;font-weight:900;color:var(--p)">🧘 회복 · 유연성</div>
+        <div style="font-size:11.5px;color:var(--t);margin-top:4px;line-height:1.6">· 저강도 <b>걷기 20-40분</b><br/>· 수영 · 요가<br/>· 근력운동 다음날 추천</div>
+      </div>
+
+      <div style="padding:10px 0;border-top:1px solid #F0F1F5">
+        <div style="font-size:12.5px;font-weight:900;color:var(--p)">💪 근매스 유지 (벌크업 중)</div>
+        <div style="font-size:11.5px;color:var(--t);margin-top:4px;line-height:1.6">· 유산소 과하면 근손실<br/>· 주 2-3회 20-30분으로 제한<br/>· LISS (저강도) 추천</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 운동 DB 전체 -->
+<h2>📚 운동 DB 전체 (120+ 종)</h2>
+<div class="db">
+
+<div class="db-row">
+<div class="db-ttl">💪 가슴 (12종)</div>
+<div class="db-list">벤치프레스(바벨) · 벤치프레스(덤벨) · 인클라인 벤치프레스 · 디클라인 벤치프레스 · 체스트프레스(머신) · 덤벨 플라이 · 인클라인 덤벨프레스 · 케이블 크로스오버 · 펙덱 플라이 · 푸쉬업 · 딥스 · 덤벨 풀오버</div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">🦾 등 (13종)</div>
+<div class="db-list">랫풀다운 · 풀업 · 친업 · 바벨 로우 · 덤벨 로우 · 티바로우 · 시티드 로우 · 데드리프트 · 루마니안 데드리프트 · 체스트 서포티드 로우 · 슈러그(바벨/덤벨) · 하이풀 · 백 익스텐션</div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">🏋️ 하체 (15종)</div>
+<div class="db-list">백스쿼트 · 프론트 스쿼트 · 고블릿 스쿼트 · 레그프레스 · 레그 익스텐션 · 레그컬(머신) · 루마니안 데드리프트 · 런지(바벨/덤벨) · 불가리안 스플릿 스쿼트 · 핵스쿼트 · 스미스 스쿼트 · 레그 에브덕션 · 레그 어덕션 · 카프레이즈(스탠딩/시티드) · 글루트 브릿지</div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">💥 어깨 (10종)</div>
+<div class="db-list">숄더프레스(바벨/덤벨) · 밀리터리 프레스 · 아놀드 프레스 · 사이드 레터럴 레이즈 · 프론트 레이즈 · 리어 델트 플라이 · 리버스 펙덱 · 업라이트 로우 · 페이스풀 · 머신 숄더프레스</div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">💪 팔 (11종)</div>
+<div class="db-list">바벨 컬 · 덤벨 컬 · 해머컬 · 컨센트레이션 컬 · 프리처 컬 · EZ바 컬 · 트라이셉스 익스텐션 · 케이블 푸쉬다운 · 스컬크러셔 · 트라이셉스 딥스 · 킥백</div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">🧘 코어 (10종)</div>
+<div class="db-list">플랭크 · 사이드 플랭크 · 크런치 · 레그레이즈 · 러시안 트위스트 · 바이시클 크런치 · 애브 롤러 · 행잉 레그레이즈 · 데드버그 · 마운틴 클라이머</div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">🏃 유산소 (11종)</div>
+<div class="db-list">러닝(실외) · 트레드밀 · 사이클 · 실내 자전거 · 로잉머신 · 스테퍼 · 일립티컬 · 수영 · 줄넘기 · 걷기 · 등산<br/><span style="color:var(--t2)">· 유산소는 세트/kg이 아닌 <b>거리(km) + 시간(분)</b> 입력</span></div>
+</div>
+
+<div class="db-row">
+<div class="db-ttl">🧘‍♀️ 전신 · 복합 (6종)</div>
+<div class="db-list">버피 · 케틀벨 스윙 · 클린앤저크 · 스내치 · 터키쉬 겟업 · 월볼</div>
+</div>
+
+</div>
+
+<h2>🤝 메이트 운동 루틴 공유 (추가)</h2>
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13.5px;line-height:1.9">
+  <b>작동 방식</b><br/>
+  · 내 운동 루틴 저장 (예: "월요일 가슴 루틴 — 벤치 4세트 / 덤벨 플라이 3세트 / 딥스 3세트")<br/>
+  · 메이트에게 공유 → 메이트가 그대로 가져다 쓰기<br/>
+  · 템플릿 리스트에서 "{이름}의 가슴 루틴" 선택하면 세트까지 자동 입력<br/><br/>
+
+  <b>왜 좋음</b><br/>
+  · PT가 회원에게 "이번주 루틴" 전달 (B2B 핵심)<br/>
+  · 친구끼리 "오늘 같이 가슴 하자" 공유<br/>
+  · 좋은 루틴은 메이트 네트워크 내에서 전파 → 자연스런 리텐션<br/><br/>
+
+  <b>UI</b><br/>
+  · 운동 모달 상단에 "루틴 불러오기 ↓" 버튼<br/>
+  · 운동 모달 하단에 "이 루틴 저장 💾" 버튼<br/>
+  · 메이트 피드 "💪 운동 탭"에서 "이 루틴 가져오기 📥" 버튼
+</div>
+
+<h2>📋 작업 범위 요약</h2>
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13.5px;line-height:1.9">
+  <b>Phase G2 · 운동 전면 개편</b><br/>
+  ① 운동 DB 상수 (EXERCISE_DB) — 120+ 종, 부위별 분류, 유산소 플래그<br/>
+  ② 운동 모달 3단계 UI (부위 → 운동 다중선택 → 세트 입력)<br/>
+  ③ 유산소 전용 입력 (거리·시간 · 자동 페이스/칼로리 계산)<br/>
+  ④ 가이드라인 (목표별 유산소 추천)<br/>
+  ⑤ 루틴 저장·불러오기 (localStorage + 서버 선택적)<br/><br/>
+
+  <b>Phase I-2 · 메이트 소셜 (별도 작업)</b><br/>
+  ① 좋아요 (mate_likes 테이블)<br/>
+  ② 댓글 (mate_comments 테이블)<br/>
+  ③ 챌린지 (mate_challenges)<br/>
+  ④ 통합 피드 (전체 메이트 식단·운동 타임라인)<br/>
+  ⑤ 운동 루틴 공유 (workout_routines 테이블)<br/><br/>
+
+  <b>우선순위 추천</b><br/>
+  1. Phase G2 운동 전면 개편 (지금 바로 · 3시간 작업)<br/>
+  2. 메이트 운동 피드 (이미 구조 있음 · 1시간 작업)<br/>
+  3. 좋아요 · 댓글 (2시간 작업)<br/>
+  4. 루틴 공유 (2시간 작업)<br/>
+  5. 챌린지 · 통합 피드 (1일 작업)<br/><br/>
+
+  <b>이대로 OK면 Phase G2 운동 전면 개편부터 바로 들어갈게.</b> 운동 DB 종목 추가/수정 필요한 거 있어? (예: "체스트 서포티드 로우도 가슴에 넣어줘" 같은 거)
+</div>
+
+</div>
+</body>
+</html>

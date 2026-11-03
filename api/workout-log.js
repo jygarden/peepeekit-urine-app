@@ -69,18 +69,30 @@ async function handlePost(sb, user, req, res) {
   const wt = workout_type && VALID_TYPES.has(workout_type) ? workout_type : 'other';
   const exes = Array.isArray(exercises) ? exercises : [];
 
-  // 입력 정리 및 총 volume 계산
+  // 입력 정리 및 총 volume/거리 계산 (근력 + 유산소)
   let totalVolume = 0;
+  let totalCardioKm = 0;
+  let totalCardioMin = 0;
   const cleanExes = exes.slice(0, 30).map(e => {
     const name = String(e.name || '').trim().slice(0, 40);
+    const type = e.type === 'cardio' ? 'cardio' : 'strength';
+    if (type === 'cardio') {
+      const d = Math.max(0, Math.min(500, Number(e.distance_km) || 0));
+      const t = Math.max(0, Math.min(600, Number(e.duration_min) || 0));
+      if (!d && !t) return null;
+      totalCardioKm += d;
+      totalCardioMin += t;
+      return { name, type:'cardio', distance_km: d, duration_min: t, sets: [], note: e.note ? String(e.note).slice(0, 100) : '' };
+    }
     const sets = Array.isArray(e.sets) ? e.sets.slice(0, 20).map(s => {
       const w = Number(s.weight_kg) || 0;
       const r = Number(s.reps) || 0;
       totalVolume += w * r;
       return { weight_kg: w, reps: r };
     }) : [];
-    return { name, sets, note: e.note ? String(e.note).slice(0, 100) : '' };
-  }).filter(e => e.name);
+    if (!sets.length) return null;
+    return { name, type:'strength', sets, note: e.note ? String(e.note).slice(0, 100) : '' };
+  }).filter(e => e && e.name);
 
   if (!cleanExes.length) return sendError(res, 400, '운동 1개 이상 필요');
 
