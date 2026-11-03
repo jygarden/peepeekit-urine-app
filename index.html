@@ -15497,6 +15497,60 @@ function _buildObSlides() {
     <span style="position:relative;display:inline-block">${text}<svg style="position:absolute;left:-2px;bottom:-4px;width:calc(100% + 4px);height:8px" viewBox="0 0 300 8" preserveAspectRatio="none"><path d="M2 5 Q 75 1, 150 4 T 298 3" stroke="#FDD948" stroke-width="4" fill="none" stroke-linecap="round"/></svg></span>
   </div>`;
 
+  // ═══════════════════════════════════════════════════════════
+  // 🎨 v2 온보딩 (필라이즈·인아웃 스타일 · 비주얼 중심 4슬라이드)
+  // ═══════════════════════════════════════════════════════════
+  const V2_IMG = (name, emoji) => {
+    const path = `assets/onboarding-v2/${name}.png`;
+    return `<img src="${path}" alt="" style="width:160px;height:160px;object-fit:contain;display:block" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" draggable="false"/>
+    <div style="display:none;width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg,#DBEAFE,#EFF4FF);align-items:center;justify-content:center;font-size:90px;line-height:1">${emoji}</div>`;
+  };
+  const _v2Slide = (title, sub, imgName, emoji) => ({ html: `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 10px;animation:apFadeIn .35s ease-out">
+      <div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;margin-bottom:30px;position:relative">${V2_IMG(imgName, emoji)}</div>
+      <div style="font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:24px;font-weight:900;color:#0F172A;letter-spacing:-1px;line-height:1.3;margin-bottom:12px">${title}</div>
+      <div style="font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:14px;color:#52698F;font-weight:600;line-height:1.5;max-width:280px">${sub}</div>
+    </div>`});
+
+  const v2Slide1 = _v2Slide(
+    '반가워요<br/><b style="color:#2563EB">건강어때</b>에 오신 걸',
+    '식단·운동·인바디 올인원<br/>지금부터 시작해봐요',
+    'onboard-welcome', '👋'
+  );
+  const v2Slide2 = _v2Slide(
+    '사진 한 장으로<br/><b style="color:#2563EB">영양 분석 끝</b>',
+    '식약처 DB 기반 자동 계산<br/>부족한 영양도 바로 알려드려요',
+    'onboard-meal', '📸'
+  );
+  const v2Slide3 = _v2Slide(
+    '<b style="color:#2563EB">운동·몸 변화</b><br/>한 번에 트래킹',
+    '세트·중량 기록 · 인바디 OCR<br/>그래프로 변화를 눈으로 확인',
+    'onboard-workout', '💪'
+  );
+  const v2Slide4 = _v2Slide(
+    '혼자 말고<br/><b style="color:#2563EB">메이트</b>와 함께',
+    '식단·운동 공유<br/>좋아요·댓글로 서로 응원',
+    'onboard-mate', '👥'
+  );
+
+  // 최종 CTA 슬라이드 (바로 가입 폼으로)
+  const v2Final = {
+    isSelection: true,
+    html: `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;animation:apFadeIn .35s ease-out">
+        <div style="width:120px;height:120px;background:linear-gradient(135deg,#2563EB,#3B82F6);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;box-shadow:0 10px 30px rgba(37,99,235,.3)">
+          <span style="font-size:60px;color:#FFF">✨</span>
+        </div>
+        <div style="font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:24px;font-weight:900;color:#0F172A;letter-spacing:-1px;line-height:1.3;margin-bottom:10px">준비 완료!<br/>시작해볼까요?</div>
+        <div style="font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:13px;color:#52698F;font-weight:600;line-height:1.5;margin-bottom:24px">가입 30초 · 무료 · 언제든 삭제 가능</div>
+        <button onclick="startOnboardingSelf()" style="width:100%;max-width:300px;background:#2563EB;color:#FFF;border:0;padding:17px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(37,99,235,.3)">시작하기 →</button>
+      </div>`
+  };
+
+  _obSlides = [v2Slide1, v2Slide2, v2Slide3, v2Slide4, v2Final];
+  return;
+
+  // ═══ 아래 레거시 슬라이드 (반려동물 포함 · 2026-11 이후 사용 안 함) ═══
   // ═══ 슬라이드 1 · WHY ═══
   const slide1 = { html: `
     <div style="position:relative;padding:0 2px;display:flex;flex-direction:column;height:100%;animation:apFadeIn .35s ease-out">
