@@ -2499,8 +2499,8 @@ window.appIcon = function(name, size){
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · hero -->
-        <div style="background:linear-gradient(135deg,#1E40AF 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 6px;box-shadow:none;margin-bottom:12px;margin-top:4px;overflow:hidden;position:relative;min-height:230px">
+        <!-- ① 다음 한 끼 추천 · hero (말풍선 꼬리 아래 ↓) -->
+        <div style="background:linear-gradient(135deg,#1E40AF 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 6px;box-shadow:none;margin-bottom:0;margin-top:4px;overflow:hidden;position:relative;min-height:230px">
           <!-- 노란 halo -->
           <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(251,191,36,.24) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
           <!-- 본문 · 텍스트만 가운데 정렬 · 일러스트/kcal 제거 (Phase 7.5.1) -->
@@ -2547,6 +2547,9 @@ window.appIcon = function(name, size){
           </div>
         </div>
 
+        <!-- 말풍선 꼬리 ↓ (히어로에서 아래 카드로 가리킴) -->
+        <div style="width:0;height:0;margin:0 0 14px 48px;border-left:14px solid transparent;border-right:14px solid transparent;border-top:14px solid #3D63D9"></div>
+
         <!-- 실천 카드 (히든) -->
         <div id="v21PracticeCard" style="display:none">
           <div id="v21PracticeMain"></div>
@@ -2556,13 +2559,13 @@ window.appIcon = function(name, size){
         <!-- ② 2×2 vibrant 그리드 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
 
-          <!-- ⓐ 내 몸의 신호 · 노란 -->
-          <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:linear-gradient(135deg,#FEF9E7 0%,#FEF3C7 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+          <!-- ⓐ 내 몸의 신호 · 흰 -->
+          <div id="v20BodySignalCard" onclick="try{_v21ShowBodySignalDetail()}catch(e){}" style="background:#FFF;border:1px solid #EDEFF4;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
               <img src="assets/home-icons/icon-nutrition-v2.png" alt="부족 영양" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div id="v20BodySignalTitle" style="font-size:10.5px;font-weight:800;color:#1D3762;letter-spacing:-.4px;text-align:center;margin-bottom:3px;line-height:1.3;word-break:keep-all;padding:0 2px">내 몸의 신호</div>
-            <div style="font-size:10px;color:#B45309;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
+            <div style="font-size:10px;color:#2563EB;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
             <div id="v20BodySignalDesc" style="display:none"></div>
             <!-- 히든 · JS 참조 유지 -->
             <div id="v20BodySignalIcon" style="display:none"></div>
@@ -2571,38 +2574,38 @@ window.appIcon = function(name, size){
             <span id="v20BodySignalDisclaimer" style="display:none">가능성 중 하나 · 지속되면 진료</span>
           </div>
 
-          <!-- ⓑ 식사 기록 · 파란 -->
-          <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:linear-gradient(135deg,#EEF2FF 0%,#DBEAFE 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+          <!-- ⓑ 식사 기록 · 흰 -->
+          <div id="v20RecentMealCard" onclick="try{_v20OpenRecentMealResult()}catch(e){}" style="background:#FFF;border:1px solid #EDEFF4;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21RecentScore" style="display:none">—점</span>
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
               <img src="assets/home-icons/icon-check-v2.png" alt="영양 확인" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div id="v20RecentMealName" style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">식사 기록</div>
-            <div style="font-size:10px;color:#2E61C4;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
+            <div style="font-size:10px;color:#2563EB;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
             <!-- 히든 · JS 참조 유지 -->
             <div id="v21RecentHex" style="display:none"></div>
             <div id="v20RecentMealComment" style="display:none"><span></span><button id="v20RecentMealMore" onclick="_v20OpenRecentMealResult()"></button></div>
             <div id="v20RecentMealChips" style="display:none"></div>
           </div>
 
-          <!-- ⓒ 오늘의 운세 · 초록 -->
-          <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:linear-gradient(135deg,#F0FDF4 0%,#D1FAE5 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+          <!-- ⓒ 오늘의 운세 · 흰 -->
+          <div onclick="try{_v21OpenFortune()}catch(e){}" style="background:#FFF;border:1px solid #EDEFF4;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <span id="v21FortuneBadge" style="display:none">吉</span>
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
               <img src="assets/home-icons/icon-fortune-v2.png" alt="운세" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">오늘의 운세</div>
-            <div style="font-size:10px;color:#065F46;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
+            <div style="font-size:10px;color:#2563EB;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
             <div id="v21FortuneSub" style="display:none">大吉</div>
           </div>
 
-          <!-- ⓓ 운동 기록 · 핑크 -->
-          <div onclick="openWorkoutModal()" style="background:linear-gradient(135deg,#FEF2F2 0%,#FEE2E2 100%);border:0;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
+          <!-- ⓓ 운동 기록 · 흰 -->
+          <div onclick="openWorkoutModal()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:16px;padding:10px 10px 12px;box-shadow:none;position:relative;overflow:hidden;min-height:120px;cursor:pointer">
             <div style="width:72px;height:72px;margin:4px auto 6px;display:flex;align-items:center;justify-content:center">
               <img src="assets/home-icons/icon-exercise-v2.png" alt="운동" style="width:72px;height:72px;object-fit:contain"/>
             </div>
             <div style="font-size:12.5px;font-weight:800;color:#1D3762;letter-spacing:-.3px;text-align:center;margin-bottom:3px;line-height:1.25">💪 오늘 운동</div>
-            <div style="font-size:10px;color:#991B1B;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
+            <div style="font-size:10px;color:#2563EB;font-weight:700;text-align:center;line-height:1.3">자세히 ›</div>
           </div>
 
         </div>

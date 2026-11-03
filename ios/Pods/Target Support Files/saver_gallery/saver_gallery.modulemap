@@ -1,0 +1,6 @@
+framework module saver_gallery {
+  umbrella header "saver_gallery-umbrella.h"
+
+  export *
+  module * { export * }
+}
