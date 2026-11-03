@@ -8494,7 +8494,7 @@ function _v20RenderRecentMeal() {
     recent = fh[0];
   } catch(e) { recent = null; }
   if (!recent) {
-    if (nameEl) nameEl.textContent = '나의 영양 확인하기';
+    if (nameEl) nameEl.textContent = '나의 영양';
     if (chipsEl) chipsEl.innerHTML = '';
     if (commentEl) commentEl.innerHTML = '음식을 찍으면 6대 영양 밸런스와 부족한 영양소를 이 자리에 보여드려요.';
     if (moreEl) moreEl.style.display = 'none';
@@ -8503,13 +8503,13 @@ function _v20RenderRecentMeal() {
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background = '#F1F5F9'; scoreEl.style.color = '#94A3B8'; }
     return;
   }
-  // 🎯 사용자 요청: 기록이 있어도 음식명 표시 X · 항상 "나의 영양 확인하기"
+  // 🎯 사용자 요청: 기록이 있어도 음식명 표시 X · 항상 "나의 영양"
   const firstFood = _foodsFromEntry(recent)[0];
   const foodName = (firstFood && firstFood.name) || recent.foods || '식사';
   const mealTime = recent.mealTime || '';
   const mealLabel = {'breakfast':'아침', 'lunch':'점심', 'dinner':'저녁', 'snack':'간식'}[mealTime] || '';
   const displayName = mealLabel ? `${mealLabel} · ${foodName}` : foodName;
-  if (nameEl) nameEl.textContent = '나의 영양 확인하기';
+  if (nameEl) nameEl.textContent = '나의 영양';
   try { _v22UpdateHeroIllust(displayName); } catch(e){}
   // chip · nutrition 기반
   const nut = recent.nutrition || {};
@@ -8807,7 +8807,7 @@ function _v20RenderBodySignal(shortages) {
   let hasHistory = false;
   try { const fh = _getFoodHistory(); hasHistory = fh && fh.length > 0; } catch(e){}
   if (!hasHistory) {
-    titleEl.textContent = '부족한 영양으로 인한 내 몸상태';
+    titleEl.textContent = '내 몸의 신호';
     descEl.innerHTML = '음식을 며칠 기록하면 부족한 영양과 관련된 몸 신호를 이 자리에 알려드려요.';
     if (chipsEl) chipsEl.innerHTML = '';
     if (medEl) { medEl.style.display = 'none'; medEl.innerHTML = ''; }
@@ -8820,9 +8820,9 @@ function _v20RenderBodySignal(shortages) {
     iconEl.style.background = sig.bg;
     iconEl.innerHTML = `<span style="font-size:24px">${sig.icon}</span>`;
   }
-  // 🎯 사용자 요청 · 제목은 "부족한 영양으로 인한 내 몸상태"로 고정
+  // 🎯 사용자 요청 · 제목은 "내 몸의 신호"로 고정
   //    실제 선택된 신호(단백질 부족·머리카락 약해져요)는 desc 상단에 작게 표시
-  titleEl.textContent = '부족한 영양으로 인한 내 몸상태';
+  titleEl.textContent = '내 몸의 신호';
   const sigTitle = sig.title ? `<div style="font-size:12px;color:#92400E;font-weight:800;margin-bottom:4px;letter-spacing:-.2px">${sig.title}</div>` : '';
   if (descEl) descEl.innerHTML = sigTitle + (sig.desc || '');
   chipsEl.innerHTML = (sig.chips || []).map(c => `<span style="color:#64748B;padding:1px 2px;font-size:9.5px;font-weight:700;display:inline-flex;align-items:center">#${c.label}</span>`).join('');
@@ -11574,7 +11574,7 @@ function _v21RenderRecentHex() {
   if (!todayNut) {
     el.innerHTML = _v21NutrientBars([0,0,0,0,0,0], true, 'grid');
     if (scoreEl) { scoreEl.textContent = '—'; scoreEl.style.background='#F1F5F9'; scoreEl.style.color='#64748B'; }
-    if (nameEl) nameEl.textContent = '나의 영양 확인하기';
+    if (nameEl) nameEl.textContent = '나의 영양';
     return;
   }
   // 오늘 하루 진행률 · 6축 대비 %
@@ -11588,8 +11588,8 @@ function _v21RenderRecentHex() {
     Math.min(100, (todayNut.fiber||0)/rda.fiber*100),
     vitScore, minScore
   ];
-  // 🎯 사용자 요청 · 항상 "나의 영양 확인하기"로 통일
-  if (nameEl) nameEl.textContent = '나의 영양 확인하기';
+  // 🎯 사용자 요청 · 항상 "나의 영양"로 통일
+  if (nameEl) nameEl.textContent = '나의 영양';
   el.innerHTML = _v21NutrientBars(values, false, 'grid');
   // score badge (평균)
   if (scoreEl) {
