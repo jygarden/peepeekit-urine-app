@@ -5203,7 +5203,8 @@ window.appIcon = function(name, size){
     </div>
 
     <div class="card">
-      <div class="field">
+      <!-- 🧹 인체용 전용 · 반려동물 유형 선택 숨김 (JS 참조 유지) -->
+      <div class="field" style="display:none">
         <label>어떤 유형인가요?</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <button id="apTypeAdult" class="meal-time-btn active" onclick="apSelectType('adult')">본인</button>

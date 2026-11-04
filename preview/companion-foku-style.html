@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>Foku 스타일 · 캐릭터 주인공 홈</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1200px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:15px;margin:22px 2px 10px;font-weight:800}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:800px;display:flex;flex-direction:column;position:relative}
+  .body{flex:1;overflow-y:auto;background:var(--bg)}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 10px}
+  .hi{font-size:16px;color:var(--t);font-weight:900}
+  .hi-sub{font-size:11px;color:var(--t2);font-weight:600;margin-top:2px}
+  .chips{display:flex;gap:6px;align-items:center}
+  .fire{background:#FEF3C7;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:900;color:#92400E}
+
+  /* 캐릭터 스테이지 */
+  .stage{background:linear-gradient(180deg,#F8FAFC 0%,#EFF4FF 100%);padding:16px 18px 20px;position:relative;overflow:hidden}
+
+  /* 스테이지 배경 반짝임 */
+  .sparkle{position:absolute;color:#FBBF24;font-size:16px;opacity:.7;pointer-events:none;animation:twinkle 3s ease-in-out infinite}
+  .sparkle.s1{top:20%;left:12%;animation-delay:0s;font-size:14px}
+  .sparkle.s2{top:35%;right:18%;animation-delay:.8s;font-size:18px}
+  .sparkle.s3{top:55%;left:18%;animation-delay:1.5s;font-size:12px}
+  .sparkle.s4{top:25%;right:30%;animation-delay:2.2s;font-size:10px;color:#3B82F6}
+  .sparkle.s5{top:65%;right:12%;animation-delay:.3s;font-size:14px;color:#3B82F6}
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(.5) rotate(0deg) }
+    50% { opacity: 1; transform: scale(1) rotate(180deg) }
+  }
+
+  /* 말풍선 (캐릭터 위에서 말함) */
+  .speech{background:#FFF;border-radius:18px 18px 18px 6px;padding:12px 15px;position:relative;margin-bottom:14px;box-shadow:0 2px 10px rgba(37,99,235,.08);max-width:85%;margin-left:0}
+  .speech .st{font-size:10.5px;color:var(--p);font-weight:800;margin-bottom:3px}
+  .speech .sh{font-size:16px;font-weight:900;color:#0F172A;line-height:1.3}
+  .speech .sh mark{background:#FBBF24;color:#1E40AF;padding:1px 6px;border-radius:5px}
+  .speech::after{content:"";position:absolute;bottom:-8px;left:28px;width:14px;height:14px;background:#FFF;transform:rotate(45deg);border-radius:0 0 3px 0;box-shadow:3px 3px 6px rgba(37,99,235,.08)}
+
+  /* 캐릭터 중앙 */
+  .char-center{display:flex;justify-content:center;position:relative;z-index:2;margin:6px 0 2px}
+  .char-canvas{width:160px;height:160px}
+
+  /* 하단 그림자 */
+  .char-shadow{width:100px;height:14px;background:radial-gradient(ellipse,rgba(37,99,235,.2) 0%,transparent 70%);margin:-8px auto 0;position:relative;z-index:1}
+
+  /* 스탯 2 카드 (Foku의 Hunger/Happiness) */
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px;margin-top:-6px;position:relative;z-index:3}
+  .stat{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+  .stat-ico{width:36px;height:36px;background:linear-gradient(135deg,#DBEAFE,#EFF4FF);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .stat-txt{flex:1;min-width:0}
+  .stat-l{font-size:10.5px;color:var(--t2);font-weight:700}
+  .stat-v{font-size:17px;font-weight:900;color:var(--t);line-height:1.2;margin-top:1px}
+  .stat-v small{font-size:11px;color:var(--t2);font-weight:700}
+
+  /* 메인 CTA */
+  .main-cta{margin:14px 18px 10px}
+  .main-cta-btn{width:100%;background:#0F172A;color:#FFF;border:0;padding:16px;border-radius:14px;font-size:14.5px;font-weight:900;cursor:pointer;font-family:inherit}
+  .main-cta-sub{text-align:center;font-size:11px;color:var(--t2);font-weight:600;margin-top:6px}
+
+  /* 하단 섹션 */
+  .section{margin:16px 18px 0}
+  .section-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .section-t{font-size:13px;font-weight:900;color:var(--t)}
+  .section-a{font-size:11px;color:var(--p);font-weight:800}
+  .today-card{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:12px 14px}
+  .today-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .today-ico{width:28px;height:28px;background:#DBEAFE;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .today-t{font-size:12.5px;font-weight:900;flex:1}
+  .today-v{font-size:11.5px;color:var(--p);font-weight:800}
+  .today-bar{height:5px;background:#F0F1F5;border-radius:3px;overflow:hidden}
+  .today-bar>div{height:100%;background:var(--p);width:60%}
+
+  /* 하단 네비 */
+  .nav{background:#FFF;border-top:1px solid var(--b);padding:9px 10px 16px;display:flex;justify-content:space-around;align-items:center}
+  .nv{text-align:center;font-size:9.5px;color:#94A3B8;font-weight:800;flex:1}
+  .nv .ni{font-size:19px;line-height:1}
+  .nv.on{color:var(--p)}
+  .nv-fab{width:52px;height:52px;border-radius:50%;background:var(--p);color:#FFF;display:flex;align-items:center;justify-content:center;font-size:24px;margin-top:-24px;box-shadow:0 6px 16px rgba(37,99,235,.4)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🎯 Foku 스타일 · 캐릭터 주인공 홈</h1>
+<p class="sub">캐릭터가 홈의 주인공 · 말풍선으로 추천 · 양쪽 스탯 · 큰 CTA + 하단 요약. 3가지 바리에이션.</p>
+
+<div class="cols">
+
+  <!-- ============ 안1 · 밝은 톤 (Foku 비슷) ============ -->
+  <div>
+    <div class="label">안 1 · 밝은 톤 (Foku와 가장 비슷)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕, 지눙이님</div><div class="hi-sub">2026년 11월 4일 화요일</div></div>
+          <div class="chips"><span class="fire">🔥 5</span></div>
+        </div>
+
+        <div class="stage">
+          <span class="sparkle s1">✦</span><span class="sparkle s2">✦</span><span class="sparkle s3">✧</span>
+          <span class="sparkle s4">✦</span><span class="sparkle s5">✧</span>
+
+          <div class="speech">
+            <div class="st">🤖 오늘 저녁 추천</div>
+            <div class="sh"><mark>월남쌈</mark> 어때요?<br/>단백질 풍부해 든든해요</div>
+          </div>
+
+          <div class="char-center"><div class="char-canvas" id="char1"></div></div>
+          <div class="char-shadow"></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-ico">🍚</div>
+            <div class="stat-txt"><div class="stat-l">오늘 섭취</div><div class="stat-v">1,240<small>kcal</small></div></div>
+          </div>
+          <div class="stat">
+            <div class="stat-ico">💪</div>
+            <div class="stat-txt"><div class="stat-l">단백질</div><div class="stat-v">42<small>g</small></div></div>
+          </div>
+        </div>
+
+        <div class="main-cta">
+          <button class="main-cta-btn">📷 식사 사진 찍기</button>
+          <div class="main-cta-sub">사진 한 장이면 AI가 분석해드려요</div>
+        </div>
+
+        <div class="section">
+          <div class="section-hdr"><span class="section-t">오늘의 목표</span><a class="section-a">전체 보기 ›</a></div>
+          <div class="today-card">
+            <div class="today-row">
+              <div class="today-ico">🎯</div>
+              <div class="today-t">칼로리</div>
+              <div class="today-v">1,240 / 2,060</div>
+            </div>
+            <div class="today-bar"><div></div></div>
+          </div>
+        </div>
+
+        <div style="height:20px"></div>
+      </div>
+      <div class="nav">
+        <div class="nv on"><div class="ni">🏠</div>홈</div>
+        <div class="nv"><div class="ni">📊</div>분석</div>
+        <div class="nv-fab">📷</div>
+        <div class="nv"><div class="ni">👥</div>메이트</div>
+        <div class="nv"><div class="ni">📈</div>리포트</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 안2 · 블루 톤 (더 진지하게) ============ -->
+  <div>
+    <div class="label">안 2 · 블루 스테이지 (브랜드 임팩트 ↑)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕, 지눙이님</div><div class="hi-sub">2026년 11월 4일 화요일</div></div>
+          <div class="chips"><span class="fire">🔥 5</span></div>
+        </div>
+
+        <div class="stage" style="background:linear-gradient(180deg,#1E40AF 0%,#2563EB 100%);padding-bottom:40px">
+          <span class="sparkle s1" style="color:#FBBF24">✦</span><span class="sparkle s2" style="color:#FBBF24">✦</span><span class="sparkle s3" style="color:#FFF">✧</span><span class="sparkle s4" style="color:#FFF">✦</span>
+
+          <div class="speech" style="background:#FFF;color:#0F172A">
+            <div class="st">🤖 오늘 저녁 추천</div>
+            <div class="sh"><mark>월남쌈</mark> 어때요?<br/>단백질 풍부해 든든해요</div>
+          </div>
+
+          <div class="char-center"><div class="char-canvas" id="char2"></div></div>
+          <div class="char-shadow" style="background:radial-gradient(ellipse,rgba(0,0,0,.25) 0%,transparent 70%)"></div>
+        </div>
+
+        <div class="stats" style="margin-top:-22px">
+          <div class="stat">
+            <div class="stat-ico">🍚</div>
+            <div class="stat-txt"><div class="stat-l">오늘 섭취</div><div class="stat-v">1,240<small>kcal</small></div></div>
+          </div>
+          <div class="stat">
+            <div class="stat-ico">💪</div>
+            <div class="stat-txt"><div class="stat-l">단백질</div><div class="stat-v">42<small>g</small></div></div>
+          </div>
+        </div>
+
+        <div class="main-cta">
+          <button class="main-cta-btn">📷 식사 사진 찍기</button>
+          <div class="main-cta-sub">사진 한 장이면 AI가 분석해드려요</div>
+        </div>
+
+        <div class="section">
+          <div class="section-hdr"><span class="section-t">오늘의 목표</span><a class="section-a">전체 보기 ›</a></div>
+          <div class="today-card">
+            <div class="today-row">
+              <div class="today-ico">🎯</div>
+              <div class="today-t">칼로리</div>
+              <div class="today-v">1,240 / 2,060</div>
+            </div>
+            <div class="today-bar"><div></div></div>
+          </div>
+        </div>
+
+        <div style="height:20px"></div>
+      </div>
+      <div class="nav">
+        <div class="nv on"><div class="ni">🏠</div>홈</div>
+        <div class="nv"><div class="ni">📊</div>분석</div>
+        <div class="nv-fab">📷</div>
+        <div class="nv"><div class="ni">👥</div>메이트</div>
+        <div class="nv"><div class="ni">📈</div>리포트</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 안3 · 컴팩트 (스탯 더 많이) ============ -->
+  <div>
+    <div class="label">안 3 · 컴팩트 (스탯 4개 + 메이트 피드)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕, 지눙이님</div><div class="hi-sub">2026년 11월 4일 화요일</div></div>
+          <div class="chips"><span class="fire">🔥 5</span></div>
+        </div>
+
+        <div class="stage" style="padding-bottom:16px">
+          <span class="sparkle s1">✦</span><span class="sparkle s2">✦</span><span class="sparkle s3">✧</span><span class="sparkle s4">✦</span><span class="sparkle s5">✧</span>
+
+          <div class="speech">
+            <div class="st">🤖 오늘 저녁 추천</div>
+            <div class="sh"><mark>월남쌈</mark> 어때요?</div>
+          </div>
+
+          <div class="char-center"><div class="char-canvas" id="char3" style="width:130px;height:130px"></div></div>
+          <div class="char-shadow"></div>
+        </div>
+
+        <div class="stats" style="grid-template-columns:repeat(4,1fr);gap:6px">
+          <div class="stat" style="flex-direction:column;align-items:flex-start;padding:10px"><div class="stat-l">🍚 kcal</div><div class="stat-v" style="font-size:14px">1,240</div></div>
+          <div class="stat" style="flex-direction:column;align-items:flex-start;padding:10px"><div class="stat-l">💪 단백</div><div class="stat-v" style="font-size:14px">42g</div></div>
+          <div class="stat" style="flex-direction:column;align-items:flex-start;padding:10px"><div class="stat-l">⚖️ 체중</div><div class="stat-v" style="font-size:14px">70kg</div></div>
+          <div class="stat" style="flex-direction:column;align-items:flex-start;padding:10px"><div class="stat-l">🏋️ 운동</div><div class="stat-v" style="font-size:14px">5회</div></div>
+        </div>
+
+        <div class="main-cta">
+          <button class="main-cta-btn">📷 식사 사진 찍기</button>
+        </div>
+
+        <div class="section">
+          <div class="section-hdr"><span class="section-t">👥 메이트 활동</span><a class="section-a">모두 보기 ›</a></div>
+          <div class="today-card">
+            <div style="display:flex;align-items:center;gap:10px;padding:4px 0;border-bottom:1px dashed #F0F1F5">
+              <div style="width:28px;height:28px;background:#FEF3C7;border-radius:50%;text-align:center;line-height:28px">🙂</div>
+              <div style="flex:1;font-size:12px"><b>달구</b> 점심 기록 · 샐러드 420kcal</div>
+              <span style="font-size:11px;color:var(--p);font-weight:800">❤️ 3</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 0">
+              <div style="width:28px;height:28px;background:#DBEAFE;border-radius:50%;text-align:center;line-height:28px">💪</div>
+              <div style="flex:1;font-size:12px"><b>민재</b> 운동 완료 · 가슴 볼륨 1,240kg</div>
+              <span style="font-size:11px;color:var(--p);font-weight:800">💬 1</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:20px"></div>
+      </div>
+      <div class="nav">
+        <div class="nv on"><div class="ni">🏠</div>홈</div>
+        <div class="nv"><div class="ni">📊</div>분석</div>
+        <div class="nv-fab">📷</div>
+        <div class="nv"><div class="ni">👥</div>메이트</div>
+        <div class="nv"><div class="ni">📈</div>리포트</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#FFF;padding:14px 16px;border-radius:12px;border:1px solid var(--b);font-size:12.5px;line-height:1.8;margin-top:20px;max-width:800px">
+  <b>🎯 Foku 참고 포인트 반영한 것</b><br/>
+  · <b>캐릭터가 중앙 스테이지에 서있음</b> · 하단 그림자 · 반짝임 효과<br/>
+  · <b>말풍선이 위에서 캐릭터 가리킴</b> · 꼬리 ↙ 아래로<br/>
+  · <b>스탯 카드 양쪽 (kcal/단백질)</b> · Foku의 Hunger/Happiness 대응<br/>
+  · <b>큰 검정 CTA</b> · Foku의 Start focus session ↔ 우리는 "식사 사진 찍기"<br/>
+  · <b>하단 요약 섹션</b> · 목표 진행률 or 메이트 활동<br/><br/>
+
+  <b>차이점</b><br/>
+  · Foku는 몬스터 (쿠키런 느낌) · 우리는 블루 슬라임 (건강/신뢰)<br/>
+  · Foku는 생존 게임 (배고픔/행복) · 우리는 식단 코치 (kcal/단백질)<br/><br/>
+
+  <b>3안 중 뭐가 맘에 들어?</b> 아니면 요소 섞을까?
+</div>
+
+</div>
+
+<script>
+(function(global){
+  'use strict';
+  function Companion(el){
+    this.el = el; this.opts = {speed:0.8, autoRevert:true};
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.cssText = 'display:block;width:100%;height:100%;background:transparent';
+    this.wrap = document.createElement('div');
+    this.wrap.style.cssText = 'width:100%;height:100%;aspect-ratio:1;position:relative';
+    this.wrap.appendChild(this.canvas); el.appendChild(this.wrap);
+    this.mode='idle'; this.t=0; this.e=0; this.last=0; this.blend=0; this.visible=true;
+    this.playing = !(matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if ('IntersectionObserver' in global) { this.io = new IntersectionObserver(es => { this.visible = es.some(en => en.isIntersecting); }, {threshold:0.01}); this.io.observe(this.wrap); }
+    if ('ResizeObserver' in global) { this.ro = new ResizeObserver(() => this._draw()); this.ro.observe(this.wrap); }
+    requestAnimationFrame(this._frame.bind(this)); this._draw();
+  }
+  Companion.prototype._frame = function(now){
+    const dt = this.last ? Math.min((now-this.last)/1000, 0.05) : 0; this.last = now;
+    if (this.playing && this.visible) { this.t += dt*this.opts.speed; this.e += dt; this.blend += (1-this.blend)*dt*3; this._draw(); }
+    requestAnimationFrame(this._frame.bind(this));
+  };
+  Companion.prototype._draw = function(){
+    const canvas = this.canvas, w = this.wrap.clientWidth, dpr = Math.min(devicePixelRatio||1, 2);
+    const px = Math.max(1, Math.round(w*dpr));
+    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+    const c = canvas.getContext('2d');
+    c.setTransform(canvas.width/360, 0, 0, canvas.height/360, 0, 0); c.clearRect(0,0,360,360);
+    const mode = this.mode, t = this.t, e = this.e;
+    const active = mode==='thinking' ? this.blend : 0;
+    const hop = mode==='result' ? Math.sin(e*8)*Math.exp(-e*1.5)*15 : 0;
+    const nod = mode==='saved' ? Math.sin(e*6)*Math.exp(-e*1.7)*0.12 : 0;
+    const breath = Math.sin(t*1.45)*2.5;
+    const cy = 181 + Math.sin(t*0.95)*2 - Math.abs(hop);
+    c.save(); c.translate(180, cy); c.rotate(nod); c.scale(1+hop*0.002, 1-hop*0.002);
+    c.beginPath();
+    for (let j=0; j<=220; j++) {
+      const a = j/220*Math.PI*2;
+      const angular = Math.atan2(Math.sin(a+1.03), Math.cos(a+1.03));
+      const tuft = 15*Math.exp(-angular*angular/0.075);
+      const r = 91 + breath + tuft + (3+active*7)*Math.sin(a*3+t*(0.65+active)) + (2+active*3)*Math.cos(a*4-t*0.6);
+      const x = Math.cos(a)*r*1.05, y = Math.sin(a)*r;
+      if (j) c.lineTo(x,y); else c.moveTo(x,y);
+    }
+    c.closePath();
+    const g = c.createLinearGradient(-65,-90,65,95);
+    g.addColorStop(0,'#69a4ff'); g.addColorStop(0.5,'#347af4'); g.addColorStop(1,'#2563eb');
+    c.fillStyle = g; c.fill();
+    const blink = Math.pow(Math.max(0, Math.cos(t*1.1+2)), 65);
+    const fx = mode==='thinking' ? Math.sin(t*1.4)*3 : Math.sin(t*0.6)*1.2;
+    c.fillStyle='#fff'; c.strokeStyle='#fff'; c.lineCap='round'; c.lineWidth=4;
+    for (const x of [-20,20]) {
+      c.beginPath();
+      if (mode==='result' && e < 2.6) { c.moveTo(x-5,-2); c.quadraticCurveTo(x,-11, x+5,-2); c.stroke(); }
+      else { c.ellipse(x+fx, -5, 5.3, Math.max(1.2, 7.5*(1-blink)), 0, 0, Math.PI*2); c.fill(); }
+    }
+    c.beginPath(); c.moveTo(-8+fx, 12); c.quadraticCurveTo(fx, 23, 8+fx, 12); c.stroke();
+    c.restore();
+  };
+  global.__mount = function(id){ const el = document.getElementById(id); if (el) new Companion(el); };
+})(window);
+__mount('char1'); __mount('char2'); __mount('char3');
+</script>
+</body>
+</html>

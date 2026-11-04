@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>AI 캐릭터 메인 활용 · 홈 추천 스타일</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1400px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:15px;margin:22px 2px 10px;font-weight:800}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:620px;display:flex;flex-direction:column;position:relative}
+  .body{flex:1;overflow-y:auto;background:var(--bg);padding:16px}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .hi{font-size:13.5px;color:var(--t2)}
+  .hi b{color:#1E3B70;font-weight:800;font-size:14.5px}
+  .hi-sub{font-size:11px;color:var(--t2);font-weight:600;margin-top:2px}
+  .chips{display:flex;gap:5px;align-items:center}
+  .fire{background:#FEF3C7;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:900;color:#92400E}
+  .gear{width:26px;height:26px;background:#FFF;border:1px solid var(--b);border-radius:50%;text-align:center;line-height:26px;font-size:12px}
+
+  .pills{display:flex;gap:5px;margin-bottom:12px}
+  .pill{padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:800;border:1px solid}
+  .pill.a{background:linear-gradient(135deg,#DBEAFE,#EFF4FF);color:var(--pd);border-color:#3B82F6}
+  .pill.g{background:linear-gradient(135deg,#D1FAE5,#A7F3D0);color:#065F46;border-color:#10B981}
+
+  /* 공통 - 추천 버튼 행 */
+  .reco-row{display:flex;gap:5px;margin-top:12px}
+  .reco-row button{flex:1;background:rgba(255,255,255,.95);color:var(--pd);border:0;padding:7px 4px;border-radius:999px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit}
+
+  mark{background:#FBBF24;color:#1E40AF;padding:1px 6px;border-radius:5px}
+
+  /* ═══════ A안: 캐릭터가 왼쪽에서 말풍선 '덮어씌움' ═══════ */
+  .a-wrap{position:relative;padding-left:52px;margin-top:8px}
+  .a-char{position:absolute;left:-4px;top:16px;width:72px;height:72px;z-index:3}
+  .a-bubble{background:linear-gradient(135deg,#1E40AF,#3D63D9);border-radius:18px 18px 18px 4px;padding:14px 14px 12px 32px;color:#FFF;position:relative;margin-left:16px}
+  .a-bubble::before{content:"";position:absolute;left:-10px;bottom:16px;width:20px;height:16px;background:#1E40AF;border-radius:8px 0 0 8px;clip-path:polygon(100% 0, 0 50%, 100% 100%)}
+  .a-bubble .h{font-size:17px;font-weight:900;line-height:1.3}
+  .a-bubble .s{font-size:11px;opacity:.9;margin-top:6px}
+
+  /* ═══════ B안: 캐릭터 중앙 상단 · 말풍선 아래 ═══════ */
+  .b-wrap{text-align:center;padding-top:8px}
+  .b-char{width:92px;height:92px;margin:0 auto}
+  .b-bubble{background:linear-gradient(135deg,#1E40AF,#3D63D9);border-radius:18px;padding:16px 16px 14px;color:#FFF;margin-top:-18px;position:relative;z-index:1;padding-top:30px}
+  .b-bubble .h{font-size:18px;font-weight:900;line-height:1.3;text-align:center}
+  .b-bubble .s{font-size:11px;opacity:.9;margin-top:6px;text-align:center}
+
+  /* ═══════ C안: 흰 바탕 카드 + 캐릭터 왼쪽 ═══════ */
+  .c-wrap{background:#FFF;border-radius:18px;padding:14px;display:flex;gap:12px;align-items:center;border:1px solid var(--b);box-shadow:0 4px 12px rgba(37,99,235,.06)}
+  .c-char{width:80px;height:80px;flex-shrink:0;background:linear-gradient(135deg,#EFF4FF,#DBEAFE);border-radius:50%}
+  .c-text{flex:1;min-width:0}
+  .c-tag{font-size:10px;color:var(--p);font-weight:800;letter-spacing:.5px}
+  .c-text .h{font-size:16px;font-weight:900;margin-top:3px;line-height:1.3;color:#0F172A}
+  .c-text .s{font-size:11px;color:var(--t2);font-weight:600;margin-top:4px}
+
+  /* ═══════ D안: 큰 블루 카드 + 캐릭터 top-right 떠있음 ═══════ */
+  .d-wrap{background:linear-gradient(135deg,#1E40AF,#3D63D9);border-radius:22px;padding:18px 16px 14px;color:#FFF;position:relative;min-height:170px;margin-top:40px}
+  .d-char{position:absolute;top:-38px;right:16px;width:86px;height:86px}
+  .d-tag{font-size:10px;color:#FBBF24;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+  .d-wrap .h{font-size:19px;font-weight:900;line-height:1.3;padding-right:70px}
+  .d-wrap .s{font-size:11.5px;opacity:.9;margin-top:6px}
+
+  /* ═══════ E안: 채팅 말풍선 형태 ═══════ */
+  .e-msg{display:flex;align-items:flex-end;gap:8px;margin-top:8px}
+  .e-char{width:52px;height:52px;flex-shrink:0;background:#FFF;border-radius:50%;box-shadow:0 2px 8px rgba(37,99,235,.15)}
+  .e-bubble{background:#FFF;border:1px solid var(--b);border-radius:18px 18px 18px 4px;padding:12px 14px;flex:1;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+  .e-name{font-size:10.5px;font-weight:900;color:var(--p);margin-bottom:3px}
+  .e-bubble .h{font-size:16px;font-weight:900;color:#0F172A;line-height:1.3}
+  .e-bubble .s{font-size:11.5px;color:var(--t2);font-weight:600;margin-top:5px}
+  .e-time{font-size:9.5px;color:#94A3B8;margin-top:6px;text-align:right}
+
+  /* ═══════ F안: 큰 캐릭터 히어로 ═══════ */
+  .f-wrap{text-align:center;padding:4px 0 10px}
+  .f-char{width:140px;height:140px;margin:0 auto 6px}
+  .f-tag{font-size:10.5px;color:var(--p);font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+  .f-title{font-size:21px;font-weight:900;color:#0F172A;letter-spacing:-.5px;line-height:1.3;margin-top:5px}
+  .f-sub{font-size:12px;color:var(--t2);font-weight:600;margin-top:7px;line-height:1.5}
+  .f-ctas{display:flex;gap:6px;margin-top:14px;padding:0 4px}
+  .f-ctas button{flex:1;background:var(--p);color:#FFF;border:0;padding:10px;border-radius:12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit}
+  .f-ctas button.g{background:#FFF;color:var(--pd);border:1px solid var(--pl)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🤖 AI 캐릭터 메인 활용 · 홈 추천 6스타일</h1>
+<p class="sub">캐릭터가 "말하는 주체" — 추천 메시지의 화자로 디자인. 상태 전환은 자동 (idle→thinking→result).</p>
+
+<div class="cols">
+
+  <!-- A안 -->
+  <div>
+    <div class="label">A안 · 왼쪽 캐릭터 · 말풍선 오버랩</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div><div class="hi-sub">🤖 AI가 오늘 뭐 먹을지 골라드려요</div></div>
+          <div class="chips"><span class="fire">🔥 1</span><span class="gear">⚙️</span></div>
+        </div>
+        <div class="pills"><span class="pill a">🎯 건강유지 ›</span><span class="pill g">🎯 챌린지 ›</span></div>
+
+        <div class="a-wrap">
+          <div class="a-char" id="charA"></div>
+          <div class="a-bubble">
+            <div class="h">오늘 저녁,<br/><mark>월남쌈</mark> 어때?</div>
+            <div class="s">단백질 풍부해서 든든할 거야 💪</div>
+            <div class="reco-row">
+              <button>↻ 다른 음식</button><button>📍 내 주변</button><button>자세히 ›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B안 -->
+  <div>
+    <div class="label">B안 · 중앙 상단 캐릭터 · 아래 말풍선</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div><div class="hi-sub">🤖 AI가 오늘 뭐 먹을지 골라드려요</div></div>
+          <div class="chips"><span class="fire">🔥 1</span><span class="gear">⚙️</span></div>
+        </div>
+        <div class="pills"><span class="pill a">🎯 건강유지 ›</span><span class="pill g">🎯 챌린지 ›</span></div>
+
+        <div class="b-wrap">
+          <div class="b-char" id="charB"></div>
+          <div class="b-bubble">
+            <div class="h">오늘 저녁,<br/><mark>월남쌈</mark> 어때?</div>
+            <div class="s">단백질 풍부해서 든든할 거야 💪</div>
+            <div class="reco-row">
+              <button>↻ 다른 음식</button><button>📍 내 주변</button><button>자세히 ›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C안 -->
+  <div>
+    <div class="label">C안 · 흰 카드 · 캐릭터 좌측 (깔끔)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div><div class="hi-sub">🤖 AI가 오늘 뭐 먹을지 골라드려요</div></div>
+          <div class="chips"><span class="fire">🔥 1</span><span class="gear">⚙️</span></div>
+        </div>
+        <div class="pills"><span class="pill a">🎯 건강유지 ›</span><span class="pill g">🎯 챌린지 ›</span></div>
+
+        <div class="c-wrap">
+          <div class="c-char" id="charC"></div>
+          <div class="c-text">
+            <div class="c-tag">AI 추천</div>
+            <div class="h">오늘 저녁, <mark>월남쌈</mark> 어때?</div>
+            <div class="s">단백질 풍부해서 든든할 거야</div>
+          </div>
+        </div>
+        <div class="reco-row" style="margin-top:8px">
+          <button style="background:var(--pl);color:var(--pd)">↻ 다른 음식</button>
+          <button style="background:var(--pl);color:var(--pd)">📍 내 주변</button>
+          <button style="background:var(--p);color:#FFF">자세히 ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- D안 -->
+  <div>
+    <div class="label">D안 · 블루 카드 + 캐릭터 상단 떠있음</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div><div class="hi-sub">🤖 AI가 오늘 뭐 먹을지 골라드려요</div></div>
+          <div class="chips"><span class="fire">🔥 1</span><span class="gear">⚙️</span></div>
+        </div>
+        <div class="pills"><span class="pill a">🎯 건강유지 ›</span><span class="pill g">🎯 챌린지 ›</span></div>
+
+        <div class="d-wrap">
+          <div class="d-char" id="charD"></div>
+          <div class="d-tag">🤖 AI 추천</div>
+          <div class="h">오늘 저녁,<br/><mark>월남쌈</mark> 어때?</div>
+          <div class="s">단백질 풍부해서 든든할 거야 💪</div>
+          <div class="reco-row">
+            <button>↻ 다른 음식</button><button>📍 내 주변</button><button>자세히 ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E안 -->
+  <div>
+    <div class="label">E안 · 채팅 메시지 스타일 (대화 느낌)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div><div class="hi-sub">🤖 AI가 오늘 뭐 먹을지 골라드려요</div></div>
+          <div class="chips"><span class="fire">🔥 1</span><span class="gear">⚙️</span></div>
+        </div>
+        <div class="pills"><span class="pill a">🎯 건강유지 ›</span><span class="pill g">🎯 챌린지 ›</span></div>
+
+        <div class="e-msg">
+          <div class="e-char" id="charE"></div>
+          <div class="e-bubble">
+            <div class="e-name">건강어때</div>
+            <div class="h">오늘 저녁엔<br/><mark>월남쌈</mark> 어때요?</div>
+            <div class="s">단백질 풍부해서 든든할 거예요 💪</div>
+            <div class="e-time">방금 전</div>
+          </div>
+        </div>
+        <div class="reco-row" style="margin-top:10px">
+          <button style="background:var(--pl);color:var(--pd)">↻ 다른 음식</button>
+          <button style="background:var(--pl);color:var(--pd)">📍 내 주변</button>
+          <button style="background:var(--p);color:#FFF">자세히 ›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F안 -->
+  <div>
+    <div class="label">F안 · 히어로 큰 캐릭터 (브랜드 임팩트)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div><div class="hi-sub">🤖 AI가 오늘 뭐 먹을지 골라드려요</div></div>
+          <div class="chips"><span class="fire">🔥 1</span><span class="gear">⚙️</span></div>
+        </div>
+        <div class="pills"><span class="pill a">🎯 건강유지 ›</span><span class="pill g">🎯 챌린지 ›</span></div>
+
+        <div class="f-wrap">
+          <div class="f-char" id="charF"></div>
+          <div class="f-tag">오늘 저녁 추천</div>
+          <div class="f-title"><mark>월남쌈</mark> 어때요?</div>
+          <div class="f-sub">단백질 풍부해서 든든할 거야 💪</div>
+          <div class="f-ctas">
+            <button class="g">↻ 다른 음식</button>
+            <button class="g">📍 내 주변</button>
+            <button>자세히 ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#FFF;padding:14px 16px;border-radius:12px;border:1px solid var(--b);font-size:12.5px;line-height:1.8;margin-top:20px;max-width:800px">
+  <b>💡 비교 포인트</b><br/>
+  · <b>A안</b> — 캐릭터가 왼쪽에 서서 말풍선 꼬리로 "말 거는" 느낌. 공간 효율 좋음.<br/>
+  · <b>B안</b> — 중앙 상단 캐릭터 + 아래 말풍선. 전면 노출, 임팩트 있음.<br/>
+  · <b>C안</b> — 흰 카드 + 좌측 캐릭터. 가장 깔끔, 톤 다운.<br/>
+  · <b>D안</b> — 블루 카드 상단에 캐릭터 떠있음. 기존 카드 유지하면서 캐릭터만 추가.<br/>
+  · <b>E안</b> — 채팅 메시지 느낌. 대화 늘어나는 구조로 확장 가능 (여러 메시지).<br/>
+  · <b>F안</b> — 큰 히어로 캐릭터. 브랜드 임팩트 최대, 홈 톤 주인공.<br/><br/>
+
+  어떤 안이 마음에 들어? 아니면 요소 섞을까? (예: F안 톤 + E안 CTA)
+</div>
+
+</div>
+
+<script>
+// === HealthCompanion 인라인 ===
+(function(global){
+  'use strict';
+  function Companion(el, opts) {
+    this.el = el; this.opts = Object.assign({size:80, speed:0.8, autoRevert:true}, opts||{});
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.cssText = 'display:block;width:100%;height:100%;background:transparent';
+    this.wrap = document.createElement('div');
+    this.wrap.style.cssText = 'width:100%;height:100%;aspect-ratio:1;position:relative;overflow:hidden';
+    this.wrap.appendChild(this.canvas); el.appendChild(this.wrap);
+    this.mode='idle'; this.t=0; this.e=0; this.last=0; this.blend=0; this.visible=true; this.destroyed=false;
+    this.playing = !(matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if ('IntersectionObserver' in global) { this.io = new IntersectionObserver(es => { this.visible = es.some(en => en.isIntersecting); }, {threshold:0.01}); this.io.observe(this.wrap); }
+    if ('ResizeObserver' in global) { this.ro = new ResizeObserver(() => this._draw()); this.ro.observe(this.wrap); }
+    this._raf = requestAnimationFrame(this._frame.bind(this)); this._draw();
+  }
+  Companion.prototype.setState = function(m) {
+    if (!['idle','thinking','result','saved'].includes(m)) return;
+    this.mode = m; this.e = 0;
+    if (this.opts.autoRevert) {
+      if (this._to) clearTimeout(this._to);
+      if (m==='result') this._to = setTimeout(() => this.setState('idle'), 2600);
+      else if (m==='saved') this._to = setTimeout(() => this.setState('idle'), 2000);
+    }
+  };
+  Companion.prototype._frame = function(now) {
+    if (this.destroyed) return;
+    const dt = this.last ? Math.min((now-this.last)/1000, 0.05) : 0; this.last = now;
+    if (this.playing && this.visible) { this.t += dt*this.opts.speed; this.e += dt; this.blend += (1-this.blend)*dt*3; this._draw(); }
+    this._raf = requestAnimationFrame(this._frame.bind(this));
+  };
+  Companion.prototype._draw = function() {
+    const canvas = this.canvas, w = this.wrap.clientWidth, dpr = Math.min(devicePixelRatio||1, 2);
+    const px = Math.max(1, Math.round(w*dpr));
+    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+    const c = canvas.getContext('2d');
+    c.setTransform(canvas.width/360, 0, 0, canvas.height/360, 0, 0); c.clearRect(0,0,360,360);
+    const mode = this.mode, t = this.t, e = this.e;
+    const active = mode==='thinking' ? this.blend : 0;
+    const hop = mode==='result' ? Math.sin(e*8)*Math.exp(-e*1.5)*15 : 0;
+    const nod = mode==='saved' ? Math.sin(e*6)*Math.exp(-e*1.7)*0.12 : 0;
+    const breath = Math.sin(t*1.45)*2.5;
+    const cy = 181 + Math.sin(t*0.95)*2 - Math.abs(hop);
+    c.save(); c.translate(180, cy); c.rotate(nod); c.scale(1+hop*0.002, 1-hop*0.002);
+    c.beginPath();
+    for (let j=0; j<=220; j++) {
+      const a = j/220*Math.PI*2;
+      const angular = Math.atan2(Math.sin(a+1.03), Math.cos(a+1.03));
+      const tuft = 15*Math.exp(-angular*angular/0.075);
+      const r = 91 + breath + tuft + (3+active*7)*Math.sin(a*3+t*(0.65+active)) + (2+active*3)*Math.cos(a*4-t*0.6);
+      const x = Math.cos(a)*r*1.05, y = Math.sin(a)*r;
+      if (j) c.lineTo(x,y); else c.moveTo(x,y);
+    }
+    c.closePath();
+    const g = c.createLinearGradient(-65,-90,65,95);
+    g.addColorStop(0,'#69a4ff'); g.addColorStop(0.5,'#347af4'); g.addColorStop(1,'#2563eb');
+    c.fillStyle = g; c.fill();
+    const blink = Math.pow(Math.max(0, Math.cos(t*1.1+2)), 65);
+    const fx = mode==='thinking' ? Math.sin(t*1.4)*3 : Math.sin(t*0.6)*1.2;
+    c.fillStyle='#fff'; c.strokeStyle='#fff'; c.lineCap='round'; c.lineWidth=4;
+    for (const x of [-20,20]) {
+      c.beginPath();
+      if (mode==='result' && e < 2.6) { c.moveTo(x-5,-2); c.quadraticCurveTo(x,-11, x+5,-2); c.stroke(); }
+      else { c.ellipse(x+fx, -5, 5.3, Math.max(1.2, 7.5*(1-blink)), 0, 0, Math.PI*2); c.fill(); }
+    }
+    c.beginPath(); c.moveTo(-8+fx, 12); c.quadraticCurveTo(fx, 23, 8+fx, 12); c.stroke();
+    c.restore();
+  };
+  global.HealthCompanion = { mount: function(el) { if (typeof el === 'string') el = document.querySelector(el); return new Companion(el); } };
+})(window);
+
+// 모든 슬롯에 캐릭터 마운트 (idle 상태)
+['charA','charB','charC','charD','charE','charF'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) HealthCompanion.mount(el);
+});
+</script>
+</body>
+</html>
