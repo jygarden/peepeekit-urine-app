@@ -4,17 +4,17 @@
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://peepeekit-urine-app-5h3f.vercel.app",
-    "cleartext": false,
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "hostname": "localhost"
   },
   "ios": {
     "scheme": "건강어때",
     "contentInset": "always",
-    "backgroundColor": "#FFF8F0"
+    "backgroundColor": "#EEF4FB"
   },
   "android": {
-    "backgroundColor": "#FFF8F0",
+    "backgroundColor": "#EEF4FB",
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": false

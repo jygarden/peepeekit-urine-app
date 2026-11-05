@@ -61,6 +61,32 @@
   <script>
     window.SUPABASE_URL = 'https://guvzbtemficekutgxngb.supabase.co';
     window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1dnpidGVtZmljZWt1dGd4bmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NTkyMjcsImV4cCI6MjA5MTAzNTIyN30.u52nNN_iKreXF6R1jxe3NOtGHsnLbop4Z3t1hqY8fro';
+
+    // ═══════════════════════════════════════════════════════════
+    // 🔀 네이티브 앱 번들 모드 감지 → /api/* 요청을 Vercel로 라우팅
+    // ═══════════════════════════════════════════════════════════
+    (function(){
+      const isNative = location.protocol === 'capacitor:' || location.protocol === 'file:' ||
+                       location.hostname === 'localhost' || location.hostname === '' ||
+                       (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+      // 네이티브면 Vercel 백엔드로, 웹이면 상대경로 유지
+      window.API_BASE = isNative ? 'https://peepeekit-urine-app-5h3f.vercel.app' : '';
+      window.IS_NATIVE_APP = isNative;
+
+      // fetch 자동 리라우트: '/api/...' → API_BASE + path
+      if (isNative) {
+        const origFetch = window.fetch;
+        window.fetch = function(input, init) {
+          if (typeof input === 'string' && input.startsWith('/api/')) {
+            input = window.API_BASE + input;
+          } else if (input instanceof Request && input.url.startsWith('/api/')) {
+            input = new Request(window.API_BASE + input.url.replace(location.origin, ''), input);
+          }
+          return origFetch.call(this, input, init);
+        };
+        console.log('[🔀 Native mode] API_BASE =', window.API_BASE);
+      }
+    })();
   </script>
   <!-- v12 · 온보딩·로고 PNG 인라인 (assets 폴더 없이도 정상 렌더) -->
   <script>
@@ -5801,9 +5827,9 @@ function showBackToExitToast() {
 }
 
 // ══════════════════════════════════════
-// PWA 서비스워커 등록
+// PWA 서비스워커 등록 (네이티브 앱에서는 스킵)
 // ══════════════════════════════════════
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && !window.IS_NATIVE_APP) {
   window.addEventListener('load', async () => {
     try {
       // 캐시 전부 비우기 (옛 SW가 캐싱한 망가진 응답 제거)
