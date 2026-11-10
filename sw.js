@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v70-native-bundle-mode-2026-11-05';
+const SW_VERSION = 'v71-food-confirm-portion-similar-2026-11-10';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {

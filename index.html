@@ -3774,9 +3774,14 @@ window.appIcon = function(name, size){
           <div id="personalAnalysisCard" style="margin-bottom:14px"></div>
           <!-- 💧 물 섭취 위젯 -->
           <div id="waterWidget" style="margin-bottom:14px"></div>
-          <!-- 인식된 음식 -->
+          <!-- 인식된 음식 + 식약처 근거 뱃지 -->
           <div class="food-list">
-            <div class="nutri-title">🍴 인식된 음식</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <div class="nutri-title" style="margin:0">🍴 인식된 음식</div>
+              <div style="display:inline-flex;align-items:center;gap:4px;background:#EFF4FF;color:#1E40AF;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:800;border:1px solid #DBEAFE">
+                <span>📚</span><span>식약처 DB 기반</span>
+              </div>
+            </div>
             <div id="foodItemsList"></div>
           </div>
           <!-- 영양소 막대 -->
@@ -4506,6 +4511,21 @@ window.appIcon = function(name, size){
               <button onclick="_closePortionPicker()" style="background:transparent;border:0;font-size:18px;color:#64748B;cursor:pointer">✕</button>
             </div>
             <div id="portionPickerList"></div>
+          </div>
+        </div>
+
+        <!-- 🔍 비슷한 음식 바텀시트 -->
+        <div id="similarFoodSheet" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:9975;align-items:flex-end;justify-content:center" onclick="if(event.target===this)_closeSimilarFoodPicker()">
+          <div style="background:#FFF;width:100%;max-width:500px;max-height:78vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden">
+            <div style="padding:14px 18px;border-bottom:1px solid #E5E7EB">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div style="font-size:14.5px;font-weight:900">🔍 비슷한 음식 찾기</div>
+                <button onclick="_closeSimilarFoodPicker()" style="background:transparent;border:0;font-size:18px;color:#64748B;cursor:pointer">✕</button>
+              </div>
+              <div style="font-size:11.5px;color:#64748B;font-weight:600">현재: <b id="similarFoodCurrent">—</b> · 식약처 식품영양성분DB 기반</div>
+              <input id="similarFoodQuery" placeholder="음식명 검색 (예: 비빔밥)" onkeyup="if(event.key==='Enter')_searchSimilarFoods(this.value)" oninput="clearTimeout(window._simTO);window._simTO=setTimeout(()=>_searchSimilarFoods(this.value),400)" style="width:100%;margin-top:10px;padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;background:#F8FAFC;outline:none;font-family:inherit"/>
+            </div>
+            <div id="similarFoodList" style="flex:1;overflow-y:auto;padding:14px 16px"></div>
           </div>
         </div>
 
@@ -18147,8 +18167,8 @@ function renderConfirmFoods() {
     return;
   }
   const cardsHtml = detectedFoodsData.map((food, fi) => {
-    const isExpanded = _expandedFoods.has(fi);
-    const ingredients = food.ingredients || [];
+    const portion = food.portion || 1;
+    const portionLbl = (typeof portionLabel === 'function') ? portionLabel(portion) : `×${portion}`;
     return `
     <div class="confirm-food-card" style="position:relative">
       <button onclick="removeFood(${fi})" title="이 음식 제외하기"
@@ -18160,24 +18180,18 @@ function renderConfirmFoods() {
       </div>
       ${food.brand ? `<div style="margin:6px 0 0 28px;display:inline-flex;align-items:center;gap:4px;background:#EFF6FF;color:#1E40AF;font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;border:1px solid #DBEAFE"><span style="font-size:11px">🏪</span> ${escapeHtml(food.brand)}</div>` : ''}
 
-      <button onclick="toggleFoodIngredients(${fi})" style="margin-top:8px;background:transparent;border:none;color:#6366F1;font-size:11.5px;font-weight:700;cursor:pointer;padding:4px 0;font-family:inherit;display:inline-flex;align-items:center;gap:4px">
-        ${isExpanded ? '▾' : '▸'} 재료 ${ingredients.length}개 ${isExpanded ? '접기' : '보기·수정'}
-      </button>
-
-      ${isExpanded ? `
-        <div id="ingredients-${fi}" style="margin-top:6px">
-          ${ingredients.map((ing, ii) => {
-            const ingName = typeof ing === 'string' ? ing : (ing && ing.name) ? ing.name : '';
-            return `
-            <span class="confirm-ing-chip">
-              <input type="text" value="${escapeHtml(ingName)}" oninput="updateIngredient(${fi}, ${ii}, this.value)" style="width:${Math.max(ingName.length*8, 40)}px"/>
-              <button onclick="removeIngredient(${fi}, ${ii})">✕</button>
-            </span>
-          `;
-          }).join('')}
-          <button class="confirm-add-btn" onclick="addIngredient(${fi})">＋ 재료 추가</button>
-        </div>
-      ` : ''}
+      <!-- 양 보정 + 비슷한 음식 (재료 섹션 대체) -->
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <button onclick="openFoodPortionPicker(${fi})" style="background:#EFF4FF;color:#1E40AF;border:1px solid #DBEAFE;padding:6px 11px;border-radius:999px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">
+          <span>🍚</span>
+          <span>${portionLbl}</span>
+          <span style="color:#64748B;font-weight:600;font-size:10px">(×${portion})</span>
+        </button>
+        <button onclick="openSimilarFoodPicker(${fi})" style="background:#FFF;color:#1E40AF;border:1px solid #DBEAFE;padding:6px 11px;border-radius:999px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px">
+          <span>🔍</span>
+          <span>비슷한 음식</span>
+        </button>
+      </div>
     </div>
   `;
   }).join('');
@@ -18279,6 +18293,73 @@ function removeIngredient(fi, ii) {
     renderConfirmFoods();
     _scheduleEditSave(fi);
   }
+}
+
+// ═══ 🍚 양 보정 피커 ═══
+function openFoodPortionPicker(fi) {
+  const food = detectedFoodsData[fi];
+  if (!food) return;
+  const current = food.portion || 1;
+  if (typeof openPortionPicker !== 'function') return;
+  openPortionPicker(current, (newPortion) => {
+    detectedFoodsData[fi].portion = newPortion;
+    renderConfirmFoods();
+    _scheduleEditSave(fi);
+  });
+}
+
+// ═══ 🔍 비슷한 음식 피커 ═══
+let _similarPickerCurFi = null;
+async function openSimilarFoodPicker(fi) {
+  const food = detectedFoodsData[fi];
+  if (!food) return;
+  _similarPickerCurFi = fi;
+  const sheet = document.getElementById('similarFoodSheet');
+  if (!sheet) return;
+  sheet.style.display = 'flex';
+  document.getElementById('similarFoodQuery').value = food.name || '';
+  document.getElementById('similarFoodCurrent').textContent = food.name || '';
+  await _searchSimilarFoods(food.name || '');
+}
+
+function _closeSimilarFoodPicker() {
+  const s = document.getElementById('similarFoodSheet');
+  if (s) s.style.display = 'none';
+  _similarPickerCurFi = null;
+}
+
+async function _searchSimilarFoods(q) {
+  const list = document.getElementById('similarFoodList');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:#64748B;font-size:12.5px">검색 중...</div>';
+  try {
+    const r = await _bodyApi('GET', `/api/food-similar?q=${encodeURIComponent(q)}`);
+    const foods = r.foods || [];
+    if (!foods.length) {
+      list.innerHTML = '<div style="padding:30px;text-align:center;color:#94A3B8;font-size:12.5px">비슷한 음식 없음 · 직접 수정하세요</div>';
+      return;
+    }
+    const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+    list.innerHTML = foods.slice(0, 15).map(f => `
+      <button onclick="_pickSimilarFood('${esc(f.name).replace(/'/g,"\\'")}')" style="width:100%;text-align:left;background:#FFF;border:1px solid #E5E7EB;border-radius:10px;padding:10px 13px;margin-bottom:6px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px">
+        <span style="font-size:16px">🍽</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:900;color:#0F172A">${esc(f.name)}</div>
+          <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:1px">${esc(f.category || '')}${f.kcal_per_serving ? ' · ' + f.kcal_per_serving + ' kcal' : ''}</div>
+        </div>
+      </button>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = `<div style="padding:20px;color:#991B1B;font-size:12px">⚠️ ${e.message}</div>`;
+  }
+}
+
+function _pickSimilarFood(name) {
+  if (_similarPickerCurFi == null) return;
+  detectedFoodsData[_similarPickerCurFi].name = name;
+  renderConfirmFoods();
+  _scheduleEditSave(_similarPickerCurFi);
+  _closeSimilarFoodPicker();
 }
 function addIngredient(fi) {
   const val = prompt('추가할 재료 이름:');
@@ -20597,6 +20678,37 @@ function saveFoodHistory(result) {
         evidence: result.evidence || null
       })
     }).catch(e => console.warn('[meal-log] fire-and-forget:', e.message));
+
+    // ⭐ 식단 저장 후 "자주 먹는 메뉴로 등록?" 프롬프트 (2초 뒤 토스트)
+    try {
+      setTimeout(() => {
+        const foods = result.foods || [];
+        if (!foods.length) return;
+        // 이미 저장된 메뉴면 스킵
+        if (typeof _promptSaveAsMyMenu === 'function') {
+          _promptSaveAsMyMenu({
+            foods: foods.map(f => ({
+              name: f.name,
+              portion: f.portion || 1,
+              kcal: f.calories || f.kcal || null,
+              protein_g: (f.nutrition && (f.nutrition.protein_g || f.nutrition.protein)) || null,
+              carbs_g:   (f.nutrition && (f.nutrition.carbs_g   || f.nutrition.carbs))   || null,
+              fat_g:     (f.nutrition && (f.nutrition.fat_g     || f.nutrition.fat))     || null
+            })),
+            totals: {
+              kcal: result.totalCalories || n.kcal || null,
+              protein_g: n.protein_g || n.protein || null,
+              carbs_g:   n.carbs_g   || n.carbs   || null,
+              fat_g:     n.fat_g     || n.fat     || null,
+              sodium_mg: n.sodium_mg || n.sodium  || null,
+              fiber_g:   n.fiber_g   || n.fiber   || null
+            },
+            tag: selectedMealTime,
+            store_tag: result.storeTag || null
+          });
+        }
+      }, 2000);
+    } catch(e) { console.warn('[my-menu prompt]', e); }
   } catch(e) { console.warn('[meal-log]', e); }
 
   try {
@@ -23434,6 +23546,61 @@ async function _deleteMyMenu(id, btn) {
     await _bodyApi('DELETE', `/api/my-menu?id=${encodeURIComponent(id)}`);
     btn.closest('div').remove();
   } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+// 🌟 자주 먹는 메뉴로 저장할지 묻는 토스트 (분석 저장 후 자동)
+let _myMenuPromptData = null;
+function _promptSaveAsMyMenu(mealData) {
+  if (!mealData || !mealData.foods || !mealData.foods.length) return;
+  // 중복 방지
+  const existing = document.getElementById('myMenuSavePrompt');
+  if (existing) existing.remove();
+  _myMenuPromptData = mealData;
+
+  const name = mealData.foods.map(f => f.name).slice(0, 2).join(' · ');
+  const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+  const toast = document.createElement('div');
+  toast.id = 'myMenuSavePrompt';
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#FFF;border:1px solid #DBEAFE;border-radius:14px;padding:14px 16px;z-index:99998;box-shadow:0 10px 30px rgba(37,99,235,.18);width:min(380px,92%);font-family:inherit;animation:fadeInUp .35s ease-out';
+  toast.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:38px;height:38px;background:#FEF3C7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">⭐</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:900;color:#0F172A">자주 먹는 메뉴로 저장?</div>
+        <div style="font-size:11px;color:#64748B;font-weight:600;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>
+      </div>
+      <button onclick="_confirmSaveAsMyMenu()" style="background:#2563EB;color:#FFF;border:0;padding:7px 13px;border-radius:999px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0">저장</button>
+      <button onclick="_dismissMyMenuPrompt()" style="background:transparent;border:0;color:#94A3B8;font-size:18px;cursor:pointer;padding:0 4px">✕</button>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  // 10초 후 자동 사라짐
+  setTimeout(() => { if (toast.parentNode) { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; setTimeout(() => toast.remove(), 300); } }, 10000);
+}
+
+async function _confirmSaveAsMyMenu() {
+  if (!_myMenuPromptData) return;
+  const mealData = _myMenuPromptData;
+  const defaultName = mealData.foods.map(f => f.name).slice(0, 2).join(' · ');
+  const name = prompt('이 메뉴 이름', defaultName);
+  if (!name || !name.trim()) return;
+  try {
+    const r = await _bodyApi('POST', '/api/my-menu', {
+      name: name.trim(),
+      foods: mealData.foods,
+      totals: mealData.totals,
+      tag: mealData.tag,
+      store_tag: mealData.store_tag
+    });
+    if (typeof showPointToast === 'function') showPointToast(`⭐ "${r.name}" 저장됨`);
+    _dismissMyMenuPrompt();
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+function _dismissMyMenuPrompt() {
+  const el = document.getElementById('myMenuSavePrompt');
+  if (el) el.remove();
+  _myMenuPromptData = null;
 }
 
 // 식사 분석 결과에서 "내 메뉴로 저장" (외부 함수 호출용)
