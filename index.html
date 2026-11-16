@@ -2491,8 +2491,8 @@ window.appIcon = function(name, size){
           </div>
           <div style="font-size:12.5px;color:#64748B;font-weight:600;margin-top:3px;letter-spacing:-.2px">🤖 AI가 오늘 뭐 먹을지 골라드려요</div>
         </div>
-        <!-- 🎯 식단 목표 + 챌린지 칩 (가로 2개) -->
-        <div id="homeGoalChipWrap" style="padding:6px 0 10px;display:flex;gap:6px;flex-wrap:wrap">
+        <!-- 🧹 식단 목표/챌린지 pills 숨김 · 하단 챌린지 섹션으로 통합 -->
+        <div id="homeGoalChipWrap" style="display:none">
           <button id="homeGoalChip" onclick="openGoalModal()" style="background:linear-gradient(135deg,#DBEAFE,#DBEAFE);border:1px solid #3B82F6;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:800;color:#1E40AF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;max-width:60%">
             <span style="font-size:12px;flex-shrink:0">🎯</span>
             <span id="homeGoalText" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">목표 설정하기</span>
@@ -2637,6 +2637,24 @@ window.appIcon = function(name, size){
           </div>
         </div>
 
+        <!-- ═════════ 🎯 오늘 챌린지 · 신규 ═════════ -->
+        <div style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:12px 13px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font-size:11.5px;color:#0F172A;font-weight:900">오늘 챌린지 <span id="homeChChip" style="color:#2563EB">0/3</span></span>
+            <a onclick="openChallengeModal()" style="font-size:10.5px;color:#2563EB;font-weight:800;cursor:pointer">전체 ›</a>
+          </div>
+          <div id="homeChList" style="font-size:12px;color:#94A3B8">불러오는 중...</div>
+        </div>
+
+        <!-- ═════════ 👥 메이트 최근 활동 · 신규 ═════════ -->
+        <div style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:12px 13px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span style="font-size:11.5px;color:#0F172A;font-weight:900">메이트 최근 활동</span>
+            <a onclick="try{if(typeof ggGoTab==='function')ggGoTab('mate')}catch(e){}" style="font-size:10.5px;color:#2563EB;font-weight:800;cursor:pointer">모두 보기 ›</a>
+          </div>
+          <div id="homeMateFeed" style="font-size:12px;color:#94A3B8">아직 메이트 활동 없음 · 공유 코드 등록하세요</div>
+        </div>
+
         <!-- 🧹 노랑 자주 먹는 메뉴 버튼 제거 · 식단 저장 토스트로 대체 -->
         <button onclick="openMyMenus()" style="display:none">자주 먹는 메뉴</button>
 
@@ -2700,8 +2718,8 @@ window.appIcon = function(name, size){
 
         </div>
 
-        <!-- ⑤ 건강어때 스토어 · 헤드 + 4개 썸네일 스트립 -->
-        <div style="background:#FFFFFF;border:1px solid #E2EAF9;border-radius:22px;padding:17px 18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(30,58,138,.04)">
+        <!-- 🧹 스토어 배너 숨김 · 미리보기 디자인 일치 (설정에서 접근) -->
+        <div style="display:none">
           <a href="https://smartstore.naver.com/checkmyhealth" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-bottom:0;min-height:50px">
             <div style="width:44px;height:44px;background:#F4F7FD;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
               <svg width="30" height="30" viewBox="0 0 64 64" fill="none"><path d="M18 22c0-8 6.3-14 14-14s14 6 14 14" stroke="#17243A" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M14 22h36l-2 32a4 4 0 0 1-4 3.6H20a4 4 0 0 1-4-3.6L14 22Z" fill="#E9F0FA" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><path d="M14 38h36l-1.8 16a4 4 0 0 1-4 3.6H19.8a4 4 0 0 1-4-3.6L14 38Z" fill="#3D73F5" stroke="#17243A" stroke-width="3.6" stroke-linejoin="round"/><rect x="22" y="32" width="20" height="4" rx="2" fill="#22C55E"/></svg>
@@ -23558,9 +23576,74 @@ function _renderUrineSummary(latest) {
   }
 }
 
+// ═══ 챌린지 미니 리스트 ═══
+async function renderHomeChallenges() {
+  const box = document.getElementById('homeChList');
+  const chip = document.getElementById('homeChChip');
+  if (!box) return;
+  try {
+    const challenges = (typeof _getTodayChallenges === 'function') ? _getTodayChallenges() : [];
+    let completedIds = new Set();
+    try {
+      const r = await _bodyApi('GET', '/api/challenge');
+      (r.today || []).forEach(c => completedIds.add(c.challenge_id));
+    } catch(e) {}
+    const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+    if (chip) chip.textContent = `${completedIds.size}/${challenges.length || 3}`;
+    if (!challenges.length) { box.textContent = '챌린지 없음'; return; }
+    box.innerHTML = challenges.slice(0,3).map(c => {
+      const done = completedIds.has(c.id);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+        <div style="width:20px;height:20px;border:2px solid ${done?'#10B981':'#2563EB'};${done?'background:#10B981;color:#FFF':'color:#2563EB'};border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0">${done?'✓':''}</div>
+        <div style="flex:1;font-size:12px;color:${done?'#94A3B8':'#0F172A'};font-weight:700;${done?'text-decoration:line-through':''}">${esc(c.title)}</div>
+        <div style="font-size:10.5px;color:${done?'#94A3B8':'#2563EB'};font-weight:800">+${c.points}P</div>
+      </div>`;
+    }).join('');
+  } catch(e) { box.textContent = '불러오기 실패'; }
+}
+
+// ═══ 메이트 최근 활동 ═══
+async function renderHomeMateFeed() {
+  const box = document.getElementById('homeMateFeed');
+  if (!box) return;
+  try {
+    const r = await _coachApi('GET', '/api/mate');
+    const mates = (r.mates || []).slice(0, 5);
+    if (!mates.length) { box.innerHTML = '<div style="color:#94A3B8;font-size:11.5px;text-align:center;padding:6px 0">공유 코드를 등록해보세요</div>'; return; }
+    // 메이트별 최신 식단/운동 1-2개만
+    const items = [];
+    for (const m of mates.slice(0, 2)) {
+      try {
+        const feed = await _coachApi('GET', `/api/mate?action=meals&owner_id=${encodeURIComponent(m.owner_id)}&limit=1`);
+        if (feed.meals && feed.meals[0]) {
+          const meal = feed.meals[0];
+          const foods = (meal.foods || []).slice(0,2).map(f => f.name).join(' · ');
+          items.push({ name: m.nickname, type: '식단', detail: `${foods} · ${Math.round((meal.totals||{}).kcal||0)}kcal` });
+        }
+      } catch(e) {}
+    }
+    const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+    if (!items.length) { box.innerHTML = '<div style="color:#94A3B8;font-size:11.5px;text-align:center;padding:6px 0">메이트는 있지만 최근 활동 없음</div>'; return; }
+    box.innerHTML = items.map(it => `
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px dashed #F0F1F5">
+        <div style="width:26px;height:26px;background:#DBEAFE;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#1E40AF;flex-shrink:0">${esc(it.name.charAt(0))}</div>
+        <div style="flex:1;min-width:0;font-size:11px;color:#52698F">
+          <div style="font-weight:900;color:#0F172A;font-size:11.5px">${esc(it.name)} · ${it.type} 기록</div>
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.detail)}</div>
+        </div>
+      </div>`).join('').replace('border-top:1px dashed #F0F1F5','border-top:0');
+  } catch(e) { box.innerHTML = '<div style="color:#94A3B8;font-size:11.5px;text-align:center;padding:6px 0">메이트 기능이 준비 중이에요</div>'; }
+}
+
 // 홈 로드 시 호출
 if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try { renderHomeMetrics(); } catch(e){} }, 1500); });
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      try { renderHomeMetrics(); } catch(e){}
+      try { renderHomeChallenges(); } catch(e){}
+      try { renderHomeMateFeed(); } catch(e){}
+    }, 1500);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
