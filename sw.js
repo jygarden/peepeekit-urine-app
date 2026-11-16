@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v72-health-metrics-dashboard-2026-11-16';
+const SW_VERSION = 'v73-home-cleanup-2026-11-16';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
