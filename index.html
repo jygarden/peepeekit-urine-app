@@ -88,6 +88,8 @@
       }
     })();
   </script>
+  <!-- 🏥 Apple HealthKit / Google Health Connect 연동 -->
+  <script src="assets/health/health-sync.js"></script>
   <!-- v12 · 온보딩·로고 PNG 인라인 (assets 폴더 없이도 정상 렌더) -->
   <script>
 // ══ v12 · 온보딩·로고 PNG 인라인 (assets 폴더 없이도 정상 렌더) ══
@@ -5626,6 +5628,7 @@ window.appIcon = function(name, size){
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openProfileManager()">프로필 관리 (가족·반려동물)</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();goAllergyProfile()" style="background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border-color:#FCA5A5;color:#991B1B;font-weight:900">🚨 내 알레르기 관리</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openCoachShareSheet()" style="background:linear-gradient(135deg,#DBEAFE,#EEF2FF);border-color:#93C5FD;color:#1E40AF;font-weight:900">🤝 내 식단 공유하기</button>
+    <button class="settings-btn settings-btn-secondary" id="healthKitToggleBtn" onclick="toggleHealthKit()" style="background:linear-gradient(135deg,#D1FAE5,#EFF4FF);border-color:#10B981;color:#065F46;font-weight:900">🏥 Apple 건강 / 삼성헬스 연동</button>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
@@ -23621,6 +23624,45 @@ function _renderUrineSummary(latest) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🏥 HealthKit / Health Connect 연동 토글
+// ═══════════════════════════════════════════════════════════════
+async function toggleHealthKit() {
+  const btn = document.getElementById('healthKitToggleBtn');
+  if (!window.HealthSync) { alert('⚠️ 건강 연동 모듈 없음 · 앱 재빌드 필요'); return; }
+  if (!window.HealthSync.isNative()) {
+    alert('이 기능은 모바일 앱에서만 작동해요 (웹에선 비활성)');
+    return;
+  }
+  const available = await window.HealthSync.isAvailable();
+  if (!available) {
+    alert('⚠️ 건강 앱 플러그인 설치 필요 (Apple Health or Google Health Connect)');
+    return;
+  }
+
+  const enabled = window.HealthSync.isEnabled();
+  if (enabled) {
+    if (!confirm('건강 앱 연동을 끌까요?')) return;
+    window.HealthSync.setEnabled(false);
+    if (btn) btn.textContent = '🏥 Apple 건강 / 삼성헬스 연동';
+    alert('✅ 연동 해제됨');
+    return;
+  }
+
+  // 권한 요청
+  try {
+    const granted = await window.HealthSync.requestPermissions();
+    if (!granted) { alert('⚠️ 권한이 허용되지 않았어요'); return; }
+    window.HealthSync.setEnabled(true);
+    if (btn) btn.textContent = '🏥 건강 앱 연동 중 · 탭해서 해제';
+    if (typeof showPointToast === 'function') showPointToast('✅ 건강 앱 연동됨 · 수치 자동 업데이트');
+    // 첫 동기화
+    const r = await window.HealthSync.syncToServer();
+    if (r && r.synced) alert(`✅ ${r.synced}개 수치 자동 동기화됨`);
+    try { renderHomeMetrics(); } catch(e){}
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+
 // ═══ 챌린지 미니 리스트 ═══
 async function renderHomeChallenges() {
   const box = document.getElementById('homeChList');
@@ -23687,6 +23729,8 @@ if (typeof window !== 'undefined') {
       try { renderHomeMetrics(); } catch(e){}
       try { renderHomeChallenges(); } catch(e){}
       try { renderHomeMateFeed(); } catch(e){}
+      // 🏥 HealthKit 자동 동기화 (활성화된 경우 12시간마다)
+      try { if (window.HealthSync) window.HealthSync.autoSyncIfNeeded().then(() => { renderHomeMetrics(); }); } catch(e){}
     }, 1500);
   });
 }
