@@ -36,7 +36,7 @@ async function handleGet(sb, user, req, res) {
   const limit = latest ? 1 : Math.min(90, parseInt(req.query.limit) || 30);
   const { data, error } = await sb
     .from('body_logs')
-    .select('id, weight_kg, body_fat_pct, muscle_mass_kg, waist_cm, photo_path, memo, recorded_at')
+    .select('id, weight_kg, body_fat_pct, muscle_mass_kg, waist_cm, glucose_mg_dl, glucose_context, bp_systolic, bp_diastolic, bmr_kcal, visceral_fat_level, bmi, waist_hip_ratio, ecw_tbw_ratio, photo_path, memo, recorded_at')
     .eq('user_id', user.id)
     .order('recorded_at', { ascending: false })
     .limit(limit);
@@ -63,7 +63,11 @@ async function handleGet(sb, user, req, res) {
 }
 
 async function handlePost(sb, user, req, res) {
-  const { weight_kg, body_fat_pct, muscle_mass_kg, waist_cm, memo, photo_base64, recorded_at } = req.body || {};
+  const {
+    weight_kg, body_fat_pct, muscle_mass_kg, waist_cm, memo, photo_base64, recorded_at,
+    glucose_mg_dl, glucose_context, bp_systolic, bp_diastolic,
+    bmr_kcal, visceral_fat_level, bmi, waist_hip_ratio, ecw_tbw_ratio
+  } = req.body || {};
 
   // 입력 검증
   if (weight_kg != null) {
@@ -73,6 +77,15 @@ async function handlePost(sb, user, req, res) {
   if (body_fat_pct != null) {
     const b = Number(body_fat_pct);
     if (!(b >= 1 && b <= 70)) return sendError(res, 400, '체지방 범위 오류 (1~70%)');
+  }
+  if (glucose_mg_dl != null) {
+    const g = Number(glucose_mg_dl);
+    if (!(g >= 30 && g <= 500)) return sendError(res, 400, '혈당 범위 오류 (30~500 mg/dL)');
+  }
+  if (bp_systolic != null && bp_diastolic != null) {
+    const s = Number(bp_systolic), d = Number(bp_diastolic);
+    if (!(s >= 60 && s <= 250 && d >= 40 && d <= 150))
+      return sendError(res, 400, '혈압 범위 오류 (수축기 60~250, 이완기 40~150)');
   }
 
   // 사진 업로드 (선택)
@@ -97,18 +110,29 @@ async function handlePost(sb, user, req, res) {
     }
   }
 
+  const insertRow = {
+    user_id: user.id,
+    weight_kg: weight_kg != null ? Number(weight_kg) : null,
+    body_fat_pct: body_fat_pct != null ? Number(body_fat_pct) : null,
+    muscle_mass_kg: muscle_mass_kg != null ? Number(muscle_mass_kg) : null,
+    waist_cm: waist_cm != null ? Number(waist_cm) : null,
+    photo_path: photoPath,
+    memo: memo ? String(memo).slice(0, 500) : null,
+    recorded_at: recorded_at || new Date().toISOString()
+  };
+  if (glucose_mg_dl != null)   insertRow.glucose_mg_dl = Number(glucose_mg_dl);
+  if (glucose_context)         insertRow.glucose_context = String(glucose_context);
+  if (bp_systolic != null)     insertRow.bp_systolic = parseInt(bp_systolic);
+  if (bp_diastolic != null)    insertRow.bp_diastolic = parseInt(bp_diastolic);
+  if (bmr_kcal != null)        insertRow.bmr_kcal = parseInt(bmr_kcal);
+  if (visceral_fat_level != null) insertRow.visceral_fat_level = parseInt(visceral_fat_level);
+  if (bmi != null)             insertRow.bmi = Number(bmi);
+  if (waist_hip_ratio != null) insertRow.waist_hip_ratio = Number(waist_hip_ratio);
+  if (ecw_tbw_ratio != null)   insertRow.ecw_tbw_ratio = Number(ecw_tbw_ratio);
+
   const { data, error } = await sb
     .from('body_logs')
-    .insert({
-      user_id: user.id,
-      weight_kg: weight_kg != null ? Number(weight_kg) : null,
-      body_fat_pct: body_fat_pct != null ? Number(body_fat_pct) : null,
-      muscle_mass_kg: muscle_mass_kg != null ? Number(muscle_mass_kg) : null,
-      waist_cm: waist_cm != null ? Number(waist_cm) : null,
-      photo_path: photoPath,
-      memo: memo ? String(memo).slice(0, 500) : null,
-      recorded_at: recorded_at || new Date().toISOString()
-    })
+    .insert(insertRow)
     .select('id, recorded_at')
     .single();
   if (error) return sendError(res, 500, error.message);

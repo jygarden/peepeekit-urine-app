@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>건강 데이터 대시보드 홈 · 3가지 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F; --t3:#94A3B8;
+    --good:#10B981; --warn:#F59E0B; --bad:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1300px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:15px;margin:22px 2px 10px;font-weight:800}
+  .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  @media (max-width:1000px){.cols{grid-template-columns:1fr 1fr}}
+  @media (max-width:600px){.cols{grid-template-columns:1fr}}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:860px;display:flex;flex-direction:column;position:relative}
+  .body{flex:1;overflow-y:auto;background:var(--bg);padding:14px}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .hi{font-size:14px;color:var(--t2)}
+  .hi b{color:#1E3B70;font-weight:800;font-size:15px}
+  .chips{display:flex;gap:5px;align-items:center}
+  .fire{background:#FEF3C7;padding:4px 9px;border-radius:999px;font-size:10px;font-weight:900;color:#92400E}
+  .gear{width:28px;height:28px;background:#FFF;border:1px solid var(--b);border-radius:50%;text-align:center;line-height:28px;font-size:12px}
+
+  mark{background:#FBBF24;color:#1E40AF;padding:1px 6px;border-radius:5px}
+
+  /* ═══════ 시안 A · 점수 카드 중심 ═══════ */
+  .score-hero{background:linear-gradient(135deg,#1E40AF,#3D63D9);border-radius:22px;padding:16px 18px;color:#FFF;margin-bottom:12px}
+  .score-row{display:flex;justify-content:space-between;align-items:flex-end}
+  .score-left{flex:1}
+  .score-tag{font-size:10.5px;opacity:.9;font-weight:700}
+  .score-num{font-size:40px;font-weight:900;line-height:1;margin-top:2px}
+  .score-num small{font-size:14px;opacity:.8}
+  .score-chg{font-size:11px;opacity:.95;font-weight:600;margin-top:4px}
+  .score-ring{width:68px;height:68px;border-radius:50%;background:conic-gradient(#FBBF24 76%,rgba(255,255,255,.2) 0);display:flex;align-items:center;justify-content:center}
+  .score-ring .inner{width:52px;height:52px;background:#1E40AF;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-ring b{font-size:15px;font-weight:900}
+  .score-ring span{font-size:8px;opacity:.9}
+
+  /* 4 메트릭 카드 */
+  .m4{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+  .mcard{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:11px 13px}
+  .mcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .mcard-l{font-size:10.5px;color:var(--t2);font-weight:800;display:flex;align-items:center;gap:4px}
+  .mcard-s{font-size:9px;font-weight:900;padding:2px 6px;border-radius:5px}
+  .mcard-s.good{background:#D1FAE5;color:#065F46}
+  .mcard-s.ok{background:#DBEAFE;color:#1E40AF}
+  .mcard-s.warn{background:#FEF3C7;color:#92400E}
+  .mcard-s.bad{background:#FEE2E2;color:#991B1B}
+  .mcard-v{font-size:18px;font-weight:900;color:var(--t)}
+  .mcard-v small{font-size:11px;color:var(--t2);font-weight:700}
+  .mcard-b{font-size:10px;color:var(--t3);font-weight:700;margin-top:2px}
+  .mcard-bar{height:4px;background:#F0F1F5;border-radius:2px;overflow:hidden;margin-top:6px}
+  .mcard-bar>div{height:100%;background:var(--p)}
+
+  /* 근거 기반 추천 */
+  .ev-reco{background:#FFF;border:1px solid var(--b);border-radius:16px;padding:14px;margin-bottom:12px;border-left:4px solid var(--p)}
+  .ev-tag{font-size:10px;color:var(--p);font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+  .ev-why{font-size:11.5px;color:var(--t2);font-weight:600;margin:5px 0 8px;line-height:1.5}
+  .ev-why b{color:var(--bad);font-weight:800}
+  .ev-food{font-size:18px;font-weight:900;color:var(--t);line-height:1.3}
+  .ev-food mark{background:#FBBF24;color:#1E40AF;padding:1px 6px;border-radius:5px}
+  .ev-nutr{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .ev-nutr span{background:#D1FAE5;color:#065F46;padding:3px 8px;border-radius:5px;font-size:10.5px;font-weight:800}
+  .ev-btns{display:flex;gap:5px;margin-top:11px}
+  .ev-btns button{flex:1;background:var(--pl);color:var(--pd);border:0;padding:8px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit}
+  .ev-btns button.p{background:var(--p);color:#FFF}
+
+  /* ═══════ 시안 B · 가로 스크롤 메트릭 ═══════ */
+  .b-strip{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+  .b-strip::-webkit-scrollbar{display:none}
+  .b-item{flex-shrink:0;width:124px;background:#FFF;border:1px solid var(--b);border-radius:14px;padding:12px}
+  .b-item-ico{width:30px;height:30px;background:var(--pl);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:6px}
+  .b-item-l{font-size:10.5px;color:var(--t2);font-weight:800}
+  .b-item-v{font-size:18px;font-weight:900;margin-top:1px}
+  .b-item-v small{font-size:10px;color:var(--t2);font-weight:700}
+  .b-item-chg{font-size:9.5px;color:var(--good);font-weight:800;margin-top:2px}
+
+  /* ═══════ 시안 C · 리스트 + 큰 카드 ═══════ */
+  .c-main{background:linear-gradient(135deg,#F0F7FF 0%,#FFF 100%);border:1px solid var(--pl);border-radius:18px;padding:16px;margin-bottom:12px}
+  .c-main-t{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
+  .c-main-l{font-size:13px;color:var(--t2);font-weight:800}
+  .c-main-u{font-size:9.5px;color:var(--t3);font-weight:700}
+  .c-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .c-item{display:flex;flex-direction:column}
+  .c-ic{font-size:14px;color:var(--p);font-weight:900}
+  .c-val{font-size:22px;font-weight:900;line-height:1;margin:2px 0}
+  .c-val small{font-size:11px;color:var(--t2);font-weight:700}
+  .c-nxt{font-size:10px;color:var(--t2);font-weight:600;margin-top:2px}
+  .c-list{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:4px 0;margin-bottom:12px}
+  .c-row{display:flex;align-items:center;padding:12px 14px;border-top:1px solid #F0F1F5;gap:11px}
+  .c-row:first-child{border-top:0}
+  .c-row-ic{width:34px;height:34px;background:var(--pl);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .c-row-t{flex:1;font-size:12px}
+  .c-row-t b{display:block;font-weight:900;color:var(--t);font-size:13px}
+  .c-row-t span{color:var(--t2);font-weight:600}
+  .c-row-v{font-size:14px;font-weight:900;color:var(--p)}
+  .c-row-v small{font-size:10px;color:var(--t2);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>📊 건강 데이터 기반 추천 홈 · 3가지 시안</h1>
+<p class="sub">인바디·혈당·혈압·소변검사 수치를 메인에 노출 + 추천 근거로 연결 (B2B 헬스장 PT가 바로 보고 설명 가능)</p>
+
+<div class="cols">
+
+  <!-- ═══════ A안 · 건강점수 + 4메트릭 + 근거추천 ═══════ -->
+  <div>
+    <div class="label">A안 · 건강점수 중심 (PT 추천)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gear">⚙️</span></div>
+        </div>
+
+        <!-- 건강점수 히어로 -->
+        <div class="score-hero">
+          <div style="font-size:10.5px;opacity:.85;font-weight:800;margin-bottom:6px">📊 오늘의 건강 점수</div>
+          <div class="score-row">
+            <div class="score-left">
+              <div class="score-num">76<small>/100</small></div>
+              <div class="score-chg">↑ 어제 대비 +3 · 지난주 평균 72</div>
+            </div>
+            <div class="score-ring"><div class="inner"><b>B+</b><span>GOOD</span></div></div>
+          </div>
+        </div>
+
+        <!-- 4 메트릭 -->
+        <div class="m4">
+          <div class="mcard">
+            <div class="mcard-top">
+              <div class="mcard-l">📏 체지방</div>
+              <div class="mcard-s warn">높음</div>
+            </div>
+            <div class="mcard-v">23.2<small>%</small></div>
+            <div class="mcard-b">목표 18% · ↓ 0.3 (30일)</div>
+            <div class="mcard-bar"><div style="width:85%;background:var(--warn)"></div></div>
+          </div>
+          <div class="mcard">
+            <div class="mcard-top">
+              <div class="mcard-l">🩸 혈당</div>
+              <div class="mcard-s ok">정상</div>
+            </div>
+            <div class="mcard-v">98<small>mg/dL</small></div>
+            <div class="mcard-b">공복 · 11/10 측정</div>
+            <div class="mcard-bar"><div style="width:49%"></div></div>
+          </div>
+          <div class="mcard">
+            <div class="mcard-top">
+              <div class="mcard-l">❤️ 혈압</div>
+              <div class="mcard-s good">양호</div>
+            </div>
+            <div class="mcard-v">118/78<small></small></div>
+            <div class="mcard-b">↓ 지난주 대비 -4</div>
+            <div class="mcard-bar"><div style="width:60%;background:var(--good)"></div></div>
+          </div>
+          <div class="mcard">
+            <div class="mcard-top">
+              <div class="mcard-l">💧 소변검사</div>
+              <div class="mcard-s warn">주의</div>
+            </div>
+            <div class="mcard-v">단백뇨 <small>1+</small></div>
+            <div class="mcard-b">11/12 측정 · 재검 권장</div>
+            <div class="mcard-bar"><div style="width:70%;background:var(--warn)"></div></div>
+          </div>
+        </div>
+
+        <!-- 근거 기반 추천 -->
+        <div class="ev-reco">
+          <div class="ev-tag">🎯 오늘 저녁 추천 · 근거 기반</div>
+          <div class="ev-why">
+            <b>체지방 23% (목표 +5)</b> + 단백뇨 1+ 감지<br/>
+            → 고단백 저염 식단 필요
+          </div>
+          <div class="ev-food">오늘 저녁엔<br/><mark>닭가슴살 샐러드</mark> 어때요?</div>
+          <div class="ev-nutr">
+            <span>✓ 단백질 +32g</span>
+            <span>✓ 저염 (300mg)</span>
+            <span>✓ 420kcal</span>
+          </div>
+          <div class="ev-btns">
+            <button>↻ 다른 추천</button>
+            <button>📍 내 주변</button>
+            <button class="p">자세히 ›</button>
+          </div>
+        </div>
+
+        <!-- 측정 바로가기 -->
+        <div style="background:#FFF;border:1px dashed #CBD5E1;border-radius:12px;padding:11px 14px;display:flex;gap:7px;align-items:center;margin-bottom:10px">
+          <span style="font-size:18px">📏</span>
+          <div style="flex:1;font-size:11.5px;color:var(--t2);font-weight:700">인바디 측정한 지 3일 됐어요</div>
+          <button style="background:var(--p);color:#FFF;border:0;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">측정</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ B안 · 가로 스트립 메트릭 ═══════ -->
+  <div>
+    <div class="label">B안 · 가로 스트립 (스크롤 가능)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gear">⚙️</span></div>
+        </div>
+
+        <div style="font-size:11.5px;color:var(--t2);font-weight:800;margin-bottom:7px;padding-left:2px">📊 내 건강 수치 <span style="color:var(--t3);font-weight:600">· 옆으로 밀어 보기</span></div>
+        <!-- 가로 스크롤 -->
+        <div class="b-strip">
+          <div class="b-item" style="background:linear-gradient(135deg,#2563EB,#3B82F6);color:#FFF;border:0">
+            <div class="b-item-ico" style="background:rgba(255,255,255,.2)">⭐</div>
+            <div class="b-item-l" style="color:#DBEAFE">종합점수</div>
+            <div class="b-item-v" style="color:#FFF">76<small style="color:#DBEAFE">/100</small></div>
+            <div class="b-item-chg" style="color:#FBBF24">↑ +3</div>
+          </div>
+          <div class="b-item">
+            <div class="b-item-ico">📏</div>
+            <div class="b-item-l">체지방</div>
+            <div class="b-item-v">23.2<small>%</small></div>
+            <div class="b-item-chg" style="color:var(--good)">↓ 0.3</div>
+          </div>
+          <div class="b-item">
+            <div class="b-item-ico">🩸</div>
+            <div class="b-item-l">혈당 (공복)</div>
+            <div class="b-item-v">98<small>mg/dL</small></div>
+            <div class="b-item-chg">↔ 정상</div>
+          </div>
+          <div class="b-item">
+            <div class="b-item-ico">❤️</div>
+            <div class="b-item-l">혈압</div>
+            <div class="b-item-v">118<small>/78</small></div>
+            <div class="b-item-chg" style="color:var(--good)">↓ -4</div>
+          </div>
+          <div class="b-item">
+            <div class="b-item-ico">💧</div>
+            <div class="b-item-l">소변검사</div>
+            <div class="b-item-v" style="font-size:14px">단백뇨 1+</div>
+            <div class="b-item-chg" style="color:var(--warn)">재검 권장</div>
+          </div>
+          <div class="b-item">
+            <div class="b-item-ico">💪</div>
+            <div class="b-item-l">근육량</div>
+            <div class="b-item-v">32.1<small>kg</small></div>
+            <div class="b-item-chg" style="color:var(--good)">↑ +0.4</div>
+          </div>
+        </div>
+
+        <!-- 근거 추천 -->
+        <div class="ev-reco">
+          <div class="ev-tag">🎯 오늘 추천 · 데이터 근거</div>
+          <div class="ev-why">
+            <b>체지방↓ · 근육↑</b>로 벌크 중<br/>
+            → 단백질 1.6g/kg 목표 · 지금 70% 달성
+          </div>
+          <div class="ev-food">점심은<br/><mark>연어구이 정식</mark> 추천</div>
+          <div class="ev-nutr">
+            <span>✓ 단백질 42g</span>
+            <span>✓ 오메가3</span>
+            <span>✓ 580kcal</span>
+          </div>
+          <div class="ev-btns">
+            <button>↻ 다른 추천</button>
+            <button>📍 내 주변</button>
+            <button class="p">자세히 ›</button>
+          </div>
+        </div>
+
+        <!-- 오늘 식단 요약 -->
+        <div style="background:#FFF;border:1px solid var(--b);border-radius:14px;padding:12px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+            <div style="font-size:11.5px;color:var(--t2);font-weight:800">🍚 오늘 식단</div>
+            <div style="font-size:11px;color:var(--p);font-weight:800">자세히 ›</div>
+          </div>
+          <div style="font-size:16px;font-weight:900">1,240<small style="font-size:11px;color:var(--t2)"> / 2,060 kcal</small></div>
+          <div style="height:5px;background:#F0F1F5;border-radius:3px;margin-top:6px;overflow:hidden"><div style="width:60%;height:100%;background:var(--p)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ C안 · 리스트 중심 (B2B 전문가) ═══════ -->
+  <div>
+    <div class="label">C안 · 리스트 중심 (전문가 PT 뷰)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gear">⚙️</span></div>
+        </div>
+
+        <!-- 메인 수치 블록 -->
+        <div class="c-main">
+          <div class="c-main-t">
+            <div><div class="c-main-l">📊 내 건강 · 11/16</div></div>
+            <div class="c-main-u">모든 수치 보기 ›</div>
+          </div>
+          <div class="c-grid">
+            <div class="c-item">
+              <div class="c-ic">📏 체지방</div>
+              <div class="c-val">23.2<small>%</small></div>
+              <div class="c-nxt" style="color:var(--warn)">목표까지 -5.2%</div>
+            </div>
+            <div class="c-item">
+              <div class="c-ic">💪 근육량</div>
+              <div class="c-val">32.1<small>kg</small></div>
+              <div class="c-nxt" style="color:var(--good)">↑ 0.4 (30일)</div>
+            </div>
+            <div class="c-item">
+              <div class="c-ic">🩸 혈당 (공복)</div>
+              <div class="c-val">98<small>mg/dL</small></div>
+              <div class="c-nxt">정상 · 11/10</div>
+            </div>
+            <div class="c-item">
+              <div class="c-ic">❤️ 혈압</div>
+              <div class="c-val">118<small>/78</small></div>
+              <div class="c-nxt" style="color:var(--good)">양호</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 근거 추천 (컴팩트) -->
+        <div class="ev-reco" style="padding:12px 13px">
+          <div class="ev-tag">🎯 오늘 저녁 추천</div>
+          <div class="ev-why" style="margin:4px 0 6px">
+            체지방 +5%·단백뇨 1+ → <b>고단백 저염</b>
+          </div>
+          <div class="ev-food" style="font-size:16px"><mark>닭가슴살 샐러드</mark></div>
+          <div class="ev-nutr"><span>단백 32g</span><span>저염 300mg</span><span>420kcal</span></div>
+          <div class="ev-btns"><button>↻</button><button>📍</button><button class="p" style="flex:2">자세히 ›</button></div>
+        </div>
+
+        <!-- 측정 바로가기 리스트 -->
+        <div class="c-list">
+          <div class="c-row">
+            <div class="c-row-ic">📏</div>
+            <div class="c-row-t"><b>인바디 측정</b><span>3일 전 · 월 1회 권장</span></div>
+            <div class="c-row-v" style="color:var(--warn)">측정</div>
+          </div>
+          <div class="c-row">
+            <div class="c-row-ic">🩸</div>
+            <div class="c-row-t"><b>혈당 기록</b><span>어제 · 하루 1회</span></div>
+            <div class="c-row-v">98<small>mg/dL</small></div>
+          </div>
+          <div class="c-row">
+            <div class="c-row-ic">❤️</div>
+            <div class="c-row-t"><b>혈압 기록</b><span>2일 전</span></div>
+            <div class="c-row-v">118<small>/78</small></div>
+          </div>
+          <div class="c-row">
+            <div class="c-row-ic">💧</div>
+            <div class="c-row-t"><b>소변검사</b><span>4일 전 · 재검 권장</span></div>
+            <div class="c-row-v" style="color:var(--warn)">재검</div>
+          </div>
+        </div>
+
+        <!-- PT 공유 -->
+        <div style="background:#FEF9E7;border:1px solid #FCD34D;border-radius:12px;padding:11px 13px;font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:10px">
+          🏋️ <b>PT 이철수 선생님</b>이 어제 식단 확인 완료<br/>
+          "오늘 저녁 단백질 더 챙기세요 💪"
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 요약 -->
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13px;line-height:1.85;margin-top:20px">
+  <b>🎯 공통 핵심 (모든 안)</b><br/>
+  · <b>건강 수치가 메인</b> — 음식 추천보다 위에 배치<br/>
+  · <b>추천에 근거 명시</b> — "체지방 23% + 단백뇨 1+ → 고단백 저염" 식<br/>
+  · <b>영양소 획득량 표기</b> — "단백질 +32g, 저염 (300mg), 420kcal"<br/>
+  · <b>측정 리마인더</b> — 안 측정한 지 N일 지나면 알림<br/><br/>
+
+  <b>💡 안 별 차이</b><br/>
+  · <b>A안</b> — 건강점수(76/100) 크게 · PT가 "지난주 72였는데 지금 76" 식 설명 쉬움<br/>
+  · <b>B안</b> — 가로 스크롤로 많은 수치 · 수치 더 추가 쉬움 (수면, 걸음수 등)<br/>
+  · <b>C안</b> — 리스트 형태 · 전문가 뷰 · PT 피드백 메시지 포함<br/><br/>
+
+  <b>📊 B2B 헬스장에서는 C안 추천</b> — PT가 숫자 보고 바로 조언 가능. 그리고 모바일 UI는 A안 느낌 많이 선호됨.<br/><br/>
+
+  <b>🔧 서버 구조 필요 (추가로 짜야 할 것)</b><br/>
+  · 혈당·혈압 기록 테이블 (body_logs에 컬럼 추가 or 새 테이블)<br/>
+  · 건강점수 계산 로직 (각 수치 가중치 합산)<br/>
+  · /api/recommend-next 개편 — 수치 기반 필터 추가<br/>
+  · 측정 리마인더 (측정 간격 로직)<br/><br/>
+
+  어느 안 (A/B/C) 끌려? 섞어도 OK (예: A안 레이아웃 + C안의 측정 리스트).
+</div>
+
+</div>
+</body>
+</html>

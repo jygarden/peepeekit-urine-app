@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>C안 v3 · 소변검사 10항목 추가</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F; --t3:#94A3B8;
+    --good:#10B981; --warn:#F59E0B; --bad:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1300px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:15px;margin:22px 2px 10px;font-weight:800}
+  .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  @media (max-width:800px){.cols{grid-template-columns:1fr}}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:920px;display:flex;flex-direction:column;position:relative}
+  .body{flex:1;overflow-y:auto;background:var(--bg);padding:14px}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .hi{font-size:14px;color:var(--t2)}
+  .hi b{color:#1E3B70;font-weight:800;font-size:15px}
+  .gear{width:30px;height:30px;background:#FFF;border:1px solid var(--b);border-radius:50%;text-align:center;display:flex;align-items:center;justify-content:center}
+
+  .ico{width:22px;height:22px;stroke:var(--p);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .ico-sm{width:16px;height:16px;stroke:var(--p);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+  mark{background:#FBBF24;color:#1E40AF;padding:1px 6px;border-radius:5px}
+
+  .score-top{background:#FFF;border:1px solid var(--b);border-radius:16px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px}
+  .score-info{flex:1;min-width:0}
+  .score-info .l{font-size:11px;color:var(--t2);font-weight:800;letter-spacing:.3px;text-transform:uppercase}
+  .score-info .v{font-size:26px;font-weight:900;color:var(--t);line-height:1;margin:3px 0}
+  .score-info .v small{font-size:12px;color:var(--t2);font-weight:700}
+  .score-info .d{font-size:11px;color:var(--good);font-weight:800}
+
+  .mcard{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .mcard-tag{font-size:9.5px;font-weight:900;padding:2px 7px;border-radius:5px;letter-spacing:.3px}
+  .mcard-tag.good{background:#D1FAE5;color:#065F46}
+  .mcard-tag.ok{background:#DBEAFE;color:#1E40AF}
+  .mcard-tag.warn{background:#FEF3C7;color:#92400E}
+  .mcard-tag.bad{background:#FEE2E2;color:#991B1B}
+
+  /* 2x2 메트릭 */
+  .m2x2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+  .mmini{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:12px 11px}
+  .mmini-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .mmini-l{font-size:9.5px;color:var(--t2);font-weight:800;margin-top:3px}
+  .mmini-v{font-size:18px;font-weight:900}
+  .mmini-v small{font-size:10px;color:var(--t2);font-weight:700}
+  .mmini-chg{font-size:9.5px;font-weight:800;margin-top:2px}
+
+  /* 소변검사 전용 카드 */
+  .uri-card{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .uri-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+  .uri-head-l{display:flex;align-items:center;gap:8px}
+  .uri-head-l .t{font-size:12px;color:var(--t);font-weight:900}
+  .uri-summary{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .uri-donut{flex-shrink:0}
+  .uri-stat{flex:1;font-size:11.5px;color:var(--t2);font-weight:600;line-height:1.5}
+  .uri-stat b{color:var(--t);font-weight:900}
+  .uri-mini-bars{display:flex;gap:2.5px;margin-top:11px;padding:0 2px}
+  .uri-mini-bars > div{flex:1;height:5px;border-radius:2px}
+  .uri-mini-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:8.5px;color:var(--t3);font-weight:700}
+  .uri-expand-btn{background:transparent;border:0;color:var(--p);font-size:11px;font-weight:800;cursor:pointer;margin-top:10px;display:flex;align-items:center;gap:3px;padding:0;font-family:inherit}
+
+  /* 소변검사 상세 (펼침) */
+  .uri-detail{margin-top:10px;padding-top:10px;border-top:1px solid var(--b);display:none}
+  .uri-detail.open{display:block}
+  .uri-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:11.5px}
+  .uri-row:first-child{border-top:0}
+  .uri-row-name{font-weight:700;color:var(--t);flex:1}
+  .uri-row-val{font-weight:900;color:var(--t);margin-right:8px}
+  .uri-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+  /* 추천 */
+  .reco{background:#FFF;border:1px solid var(--b);border-radius:16px;padding:14px 16px;margin-bottom:12px;border-left:4px solid var(--p)}
+  .reco-tag{font-size:10px;color:var(--p);font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+  .reco-why{font-size:11.5px;color:var(--t2);font-weight:600;margin:5px 0 8px;line-height:1.5}
+  .reco-why b{color:var(--bad);font-weight:800}
+  .reco-food{font-size:17px;font-weight:900;color:var(--t);line-height:1.3}
+  .reco-nutr{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+  .reco-nutr span{background:#D1FAE5;color:#065F46;padding:3px 8px;border-radius:5px;font-size:10.5px;font-weight:800}
+  .reco-btns{display:flex;gap:5px;margin-top:11px}
+  .reco-btns button{flex:1;background:var(--pl);color:var(--pd);border:0;padding:9px;border-radius:9px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit}
+  .reco-btns button.p{background:var(--p);color:#FFF}
+
+  .pt-msg{background:#FEF9E7;border:1px solid #FCD34D;border-radius:12px;padding:11px 13px;font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>C안 v3 · 소변검사 10항목 추가</h1>
+<p class="sub">소변검사는 "종합 상태"로 상단 요약 → 탭하면 10항목 펼침. 공간 효율 + 디테일 둘 다.</p>
+
+<div class="cols">
+
+  <!-- v3 안 1 · 소변검사 요약 접힌 상태 -->
+  <div>
+    <div class="label">v3 안1 · 요약 상태 (접힘)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="gear"><svg class="ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></div>
+        </div>
+
+        <!-- PT 메시지 -->
+        <div class="pt-msg">
+          <svg class="ico" viewBox="0 0 24 24" style="stroke:#92400E;flex-shrink:0;width:16px;height:16px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div><b>이철수 트레이너</b> · 어제 확인<br/>저녁 단백질 꼭 챙기세요</div>
+        </div>
+
+        <!-- 종합 점수 -->
+        <div class="score-top">
+          <svg width="52" height="52" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="20" stroke="#E5E7EB" stroke-width="5" fill="none"/>
+            <circle cx="26" cy="26" r="20" stroke="#2563EB" stroke-width="5" fill="none" stroke-dasharray="125.6" stroke-dashoffset="30.1" transform="rotate(-90 26 26)" stroke-linecap="round"/>
+            <text x="26" y="31" text-anchor="middle" font-size="15" font-weight="900" fill="#0F172A">76</text>
+          </svg>
+          <div class="score-info">
+            <div class="l">종합 건강 점수</div>
+            <div class="v">76<small> / 100</small></div>
+            <div class="d">↑ 어제 +3 · 7일 평균 73</div>
+          </div>
+        </div>
+
+        <!-- 2x2 메트릭 -->
+        <div class="m2x2">
+          <div class="mmini">
+            <div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><span class="mcard-tag warn">높음</span></div>
+            <div class="mmini-l">체지방</div>
+            <div class="mmini-v">23.2<small>%</small></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:20px;margin-top:4px"><polyline points="0,6 15,8 30,7 45,11 60,10 75,13 90,15" stroke="#F59E0B" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div class="mmini-chg" style="color:var(--good)">↓ 0.3</div>
+          </div>
+          <div class="mmini">
+            <div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><rect x="8" y="11" width="8" height="2"/></svg><span class="mcard-tag good">증가</span></div>
+            <div class="mmini-l">근육량</div>
+            <div class="mmini-v">32.1<small>kg</small></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:20px;margin-top:4px"><polyline points="0,15 15,13 30,11 45,9 60,7 75,5 90,4" stroke="#10B981" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div class="mmini-chg" style="color:var(--good)">↑ 0.4</div>
+          </div>
+          <div class="mmini">
+            <div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M12 2v6m0 0l-4 4m4-4l4 4M5 16a7 7 0 0 0 14 0"/></svg><span class="mcard-tag ok">정상</span></div>
+            <div class="mmini-l">공복혈당</div>
+            <div class="mmini-v">98<small>mg/dL</small></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:20px;margin-top:4px"><polyline points="0,10 15,9 30,11 45,10 60,10 75,10 90,9" stroke="#2563EB" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div class="mmini-chg" style="color:var(--t3)">↔ 안정</div>
+          </div>
+          <div class="mmini">
+            <div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="mcard-tag good">양호</span></div>
+            <div class="mmini-l">혈압</div>
+            <div class="mmini-v">118<small>/78</small></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:20px;margin-top:4px"><polyline points="0,5 15,7 30,9 45,10 60,11 75,13 90,15" stroke="#10B981" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div class="mmini-chg" style="color:var(--good)">↓ -4</div>
+          </div>
+        </div>
+
+        <!-- 🧪 소변검사 요약 카드 (접힌 상태) -->
+        <div class="uri-card">
+          <div class="uri-head" onclick="document.getElementById('uriDet1').classList.toggle('open');this.querySelector('.arr').textContent=document.getElementById('uriDet1').classList.contains('open')?'▴':'▾'">
+            <div class="uri-head-l">
+              <svg class="ico-sm" viewBox="0 0 24 24"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+              <span class="t">소변검사 10항목</span>
+              <span class="mcard-tag warn">2개 주의</span>
+            </div>
+            <span class="arr" style="color:var(--t3);font-size:14px">▾</span>
+          </div>
+
+          <div class="uri-summary">
+            <!-- 도넛: 정상 8 / 주의 2 -->
+            <svg class="uri-donut" width="52" height="52" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#E5E7EB" stroke-width="7"/>
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#10B981" stroke-width="7"
+                stroke-dasharray="100.5 125.6" transform="rotate(-90 26 26)"/>
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#F59E0B" stroke-width="7"
+                stroke-dasharray="25.1 125.6" stroke-dashoffset="-100.5" transform="rotate(-90 26 26)"/>
+            </svg>
+            <div class="uri-stat">
+              <div><b>10개 중 8개 정상</b> · 2개 주의</div>
+              <div style="color:var(--bad);font-weight:800;margin-top:2px">단백뇨 1+, 우로빌리노겐 상승</div>
+              <div style="color:var(--t3);margin-top:2px;font-size:10.5px">마지막 측정 11/12 · 4일 전</div>
+            </div>
+          </div>
+
+          <!-- 10개 미니 바 (정상/주의 색상) -->
+          <div class="uri-mini-bars">
+            <div style="background:#10B981" title="SG"></div>
+            <div style="background:#10B981" title="pH"></div>
+            <div style="background:#10B981" title="LEU"></div>
+            <div style="background:#10B981" title="NIT"></div>
+            <div style="background:#F59E0B" title="PRO"></div>
+            <div style="background:#10B981" title="GLU"></div>
+            <div style="background:#10B981" title="KET"></div>
+            <div style="background:#F59E0B" title="URO"></div>
+            <div style="background:#10B981" title="BIL"></div>
+            <div style="background:#10B981" title="BLD"></div>
+          </div>
+          <div class="uri-mini-labels">
+            <span>비중</span><span>pH</span><span>백혈구</span><span>아질산</span><span>단백</span><span>포도당</span><span>케톤</span><span>우로</span><span>빌리</span><span>잠혈</span>
+          </div>
+
+          <!-- 접힌 상세 -->
+          <div class="uri-detail" id="uriDet1">
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">비중 (SG)</span><span class="uri-row-val">1.020</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">pH</span><span class="uri-row-val">6.0</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">백혈구 (LEU)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">아질산염 (NIT)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#F59E0B"></div><span class="uri-row-name">단백질 (PRO)</span><span class="uri-row-val">1+</span><span class="mcard-tag warn">주의</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">포도당 (GLU)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">케톤 (KET)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#F59E0B"></div><span class="uri-row-name">우로빌리노겐 (URO)</span><span class="uri-row-val">+</span><span class="mcard-tag warn">주의</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">빌리루빈 (BIL)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">잠혈 (BLD)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <button style="width:100%;margin-top:10px;background:var(--p);color:#FFF;border:0;padding:10px;border-radius:9px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">재검사 하기</button>
+          </div>
+
+          <button class="uri-expand-btn" onclick="document.getElementById('uriDet1').classList.toggle('open');this.previousElementSibling.previousElementSibling.previousElementSibling.querySelector('.arr').textContent=document.getElementById('uriDet1').classList.contains('open')?'▴':'▾'">10개 항목 전체 보기 ›</button>
+        </div>
+
+        <!-- 추천 (소변검사 반영) -->
+        <div class="reco">
+          <div class="reco-tag">오늘 저녁 추천 · 근거 기반</div>
+          <div class="reco-why">
+            <b>단백뇨 1+</b> + 체지방 +5%<br/>
+            → 신장 부담 낮은 <b>저염 고단백 식단</b>
+          </div>
+          <div class="reco-food"><mark>닭가슴살 샐러드</mark></div>
+          <div class="reco-nutr"><span>단백 32g</span><span>저염 300mg</span><span>420kcal</span></div>
+          <div class="reco-btns">
+            <button>다른 추천</button>
+            <button>내 주변</button>
+            <button class="p">자세히 ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- v3 안 2 · 소변검사 펼친 상태 (스크린샷용) -->
+  <div>
+    <div class="label">v3 안1 (같은 레이아웃 · 소변검사 펼친 상태)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="gear"><svg class="ico-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg></div>
+        </div>
+
+        <div class="score-top">
+          <svg width="52" height="52" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="20" stroke="#E5E7EB" stroke-width="5" fill="none"/>
+            <circle cx="26" cy="26" r="20" stroke="#2563EB" stroke-width="5" fill="none" stroke-dasharray="125.6" stroke-dashoffset="30.1" transform="rotate(-90 26 26)" stroke-linecap="round"/>
+            <text x="26" y="31" text-anchor="middle" font-size="15" font-weight="900" fill="#0F172A">76</text>
+          </svg>
+          <div class="score-info">
+            <div class="l">종합 건강 점수</div>
+            <div class="v">76<small> / 100</small></div>
+            <div class="d">↑ 어제 +3</div>
+          </div>
+        </div>
+
+        <!-- 소변검사 카드 (펼친 상태) -->
+        <div class="uri-card">
+          <div class="uri-head">
+            <div class="uri-head-l">
+              <svg class="ico-sm" viewBox="0 0 24 24"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+              <span class="t">소변검사 10항목</span>
+              <span class="mcard-tag warn">2개 주의</span>
+            </div>
+            <span style="color:var(--t3);font-size:14px">▴</span>
+          </div>
+
+          <div class="uri-summary">
+            <svg class="uri-donut" width="52" height="52" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#E5E7EB" stroke-width="7"/>
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#10B981" stroke-width="7" stroke-dasharray="100.5 125.6" transform="rotate(-90 26 26)"/>
+              <circle cx="26" cy="26" r="20" fill="none" stroke="#F59E0B" stroke-width="7" stroke-dasharray="25.1 125.6" stroke-dashoffset="-100.5" transform="rotate(-90 26 26)"/>
+            </svg>
+            <div class="uri-stat">
+              <div><b>10개 중 8개 정상</b> · 2개 주의</div>
+              <div style="color:var(--bad);font-weight:800;margin-top:2px">단백뇨 1+, 우로빌리노겐 상승</div>
+              <div style="color:var(--t3);margin-top:2px;font-size:10.5px">마지막 측정 11/12 · 4일 전</div>
+            </div>
+          </div>
+
+          <div class="uri-detail open">
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">비중 (SG)</span><span class="uri-row-val">1.020</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">pH</span><span class="uri-row-val">6.0</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">백혈구 (LEU)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">아질산염 (NIT)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#F59E0B"></div><span class="uri-row-name">단백질 (PRO)</span><span class="uri-row-val">1+</span><span class="mcard-tag warn">주의</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">포도당 (GLU)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">케톤 (KET)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#F59E0B"></div><span class="uri-row-name">우로빌리노겐 (URO)</span><span class="uri-row-val">+</span><span class="mcard-tag warn">주의</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">빌리루빈 (BIL)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <div class="uri-row"><div class="uri-dot" style="background:#10B981"></div><span class="uri-row-name">잠혈 (BLD)</span><span class="uri-row-val">음성</span><span class="mcard-tag good">정상</span></div>
+            <button style="width:100%;margin-top:10px;background:var(--p);color:#FFF;border:0;padding:10px;border-radius:9px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">재검사 하기</button>
+          </div>
+        </div>
+
+        <div class="reco">
+          <div class="reco-tag">오늘 저녁 추천</div>
+          <div class="reco-why"><b>단백뇨 1+</b> → <b>저염 고단백</b></div>
+          <div class="reco-food"><mark>닭가슴살 샐러드</mark></div>
+          <div class="reco-nutr"><span>단백 32g</span><span>저염 300mg</span></div>
+          <div class="reco-btns"><button>다른</button><button>주변</button><button class="p">자세히 ›</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13px;line-height:1.85;margin-top:20px">
+  <b>🧪 소변검사 카드 설계</b><br/>
+  <b>접힌 상태 (기본)</b>:<br/>
+  · 10개 중 정상/주의/위험 개수 (예: "8 정상 · 2 주의")<br/>
+  · 도넛 차트 (초록/노랑/빨강 비율)<br/>
+  · 주의 항목 이름 명시 (단백뇨, 우로빌리노겐 등)<br/>
+  · 10개 미니 바 (한 줄로 전체 상태 한눈에)<br/>
+  · "10개 항목 전체 보기" 버튼<br/><br/>
+  <b>펼친 상태</b>: 10개 항목 각각 수치 + 정상/주의 태그 + 재검사 버튼<br/><br/>
+
+  <b>💡 소변검사 추천 연계 (연결고리)</b><br/>
+  · <b>단백뇨 +</b> → 저염, 신장 보호 식단<br/>
+  · <b>포도당 +</b> → 저당, 당뇨 주의 식단<br/>
+  · <b>케톤 +</b> → 탄수화물 보충<br/>
+  · <b>잠혈 +</b> → 철분 보충, 요로 보호<br/>
+  · <b>우로빌리노겐 ↑</b> → 간 보호 식단 (알코올 금지)<br/>
+  → "<b>왜 이걸 추천?</b>" 에 소변 수치 바로 반영
+</div>
+
+</div>
+</body>
+</html>

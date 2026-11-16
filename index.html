@@ -2525,15 +2525,15 @@ window.appIcon = function(name, size){
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · hero (말풍선 꼬리 아래 ↓) -->
+        <!-- ① 다음 한 끼 추천 · hero (톤 다운 · 노랑 제거) -->
         <div style="background:linear-gradient(135deg,#1E40AF 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 6px;box-shadow:none;margin-bottom:0;margin-top:4px;overflow:hidden;position:relative;min-height:230px">
-          <!-- 노란 halo -->
-          <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(251,191,36,.24) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
+          <!-- 소프트 블루 halo -->
+          <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(147,197,253,.2) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
           <!-- 본문 · 텍스트만 가운데 정렬 · 일러스트/kcal 제거 (Phase 7.5.1) -->
           <div style="position:relative;z-index:2;margin-bottom:32px;text-align:center;padding:8px 12px 0">
             <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
             <div id="v21HeroTitle" style="font-size:25px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.25;margin-top:2px;margin-bottom:14px">
-              오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="font-size:28px;font-weight:900;color:#FFF;letter-spacing:-.8px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
+              오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="font-size:28px;font-weight:900;color:#C7E0FF;letter-spacing:-.8px;border-bottom:3px solid rgba(147,197,253,.5);padding-bottom:1px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
             </div>
             <!-- Why · Gemini reason 들어감 -->
             <div id="v21RecWhy" style="font-size:12.5px;color:rgba(255,255,255,.88);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal;max-width:280px;margin:0 auto">지금 이 시간에 딱 맞는 한 끼 · 잠시만요</div>
@@ -2549,10 +2549,7 @@ window.appIcon = function(name, size){
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
               다른 음식
             </button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenNearbyMap()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              내 주변
-            </button>
+            <!-- 🧹 "내 주변" 제거 · 건강식 추천은 주변 식당 의미 약함 -->
             <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
               자세히
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -2573,11 +2570,71 @@ window.appIcon = function(name, size){
           </div>
         </div>
 
-        <!-- 말풍선 꼬리 ↙ (로고 스타일 · 오른쪽에 짧은 혀가 왼쪽 아래로) -->
-        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;margin-top:-1px">
-          <svg width="26" height="26" viewBox="0 0 26 26" style="margin-right:42px;display:block">
-            <path d="M 26 0 C 24 14, 14 24, 6 20 C 4 10, 2 4, 0 0 Z" fill="#3D63D9"/>
-          </svg>
+        <!-- 🧹 말풍선 꼬리 제거 · 추천이 히어로 역할 -->
+        <div style="height:12px"></div>
+
+        <!-- ═════════ 📊 4 메트릭 2x2 (체지방/근육/혈당/혈압) · 신규 ═════════ -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <!-- 체지방 -->
+          <div class="metric-card" id="metricBodyfat" onclick="openInbodyMeasureSheet()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:11px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              <span class="mcard-tag" id="metricBodyfatTag" style="font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px;background:#F1F5F9;color:#64748B">—</span>
+            </div>
+            <div style="font-size:9.5px;color:#52698F;font-weight:800">체지방</div>
+            <div style="font-size:17px;font-weight:900;margin-top:1px" id="metricBodyfatVal">— <span style="font-size:10px;color:#52698F;font-weight:700">%</span></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px" id="metricBodyfatSpark"><polyline points="" stroke="#F59E0B" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div style="font-size:9.5px;font-weight:800;margin-top:2px;color:#2563EB" id="metricBodyfatChg">측정 ›</div>
+          </div>
+          <!-- 근육량 -->
+          <div class="metric-card" id="metricMuscle" onclick="openInbodyMeasureSheet()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:11px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><rect x="8" y="11" width="8" height="2"/></svg>
+              <span class="mcard-tag" id="metricMuscleTag" style="font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px;background:#F1F5F9;color:#64748B">—</span>
+            </div>
+            <div style="font-size:9.5px;color:#52698F;font-weight:800">근육량</div>
+            <div style="font-size:17px;font-weight:900;margin-top:1px" id="metricMuscleVal">— <span style="font-size:10px;color:#52698F;font-weight:700">kg</span></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px" id="metricMuscleSpark"><polyline points="" stroke="#10B981" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div style="font-size:9.5px;font-weight:800;margin-top:2px;color:#2563EB" id="metricMuscleChg">측정 ›</div>
+          </div>
+          <!-- 혈당 -->
+          <div class="metric-card" id="metricGlucose" onclick="openGlucoseMeasureSheet()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:11px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6m0 0l-4 4m4-4l4 4M5 16a7 7 0 0 0 14 0"/></svg>
+              <span class="mcard-tag" id="metricGlucoseTag" style="font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px;background:#F1F5F9;color:#64748B">—</span>
+            </div>
+            <div style="font-size:9.5px;color:#52698F;font-weight:800">공복혈당</div>
+            <div style="font-size:17px;font-weight:900;margin-top:1px" id="metricGlucoseVal">— <span style="font-size:10px;color:#52698F;font-weight:700">mg/dL</span></div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px" id="metricGlucoseSpark"><polyline points="" stroke="#2563EB" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div style="font-size:9.5px;font-weight:800;margin-top:2px;color:#2563EB" id="metricGlucoseChg">입력 ›</div>
+          </div>
+          <!-- 혈압 -->
+          <div class="metric-card" id="metricBp" onclick="openBpMeasureSheet()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:11px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <span class="mcard-tag" id="metricBpTag" style="font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px;background:#F1F5F9;color:#64748B">—</span>
+            </div>
+            <div style="font-size:9.5px;color:#52698F;font-weight:800">혈압</div>
+            <div style="font-size:17px;font-weight:900;margin-top:1px" id="metricBpVal">—/—</div>
+            <svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px" id="metricBpSpark"><polyline points="" stroke="#10B981" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+            <div style="font-size:9.5px;font-weight:800;margin-top:2px;color:#2563EB" id="metricBpChg">입력 ›</div>
+          </div>
+        </div>
+
+        <!-- ═════════ 💧 소변검사 10항목 요약 카드 · 신규 ═════════ -->
+        <div id="uriSummaryCard" style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:12px 13px;margin-bottom:10px;cursor:pointer" onclick="goHistory()">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;align-items:center;gap:7px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+              <span style="font-size:12px;font-weight:900">소변검사 10항목</span>
+              <span id="uriStatusTag" style="font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px;background:#F1F5F9;color:#64748B">아직 없음</span>
+            </div>
+            <span style="color:#94A3B8;font-size:12px">›</span>
+          </div>
+          <div id="uriSummaryBody" style="padding:10px 0 2px;text-align:center">
+            <div style="font-size:12px;font-weight:800;color:#0F172A;margin-bottom:3px">아직 측정하지 않았어요</div>
+            <div style="font-size:11px;color:#52698F;font-weight:600">피피키트로 1분이면 10항목 체크</div>
+          </div>
         </div>
 
         <!-- ⭐ 내 메뉴 바로가기 -->
@@ -23319,6 +23376,201 @@ if (window.visualViewport) {
       _scrollInputIntoView(el);
     }
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 홈 메트릭 카드 (체지방/근육/혈당/혈압/소변) · 데이터 바인딩
+// ═══════════════════════════════════════════════════════════════
+
+// 측정 시트 열기 (각 임시 · 실제 모달은 Phase #3에서 구현)
+function openInbodyMeasureSheet() {
+  try { if (typeof openBodyLogModal === 'function') return openBodyLogModal(); } catch(e){}
+  alert('인바디 측정 기능 · 체성분 탭에서 측정하세요');
+}
+function openGlucoseMeasureSheet() {
+  const v = prompt('공복 혈당 (mg/dL · 정상 70-100)', '');
+  if (!v) return;
+  const num = parseFloat(v);
+  if (!num || num < 30 || num > 500) { alert('30-500 범위로 입력해주세요'); return; }
+  try {
+    _bodyApi('POST', '/api/body-log', { glucose_mg_dl: num }).then(() => {
+      showPointToast && showPointToast('✅ 혈당 저장됨');
+      renderHomeMetrics();
+    }).catch(e => alert('⚠️ ' + e.message));
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+function openBpMeasureSheet() {
+  const sys = prompt('수축기 혈압 (상 · 정상 <120)', '');
+  if (!sys) return;
+  const dia = prompt('이완기 혈압 (하 · 정상 <80)', '');
+  if (!dia) return;
+  const s = parseInt(sys), d = parseInt(dia);
+  if (!s || !d || s < 60 || s > 250 || d < 40 || d > 150) { alert('범위 벗어남'); return; }
+  try {
+    _bodyApi('POST', '/api/body-log', { bp_systolic: s, bp_diastolic: d }).then(() => {
+      showPointToast && showPointToast('✅ 혈압 저장됨');
+      renderHomeMetrics();
+    }).catch(e => alert('⚠️ ' + e.message));
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+// 메트릭 카드 렌더링 (body_logs + 소변 결과)
+async function renderHomeMetrics() {
+  // body_logs 가져오기
+  try {
+    const r = await _bodyApi('GET', '/api/body-log');
+    const logs = r.logs || [];
+    const latest = logs[0] || {};
+
+    // 체지방
+    _renderMetric('Bodyfat', latest.body_fat_pct, '%', 'bodyFatTag', logs, 'body_fat_pct', false);
+    // 근육량
+    _renderMetric('Muscle', latest.muscle_mass_kg, 'kg', 'muscleTag', logs, 'muscle_mass_kg', true);
+    // 혈당
+    _renderMetric('Glucose', latest.glucose_mg_dl, 'mg/dL', 'glucoseTag', logs, 'glucose_mg_dl', null);
+    // 혈압
+    const bpVal = (latest.bp_systolic && latest.bp_diastolic) ? `${latest.bp_systolic}/${latest.bp_diastolic}` : null;
+    _renderBp(bpVal, latest, logs);
+  } catch(e) { console.warn('[home metrics]', e); }
+
+  // 소변검사 요약
+  try {
+    const r = await _bodyApi('GET', '/api/urine-latest').catch(() => null);
+    if (r && r.latest) _renderUrineSummary(r.latest);
+  } catch(e) {}
+}
+
+function _renderMetric(id, val, unit, tag, logs, key, higherIsBetter) {
+  const valEl = document.getElementById('metric' + id + 'Val');
+  const chgEl = document.getElementById('metric' + id + 'Chg');
+  const tagEl = document.getElementById('metric' + id + 'Tag');
+  const spEl  = document.getElementById('metric' + id + 'Spark');
+  if (val == null) return; // 빈 상태 유지
+  if (valEl) valEl.innerHTML = `${val} <span style="font-size:10px;color:#52698F;font-weight:700">${unit}</span>`;
+  // 변화량 (30일)
+  const values = logs.slice(0, 30).map(l => l[key]).filter(v => v != null);
+  if (values.length >= 2) {
+    const diff = +(values[0] - values[values.length - 1]).toFixed(1);
+    const good = higherIsBetter == null ? Math.abs(diff) < 2 : (higherIsBetter ? diff > 0 : diff < 0);
+    if (chgEl) {
+      chgEl.textContent = diff > 0 ? `↑ +${diff}` : diff < 0 ? `↓ ${Math.abs(diff)}` : '↔ 안정';
+      chgEl.style.color = diff === 0 ? '#94A3B8' : (good ? '#10B981' : '#DC2626');
+    }
+    // 스파크라인
+    if (spEl && values.length >= 3) {
+      const min = Math.min(...values), max = Math.max(...values);
+      const range = max - min || 1;
+      const pts = values.slice().reverse().map((v, i) =>
+        `${(i / (values.length - 1)) * 90},${18 - ((v - min) / range) * 14}`).join(' ');
+      const poly = spEl.querySelector('polyline');
+      if (poly) poly.setAttribute('points', pts);
+    }
+  }
+  // 태그 (정상/주의)
+  if (tagEl) _setMetricTag(tagEl, id, val);
+}
+
+function _renderBp(bpStr, latest, logs) {
+  const valEl = document.getElementById('metricBpVal');
+  const tagEl = document.getElementById('metricBpTag');
+  const chgEl = document.getElementById('metricBpChg');
+  if (!bpStr) return;
+  if (valEl) valEl.textContent = bpStr;
+  // 혈압 판정
+  if (tagEl) {
+    const s = latest.bp_systolic, d = latest.bp_diastolic;
+    let status = 'good', label = '양호';
+    if (s >= 140 || d >= 90) { status = 'bad'; label = '고혈압'; }
+    else if (s >= 130 || d >= 80) { status = 'warn'; label = '주의'; }
+    _setTagColor(tagEl, status, label);
+  }
+  if (chgEl) { chgEl.textContent = `${new Date(latest.recorded_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'})}`; chgEl.style.color = '#64748B'; }
+}
+
+function _setMetricTag(el, metricId, val) {
+  let status = 'ok', label = '정상';
+  if (metricId === 'Bodyfat') {
+    if (val >= 25) { status = 'bad'; label = '매우 높음'; }
+    else if (val >= 20) { status = 'warn'; label = '높음'; }
+    else if (val < 10) { status = 'warn'; label = '낮음'; }
+    else { status = 'good'; label = '정상'; }
+  } else if (metricId === 'Glucose') {
+    if (val >= 126) { status = 'bad'; label = '당뇨 의심'; }
+    else if (val >= 100) { status = 'warn'; label = '공복장애'; }
+    else if (val < 70) { status = 'warn'; label = '저혈당'; }
+    else { status = 'good'; label = '정상'; }
+  } else {
+    status = 'good'; label = '최신';
+  }
+  _setTagColor(el, status, label);
+}
+
+function _setTagColor(el, status, label) {
+  const colors = {
+    good: { bg: '#D1FAE5', fg: '#065F46' },
+    ok:   { bg: '#DBEAFE', fg: '#1E40AF' },
+    warn: { bg: '#FEF3C7', fg: '#92400E' },
+    bad:  { bg: '#FEE2E2', fg: '#991B1B' }
+  };
+  const c = colors[status] || colors.ok;
+  el.textContent = label;
+  el.style.background = c.bg;
+  el.style.color = c.fg;
+}
+
+function _renderUrineSummary(latest) {
+  const card = document.getElementById('uriSummaryCard');
+  const tag = document.getElementById('uriStatusTag');
+  const body = document.getElementById('uriSummaryBody');
+  if (!card || !latest) return;
+  // 10항목 수집
+  const items = [
+    { key:'sg', ko:'비중', normal:(v)=> v>=1.005 && v<=1.030 },
+    { key:'ph', ko:'pH', normal:(v)=> v>=4.5 && v<=8.0 },
+    { key:'leu', ko:'백혈구', normal:(v)=> v === 'negative' || v === 0 || v === '-' },
+    { key:'nit', ko:'아질산', normal:(v)=> v === 'negative' || v === '-' },
+    { key:'pro', ko:'단백질', normal:(v)=> v === 'negative' || v === 0 || v === '-' },
+    { key:'glu', ko:'포도당', normal:(v)=> v === 'negative' || v === 0 || v === '-' },
+    { key:'ket', ko:'케톤', normal:(v)=> v === 'negative' || v === 0 || v === '-' },
+    { key:'uro', ko:'우로빌리노겐', normal:(v)=> v == null || v <= 1 },
+    { key:'bil', ko:'빌리루빈', normal:(v)=> v === 'negative' || v === 0 || v === '-' },
+    { key:'bld', ko:'잠혈', normal:(v)=> v === 'negative' || v === 0 || v === '-' }
+  ];
+  let normalCount = 0, abnormalNames = [];
+  items.forEach(it => {
+    const val = latest[it.key];
+    if (val == null) return;
+    if (it.normal(val)) normalCount++;
+    else abnormalNames.push(it.ko);
+  });
+  const total = items.filter(it => latest[it.key] != null).length;
+  if (!total) return;
+  const dateStr = latest.tested_at ? new Date(latest.tested_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'}) + ' 측정' : '';
+  if (tag) {
+    const warn = abnormalNames.length;
+    _setTagColor(tag, warn ? 'warn' : 'good', warn ? `${warn}개 주의` : '전부 정상');
+  }
+  if (body) {
+    body.style.textAlign = 'left';
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg width="42" height="42" viewBox="0 0 42 42">
+          <circle cx="21" cy="21" r="16" fill="none" stroke="#E5E7EB" stroke-width="6"/>
+          <circle cx="21" cy="21" r="16" fill="none" stroke="#10B981" stroke-width="6"
+            stroke-dasharray="${(normalCount/total)*100.5} 100.5" transform="rotate(-90 21 21)"/>
+        </svg>
+        <div style="flex:1;min-width:0;font-size:11px;color:#52698F;font-weight:600;line-height:1.5">
+          <div><b style="color:#0F172A">${total}개 중 ${normalCount}개 정상</b></div>
+          ${abnormalNames.length ? `<div style="color:#DC2626;font-weight:800">${abnormalNames.slice(0,3).join(', ')}</div>` : '<div style="color:#10B981">모두 정상 범위</div>'}
+          <div style="color:#94A3B8;font-size:10px">${dateStr}</div>
+        </div>
+      </div>`;
+  }
+}
+
+// 홈 로드 시 호출
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => { setTimeout(() => { try { renderHomeMetrics(); } catch(e){} }, 1500); });
 }
 
 // ═══════════════════════════════════════════════════════════════

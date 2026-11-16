@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>최종 B안 · 캐릭터 원 제거</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F; --t3:#94A3B8;
+    --good:#10B981; --warn:#F59E0B; --bad:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:900px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:700px){.cols{grid-template-columns:1fr}}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:760px;display:flex;flex-direction:column;position:relative}
+  .body{flex:1;overflow-y:auto;background:var(--bg);padding:14px}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .hi{font-size:13.5px;color:var(--t2)}
+  .hi b{color:#1E3B70;font-weight:800;font-size:14.5px}
+  .chips{display:flex;gap:5px;align-items:center}
+  .fire{background:#FEF3C7;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:900;color:#92400E}
+  .gem{background:#FFF;border:1px solid var(--b);padding:3px 9px;border-radius:999px;font-size:10px;font-weight:900;color:#1E40AF}
+
+  .ico-sm{width:16px;height:16px;stroke:var(--p);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+  /* B안 히어로 · 원 배경 제거 */
+  .hero{background:#FFF;color:var(--t);border:1px solid var(--pl);border-radius:20px;padding:18px 18px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(37,99,235,.06)}
+  .hero-head{display:flex;align-items:flex-start;gap:12px}
+  .hero-text{flex:1;min-width:0}
+  .hero-tag{font-size:10px;color:var(--p);font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+  .hero-why{font-size:11px;color:var(--t2);font-weight:600;margin-top:4px;line-height:1.5}
+  .hero-why b{color:var(--p);font-weight:800}
+  .hero-food{font-size:22px;font-weight:900;color:#0F172A;line-height:1.25;margin-top:6px;letter-spacing:-.5px}
+  .hero-food em{color:var(--p);font-style:normal;font-weight:900}
+  /* 캐릭터 · 배경 X · 떠있는 느낌 */
+  .hero-char{flex-shrink:0;width:66px;height:66px}
+  .hero-nutr{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+  .hero-nutr span{background:#D1FAE5;color:#065F46;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:800}
+  .hero-btns{display:flex;gap:6px;margin-top:12px}
+  .hero-btns button{flex:1;border:0;padding:10px;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;background:var(--pl);color:var(--pd)}
+  .hero-btns button.p{background:var(--p);color:#FFF}
+
+  /* 메트릭 */
+  .m2x2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .mmini{background:#FFF;border:1px solid var(--b);border-radius:12px;padding:10px 11px}
+  .mmini-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+  .mmini-l{font-size:9.5px;color:var(--t2);font-weight:800}
+  .mmini-v{font-size:17px;font-weight:900;margin-top:1px}
+  .mmini-v small{font-size:10px;color:var(--t2);font-weight:700}
+  .mmini-chg{font-size:9.5px;font-weight:800;margin-top:2px}
+  .tg{font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px}
+  .tg.warn{background:#FEF3C7;color:#92400E}
+  .tg.good{background:#D1FAE5;color:#065F46}
+  .tg.ok{background:#DBEAFE;color:#1E40AF}
+
+  /* 소변 */
+  .uri{background:#FFF;border:1px solid var(--b);border-radius:12px;padding:12px 13px;margin-bottom:10px}
+  .uri-head{display:flex;justify-content:space-between;align-items:center}
+  .uri-tt{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:900}
+  .uri-summary{display:flex;align-items:center;gap:10px;margin-top:9px}
+  .uri-stat{flex:1;font-size:11px;color:var(--t2);font-weight:600;line-height:1.5}
+  .uri-stat b{color:var(--t)}
+  .uri-bars{display:flex;gap:2px;margin-top:9px}
+  .uri-bars > div{flex:1;height:5px;border-radius:2px}
+  .uri-labels{display:flex;justify-content:space-between;margin-top:4px;font-size:8px;color:var(--t3);font-weight:700}
+  .uri-expand{background:transparent;border:0;color:var(--p);font-size:11px;font-weight:800;cursor:pointer;margin-top:8px;padding:0;font-family:inherit}
+
+  /* 챌린지/메이트 */
+  .sec{background:#FFF;border:1px solid var(--b);border-radius:12px;padding:12px 13px;margin-bottom:10px}
+  .sec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .sec-t{font-size:11.5px;color:var(--t);font-weight:900}
+  .sec-a{font-size:10.5px;color:var(--p);font-weight:800}
+  .ch-row{display:flex;align-items:center;gap:10px;padding:5px 0}
+  .ch-circle{width:22px;height:22px;border:2px solid var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--p);font-weight:900;flex-shrink:0}
+  .ch-circle.done{background:var(--good);border-color:var(--good);color:#FFF}
+  .ch-name{flex:1;font-size:12px;color:var(--t);font-weight:700}
+  .ch-name.done{text-decoration:line-through;color:var(--t3)}
+  .ch-pt{font-size:10.5px;color:var(--p);font-weight:800}
+
+  .pt-msg{background:#FEF9E7;border:1px solid #FCD34D;border-radius:12px;padding:10px 13px;font-size:11px;color:#78350F;line-height:1.5;margin-bottom:10px;display:flex;gap:10px;align-items:flex-start}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>✅ 최종 B안 · 캐릭터 원 배경 제거</h1>
+<p class="sub">가벼운 느낌 · 캐릭터가 흰 카드 위에 자연스럽게 떠있음</p>
+
+<div class="cols">
+
+  <!-- 활성 유저 -->
+  <div>
+    <div class="label">활성 유저</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gem">💎 600P</span></div>
+        </div>
+
+        <div class="pt-msg">
+          <svg class="ico-sm" viewBox="0 0 24 24" style="stroke:#92400E;flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div><b>이철수 트레이너</b> · 어제<br/>저녁 단백질 꼭 챙기세요</div>
+        </div>
+
+        <!-- 히어로 · 원 배경 없는 캐릭터 -->
+        <div class="hero">
+          <div class="hero-head">
+            <div class="hero-text">
+              <div class="hero-tag">🎯 오늘 저녁 추천</div>
+              <div class="hero-why"><b>단백뇨 1+</b> · 체지방 23% → 저염 고단백</div>
+              <div class="hero-food">오늘 저녁엔<br/><em>닭가슴살 샐러드</em> 어때요?</div>
+            </div>
+            <!-- 캐릭터 · 배경 없음 -->
+            <div class="hero-char">
+              <svg viewBox="0 0 66 66" width="66" height="66">
+                <defs>
+                  <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#69A4FF"/>
+                    <stop offset="0.5" stop-color="#3B82F6"/>
+                    <stop offset="1" stop-color="#2563EB"/>
+                  </linearGradient>
+                  <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                    <feOffset dx="0" dy="2"/>
+                    <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+                    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+                <g filter="url(#sh)">
+                  <path d="M14,45 Q11,22 24,16 Q30,10 33,13 Q37,8 45,16 Q58,23 56,45 Q56,56 45,58 Q33,60 22,58 Q14,56 14,45 Z" fill="url(#gC)"/>
+                  <ellipse cx="27" cy="33" rx="2" ry="3" fill="#FFF"/>
+                  <ellipse cx="40" cy="33" rx="2" ry="3" fill="#FFF"/>
+                  <path d="M29,42 Q33,45 37,42" stroke="#FFF" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div class="hero-nutr">
+            <span>단백 32g</span>
+            <span>저염 300mg</span>
+            <span>420kcal</span>
+          </div>
+          <div class="hero-btns">
+            <button>↻ 다른 추천</button>
+            <button class="p">자세히 ›</button>
+          </div>
+        </div>
+
+        <!-- 메트릭 -->
+        <div class="m2x2">
+          <div class="mmini"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><span class="tg warn">높음</span></div><div class="mmini-l">체지방</div><div class="mmini-v">23.2<small>%</small></div><svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px"><polyline points="0,6 15,8 30,7 45,11 60,10 75,13 90,15" stroke="#F59E0B" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="mmini-chg" style="color:var(--good)">↓ 0.3</div></div>
+          <div class="mmini"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/><rect x="8" y="11" width="8" height="2"/></svg><span class="tg good">증가</span></div><div class="mmini-l">근육량</div><div class="mmini-v">32.1<small>kg</small></div><svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px"><polyline points="0,15 15,13 30,11 45,9 60,7 75,5 90,4" stroke="#10B981" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="mmini-chg" style="color:var(--good)">↑ 0.4</div></div>
+          <div class="mmini"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M12 2v6m0 0l-4 4m4-4l4 4M5 16a7 7 0 0 0 14 0"/></svg><span class="tg ok">정상</span></div><div class="mmini-l">공복혈당</div><div class="mmini-v">98<small>mg/dL</small></div><svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px"><polyline points="0,10 15,9 30,11 45,10 60,10 75,10 90,9" stroke="#2563EB" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="mmini-chg" style="color:var(--t3)">↔ 안정</div></div>
+          <div class="mmini"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tg good">양호</span></div><div class="mmini-l">혈압</div><div class="mmini-v">118<small>/78</small></div><svg viewBox="0 0 90 20" preserveAspectRatio="none" style="width:100%;height:18px;margin-top:3px"><polyline points="0,5 15,7 30,9 45,10 60,11 75,13 90,15" stroke="#10B981" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><div class="mmini-chg" style="color:var(--good)">↓ -4</div></div>
+        </div>
+
+        <!-- 소변검사 -->
+        <div class="uri">
+          <div class="uri-head"><div class="uri-tt"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>소변검사 10항목<span class="tg warn">2개 주의</span></div></div>
+          <div class="uri-summary">
+            <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="17" fill="none" stroke="#E5E7EB" stroke-width="6"/><circle cx="22" cy="22" r="17" fill="none" stroke="#10B981" stroke-width="6" stroke-dasharray="85.4 107" transform="rotate(-90 22 22)"/><circle cx="22" cy="22" r="17" fill="none" stroke="#F59E0B" stroke-width="6" stroke-dasharray="21.4 107" stroke-dashoffset="-85.4" transform="rotate(-90 22 22)"/></svg>
+            <div class="uri-stat"><div><b>10개 중 8개 정상</b></div><div style="color:var(--bad);font-weight:800">단백뇨 1+, 우로빌리노겐 상승</div><div style="color:var(--t3);font-size:10px">11/12 · 4일 전</div></div>
+          </div>
+          <div class="uri-bars"><div style="background:#10B981"></div><div style="background:#10B981"></div><div style="background:#10B981"></div><div style="background:#10B981"></div><div style="background:#F59E0B"></div><div style="background:#10B981"></div><div style="background:#10B981"></div><div style="background:#F59E0B"></div><div style="background:#10B981"></div><div style="background:#10B981"></div></div>
+          <div class="uri-labels"><span>비중</span><span>pH</span><span>백혈</span><span>아질</span><span>단백</span><span>포도</span><span>케톤</span><span>우로</span><span>빌리</span><span>잠혈</span></div>
+          <button class="uri-expand">10개 항목 전체 보기 ›</button>
+        </div>
+
+        <!-- 챌린지 -->
+        <div class="sec">
+          <div class="sec-head"><span class="sec-t">오늘 챌린지 2/3</span><a class="sec-a">전체 ›</a></div>
+          <div class="ch-row"><div class="ch-circle done">✓</div><div class="ch-name done">단백질 80g 이상</div><div class="ch-pt" style="color:var(--t3)">+30P</div></div>
+          <div class="ch-row"><div class="ch-circle done">✓</div><div class="ch-name done">물 2L 챌린지</div><div class="ch-pt" style="color:var(--t3)">+30P</div></div>
+          <div class="ch-row"><div class="ch-circle"></div><div class="ch-name">야식 금지</div><div class="ch-pt">+30P</div></div>
+        </div>
+
+        <div style="height:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 빈 상태 -->
+  <div>
+    <div class="label">빈 상태 · 신규 유저</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="gem">💎 50P</span></div>
+        </div>
+
+        <div class="pt-msg" style="background:#DBEAFE;border-color:#3B82F6;color:#1E40AF">
+          <svg class="ico-sm" viewBox="0 0 24 24" style="stroke:#1E40AF;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/></svg>
+          <div><b>건강 수치를 등록하면</b><br/>더 정확한 맞춤 추천</div>
+        </div>
+
+        <div class="hero">
+          <div class="hero-head">
+            <div class="hero-text">
+              <div class="hero-tag">식단 분석으로 시작</div>
+              <div class="hero-why">사진 한 장으로 영양 분석</div>
+              <div class="hero-food">오늘<br/><em>뭐 드셨어요?</em></div>
+            </div>
+            <div class="hero-char">
+              <svg viewBox="0 0 66 66" width="66" height="66">
+                <g>
+                  <path d="M14,45 Q11,22 24,16 Q30,10 33,13 Q37,8 45,16 Q58,23 56,45 Q56,56 45,58 Q33,60 22,58 Q14,56 14,45 Z" fill="url(#gC)"/>
+                  <ellipse cx="27" cy="33" rx="2" ry="3" fill="#FFF"/>
+                  <ellipse cx="40" cy="33" rx="2" ry="3" fill="#FFF"/>
+                  <path d="M29,42 Q33,43 37,42" stroke="#FFF" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div class="hero-btns" style="margin-top:14px"><button class="p" style="flex:1">📷 사진으로 분석 시작</button></div>
+        </div>
+
+        <div class="m2x2">
+          <div class="mmini" style="background:#F8FAFC;border:1px dashed #CBD5E1"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div><div class="mmini-l">체지방</div><div style="font-size:12px;color:var(--t3);font-weight:700;margin-top:3px">— %</div><div class="mmini-chg" style="color:var(--p)">인바디 측정 ›</div></div>
+          <div class="mmini" style="background:#F8FAFC;border:1px dashed #CBD5E1"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5" y="7" width="3" height="10" rx="1"/><rect x="16" y="7" width="3" height="10" rx="1"/></svg></div><div class="mmini-l">근육량</div><div style="font-size:12px;color:var(--t3);font-weight:700;margin-top:3px">— kg</div><div class="mmini-chg" style="color:var(--p)">인바디 측정 ›</div></div>
+          <div class="mmini" style="background:#F8FAFC;border:1px dashed #CBD5E1"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M12 2v6m0 0l-4 4m4-4l4 4M5 16a7 7 0 0 0 14 0"/></svg></div><div class="mmini-l">공복혈당</div><div style="font-size:12px;color:var(--t3);font-weight:700;margin-top:3px">— mg/dL</div><div class="mmini-chg" style="color:var(--p)">직접 입력 ›</div></div>
+          <div class="mmini" style="background:#F8FAFC;border:1px dashed #CBD5E1"><div class="mmini-top"><svg class="ico-sm" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><div class="mmini-l">혈압</div><div style="font-size:12px;color:var(--t3);font-weight:700;margin-top:3px">—/—</div><div class="mmini-chg" style="color:var(--p)">직접 입력 ›</div></div>
+        </div>
+
+        <div class="uri" style="background:#F8FAFC;border:1px dashed #CBD5E1">
+          <div class="uri-head"><div class="uri-tt" style="color:var(--t3)"><svg class="ico-sm" viewBox="0 0 24 24" style="stroke:#94A3B8"><path d="M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>소변검사 10항목</div></div>
+          <div style="padding:10px 0;text-align:center">
+            <div style="font-size:12.5px;font-weight:800;color:var(--t);margin-bottom:4px">아직 측정하지 않았어요</div>
+            <div style="font-size:11px;color:var(--t2);font-weight:600">피피키트로 1분이면 10항목 체크</div>
+          </div>
+          <button style="width:100%;background:var(--p);color:#FFF;border:0;padding:9px;border-radius:9px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">검사 시작하기 ›</button>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head"><span class="sec-t">오늘 챌린지 0/3</span><a class="sec-a">전체 ›</a></div>
+          <div class="ch-row"><div class="ch-circle"></div><div class="ch-name">단백질 80g 이상</div><div class="ch-pt">+30P</div></div>
+          <div class="ch-row"><div class="ch-circle"></div><div class="ch-name">물 2L 챌린지</div><div class="ch-pt">+30P</div></div>
+          <div class="ch-row"><div class="ch-circle"></div><div class="ch-name">야식 금지</div><div class="ch-pt">+30P</div></div>
+        </div>
+
+        <div style="height:10px"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13px;line-height:1.85;margin-top:20px">
+  <b>✅ 최종 확정 반영</b><br/>
+  · 캐릭터 <b>원 배경 제거</b> · 그림자만 살짝 (떠있는 느낌)<br/>
+  · <b>내 주변 버튼 제거</b> · 다른 추천 / 자세히 2개만<br/>
+  · 노란 하이라이트 X · 음식명 <b>블루 포인트</b><br/>
+  · 영양소 뱃지는 민트 톤 (단백 32g · 저염 300mg · 420kcal)<br/><br/>
+
+  이대로 OK면 index.html 전면 교체 작업 들어간다. GO?
+</div>
+
+</div>
+</body>
+</html>

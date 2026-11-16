@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>전체 페이지 통일 미리보기 · 분석/리포트/메이트/설정</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F; --t3:#94A3B8;
+    --good:#10B981; --warn:#F59E0B; --bad:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1400px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:16px;margin:28px 2px 10px;font-weight:800;color:#0F172A}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:820px;display:flex;flex-direction:column}
+  .body{flex:1;overflow-y:auto;background:var(--bg);padding:14px}
+
+  .page-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .page-back{width:28px;height:28px;background:#FFF;border:1px solid var(--b);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px}
+  .page-ttl{font-size:16px;font-weight:900;flex:1}
+
+  .ico-sm{width:16px;height:16px;stroke:var(--p);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+  .card{background:#FFF;border:1px solid var(--b);border-radius:14px;padding:13px 14px;margin-bottom:10px}
+  .card-ttl{font-size:12px;font-weight:900;color:var(--t);margin-bottom:8px}
+
+  .tg{font-size:9px;font-weight:900;padding:2px 7px;border-radius:5px;letter-spacing:.3px}
+  .tg.good{background:#D1FAE5;color:#065F46}
+  .tg.ok{background:#DBEAFE;color:#1E40AF}
+  .tg.warn{background:#FEF3C7;color:#92400E}
+  .tg.bad{background:#FEE2E2;color:#991B1B}
+
+  /* 공통 헤더 */
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .hi b{color:#1E3B70;font-weight:800}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🎨 전체 페이지 통일 · 데이터 중심 디자인</h1>
+<p class="sub">홈과 같은 톤 (블루 · 흰 카드 · SVG 선 아이콘 · 스파크라인) → 분석 / 리포트 / 메이트 / 설정</p>
+
+<h2>📊 분석 탭 (수치 상세 뷰)</h2>
+<div class="cols">
+
+  <!-- 분석 탭 -->
+  <div>
+    <div class="label">분석 · 체성분 (인바디)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="page-head">
+          <div class="page-back">‹</div>
+          <div class="page-ttl">분석</div>
+          <span class="tg ok">11/16 측정</span>
+        </div>
+
+        <!-- 탭 -->
+        <div style="display:flex;gap:4px;background:#FFF;padding:4px;border-radius:10px;border:1px solid var(--b);margin-bottom:12px">
+          <button style="flex:1;background:var(--p);color:#FFF;border:0;padding:8px;border-radius:7px;font-size:11.5px;font-weight:800">인바디</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11.5px;font-weight:700">혈당</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11.5px;font-weight:700">혈압</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11.5px;font-weight:700">소변</button>
+        </div>
+
+        <!-- 메인 수치 (큰) -->
+        <div class="card" style="background:linear-gradient(135deg,#F0F7FF,#FFF)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div>
+              <div style="font-size:10.5px;color:var(--t2);font-weight:800">체지방률</div>
+              <div style="font-size:32px;font-weight:900;color:var(--t);line-height:1">23.2<small style="font-size:14px;color:var(--t2);font-weight:700">%</small></div>
+              <div style="font-size:11px;color:var(--good);font-weight:800;margin-top:2px">↓ 0.3% (30일) · 목표 18%</div>
+            </div>
+            <span class="tg warn">높음</span>
+          </div>
+          <!-- 큰 그래프 -->
+          <svg viewBox="0 0 280 90" preserveAspectRatio="none" style="width:100%;height:90px;margin-top:10px">
+            <defs><linearGradient id="gr1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F59E0B" stop-opacity=".3"/><stop offset="1" stop-color="#F59E0B" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0,24 L40,30 L80,22 L120,50 L160,42 L200,60 L240,54 L280,66 L280,90 L0,90 Z" fill="url(#gr1)"/>
+            <polyline points="0,24 40,30 80,22 120,50 160,42 200,60 240,54 280,66" stroke="#F59E0B" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <circle cx="280" cy="66" r="4" fill="#F59E0B"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--t3);margin-top:3px"><span>30일 전</span><span>20일</span><span>10일</span><span>오늘</span></div>
+        </div>
+
+        <!-- 다른 수치들 (리스트) -->
+        <div class="card">
+          <div class="card-ttl">전체 수치 (최근 측정)</div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">체중</span><span style="font-weight:900">70.5 kg</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">근육량</span><span style="font-weight:900">32.1 kg <span class="tg good">증가</span></span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">기초대사량 (BMR)</span><span style="font-weight:900">1,680 kcal</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">내장지방 레벨</span><span style="font-weight:900">7 <span class="tg warn">주의</span></span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">BMI</span><span style="font-weight:900">22.4 <span class="tg good">정상</span></span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">복부지방률</span><span style="font-weight:900">0.86</span></div>
+        </div>
+
+        <!-- 측정 CTA -->
+        <button style="width:100%;background:var(--p);color:#FFF;border:0;padding:13px;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit">
+          📷 인바디 결과지 찍기
+        </button>
+        <button style="width:100%;background:#FFF;color:var(--pd);border:1px solid var(--pl);padding:12px;border-radius:12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:6px">
+          직접 수치 입력
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 분석 혈당 탭 -->
+  <div>
+    <div class="label">분석 · 혈당 (시계열)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="page-head">
+          <div class="page-back">‹</div>
+          <div class="page-ttl">분석</div>
+          <span class="tg ok">공복</span>
+        </div>
+
+        <div style="display:flex;gap:4px;background:#FFF;padding:4px;border-radius:10px;border:1px solid var(--b);margin-bottom:12px">
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11.5px;font-weight:700">인바디</button>
+          <button style="flex:1;background:var(--p);color:#FFF;border:0;padding:8px;border-radius:7px;font-size:11.5px;font-weight:800">혈당</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11.5px;font-weight:700">혈압</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11.5px;font-weight:700">소변</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end">
+            <div>
+              <div style="font-size:10.5px;color:var(--t2);font-weight:800">공복 혈당 · 7일 평균</div>
+              <div style="font-size:32px;font-weight:900;line-height:1">97<small style="font-size:14px;color:var(--t2);font-weight:700">mg/dL</small></div>
+              <div style="font-size:11px;color:var(--good);font-weight:800;margin-top:2px">정상 범위 (70-100)</div>
+            </div>
+            <span class="tg good">양호</span>
+          </div>
+          <!-- 그래프 (혈당은 공복/식후 두 선) -->
+          <svg viewBox="0 0 280 100" preserveAspectRatio="none" style="width:100%;height:100px;margin-top:10px">
+            <line x1="0" y1="60" x2="280" y2="60" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="4" y="58" font-size="8" fill="#94A3B8">100</text>
+            <polyline points="0,64 40,58 80,62 120,58 160,60 200,55 240,58 280,54" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <polyline points="0,20 40,18 80,16 120,24 160,12 200,22 240,16 280,14" stroke="#F59E0B" stroke-width="2" fill="none" stroke-dasharray="4,2" stroke-linecap="round"/>
+            <circle cx="280" cy="54" r="3" fill="#2563EB"/>
+            <circle cx="280" cy="14" r="3" fill="#F59E0B"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--t2);font-weight:700">
+            <span><span style="color:#2563EB">●</span> 공복 평균 97</span>
+            <span><span style="color:#F59E0B">●</span> 식후 평균 142</span>
+          </div>
+        </div>
+
+        <!-- 식후 시간대 분석 -->
+        <div class="card">
+          <div class="card-ttl">식후 혈당 패턴 (7일)</div>
+          <div style="font-size:11px;color:var(--t2);font-weight:600;line-height:1.6">
+            🍳 아침 식후 · 128 mg/dL · 정상<br/>
+            🍚 점심 식후 · 152 mg/dL · <span style="color:var(--warn);font-weight:800">약간 상승</span><br/>
+            🌙 저녁 식후 · 148 mg/dL · <span style="color:var(--warn);font-weight:800">약간 상승</span>
+          </div>
+        </div>
+
+        <!-- 최근 기록 -->
+        <div class="card">
+          <div class="card-ttl">최근 기록</div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">11/16 07:30 공복</span><span style="font-weight:900">98</span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">11/15 13:30 점심2h</span><span style="font-weight:900">152 <span class="tg warn">상승</span></span></div>
+          <div style="display:flex;justify-content:space-between;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:12px"><span style="color:var(--t2);font-weight:700">11/15 07:00 공복</span><span style="font-weight:900">95</span></div>
+        </div>
+
+        <button style="width:100%;background:var(--p);color:#FFF;border:0;padding:13px;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit">+ 혈당 입력</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2>📈 리포트 탭 (추세 종합)</h2>
+<div class="cols">
+
+  <div>
+    <div class="label">리포트 · 주간 종합</div>
+    <div class="phone">
+      <div class="body">
+        <div class="page-head">
+          <div class="page-back">‹</div>
+          <div class="page-ttl">리포트</div>
+          <span style="font-size:10.5px;color:var(--t2);font-weight:700">11월 2주</span>
+        </div>
+
+        <!-- 기간 선택 -->
+        <div style="display:flex;gap:4px;background:#FFF;padding:4px;border-radius:10px;border:1px solid var(--b);margin-bottom:12px">
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:7px;font-size:11px;font-weight:700">오늘</button>
+          <button style="flex:1;background:var(--p);color:#FFF;border:0;padding:7px;border-radius:7px;font-size:11px;font-weight:800">주간</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:7px;font-size:11px;font-weight:700">월간</button>
+        </div>
+
+        <!-- 이번 주 요약 (주간 리포트) -->
+        <div class="card" style="background:linear-gradient(135deg,#1E40AF,#3561DD);color:#FFF;border:0">
+          <div style="font-size:10.5px;opacity:.85;font-weight:800;letter-spacing:.5px;text-transform:uppercase">이번 주의 나</div>
+          <div style="font-size:16px;font-weight:900;margin-top:4px;line-height:1.4">
+            ✓ <mark style="background:rgba(94,234,212,.25);color:#5EEAD4;padding:1px 6px;border-radius:4px">근육량 +0.4kg</mark><br/>
+            ⚠ 저녁 늦게 먹은 날 많았어요
+          </div>
+          <div style="font-size:11px;opacity:.85;font-weight:600;margin-top:8px">다음 주 미션: <b style="color:#FBBF24">저녁 8시 전에 먹기</b></div>
+        </div>
+
+        <!-- 4 메트릭 변화 요약 -->
+        <div class="card">
+          <div class="card-ttl">수치 변화 요약 (7일)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+            <div style="padding:9px 10px;background:#F8FAFC;border-radius:8px">
+              <div style="font-size:10px;color:var(--t2);font-weight:800">체지방</div>
+              <div style="font-size:15px;font-weight:900;color:var(--good)">↓ 0.3%</div>
+            </div>
+            <div style="padding:9px 10px;background:#F8FAFC;border-radius:8px">
+              <div style="font-size:10px;color:var(--t2);font-weight:800">근육량</div>
+              <div style="font-size:15px;font-weight:900;color:var(--good)">↑ 0.4kg</div>
+            </div>
+            <div style="padding:9px 10px;background:#F8FAFC;border-radius:8px">
+              <div style="font-size:10px;color:var(--t2);font-weight:800">공복혈당</div>
+              <div style="font-size:15px;font-weight:900">97 안정</div>
+            </div>
+            <div style="padding:9px 10px;background:#F8FAFC;border-radius:8px">
+              <div style="font-size:10px;color:var(--t2);font-weight:800">혈압</div>
+              <div style="font-size:15px;font-weight:900;color:var(--good)">↓ -4</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 영양 균형 -->
+        <div class="card">
+          <div class="card-ttl">영양 균형 (7일 평균)</div>
+          <div style="font-size:11px;color:var(--t2);font-weight:700;margin-bottom:6px">단백질 <span style="color:var(--bad);font-weight:800">70g / 90g (−22%)</span></div>
+          <div style="height:7px;background:#F0F1F5;border-radius:4px;overflow:hidden;margin-bottom:10px"><div style="width:78%;height:100%;background:#DC2626"></div></div>
+          <div style="font-size:11px;color:var(--t2);font-weight:700;margin-bottom:6px">나트륨 <span style="color:var(--bad);font-weight:800">2,800mg / 2,000mg (+40%)</span></div>
+          <div style="height:7px;background:#F0F1F5;border-radius:4px;overflow:hidden;margin-bottom:10px"><div style="width:100%;height:100%;background:#DC2626"></div></div>
+          <div style="font-size:11px;color:var(--t2);font-weight:700;margin-bottom:6px">식이섬유 <span style="color:var(--warn);font-weight:800">16g / 25g (−36%)</span></div>
+          <div style="height:7px;background:#F0F1F5;border-radius:4px;overflow:hidden"><div style="width:64%;height:100%;background:#F59E0B"></div></div>
+        </div>
+
+        <!-- 공유 CTA -->
+        <button style="width:100%;background:var(--p);color:#FFF;border:0;padding:13px;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:6px">
+          📷 인스타 스토리로 공유
+        </button>
+        <button style="width:100%;background:#FFF;color:var(--pd);border:1px solid var(--pl);padding:12px;border-radius:12px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit">
+          📄 PDF 리포트 (PT 공유용)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리포트 월간 -->
+  <div>
+    <div class="label">리포트 · 월간 (추세)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="page-head">
+          <div class="page-back">‹</div>
+          <div class="page-ttl">리포트</div>
+          <span style="font-size:10.5px;color:var(--t2);font-weight:700">2026.10</span>
+        </div>
+
+        <div style="display:flex;gap:4px;background:#FFF;padding:4px;border-radius:10px;border:1px solid var(--b);margin-bottom:12px">
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:7px;font-size:11px;font-weight:700">오늘</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:7px;font-size:11px;font-weight:700">주간</button>
+          <button style="flex:1;background:var(--p);color:#FFF;border:0;padding:7px;border-radius:7px;font-size:11px;font-weight:800">월간</button>
+        </div>
+
+        <div class="card">
+          <div class="card-ttl">체중 · 체지방 30일</div>
+          <svg viewBox="0 0 280 110" preserveAspectRatio="none" style="width:100%;height:110px">
+            <defs>
+              <linearGradient id="gr2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563EB" stop-opacity=".2"/><stop offset="1" stop-color="#2563EB" stop-opacity="0"/></linearGradient>
+            </defs>
+            <path d="M0,40 L35,42 L70,38 L105,36 L140,32 L175,35 L210,30 L245,28 L280,25 L280,110 L0,110 Z" fill="url(#gr2)"/>
+            <polyline points="0,40 35,42 70,38 105,36 140,32 175,35 210,30 245,28 280,25" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <polyline points="0,70 35,72 70,70 105,74 140,72 175,76 210,74 245,78 280,76" stroke="#F59E0B" stroke-width="2" fill="none" stroke-dasharray="4,2"/>
+          </svg>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);font-weight:700;margin-top:6px">
+            <span><span style="color:#2563EB">●</span> 근육량 ↑ 1.2kg</span>
+            <span><span style="color:#F59E0B">●</span> 체지방 ↓ 0.9%</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-ttl">혈당 추세 30일</div>
+          <svg viewBox="0 0 280 90" preserveAspectRatio="none" style="width:100%;height:90px">
+            <line x1="0" y1="45" x2="280" y2="45" stroke="#E5E7EB" stroke-width="1" stroke-dasharray="3,3"/>
+            <polyline points="0,50 20,48 40,52 60,46 80,54 100,42 120,48 140,46 160,44 180,48 200,42 220,46 240,44 260,42 280,40" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div style="font-size:11px;color:var(--good);font-weight:800;margin-top:4px">평균 97 → 95 (↓ 2) · 안정 추세</div>
+        </div>
+
+        <div class="card">
+          <div class="card-ttl">월간 평가</div>
+          <div style="font-size:12px;color:var(--t);font-weight:700;line-height:1.7">
+            🎯 목표 달성률: <b style="color:var(--good)">72%</b><br/>
+            💪 근육량 꾸준히 상승<br/>
+            ⚠ 나트륨 섭취 빈번<br/>
+            ✨ 다음 달 포인트: <b>저염 식단 챌린지</b>
+          </div>
+        </div>
+
+        <button style="width:100%;background:var(--p);color:#FFF;border:0;padding:13px;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit">
+          📄 PDF 다운로드
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2>👥 메이트 탭 (PT 뷰)</h2>
+<div class="cols">
+
+  <div>
+    <div class="label">메이트 · 내 식단·운동 공유</div>
+    <div class="phone">
+      <div class="body">
+        <div class="page-head">
+          <div class="page-back">‹</div>
+          <div class="page-ttl">메이트</div>
+        </div>
+
+        <!-- 내 공유 코드 -->
+        <div class="card" style="background:linear-gradient(135deg,#F0F7FF,#FFF)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:10.5px;color:var(--t2);font-weight:800">내 공유 코드</span>
+            <span class="tg good">활성</span>
+          </div>
+          <div style="font-size:19px;font-weight:900;letter-spacing:1.5px;color:var(--p);font-family:ui-monospace">HLT-A3K9XQ</div>
+          <div style="display:flex;gap:6px;margin-top:10px">
+            <button style="flex:1;background:var(--p);color:#FFF;border:0;padding:8px;border-radius:999px;font-size:11px;font-weight:800">📋 복사</button>
+            <button style="flex:1;background:#FFF;color:var(--pd);border:1px solid var(--pl);padding:8px;border-radius:999px;font-size:11px;font-weight:800">💬 공유</button>
+          </div>
+        </div>
+
+        <!-- 공유 범위 -->
+        <div class="card">
+          <div class="card-ttl">공유 범위 설정</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5">
+            <span style="font-size:12px;font-weight:700">식단 기록</span>
+            <div style="width:38px;height:22px;background:var(--p);border-radius:999px;position:relative"><div style="width:18px;height:18px;background:#FFF;border-radius:50%;position:absolute;top:2px;right:2px"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5">
+            <span style="font-size:12px;font-weight:700">운동 기록</span>
+            <div style="width:38px;height:22px;background:var(--p);border-radius:999px;position:relative"><div style="width:18px;height:18px;background:#FFF;border-radius:50%;position:absolute;top:2px;right:2px"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5">
+            <span style="font-size:12px;font-weight:700">인바디·체지방</span>
+            <div style="width:38px;height:22px;background:var(--p);border-radius:999px;position:relative"><div style="width:18px;height:18px;background:#FFF;border-radius:50%;position:absolute;top:2px;right:2px"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5">
+            <span style="font-size:12px;font-weight:700">혈당·혈압 <span style="color:var(--t3);font-weight:600">· 민감</span></span>
+            <div style="width:38px;height:22px;background:#E5E7EB;border-radius:999px;position:relative"><div style="width:18px;height:18px;background:#FFF;border-radius:50%;position:absolute;top:2px;left:2px"></div></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5">
+            <span style="font-size:12px;font-weight:700">소변검사 <span style="color:var(--t3);font-weight:600">· 민감</span></span>
+            <div style="width:38px;height:22px;background:#E5E7EB;border-radius:999px;position:relative"><div style="width:18px;height:18px;background:#FFF;border-radius:50%;position:absolute;top:2px;left:2px"></div></div>
+          </div>
+        </div>
+
+        <!-- 메이트 입력 -->
+        <div class="card">
+          <div class="card-ttl">다른 사람 공유 코드 입력</div>
+          <div style="display:flex;gap:6px">
+            <input placeholder="HLT-..." style="flex:1;padding:10px 12px;border:1px solid var(--b);border-radius:9px;font-size:14px;font-family:ui-monospace;background:#F8FAFC;outline:none"/>
+            <button style="background:var(--p);color:#FFF;border:0;padding:10px 15px;border-radius:9px;font-size:12.5px;font-weight:800">추가</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메이트 상세 (PT가 회원 보는 뷰) -->
+  <div>
+    <div class="label">PT가 회원 데이터 보는 뷰</div>
+    <div class="phone">
+      <div class="body">
+        <div class="page-head" style="background:linear-gradient(135deg,#2563EB,#3B82F6);margin:-14px -14px 12px;padding:14px;color:#FFF;border-radius:0 0 18px 18px">
+          <div style="width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFF">‹</div>
+          <div style="flex:1">
+            <div style="font-size:15px;font-weight:900">달구님</div>
+            <div style="font-size:10.5px;opacity:.85;font-weight:600">14일째 트래킹 중</div>
+          </div>
+          <span style="font-size:11px;color:#FFF;font-weight:800">✕ 해제</span>
+        </div>
+
+        <!-- 탭 -->
+        <div style="display:flex;background:#FFF;border:1px solid var(--b);border-radius:10px;padding:4px;margin-bottom:12px">
+          <button style="flex:1;background:var(--p);color:#FFF;border:0;padding:8px;border-radius:7px;font-size:11px;font-weight:800">📊 수치</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11px;font-weight:700">🍽 식단</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11px;font-weight:700">💪 운동</button>
+          <button style="flex:1;background:transparent;color:var(--t2);border:0;padding:8px;font-size:11px;font-weight:700">요약</button>
+        </div>
+
+        <!-- 메트릭 2x2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div class="card" style="margin:0"><div style="font-size:9.5px;color:var(--t2);font-weight:800">체지방</div><div style="font-size:16px;font-weight:900;margin-top:2px">22.8 <small style="font-size:10px;color:var(--t2)">%</small></div><div style="font-size:10px;color:var(--good);font-weight:800;margin-top:2px">↓ 1.2% (14일)</div></div>
+          <div class="card" style="margin:0"><div style="font-size:9.5px;color:var(--t2);font-weight:800">근육량</div><div style="font-size:16px;font-weight:900;margin-top:2px">34.2 <small style="font-size:10px;color:var(--t2)">kg</small></div><div style="font-size:10px;color:var(--good);font-weight:800;margin-top:2px">↑ 0.8kg (14일)</div></div>
+        </div>
+
+        <!-- PT 피드백 가이드 -->
+        <div style="background:#FEF9E7;border:1px solid #FCD34D;border-radius:12px;padding:11px 13px;font-size:11.5px;color:#78350F;line-height:1.5;margin-bottom:10px">
+          <b>📋 PT 피드백 가이드</b><br/>
+          • 체지방 꾸준히 감소 중 → 긍정 피드백<br/>
+          • 단백질 평균 70g · 체중 1.6g/kg (112g)이 목표 → 42g 더 필요<br/>
+          • 나트륨 섭취 과다 → 국물 줄이기 권유
+        </div>
+
+        <!-- 식단 평균 -->
+        <div class="card">
+          <div class="card-ttl">7일 영양 평균</div>
+          <div style="font-size:11.5px;color:var(--t);font-weight:700;line-height:1.8">
+            칼로리 <span style="color:var(--t2)">1,820 / 2,060</span> · 88%<br/>
+            단백질 <span style="color:var(--bad);font-weight:800">70g / 112g</span> · <span class="tg bad">부족</span><br/>
+            탄수 <span style="color:var(--t2)">220g</span> · 지방 <span style="color:var(--t2)">62g</span>
+          </div>
+        </div>
+
+        <!-- 메시지 보내기 -->
+        <div style="display:flex;gap:6px">
+          <input placeholder="오늘도 수고하셨어요 💪" style="flex:1;padding:10px 12px;border:1px solid var(--b);border-radius:9px;font-size:13px;background:#F8FAFC;outline:none"/>
+          <button style="background:var(--p);color:#FFF;border:0;padding:10px 14px;border-radius:9px;font-size:12px;font-weight:800">전송</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2>⚙️ 설정 탭 (추천 모드)</h2>
+<div class="cols" style="grid-template-columns:repeat(auto-fit,minmax(340px,1fr))">
+
+  <div>
+    <div class="label">설정 · 추천 모드 선택</div>
+    <div class="phone" style="height:700px">
+      <div class="body">
+        <div class="page-head">
+          <div class="page-back">‹</div>
+          <div class="page-ttl">설정</div>
+        </div>
+
+        <!-- 추천 모드 -->
+        <div class="card">
+          <div class="card-ttl">🎯 음식 추천 모드</div>
+          <div style="font-size:11px;color:var(--t2);font-weight:600;margin-bottom:10px">상황에 따라 다른 추천을 받아요</div>
+          <!-- 자유 -->
+          <div onclick="" style="background:#EFF4FF;border:2px solid #2563EB;border-radius:10px;padding:11px 12px;margin-bottom:6px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:900;color:var(--pd)">😋 자유 모드</span><span style="font-size:11px;color:var(--p);font-weight:800">✓ 선택됨</span></div>
+            <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px">모든 음식 자유롭게 · 맛있는 거 중심</div>
+          </div>
+          <!-- 건강 -->
+          <div style="background:#FFF;border:1px solid var(--b);border-radius:10px;padding:11px 12px;margin-bottom:6px;cursor:pointer">
+            <div style="font-size:13px;font-weight:900;color:var(--t)">🥗 건강 모드</div>
+            <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px">고단백·저지방 중심 (다이어트·근육)</div>
+          </div>
+          <!-- 치료 -->
+          <div style="background:#FFF;border:1px solid var(--b);border-radius:10px;padding:11px 12px;margin-bottom:6px;cursor:pointer">
+            <div style="font-size:13px;font-weight:900;color:var(--t)">⚕️ 치료 모드</div>
+            <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px">저염·저당·질환 맞춤 (단백뇨·고혈압 등)</div>
+          </div>
+          <!-- 자동 -->
+          <div style="background:#FFF;border:1px solid var(--b);border-radius:10px;padding:11px 12px;cursor:pointer">
+            <div style="font-size:13px;font-weight:900;color:var(--t)">🤖 자동 (수치 기반)</div>
+            <div style="font-size:11px;color:var(--t2);font-weight:600;margin-top:3px">수치 이상 있으면 치료, 없으면 자유</div>
+          </div>
+        </div>
+
+        <!-- 설정 리스트 -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed #F0F1F5;font-size:12.5px;font-weight:700;cursor:pointer"><span>📏 측정 알림</span><span style="color:var(--t3)">매주 월 ›</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed #F0F1F5;font-size:12.5px;font-weight:700;cursor:pointer"><span>🔔 푸시 알림</span><span style="color:var(--t3)">ON ›</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed #F0F1F5;font-size:12.5px;font-weight:700;cursor:pointer"><span>🎯 건강 목표</span><span style="color:var(--t3)">건강유지 ›</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed #F0F1F5;font-size:12.5px;font-weight:700;cursor:pointer"><span>🚨 알레르기</span><span style="color:var(--t3)">2개 ›</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed #F0F1F5;font-size:12.5px;font-weight:700;cursor:pointer"><span>👨‍👩‍👧 프로필 관리</span><span style="color:var(--t3)">3명 ›</span></div>
+        </div>
+
+        <div style="font-size:10.5px;color:var(--t3);font-weight:600;text-align:center;padding:14px 0">v1.0.0 · 에그닷 (Eggdot)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 설명 -->
+<div style="background:#FFF;padding:18px 20px;border-radius:14px;border:1px solid var(--b);font-size:13px;line-height:1.9;margin-top:24px">
+  <b>🎨 통일된 디자인 원칙</b><br/>
+  · <b>흰 카드 + 블루 액센트</b> · 모든 페이지 동일<br/>
+  · <b>SVG 선 아이콘</b> · 이모지 보조 (너무 많으면 집중 분산)<br/>
+  · <b>수치는 큰 글씨 + 변화량 ↑↓</b> · 색으로 상태 전달<br/>
+  · <b>태그 (정상/주의/높음)</b> · 통일된 색상 체계<br/>
+  · <b>스파크라인/영역 그래프</b> · 추세 한눈에<br/><br/>
+
+  <b>📱 4개 페이지 핵심</b><br/>
+  · <b>분석</b> — 수치 상세 (인바디/혈당/혈압/소변 탭 전환) · 큰 그래프 + 측정 CTA<br/>
+  · <b>리포트</b> — 주/월별 추세 · "이번 주의 나" 요약 · 공유 CTA<br/>
+  · <b>메이트</b> — 공유 코드 + 공유 범위 설정 (혈당/소변은 민감 토글 OFF 기본)<br/>
+  · <b>설정</b> — 추천 모드 (자유/건강/치료/자동) · 알림 · 알레르기<br/><br/>
+
+  이대로 OK? 아니면 손봐야 할 것 있어?
+</div>
+
+</div>
+</body>
+</html>

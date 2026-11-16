@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<title>최종 v3 · 컬러 톤 정리 + 입력 방식</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"/>
+<style>
+  :root{
+    --p:#2563EB; --pd:#1E40AF; --pl:#DBEAFE; --plt:#EFF4FF;
+    --bg:#EEF4FB; --b:#EDEFF4;
+    --t:#0F172A; --t2:#52698F; --t3:#94A3B8;
+    --good:#10B981; --warn:#F59E0B; --bad:#DC2626;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;background:#E6E9F0;color:var(--t);padding:24px 12px;letter-spacing:-.3px}
+  .wrap{max-width:1400px;margin:0 auto}
+  h1{font-size:22px;margin:0 4px 4px;font-weight:900}
+  .sub{font-size:13.5px;color:#4B5563;margin:0 4px 20px}
+  h2{font-size:15px;margin:22px 2px 10px;font-weight:800}
+  .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  @media (max-width:1000px){.cols{grid-template-columns:1fr 1fr}}
+  @media (max-width:600px){.cols{grid-template-columns:1fr}}
+  .label{font-size:10.5px;font-weight:900;color:#64748B;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px}
+
+  .phone{background:#FFF;border:1px solid #E5E7EB;border-radius:28px;overflow:hidden;box-shadow:0 14px 44px rgba(15,23,42,.1);height:720px;display:flex;flex-direction:column;position:relative}
+  .body{flex:1;overflow-y:auto;background:var(--bg);padding:14px}
+
+  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .hi{font-size:13px;color:var(--t2)}
+  .hi b{color:#1E3B70;font-weight:800;font-size:14px}
+  .chips{display:flex;gap:5px;align-items:center}
+  .fire{background:#FEF3C7;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:900;color:#92400E}
+  .gem{background:#FFF;border:1px solid var(--b);padding:3px 9px;border-radius:999px;font-size:9.5px;font-weight:900;color:#1E40AF}
+
+  .ico-sm{width:16px;height:16px;stroke:var(--p);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ========== 공통 히어로 베이스 ========== */
+  .hero{border-radius:20px;padding:18px 18px 16px;margin-bottom:12px;position:relative;overflow:hidden}
+  .hero-head{display:flex;align-items:flex-start;gap:12px;position:relative;z-index:2}
+  .hero-text{flex:1;min-width:0}
+  .hero-tag{font-size:10px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+  .hero-why{font-size:11px;font-weight:600;margin-top:4px;line-height:1.5}
+  .hero-food{font-size:22px;font-weight:900;line-height:1.25;margin-top:6px;letter-spacing:-.5px}
+  .hero-char{flex-shrink:0;width:60px;height:60px;border-radius:50%;padding:3px;display:flex;align-items:center;justify-content:center}
+  .hero-nutr{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;position:relative;z-index:2}
+  .hero-nutr span{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:800}
+  .hero-btns{display:flex;gap:6px;margin-top:12px;position:relative;z-index:2}
+  .hero-btns button{flex:1;border:0;padding:10px;border-radius:999px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit}
+
+  /* === A안 · 소프트 블루 (노랑 완전 제거) === */
+  .hero.a{background:linear-gradient(135deg,#1E40AF 0%,#3561DD 100%);color:#FFF}
+  .hero.a .hero-tag{color:#93C5FD}
+  .hero.a .hero-why{color:rgba(255,255,255,.85)}
+  .hero.a .hero-why b{color:#93C5FD}
+  .hero.a .hero-food{color:#FFF}
+  .hero.a .hero-food em{color:#C7E0FF;font-style:normal;font-weight:900;border-bottom:3px solid rgba(147,197,253,.5)}
+  .hero.a .hero-char{background:rgba(255,255,255,.12)}
+  .hero.a .hero-nutr span{background:rgba(255,255,255,.18);color:#FFF}
+  .hero.a .hero-btns button{background:rgba(255,255,255,.95);color:#1E40AF}
+  .hero.a .hero-btns button.p{background:#FFF;color:#1E40AF}
+
+  /* === B안 · 소프트 크림/화이트 카드 (반전) === */
+  .hero.b{background:#FFF;color:var(--t);border:1px solid var(--pl);box-shadow:0 4px 14px rgba(37,99,235,.06)}
+  .hero.b .hero-tag{color:var(--p)}
+  .hero.b .hero-why{color:var(--t2)}
+  .hero.b .hero-why b{color:var(--p)}
+  .hero.b .hero-food{color:#0F172A}
+  .hero.b .hero-food em{color:var(--p);font-style:normal}
+  .hero.b .hero-char{background:linear-gradient(135deg,#EFF4FF,#DBEAFE)}
+  .hero.b .hero-nutr span{background:#D1FAE5;color:#065F46}
+  .hero.b .hero-btns button{background:var(--pl);color:var(--pd)}
+  .hero.b .hero-btns button.p{background:var(--p);color:#FFF}
+
+  /* === C안 · 다크 네이비 + 민트 포인트 (고급) === */
+  .hero.c{background:linear-gradient(135deg,#0F172A 0%,#1E40AF 100%);color:#FFF}
+  .hero.c .hero-tag{color:#5EEAD4}
+  .hero.c .hero-why{color:rgba(255,255,255,.75)}
+  .hero.c .hero-why b{color:#5EEAD4}
+  .hero.c .hero-food{color:#FFF}
+  .hero.c .hero-food em{color:#5EEAD4;font-style:normal;font-weight:900}
+  .hero.c .hero-char{background:rgba(94,234,212,.15)}
+  .hero.c .hero-nutr span{background:rgba(94,234,212,.2);color:#5EEAD4}
+  .hero.c .hero-btns button{background:rgba(255,255,255,.95);color:#0F172A}
+  .hero.c .hero-btns button.p{background:#5EEAD4;color:#0F172A}
+
+  /* 공통 하위 */
+  .m2x2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+  .mmini{background:#FFF;border:1px solid var(--b);border-radius:12px;padding:10px 11px}
+  .mmini-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+  .mmini-l{font-size:9.5px;color:var(--t2);font-weight:800}
+  .mmini-v{font-size:16px;font-weight:900;margin-top:1px}
+  .mmini-v small{font-size:9.5px;color:var(--t2);font-weight:700}
+  .tg{font-size:8.5px;font-weight:900;padding:2px 5px;border-radius:5px}
+  .tg.warn{background:#FEF3C7;color:#92400E}
+  .tg.good{background:#D1FAE5;color:#065F46}
+  .tg.ok{background:#DBEAFE;color:#1E40AF}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🎨 히어로 색상 톤 비교 (3안) + 내 주변 제거 + 입력 방식</h1>
+<p class="sub">쨍한 노랑 → 부드러운 톤. 어느 안이 좋은지 비교 후 결정.</p>
+
+<h2>히어로 색상 3가지</h2>
+<div class="cols">
+
+  <!-- A안 · 소프트 블루 -->
+  <div>
+    <div class="label">A안 · 소프트 블루 (노랑 완전 제거)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gem">💎 600P</span></div>
+        </div>
+        <div class="hero a">
+          <div class="hero-head">
+            <div class="hero-text">
+              <div class="hero-tag">오늘 저녁 추천</div>
+              <div class="hero-why"><b>단백뇨 1+</b> · 체지방 23% → 저염 고단백</div>
+              <div class="hero-food">오늘 저녁엔<br/><em>닭가슴살 샐러드</em> 어때요?</div>
+            </div>
+            <div class="hero-char">
+              <svg viewBox="0 0 54 54" width="54" height="54">
+                <defs><linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C7E0FF"/><stop offset="1" stop-color="#69A4FF"/></linearGradient></defs>
+                <path d="M11,36 Q9,18 20,13 Q24,10 27,11 Q30,8 37,13 Q47,19 46,36 Q46,45 37,47 Q27,49 18,47 Q11,45 11,36 Z" fill="url(#gA)"/>
+                <ellipse cx="22" cy="27" rx="1.7" ry="2.5" fill="#FFF"/>
+                <ellipse cx="33" cy="27" rx="1.7" ry="2.5" fill="#FFF"/>
+                <path d="M24,34 Q27,37 30,34" stroke="#FFF" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="hero-nutr"><span>단백 32g</span><span>저염 300mg</span><span>420kcal</span></div>
+          <div class="hero-btns"><button>↻ 다른 추천</button><button class="p">자세히 ›</button></div>
+        </div>
+        <div class="m2x2">
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">체지방</span><span class="tg warn">높음</span></div><div class="mmini-v">23.2<small>%</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">근육량</span><span class="tg good">증가</span></div><div class="mmini-v">32.1<small>kg</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">공복혈당</span><span class="tg ok">정상</span></div><div class="mmini-v">98<small>mg/dL</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">혈압</span><span class="tg good">양호</span></div><div class="mmini-v">118<small>/78</small></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B안 · 소프트 화이트 -->
+  <div>
+    <div class="label">B안 · 화이트 반전 (가장 심플)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gem">💎 600P</span></div>
+        </div>
+        <div class="hero b">
+          <div class="hero-head">
+            <div class="hero-text">
+              <div class="hero-tag">🎯 오늘 저녁 추천</div>
+              <div class="hero-why"><b>단백뇨 1+</b> · 체지방 23% → 저염 고단백</div>
+              <div class="hero-food">오늘 저녁엔<br/><em>닭가슴살 샐러드</em> 어때요?</div>
+            </div>
+            <div class="hero-char">
+              <svg viewBox="0 0 54 54" width="54" height="54">
+                <defs><linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#69A4FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs>
+                <path d="M11,36 Q9,18 20,13 Q24,10 27,11 Q30,8 37,13 Q47,19 46,36 Q46,45 37,47 Q27,49 18,47 Q11,45 11,36 Z" fill="url(#gB)"/>
+                <ellipse cx="22" cy="27" rx="1.7" ry="2.5" fill="#FFF"/>
+                <ellipse cx="33" cy="27" rx="1.7" ry="2.5" fill="#FFF"/>
+                <path d="M24,34 Q27,37 30,34" stroke="#FFF" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="hero-nutr"><span>단백 32g</span><span>저염 300mg</span><span>420kcal</span></div>
+          <div class="hero-btns"><button>↻ 다른 추천</button><button class="p">자세히 ›</button></div>
+        </div>
+        <div class="m2x2">
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">체지방</span><span class="tg warn">높음</span></div><div class="mmini-v">23.2<small>%</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">근육량</span><span class="tg good">증가</span></div><div class="mmini-v">32.1<small>kg</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">공복혈당</span><span class="tg ok">정상</span></div><div class="mmini-v">98<small>mg/dL</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">혈압</span><span class="tg good">양호</span></div><div class="mmini-v">118<small>/78</small></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C안 · 다크 + 민트 -->
+  <div>
+    <div class="label">C안 · 다크 네이비 + 민트 (고급스러움)</div>
+    <div class="phone">
+      <div class="body">
+        <div class="top-bar">
+          <div><div class="hi">안녕하세요, <b>지눙이님</b></div></div>
+          <div class="chips"><span class="fire">🔥 5</span><span class="gem">💎 600P</span></div>
+        </div>
+        <div class="hero c">
+          <div class="hero-head">
+            <div class="hero-text">
+              <div class="hero-tag">오늘 저녁 추천</div>
+              <div class="hero-why"><b>단백뇨 1+</b> · 체지방 23% → 저염 고단백</div>
+              <div class="hero-food">오늘 저녁엔<br/><em>닭가슴살 샐러드</em> 어때요?</div>
+            </div>
+            <div class="hero-char">
+              <svg viewBox="0 0 54 54" width="54" height="54">
+                <defs><linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C7E0FF"/><stop offset="1" stop-color="#5EEAD4"/></linearGradient></defs>
+                <path d="M11,36 Q9,18 20,13 Q24,10 27,11 Q30,8 37,13 Q47,19 46,36 Q46,45 37,47 Q27,49 18,47 Q11,45 11,36 Z" fill="url(#gC)"/>
+                <ellipse cx="22" cy="27" rx="1.7" ry="2.5" fill="#0F172A"/>
+                <ellipse cx="33" cy="27" rx="1.7" ry="2.5" fill="#0F172A"/>
+                <path d="M24,34 Q27,37 30,34" stroke="#0F172A" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="hero-nutr"><span>단백 32g</span><span>저염 300mg</span><span>420kcal</span></div>
+          <div class="hero-btns"><button>↻ 다른 추천</button><button class="p">자세히 ›</button></div>
+        </div>
+        <div class="m2x2">
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">체지방</span><span class="tg warn">높음</span></div><div class="mmini-v">23.2<small>%</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">근육량</span><span class="tg good">증가</span></div><div class="mmini-v">32.1<small>kg</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">공복혈당</span><span class="tg ok">정상</span></div><div class="mmini-v">98<small>mg/dL</small></div></div>
+          <div class="mmini"><div class="mmini-top"><span class="mmini-l">혈압</span><span class="tg good">양호</span></div><div class="mmini-v">118<small>/78</small></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<h2>💉 수치 입력 방식 설계</h2>
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13px;line-height:1.85">
+
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px">
+    <tr style="background:#F1F5F9;text-align:left"><th style="padding:8px 10px;border:1px solid #E5E7EB">수치</th><th style="padding:8px 10px;border:1px solid #E5E7EB">입력 방법</th><th style="padding:8px 10px;border:1px solid #E5E7EB">구현</th></tr>
+
+    <tr><td style="padding:8px 10px;border:1px solid #E5E7EB"><b>📏 인바디</b></td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">
+        ① <b>결과지 사진 → OCR 자동 입력</b> (현재 있음)<br/>
+        ② 숫자 직접 입력 (체중/체지방/근육량)<br/>
+        ③ 스마트 체중계 블루투스 (Withings, 샤오미)
+      </td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">① 이미 구현 ✅<br/>② 이미 구현 ✅<br/>③ 추후 (Phase B)</td></tr>
+
+    <tr><td style="padding:8px 10px;border:1px solid #E5E7EB"><b>🩸 혈당</b></td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">
+        ① 자가혈당계 수치 <b>직접 입력</b> (숫자 1개)<br/>
+        ② 공복/식후 1시간/2시간 중 선택<br/>
+        ③ Apple Health / 삼성헬스 연동 (CGM 센서 → 자동)
+      </td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">새로 구현<br/>· 모달 1개 (3분 작업)<br/>· API 1개 (body_logs 확장 or 새 테이블)</td></tr>
+
+    <tr><td style="padding:8px 10px;border:1px solid #E5E7EB"><b>❤️ 혈압</b></td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">
+        ① 수축기/이완기 <b>직접 입력</b> (숫자 2개)<br/>
+        ② Apple Health / 삼성헬스 연동 (갤럭시워치, 블루투스 혈압계)
+      </td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">새로 구현<br/>· 모달 1개<br/>· API 확장</td></tr>
+
+    <tr><td style="padding:8px 10px;border:1px solid #E5E7EB"><b>💧 소변검사 10항목</b></td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">
+        ① 피피키트 결과지 촬영 → <b>AI 자동 판독</b> (이미 구현)<br/>
+        ② 10개 항목 각각 선택 (음성 / +1 / +2 / +3)
+      </td>
+      <td style="padding:8px 10px;border:1px solid #E5E7EB">① 이미 구현 ✅<br/>② 보조 입력만 추가</td></tr>
+  </table>
+
+  <br/>
+  <b>💡 가장 간단한 접근</b>: 각 메트릭 카드에 <b>"+ 입력"</b> 버튼 → 모달로 숫자 입력 (3초). 혈당·혈압은 손가락 터치 몇 번이면 끝.<br/>
+  스마트워치/CGM 연동은 Phase 2 (앱 출시 후 상위 기능).
+</div>
+
+<div style="background:#FFF;padding:16px 18px;border-radius:14px;border:1px solid var(--b);font-size:13px;line-height:1.85;margin-top:16px">
+  <b>🎨 색상 톤 비교</b><br/>
+  · <b>A안 (소프트 블루)</b> — 안전, 현재 톤과 가장 가까움, 음식명은 밝은 블루 밑줄로 강조<br/>
+  · <b>B안 (화이트 반전)</b> — 가장 밝고 깔끔, 톤 다운 · 초보자 친근<br/>
+  · <b>C안 (다크 + 민트)</b> — 프리미엄 느낌 · 피트니스 브랜드스러움 · B2B 프로페셔널<br/><br/>
+
+  <b>바뀐 거</b>:<br/>
+  ❌ "내 주변" 버튼 제거 (2 버튼으로: 다른 추천 / 자세히)<br/>
+  ❌ 노란 형광펜 하이라이트 제거<br/>
+  ✅ 음식명은 밑줄 or 다른 색상으로 더 부드럽게 강조<br/><br/>
+
+  어느 톤? 아니면 더 손봐야 할 것 있어?
+</div>
+
+</div>
+</body>
+</html>
