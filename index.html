@@ -2525,38 +2525,65 @@ window.appIcon = function(name, size){
         <!-- 히든 · 코치 헤드라인 참조 유지 (JS 접근용 · UI 표시 X) -->
         <div id="v21CoachHeadline" style="display:none !important"></div>
 
-        <!-- ① 다음 한 끼 추천 · hero (톤 다운 · 노랑 제거) -->
-        <div style="background:linear-gradient(135deg,#1E40AF 0%,#3D63D9 100%);border-radius:24px;padding:20px 20px 6px;box-shadow:none;margin-bottom:0;margin-top:4px;overflow:hidden;position:relative;min-height:230px">
-          <!-- 소프트 블루 halo -->
-          <div style="position:absolute;top:-30%;right:-20%;width:60%;height:60%;background:radial-gradient(circle,rgba(147,197,253,.2) 0%,transparent 65%);pointer-events:none;z-index:0"></div>
-          <!-- 본문 · 텍스트만 가운데 정렬 · 일러스트/kcal 제거 (Phase 7.5.1) -->
-          <div style="position:relative;z-index:2;margin-bottom:32px;text-align:center;padding:8px 12px 0">
-            <!-- Title · 2줄 (오늘 저녁, / 삼계탕 어때?) · 노란 형광펜 -->
-            <div id="v21HeroTitle" style="font-size:25px;font-weight:900;color:#FFF;letter-spacing:-.8px;line-height:1.25;margin-top:2px;margin-bottom:14px">
-              오늘 <span id="v21MealSlot" style="color:#DAE7FF">저녁</span>,<br><span id="v21RecName" style="font-size:28px;font-weight:900;color:#C7E0FF;letter-spacing:-.8px;border-bottom:3px solid rgba(147,197,253,.5);padding-bottom:1px">AI가 고르는 중</span> <span id="v21NameSuffix">어때?</span>
+        <!-- 📨 PT 메시지 (연결된 코치 있을 때만 노출) -->
+        <div id="homePtMsg" style="display:none;background:#FEF9E7;border:1px solid #FCD34D;border-radius:12px;padding:10px 13px;margin-bottom:10px;align-items:flex-start;gap:10px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div style="font-size:11.5px;color:#78350F;font-weight:600;line-height:1.5"><b id="homePtMsgName">—</b> · <span id="homePtMsgTime">—</span><br/><span id="homePtMsgText">—</span></div>
+        </div>
+
+        <!-- ① 다음 한 끼 추천 · hero (B안 · 흰 카드 + 캐릭터) -->
+        <div style="background:#FFF;border:1px solid #DBEAFE;border-radius:20px;padding:18px 18px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(37,99,235,.06)">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:10px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase">🎯 오늘 저녁 추천</div>
+              <div id="v21RecWhy" style="font-size:11px;color:#52698F;font-weight:600;margin-top:4px;line-height:1.5">지금 이 시간에 딱 맞는 한 끼</div>
+              <!-- 음식명 영역 -->
+              <div id="v21HeroTitle" style="font-size:22px;font-weight:900;color:#0F172A;line-height:1.25;margin-top:6px;letter-spacing:-.5px">
+                오늘 <span id="v21MealSlot" style="color:#64748B">저녁</span>엔<br/>
+                <span id="v21RecName" style="color:#2563EB;font-weight:900">AI가 고르는 중</span>
+                <span id="v21NameSuffix" style="color:#0F172A">어때요?</span>
+              </div>
             </div>
-            <!-- Why · Gemini reason 들어감 -->
-            <div id="v21RecWhy" style="font-size:12.5px;color:rgba(255,255,255,.88);font-weight:500;line-height:1.55;word-break:keep-all;white-space:normal;max-width:280px;margin:0 auto">지금 이 시간에 딱 맞는 한 끼 · 잠시만요</div>
-            <!-- 히든 · JS 참조 유지 (제거 대신 숨김) -->
-            <div id="v21HeroIllust" style="display:none"></div>
-            <div id="v21HeroKcal" style="display:none">— kcal</div>
+            <!-- 캐릭터 (SVG 블루 슬라임) · 배경 없음 -->
+            <div style="flex-shrink:0;width:66px;height:66px">
+              <svg viewBox="0 0 66 66" width="66" height="66">
+                <defs>
+                  <linearGradient id="heroSlime" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#69A4FF"/>
+                    <stop offset="0.5" stop-color="#3B82F6"/>
+                    <stop offset="1" stop-color="#2563EB"/>
+                  </linearGradient>
+                  <filter id="heroShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                    <feOffset dx="0" dy="2"/>
+                    <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+                    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+                <g filter="url(#heroShadow)">
+                  <path d="M14,45 Q11,22 24,16 Q30,10 33,13 Q37,8 45,16 Q58,23 56,45 Q56,56 45,58 Q33,60 22,58 Q14,56 14,45 Z" fill="url(#heroSlime)"/>
+                  <ellipse cx="27" cy="33" rx="2" ry="3" fill="#FFF"/>
+                  <ellipse cx="40" cy="33" rx="2" ry="3" fill="#FFF"/>
+                  <path d="M29,42 Q33,45 37,42" stroke="#FFF" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
           </div>
-          <!-- 히든 · chips 참조 유지 -->
-          <div id="v21HeroChips" style="display:none"></div>
-          <!-- Buttons · 흰 pill 개별 · 작게 · 더 아래로 -->
-          <div style="display:flex;gap:5px;position:relative;z-index:2;padding:8px 0 16px">
-            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              다른 음식
-            </button>
-            <!-- 🧹 "내 주변" 제거 · 건강식 추천은 주변 식당 의미 약함 -->
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:rgba(255,255,255,.95);border:none;padding:5px 4px;border-radius:99px;font-size:10.5px;font-weight:700;color:#1D3762;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,.1);min-height:26px">
-              자세히
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#1D3762" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
+
+          <!-- 영양소 뱃지 -->
+          <div id="v21HeroNutr" style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap"></div>
+
+          <!-- 버튼 -->
+          <div style="display:flex;gap:6px;margin-top:12px">
+            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#DBEAFE;color:#1E40AF;border:0;padding:10px;border-radius:999px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">↻ 다른 추천</button>
+            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1;background:#2563EB;color:#FFF;border:0;padding:10px;border-radius:999px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">자세히 ›</button>
           </div>
-          <!-- 레거시 · JS 참조 유지 -->
+
+          <!-- 레거시 · JS 참조 유지 (화면 X) -->
           <div style="display:none">
+            <div id="v21HeroChips"></div>
+            <div id="v21HeroIllust"></div>
+            <div id="v21HeroKcal">— kcal</div>
             <div id="v21GapCard"><div id="v21GapMain"></div><div id="v21GapAct"></div></div>
             <span id="v21RecJosa">을</span>
             <div id="v21HeroPhoto"></div>
@@ -10391,10 +10418,12 @@ function _v21ApplyToHero(primary, meal_slot) {
   if (slotEl) slotEl.textContent = slotLabel;
   if (nameEl) {
     nameEl.textContent = primary.name;
-    nameEl.style.color = '#FFF';
-    nameEl.style.background = 'linear-gradient(180deg,transparent 60%,#FBBF24 60%,#FBBF24 92%,transparent 92%)';
-    nameEl.style.padding = '0 4px';
-    nameEl.style.display = 'inline-block';
+    // B안 · 블루 포인트 (노랑 하이라이트 제거)
+    nameEl.style.color = '#2563EB';
+    nameEl.style.background = 'transparent';
+    nameEl.style.padding = '0';
+    nameEl.style.display = 'inline';
+    nameEl.style.fontWeight = '900';
   }
   // Gemini reason만 표시 (headline은 큰 제목과 중복이라 스킵)
   if (whyEl) {
@@ -10418,6 +10447,22 @@ function _v21ApplyToHero(primary, meal_slot) {
     kcalEl.style.color = '#C4D4F0';
   }
   if (chipsEl) chipsEl.innerHTML = '';
+  // ═══ 영양소 뱃지 자동 삽입 (B안 디자인) ═══
+  try {
+    const nutrEl = document.getElementById('v21HeroNutr');
+    if (nutrEl) {
+      let db = null;
+      try { db = (typeof _matchFoodInDB === 'function') ? _matchFoodInDB(primary.name) : null; } catch(_){}
+      const tags = [];
+      const kc = (db && db.kcal) || primary.kcal;
+      const pr = (db && db.protein_g) || primary.protein_g;
+      const na = (db && db.sodium_mg) || primary.sodium_mg;
+      if (pr)  tags.push(`단백 ${Math.round(pr)}g`);
+      if (na)  tags.push(na < 500 ? `저염 ${Math.round(na)}mg` : `나트 ${Math.round(na)}mg`);
+      if (kc)  tags.push(`${Math.round(kc)}kcal`);
+      nutrEl.innerHTML = tags.map(t => `<span style="background:#D1FAE5;color:#065F46;padding:3px 9px;border-radius:5px;font-size:10.5px;font-weight:800">${t}</span>`).join('');
+    }
+  } catch(_){}
   try { _v22UpdateHeroIllust(primary.name); } catch(_){}
   // 을/를 조사
   try {
