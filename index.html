@@ -90,6 +90,8 @@
   </script>
   <!-- 🏥 Apple HealthKit / Google Health Connect 연동 -->
   <script src="assets/health/health-sync.js"></script>
+  <!-- 🤖 AI 캐릭터 (애니메이션 슬라임) -->
+  <script src="assets/ai-companion/companion.js"></script>
   <!-- v12 · 온보딩·로고 PNG 인라인 (assets 폴더 없이도 정상 렌더) -->
   <script>
 // ══ v12 · 온보딩·로고 PNG 인라인 (assets 폴더 없이도 정상 렌더) ══
@@ -2546,30 +2548,8 @@ window.appIcon = function(name, size){
                 <span id="v21NameSuffix" style="color:#0F172A">어때요?</span>
               </div>
             </div>
-            <!-- 캐릭터 (SVG 블루 슬라임) · 배경 없음 -->
-            <div style="flex-shrink:0;width:66px;height:66px">
-              <svg viewBox="0 0 66 66" width="66" height="66">
-                <defs>
-                  <linearGradient id="heroSlime" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#69A4FF"/>
-                    <stop offset="0.5" stop-color="#3B82F6"/>
-                    <stop offset="1" stop-color="#2563EB"/>
-                  </linearGradient>
-                  <filter id="heroShadow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-                    <feOffset dx="0" dy="2"/>
-                    <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
-                    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-                  </filter>
-                </defs>
-                <g filter="url(#heroShadow)">
-                  <path d="M14,45 Q11,22 24,16 Q30,10 33,13 Q37,8 45,16 Q58,23 56,45 Q56,56 45,58 Q33,60 22,58 Q14,56 14,45 Z" fill="url(#heroSlime)"/>
-                  <ellipse cx="27" cy="33" rx="2" ry="3" fill="#FFF"/>
-                  <ellipse cx="40" cy="33" rx="2" ry="3" fill="#FFF"/>
-                  <path d="M29,42 Q33,45 37,42" stroke="#FFF" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-                </g>
-              </svg>
-            </div>
+            <!-- 🤖 애니메이션 슬라임 캐릭터 (Canvas 기반 · 숨쉬며 움직임) -->
+            <div id="heroCompanionMount" style="flex-shrink:0;width:92px;height:92px"></div>
           </div>
 
           <!-- 영양소 뱃지 -->
@@ -24113,10 +24093,35 @@ async function renderHomeMateFeed() {
   } catch(e) { box.innerHTML = '<div style="color:#94A3B8;font-size:11.5px;text-align:center;padding:6px 0">메이트 기능이 준비 중이에요</div>'; }
 }
 
+// 🤖 캐릭터 마운트 (한 번만)
+let _heroCompanionInstance = null;
+function _mountHeroCompanion() {
+  if (_heroCompanionInstance) return;
+  try {
+    const el = document.getElementById('heroCompanionMount');
+    if (!el || !window.HealthCompanion) return;
+    _heroCompanionInstance = window.HealthCompanion.mount(el, { size: 92, speed: 0.7 });
+  } catch(e) { console.warn('[companion mount]', e); }
+}
+
+// 추천 받으면 "결과" 상태로 잠깐
+window.triggerCompanionResult = function() {
+  try { _heroCompanionInstance && _heroCompanionInstance.setState('result'); } catch(e){}
+};
+// 분석 중일 때 "thinking"
+window.triggerCompanionThinking = function() {
+  try { _heroCompanionInstance && _heroCompanionInstance.setState('thinking'); } catch(e){}
+};
+// 저장 완료
+window.triggerCompanionSaved = function() {
+  try { _heroCompanionInstance && _heroCompanionInstance.setState('saved'); } catch(e){}
+};
+
 // 홈 로드 시 호출
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
+      try { _mountHeroCompanion(); } catch(e){}
       try { renderHomeMetrics(); } catch(e){}
       try { renderHomeChallenges(); } catch(e){}
       try { renderHomeMateFeed(); } catch(e){}
