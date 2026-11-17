@@ -90,8 +90,167 @@
   </script>
   <!-- 🏥 Apple HealthKit / Google Health Connect 연동 -->
   <script src="assets/health/health-sync.js"></script>
-  <!-- 🤖 AI 캐릭터 (애니메이션 슬라임 · 인라인) -->
+  <!-- 🤖 AI 캐릭터 (귀여운 SVG 슬라임 · CSS 애니메이션 · 상태별 색상) -->
+  <style>
+    .slime-wrap{display:inline-block;position:relative;animation:slimeBob 2.6s ease-in-out infinite}
+    @keyframes slimeBob {
+      0%, 100% { transform: translateY(0) }
+      50%      { transform: translateY(-6px) }
+    }
+    .slime-body{transform-origin:50% 90%;animation:slimeSquish 2.6s ease-in-out infinite}
+    @keyframes slimeSquish {
+      0%, 100% { transform: scale(1, 1) }
+      25%      { transform: scale(1.08, 0.92) }
+      50%      { transform: scale(0.95, 1.06) }
+      75%      { transform: scale(1.03, 0.97) }
+    }
+    .slime-eye{animation:slimeBlink 5s ease-in-out infinite}
+    @keyframes slimeBlink {
+      0%, 92%, 100% { transform: scaleY(1) }
+      95%           { transform: scaleY(0.1) }
+    }
+    .slime-eye-left { transform-origin:center 48% }
+    .slime-eye-right{ transform-origin:center 48% }
+    .slime-highlight{animation:slimeShine 4s ease-in-out infinite}
+    @keyframes slimeShine {
+      0%, 100% { opacity: .85 }
+      50%      { opacity: 1 }
+    }
+    .slime-wrap.state-result .slime-body{animation:slimeBounce .6s ease-out}
+    @keyframes slimeBounce {
+      0%   { transform: scale(1, 1)   translateY(0) }
+      30%  { transform: scale(1.15, 0.85) translateY(0) }
+      60%  { transform: scale(0.9, 1.15) translateY(-14px) }
+      100% { transform: scale(1, 1)   translateY(0) }
+    }
+    .slime-wrap.state-saved .slime-body{animation:slimeNod .8s ease-in-out}
+    @keyframes slimeNod {
+      0%, 100% { transform: rotate(0deg) scale(1,1) }
+      25%      { transform: rotate(-6deg) scale(1.03, 0.97) }
+      75%      { transform: rotate(6deg)  scale(1.03, 0.97) }
+    }
+  </style>
   <script>
+  (function(global){
+    'use strict';
+
+    // 건강 점수 → 색상 매핑 (0~100)
+    // 100 = 초록, 60 = 노랑, 30 = 빨강, 0 = 검정
+    function scoreToColors(score) {
+      const s = Math.max(0, Math.min(100, score));
+      if (s >= 85) return { body: '#10B981', dark: '#059669', light: '#6EE7B7', eye: '#064E3B' };  // 매우 건강 · 초록
+      if (s >= 70) return { body: '#34D399', dark: '#10B981', light: '#A7F3D0', eye: '#064E3B' };  // 건강 · 연한 초록
+      if (s >= 55) return { body: '#A3E635', dark: '#84CC16', light: '#D9F99D', eye: '#365314' };  // 양호 · 라임
+      if (s >= 40) return { body: '#FBBF24', dark: '#F59E0B', light: '#FDE68A', eye: '#78350F' };  // 보통 · 노랑
+      if (s >= 25) return { body: '#F97316', dark: '#EA580C', light: '#FDBA74', eye: '#7C2D12' };  // 주의 · 주황
+      if (s >= 10) return { body: '#DC2626', dark: '#B91C1C', light: '#FCA5A5', eye: '#FFF' };     // 위험 · 빨강
+      return             { body: '#1F2937', dark: '#111827', light: '#4B5563', eye: '#FFF' };     // 매우 위험 · 검정
+    }
+
+    function Companion(element, opts) {
+      this.el = element;
+      this.opts = Object.assign({ size: 120, score: 85 }, opts || {});
+      this.wrap = document.createElement('div');
+      this.wrap.className = 'slime-wrap';
+      this.wrap.style.cssText = `width:${this.opts.size}px;height:${this.opts.size}px;display:block;position:relative`;
+      this._render();
+      element.appendChild(this.wrap);
+    }
+
+    Companion.prototype._render = function() {
+      const colors = scoreToColors(this.opts.score);
+      const s = this.opts.size;
+      // SVG viewBox 100x100 · 비율 유지
+      this.wrap.innerHTML = `
+        <svg viewBox="0 0 100 100" width="${s}" height="${s}" style="display:block;overflow:visible">
+          <defs>
+            <radialGradient id="slimeGrad_${s}" cx="35%" cy="30%" r="80%">
+              <stop offset="0%"  stop-color="${colors.light}"/>
+              <stop offset="60%" stop-color="${colors.body}"/>
+              <stop offset="100%" stop-color="${colors.dark}"/>
+            </radialGradient>
+            <filter id="slimeShadow_${s}" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+              <feOffset dx="0" dy="2"/>
+              <feComponentTransfer><feFuncA type="linear" slope="0.25"/></feComponentTransfer>
+              <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- 바닥 그림자 -->
+          <ellipse cx="50" cy="92" rx="26" ry="3" fill="rgba(0,0,0,.12)"/>
+
+          <g class="slime-body" filter="url(#slimeShadow_${s})">
+            <!-- 슬라임 몸통 (귀여운 둥근 반구 + 아래 넓게) -->
+            <path d="
+              M 20 55
+              Q 18 25 50 20
+              Q 82 25 80 55
+              Q 82 85 70 88
+              Q 60 92 50 90
+              Q 40 92 30 88
+              Q 18 85 20 55 Z"
+              fill="url(#slimeGrad_${s})"
+              stroke="${colors.dark}" stroke-width="1.5" stroke-opacity=".5"/>
+
+            <!-- 작은 뿔 (slime 꼭대기) -->
+            <circle cx="42" cy="21" r="4" fill="${colors.light}" opacity=".9"/>
+
+            <!-- 하이라이트 -->
+            <ellipse class="slime-highlight" cx="37" cy="40" rx="8" ry="11" fill="#FFF" opacity=".85"/>
+            <ellipse class="slime-highlight" cx="63" cy="35" rx="3" ry="4" fill="#FFF" opacity=".7"/>
+
+            <!-- 눈 (왼) -->
+            <g class="slime-eye slime-eye-left">
+              <ellipse cx="40" cy="58" rx="3.5" ry="4.5" fill="${colors.eye}"/>
+              <circle cx="41" cy="56" r="1.3" fill="#FFF"/>
+            </g>
+            <!-- 눈 (오른) -->
+            <g class="slime-eye slime-eye-right">
+              <ellipse cx="60" cy="58" rx="3.5" ry="4.5" fill="${colors.eye}"/>
+              <circle cx="61" cy="56" r="1.3" fill="#FFF"/>
+            </g>
+
+            <!-- 미소 -->
+            <path d="M 44 70 Q 50 75 56 70" stroke="${colors.eye}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+
+            <!-- 볼 터치 (살짝 핑크) -->
+            <circle cx="30" cy="68" r="3" fill="#FCA5A5" opacity=".5"/>
+            <circle cx="70" cy="68" r="3" fill="#FCA5A5" opacity=".5"/>
+          </g>
+        </svg>
+      `;
+    };
+
+    Companion.prototype.setScore = function(score) {
+      this.opts.score = score;
+      this._render();
+    };
+    Companion.prototype.setState = function(mode) {
+      // idle / thinking / result / saved
+      this.wrap.classList.remove('state-idle','state-thinking','state-result','state-saved');
+      this.wrap.classList.add('state-'+mode);
+      // auto-revert
+      if (mode==='result') setTimeout(() => this.setState('idle'), 800);
+      if (mode==='saved') setTimeout(() => this.setState('idle'), 900);
+    };
+    Companion.prototype.destroy = function() {
+      if (this.wrap && this.wrap.parentNode) this.wrap.parentNode.removeChild(this.wrap);
+    };
+
+    global.HealthCompanion = {
+      mount: function(el, opts) {
+        if (typeof el === 'string') el = document.querySelector(el);
+        if (!el) throw new Error('HealthCompanion: element not found');
+        return new Companion(el, opts);
+      },
+      scoreToColors
+    };
+  })(window);
+  </script>
+  <script>
+  // === 레거시 Canvas 슬라임 (사용 X · 삭제됨) ===
+  if (false) {
   (function(global){
     'use strict';
     const DEFAULTS = { size: 120, speed: 1.0, autoRevert: true };
@@ -186,14 +345,9 @@
       c.beginPath(); c.moveTo(-8+fx, 12); c.quadraticCurveTo(fx, 23, 8+fx, 12); c.stroke();
       c.restore();
     };
-    global.HealthCompanion = {
-      mount: function(el, opts) {
-        if (typeof el === 'string') el = document.querySelector(el);
-        if (!el) throw new Error('HealthCompanion: element not found');
-        return new Companion(el, opts);
-      }
-    };
+    // 레거시 코드 끝 (사용 X)
   })(window);
+  } // if(false) 끝
   </script>
   <!-- v12 · 온보딩·로고 PNG 인라인 (assets 폴더 없이도 정상 렌더) -->
   <script>
@@ -23574,13 +23728,62 @@ function openBpMeasureSheet() {
   } catch(e) { alert('⚠️ ' + e.message); }
 }
 
+// 건강 점수 계산 (0~100)
+function _calcHealthScore(latest, urineLatest) {
+  let score = 50; // 기본
+  let count = 0;
+  // 체지방
+  if (latest.body_fat_pct != null) {
+    count++;
+    if (latest.body_fat_pct < 20) score += 10;
+    else if (latest.body_fat_pct < 25) score += 3;
+    else score -= 5;
+  }
+  // 근육량 (여성 25+, 남성 30+ 기준)
+  if (latest.muscle_mass_kg != null) {
+    count++;
+    if (latest.muscle_mass_kg >= 28) score += 10;
+    else score += 3;
+  }
+  // 혈당
+  if (latest.glucose_mg_dl != null) {
+    count++;
+    if (latest.glucose_mg_dl < 100) score += 10;
+    else if (latest.glucose_mg_dl < 126) score -= 5;
+    else score -= 15;
+  }
+  // 혈압
+  if (latest.bp_systolic != null) {
+    count++;
+    if (latest.bp_systolic < 120) score += 10;
+    else if (latest.bp_systolic < 140) score -= 5;
+    else score -= 15;
+  }
+  // 소변검사
+  if (urineLatest) {
+    count++;
+    let abnormal = 0;
+    ['pro','glu','ket','bld','leu','nit'].forEach(k => {
+      const v = urineLatest[k];
+      if (v && v !== 'negative' && v !== 0 && v !== '-') abnormal++;
+    });
+    if (abnormal === 0) score += 15;
+    else if (abnormal <= 2) score -= 5;
+    else score -= 15;
+  }
+  // 측정 안 하면 중립
+  if (count === 0) score = 70; // 측정 유도 중
+  return Math.max(0, Math.min(100, score));
+}
+
 // 메트릭 카드 렌더링 (body_logs + 소변 결과)
 async function renderHomeMetrics() {
+  let latest = {}, urineLatest = null;
   // body_logs 가져오기
   try {
     const r = await _bodyApi('GET', '/api/body-log');
     const logs = r.logs || [];
-    const latest = logs[0] || {};
+    latest = logs[0] || {};
 
     // 체지방
     _renderMetric('Bodyfat', latest.body_fat_pct, '%', 'bodyFatTag', logs, 'body_fat_pct', false);
@@ -23596,7 +23799,16 @@ async function renderHomeMetrics() {
   // 소변검사 요약
   try {
     const r = await _bodyApi('GET', '/api/urine-latest').catch(() => null);
-    if (r && r.latest) _renderUrineSummary(r.latest);
+    if (r && r.latest) { urineLatest = r.latest; _renderUrineSummary(r.latest); }
+  } catch(e) {}
+
+  // 🎨 건강 점수 기반 캐릭터 색상 업데이트
+  try {
+    const score = _calcHealthScore(latest, urineLatest);
+    if (_heroCompanionInstance && _heroCompanionInstance.setScore) {
+      _heroCompanionInstance.setScore(score);
+    }
+    window._latestHealthScore = score;
   } catch(e) {}
 }
 
