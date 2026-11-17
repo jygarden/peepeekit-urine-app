@@ -4053,6 +4053,21 @@ window.appIcon = function(name, size){
         <button type="button" data-tgt="pet" class="v20-atgt-btn">반려동물</button>
       </div>
 
+      <!-- ═════════ 📊 수치 상세 뷰 · 4탭 (인바디/혈당/혈압/소변) ═════════ -->
+      <div style="background:#FFF;border:1px solid #EDEFF4;border-radius:14px;padding:14px;margin-bottom:12px">
+        <!-- 탭 -->
+        <div style="display:flex;gap:4px;background:#F8FAFC;padding:4px;border-radius:10px;margin-bottom:12px">
+          <button onclick="_switchAnalyzeTab('inbody')" data-atab="inbody" class="an-tab" style="flex:1;background:#2563EB;color:#FFF;border:0;padding:8px;border-radius:7px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">인바디</button>
+          <button onclick="_switchAnalyzeTab('glucose')" data-atab="glucose" class="an-tab" style="flex:1;background:transparent;color:#52698F;border:0;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">혈당</button>
+          <button onclick="_switchAnalyzeTab('bp')" data-atab="bp" class="an-tab" style="flex:1;background:transparent;color:#52698F;border:0;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">혈압</button>
+          <button onclick="_switchAnalyzeTab('urine')" data-atab="urine" class="an-tab" style="flex:1;background:transparent;color:#52698F;border:0;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit">소변</button>
+        </div>
+        <!-- 컨텐츠 영역 -->
+        <div id="analyzeTabContent" style="min-height:260px">
+          <div style="padding:30px;text-align:center;color:#94A3B8;font-size:12.5px">불러오는 중...</div>
+        </div>
+      </div>
+
       <!-- ═══ 사람 컨텐츠 · 4카드 ═══ -->
       <div id="v20AnalyzeHumanBlock">
         <div style="display:flex;flex-direction:column;gap:11px">
@@ -23622,6 +23637,216 @@ function _renderUrineSummary(latest) {
         </div>
       </div>`;
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 📊 분석 탭 · 4탭 상세 뷰 (인바디/혈당/혈압/소변)
+// ═══════════════════════════════════════════════════════════════
+let _analyzeCurrentTab = 'inbody';
+let _analyzeCachedLogs = null;
+
+async function _switchAnalyzeTab(tab) {
+  _analyzeCurrentTab = tab;
+  document.querySelectorAll('.an-tab').forEach(b => {
+    const on = b.dataset.atab === tab;
+    b.style.background = on ? '#2563EB' : 'transparent';
+    b.style.color = on ? '#FFF' : '#52698F';
+    b.style.fontWeight = on ? '800' : '700';
+    b.style.borderRadius = on ? '7px' : '0';
+  });
+  const content = document.getElementById('analyzeTabContent');
+  if (!content) return;
+  content.innerHTML = '<div style="padding:30px;text-align:center;color:#94A3B8;font-size:12.5px">불러오는 중...</div>';
+  try {
+    if (!_analyzeCachedLogs) {
+      const r = await _bodyApi('GET', '/api/body-log?limit=30');
+      _analyzeCachedLogs = r.logs || [];
+    }
+    if (tab === 'inbody')  _renderAnalyzeInbody(content, _analyzeCachedLogs);
+    if (tab === 'glucose') _renderAnalyzeGlucose(content, _analyzeCachedLogs);
+    if (tab === 'bp')      _renderAnalyzeBp(content, _analyzeCachedLogs);
+    if (tab === 'urine')   _renderAnalyzeUrine(content);
+  } catch(e) {
+    content.innerHTML = `<div style="padding:20px;color:#991B1B;font-size:12.5px">⚠️ ${e.message}</div>`;
+  }
+}
+
+function _buildSparkArea(values, color, height=90) {
+  if (!values.length) return '';
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  const w = 280;
+  const pts = values.slice().reverse().map((v, i) => {
+    const x = (i / (values.length - 1)) * w;
+    const y = height - 20 - ((v - min) / range) * (height - 40);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const fillPts = pts.concat([`${w},${height}`, `0,${height}`]).join(' ');
+  return `<svg viewBox="0 0 ${w} ${height}" preserveAspectRatio="none" style="width:100%;height:${height}px;margin-top:10px">
+    <defs><linearGradient id="grA${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".25"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <polygon points="${fillPts}" fill="url(#grA${color.replace('#','')})"/>
+    <polyline points="${pts.join(' ')}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${w}" cy="${pts[pts.length-1].split(',')[1]}" r="4" fill="${color}"/>
+  </svg>`;
+}
+
+function _renderAnalyzeInbody(box, logs) {
+  const latest = logs[0] || {};
+  const fatValues = logs.map(l => l.body_fat_pct).filter(v => v != null);
+  const bodyfat = latest.body_fat_pct != null ? latest.body_fat_pct : null;
+  const delta = fatValues.length >= 2 ? +(fatValues[0] - fatValues[fatValues.length-1]).toFixed(1) : null;
+  const esc = s => String(s||'').replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">
+      <div>
+        <div style="font-size:10.5px;color:#52698F;font-weight:800">체지방률</div>
+        <div style="font-size:30px;font-weight:900;line-height:1">${bodyfat != null ? bodyfat : '—'}<small style="font-size:14px;color:#52698F;font-weight:700">${bodyfat != null ? '%' : ''}</small></div>
+        ${delta != null ? `<div style="font-size:11px;color:${delta<=0?'#10B981':'#DC2626'};font-weight:800;margin-top:2px">${delta>0?'↑':'↓'} ${Math.abs(delta)}% (${fatValues.length}회 측정)</div>` : '<div style="font-size:10px;color:#94A3B8;font-weight:700;margin-top:2px">데이터 더 필요</div>'}
+      </div>
+      <span style="background:${bodyfat>=25?'#FEE2E2':bodyfat>=20?'#FEF3C7':'#D1FAE5'};color:${bodyfat>=25?'#991B1B':bodyfat>=20?'#92400E':'#065F46'};padding:3px 8px;border-radius:5px;font-size:9.5px;font-weight:900">${bodyfat==null?'미측정':bodyfat>=25?'매우 높음':bodyfat>=20?'높음':'정상'}</span>
+    </div>
+    ${_buildSparkArea(fatValues, '#F59E0B', 90)}
+    <div style="font-size:9.5px;color:#94A3B8;margin-top:3px;display:flex;justify-content:space-between"><span>${fatValues.length}일 전</span><span>오늘</span></div>
+
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0F1F5">
+      <div style="font-size:11.5px;font-weight:900;margin-bottom:8px">전체 수치 (최근)</div>
+      ${_mkRow('체중', latest.weight_kg, 'kg')}
+      ${_mkRow('근육량', latest.muscle_mass_kg, 'kg')}
+      ${_mkRow('허리', latest.waist_cm, 'cm')}
+      ${_mkRow('BMI', latest.bmi, '')}
+      ${_mkRow('기초대사량 (BMR)', latest.bmr_kcal, 'kcal')}
+      ${_mkRow('내장지방 레벨', latest.visceral_fat_level, '')}
+    </div>
+
+    <div style="display:flex;gap:6px;margin-top:14px">
+      <button onclick="openBodyLogModal()" style="flex:1;background:#2563EB;color:#FFF;border:0;padding:12px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit">📷 결과지 찍기</button>
+      <button onclick="openBodyLogModal()" style="flex:1;background:#FFF;color:#1E40AF;border:1px solid #DBEAFE;padding:12px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">직접 입력</button>
+    </div>`;
+}
+
+function _mkRow(label, val, unit) {
+  if (val == null) return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #F0F1F5;font-size:11.5px"><span style="color:#52698F;font-weight:700">${label}</span><span style="color:#94A3B8;font-weight:700">—</span></div>`;
+  return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #F0F1F5;font-size:11.5px"><span style="color:#52698F;font-weight:700">${label}</span><span style="font-weight:900">${val}${unit?' '+unit:''}</span></div>`;
+}
+
+function _renderAnalyzeGlucose(box, logs) {
+  const values = logs.map(l => l.glucose_mg_dl).filter(v => v != null);
+  const latest = values[0];
+  const avg = values.length ? Math.round(values.reduce((a,b)=>a+b,0)/values.length) : null;
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">
+      <div>
+        <div style="font-size:10.5px;color:#52698F;font-weight:800">공복 혈당 (최근)</div>
+        <div style="font-size:30px;font-weight:900;line-height:1">${latest != null ? latest : '—'}<small style="font-size:14px;color:#52698F;font-weight:700">${latest != null ? 'mg/dL' : ''}</small></div>
+        ${avg != null ? `<div style="font-size:11px;color:#10B981;font-weight:800;margin-top:2px">${values.length}회 평균 ${avg}</div>` : '<div style="font-size:10px;color:#94A3B8;font-weight:700;margin-top:2px">측정 시작</div>'}
+      </div>
+      <span style="background:${latest>=126?'#FEE2E2':latest>=100?'#FEF3C7':'#D1FAE5'};color:${latest>=126?'#991B1B':latest>=100?'#92400E':'#065F46'};padding:3px 8px;border-radius:5px;font-size:9.5px;font-weight:900">${latest==null?'미측정':latest>=126?'당뇨 의심':latest>=100?'공복장애':'정상'}</span>
+    </div>
+    ${_buildSparkArea(values, '#2563EB', 90)}
+
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0F1F5">
+      <div style="font-size:11.5px;font-weight:900;margin-bottom:8px">최근 기록</div>
+      ${logs.filter(l => l.glucose_mg_dl != null).slice(0,5).map(l => {
+        const d = new Date(l.recorded_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});
+        const ctx = l.glucose_context === 'fasting' ? '공복' : l.glucose_context === 'after_meal_2h' ? '식후2h' : l.glucose_context === 'after_meal_1h' ? '식후1h' : '수시';
+        return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #F0F1F5;font-size:11.5px"><span style="color:#52698F;font-weight:700">${d} · ${ctx}</span><span style="font-weight:900">${l.glucose_mg_dl}</span></div>`;
+      }).join('') || '<div style="color:#94A3B8;font-size:11px;padding:10px 0">아직 기록 없음</div>'}
+    </div>
+
+    <button onclick="openGlucoseMeasureSheet()" style="width:100%;background:#2563EB;color:#FFF;border:0;padding:12px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:14px">+ 혈당 입력</button>`;
+}
+
+function _renderAnalyzeBp(box, logs) {
+  const bps = logs.filter(l => l.bp_systolic && l.bp_diastolic);
+  const latest = bps[0];
+  const sysAvg = bps.length ? Math.round(bps.reduce((a,b)=>a+b.bp_systolic,0)/bps.length) : null;
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px">
+      <div>
+        <div style="font-size:10.5px;color:#52698F;font-weight:800">최근 혈압</div>
+        <div style="font-size:30px;font-weight:900;line-height:1">${latest ? latest.bp_systolic+'/'+latest.bp_diastolic : '—'}</div>
+        ${sysAvg != null ? `<div style="font-size:11px;color:#10B981;font-weight:800;margin-top:2px">${bps.length}회 평균 ${sysAvg}</div>` : '<div style="font-size:10px;color:#94A3B8;font-weight:700;margin-top:2px">측정 시작</div>'}
+      </div>
+      <span style="background:${!latest?'#F1F5F9':latest.bp_systolic>=140?'#FEE2E2':latest.bp_systolic>=130?'#FEF3C7':'#D1FAE5'};color:${!latest?'#64748B':latest.bp_systolic>=140?'#991B1B':latest.bp_systolic>=130?'#92400E':'#065F46'};padding:3px 8px;border-radius:5px;font-size:9.5px;font-weight:900">${!latest?'미측정':latest.bp_systolic>=140?'고혈압':latest.bp_systolic>=130?'주의':'양호'}</span>
+    </div>
+    ${_buildSparkArea(bps.map(b=>b.bp_systolic), '#10B981', 90)}
+
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0F1F5">
+      <div style="font-size:11.5px;font-weight:900;margin-bottom:8px">최근 기록</div>
+      ${bps.slice(0,5).map(l => {
+        const d = new Date(l.recorded_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'});
+        return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-top:1px dashed #F0F1F5;font-size:11.5px"><span style="color:#52698F;font-weight:700">${d}</span><span style="font-weight:900">${l.bp_systolic}/${l.bp_diastolic}</span></div>`;
+      }).join('') || '<div style="color:#94A3B8;font-size:11px;padding:10px 0">아직 기록 없음</div>'}
+    </div>
+
+    <button onclick="openBpMeasureSheet()" style="width:100%;background:#2563EB;color:#FFF;border:0;padding:12px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:14px">+ 혈압 입력</button>`;
+}
+
+async function _renderAnalyzeUrine(box) {
+  try {
+    const r = await _bodyApi('GET', '/api/urine-latest');
+    const u = r.latest;
+    if (!u) {
+      box.innerHTML = `<div style="padding:30px;text-align:center"><div style="font-size:13px;font-weight:800;color:#0F172A;margin-bottom:6px">아직 측정하지 않았어요</div><div style="font-size:11.5px;color:#52698F;margin-bottom:14px">피피키트로 1분이면 10항목 체크</div><button onclick="enterHuman()" style="background:#2563EB;color:#FFF;border:0;padding:12px 24px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit">검사 시작하기</button></div>`;
+      return;
+    }
+    const items = [
+      {k:'sg', ko:'비중', normal:v=>v>=1.005&&v<=1.03},
+      {k:'ph', ko:'pH', normal:v=>v>=4.5&&v<=8},
+      {k:'leu', ko:'백혈구', normal:v=>v==='negative'||v===0||v==='-'},
+      {k:'nit', ko:'아질산염', normal:v=>v==='negative'||v==='-'},
+      {k:'pro', ko:'단백질', normal:v=>v==='negative'||v===0||v==='-'},
+      {k:'glu', ko:'포도당', normal:v=>v==='negative'||v===0||v==='-'},
+      {k:'ket', ko:'케톤', normal:v=>v==='negative'||v===0||v==='-'},
+      {k:'uro', ko:'우로빌리노겐', normal:v=>v==null||v<=1},
+      {k:'bil', ko:'빌리루빈', normal:v=>v==='negative'||v===0||v==='-'},
+      {k:'bld', ko:'잠혈', normal:v=>v==='negative'||v===0||v==='-'}
+    ];
+    const d = u.tested_at ? new Date(u.tested_at).toLocaleDateString('ko-KR') : '';
+    const rows = items.map(it => {
+      const val = u[it.k];
+      const nor = val != null ? it.normal(val) : null;
+      const status = val == null ? '미측정' : (nor ? '정상' : '주의');
+      const color = val == null ? '#94A3B8' : nor ? '#10B981' : '#F59E0B';
+      return `<div style="display:flex;align-items:center;padding:7px 0;border-top:1px dashed #F0F1F5;font-size:11.5px">
+        <div style="width:8px;height:8px;background:${color};border-radius:50%;margin-right:10px"></div>
+        <span style="flex:1;color:#52698F;font-weight:700">${it.ko}</span>
+        <span style="font-weight:900;margin-right:8px">${val != null ? val : '—'}</span>
+        <span style="font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:4px;background:${val==null?'#F1F5F9':nor?'#D1FAE5':'#FEF3C7'};color:${val==null?'#64748B':nor?'#065F46':'#92400E'}">${status}</span>
+      </div>`;
+    }).join('');
+
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+        <div>
+          <div style="font-size:10.5px;color:#52698F;font-weight:800">${d} 측정</div>
+          <div style="font-size:18px;font-weight:900;line-height:1.2;margin-top:3px">10개 항목 결과</div>
+        </div>
+      </div>
+      <div style="margin-top:10px">${rows}</div>
+      <button onclick="enterHuman()" style="width:100%;background:#2563EB;color:#FFF;border:0;padding:12px;border-radius:10px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:14px">+ 재검사</button>`;
+  } catch(e) {
+    box.innerHTML = `<div style="padding:20px;color:#991B1B;font-size:12.5px">⚠️ ${e.message}</div>`;
+  }
+}
+
+// 분석 탭 진입 시 자동 로드
+if (typeof window !== 'undefined') {
+  const _origGgGoTab = window.ggGoTab;
+  // ggGoTab 함수 훅킹 대신, 분석 화면 진입 감지
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const observer = new MutationObserver(() => {
+        const s = document.getElementById('screenAnalyzeHub');
+        if (s && s.classList.contains('active') && !_analyzeCachedLogs) {
+          _switchAnalyzeTab('inbody');
+        }
+      });
+      const screens = document.querySelectorAll('.screen');
+      screens.forEach(s => observer.observe(s, { attributes: true, attributeFilter: ['class'] }));
+    }, 2000);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
