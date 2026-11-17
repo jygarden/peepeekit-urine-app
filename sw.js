@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v83-cute-svg-slime-color-score-2026-11-17';
+const SW_VERSION = 'v84-simple-slime-sway-2026-11-17';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
