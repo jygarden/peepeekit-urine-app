@@ -155,21 +155,20 @@
         <div class="slime-sway" style="width:${s}px;height:${s}px;display:flex;align-items:flex-end;justify-content:center">
           <svg viewBox="0 0 100 100" width="${s}" height="${s}" style="display:block;overflow:visible">
             <!-- 바닥 그림자 -->
-            <ellipse cx="50" cy="92" rx="30" ry="3" fill="rgba(0,0,0,.08)"/>
+            <ellipse cx="50" cy="85" rx="38" ry="3" fill="rgba(0,0,0,.08)"/>
             <g class="slime-body">
-              <!-- 심플한 반구 슬라임 (단색 · 얇은 외곽선) -->
+              <!-- 납작한 돔 슬라임 (가로로 넓음) -->
               <path d="
-                M 18 58
-                Q 18 30 50 22
-                Q 82 30 82 58
-                Q 85 88 70 90
-                Q 60 92 50 91
-                Q 40 92 30 90
-                Q 15 88 18 58 Z"
+                M 10 78
+                Q 8 42 50 35
+                Q 92 42 90 78
+                Q 90 82 82 82
+                Q 50 83 18 82
+                Q 10 82 10 78 Z"
                 fill="${colors.body}"/>
               <!-- 눈 (단순 점) -->
-              <circle cx="40" cy="58" r="3" fill="#0F172A"/>
-              <circle cx="60" cy="58" r="3" fill="#0F172A"/>
+              <circle cx="40" cy="60" r="3.5" fill="#0F172A"/>
+              <circle cx="60" cy="60" r="3.5" fill="#0F172A"/>
               <!-- 미소 (심플 아치) -->
               <path d="M 44 70 Q 50 75 56 70" stroke="#0F172A" stroke-width="2" fill="none" stroke-linecap="round"/>
             </g>
