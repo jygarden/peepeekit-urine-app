@@ -2747,22 +2747,30 @@ window.appIcon = function(name, size){
           <div style="font-size:11.5px;color:#78350F;font-weight:600;line-height:1.5"><b id="homePtMsgName">—</b> · <span id="homePtMsgTime">—</span><br/><span id="homePtMsgText">—</span></div>
         </div>
 
-        <!-- ① 다음 한 끼 추천 · hero (B안 · 흰 카드 + 캐릭터) -->
-        <div style="background:#FFF;border:1px solid #DBEAFE;border-radius:20px;padding:18px 18px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(37,99,235,.06)">
-          <div style="display:flex;align-items:flex-start;gap:12px">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:10px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase">🎯 오늘 저녁 추천</div>
-              <div id="v21RecWhy" style="font-size:11px;color:#52698F;font-weight:600;margin-top:4px;line-height:1.5">지금 이 시간에 딱 맞는 한 끼</div>
-              <!-- 음식명 영역 -->
-              <div id="v21HeroTitle" style="font-size:22px;font-weight:900;color:#0F172A;line-height:1.25;margin-top:6px;letter-spacing:-.5px">
-                오늘 <span id="v21MealSlot" style="color:#64748B">저녁</span>엔<br/>
-                <span id="v21RecName" style="color:#2563EB;font-weight:900">AI가 고르는 중</span>
-                <span id="v21NameSuffix" style="color:#0F172A">어때요?</span>
-              </div>
-            </div>
-            <!-- 🤖 애니메이션 슬라임 캐릭터 (Canvas 기반 · 흐물흐물) -->
-            <div id="heroCompanionMount" style="flex-shrink:0;width:120px;height:120px"></div>
+        <!-- ⭐ AI 코치 한줄 인사이트 (어제 vs 오늘 · 변화 발견) -->
+        <div id="dailyInsightCard" style="background:linear-gradient(135deg,#EFF6FF 0%,#FFFFFF 100%);border:1px solid #DBEAFE;border-radius:16px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 2px 8px rgba(37,99,235,.04)">
+          <div id="dailyInsightIcon" style="font-size:20px;line-height:1;flex-shrink:0;margin-top:1px">☀️</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:10px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px">오늘의 발견</div>
+            <div id="dailyInsightText" style="font-size:13.5px;color:#0F172A;font-weight:700;line-height:1.5;letter-spacing:-.2px">오늘 어떤 변화가 있는지 확인 중…</div>
+            <div id="dailyInsightSub" style="font-size:11px;color:#64748B;font-weight:600;line-height:1.5;margin-top:3px;display:none"></div>
           </div>
+        </div>
+
+        <!-- ① 다음 한 끼 추천 · hero (B안 · 흰 카드 · 캐릭터 제거 · 풀폭) -->
+        <div style="background:#FFF;border:1px solid #DBEAFE;border-radius:20px;padding:18px 18px 16px;margin-bottom:12px;box-shadow:0 4px 14px rgba(37,99,235,.06)">
+          <div>
+            <div style="font-size:10px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase">🎯 오늘 저녁 추천</div>
+            <div id="v21RecWhy" style="font-size:11px;color:#52698F;font-weight:600;margin-top:4px;line-height:1.5">지금 이 시간에 딱 맞는 한 끼</div>
+            <!-- 음식명 영역 -->
+            <div id="v21HeroTitle" style="font-size:24px;font-weight:900;color:#0F172A;line-height:1.25;margin-top:8px;letter-spacing:-.5px">
+              오늘 <span id="v21MealSlot" style="color:#64748B">저녁</span>엔<br/>
+              <span id="v21RecName" style="color:#2563EB;font-weight:900">AI가 고르는 중</span>
+              <span id="v21NameSuffix" style="color:#0F172A">어때요?</span>
+            </div>
+          </div>
+          <!-- 레거시 캐릭터 마운트 (JS 참조용 · 숨김) -->
+          <div id="heroCompanionMount" style="display:none"></div>
 
           <!-- 영양소 뱃지 -->
           <div id="v21HeroNutr" style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap"></div>
@@ -24363,15 +24371,107 @@ async function renderHomeMateFeed() {
   } catch(e) { box.innerHTML = '<div style="color:#94A3B8;font-size:11.5px;text-align:center;padding:6px 0">메이트 기능이 준비 중이에요</div>'; }
 }
 
-// 🤖 캐릭터 마운트 (한 번만)
+// 🤖 캐릭터 마운트 (제거됨 · 참조만 유지 · no-op)
 let _heroCompanionInstance = null;
-function _mountHeroCompanion() {
-  if (_heroCompanionInstance) return;
+function _mountHeroCompanion() { /* removed · AI 인사이트로 대체 */ }
+
+// ⭐ 오늘의 발견 (AI 인사이트) · 어제 vs 오늘 수치 비교
+async function renderDailyInsight() {
+  const textEl = document.getElementById('dailyInsightText');
+  const subEl = document.getElementById('dailyInsightSub');
+  const iconEl = document.getElementById('dailyInsightIcon');
+  if (!textEl) return;
   try {
-    const el = document.getElementById('heroCompanionMount');
-    if (!el || !window.HealthCompanion) return;
-    _heroCompanionInstance = window.HealthCompanion.mount(el, { size: 120, speed: 1.0 });
-  } catch(e) { console.warn('[companion mount]', e); }
+    // 최근 body_logs 가져오기 (최근 7일)
+    let logs = [];
+    try {
+      if (typeof window._bodyApi === 'function') {
+        const r = await window._bodyApi('GET', '/api/body-log?limit=14');
+        logs = (r && r.logs) || [];
+      }
+    } catch(e) {}
+
+    // 시간별 정렬 (최신 순)
+    logs.sort((a,b) => new Date(b.logged_at||b.created_at||0) - new Date(a.logged_at||a.created_at||0));
+
+    const insight = _pickBestInsight(logs);
+    if (insight) {
+      iconEl.textContent = insight.icon || '☀️';
+      textEl.textContent = insight.text;
+      if (insight.sub) { subEl.textContent = insight.sub; subEl.style.display = 'block'; }
+    } else {
+      // 데이터 부족 시 가이드
+      const hour = new Date().getHours();
+      const greet = hour < 11 ? '좋은 아침이에요' : hour < 18 ? '오늘도 수고 많아요' : '하루 마무리 잘 하고 있어요';
+      iconEl.textContent = '✨';
+      textEl.textContent = greet + ' · 수치 1개만 기록하면 변화를 알려드릴게요';
+      subEl.textContent = '체중 · 혈압 · 혈당 중 아무거나 OK';
+      subEl.style.display = 'block';
+    }
+  } catch(e) {
+    textEl.textContent = '오늘도 좋은 하루 시작해봐요';
+  }
+}
+
+// 가장 눈에 띄는 변화 1개 뽑기
+function _pickBestInsight(logs) {
+  if (!logs || !logs.length) return null;
+  const today = logs[0];
+  const yesterday = logs[1];
+  if (!yesterday) return null;
+
+  const candidates = [];
+  // 혈압 (수축기 기준)
+  if (today.bp_systolic && yesterday.bp_systolic) {
+    const d = today.bp_systolic - yesterday.bp_systolic;
+    if (Math.abs(d) >= 3) candidates.push({
+      metric: '혈압', delta: d, unit: 'mmHg',
+      good: d < 0, value: today.bp_systolic
+    });
+  }
+  // 혈당
+  if (today.glucose_mg_dl && yesterday.glucose_mg_dl) {
+    const d = today.glucose_mg_dl - yesterday.glucose_mg_dl;
+    if (Math.abs(d) >= 5) candidates.push({
+      metric: '혈당', delta: d, unit: 'mg/dL',
+      good: d < 0, value: today.glucose_mg_dl
+    });
+  }
+  // 체중
+  if (today.weight_kg && yesterday.weight_kg) {
+    const d = today.weight_kg - yesterday.weight_kg;
+    if (Math.abs(d) >= 0.3) candidates.push({
+      metric: '체중', delta: d, unit: 'kg',
+      good: d < 0, value: today.weight_kg
+    });
+  }
+  // 체지방
+  if (today.body_fat_pct && yesterday.body_fat_pct) {
+    const d = today.body_fat_pct - yesterday.body_fat_pct;
+    if (Math.abs(d) >= 0.3) candidates.push({
+      metric: '체지방', delta: d, unit: '%',
+      good: d < 0, value: today.body_fat_pct
+    });
+  }
+  if (!candidates.length) return null;
+
+  // 가장 큰 변화 픽
+  candidates.sort((a,b) => Math.abs(b.delta) - Math.abs(a.delta));
+  const best = candidates[0];
+  const absD = Math.abs(best.delta).toFixed(best.unit === 'kg' || best.unit === '%' ? 1 : 0);
+  const arrow = best.delta < 0 ? '낮아졌어요' : '올라갔어요';
+  const icon = best.good ? '☀️' : '🌤️';
+  const subs = {
+    혈압: best.good ? '지금 흐름 좋아요 · 저염식 추천' : '물 한 컵 · 심호흡 1분 · 저녁엔 짜지 않게',
+    혈당: best.good ? '식단 흐름 유지해볼까요' : '정제 탄수 줄이고 채소 먼저 추천',
+    체중: best.good ? '칼로리 밸런스 좋은 흐름이에요' : '내일 아침 가볍게 단백질 중심 식단 추천',
+    체지방: best.good ? '근육 보존 중 · 좋은 추세예요' : '단백질 늘리고 유산소 살짝만',
+  };
+  return {
+    icon,
+    text: `${best.metric}이 어제보다 ${absD}${best.unit} ${arrow}`,
+    sub: subs[best.metric]
+  };
 }
 
 // 추천 받으면 "결과" 상태로 잠깐
@@ -24391,7 +24491,7 @@ window.triggerCompanionSaved = function() {
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-      try { _mountHeroCompanion(); } catch(e){}
+      try { renderDailyInsight(); } catch(e){}
       try { renderHomeMetrics(); } catch(e){}
       try { renderHomeChallenges(); } catch(e){}
       try { renderHomeMateFeed(); } catch(e){}
