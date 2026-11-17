@@ -4567,6 +4567,13 @@ window.appIcon = function(name, size){
           💡 코드를 상대방에게 보내면 내 식단을 함께 볼 수 있어요.<br/><b>안심 포인트:</b> 받는 사람은 가입 후 코드 입력 · 언제든 해제 가능.
         </div>
 
+        <!-- ═════════ 🔒 공유 범위 설정 (Phase L4 · 신규) ═════════ -->
+        <div style="background:#FFF;border:1px solid #E5E7EB;border-radius:16px;padding:14px 16px;margin-bottom:14px">
+          <div style="font-size:13px;font-weight:900;color:#0F172A;margin-bottom:4px">🔒 공유 범위 설정</div>
+          <div style="font-size:11px;color:#64748B;font-weight:600;margin-bottom:10px">메이트가 볼 수 있는 정보를 선택하세요</div>
+          <div id="shareScopeToggles"></div>
+        </div>
+
         <!-- 내 식단 보는 사람들 -->
         <div style="background:#FFF;border:1px solid #E5E7EB;border-radius:16px;padding:14px 16px;margin-bottom:14px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -23637,6 +23644,74 @@ function _renderUrineSummary(latest) {
         </div>
       </div>`;
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🔒 메이트 탭 · 공유 범위 설정 (신규)
+// ═══════════════════════════════════════════════════════════════
+const SHARE_SCOPE_ITEMS = [
+  { key:'meals',    label:'식단 기록',        desc:'사진·영양소·끼니 기록', sensitive:false },
+  { key:'workouts', label:'운동 기록',        desc:'세트·중량·볼륨',        sensitive:false },
+  { key:'inbody',   label:'인바디·체지방',    desc:'체중·체지방·근육량',     sensitive:false },
+  { key:'glucose',  label:'혈당',             desc:'공복·식후 기록',         sensitive:true  },
+  { key:'bp',       label:'혈압',             desc:'수축기·이완기',          sensitive:true  },
+  { key:'urine',    label:'소변검사',         desc:'10항목 결과',            sensitive:true  }
+];
+let _shareScopeState = null;
+
+async function renderShareScopeToggles() {
+  const box = document.getElementById('shareScopeToggles');
+  if (!box) return;
+  try {
+    const r = await _bodyApi('GET', '/api/user-preferences');
+    _shareScopeState = r.share_scope || { meals:true, workouts:true, inbody:true, glucose:false, bp:false, urine:false };
+  } catch(e) {
+    _shareScopeState = { meals:true, workouts:true, inbody:true, glucose:false, bp:false, urine:false };
+  }
+  box.innerHTML = SHARE_SCOPE_ITEMS.map(it => {
+    const on = _shareScopeState[it.key];
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px dashed #F0F1F5;cursor:pointer" onclick="_toggleShareScope('${it.key}')">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:700;color:#0F172A">${it.label}${it.sensitive ? ' <span style="color:#94A3B8;font-weight:600;font-size:10.5px">· 민감</span>' : ''}</div>
+        <div style="font-size:10.5px;color:#64748B;font-weight:600;margin-top:1px">${it.desc}</div>
+      </div>
+      <div style="width:40px;height:22px;background:${on?'#2563EB':'#E5E7EB'};border-radius:999px;position:relative;flex-shrink:0;transition:background .2s">
+        <div style="width:18px;height:18px;background:#FFF;border-radius:50%;position:absolute;top:2px;${on?'right:2px':'left:2px'};transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)"></div>
+      </div>
+    </div>`;
+  }).join('').replace('border-top:1px dashed #F0F1F5','border-top:0');
+}
+
+async function _toggleShareScope(key) {
+  if (!_shareScopeState) return;
+  _shareScopeState[key] = !_shareScopeState[key];
+  renderShareScopeToggles();
+  // 민감 토글이 처음 켜질 땐 확인
+  const it = SHARE_SCOPE_ITEMS.find(x => x.key === key);
+  if (_shareScopeState[key] && it && it.sensitive) {
+    if (!confirm(`${it.label}은(는) 민감한 건강 정보예요. 메이트와 공유할까요?`)) {
+      _shareScopeState[key] = false;
+      renderShareScopeToggles();
+      return;
+    }
+  }
+  try {
+    await _bodyApi('POST', '/api/user-preferences', { share_scope: _shareScopeState });
+    if (typeof showPointToast === 'function') showPointToast('공유 범위 저장됨');
+  } catch(e) { alert('⚠️ ' + e.message); }
+}
+
+// 메이트 화면 진입 시 자동 호출
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const observer = new MutationObserver(() => {
+        const s = document.getElementById('screenMate');
+        if (s && s.classList.contains('active')) renderShareScopeToggles();
+      });
+      document.querySelectorAll('.screen').forEach(s => observer.observe(s, { attributes: true, attributeFilter: ['class'] }));
+    }, 2000);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
