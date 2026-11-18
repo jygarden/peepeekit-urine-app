@@ -5852,6 +5852,47 @@ window.appIcon = function(name, size){
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();goAllergyProfile()" style="background:linear-gradient(135deg,#FEE2E2,#FEF3C7);border-color:#FCA5A5;color:#991B1B;font-weight:900">🚨 내 알레르기 관리</button>
     <button class="settings-btn settings-btn-secondary" onclick="closeSettings();openCoachShareSheet()" style="background:linear-gradient(135deg,#DBEAFE,#EEF2FF);border-color:#93C5FD;color:#1E40AF;font-weight:900">🤝 내 식단 공유하기</button>
     <button class="settings-btn settings-btn-secondary" id="healthKitToggleBtn" onclick="toggleHealthKit()" style="background:linear-gradient(135deg,#D1FAE5,#EFF4FF);border-color:#10B981;color:#065F46;font-weight:900">🏥 Apple 건강 / 삼성헬스 연동</button>
+
+    <!-- 🎯 추천 모드 선택 -->
+    <div class="settings-divider"></div>
+    <div style="margin-top:12px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">🎯 추천 모드</div>
+      <div style="font-size:11px;color:#64748B;margin-top:2px">음식을 어떤 기준으로 추천받을지 선택해주세요</div>
+    </div>
+    <div id="recModeOptions" style="display:flex;flex-direction:column;gap:7px;margin-bottom:8px">
+      <label class="rec-mode-opt" data-mode="free" style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:#FFF;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer">
+        <div style="font-size:18px;line-height:1">🍽️</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:900;color:#0F172A">자유 모드</div>
+          <div style="font-size:10.5px;color:#64748B;margin-top:1px;line-height:1.4">먹고 싶은 음식 자유롭게 · 영양 균형 가볍게 체크</div>
+        </div>
+      </label>
+      <label class="rec-mode-opt" data-mode="healthy" style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:#FFF;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer">
+        <div style="font-size:18px;line-height:1">💪</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:900;color:#0F172A">건강 모드</div>
+          <div style="font-size:10.5px;color:#64748B;margin-top:1px;line-height:1.4">인바디·운동량 기반 · 다이어트/근육/밸런스 목표 반영</div>
+        </div>
+      </label>
+      <label class="rec-mode-opt" data-mode="medical" style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:#FFF;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer">
+        <div style="font-size:18px;line-height:1">🏥</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:900;color:#0F172A">치료 모드</div>
+          <div style="font-size:10.5px;color:#64748B;margin-top:1px;line-height:1.4">혈당·혈압·소변검사 수치 반영 · 저염/저당 우선</div>
+        </div>
+      </label>
+      <label class="rec-mode-opt" data-mode="auto" style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:#FFF;border:1.5px solid #E5E7EB;border-radius:12px;cursor:pointer">
+        <div style="font-size:18px;line-height:1">✨</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12.5px;font-weight:900;color:#0F172A">자동 (추천)</div>
+          <div style="font-size:10.5px;color:#64748B;margin-top:1px;line-height:1.4">데이터 많을수록 똑똑하게 · 이상 수치 있으면 치료 모드 전환</div>
+        </div>
+      </label>
+    </div>
+    <style>
+      .rec-mode-opt.selected { background:linear-gradient(135deg,#DBEAFE,#EFF6FF)!important; border-color:#2563EB!important; box-shadow:0 2px 8px rgba(37,99,235,.12) }
+      .rec-mode-opt.selected > div:last-child > div:first-child { color:#1E40AF }
+    </style>
     <a href="privacy.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">개인정보 처리방침</a>
     <a href="terms.html" target="_blank" class="settings-btn settings-btn-secondary" style="display:block;text-decoration:none;text-align:center">서비스 이용약관</a>
     <button class="settings-btn settings-btn-danger" onclick="resetAllData()">모든 기록·이름 초기화</button>
@@ -22792,7 +22833,33 @@ function openSettings() {
   document.getElementById('settingsCurrentName').textContent = currentName;
   document.getElementById('settingsNameInput').value = '';
   document.getElementById('settingsOverlay').classList.add('show');
-  // 자동 focus 제거 · 사용자가 직접 탭했을 때만 키보드 뜸 (갤럭시 가림 방지)
+  // 추천 모드 하이라이트
+  try { _initRecModeOptions(); } catch(e){}
+}
+
+// 🎯 추천 모드 선택 UI
+function _initRecModeOptions() {
+  const current = localStorage.getItem('recommendationMode') || 'auto';
+  document.querySelectorAll('.rec-mode-opt').forEach(el => {
+    const mode = el.getAttribute('data-mode');
+    el.classList.toggle('selected', mode === current);
+    el.onclick = () => _selectRecMode(mode);
+  });
+}
+function _selectRecMode(mode) {
+  localStorage.setItem('recommendationMode', mode);
+  document.querySelectorAll('.rec-mode-opt').forEach(el => {
+    el.classList.toggle('selected', el.getAttribute('data-mode') === mode);
+  });
+  // 서버 저장 (user_preferences)
+  try {
+    if (typeof window._coachApi === 'function') {
+      window._coachApi('POST', '/api/user-preferences', { recommendation_mode: mode }).catch(()=>{});
+    }
+  } catch(e) {}
+  try {
+    if (window.navigator && navigator.vibrate) navigator.vibrate(10);
+  } catch(e) {}
 }
 function closeSettings() {
   document.getElementById('settingsOverlay').classList.remove('show');
