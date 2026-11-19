@@ -699,11 +699,11 @@ window.appIcon = function(name, size){
   #screenHome .home-metrics-grid { gap:7px !important; margin-bottom:8px !important }
   /* 🧹 홈 하단 더 넉넉하게 (스토어 배너 가려짐 방지) */
   #screenHome .v20-home { padding-bottom:120px !important }
-  /* 🧹 회원가입/프로필 화면 상단 여백 정리 */
-  #screenAddProfile { padding:12px 16px 40px !important; display:flex !important; flex-direction:column !important; justify-content:flex-start !important }
-  #screenAddProfile .page-header { margin-bottom:10px !important; padding-top:0 !important }
-  #screenAddProfile #apOnboardingIntro { margin:0 0 14px !important }
-  #screenAddProfile .card { margin-bottom:10px !important }
+  /* 🧹 회원가입/프로필 화면 상단 여백 정리 (active 상태에서만 적용) */
+  #screenAddProfile.active { padding:12px 16px 40px !important; display:block !important }
+  #screenAddProfile.active .page-header { margin-bottom:10px !important; padding-top:0 !important }
+  #screenAddProfile.active #apOnboardingIntro { margin:0 0 14px !important }
+  #screenAddProfile.active .card { margin-bottom:10px !important }
   /* v10 스토리 원 · 피드 카드 스타일 */
   .gg-story-item{text-align:center;flex-shrink:0;cursor:pointer}
   .gg-story-ring{width:56px;height:56px;border:2.5px solid var(--gg-ink);border-radius:50%;padding:2.5px;overflow:hidden}
