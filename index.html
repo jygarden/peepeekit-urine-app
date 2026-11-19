@@ -2744,33 +2744,30 @@ window.appIcon = function(name, size){
         </div>
         <button onclick="dismissReminder()" style="background:none;border:none;color:#C2410C;font-size:20px;cursor:pointer;padding:4px 8px;font-family:inherit;flex-shrink:0" aria-label="닫기">×</button>
       </div>
-      <!-- 상단 행: 설정만 (🔥 streak, 💎 포인트 제거) -->
-      <div class="home-top-bar">
-        <!-- 숨김 · JS 참조 유지 -->
-        <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge" style="display:none">
-          <span style="font-size:12px">🔥</span> <span id="homeStreakNum">0</span>
-        </button>
-        <button class="points-badge" onclick="goPoints()" id="homePointsBadge" style="display:none">
-          <span class="gem">💎</span> <span id="homePointsNum">0</span>P
-        </button>
-        <button class="settings-btn" onclick="openSettings()" aria-label="설정">
-          <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
-        </button>
+      <!-- 상단 행 · 숨김 (v20-home 헤더 안으로 통합됨) -->
+      <div class="home-top-bar" style="display:none">
+        <button class="streak-badge" onclick="openStreakInfo()" id="homeStreakBadge"></button>
+        <button class="points-badge" onclick="goPoints()" id="homePointsBadge"></button>
       </div>
 
 
       <!-- ═════════ v21 · 신 홈 (음식 사진 · 심리 훅 · 좌우 2카드) ═════════ -->
       <div class="v20-home" style="background:#EEF4FB;margin:0 -18px;padding:14px 18px 90px;font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;color:#19315B;letter-spacing:-.3px">
 
-        <!-- 헤더 · 인사말 + 서비스 설명 (컴팩트) -->
-        <div style="padding:2px 0 12px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:800">재율님</b></div>
-            <div id="v22StepBadge" style="display:none">
-              <span id="v22StepCount">0 걸음</span>
-            </div>
+        <!-- 헤더 · 인사말 + 뱃지 한 줄 (미리보기 매칭) -->
+        <div style="padding:4px 0 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:600;color:#52698F;letter-spacing:-.2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">안녕하세요, <b id="v20ProfileName" style="color:#1E3B70;font-weight:800">재율님</b></div>
+            <div style="font-size:12px;color:#64748B;font-weight:600;margin-top:3px;letter-spacing:-.2px">🤖 AI가 오늘 뭐 먹을지 골라드려요</div>
           </div>
-          <div style="font-size:12px;color:#64748B;font-weight:600;margin-top:2px;letter-spacing:-.2px">🤖 AI가 오늘 뭐 먹을지 골라드려요</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+            <button onclick="openStreakInfo()" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:0;border-radius:999px;padding:6px 10px;display:flex;align-items:center;gap:3px;font-family:inherit;cursor:pointer;height:32px;font-size:12px;font-weight:800;color:#78350F"><span style="font-size:13px">🔥</span> <span id="homeStreakNum">1</span></button>
+            <button onclick="goPoints()" style="background:#FFF;border:1px solid #E5E7EB;border-radius:999px;padding:6px 10px;display:flex;align-items:center;gap:3px;font-family:inherit;cursor:pointer;height:32px;font-size:12px;font-weight:800;color:#0F172A"><span style="font-size:12px">💎</span> <span id="homePointsNum">0</span>P</button>
+            <button onclick="openSettings()" aria-label="설정" style="background:#FFF;border:1px solid #E5E7EB;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:inherit;cursor:pointer;flex-shrink:0">
+              <i class="ph-bold ph-gear-six" style="font-size:16px;color:#0F172A"></i>
+            </button>
+          </div>
+          <div id="v22StepBadge" style="display:none"><span id="v22StepCount">0 걸음</span></div>
         </div>
         <!-- 🧹 식단 목표/챌린지 pills 숨김 · 하단 챌린지 섹션으로 통합 -->
         <div id="homeGoalChipWrap" style="display:none">
