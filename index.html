@@ -2926,13 +2926,10 @@ window.appIcon = function(name, size){
           <span style="color:#94A3B8;font-size:14px">›</span>
         </div>
 
-        <!-- ═════════ 🎯 오늘 챌린지 (컴팩트) ═════════ -->
-        <div style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:11px 13px;margin-bottom:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <span style="font-size:11.5px;color:#0F172A;font-weight:900">오늘 챌린지 <span id="homeChChip" style="color:#2563EB">0/3</span></span>
-            <a onclick="openChallengeModal()" style="font-size:10.5px;color:#2563EB;font-weight:800;cursor:pointer">전체 ›</a>
-          </div>
-          <div id="homeChList" style="font-size:12px;color:#94A3B8">불러오는 중...</div>
+        <!-- ❌ 오늘 챌린지 카드 제거 · 포인트 시스템 없어서 의미 없음 -->
+        <div style="display:none">
+          <span id="homeChChip">0/3</span>
+          <div id="homeChList"></div>
         </div>
 
         <!-- ═════════ 👥 메이트 최근 활동 (컴팩트) ═════════ -->
@@ -23943,10 +23940,15 @@ async function renderHomeMetrics() {
             '빌리루빈':'bil','bilirubin':'bil',
             '잠혈':'bld','blood':'bld','occult blood':'bld','occultblood':'bld' };
           const flat = {};
-          (h.testItems || h.items || []).forEach(it => {
+          const testItems = (h.fullResult && h.fullResult.testItems) || h.testItems || h.items || [];
+          testItems.forEach(it => {
             const nm = String(it.name||'').trim().toLowerCase().replace(/\s+/g,'');
             const k = mapKey[nm] || mapKey[it.name] || null;
-            if (k) flat[k] = it.value;
+            if (k != null) {
+              flat[k] = it.value;
+              // status 기반으로도 저장 (normal/warning/danger)
+              flat['_status_'+k] = it.status;
+            }
           });
           latestUrine = Object.assign({}, flat, { tested_at: h.savedAt || h.date });
         }
@@ -24065,11 +24067,14 @@ function _renderUrineSummary(latest) {
   let normalCount = 0, abnormalNames = [];
   items.forEach(it => {
     const val = latest[it.key];
-    if (val == null) return;
-    if (it.normal(val)) normalCount++;
+    const status = latest['_status_'+it.key];
+    if (val == null && !status) return;
+    // status 있으면 status 우선 사용
+    const isNormal = status ? status === 'normal' : it.normal(val);
+    if (isNormal) normalCount++;
     else abnormalNames.push(it.ko);
   });
-  const total = items.filter(it => latest[it.key] != null).length;
+  const total = items.filter(it => latest[it.key] != null || latest['_status_'+it.key]).length;
   if (!total) return;
   const dateStr = latest.tested_at ? new Date(latest.tested_at).toLocaleDateString('ko-KR',{month:'numeric',day:'numeric'}) + ' 측정' : '';
   if (tag) {
@@ -24081,7 +24086,14 @@ function _renderUrineSummary(latest) {
     // 각 항목별 색상 (normal=초록, abnormal=빨강, 미측정=회색)
     const strip = items.map(it => {
       const val = latest[it.key];
-      if (val == null) return { c:'#E5E7EB', label:it.ko, status:'미측정' };
+      const status = latest['_status_'+it.key];
+      if (val == null && !status) return { c:'#E5E7EB', label:it.ko, status:'미측정' };
+      // status 우선
+      if (status) {
+        if (status === 'normal') return { c:'#10B981', label:it.ko, status:'정상' };
+        if (status === 'warning') return { c:'#F59E0B', label:it.ko, status:'주의' };
+        return { c:'#EF4444', label:it.ko, status:'이상' };
+      }
       return it.normal(val)
         ? { c:'#10B981', label:it.ko, status:'정상' }
         : { c:'#EF4444', label:it.ko, status:'이상' };
