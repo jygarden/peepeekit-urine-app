@@ -23916,10 +23916,43 @@ async function renderHomeMetrics() {
     _renderBp(bpVal, latest, logs);
   } catch(e) { console.warn('[home metrics]', e); }
 
-  // 소변검사 요약
+  // 소변검사 요약 · 서버 → 로컬 순 폴백
   try {
-    const r = await _bodyApi('GET', '/api/urine-latest').catch(() => null);
-    if (r && r.latest) { urineLatest = r.latest; _renderUrineSummary(r.latest); }
+    let latestUrine = null;
+    // 1순위: 서버
+    try {
+      const r = await _bodyApi('GET', '/api/urine-latest').catch(() => null);
+      if (r && r.latest) latestUrine = r.latest;
+    } catch(e) {}
+    // 2순위: 로컬스토리지 (urineHistoryV2)
+    if (!latestUrine) {
+      try {
+        const uh = JSON.parse(localStorage.getItem('urineHistoryV2') || '[]');
+        const humanOnly = uh.filter(x => !x.subject || x.subject === 'human');
+        if (humanOnly.length) {
+          humanOnly.sort((a,b) => new Date(b.savedAt || b.date || 0) - new Date(a.savedAt || a.date || 0));
+          const h = humanOnly[0];
+          // testItems 배열을 sg/ph/leu 등으로 맵핑
+          const mapKey = { '비중':'sg','specific gravity':'sg','specificgravity':'sg','ph':'ph','pH':'ph',
+            '백혈구':'leu','leukocyte':'leu','leukocytes':'leu',
+            '아질산염':'nit','nitrite':'nit',
+            '단백질':'pro','protein':'pro',
+            '포도당':'glu','glucose':'glu',
+            '케톤체':'ket','케톤':'ket','ketone':'ket',
+            '우로빌리노겐':'uro','urobilinogen':'uro',
+            '빌리루빈':'bil','bilirubin':'bil',
+            '잠혈':'bld','blood':'bld','occult blood':'bld','occultblood':'bld' };
+          const flat = {};
+          (h.testItems || h.items || []).forEach(it => {
+            const nm = String(it.name||'').trim().toLowerCase().replace(/\s+/g,'');
+            const k = mapKey[nm] || mapKey[it.name] || null;
+            if (k) flat[k] = it.value;
+          });
+          latestUrine = Object.assign({}, flat, { tested_at: h.savedAt || h.date });
+        }
+      } catch(e) {}
+    }
+    if (latestUrine) { urineLatest = latestUrine; _renderUrineSummary(latestUrine); }
   } catch(e) {}
 
   // 🎨 건강 점수 기반 캐릭터 색상 업데이트
