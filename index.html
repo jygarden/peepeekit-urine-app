@@ -699,6 +699,11 @@ window.appIcon = function(name, size){
   #screenHome .home-metrics-grid { gap:7px !important; margin-bottom:8px !important }
   /* 🧹 홈 하단 더 넉넉하게 (스토어 배너 가려짐 방지) */
   #screenHome .v20-home { padding-bottom:120px !important }
+  /* 🧹 🔥 streak + 💎 포인트 기능 완전 제거 (나중에 재도입 전까지) */
+  .streak-badge, .points-badge,
+  [onclick*="openStreakInfo"], [onclick*="goPoints"],
+  #screenPoints, #homeStreakBadge, #homePointsBadge,
+  [onclick*="openStreakInfo()"], [onclick*="goPoints()"] { display:none !important }
   /* 🧹 회원가입/프로필 화면 상단 여백 정리 (active 상태에서만 적용) */
   #screenAddProfile.active { padding:12px 16px 40px !important; display:block !important }
   #screenAddProfile.active .page-header { margin-bottom:10px !important; padding-top:0 !important }
@@ -2813,7 +2818,7 @@ window.appIcon = function(name, size){
         <!-- ① 오늘의 발견 + 저녁 추천 · 통합 히어로 카드 (리뉴얼 · 컴팩트) -->
         <div style="background:#FFF;border:1px solid #DBEAFE;border-radius:18px;padding:0;margin-bottom:10px;box-shadow:0 2px 10px rgba(37,99,235,.05);overflow:hidden">
           <!-- 상단 인사이트 띠 -->
-          <div id="dailyInsightCard" style="background:#F1F6FE;padding:8px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #E7EFFC">
+          <div id="dailyInsightCard" style="background:#F1F6FE;padding:11px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #E7EFFC">
             <div id="dailyInsightIcon" style="font-size:13px;line-height:1;flex-shrink:0">☀️</div>
             <div style="flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap">
               <span style="font-size:9px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase;flex-shrink:0">오늘의 발견</span>
@@ -2822,7 +2827,7 @@ window.appIcon = function(name, size){
             </div>
           </div>
           <!-- 하단 추천 본문 -->
-          <div style="padding:13px 16px 14px">
+          <div style="padding:18px 18px 18px">
             <div style="font-size:10px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase">🎯 오늘 저녁 추천</div>
             <div id="v21RecWhy" style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px;line-height:1.4">지금 이 시간에 딱 맞는 한 끼</div>
             <!-- 음식명 영역 -->
@@ -13939,7 +13944,7 @@ function refreshPointsBadge() {
   const heroNum = document.getElementById('pointsHeroNum');
   if (heroNum) heroNum.textContent = num.toLocaleString();
 }
-function goPoints() {
+function goPoints() { return; // 💎 포인트 기능 비활성화 (나중에 재도입)
   renderPointsPage();
   showScreen('screenPoints');
 }
@@ -26098,7 +26103,7 @@ function saveCheckin(mood) {
   renderStreakBadge();
 }
 
-function openStreakInfo() {
+function openStreakInfo() { return; // 🔥 streak 기능 비활성화 (나중에 재도입)
   const data = getStreakData();
   const streak = data.streak || 0;
   const longest = data.longestStreak || streak;
