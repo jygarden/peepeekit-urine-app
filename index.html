@@ -23232,6 +23232,9 @@ async function saveBodyLog() {
     await _bodyApi('POST', '/api/body-log', body);
     if (typeof showPointToast === 'function') showPointToast('📏 인바디 저장됨');
     closeBodyLogModal();
+    // 캐시 지우고 홈 메트릭 강제 새로고침
+    try { localStorage.removeItem('homeMetricsCache'); } catch(e){}
+    try { renderHomeMetrics(); } catch(e){}
     // 그래프 열려있으면 새로고침
     if (document.getElementById('bodyGraphModal').style.display === 'flex') _loadBodyGraph();
   } catch(e) {
@@ -23821,31 +23824,92 @@ function openInbodyMeasureSheet() {
   try { if (typeof openBodyLogModal === 'function') return openBodyLogModal(); } catch(e){}
   alert('인바디 측정 기능 · 체성분 탭에서 측정하세요');
 }
-function openGlucoseMeasureSheet() {
-  const v = prompt('공복 혈당 (mg/dL · 정상 70-100)', '');
-  if (!v) return;
-  const num = parseFloat(v);
-  if (!num || num < 30 || num > 500) { alert('30-500 범위로 입력해주세요'); return; }
+// prompt() 네이티브 호환 래퍼 (Capacitor Dialog 우선, fallback prompt)
+async function _safePrompt(title, placeholder, defaultVal) {
   try {
-    _bodyApi('POST', '/api/body-log', { glucose_mg_dl: num }).then(() => {
-      showPointToast && showPointToast('✅ 혈당 저장됨');
+    const CapDialog = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Dialog;
+    if (CapDialog && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      const res = await CapDialog.prompt({ title, message: placeholder || '', inputPlaceholder: placeholder || '', inputText: String(defaultVal||'') });
+      return res && !res.cancelled ? res.value : null;
+    }
+  } catch(e){}
+  return prompt(title + (placeholder ? '\n('+placeholder+')' : ''), defaultVal || '');
+}
+
+function openGlucoseMeasureSheet() {
+  _openInlineInputSheet({
+    title: '💉 공복 혈당 입력',
+    fields: [{ id:'glu', label:'공복 혈당', unit:'mg/dL', hint:'정상 70-100', min:30, max:500 }],
+    onSave: async (vals) => {
+      const num = parseFloat(vals.glu);
+      if (!num || num < 30 || num > 500) { alert('30-500 범위'); return false; }
+      await _bodyApi('POST', '/api/body-log', { glucose_mg_dl: num });
+      if (typeof showPointToast === 'function') showPointToast('✅ 혈당 저장됨');
+      try { localStorage.removeItem('homeMetricsCache'); } catch(e){}
       renderHomeMetrics();
-    }).catch(e => alert('⚠️ ' + e.message));
-  } catch(e) { alert('⚠️ ' + e.message); }
+      return true;
+    }
+  });
 }
 function openBpMeasureSheet() {
-  const sys = prompt('수축기 혈압 (상 · 정상 <120)', '');
-  if (!sys) return;
-  const dia = prompt('이완기 혈압 (하 · 정상 <80)', '');
-  if (!dia) return;
-  const s = parseInt(sys), d = parseInt(dia);
-  if (!s || !d || s < 60 || s > 250 || d < 40 || d > 150) { alert('범위 벗어남'); return; }
-  try {
-    _bodyApi('POST', '/api/body-log', { bp_systolic: s, bp_diastolic: d }).then(() => {
-      showPointToast && showPointToast('✅ 혈압 저장됨');
+  _openInlineInputSheet({
+    title: '❤️ 혈압 입력',
+    fields: [
+      { id:'sys', label:'수축기 (상)', unit:'mmHg', hint:'정상 <120', min:60, max:250 },
+      { id:'dia', label:'이완기 (하)', unit:'mmHg', hint:'정상 <80', min:40, max:150 }
+    ],
+    onSave: async (vals) => {
+      const s = parseInt(vals.sys), d = parseInt(vals.dia);
+      if (!s || !d || s < 60 || s > 250 || d < 40 || d > 150) { alert('범위 벗어남'); return false; }
+      await _bodyApi('POST', '/api/body-log', { bp_systolic: s, bp_diastolic: d });
+      if (typeof showPointToast === 'function') showPointToast('✅ 혈압 저장됨');
+      try { localStorage.removeItem('homeMetricsCache'); } catch(e){}
       renderHomeMetrics();
-    }).catch(e => alert('⚠️ ' + e.message));
-  } catch(e) { alert('⚠️ ' + e.message); }
+      return true;
+    }
+  });
+}
+
+// 📝 공통 인라인 입력 시트 (prompt 대체 · 네이티브 WebView에서도 작동)
+function _openInlineInputSheet(opts) {
+  const old = document.getElementById('_inlineInputSheet');
+  if (old) old.remove();
+  const sheet = document.createElement('div');
+  sheet.id = '_inlineInputSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:100000;display:flex;align-items:flex-end;justify-content:center;padding:0;font-family:inherit';
+  const fieldsHtml = opts.fields.map(f => `
+    <label style="display:block;margin-top:14px">
+      <div style="font-size:13px;font-weight:800;color:#0F172A;margin-bottom:6px">${f.label} <span style="font-weight:600;color:#64748B;font-size:11px">${f.hint||''}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;background:#F8FAFC;border:1.5px solid #E5E7EB;border-radius:12px;padding:0 14px">
+        <input id="_ii_${f.id}" type="number" inputmode="decimal" placeholder="숫자 입력" style="flex:1;border:0;background:transparent;padding:14px 0;font-size:18px;font-weight:800;color:#0F172A;font-family:inherit;outline:none"/>
+        <span style="font-size:13px;color:#64748B;font-weight:700;flex-shrink:0">${f.unit||''}</span>
+      </div>
+    </label>`).join('');
+  sheet.innerHTML = `
+    <div style="background:#FFF;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:22px 22px 30px;box-shadow:0 -8px 30px rgba(0,0,0,.2);animation:_ii_slide .25s ease-out">
+      <div style="font-size:16px;font-weight:900;color:#0F172A;letter-spacing:-.3px">${opts.title}</div>
+      ${fieldsHtml}
+      <div style="display:flex;gap:8px;margin-top:20px">
+        <button type="button" id="_ii_cancel" style="flex:1;background:#F1F5F9;color:#64748B;border:0;padding:14px;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit">취소</button>
+        <button type="button" id="_ii_save" style="flex:1.5;background:#2563EB;color:#FFF;border:0;padding:14px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit">저장</button>
+      </div>
+    </div>
+    <style>@keyframes _ii_slide{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>`;
+  document.body.appendChild(sheet);
+  setTimeout(() => { const f = document.getElementById('_ii_' + opts.fields[0].id); if (f) f.focus(); }, 100);
+  document.getElementById('_ii_cancel').onclick = () => sheet.remove();
+  sheet.onclick = (e) => { if (e.target === sheet) sheet.remove(); };
+  document.getElementById('_ii_save').onclick = async () => {
+    const vals = {};
+    opts.fields.forEach(f => { vals[f.id] = document.getElementById('_ii_' + f.id).value; });
+    const btn = document.getElementById('_ii_save');
+    btn.disabled = true; btn.textContent = '저장 중...';
+    try {
+      const ok = await opts.onSave(vals);
+      if (ok !== false) sheet.remove();
+    } catch(e) { alert('⚠️ ' + e.message); }
+    finally { btn.disabled = false; btn.textContent = '저장'; }
+  };
 }
 
 // 건강 점수 계산 (0~100)
