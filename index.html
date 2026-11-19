@@ -679,7 +679,7 @@ window.appIcon = function(name, size){
   .pet-only,
   button[data-pet="true"] { display: none !important; }
   /* fortune/tip 슬림 2단 컨테이너 숨김 */
-  #screenHome .home-wrap > div[style*="grid-template-columns:1fr 1fr"]:not(.home-cards) { display: none !important; }
+  #screenHome .home-wrap > div[style*="grid-template-columns:1fr 1fr"]:not(.home-cards):not(.home-metrics-grid) { display: none !important; }
   /* v10 스토리 원 · 피드 카드 스타일 */
   .gg-story-item{text-align:center;flex-shrink:0;cursor:pointer}
   .gg-story-ring{width:56px;height:56px;border:2.5px solid var(--gg-ink);border-radius:50%;padding:2.5px;overflow:hidden}
@@ -2728,8 +2728,8 @@ window.appIcon = function(name, size){
         <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
           <span class="gem">💎</span> <span id="homePointsNum">0</span>P
         </button>
-        <button class="settings-btn" onclick="openStoreUrl()" aria-label="스토어" style="background:linear-gradient(135deg,#2563EB,#1E40AF);color:#FFF;border:0;padding:0 11px;border-radius:999px;font-size:12.5px;font-weight:900;height:34px;display:inline-flex;align-items:center;gap:4px;letter-spacing:-.2px;box-shadow:0 2px 8px rgba(37,99,235,.25)">
-          🛒 <span>스토어</span>
+        <button class="settings-btn" onclick="openStoreUrl()" aria-label="스토어" style="background:#2563EB;color:#FFF;border:0;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 6px rgba(37,99,235,.25)">
+          🛒
         </button>
         <button class="settings-btn" onclick="openSettings()" aria-label="설정">
           <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
@@ -2847,7 +2847,7 @@ window.appIcon = function(name, size){
         <div style="height:12px"></div>
 
         <!-- ═════════ 📊 4 메트릭 2x2 (체지방/근육/혈당/혈압) · 신규 ═════════ -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div class="home-metrics-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
           <!-- 체지방 -->
           <div class="metric-card" id="metricBodyfat" onclick="openInbodyMeasureSheet()" style="background:#FFF;border:1px solid #EDEFF4;border-radius:12px;padding:11px;cursor:pointer">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
