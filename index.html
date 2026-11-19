@@ -680,6 +680,17 @@ window.appIcon = function(name, size){
   button[data-pet="true"] { display: none !important; }
   /* fortune/tip 슬림 2단 컨테이너 숨김 */
   #screenHome .home-wrap > div[style*="grid-template-columns:1fr 1fr"]:not(.home-cards):not(.home-metrics-grid) { display: none !important; }
+  /* 🧹 홈 운세/상식 슬림 2단 · 어떤 중첩이든 숨김 */
+  #screenHome div[style*="grid-template-columns:1fr 1fr"] > button[onclick*="openFortune"],
+  #screenHome div[style*="grid-template-columns:1fr 1fr"] > button[onclick*="openDailyTip"] { display: none !important; }
+  /* 🧹 홈 레거시 빈 플레이스홀더 숨김 (공간 차지 방지) */
+  #screenHome #homeProfileSection:empty,
+  #screenHome #homeWaterWidget:empty,
+  #screenHome #homeAllergyBanner:empty,
+  #screenHome #homeKidsInsight:empty { display: none !important; }
+  /* 🧹 v20 홈 레이아웃 · 중간 여백 제거 */
+  #screenHome .v20-home { display: block !important; }
+  #screenHome .v20-home > .home-metrics-grid { margin-top: 0 !important }
   /* v10 스토리 원 · 피드 카드 스타일 */
   .gg-story-item{text-align:center;flex-shrink:0;cursor:pointer}
   .gg-story-ring{width:56px;height:56px;border:2.5px solid var(--gg-ink);border-radius:50%;padding:2.5px;overflow:hidden}
@@ -3423,8 +3434,8 @@ window.appIcon = function(name, size){
         <div class="hkc-arrow">›</div>
       </button>
 
-      <!-- 🔮🧠 오늘의 운세 · 오늘의 상식 (슬림 2단) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+      <!-- 🔮🧠 오늘의 운세 · 오늘의 상식 (슬림 2단) · 숨김 -->
+      <div style="display:none !important;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
         <button onclick="openFortune()" style="background:linear-gradient(135deg,#FEF3C7,#FCA5A5);border:none;border-radius:16px;padding:12px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 3px 10px rgba(251,146,60,.25)">
           <span style="font-size:28px;flex-shrink:0">🔮</span>
           <div style="flex:1;line-height:1.25;min-width:0">
