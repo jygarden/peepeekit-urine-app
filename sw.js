@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v108-urine-home-card-localstorage-fallback-2026-11-19';
+const SW_VERSION = 'v109-urine-10-color-strip-home-card-2026-11-19';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
