@@ -692,15 +692,15 @@ window.appIcon = function(name, size){
   #screenHome .v20-home { display: block !important; }
   #screenHome .v20-home > .home-metrics-grid { margin-top: 0 !important }
   /* 🧹 홈 리뉴얼 · 메트릭 카드 (폰트 키움) */
-  #screenHome .metric-card { padding:14px !important; min-height:0 !important; max-height:140px !important; overflow:hidden }
+  #screenHome .metric-card { padding:15px !important; min-height:0 !important; max-height:160px !important; overflow:hidden }
   #screenHome .metric-card > svg { height:16px !important; max-height:16px !important; min-height:0 !important; width:100% !important; display:block !important }  /* 스파크라인만 */
   #screenHome .metric-card > div { line-height:1.3 }
   /* 메트릭 카드 라벨 · 값 폰트 키움 */
-  #screenHome .metric-card > div:nth-child(2) { font-size:12px !important; font-weight:800 !important; color:#52698F !important; margin-top:6px !important }
-  #screenHome .metric-card > div:nth-child(3) { font-size:22px !important; font-weight:900 !important; margin-top:2px !important }
-  #screenHome .metric-card > div:nth-child(3) > span { font-size:12px !important }
-  #screenHome .metric-card .mcard-tag { font-size:10px !important; padding:3px 7px !important }
-  #screenHome .metric-card > div:last-child { font-size:11px !important; margin-top:6px !important }
+  #screenHome .metric-card > div:nth-child(2) { font-size:13.5px !important; font-weight:800 !important; color:#52698F !important; margin-top:8px !important }
+  #screenHome .metric-card > div:nth-child(3) { font-size:26px !important; font-weight:900 !important; margin-top:3px !important; letter-spacing:-.5px }
+  #screenHome .metric-card > div:nth-child(3) > span { font-size:13px !important }
+  #screenHome .metric-card .mcard-tag { font-size:11px !important; padding:4px 8px !important; font-weight:800 !important }
+  #screenHome .metric-card > div:last-child { font-size:12px !important; margin-top:8px !important; font-weight:800 !important }
   /* 2x2 카드 간격 조이기 */
   #screenHome .home-metrics-grid { gap:7px !important; margin-bottom:8px !important }
   /* 🧹 홈 하단 더 넉넉하게 (스토어 배너 가려짐 방지) */
@@ -2821,8 +2821,8 @@ window.appIcon = function(name, size){
           <div style="font-size:11.5px;color:#78350F;font-weight:600;line-height:1.5"><b id="homePtMsgName">—</b> · <span id="homePtMsgTime">—</span><br/><span id="homePtMsgText">—</span></div>
         </div>
 
-        <!-- ① 저녁 추천 히어로 (오늘의 발견 제거) -->
-        <div style="background:#FFF;border:1px solid #DBEAFE;border-radius:18px;padding:0;margin-bottom:10px;box-shadow:0 2px 10px rgba(37,99,235,.05);overflow:hidden">
+        <!-- ① 저녁 추천 히어로 (살짝 민트-블루 그라디언트로 강조) -->
+        <div style="background:linear-gradient(145deg,#F0F7FF 0%,#F8FBFF 60%,#FFFFFF 100%);border:1px solid #DBEAFE;border-radius:18px;padding:0;margin-bottom:10px;box-shadow:0 4px 16px rgba(37,99,235,.08);overflow:hidden">
           <!-- JS 참조용 숨김 (오늘의 발견 제거됨) -->
           <div id="dailyInsightCard" style="display:none">
             <span id="dailyInsightIcon"></span>
@@ -23965,9 +23965,30 @@ async function renderHomeMetrics() {
   let latest = {}, urineLatest = null;
   // body_logs 가져오기
   try {
-    const r = await _bodyApi('GET', '/api/body-log');
+    const r = await _bodyApi('GET', '/api/body-log?limit=90');
     const logs = r.logs || [];
-    latest = logs[0] || {};
+
+    // 🔥 각 수치의 "가장 최근 값"을 따로 찾기 (한 row에 한 수치만 있을 수 있음)
+    const findLatest = (key) => {
+      for (const log of logs) {
+        if (log[key] != null) return { val: log[key], at: log.recorded_at, log };
+      }
+      return null;
+    };
+    const bfLatest = findLatest('body_fat_pct');
+    const mmLatest = findLatest('muscle_mass_kg');
+    const glLatest = findLatest('glucose_mg_dl');
+    const bpSys = findLatest('bp_systolic');
+    const bpDia = findLatest('bp_diastolic');
+
+    // latest는 혼합 객체 (각 필드의 최근 값)
+    latest = {
+      body_fat_pct: bfLatest ? bfLatest.val : null,
+      muscle_mass_kg: mmLatest ? mmLatest.val : null,
+      glucose_mg_dl: glLatest ? glLatest.val : null,
+      bp_systolic: bpSys ? bpSys.val : null,
+      bp_diastolic: bpDia ? bpDia.val : null,
+    };
 
     // 체지방
     _renderMetric('Bodyfat', latest.body_fat_pct, '%', 'bodyFatTag', logs, 'body_fat_pct', false);
