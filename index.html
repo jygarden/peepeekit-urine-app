@@ -691,12 +691,19 @@ window.appIcon = function(name, size){
   /* 🧹 v20 홈 레이아웃 · 중간 여백 제거 */
   #screenHome .v20-home { display: block !important; }
   #screenHome .v20-home > .home-metrics-grid { margin-top: 0 !important }
-  /* 🧹 홈 리뉴얼 · 토스 밀도 · 토스 간결 레이아웃 */
-  #screenHome .metric-card { padding:12px !important; min-height:0 !important }
-  #screenHome .metric-card svg[id*="Spark"] { height:16px !important; width:100% !important; display:block }
+  /* 🧹 홈 리뉴얼 · 메트릭 카드 압축 (240px → 100px) */
+  #screenHome .metric-card { padding:11px !important; min-height:0 !important; max-height:110px !important; overflow:hidden }
+  #screenHome .metric-card > svg { height:16px !important; max-height:16px !important; min-height:0 !important; width:100% !important; display:block !important }  /* 스파크라인만 */
   #screenHome .metric-card > div { line-height:1.2 }
   /* 2x2 카드 간격 조이기 */
   #screenHome .home-metrics-grid { gap:7px !important; margin-bottom:8px !important }
+  /* 🧹 홈 하단 더 넉넉하게 (스토어 배너 가려짐 방지) */
+  #screenHome .v20-home { padding-bottom:120px !important }
+  /* 🧹 회원가입/프로필 화면 상단 여백 정리 */
+  #screenAddProfile { padding:12px 16px 40px !important; display:flex !important; flex-direction:column !important; justify-content:flex-start !important }
+  #screenAddProfile .page-header { margin-bottom:10px !important; padding-top:0 !important }
+  #screenAddProfile #apOnboardingIntro { margin:0 0 14px !important }
+  #screenAddProfile .card { margin-bottom:10px !important }
   /* v10 스토리 원 · 피드 카드 스타일 */
   .gg-story-item{text-align:center;flex-shrink:0;cursor:pointer}
   .gg-story-ring{width:56px;height:56px;border:2.5px solid var(--gg-ink);border-radius:50%;padding:2.5px;overflow:hidden}

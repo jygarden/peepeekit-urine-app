@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v94-home-redesign-final-approved-2026-11-19';
+const SW_VERSION = 'v95-metric-cards-compact-signup-store-fix-2026-11-19';
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
