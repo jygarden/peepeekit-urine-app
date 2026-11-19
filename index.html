@@ -2826,28 +2826,26 @@ window.appIcon = function(name, size){
               <span id="dailyInsightSub" style="font-size:10.5px;color:#64748B;font-weight:500;letter-spacing:-.1px"></span>
             </div>
           </div>
-          <!-- 하단 추천 본문 -->
-          <div style="padding:18px 18px 18px">
+          <!-- 하단 추천 본문 · 전체 감싸는 padding -->
+          <div style="padding:16px 18px 16px">
             <div style="font-size:10px;color:#2563EB;font-weight:900;letter-spacing:.5px;text-transform:uppercase">🎯 오늘 저녁 추천</div>
-            <div id="v21RecWhy" style="font-size:11px;color:#52698F;font-weight:500;margin-top:3px;line-height:1.4">지금 이 시간에 딱 맞는 한 끼</div>
+            <div id="v21RecWhy" style="font-size:11.5px;color:#52698F;font-weight:500;margin-top:3px;line-height:1.4">지금 이 시간에 딱 맞는 한 끼</div>
             <!-- 음식명 영역 -->
-            <div id="v21HeroTitle" style="font-size:21px;font-weight:900;color:#0F172A;line-height:1.25;margin-top:6px;letter-spacing:-.5px">
+            <div id="v21HeroTitle" style="font-size:21px;font-weight:900;color:#0F172A;line-height:1.3;margin-top:6px;letter-spacing:-.5px">
               오늘 <span id="v21MealSlot" style="color:#64748B">저녁</span>엔<br/>
               <span id="v21RecName" style="color:#2563EB;font-weight:900">AI가 고르는 중</span>
               <span id="v21NameSuffix" style="color:#0F172A">어때요?</span>
             </div>
-          </div>
-          <!-- 레거시 캐릭터 마운트 (JS 참조용 · 숨김) -->
-          <div id="heroCompanionMount" style="display:none"></div>
-
-          <!-- 영양소 뱃지 · 비었을 땐 공간 차지 X -->
-          <div id="v21HeroNutr" style="display:flex;gap:5px;flex-wrap:wrap"></div>
-          <style>#v21HeroNutr:empty{display:none!important;margin:0!important}#v21HeroNutr:not(:empty){margin-top:10px}</style>
-
-          <!-- 버튼 (컴팩트) -->
-          <div style="display:flex;gap:5px;margin-top:10px">
-            <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#DBEAFE;color:#1E40AF;border:0;padding:8px 10px;border-radius:10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">↻ 다른 추천</button>
-            <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1.2;background:#2563EB;color:#FFF;border:0;padding:8px 10px;border-radius:10px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">자세히 ›</button>
+            <!-- 레거시 캐릭터 마운트 (JS 참조용 · 숨김) -->
+            <div id="heroCompanionMount" style="display:none"></div>
+            <!-- 영양소/kcal 뱃지 · 비었을 땐 공간 차지 X -->
+            <div id="v21HeroNutr" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+            <style>#v21HeroNutr:empty{display:none!important;margin:0!important}#v21HeroNutr:not(:empty){margin-top:10px}</style>
+            <!-- 버튼 (컴팩트) -->
+            <div style="display:flex;gap:5px;margin-top:12px">
+              <button type="button" onclick="event.stopPropagation();try{_v21RerollHero()}catch(e){}" style="flex:1;background:#DBEAFE;color:#1E40AF;border:0;padding:9px 10px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">↻ 다른 추천</button>
+              <button type="button" onclick="event.stopPropagation();try{_v21OpenRecReason()}catch(e){}" style="flex:1.2;background:#2563EB;color:#FFF;border:0;padding:9px 10px;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">자세히 ›</button>
+            </div>
           </div>
 
           <!-- 레거시 · JS 참조 유지 (화면 X) -->
