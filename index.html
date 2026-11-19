@@ -23941,13 +23941,27 @@ async function renderHomeMetrics() {
             '잠혈':'bld','blood':'bld','occult blood':'bld','occultblood':'bld' };
           const flat = {};
           const testItems = (h.fullResult && h.fullResult.testItems) || h.testItems || h.items || [];
+          // 포함 매칭 테이블 (한글 or 영문 어디든 포함되면 매칭)
+          const matchers = [
+            { k:'sg',  needles:['비중','specificgravity','specific gravity','sg'] },
+            { k:'ph',  needles:['ph','피에이치'] },
+            { k:'leu', needles:['백혈구','leukocyte','leu','wbc'] },
+            { k:'nit', needles:['아질산','nitrite','nit'] },
+            { k:'pro', needles:['단백','protein','pro'] },
+            { k:'glu', needles:['포도당','glucose','glu'] },
+            { k:'ket', needles:['케톤','ketone','ket'] },
+            { k:'uro', needles:['우로빌','urobilin','uro'] },
+            { k:'bil', needles:['빌리루빈','bilirubin','bil'] },
+            { k:'bld', needles:['잠혈','occultblood','occult blood','blood','bld','rbc'] }
+          ];
           testItems.forEach(it => {
-            const nm = String(it.name||'').trim().toLowerCase().replace(/\s+/g,'');
-            const k = mapKey[nm] || mapKey[it.name] || null;
-            if (k != null) {
-              flat[k] = it.value;
-              // status 기반으로도 저장 (normal/warning/danger)
-              flat['_status_'+k] = it.status;
+            const raw = String(it.name||'').toLowerCase();
+            for (const m of matchers) {
+              if (m.needles.some(n => raw.includes(n))) {
+                flat[m.k] = it.value;
+                flat['_status_'+m.k] = it.status;
+                break;
+              }
             }
           });
           latestUrine = Object.assign({}, flat, { tested_at: h.savedAt || h.date });
@@ -24088,15 +24102,17 @@ function _renderUrineSummary(latest) {
       const val = latest[it.key];
       const status = latest['_status_'+it.key];
       if (val == null && !status) return { c:'#E5E7EB', label:it.ko, status:'미측정' };
-      // status 우선
+      // 4단계 색상: 🟢정상 · 🟡주의 · 🔴이상 · ⚫심각
       if (status) {
         if (status === 'normal') return { c:'#10B981', label:it.ko, status:'정상' };
         if (status === 'warning') return { c:'#F59E0B', label:it.ko, status:'주의' };
-        return { c:'#EF4444', label:it.ko, status:'이상' };
+        if (status === 'danger') return { c:'#DC2626', label:it.ko, status:'이상' };
+        if (status === 'critical' || status === 'severe') return { c:'#7F1D1D', label:it.ko, status:'심각' };
+        return { c:'#DC2626', label:it.ko, status:'이상' };
       }
       return it.normal(val)
         ? { c:'#10B981', label:it.ko, status:'정상' }
-        : { c:'#EF4444', label:it.ko, status:'이상' };
+        : { c:'#DC2626', label:it.ko, status:'이상' };
     });
     body.innerHTML = `
       <div style="display:flex;gap:3px;margin-top:2px;margin-bottom:5px">
