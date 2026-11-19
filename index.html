@@ -23914,18 +23914,25 @@ async function renderHomeMetrics() {
     // 혈압
     const bpVal = (latest.bp_systolic && latest.bp_diastolic) ? `${latest.bp_systolic}/${latest.bp_diastolic}` : null;
     _renderBp(bpVal, latest, logs);
+
+    // 📦 캐시 저장 (다음 로드 시 즉시 표시용)
+    try {
+      const vals = {}, tags = {}, tagStyles = {};
+      ['Bodyfat','Muscle','Glucose','Bp'].forEach(id => {
+        const v = document.getElementById('metric'+id+'Val');
+        const t = document.getElementById('metric'+id+'Tag');
+        if (v) vals[id] = v.innerHTML;
+        if (t && t.style.display !== 'none') { tags[id] = t.innerHTML; tagStyles[id] = t.style.cssText; }
+      });
+      localStorage.setItem('homeMetricsCache', JSON.stringify({ at: Date.now(), values: vals, tags, tagStyle: tagStyles }));
+    } catch(e) {}
   } catch(e) { console.warn('[home metrics]', e); }
 
-  // 소변검사 요약 · 서버 → 로컬 순 폴백
+  // 소변검사 요약 · 로컬 먼저 (즉시) → 서버 (백그라운드 업데이트)
   try {
     let latestUrine = null;
-    // 1순위: 서버
-    try {
-      const r = await _bodyApi('GET', '/api/urine-latest').catch(() => null);
-      if (r && r.latest) latestUrine = r.latest;
-    } catch(e) {}
-    // 2순위: 로컬스토리지 (urineHistoryV2)
-    if (!latestUrine) {
+    // 1순위: 로컬 (즉시 반응)
+    {
       try {
         const uh = JSON.parse(localStorage.getItem('urineHistoryV2') || '[]');
         const humanOnly = uh.filter(x => !x.subject || x.subject === 'human');
@@ -23972,6 +23979,13 @@ async function renderHomeMetrics() {
       } catch(e) {}
     }
     if (latestUrine) { urineLatest = latestUrine; _renderUrineSummary(latestUrine); }
+    // 백그라운드로 서버 체크 (느려도 UX 안 막음)
+    (async () => {
+      try {
+        const r = await _bodyApi('GET', '/api/urine-latest').catch(() => null);
+        if (r && r.latest) { _renderUrineSummary(r.latest); }
+      } catch(e){}
+    })();
   } catch(e) {}
 
   // 🎨 건강 점수 기반 캐릭터 색상 업데이트
@@ -24711,17 +24725,35 @@ window.triggerCompanionSaved = function() {
   try { _heroCompanionInstance && _heroCompanionInstance.setState('saved'); } catch(e){}
 };
 
-// 홈 로드 시 호출
+// 홈 로드 시 호출 · 즉시 + 병렬 + 캐시 폴백
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      try { renderDailyInsight(); } catch(e){}
-      try { renderHomeMetrics(); } catch(e){}
-      try { renderHomeChallenges(); } catch(e){}
-      try { renderHomeMateFeed(); } catch(e){}
-      // 🏥 HealthKit 자동 동기화 (활성화된 경우 12시간마다)
-      try { if (window.HealthSync) window.HealthSync.autoSyncIfNeeded().then(() => { renderHomeMetrics(); }); } catch(e){}
-    }, 1500);
+    // ① 캐시 즉시 표시 (API 기다리지 않음)
+    try {
+      const cached = localStorage.getItem('homeMetricsCache');
+      if (cached) {
+        const data = JSON.parse(cached);
+        if (Date.now() - data.at < 24 * 3600 * 1000 && data.html) {
+          // 메트릭 값 캐시 복원 (초기 렌더)
+          ['Bodyfat','Muscle','Glucose','Bp'].forEach(id => {
+            const v = document.getElementById('metric'+id+'Val');
+            if (v && data.values && data.values[id]) v.innerHTML = data.values[id];
+            const t = document.getElementById('metric'+id+'Tag');
+            if (t && data.tags && data.tags[id]) { t.innerHTML = data.tags[id]; t.style.display = 'inline-block'; t.style.cssText += data.tagStyle[id]||''; }
+          });
+        }
+      }
+    } catch(e) {}
+    // ② 모든 API 병렬 호출 (await 없음 = fire-and-forget)
+    requestAnimationFrame(() => {
+      Promise.allSettled([
+        (async () => { try { await renderDailyInsight(); } catch(e){} })(),
+        (async () => { try { await renderHomeMetrics(); } catch(e){} })(),
+        (async () => { try { await renderHomeMateFeed(); } catch(e){} })()
+      ]);
+      // ③ HealthKit은 백그라운드 (사용자 UX 안 막음)
+      try { if (window.HealthSync) window.HealthSync.autoSyncIfNeeded().catch(()=>{}); } catch(e){}
+    });
   });
 }
 
