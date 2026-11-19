@@ -2728,9 +2728,6 @@ window.appIcon = function(name, size){
         <button class="points-badge" onclick="goPoints()" id="homePointsBadge">
           <span class="gem">💎</span> <span id="homePointsNum">0</span>P
         </button>
-        <button class="settings-btn" onclick="openStoreUrl()" aria-label="스토어" style="background:#2563EB;color:#FFF;border:0;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 6px rgba(37,99,235,.25)">
-          🛒
-        </button>
         <button class="settings-btn" onclick="openSettings()" aria-label="설정">
           <i class="ph-bold ph-gear-six" style="font-size:20px"></i>
         </button>
@@ -2815,8 +2812,9 @@ window.appIcon = function(name, size){
           <!-- 레거시 캐릭터 마운트 (JS 참조용 · 숨김) -->
           <div id="heroCompanionMount" style="display:none"></div>
 
-          <!-- 영양소 뱃지 -->
-          <div id="v21HeroNutr" style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap"></div>
+          <!-- 영양소 뱃지 · 비었을 땐 공간 차지 X -->
+          <div id="v21HeroNutr" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+          <style>#v21HeroNutr:empty{display:none!important;margin:0!important}#v21HeroNutr:not(:empty){margin-top:10px}</style>
 
           <!-- 버튼 -->
           <div style="display:flex;gap:6px;margin-top:12px">
@@ -2842,9 +2840,6 @@ window.appIcon = function(name, size){
           </div>
           </div><!-- /padding wrapper -->
         </div>
-
-        <!-- 🧹 말풍선 꼬리 제거 · 추천이 히어로 역할 -->
-        <div style="height:12px"></div>
 
         <!-- ═════════ 📊 4 메트릭 2x2 (체지방/근육/혈당/혈압) · 신규 ═════════ -->
         <div class="home-metrics-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
