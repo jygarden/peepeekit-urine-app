@@ -2761,11 +2761,12 @@ window.appIcon = function(name, size){
             <div style="font-size:12px;color:#64748B;font-weight:600;margin-top:3px;letter-spacing:-.2px">🤖 AI가 오늘 뭐 먹을지 골라드려요</div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-            <button onclick="openStreakInfo()" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:0;border-radius:999px;padding:6px 10px;display:flex;align-items:center;gap:3px;font-family:inherit;cursor:pointer;height:32px;font-size:12px;font-weight:800;color:#78350F"><span style="font-size:13px">🔥</span> <span id="homeStreakNum">1</span></button>
-            <button onclick="goPoints()" style="background:#FFF;border:1px solid #E5E7EB;border-radius:999px;padding:6px 10px;display:flex;align-items:center;gap:3px;font-family:inherit;cursor:pointer;height:32px;font-size:12px;font-weight:800;color:#0F172A"><span style="font-size:12px">💎</span> <span id="homePointsNum">0</span>P</button>
             <button onclick="openSettings()" aria-label="설정" style="background:#FFF;border:1px solid #E5E7EB;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:inherit;cursor:pointer;flex-shrink:0">
               <i class="ph-bold ph-gear-six" style="font-size:16px;color:#0F172A"></i>
             </button>
+            <!-- 숨김 · JS 참조 유지 -->
+            <span id="homeStreakNum" style="display:none">0</span>
+            <span id="homePointsNum" style="display:none">0</span>
           </div>
           <div id="v22StepBadge" style="display:none"><span id="v22StepCount">0 걸음</span></div>
         </div>
