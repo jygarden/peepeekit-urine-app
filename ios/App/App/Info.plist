@@ -22,6 +22,11 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>&lt;key&gt;NSCameraUsageDescription&lt;/key&gt;
+&lt;string&gt;식사·소변검사·영양제 라벨 촬영에 사용합니다&lt;/string&gt;
+&lt;key&gt;NSPhotoLibraryUsageDescription&lt;/key&gt;
+&lt;string&gt;앨범에서 사진을 불러올 때 사용합니다&lt;/string&gt;</string>
 	<key>NSHealthClinicalHealthRecordsShareUsageDescription</key>
 	<string>건강어때는 임상 건강 기록을 읽지 않습니다.</string>
 	<key>UILaunchStoryboardName</key>
