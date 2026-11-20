@@ -87,6 +87,14 @@
         console.log('[🔀 Native mode] API_BASE =', window.API_BASE);
       }
 
+      // 🛡 안전망 · 어떤 이유로든 홈 로드 실패해도 5초 후 스플래시 강제 숨김
+      setTimeout(() => {
+        try {
+          const sp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
+          if (sp) sp.hide({ fadeOutDuration: 300 }).catch(()=>{});
+        } catch(e){}
+      }, 5000);
+
       // 🔗 외부 링크(http/https) 자동으로 시스템 브라우저로 강제 오픈 (네이티브 앱)
       window.openExternal = function(url) {
         if (!url) return;
@@ -24835,6 +24843,11 @@ if (typeof window !== 'undefined') {
     } catch(e) {}
     // ② 모든 API 병렬 호출 (await 없음 = fire-and-forget)
     requestAnimationFrame(() => {
+      // 🚀 스플래시 즉시 숨김 (홈 뼈대가 뜨자마자)
+      try {
+        const sp = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
+        if (sp) sp.hide({ fadeOutDuration: 200 }).catch(()=>{});
+      } catch(e){}
       Promise.allSettled([
         (async () => { try { await renderDailyInsight(); } catch(e){} })(),
         (async () => { try { await renderHomeMetrics(); } catch(e){} })(),
