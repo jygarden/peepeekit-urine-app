@@ -23132,6 +23132,10 @@ function resetAllData() {
   localStorage.removeItem('foodHistoryV1');        // 식단 기록
   localStorage.removeItem('captureTipShown');      // 캡처 안내 플래그
   localStorage.removeItem('reminderDismissedUntil'); // 리마인더 닫기 플래그
+  localStorage.removeItem('onboarding_done_v1');   // 🔥 온보딩 완료 플래그 (가입 화면 다시 뜨게)
+  localStorage.removeItem('socialProvider');       // 소셜 로그인 정보
+  localStorage.removeItem('socialUserId');
+  localStorage.removeItem('socialEmail');
   closeSettings();
   alert('모든 데이터가 삭제되었어요. 가입 화면으로 돌아갑니다.');
   location.reload();
