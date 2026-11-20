@@ -731,18 +731,22 @@ window.appIcon = function(name, size){
   .gg-feed-sub{font-size:11.5px;color:var(--gg-muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   </style>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- 🚀 CDN 스크립트 전부 defer (렌더 블록 X · 백그라운드 로드) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Chart.js (추세 그래프용) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <!-- jsPDF (PDF 리포트용) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- 카카오 로그인 SDK -->
-  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- 카카오 로그인 SDK · 지연 로드 (로그인 눌렀을 때만 쓰임) -->
+  <script defer src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
     integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
     crossorigin="anonymous"></script>
   <script>
     const KAKAO_JS_KEY = 'aacf444a8f6bc5687084b289c7217ada';
-    if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY);
+    // Kakao 초기화는 SDK 로드된 후 (defer라서 DOMContentLoaded 뒤)
+    window.addEventListener('DOMContentLoaded', () => {
+      try { if (window.Kakao && !Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY); } catch(e){}
+    });
   </script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
