@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = 'v128-supabase-oauth-kakao-redirect-2026-11-23';
+const SW_VERSION = "v129-force-refresh-2026-11-24";
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
