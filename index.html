@@ -26231,6 +26231,8 @@ async function _handleSupabaseOAuthRedirect() {
     const payload = JSON.parse(decodeURIComponent(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
     // user_metadata에 카카오 프로필 들어있음
     const meta = payload.user_metadata || {};
+    // 디버그: Kakao가 뭘 보내주는지 확인
+    alert('🔍 JWT payload:\nemail: ' + (payload.email||'없음') + '\nmeta keys: ' + Object.keys(meta).join(',') + '\nmeta JSON: ' + JSON.stringify(meta).slice(0,300));
     const signupData = {
       _nickname: meta.nickname || meta.full_name || meta.name || meta.preferred_username || '',
       _email: payload.email || meta.email || '',
