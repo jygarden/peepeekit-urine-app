@@ -26187,57 +26187,51 @@ function _toggleAllConsent(checked) {
   if (mk) mk.checked = checked;
 }
 
-// 🟡 카카오로 시작하기 (SDK v2.7+ · authorize 리다이렉트 방식)
+// 🟡 카카오로 시작하기 (Supabase OAuth 방식 · 복잡한 카카오 설정 불필요)
 async function _signupWithKakao() {
-  if (!window.Kakao) { alert('카카오 SDK 로드 실패 · 새로고침 후 다시 시도'); return; }
   try {
-    if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY);
-    // SDK v2.4+ 는 authorize() 사용 (리다이렉트 방식)
-    // 리다이렉트 후 돌아올 때 ?code=xxx 가 붙어오고, 그걸 아래 _handleKakaoRedirect 가 처리
-    sessionStorage.setItem('kakaoAuthPending', '1');
-    Kakao.Auth.authorize({
-      redirectUri: location.origin + location.pathname,
-      scope: 'profile_nickname,account_email,gender,birthyear,birthday'
-    });
+    sessionStorage.setItem('supabaseAuthPending', 'kakao');
+    // Supabase Auth가 카카오 OAuth를 대신 처리 → 로그인 완료되면 토큰 붙어서 돌아옴
+    const supabaseUrl = 'https://guvzbtemficekutgxngb.supabase.co';
+    const redirectTo = encodeURIComponent(location.origin + location.pathname);
+    location.href = `${supabaseUrl}/auth/v1/authorize?provider=kakao&redirect_to=${redirectTo}`;
   } catch(e) {
     console.warn('[Kakao login]', e);
-    alert('카카오 로그인 오류\n\n' + (e.message || e) + '\n\n이메일로 가입을 이용해주세요');
+    alert('카카오 로그인 오류\n\n' + (e.message || e));
   }
 }
 
-// 카카오 리다이렉트 복귀 시 code → token → 사용자정보 처리
-async function _handleKakaoRedirect() {
+// Supabase OAuth 리다이렉트 복귀 시 처리 (토큰이 URL hash에 담겨옴)
+async function _handleSupabaseOAuthRedirect() {
   try {
-    const url = new URL(location.href);
-    const code = url.searchParams.get('code');
-    const pending = sessionStorage.getItem('kakaoAuthPending');
-    if (!code || !pending) return false;
-    sessionStorage.removeItem('kakaoAuthPending');
-    if (!Kakao.isInitialized()) Kakao.init(KAKAO_JS_KEY);
-    // code → access_token (서버 프록시 필요, 지금은 클라에서 직접 시도)
-    const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        client_id: KAKAO_JS_KEY,
-        redirect_uri: location.origin + location.pathname,
-        code: code
-      }).toString()
+    const hash = (location.hash || '').replace(/^#/, '');
+    if (!hash || !hash.includes('access_token=')) return false;
+    const pending = sessionStorage.getItem('supabaseAuthPending');
+    sessionStorage.removeItem('supabaseAuthPending');
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    if (!accessToken) return false;
+    // Supabase의 user 정보 가져오기
+    const supabaseUrl = 'https://guvzbtemficekutgxngb.supabase.co';
+    const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { 'Authorization': `Bearer ${accessToken}`, 'apikey': accessToken }
     });
-    const tokenData = await tokenRes.json();
-    if (!tokenData.access_token) throw new Error('카카오 토큰 받기 실패');
-    Kakao.Auth.setAccessToken(tokenData.access_token);
-    // 사용자 정보
-    const me = await new Promise((resolve, reject) => {
-      Kakao.API.request({ url: '/v2/user/me', success: resolve, fail: reject });
-    });
-    _applySocialSignup('kakao', me);
-    // URL 정리 (code 제거)
+    const user = await userRes.json();
+    if (!user || !user.id) throw new Error('사용자 정보 받기 실패');
+    // user.user_metadata에 카카오 프로필 들어있음
+    const meta = user.user_metadata || {};
+    const signupData = {
+      // nickname / name / full_name 중 아무거나
+      _nickname: meta.nickname || meta.full_name || meta.name || '',
+      _email: user.email || meta.email || '',
+      _providerId: user.id
+    };
+    _applySocialSignup(pending === 'apple' ? 'apple' : 'kakao', signupData);
+    // URL 정리
     history.replaceState({}, '', location.pathname);
     return true;
   } catch(e) {
-    console.warn('[Kakao redirect]', e);
+    console.warn('[Supabase OAuth]', e);
     history.replaceState({}, '', location.pathname);
     return false;
   }
@@ -26271,18 +26265,11 @@ async function _signupWithApple() {
 function _applySocialSignup(provider, data) {
   try {
     if (provider === 'kakao') {
-      const ka = data.kakao_account || {};
-      const profile = ka.profile || {};
-      if (profile.nickname) localStorage.setItem('_prefillName', profile.nickname);
-      if (ka.birthyear) localStorage.setItem('_prefillYear', ka.birthyear);
-      if (ka.birthday && ka.birthday.length === 4) {
-        localStorage.setItem('_prefillMonth', parseInt(ka.birthday.slice(0,2)));
-        localStorage.setItem('_prefillDay', parseInt(ka.birthday.slice(2)));
-      }
-      if (ka.gender) localStorage.setItem('_prefillGender', ka.gender === 'male' ? 'male' : 'female');
+      // Supabase OAuth 데이터 or Kakao SDK 데이터 둘 다 처리
+      if (data._nickname) localStorage.setItem('_prefillName', data._nickname);
+      if (data._email) localStorage.setItem('socialEmail', data._email);
       localStorage.setItem('socialProvider', 'kakao');
-      localStorage.setItem('socialUserId', String(data.id || ''));
-      if (ka.email) localStorage.setItem('socialEmail', ka.email);
+      localStorage.setItem('socialUserId', String(data._providerId || data.id || ''));
     } else if (provider === 'apple') {
       if (data.givenName || data.familyName) {
         const nm = [data.familyName, data.givenName].filter(Boolean).join('');
@@ -26299,18 +26286,13 @@ function _applySocialSignup(provider, data) {
   } catch(e) { console.warn('[social → onboarding]', e); }
 }
 
-// 페이지 로드 시 카카오 리다이렉트 체크
+// 페이지 로드 시 Supabase OAuth 리다이렉트 체크
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
-    // SDK 로드 대기
-    const tryHandle = () => {
-      if (window.Kakao && Kakao.isInitialized && Kakao.isInitialized()) {
-        _handleKakaoRedirect();
-      } else {
-        setTimeout(tryHandle, 200);
-      }
-    };
-    if (location.search.includes('code=')) tryHandle();
+    // Supabase는 토큰을 URL hash(#)에 담아 돌려줌
+    if (location.hash && location.hash.includes('access_token=')) {
+      _handleSupabaseOAuthRedirect();
+    }
   });
   // 본인정보 폼 열릴 때 자동 채움 적용
   window._fillSocialPrefill = function() {
