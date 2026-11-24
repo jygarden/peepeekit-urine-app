@@ -26215,7 +26215,7 @@ async function _signupWithKakao() {
   }
 }
 
-// Supabase OAuth 리다이렉트 복귀 시 처리 (토큰이 URL hash에 담겨옴)
+// Supabase OAuth 리다이렉트 복귀 시 처리 (JWT 직접 파싱 · API 호출 불필요)
 async function _handleSupabaseOAuthRedirect() {
   try {
     const hash = (location.hash || '').replace(/^#/, '');
@@ -26225,20 +26225,16 @@ async function _handleSupabaseOAuthRedirect() {
     const params = new URLSearchParams(hash);
     const accessToken = params.get('access_token');
     if (!accessToken) return false;
-    // Supabase의 user 정보 가져오기
-    const supabaseUrl = 'https://guvzbtemficekutgxngb.supabase.co';
-    const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { 'Authorization': `Bearer ${accessToken}`, 'apikey': accessToken }
-    });
-    const user = await userRes.json();
-    if (!user || !user.id) throw new Error('사용자 정보 받기 실패');
-    // user.user_metadata에 카카오 프로필 들어있음
-    const meta = user.user_metadata || {};
+    // JWT 토큰 디코딩 (헤더.페이로드.서명 중 페이로드만)
+    const parts = accessToken.split('.');
+    if (parts.length !== 3) throw new Error('JWT 형식 오류');
+    const payload = JSON.parse(decodeURIComponent(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+    // user_metadata에 카카오 프로필 들어있음
+    const meta = payload.user_metadata || {};
     const signupData = {
-      // nickname / name / full_name 중 아무거나
-      _nickname: meta.nickname || meta.full_name || meta.name || '',
-      _email: user.email || meta.email || '',
-      _providerId: user.id
+      _nickname: meta.nickname || meta.full_name || meta.name || meta.preferred_username || '',
+      _email: payload.email || meta.email || '',
+      _providerId: payload.sub || payload.user_id || ''
     };
     _applySocialSignup(pending === 'apple' ? 'apple' : 'kakao', signupData);
     // URL 정리
@@ -26246,6 +26242,7 @@ async function _handleSupabaseOAuthRedirect() {
     return true;
   } catch(e) {
     console.warn('[Supabase OAuth]', e);
+    alert('🔍 OAuth 파싱 에러: ' + (e.message || e));
     history.replaceState({}, '', location.pathname);
     return false;
   }
