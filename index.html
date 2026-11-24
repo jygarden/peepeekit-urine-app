@@ -13832,7 +13832,14 @@ function timeGreeting() {
 }
 
 async function initWelcome() {
-  // 카카오 콜백으로 돌아왔는지 확인
+  // 🟡 Supabase OAuth (카카오/Apple) 콜백으로 돌아왔는지 먼저 확인
+  if (location.hash && location.hash.includes('access_token=')) {
+    try {
+      const handled = await _handleSupabaseOAuthRedirect();
+      if (handled) return; // OAuth 성공 → 본인정보 폼으로 이동 완료
+    } catch(e) { console.warn('[initWelcome OAuth]', e); }
+  }
+  // 옛 카카오 콜백 (호환)
   const came = await handleKakaoCallback();
   if (came) return;
 
