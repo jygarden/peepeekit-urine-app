@@ -13834,17 +13834,11 @@ function timeGreeting() {
 async function initWelcome() {
   // 🟡 Supabase OAuth (카카오/Apple) 콜백으로 돌아왔는지 먼저 확인
   const hasHashToken = location.hash && location.hash.includes('access_token=');
-  const hasQueryCode = location.search && location.search.includes('code=');
-  if (hasHashToken || hasQueryCode) {
-    // 디버그 알림 (문제 해결 후 제거 예정)
-    alert('🔍 OAuth 콜백 감지!\nhash: ' + location.hash.slice(0,80) + '\nsearch: ' + location.search.slice(0,80));
+  if (hasHashToken) {
     try {
       const handled = await _handleSupabaseOAuthRedirect();
-      alert('🔍 OAuth 처리 결과: ' + (handled ? '성공' : '실패'));
       if (handled) return;
-    } catch(e) {
-      alert('❌ OAuth 에러: ' + (e.message || e));
-    }
+    } catch(e) { console.warn('[OAuth]', e); }
   }
   // 옛 카카오 콜백 (호환)
   const came = await handleKakaoCallback();
@@ -26231,12 +26225,10 @@ async function _handleSupabaseOAuthRedirect() {
     const payload = JSON.parse(decodeURIComponent(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
     // user_metadata에 카카오 프로필 들어있음
     const meta = payload.user_metadata || {};
-    // 디버그: Kakao가 뭘 보내주는지 확인
-    alert('🔍 JWT payload:\nemail: ' + (payload.email||'없음') + '\nmeta keys: ' + Object.keys(meta).join(',') + '\nmeta JSON: ' + JSON.stringify(meta).slice(0,300));
     const signupData = {
-      _nickname: meta.nickname || meta.full_name || meta.name || meta.preferred_username || '',
+      _nickname: meta.nickname || meta.full_name || meta.name || meta.preferred_username || meta.user_name || '',
       _email: payload.email || meta.email || '',
-      _providerId: payload.sub || payload.user_id || ''
+      _providerId: payload.sub || payload.user_id || meta.provider_id || ''
     };
     _applySocialSignup(pending === 'apple' ? 'apple' : 'kakao', signupData);
     // URL 정리
@@ -26244,7 +26236,6 @@ async function _handleSupabaseOAuthRedirect() {
     return true;
   } catch(e) {
     console.warn('[Supabase OAuth]', e);
-    alert('🔍 OAuth 파싱 에러: ' + (e.message || e));
     history.replaceState({}, '', location.pathname);
     return false;
   }
@@ -26308,20 +26299,31 @@ if (typeof window !== 'undefined') {
     }
   });
   // 본인정보 폼 열릴 때 자동 채움 적용
-  window._fillSocialPrefill = function() {
+  window._fillSocialPrefill = function(retryCount) {
     try {
       const name = localStorage.getItem('_prefillName');
-      const year = localStorage.getItem('_prefillYear');
-      const month = localStorage.getItem('_prefillMonth');
-      const day = localStorage.getItem('_prefillDay');
-      const gender = localStorage.getItem('_prefillGender');
-      if (name) {
-        const el = document.getElementById('apName') || document.getElementById('su_name');
-        if (el) el.value = name;
+      if (!name) return;
+      // 가능한 모든 이름 필드 시도
+      const nameFieldIds = ['apName', 'su_name', 'name', 'nameInput'];
+      let filled = false;
+      for (const id of nameFieldIds) {
+        const el = document.getElementById(id);
+        if (el && !el.value) {
+          el.value = name;
+          // React 등이 감지할 수 있게 이벤트 트리거
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          filled = true;
+        }
       }
-      // 소셜 데이터는 한 번 사용 후 지움
+      if (!filled && (retryCount || 0) < 10) {
+        // 필드 아직 안 생겼으면 100ms 뒤 재시도 (최대 10번)
+        setTimeout(() => window._fillSocialPrefill((retryCount || 0) + 1), 100);
+        return;
+      }
+      // 성공하면 소셜 데이터 삭제
       ['_prefillName','_prefillYear','_prefillMonth','_prefillDay','_prefillGender'].forEach(k => localStorage.removeItem(k));
-    } catch(e){}
+    } catch(e){ console.warn('[prefill]', e); }
   };
 }
 
