@@ -13833,11 +13833,18 @@ function timeGreeting() {
 
 async function initWelcome() {
   // 🟡 Supabase OAuth (카카오/Apple) 콜백으로 돌아왔는지 먼저 확인
-  if (location.hash && location.hash.includes('access_token=')) {
+  const hasHashToken = location.hash && location.hash.includes('access_token=');
+  const hasQueryCode = location.search && location.search.includes('code=');
+  if (hasHashToken || hasQueryCode) {
+    // 디버그 알림 (문제 해결 후 제거 예정)
+    alert('🔍 OAuth 콜백 감지!\nhash: ' + location.hash.slice(0,80) + '\nsearch: ' + location.search.slice(0,80));
     try {
       const handled = await _handleSupabaseOAuthRedirect();
-      if (handled) return; // OAuth 성공 → 본인정보 폼으로 이동 완료
-    } catch(e) { console.warn('[initWelcome OAuth]', e); }
+      alert('🔍 OAuth 처리 결과: ' + (handled ? '성공' : '실패'));
+      if (handled) return;
+    } catch(e) {
+      alert('❌ OAuth 에러: ' + (e.message || e));
+    }
   }
   // 옛 카카오 콜백 (호환)
   const came = await handleKakaoCallback();
