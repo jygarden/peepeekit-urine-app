@@ -4656,12 +4656,9 @@ window.appIcon = function(name, size){
 
   <!-- ════════════ 결과 화면 ════════════ -->
   <div class="screen" id="screenResult">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:4px 2px">
+    <div style="display:flex;justify-content:flex-start;align-items:center;margin-bottom:14px;padding:4px 2px">
       <button onclick="goHome()" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;box-shadow:var(--shadow-xs)">
         🏠 <span>홈으로</span>
-      </button>
-      <button onclick="showScreen('screenCapture')" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;box-shadow:var(--shadow-xs)">
-        📷 <span>재촬영</span>
       </button>
     </div>
     <div id="resultCapture">
@@ -4669,27 +4666,6 @@ window.appIcon = function(name, size){
         <div class="step-dot done"></div>
         <div class="step-dot done"></div>
         <div class="step-dot active"></div>
-      </div>
-
-      <!-- 🎯 검사 변화 비교 (이전 검사 있을 때만) -->
-      <div id="compareWrap"></div>
-
-      <!-- 건강 종합 점수 카드 -->
-      <div class="health-score-card" id="healthScoreCard">
-        <div class="score-label">HEALTH SCORE</div>
-        <div class="score-main">
-          <span class="score-num" id="scoreNum">--</span>
-          <span class="score-unit">/100</span>
-        </div>
-        <div class="score-grade-wrap">
-          <span class="score-grade A" id="scoreGrade">A</span>
-          <span class="score-grade-label" id="scoreGradeLabel">최상</span>
-        </div>
-        <div class="score-bars" id="scoreBars"></div>
-        <div class="score-message" id="scoreMessage">정상 범위의 건강 상태예요</div>
-        <div class="score-trend-hint" id="scoreTrendHint" style="display:none">
-          <span id="scoreTrendIcon">↑</span> <span id="scoreTrendText">지난번보다 +5점</span>
-        </div>
       </div>
 
       <!-- 결과 배너 (기존) -->
@@ -4705,16 +4681,6 @@ window.appIcon = function(name, size){
 
       <div class="rec-box" id="recBox"></div>
 
-      <!-- 🤖 건강어때AI·약사 채팅 진입 -->
-      <button class="chat-btn-row" onclick="enterChat()">
-        <span class="chat-btn-ic">🤖</span>
-        <div class="chat-btn-text">
-          <div class="chat-btn-title">건강어때AI한테 물어보기</div>
-          <div class="chat-btn-sub">이번 결과 기반으로 답변해드려요</div>
-        </div>
-        <span class="chat-btn-arrow">›</span>
-      </button>
-
       <!-- 🎯 맞춤 추천 진입 (v12 · Premium Health Report) -->
       <button onclick="openCuration()" class="gg-font" style="width:100%;background:var(--gg-blue);border:none;border-radius:14px;padding:16px 18px;margin-top:12px;display:flex;align-items:center;gap:14px;cursor:pointer;text-align:left;color:#fff;letter-spacing:-.02em">
         <div style="width:44px;height:44px;background:var(--gg-yellow);border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:var(--gg-ink)">
@@ -4726,9 +4692,6 @@ window.appIcon = function(name, size){
         </div>
         <span style="font-size:22px;font-weight:600;color:var(--gg-yellow)">→</span>
       </button>
-
-      <!-- 📅 이번 주 액션 플랜 -->
-      <div id="actionPlanWrap"></div>
 
       <!-- 📋 검사 결과 상세 (기본 닫힘) -->
       <div class="collapse-card" id="collapseDetail">
@@ -4855,13 +4818,7 @@ window.appIcon = function(name, size){
         </div>
         <span class="cta-arrow">›</span>
       </a>
-      <button onclick="shareUrineStory()" style="width:100%;margin-bottom:8px;padding:15px;border:none;border-radius:14px;background:#264A8A;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:-.3px;box-shadow:0 4px 14px rgba(38,74,138,.25)">📸 인스타 스토리로 공유</button>
       <button class="btn-download" onclick="downloadResult()">📥 결과 이미지 저장</button>
-      <button class="btn-download" style="background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 3px 10px rgba(16,185,129,.35)" onclick="downloadPDF()">📄 PDF 리포트 다운로드 (병원용)</button>
-      <div class="action-row">
-        <button class="btn-retake" onclick="showScreen('screenCapture')">📷 재촬영</button>
-        <button class="btn-new" onclick="resetAll()">🏠 새 검사</button>
-      </div>
     </div>
   </div>
 
