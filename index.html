@@ -674,18 +674,8 @@ window.appIcon = function(name, size){
   /* 홈 상단바 · 설정 톱니바퀴 노출 */
   #screenHome .home-top-bar { display: flex !important; }
 
-  /* 🧹 인체용 전환 · 반려동물 UI 완전 숨김 */
-  #screenPetForm,
-  #screenPetFood,
-  #screenPetFoodPreview,
-  #screenPetFoodResult,
-  #screenPetPantry,
-  [onclick*="enterPetFood"],
-  [onclick*="openPetPantry"],
-  [onclick*="goPetForm"],
-  [onclick*="switchToPet"],
-  .pet-only,
-  button[data-pet="true"] { display: none !important; }
+  /* 🐾 반려동물 UI 복원 · 펫보험 대화 명분용 (2026-11-25 AFG 요청) */
+  /* 이전 숨김 규칙 제거 — 반려동물 검사/사료 분석 다시 활성화 */
   /* fortune/tip 슬림 2단 컨테이너 숨김 */
   #screenHome .home-wrap > div[style*="grid-template-columns:1fr 1fr"]:not(.home-cards):not(.home-metrics-grid) { display: none !important; }
   /* 🧹 홈 운세/상식 슬림 2단 · 어떤 중첩이든 숨김 */
@@ -3034,6 +3024,16 @@ window.appIcon = function(name, size){
           <span style="color:#94A3B8;font-size:16px">›</span>
         </div>
 
+        <!-- 🐾 반려동물 검사 유도 카드 (펫보험 대화 명분) -->
+        <div style="background:linear-gradient(135deg,#FEF9E7 0%,#FCE7F3 100%);border:1px solid #FDE68A;border-radius:14px;padding:14px 15px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px" onclick="enterPet()">
+          <div style="width:36px;height:36px;background:rgba(255,255,255,.6);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🐾</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px"><span style="font-size:14px;font-weight:900;color:#78350F">반려동물 소변검사 11항목</span><span style="font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:5px;background:#F59E0B;color:#FFF">NEW</span></div>
+            <div style="font-size:12px;color:#92400E;font-weight:600;margin-top:3px">사람 키트와 동일하게 · 아스코르빈산까지</div>
+          </div>
+          <span style="color:#B45309;font-size:16px">›</span>
+        </div>
+
         <!-- ❌ 오늘 챌린지 카드 제거 · 포인트 시스템 없어서 의미 없음 -->
         <div style="display:none">
           <span id="homeChChip">0/3</span>
@@ -4484,7 +4484,12 @@ window.appIcon = function(name, size){
       </div>
 
       <!-- 🧹 반려동물 컨텐츠 영구 숨김 (인체용 전용) -->
-      <div id="v20AnalyzePetBlock" style="display:none !important">
+      <!-- 🐾 반려동물 블록 · 분석 탭에 토글로 표시 (펫보험 명분 확보) -->
+      <div id="v20AnalyzePetBlock" style="margin-top:16px;padding-top:16px;border-top:1px dashed #E5E7EB">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">🐾 반려동물 검사</div>
+          <span style="font-size:10px;color:#2563EB;font-weight:700;padding:3px 8px;background:#DBEAFE;border-radius:999px">NEW</span>
+        </div>
         <div style="display:flex;flex-direction:column;gap:11px">
           <button type="button" onclick="enterPet()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
             <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
