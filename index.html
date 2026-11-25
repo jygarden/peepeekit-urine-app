@@ -22174,28 +22174,18 @@ function _switchUrineSubject(mode) {
     try { if (typeof switchCaptureSubject === 'function') switchCaptureSubject('human'); } catch(e){}
     try { window.subjectMode = 'human'; } catch(e){}
   } else {
-    // 반려동물 선택
+    // 반려동물 선택 · 프로필 필요 없이 바로 촬영 가능
     if (human) { human.style.background = 'transparent'; human.style.color = '#64748B'; human.style.fontWeight = '800'; human.style.boxShadow = 'none'; human.firstElementChild && (human.firstElementChild.style.background = '#F1F5F9', human.firstElementChild.style.color = '#64748B'); }
     if (pet) { pet.style.background = 'linear-gradient(135deg,#F59E0B,#D97706)'; pet.style.color = '#FFF'; pet.style.fontWeight = '900'; pet.style.boxShadow = '0 2px 6px rgba(245,158,11,.25)'; pet.firstElementChild && (pet.firstElementChild.style.background = 'rgba(255,255,255,.2)', pet.firstElementChild.style.color = '#FFF'); }
-    if (titleEl) titleEl.textContent = '소변검사 · 반려동물';
-    if (subEl) subEl.textContent = 'AI 자동 판독 11항목 · 아스코르빈산 포함';
-    // 반려동물 프로필 확인
-    let hasPet = false;
-    try {
-      if (typeof getFamilyProfiles === 'function') {
-        const fam = getFamilyProfiles() || [];
-        hasPet = fam.some(p => p && p.type === 'pet' && p.name);
-      }
-    } catch(e){}
-    if (!hasPet) {
-      if (empty) empty.style.display = 'block';
-      if (body) body.style.display = 'none';
-      return;
-    }
     if (empty) empty.style.display = 'none';
     if (body) body.style.display = 'block';
+    if (titleEl) titleEl.textContent = '소변검사 · 반려동물';
+    if (subEl) subEl.textContent = 'AI 자동 판독 11항목 · 아스코르빈산 포함';
     if (tagRow) tagRow.innerHTML = '<span style="font-size:11px;color:#78350F;font-weight:700">비중·pH</span><span style="color:#C8C6BC">·</span><span style="font-size:11px;color:#78350F;font-weight:700">단백질·잠혈</span><span style="color:#C8C6BC">·</span><span style="font-size:11px;color:#78350F;font-weight:700">아스코르빈산</span>';
     if (guideImg) guideImg.src = 'assets/guide/urine-strip-pet.jpg';
+    // 프로필 chip도 "반려동물" 간단 표시로 바꿔줌
+    const chip = document.getElementById('captureProfileText');
+    if (chip) chip.textContent = '🐾 반려동물 (프로필 입력 없이 바로 분석)';
     try { if (typeof switchCaptureSubject === 'function') switchCaptureSubject('pet'); } catch(e){}
     try { window.subjectMode = 'pet'; } catch(e){}
   }
