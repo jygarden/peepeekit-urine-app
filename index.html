@@ -22340,6 +22340,7 @@ async function analyze() {
     if (result.error) throw new Error(result.error);
 
     currentResult = result;
+    window.currentResult = result; // _shareWithCoach 에서 참조
     const saju = getSajuHealth(sajuInput.birthYear, sajuInput.birthMonth, subjectMode);
 
     renderResult(result, {
@@ -22531,6 +22532,137 @@ function renderTrendChart() {
   } catch(e) { section.style.display = 'none'; }
 }
 
+// 🎯 집중관찰 + 재검사 CTA + 설계사 공유 (피피키트 피칭 핵심 리텐션)
+function _renderFocusAndReExamCTA(r, info) {
+  let box = document.getElementById('focusReExamBlock');
+  // 블록이 없으면 resultSummary 바로 아래에 생성
+  if (!box) {
+    const summary = document.getElementById('resultSummary');
+    if (!summary) return;
+    box = document.createElement('div');
+    box.id = 'focusReExamBlock';
+    box.style.cssText = 'margin:14px 0 18px';
+    summary.parentNode.insertBefore(box, summary.nextSibling);
+  }
+
+  // 1️⃣ 건강 등급 (healthGrade / healthScore)
+  const grade = r.healthGrade || _computeGradeFromStatus(r);
+  const score = r.healthScore || _computeScoreFromStatus(r);
+  const pct = r.percentileNote || '';
+
+  // 2️⃣ 집중 관찰 포인트 (focusWatchPoints · 정상이어도 최소 2개)
+  let focusHtml = '';
+  if (Array.isArray(r.focusWatchPoints) && r.focusWatchPoints.length) {
+    focusHtml = r.focusWatchPoints.slice(0, 3).map(fp => `
+      <div style="padding:9px 11px;background:#FFF7ED;border-left:3px solid #F59E0B;border-radius:6px;margin-top:6px">
+        <div style="font-size:12px;font-weight:900;color:#78350F">${_safe(fp.name)} <span style="color:#B45309;font-weight:700">${_safe(fp.value||'')}</span></div>
+        <div style="font-size:11.5px;color:#92400E;font-weight:600;line-height:1.5;margin-top:2px">${_safe(fp.note||'')}</div>
+      </div>`).join('');
+  }
+
+  // 3️⃣ 재검사 사유 (nextCheckReason)
+  const reExamReason = r.nextCheckReason || '수치는 하루 중에도 변동이 있어요. 3회는 측정해야 내 기준선이 잡혀요.';
+
+  box.innerHTML = `
+    <!-- 건강 등급 + 백분위 -->
+    <div style="background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border:1px solid #BFDBFE;border-radius:14px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px">
+      <div style="width:70px;height:70px;background:#FFF;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(37,99,235,.12)">
+        <div style="font-size:24px;font-weight:900;color:#2563EB;line-height:1;letter-spacing:-1px">${_safe(grade)}</div>
+        <div style="font-size:9.5px;color:#64748B;font-weight:700;margin-top:2px">${score}점</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.2px">건강 등급 <span style="color:#2563EB">${_safe(grade)}</span></div>
+        <div style="font-size:11.5px;color:#52698F;font-weight:600;line-height:1.5;margin-top:3px">${_safe(pct || '지금부터 관리하면 더 올라갈 수 있어요')}</div>
+      </div>
+    </div>
+
+    ${focusHtml ? `
+    <!-- 집중 관찰 포인트 -->
+    <div style="background:#FFF;border:1px solid #FED7AA;border-radius:14px;padding:14px 15px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="font-size:14px">📍</span>
+        <span style="font-size:13px;font-weight:900;color:#78350F">집중 관찰 포인트 ${r.focusWatchPoints.length}개</span>
+      </div>
+      <div style="font-size:10.5px;color:#64748B;font-weight:500;line-height:1.5">정상이지만 다음 검사 때 변화 체크하면 좋은 항목이에요</div>
+      ${focusHtml}
+    </div>` : ''}
+
+    <!-- 재검사 사유 -->
+    <div style="background:linear-gradient(135deg,#F0FDF4 0%,#DCFCE7 100%);border:1px solid #86EFAC;border-radius:14px;padding:14px 15px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="font-size:14px">🔄</span>
+        <span style="font-size:13px;font-weight:900;color:#166534">4주 뒤 재검사 권장</span>
+      </div>
+      <div style="font-size:11.5px;color:#15803D;font-weight:600;line-height:1.55">${_safe(reExamReason)}</div>
+    </div>
+
+    <!-- 액션 버튼 2개 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onclick="_scheduleReExamReminder()" style="background:#2563EB;color:#FFF;border:0;padding:14px 10px;border-radius:12px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;letter-spacing:-.2px">
+        <span>📅 4주 뒤 재검사</span>
+        <span style="font-size:10px;font-weight:700;opacity:.9">알림 받기</span>
+      </button>
+      <button onclick="_shareWithCoach()" style="background:#FFF;color:#2563EB;border:1.5px solid #2563EB;padding:14px 10px;border-radius:12px;font-size:12.5px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;letter-spacing:-.2px">
+        <span>📤 결과 공유</span>
+        <span style="font-size:10px;font-weight:700;opacity:.8">설계사·메이트</span>
+      </button>
+    </div>`;
+}
+
+function _safe(s) { return String(s==null?'':s).replace(/[<>&"']/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function _computeGradeFromStatus(r) {
+  const items = r.testItems || [];
+  const normal = items.filter(i => i.status === 'normal').length;
+  const total = items.length || 1;
+  const ratio = normal / total;
+  if (ratio >= 0.95) return 'A';
+  if (ratio >= 0.85) return 'A-';
+  if (ratio >= 0.75) return 'B+';
+  if (ratio >= 0.60) return 'B';
+  return 'C';
+}
+
+function _computeScoreFromStatus(r) {
+  const items = r.testItems || [];
+  const n = items.filter(i => i.status === 'normal').length;
+  const w = items.filter(i => i.status === 'warning').length;
+  const total = items.length || 1;
+  return Math.max(50, Math.min(94, Math.round((n * 9 + w * 5.5) / total * 10)));
+}
+
+// 📅 4주 뒤 재검사 알림 예약
+function _scheduleReExamReminder() {
+  try {
+    const next = new Date();
+    next.setDate(next.getDate() + 28);
+    localStorage.setItem('reExamReminderDate', next.toISOString());
+    // 설계사한테도 알림 (연결되어 있으면)
+    try {
+      if (typeof _coachApi === 'function') {
+        _coachApi('POST', '/api/mate', { action: 'notify_recheck', date: next.toISOString() }).catch(()=>{});
+      }
+    } catch(e){}
+    alert('✅ 4주 뒤(' + next.toLocaleDateString('ko-KR',{month:'long',day:'numeric'}) + ') 재검사 알림이 예약됐어요.\n\n설계사가 연결되어 있다면 자동으로 공유돼요.');
+  } catch(e) { alert('알림 예약 실패: ' + e.message); }
+}
+
+// 📤 결과 공유 (설계사 or 메이트)
+function _shareWithCoach() {
+  try {
+    const text = '🔬 소변검사 결과 공유\n\n' +
+      '등급: ' + (window.currentResult?.healthGrade || 'B') + '\n' +
+      (window.currentResult?.summary || '') + '\n\n' +
+      '👉 건강어때 앱에서 전체 결과 보기';
+    if (navigator.share) {
+      navigator.share({ title: '건강어때 · 소변검사 결과', text });
+    } else {
+      navigator.clipboard.writeText(text);
+      alert('✅ 결과가 클립보드에 복사됐어요. 설계사나 메이트한테 붙여넣으세요.');
+    }
+  } catch(e) { alert('공유 실패: ' + e.message); }
+}
+
 function renderResult(r, info) {
   // 🎯 변화 비교 카드 (이전 검사와)
   renderCompareCard(r, info);
@@ -22563,6 +22695,9 @@ function renderResult(r, info) {
     : (info.petName ? info.petName + '의 검사 결과' : '');
   document.getElementById('resultPetSub').textContent  = subjLabel;
   document.getElementById('resultSummary').textContent = r.summary||'';
+
+  // 🎯 피피키트 피칭용 · 집중관찰 + 재검사 CTA + 설계사 공유 블록
+  _renderFocusAndReExamCTA(r, info);
 
   const items = r.testItems || [];
   const normalCount = items.filter(i => i.status === 'normal').length;

@@ -1,6 +1,6 @@
 // 건강어때 PWA Service Worker
 // 버전 올리면 모든 클라이언트가 자동 업데이트됨
-const SW_VERSION = "v133-pet-urine-11-restore-afg-pitch-2026-11-25";
+const SW_VERSION = "v134-focus-watch-recheck-cta-grade-2026-11-25";
 
 // install: 즉시 활성화
 self.addEventListener('install', (event) => {
