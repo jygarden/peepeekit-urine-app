@@ -3024,15 +3024,7 @@ window.appIcon = function(name, size){
           <span style="color:#94A3B8;font-size:16px">›</span>
         </div>
 
-        <!-- 🐾 반려동물 검사 유도 카드 (펫보험 대화 명분) -->
-        <div style="background:linear-gradient(135deg,#FEF9E7 0%,#FCE7F3 100%);border:1px solid #FDE68A;border-radius:14px;padding:14px 15px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px" onclick="enterPet()">
-          <div style="width:36px;height:36px;background:rgba(255,255,255,.6);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🐾</div>
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:6px"><span style="font-size:14px;font-weight:900;color:#78350F">반려동물 소변검사 11항목</span><span style="font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:5px;background:#F59E0B;color:#FFF">NEW</span></div>
-            <div style="font-size:12px;color:#92400E;font-weight:600;margin-top:3px">사람 키트와 동일하게 · 아스코르빈산까지</div>
-          </div>
-          <span style="color:#B45309;font-size:16px">›</span>
-        </div>
+        <!-- 🧹 반려동물 검사는 '소변검사' 안의 토글로 통합 (홈에서는 노출 X) -->
 
         <!-- ❌ 오늘 챌린지 카드 제거 · 포인트 시스템 없어서 의미 없음 -->
         <div style="display:none">
@@ -4484,12 +4476,8 @@ window.appIcon = function(name, size){
       </div>
 
       <!-- 🧹 반려동물 컨텐츠 영구 숨김 (인체용 전용) -->
-      <!-- 🐾 반려동물 블록 · 분석 탭에 토글로 표시 (펫보험 명분 확보) -->
-      <div id="v20AnalyzePetBlock" style="margin-top:16px;padding-top:16px;border-top:1px dashed #E5E7EB">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-size:13px;font-weight:900;color:#0F172A;letter-spacing:-.3px">🐾 반려동물 검사</div>
-          <span style="font-size:10px;color:#2563EB;font-weight:700;padding:3px 8px;background:#DBEAFE;border-radius:999px">NEW</span>
-        </div>
+      <!-- 🧹 분석 탭 반려동물 섹션 숨김 · 소변검사 토글 안으로 통합 -->
+      <div id="v20AnalyzePetBlock" style="display:none">
         <div style="display:flex;flex-direction:column;gap:11px">
           <button type="button" onclick="enterPet()" style="width:100%;background:#FFFFFF;border:1px solid #E8EDF4;border-radius:20px;padding:17px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:inherit;text-align:left;box-shadow:0 2px 8px rgba(30,58,138,.03);min-height:50px">
             <div style="width:44px;height:44px;background:transparent;border:1px solid #E8EDF4;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="assets/icons/v14/pet-urine.svg" alt="" style="width:36px;height:36px;object-fit:contain"></div>
@@ -4547,12 +4535,32 @@ window.appIcon = function(name, size){
           <svg width="24" height="24" viewBox="0 0 128 128"><g transform="rotate(-8 55 62)"><rect x="34" y="18" width="42" height="88" rx="8" fill="#FFFFFF" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/><rect x="42" y="28" width="26" height="18" rx="3" fill="#FBBF24" stroke="#17243A" stroke-width="4"/><rect x="42" y="52" width="26" height="18" rx="3" fill="#22C55E" stroke="#17243A" stroke-width="4"/><rect x="42" y="76" width="26" height="18" rx="3" fill="#3B82F6" stroke="#17243A" stroke-width="4"/></g><path d="M99 54c-8 11-12 17-12 26a12 12 0 0 0 24 0c0-9-4-15-12-26Z" fill="#FBBF24" stroke="#17243A" stroke-width="5" stroke-linejoin="round"/></svg>
         </div>
         <div>
-          <div id="capturePageTitle" style="font-size:16px;font-weight:700;color:#17243A;letter-spacing:-.3px">인체용 소변검사</div>
-          <div id="capturePageSub" style="font-size:11px;color:#8B95A1;margin-top:1px">테스트 스트립의 10가지 항목을 자동 판독해요</div>
+          <div id="capturePageTitle" style="font-size:16px;font-weight:700;color:#17243A;letter-spacing:-.3px">소변검사</div>
+          <div id="capturePageSub" style="font-size:11px;color:#8B95A1;margin-top:1px">AI 자동 판독 · 1분</div>
         </div>
       </div>
     </div>
 
+    <!-- 🔀 인체/반려동물 세그먼티드 토글 (피칭 핵심 · 펫보험 대화 명분) -->
+    <div id="urineSubjectToggle" style="background:#FFF;border-radius:14px;padding:5px;display:grid;grid-template-columns:1fr 1fr;gap:4px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:14px">
+      <button type="button" id="urineSegHuman" onclick="_switchUrineSubject('human')" style="border:0;background:#0F172A;color:#FFF;padding:11px 10px;border-radius:10px;font-size:13.5px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:-.2px;box-shadow:0 2px 6px rgba(15,23,42,.2)">
+        👤 인체용 <span style="font-size:10px;font-weight:700;padding:2px 6px;background:rgba(255,255,255,.2);border-radius:999px">10</span>
+      </button>
+      <button type="button" id="urineSegPet" onclick="_switchUrineSubject('pet')" style="border:0;background:transparent;color:#64748B;padding:11px 10px;border-radius:10px;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:-.2px">
+        🐾 반려동물 <span style="font-size:10px;font-weight:700;padding:2px 6px;background:#F1F5F9;color:#64748B;border-radius:999px">11</span>
+      </button>
+    </div>
+
+    <!-- 반려동물 선택 시 프로필 없으면 등록 유도 (기본 숨김) -->
+    <div id="urinePetEmpty" style="display:none;background:#FFF;border:1.5px dashed #F59E0B;border-radius:14px;padding:30px 18px;text-align:center;margin-bottom:12px">
+      <div style="font-size:52px;margin-bottom:8px">🐶</div>
+      <div style="font-size:15px;font-weight:900;color:#0F172A;margin-bottom:4px">아직 등록된 반려동물이 없어요</div>
+      <div style="font-size:12px;color:#64748B;font-weight:600;line-height:1.55;margin-bottom:16px">검사 전에 반려동물 프로필을 먼저 등록해주세요.<br>품종·나이·체중 정보로 더 정확한 분석이 가능해요.</div>
+      <button onclick="openAddProfileForm('pet')" style="width:100%;background:linear-gradient(135deg,#F59E0B,#D97706);color:#FFF;border:0;padding:14px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 6px 20px rgba(245,158,11,.3)">+ 반려동물 등록하기</button>
+    </div>
+
+    <!-- 본 검사 영역 (인체 또는 프로필 있는 반려동물) -->
+    <div id="urineCaptureBody">
     <!-- 프로필 chip (편집 가능) -->
     <div id="captureProfileChip" style="display:flex;align-items:center;justify-content:space-between;background:#FFF;border:0.5px solid #D9DEDC;border-radius:12px;padding:12px 14px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:10px">
@@ -4602,6 +4610,7 @@ window.appIcon = function(name, size){
     <button onclick="openFileInput('galleryInput')" style="width:100%;background:transparent;color:#17243A;border:none;padding:12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px">앨범에서 선택</button>
 
     <div style="text-align:center;font-size:10.5px;color:#8B95A1;padding-bottom:20px">사진 처리 기준은 <a href="privacy.html" style="color:#8B95A1;text-decoration:underline;text-underline-offset:2px">개인정보처리방침</a>을 확인해주세요</div>
+    </div><!-- /urineCaptureBody -->
 
     <!-- 레거시 히든 요소 (기존 JS 호환) -->
     <div id="captureSubjectSeg" style="display:none">
@@ -22138,6 +22147,58 @@ function updateCaptureIntro(mode) {
 function switchCaptureSubject(mode) {
   subjectMode = mode;
   updateCaptureIntro(mode);
+}
+
+// 🔀 소변검사 상단 세그먼티드 토글 핸들러 (피칭 핵심 · 펫보험 명분)
+function _switchUrineSubject(mode) {
+  const human = document.getElementById('urineSegHuman');
+  const pet = document.getElementById('urineSegPet');
+  const empty = document.getElementById('urinePetEmpty');
+  const body = document.getElementById('urineCaptureBody');
+  const titleEl = document.getElementById('capturePageTitle');
+  const subEl = document.getElementById('capturePageSub');
+  const tagRow = document.getElementById('captureTagRow');
+  const guideImg = document.getElementById('captureGuideImg');
+
+  // 스타일 전환
+  if (mode === 'human') {
+    if (human) { human.style.background = '#0F172A'; human.style.color = '#FFF'; human.style.fontWeight = '900'; human.style.boxShadow = '0 2px 6px rgba(15,23,42,.2)'; human.firstElementChild && (human.firstElementChild.style.background = 'rgba(255,255,255,.2)', human.firstElementChild.style.color = '#FFF'); }
+    if (pet) { pet.style.background = 'transparent'; pet.style.color = '#64748B'; pet.style.fontWeight = '800'; pet.style.boxShadow = 'none'; pet.firstElementChild && (pet.firstElementChild.style.background = '#F1F5F9', pet.firstElementChild.style.color = '#64748B'); }
+    if (empty) empty.style.display = 'none';
+    if (body) body.style.display = 'block';
+    if (titleEl) titleEl.textContent = '소변검사 · 인체용';
+    if (subEl) subEl.textContent = 'AI 자동 판독 10항목 · 1분';
+    if (tagRow) tagRow.innerHTML = '<span style="font-size:11px;color:#17243A;font-weight:600">비중·pH</span><span style="color:#C8C6BC">·</span><span style="font-size:11px;color:#17243A;font-weight:600">단백질·잠혈</span><span style="color:#C8C6BC">·</span><span style="font-size:11px;color:#17243A;font-weight:600">포도당·케톤</span>';
+    if (guideImg) guideImg.src = 'assets/guide/urine-strip-human.jpg';
+    // 기존 로직 트리거
+    try { if (typeof switchCaptureSubject === 'function') switchCaptureSubject('human'); } catch(e){}
+    try { window.subjectMode = 'human'; } catch(e){}
+  } else {
+    // 반려동물 선택
+    if (human) { human.style.background = 'transparent'; human.style.color = '#64748B'; human.style.fontWeight = '800'; human.style.boxShadow = 'none'; human.firstElementChild && (human.firstElementChild.style.background = '#F1F5F9', human.firstElementChild.style.color = '#64748B'); }
+    if (pet) { pet.style.background = 'linear-gradient(135deg,#F59E0B,#D97706)'; pet.style.color = '#FFF'; pet.style.fontWeight = '900'; pet.style.boxShadow = '0 2px 6px rgba(245,158,11,.25)'; pet.firstElementChild && (pet.firstElementChild.style.background = 'rgba(255,255,255,.2)', pet.firstElementChild.style.color = '#FFF'); }
+    if (titleEl) titleEl.textContent = '소변검사 · 반려동물';
+    if (subEl) subEl.textContent = 'AI 자동 판독 11항목 · 아스코르빈산 포함';
+    // 반려동물 프로필 확인
+    let hasPet = false;
+    try {
+      if (typeof getFamilyProfiles === 'function') {
+        const fam = getFamilyProfiles() || [];
+        hasPet = fam.some(p => p && p.type === 'pet' && p.name);
+      }
+    } catch(e){}
+    if (!hasPet) {
+      if (empty) empty.style.display = 'block';
+      if (body) body.style.display = 'none';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    if (body) body.style.display = 'block';
+    if (tagRow) tagRow.innerHTML = '<span style="font-size:11px;color:#78350F;font-weight:700">비중·pH</span><span style="color:#C8C6BC">·</span><span style="font-size:11px;color:#78350F;font-weight:700">단백질·잠혈</span><span style="color:#C8C6BC">·</span><span style="font-size:11px;color:#78350F;font-weight:700">아스코르빈산</span>';
+    if (guideImg) guideImg.src = 'assets/guide/urine-strip-pet.jpg';
+    try { if (typeof switchCaptureSubject === 'function') switchCaptureSubject('pet'); } catch(e){}
+    try { window.subjectMode = 'pet'; } catch(e){}
+  }
 }
 
 // ══════════════════════════════════════
