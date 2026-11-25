@@ -6467,22 +6467,10 @@ function openFileInput(inputId) {
 //   · 웹: getUserMedia (제한된 해상도)
 // ════════════════════════════════════════════════════════════════
 async function openCustomCamera(callback) {
-  // 🏆 1순위: Capacitor 네이티브 카메라 (아이폰 풀 센서)
-  // 디버그: window 상태 로그
-  const dbg = {
-    hasCapacitor: !!window.Capacitor,
-    hasPlugins: !!(window.Capacitor && window.Capacitor.Plugins),
-    pluginsList: window.Capacitor && window.Capacitor.Plugins ? Object.keys(window.Capacitor.Plugins).join(',') : 'none',
-    hasCamera: !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Camera),
-    isNativeFn: !!(window.Capacitor && window.Capacitor.isNativePlatform),
-    isNative: !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()),
-    platform: window.Capacitor && window.Capacitor.getPlatform ? window.Capacitor.getPlatform() : 'unknown'
-  };
-  console.log('[Camera DEBUG]', JSON.stringify(dbg));
+  // 🏆 1순위: Capacitor 네이티브 카메라 (앱 번들 · 아이폰 풀 센서)
   try {
     const CapCamera = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Camera;
     if (CapCamera) {
-      // isNativePlatform 체크 제거 · Camera 플러그인이 있으면 무조건 시도
       const img = await CapCamera.getPhoto({
         quality: 92,
         resultType: 'dataUrl',
@@ -6495,67 +6483,43 @@ async function openCustomCamera(callback) {
         promptLabelPhoto: '앨범에서 선택',
         promptLabelPicture: '사진 찍기'
       });
-      if (img && img.dataUrl) {
-        callback(img.dataUrl);
-        return;
-      }
+      if (img && img.dataUrl) { callback(img.dataUrl); return; }
     }
-    // Capacitor 없으면 조용히 fallback (Safari/웹브라우저 정상)
   } catch(e) {
-    if (e && (e.message === 'User cancelled photos app' || /cancel/i.test(e.message||''))) return;
-    console.warn('[Capacitor Camera] fallback:', e);
+    if (e && /cancel/i.test(e.message||'')) return;
+    console.warn('[Capacitor Camera]', e);
   }
 
-  // 🔙 Fallback: 웹 getUserMedia (PWA 브라우저용)
-  let stream;
+  // 🏆 2순위: HTML input[type=file capture] (Safari/Chrome 모바일 → 네이티브 카메라 호출)
+  // getUserMedia 쓰지 말 것 (웹 카메라 UI 못생김)
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
-    });
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.setAttribute('capture', 'environment'); // 후면 카메라 선호
+    input.style.position = 'fixed';
+    input.style.left = '-9999px';
+    input.style.opacity = '0';
+    input.onchange = async () => {
+      const file = input.files && input.files[0];
+      if (!file) { input.remove(); return; }
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
+        callback(dataUrl);
+      } catch(e) { console.warn('[file read]', e); }
+      input.remove();
+    };
+    document.body.appendChild(input);
+    input.click();
   } catch(e) {
-    showCameraPermissionGuide();
-    return;
+    console.warn('[camera fallback]', e);
+    if (typeof showCameraPermissionGuide === 'function') showCameraPermissionGuide();
   }
-
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column';
-  modal.innerHTML = '<video autoplay playsinline muted style="flex:1;width:100%;object-fit:cover;background:#000;min-height:0"><\/video>' +
-    '<div style="background:#000;padding:24px 20px 80px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));display:flex;gap:14px;justify-content:space-around;align-items:center;flex-shrink:0">' +
-      '<button id="_cancelCam" style="background:#374151;color:#fff;border:none;border-radius:14px;padding:14px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">취소<\/button>' +
-      '<button id="_takeCam" style="background:#fff;border:6px solid #10B981;border-radius:50%;width:78px;height:78px;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(16,185,129,.5)">📷<\/button>' +
-      '<button id="_switchCam" style="background:#374151;color:#fff;border:none;border-radius:14px;padding:14px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">🔄<\/button>' +
-    '<\/div>';
-  document.body.appendChild(modal);
-
-  const video = modal.querySelector('video');
-  video.srcObject = stream;
-  let facing = 'environment';
-
-  modal.querySelector('#_cancelCam').onclick = () => {
-    stream.getTracks().forEach(t => t.stop());
-    modal.remove();
-  };
-
-  modal.querySelector('#_switchCam').onclick = async () => {
-    stream.getTracks().forEach(t => t.stop());
-    facing = facing === 'environment' ? 'user' : 'environment';
-    try {
-      const newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing } });
-      stream = newStream;
-      video.srcObject = stream;
-    } catch(e) { /* 카메라 전환 실패 — 무시 */ }
-  };
-
-  modal.querySelector('#_takeCam').onclick = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-    stream.getTracks().forEach(t => t.stop());
-    modal.remove();
-    callback(dataUrl);
-  };
 }
 
 // safeCameraClick — 커스텀 카메라 사용 (input file 우회)
