@@ -22326,22 +22326,30 @@ async function analyze() {
   let recordData, petHint = '', sajuInput = null;
 
   if (subjectMode === 'pet') {
-    const petName   = document.getElementById('petName').value.trim();
-    const petBreed  = document.getElementById('petBreed').value.trim();
-    const petType   = selectedPet;
-    const gender    = selectedGender;
-    const birthYear = document.getElementById('petBirthYear').value;
-    const birthMonth= document.getElementById('petBirthMonth').value;
-    const region    = document.getElementById('region').value;
-    const env       = selectedEnv;
-    const contact   = document.getElementById('petContact').value.trim();
-    const marketing = document.getElementById('petConsentMarketing').checked;
+    // 🆕 토글 경로: 옛날 회원가입 폼 없음 → urinePetProfile(모달 저장값) 우선 사용
+    const _pp = (() => { try { return JSON.parse(localStorage.getItem('urinePetProfile')||'{}'); } catch(e){ return {}; } })();
+    const _el = id => { const e = document.getElementById(id); return e ? (e.value||'').trim() : ''; };
+    const _elv = id => { const e = document.getElementById(id); return e ? e.value : ''; };
+    const _elck= id => { const e = document.getElementById(id); return e ? !!e.checked : false; };
+
+    const petName   = _pp.name  || _el('petName');
+    const petBreed  = _pp.breed || _el('petBreed');
+    const petType   = _pp.species || (typeof selectedPet !== 'undefined' ? selectedPet : '') || 'dog';
+    const gender    = _pp.gender || (typeof selectedGender !== 'undefined' ? selectedGender : '');
+    const ageYears  = _pp.age ? parseInt(_pp.age,10) : null;
+    const weight    = _pp.weight ? parseFloat(_pp.weight) : null;
+    const birthYear = _elv('petBirthYear');
+    const birthMonth= _elv('petBirthMonth');
+    const region    = _elv('region');
+    const env       = (typeof selectedEnv !== 'undefined') ? selectedEnv : '';
+    const contact   = _el('petContact');
+    const marketing = _elck('petConsentMarketing');
 
     petHint = petType
-      ? `이 이미지는 ${petType==='dog'?'강아지':'고양이'}${petBreed?`(품종: ${petBreed})`:''}${petName?`(이름: ${petName})`:''}${gender?`(성별: ${gender})`:''}의 소변검사 키트입니다. `
+      ? `이 이미지는 ${petType==='dog'?'강아지':'고양이'}${petBreed?`(품종: ${petBreed})`:''}${petName?`(이름: ${petName})`:''}${gender?`(성별: ${gender==='male'?'수컷':gender==='female'?'암컷':gender})`:''}${ageYears?`(${ageYears}살)`:''}${weight?`(${weight}kg)`:''}의 소변검사 키트입니다. `
       : '';
 
-    recordData = { contact, marketing, petType, petName, breed: petBreed, gender, birthYear, birthMonth, region, environment: env };
+    recordData = { contact, marketing, petType, petName, breed: petBreed, gender, ageYears, weight, birthYear, birthMonth, region, environment: env };
     sajuInput = { birthYear, birthMonth };
   } else {
     const name      = document.getElementById('humanName').value.trim();
